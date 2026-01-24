@@ -1,0 +1,257 @@
+// ========================================
+// Utility Functions
+// ========================================
+
+// Calculate BMI
+function calculateBMI(height, weight) {
+    if (!height || !weight || height <= 0 || weight <= 0) return null;
+    const heightInMeters = height / 100;
+    return (weight / (heightInMeters * heightInMeters)).toFixed(1);
+}
+
+// Get BMI Category
+function getBMICategory(bmi) {
+    if (!bmi) return null;
+    const bmiNum = parseFloat(bmi);
+    if (bmiNum < 18.5) return { category: 'น้ำหนักน้อย', class: 'underweight', emoji: '🔵' };
+    if (bmiNum < 23) return { category: 'น้ำหนักปกติ', class: 'normal', emoji: '🟢' };
+    if (bmiNum < 25) return { category: 'น้ำหนักเกิน', class: 'overweight', emoji: '🟡' };
+    return { category: 'อ้วน', class: 'obese', emoji: '🔴' };
+}
+
+// Calculate Depression Score (PHQ-9 style)
+function calculateDepressionScore(responses) {
+    let score = 0;
+    const phqKeys = ['phq_1', 'phq_2', 'phq_3', 'phq_4', 'phq_5', 'phq_6', 'phq_7', 'phq_8', 'phq_9', 'phq_10', 'phq_11'];
+    phqKeys.forEach(key => {
+        if (responses[key] !== undefined) {
+            score += parseInt(responses[key]) || 0;
+        }
+    });
+    return score;
+}
+
+// Get Depression Level
+function getDepressionLevel(score) {
+    if (score < 7) return { level: 'ไม่มีภาวะซึมเศร้า', class: 'none', emoji: '😊' };
+    if (score <= 12) return { level: 'ซึมเศร้าระดับน้อย', class: 'mild', emoji: '😐' };
+    if (score <= 18) return { level: 'ซึมเศร้าระดับปานกลาง', class: 'moderate', emoji: '😔' };
+    return { level: 'ซึมเศร้าระดับรุนแรง', class: 'severe', emoji: '😰' };
+}
+
+// Format time
+function formatTime(hours, minutes) {
+    const h = String(hours).padStart(2, '0');
+    const m = String(minutes).padStart(2, '0');
+    return `${h}:${m}`;
+}
+
+// Calculate sleep duration
+function calculateSleepDuration(bedtime, wakeTime) {
+    if (!bedtime || !wakeTime) return null;
+    const [bedH, bedM] = bedtime.split(':').map(Number);
+    const [wakeH, wakeM] = wakeTime.split(':').map(Number);
+
+    let bedMinutes = bedH * 60 + bedM;
+    let wakeMinutes = wakeH * 60 + wakeM;
+
+    if (wakeMinutes < bedMinutes) {
+        wakeMinutes += 24 * 60;
+    }
+
+    return ((wakeMinutes - bedMinutes) / 60).toFixed(1);
+}
+
+// Save to localStorage
+function saveResponses(responses) {
+    localStorage.setItem('wellbeing_survey_responses', JSON.stringify(responses));
+    localStorage.setItem('wellbeing_survey_timestamp', new Date().toISOString());
+}
+
+// Load from localStorage
+function loadResponses() {
+    const saved = localStorage.getItem('wellbeing_survey_responses');
+    return saved ? JSON.parse(saved) : {};
+}
+
+// Clear saved responses
+function clearResponses() {
+    localStorage.removeItem('wellbeing_survey_responses');
+    localStorage.removeItem('wellbeing_survey_timestamp');
+    localStorage.removeItem('wellbeing_survey_section');
+}
+
+// Show toast notification
+function showToast(message, type = 'info') {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.className = `toast show ${type}`;
+    setTimeout(() => {
+        toast.className = 'toast';
+    }, 3000);
+}
+
+// Export to Excel
+function exportToExcel(responses, userInfo) {
+    const data = [];
+
+    // Header row
+    data.push(['แบบสำรวจสุขภาวะบุคลากร', '']);
+    data.push(['วันที่ทำแบบสำรวจ', new Date().toLocaleString('th-TH')]);
+    if (userInfo?.name) data.push(['ผู้ตอบ', userInfo.name]);
+    data.push(['', '']);
+
+    // Add all responses
+    Object.entries(responses).forEach(([key, value]) => {
+        if (Array.isArray(value)) {
+            data.push([key, value.join(', ')]);
+        } else {
+            data.push([key, value]);
+        }
+    });
+
+    // Add calculated scores
+    const height = parseFloat(responses.height);
+    const weight = parseFloat(responses.weight);
+    if (height && weight) {
+        const bmi = calculateBMI(height, weight);
+        const bmiInfo = getBMICategory(bmi);
+        data.push(['', '']);
+        data.push(['BMI', bmi]);
+        data.push(['ระดับ BMI', bmiInfo?.category || '-']);
+    }
+
+    const depressionScore = calculateDepressionScore(responses);
+    const depressionLevel = getDepressionLevel(depressionScore);
+    data.push(['', '']);
+    data.push(['คะแนนซึมเศร้า', depressionScore]);
+    data.push(['ระดับ', depressionLevel.level]);
+
+    // Create workbook
+    const ws = XLSX.utils.aoa_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'แบบสำรวจ');
+
+    // Download
+    const filename = `wellbeing_survey_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    XLSX.writeFile(wb, filename);
+    showToast('ดาวน์โหลด Excel สำเร็จ!', 'success');
+}
+
+// Google Sheets Export (requires user to be logged in)
+async function exportToGoogleSheets(responses, accessToken) {
+    if (!accessToken) {
+        showToast('กรุณาเข้าสู่ระบบด้วย Google ก่อน', 'error');
+        return;
+    }
+
+    try {
+        // Create new spreadsheet
+        const createResponse = await fetch('https://sheets.googleapis.com/v4/spreadsheets', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                properties: {
+                    title: `แบบสำรวจสุขภาวะ - ${new Date().toLocaleDateString('th-TH')}`
+                }
+            })
+        });
+
+        if (!createResponse.ok) throw new Error('Failed to create spreadsheet');
+
+        const spreadsheet = await createResponse.json();
+        const spreadsheetId = spreadsheet.spreadsheetId;
+
+        // Prepare data
+        const values = [
+            ['แบบสำรวจสุขภาวะบุคลากร', ''],
+            ['วันที่', new Date().toLocaleString('th-TH')],
+            ['', '']
+        ];
+
+        Object.entries(responses).forEach(([key, value]) => {
+            values.push([key, Array.isArray(value) ? value.join(', ') : value]);
+        });
+
+        // Update spreadsheet
+        await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/A1:B${values.length}?valueInputOption=RAW`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ values })
+        });
+
+        // Open spreadsheet
+        window.open(`https://docs.google.com/spreadsheets/d/${spreadsheetId}`, '_blank');
+        showToast('สร้าง Google Sheets สำเร็จ!', 'success');
+
+    } catch (error) {
+        console.error('Google Sheets export error:', error);
+        showToast('ไม่สามารถสร้าง Google Sheets ได้', 'error');
+    }
+}
+
+// Validate required fields in current section
+function validateSection(questions, responses) {
+    const missing = [];
+    questions.forEach(q => {
+        if (q.required && !responses[q.id]) {
+            missing.push(q.id);
+        }
+    });
+    return missing;
+}
+
+// Submit response to Google Apps Script
+async function submitResponseToGAS(data, scriptUrl) {
+    if (!scriptUrl) {
+        console.warn('Google Script URL is not configured');
+        return false;
+    }
+
+    try {
+        // Use no-cors mode for simple submission
+        // Note: We won't get a readable response body in no-cors mode, 
+        // but it avoids CORS preflight issues with GAS web apps.
+        // Alternatively, we use text/plain to avoid preflight if possible, 
+        // but GAS requires specific handling. Standard fetch to GAS usually involves redirects.
+
+        // Strategy: Use standard Fetch with content-type text/plain or similar to avoid complex CORS
+        // and handle the opaqueness. 
+
+        // Actually, for GAS `doPost`, the best way is usually Sending Stringified JSON as Body
+        // and using text/plain to prevent Preflight (OPTIONS).
+
+        const response = await fetch(scriptUrl, {
+            method: 'POST',
+            body: JSON.stringify(data)
+        });
+
+        // Ensure request was sent (even if we can't fully read response due to CORS sometimes)
+        return true;
+    } catch (error) {
+        console.error('Error submitting to GAS:', error);
+        return false;
+    }
+}
+
+// Get user history from Google Apps Script
+async function getUserHistory(email, scriptUrl) {
+    if (!scriptUrl || !email) return [];
+
+    try {
+        // Use GET request for checking history
+        const url = `${scriptUrl}?action=getHistory&email=${encodeURIComponent(email)}`;
+        const response = await fetch(url);
+        const data = await response.json();
+        return Array.isArray(data) ? data : [];
+    } catch (error) {
+        console.error('Error fetching history:', error);
+        return [];
+    }
+}
