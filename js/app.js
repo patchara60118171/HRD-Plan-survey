@@ -97,6 +97,7 @@ const app = {
             google.accounts.id.disableAutoSelect();
         }
         this.renderUserSection();
+        this.renderWelcome(); // Redirect to home
         showToast('ออกจากระบบแล้ว', 'info');
     },
 
