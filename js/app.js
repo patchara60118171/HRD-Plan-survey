@@ -213,6 +213,12 @@ const app = {
 
     // Start Survey
     startSurvey() {
+        if (!this.userInfo) {
+            showToast('กรุณาเข้าสู่ระบบก่อนเริ่มทำแบบสำรวจ', 'error');
+            this.googleLogin();
+            return;
+        }
+
         this.currentView = 'survey';
         this.currentSectionIndex = 0;
         this.currentSubsectionIndex = 0;
