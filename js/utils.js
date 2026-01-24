@@ -13,9 +13,10 @@ function calculateBMI(height, weight) {
 function getBMICategory(bmi) {
     if (!bmi) return null;
     const bmiNum = parseFloat(bmi);
+    // WHO International Standard
     if (bmiNum < 18.5) return { category: 'น้ำหนักน้อย', class: 'underweight', emoji: '🔵' };
-    if (bmiNum < 23) return { category: 'น้ำหนักปกติ', class: 'normal', emoji: '🟢' };
-    if (bmiNum < 25) return { category: 'น้ำหนักเกิน', class: 'overweight', emoji: '🟡' };
+    if (bmiNum < 25) return { category: 'น้ำหนักปกติ', class: 'normal', emoji: '🟢' };
+    if (bmiNum < 30) return { category: 'น้ำหนักเกิน', class: 'overweight', emoji: '🟡' };
     return { category: 'อ้วน', class: 'obese', emoji: '🔴' };
 }
 

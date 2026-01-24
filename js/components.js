@@ -218,6 +218,9 @@ function renderBMIResult(height, weight) {
             <div>ดัชนีมวลกาย (BMI) ของท่าน:</div>
             <div class="bmi-value">${bmi}</div>
             <div class="bmi-category ${info.class}">${info.emoji} ${info.category}</div>
+            <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.5rem;">
+                *อ้างอิงเกณฑ์สากล (WHO): ปกติ 18.5 - 24.9
+            </div>
         </div>
     `;
 }
