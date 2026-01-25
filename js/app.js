@@ -73,11 +73,16 @@ const app = {
 
     // Render Google Button (Official)
     renderGoogleButton() {
-        if (typeof google === 'undefined') return;
+        if (typeof google === 'undefined' || !google.accounts || !google.accounts.id) {
+            // Retry if library not ready
+            setTimeout(() => this.renderGoogleButton(), 500);
+            return;
+        }
 
         // Header button
         const headerBtn = document.getElementById('g_id_signin_button');
         if (headerBtn) {
+            // Check if already rendered to avoid duplicates/errors? GSI handles it usually.
             google.accounts.id.renderButton(
                 headerBtn,
                 { theme: "outline", size: "large", type: "standard", shape: "pill", text: "signin_with" }
@@ -85,12 +90,15 @@ const app = {
         }
 
         // Welcome screen button
+        // Always try to render if container exists, even if logic thinks userInfo might be there (safety)
         const welcomeBtn = document.getElementById('welcome-login-btn');
-        if (welcomeBtn && !this.userInfo) {
-            google.accounts.id.renderButton(
-                welcomeBtn,
-                { theme: "filled_blue", size: "large", shape: "pill", text: "signin_with", width: "250" }
-            );
+        if (welcomeBtn) {
+            if (!this.userInfo) {
+                google.accounts.id.renderButton(
+                    welcomeBtn,
+                    { theme: "filled_blue", size: "large", shape: "pill", text: "signin_with", width: "250" }
+                );
+            }
         }
     },
 

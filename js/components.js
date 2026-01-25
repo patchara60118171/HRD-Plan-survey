@@ -24,11 +24,7 @@ function renderWelcome() {
                     <div class="info-title">สุขภาวะทางใจ</div>
                     <div class="info-desc">ความเครียด อารมณ์ จิตใจ ความกังวล</div>
                 </div>
-                <div class="info-card social">
-                    <div class="info-icon">👥</div>
-                    <div class="info-title">สุขภาวะทางสังคม</div>
-                    <div class="info-desc">ความสัมพันธ์ การเรียนรู้ การพัฒนาตนเอง</div>
-                </div>
+                <!-- Social Removed -->
                 <div class="info-card environment">
                     <div class="info-icon">🏢</div>
                     <div class="info-title">สภาพแวดล้อม</div>
