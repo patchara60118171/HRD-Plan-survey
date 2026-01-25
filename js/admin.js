@@ -72,20 +72,29 @@ async function fetchData() {
             return;
         }
 
-        renderTable(data);
-        window.originalData = data; // Store original for filtering
-        window.currentData = data; // Store for export/display
+        loading.style.display = 'none';
 
-        // Populate Filters
+        // 1. Check Data Quality
+        console.log('Fetched Data:', data.length);
+
+        renderTable(data);
+        window.originalData = data;
+        window.currentData = data;
+
         updateFilterCounts();
 
-        // Update Dashboard Stats & Charts
-        processAdvancedStats(window.currentData);
+        // 2. Process Logic (Separate Try-Catch)
+        try {
+            processAdvancedStats(window.currentData);
+        } catch (processError) {
+            console.error('Processing Stats Error:', processError);
+            alert('เกิดข้อผิดพลาดในการคำนวณสถิติ: ' + processError.message);
+        }
 
     } catch (e) {
         loading.style.display = 'none';
-        console.error(e);
-        alert('Failed to fetch data');
+        console.error('Fetch Exception:', e);
+        alert('Failed to fetch data: ' + e.message);
     }
 }
 
@@ -135,6 +144,7 @@ let charts = {}; // Store chart instances
 
 function processAdvancedStats(data) {
     if (!data) return;
+    console.log('Processing Stats for', data.length, 'rows');
 
     // --- 1. Overview Stats ---
     let totalBMI = 0, totalTMHI = 0, riskCount = 0;
@@ -254,7 +264,7 @@ function processAdvancedStats(data) {
     const riskPct = data.length ? ((riskCount / data.length) * 100).toFixed(1) : 0;
     document.getElementById('stat-risk').innerText = `${riskPct}%`;
 
-
+    console.log('Rendering Charts with counts:', counts);
     // --- Render Charts ---
     renderAllCharts(counts, avgTMHI);
 }
