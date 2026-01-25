@@ -225,6 +225,13 @@ function processAdvancedStats(data) {
         // Check sweet_1..5, fat_1..5, salt_1..5
         ['sweet', 'fat', 'salt'].forEach(cat => {
             for (let i = 1; i <= 5; i++) {
+                // SKIP Good Behaviors (Not Risk)
+                // sweet_1: Water/Black Coffee
+                // salt_1: Taste before seasoning
+                // salt_2: Use herbs
+                if (cat === 'sweet' && i === 1) continue;
+                if (cat === 'salt' && (i === 1 || i === 2)) continue;
+
                 const key = `${cat}_${i}`;
                 const val = r[key];
                 if (val && (val.includes('ทุกวัน') || val.includes('ประจำ'))) {
@@ -233,6 +240,8 @@ function processAdvancedStats(data) {
                 }
             }
         });
+
+
 
         // Environment (check for "ใช่ (มีตอสุขภาพ)")
         if (r.env_glare?.includes('มีผล')) counts.envImpact.glare++;
@@ -413,7 +422,7 @@ function createChart(canvasId, type, data, options = {}) {
 // Helper to map Question ID to readable label
 function mapDietLabel(key) {
     const map = {
-        'sweet_1': 'น้ำอัดลม', 'sweet_2': 'เครื่องดื่มชง', 'sweet_3': 'น้ำผลไม้กล่อง', 'sweet_4': 'ขนมหวาน/เบเกอรี่', 'sweet_5': 'เติมน้ำตาล',
+        'sweet_1': 'ดื่มน้ำ/กาแฟดำ', 'sweet_2': 'เครื่องดื่มหวาน/อัดลม', 'sweet_3': 'น้ำผลไม้กล่อง', 'sweet_4': 'ไอศกรีม/ขนมหวาน', 'sweet_5': 'เติมน้ำตาล/น้ำเชื่อม',
         'fat_1': 'ของมัน/หนังไก่', 'fat_2': 'ของทอด', 'fat_3': 'กะทิ', 'fat_4': 'ครีมเทียม', 'fat_5': 'ราดน้ำแกง',
         'salt_1': 'ปรุงก่อนชิม', 'salt_2': 'ไม่ใช้สมุนไพร', 'salt_3': 'อาหารแปรรูป', 'salt_4': 'บะหมี่กึ่งฯ', 'salt_5': 'ของดอง'
     };

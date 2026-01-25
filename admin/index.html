@@ -173,6 +173,8 @@
                 <p style="color: #64748B; margin: 0;">ภาพรวมผลการประเมินสุขภาวะองค์กร</p>
             </div>
             <div style="display: flex; gap: 1rem;">
+                <button onclick="fetchData()" class="btn-login"
+                    style="background: #EFF6FF; color: #1D4ED8; border: 1px solid #BFDBFE;">🔄 รีเฟรชข้อมูล</button>
                 <button onclick="location.href='../index.html'" class="btn-login"
                     style="background: transparent; color: #64748B; border: 1px solid #CBD5E1;">🏠 หน้าหลัก</button>
                 <button onclick="logout()" class="btn-login"
@@ -347,7 +349,7 @@
             <div style="flex: 1;">
                 <h2 style="margin: 0 0 1rem 0;">📋 ข้อมูลดิบ (Raw Data)</h2>
             </div>
-            <button onclick="fetchData()" class="btn-action">🔄 รีเฟรชข้อมูล</button>
+
             <button onclick="downloadExcel()" class="btn-action primary">📥 Export Excel</button>
         </div>
 
