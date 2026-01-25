@@ -139,14 +139,30 @@ async function initializeHeaders() {
 
     // 2. Send to GAS
     try {
-        const response = await fetch(SCRIPT_URL, {
+        console.log('Sending request to:', GOOGLE_SCRIPT_URL);
+        const response = await fetch(GOOGLE_SCRIPT_URL, {
             method: 'POST',
+            redirect: 'follow', // Ensure redirects are followed
+            headers: {
+                'Content-Type': 'text/plain;charset=utf-8', // Explicitly set simple content type to avoid preflight
+            },
             body: JSON.stringify({
                 action: 'setupHeaders',
                 keys: keys
             })
         });
-        const result = await response.json();
+
+        const text = await response.text();
+        console.log('Raw Response:', text);
+
+        let result;
+        try {
+            result = JSON.parse(text);
+        } catch (e) {
+            console.error('JSON Parse Error:', e);
+            alert('Server Error: ได้รับข้อมูลที่ไม่ใช่ JSON (อาจเกิดจากสิทธิ์การเข้าถึง)');
+            return;
+        }
 
         if (result.result === 'success') {
             alert(`สำเร็จ! ${result.message}`);
@@ -155,8 +171,8 @@ async function initializeHeaders() {
         }
 
     } catch (e) {
-        console.error(e);
-        alert('Failed to sync headers');
+        console.error('Network/Fetch Error:', e);
+        alert('Failed to sync headers (Network Error)');
     }
 }
 
