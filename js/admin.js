@@ -309,7 +309,25 @@ function downloadExcel() {
         return;
     }
 
-    const ws = XLSX.utils.json_to_sheet(window.currentData);
+    // Flatten data for Export
+    const exportData = window.currentData.map(row => {
+        // 1. Extract basic fields
+        const { raw_responses, ...baseFields } = row;
+
+        // 2. Format timestamp
+        const formattedDate = baseFields.timestamp ? new Date(baseFields.timestamp).toLocaleString('th-TH') : '-';
+
+        // 3. Merge with raw_responses (all questions)
+        // We prioritize baseFields (calculated stats) over raw_responses if conflict, or vice versa depending on need.
+        // Usually raw_responses has the source truth.
+        return {
+            ...baseFields,
+            timestamp_formatted: formattedDate,
+            ...raw_responses // Spread all survey answers (q1, q2, etc.) here
+        };
+    });
+
+    const ws = XLSX.utils.json_to_sheet(exportData);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Responses");
     XLSX.writeFile(wb, `survey_data_${new Date().toISOString().slice(0, 10)}.xlsx`);
