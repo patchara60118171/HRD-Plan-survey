@@ -458,15 +458,6 @@ function renderResults(responses, userInfo) {
                     </div>
                 </div>
             </div>
-            
-            <div class="results-actions" style="margin-top: 3rem;">
-                <button class="btn-action" onclick="exportToExcel(app.responses, app.userInfo)">
-                    <span class="btn-action-icon">📊</span> ดาวน์โหลด Excel
-                </button>
-                <button class="btn-action primary" onclick="app.startNew()">
-                    <span class="btn-action-icon">🔄</span> ทำแบบสำรวจใหม่
-                </button>
-            </div>
         </div>
     `;
 }
@@ -479,14 +470,26 @@ function renderLoginButton() {
 // Render User Profile
 function renderUserProfile(user) {
     return `
-        <div class="user-profile">
-            <img src="${user.picture}" alt="${user.name}">
-            <div class="user-info-text">
+        <div class="user-profile-container">
+            <div class="user-profile" onclick="toggleProfileMenu()">
+                <img src="${user.picture}" alt="${user.name}">
                 <span class="user-name">${user.name}</span>
-                <div class="user-actions">
-                    <button onclick="app.viewHistory()" class="btn-text" style="font-size: 0.8rem; margin-right: 8px;">📜 ประวัติ</button>
-                    <button onclick="app.logout()" class="btn-text" style="font-size: 0.8rem; color: #ef4444;">ออกจากระบบ</button>
+                <span class="dropdown-arrow">▼</span>
+            </div>
+            <div class="profile-dropdown" id="profile-dropdown">
+                <div class="dropdown-header">
+                    <img src="${user.picture}" alt="${user.name}">
+                    <div>
+                        <div class="dropdown-name">${user.name}</div>
+                        <div class="dropdown-email">${user.email || ''}</div>
+                    </div>
                 </div>
+                <div class="dropdown-divider"></div>
+                <button onclick="app.viewHistory(); toggleProfileMenu();" class="dropdown-item">📜 ประวัติ</button>
+                <button onclick="exportToExcel(app.responses, app.userInfo); toggleProfileMenu();" class="dropdown-item">📊 ดาวน์โหลด Excel</button>
+                <button onclick="app.startNew(); toggleProfileMenu();" class="dropdown-item">🔄 ทำแบบสำรวจใหม่</button>
+                <div class="dropdown-divider"></div>
+                <button onclick="app.logout()" class="dropdown-item logout">🚪 ออกจากระบบ</button>
             </div>
         </div>
     `;

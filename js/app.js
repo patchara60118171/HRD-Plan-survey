@@ -169,7 +169,9 @@ const app = {
         if (typeof google !== 'undefined' && google.accounts) {
             google.accounts.id.initialize({
                 client_id: GOOGLE_CLIENT_ID,
-                callback: (response) => this.handleGoogleCallback(response)
+                callback: (response) => this.handleGoogleCallback(response),
+                ux_mode: 'popup', // Force popup mode to avoid auto-redirect mismatch issues
+                auto_select: false
             });
             // Also render button if user section is waiting
             if (!this.userInfo && document.getElementById('g_id_signin_button')) {
@@ -178,7 +180,7 @@ const app = {
         }
     },
 
-    // Handle Google OAuth Redirect Callback (for Safari/iOS)
+    // Handle Google OAuth Redirect Callback (for Safari/iOS Manual Flow)
     handleGoogleRedirectCallback() {
         // Check if URL hash contains token from OAuth redirect
         const hash = window.location.hash.substring(1);
@@ -199,16 +201,25 @@ const app = {
                 };
                 this.accessToken = accessToken || idToken;
 
-                // Clear hash from URL
-                history.replaceState(null, '', window.location.pathname + window.location.search);
+                // Clear hash from URL cleanly
+                const cleanUrl = window.location.pathname + window.location.search;
+                history.replaceState(null, '', cleanUrl);
 
                 this.renderUserSection();
                 showToast(`ยินดีต้อนรับ ${this.userInfo.name}!`, 'success');
 
-                // Load draft from cloud if exists
-                this.loadDraftFromCloud();
+                // Load draft from Supabase if exists
+                if (this.loadDraftFromSupabase) {
+                    this.loadDraftFromSupabase();
+                }
+
+                // Re-render Welcome if needed
+                if (this.currentView === 'welcome') {
+                    this.renderWelcome();
+                }
             } catch (e) {
                 console.error('Error parsing OAuth token:', e);
+                showToast('เกิดข้อผิดพลาดในการเข้าสู่ระบบ', 'error');
             }
         }
     },
@@ -236,31 +247,64 @@ const app = {
         }
     },
 
-    // Google Login - Trigger the prompt or show button for Safari/iOS
+    // Helper: Use Manual Google OAuth Redirect Flow (Best for iOS/Safari)
+    useGoogleRedirectFlow() {
+        // Must match EXACTLY what is in Google Cloud Console
+        // We ensure no trailing slash (unless root) and no index.html
+        let redirectUri = window.location.origin;
+        if (redirectUri.endsWith('/')) {
+            redirectUri = redirectUri.slice(0, -1);
+        }
+
+        // If we are on production, force the known good URI
+        if (window.location.hostname === 'nidawellbeing.vercel.app') {
+            redirectUri = 'https://nidawellbeing.vercel.app';
+        }
+
+        const scope = 'openid email profile';
+        const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
+            `client_id=${GOOGLE_CLIENT_ID}` +
+            `&redirect_uri=${encodeURIComponent(redirectUri)}` +
+            `&response_type=token id_token` +
+            `&scope=${encodeURIComponent(scope)}` +
+            `&nonce=${Math.random().toString(36).substring(2)}`;
+
+        console.log('Redirecting to Google Auth:', authUrl);
+        window.location.href = authUrl;
+    },
+
+    // Google Login - Trigger strategy based on device
     googleLogin() {
         if (typeof google === 'undefined' || !google.accounts) {
             showToast('Google Sign-In ยังไม่พร้อม กรุณารอสักครู่', 'error');
             return;
         }
 
-        // Try prompt first (works on Chrome, Windows, Android)
+        // iOS/Safari detection
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+
+        // Use Manual Redirect Flow for iOS or Safari to avoid Popup blocking and Mismatch issues
+        if (isIOS || isSafari) {
+            this.showGoogleSignInModal(true); // Show modal but trigger redirect on click
+            return;
+        }
+
+        // Try prompt for others
         try {
             google.accounts.id.prompt((notification) => {
-                // If prompt is suppressed or failed, show sign-in button modal
                 if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-                    console.log('Prompt not displayed, reason:', notification.getNotDisplayedReason() || notification.getSkippedReason());
-                    // Show manual button modal for Safari/iOS
-                    this.showGoogleSignInModal();
+                    this.showGoogleSignInModal(false);
                 }
             });
         } catch (e) {
             console.error('Google prompt failed:', e);
-            this.showGoogleSignInModal();
+            this.showGoogleSignInModal(false);
         }
     },
 
     // Show Google Sign-In Modal for Safari/iOS
-    showGoogleSignInModal() {
+    showGoogleSignInModal(isManualRedirect = false) {
         // Create modal with Google Sign-In button
         const modal = document.createElement('div');
         modal.id = 'google-signin-modal';
@@ -270,24 +314,44 @@ const app = {
                     <button class="signin-modal-close" onclick="document.getElementById('google-signin-modal').remove()">✕</button>
                     <h3 style="margin-bottom: 1rem; color: #1E293B;">เข้าสู่ระบบด้วย Google</h3>
                     <p style="color: #64748B; margin-bottom: 1.5rem; font-size: 0.9rem;">กรุณากดปุ่มด้านล่างเพื่อเข้าสู่ระบบ</p>
-                    <div id="google-signin-btn-modal"></div>
+                    <div id="google-signin-btn-modal" style="display: flex; justify-content: center;"></div>
                 </div>
             </div>
         `;
         document.body.appendChild(modal);
 
-        // Render Google button in modal
-        google.accounts.id.renderButton(
-            document.getElementById('google-signin-btn-modal'),
-            {
-                theme: 'outline',
-                size: 'large',
-                type: 'standard',
-                shape: 'pill',
-                text: 'signin_with',
-                width: 280
-            }
-        );
+        const btnContainer = document.getElementById('google-signin-btn-modal');
+
+        if (isManualRedirect) {
+            // Manual Button for iOS/Safari Redirect Flow
+            const googleIconSvg = `<svg width="20" height="20" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+            </svg>`;
+
+            const manualBtn = document.createElement('button');
+            manualBtn.className = 'google-login-btn-welcome';
+            manualBtn.style.width = '280px';
+            manualBtn.style.justifyContent = 'center';
+            manualBtn.innerHTML = `${googleIconSvg} เข้าสู่ระบบด้วย Google`;
+            manualBtn.onclick = () => this.useGoogleRedirectFlow();
+            btnContainer.appendChild(manualBtn);
+        } else {
+            // Standard renderButton for other browsers fallback
+            google.accounts.id.renderButton(
+                btnContainer,
+                {
+                    theme: 'outline',
+                    size: 'large',
+                    type: 'standard',
+                    shape: 'pill',
+                    text: 'signin_with',
+                    width: 280
+                }
+            );
+        }
     },
 
     // Render Login Screen

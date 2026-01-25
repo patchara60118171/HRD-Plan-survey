@@ -2,6 +2,24 @@
 // Utility Functions
 // ========================================
 
+// Toggle Profile Dropdown Menu
+function toggleProfileMenu() {
+    const dropdown = document.getElementById('profile-dropdown');
+    if (dropdown) {
+        dropdown.classList.toggle('show');
+    }
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function (e) {
+    const container = document.querySelector('.user-profile-container');
+    const dropdown = document.getElementById('profile-dropdown');
+    if (dropdown && container && !container.contains(e.target)) {
+        dropdown.classList.remove('show');
+    }
+});
+
+
 // Calculate BMI
 function calculateBMI(height, weight) {
     if (!height || !weight || height <= 0 || weight <= 0) return null;
