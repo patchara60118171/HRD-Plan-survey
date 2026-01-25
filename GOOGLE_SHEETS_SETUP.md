@@ -13,6 +13,12 @@
 // CODE FOR GOOGLE APPS SCRIPT
 // ========================================
 
+// ========================================
+// CODE FOR GOOGLE APPS SCRIPT
+// ========================================
+
+const ADMIN_PASSWORD = "admin"; // Simple protection for demo
+
 function doPost(e) {
   const lock = LockService.getScriptLock();
   lock.tryLock(10000);
@@ -26,10 +32,15 @@ function doPost(e) {
         return saveDraft(params.email, params.data);
     }
 
+    // Handle Header Setup (New)
+    if (action === 'setupHeaders') {
+        return setupHeaders(params.keys);
+    }
+
     // Default: Submit Response
     const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-    const data = params; // If no action, assume it's data
-    if (data.action) delete data.action; // Cleanup
+    const data = params; 
+    if (data.action) delete data.action; 
 
     data.timestamp = new Date(); 
 
@@ -40,8 +51,7 @@ function doPost(e) {
     }
     const nextRow = Math.max(sheet.getLastRow() + 1, 2); 
     
-    // ... (Same submission logic as before, abbreviated for clarity but essentially maps headers) ...
-    // Note: For simplicity in this edit, I will include the full submission logic again effectively
+    // Auto-add new columns if missing
     const currentHeaders = sheet.getRange(1, 1, 1, sheet.getLastColumn() || 1).getValues()[0];
     const missingHeaders = [];
     Object.keys(data).forEach(key => {
@@ -51,6 +61,7 @@ function doPost(e) {
       const startCol = currentHeaders.length + (currentHeaders[0] === "" ? 0 : 1);
       sheet.getRange(1, startCol, 1, missingHeaders.length).setValues([missingHeaders]);
     }
+    
     const finalHeaders = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
     const newRow = [];
     finalHeaders.forEach(header => {
@@ -59,10 +70,8 @@ function doPost(e) {
       if (header === 'timestamp') value = new Date();
       newRow.push(value !== undefined ? value : '');
     });
-    sheet.getRange(nextRow, 1, 1, newRow.length).setValues([newRow]);
     
-    // Should we clear draft after submission? Optional, but good practice.
-    // For now, let client handle deletion or just overwrite next time.
+    sheet.getRange(nextRow, 1, 1, newRow.length).setValues([newRow]);
 
     return ContentService.createTextOutput(JSON.stringify({ 'result': 'success', 'row': nextRow })).setMimeType(ContentService.MimeType.JSON);
 
@@ -86,6 +95,12 @@ function doGet(e) {
     if (action === 'getDraft') {
        return getDraft(e.parameter.email);
     }
+    if (action === 'getAllResponses') {
+        if (e.parameter.password !== ADMIN_PASSWORD) {
+            return ContentService.createTextOutput(JSON.stringify({ 'result': 'error', 'message': 'Unauthorized' })).setMimeType(ContentService.MimeType.JSON);
+        }
+       return getAllResponses();
+    }
     
     return ContentService.createTextOutput(JSON.stringify({ 'result': 'error', 'message': 'Invalid action' })).setMimeType(ContentService.MimeType.JSON);
       
@@ -94,6 +109,57 @@ function doGet(e) {
   } finally {
      lock.releaseLock();
   }
+}
+
+// --- Admin Functions ---
+
+function getAllResponses() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  // Get Main Sheet (Assume it's the one that's NOT 'Drafts')
+  let sheet = ss.getSheets()[0];
+  if (sheet.getName() === "Drafts" && ss.getNumSheets() > 1) {
+     sheet = ss.getSheets()[1];
+  }
+  
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 2) return ContentService.createTextOutput(JSON.stringify([])).setMimeType(ContentService.MimeType.JSON);
+  
+  const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  const data = sheet.getRange(2, 1, lastRow - 1, sheet.getLastColumn()).getValues();
+  
+  const responses = data.map(row => {
+    let obj = {};
+    headers.forEach((header, index) => {
+      obj[header] = row[index];
+    });
+    return obj;
+  });
+  
+  return ContentService.createTextOutput(JSON.stringify(responses)).setMimeType(ContentService.MimeType.JSON);
+}
+
+function setupHeaders(keys) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let sheet = ss.getSheets()[0];
+  if (sheet.getName() === "Drafts" && ss.getNumSheets() > 1) sheet = ss.getSheets()[1];
+
+  // If sheet has data, warn or skip? For safety, we only append missing.
+  // But user specifically asked to "create headers first". 
+  
+  let currentHeaders = [];
+  if (sheet.getLastColumn() > 0) {
+      currentHeaders = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  }
+  
+  const missing = keys.filter(k => !currentHeaders.includes(k));
+  
+  if (missing.length > 0) {
+      const startCol = (sheet.getLastColumn() || 0) + 1;
+      sheet.getRange(1, startCol, 1, missing.length).setValues([missing]);
+      return ContentService.createTextOutput(JSON.stringify({ 'result': 'success', 'message': `Added ${missing.length} headers` })).setMimeType(ContentService.MimeType.JSON);
+  }
+  
+  return ContentService.createTextOutput(JSON.stringify({ 'result': 'success', 'message': 'No new headers needed' })).setMimeType(ContentService.MimeType.JSON);
 }
 
 // --- Draft Functions ---

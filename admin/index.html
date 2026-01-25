@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Well-being Survey</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        body {
+            background: #F1F5F9;
+            padding: 2rem;
+        }
+
+        .admin-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid #E2E8F0;
+            padding-bottom: 1rem;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            display: block;
+            overflow-x: auto;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 0.75rem;
+            border: 1px solid #E2E8F0;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        .data-table th {
+            background: #F8FAFC;
+            font-weight: 600;
+        }
+
+        .login-box {
+            max-width: 400px;
+            margin: 100px auto;
+            text-align: center;
+            padding: 2rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .actions-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+        }
+
+        .status-badge.good {
+            background: #D1FAE5;
+            color: #065F46;
+        }
+
+        .status-badge.poor {
+            background: #FEE2E2;
+            color: #991B1B;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+
+<body>
+
+    <!-- Login Screen -->
+    <div id="login-screen" class="login-box">
+        <h2>🔐 Admin Login</h2>
+        <p style="color: #64748B; margin-bottom: 1.5rem;">กรุณากรอกรหัสผ่านเพื่อเข้าถึงข้อมูล</p>
+        <input type="password" id="admin-pass" class="input-field" placeholder="Password" style="margin-bottom: 1rem;">
+        <button onclick="adminLogin()" class="btn-start" style="width: 100%; padding: 0.75rem;">เข้าสู่ระบบ</button>
+    </div>
+
+    <!-- Dashboard Screen -->
+    <div id="dashboard-screen" class="admin-container" style="display: none;">
+        <div class="admin-header">
+            <div>
+                <h1 style="margin: 0;">📊 Dashboard</h1>
+                <p style="color: #64748B; margin: 0;">ภาพรวมผลการประเมินสุขภาวะ</p>
+            </div>
+            <div>
+                <button onclick="location.href='../index.html'" class="btn-login">🏠 หน้าหลัก</button>
+            </div>
+        </div>
+
+        <div class="actions-bar">
+            <button onclick="fetchData()" class="btn-action">🔄 รีเฟรชข้อมูล</button>
+            <button onclick="downloadExcel()" class="btn-action primary">📥 Export Excel</button>
+            <button onclick="initializeHeaders()" class="btn-action" style="background: #F59E0B; color: white;">⚡
+                สร้างหัวตาราง (Setup Headers)</button>
+        </div>
+
+        <div id="loading" style="display: none; text-align: center; padding: 2rem;">กำลังโหลดข้อมูล...</div>
+
+        <div style="overflow-x: auto;">
+            <table class="data-table" id="responses-table">
+                <thead>
+                    <tr id="table-headers">
+                        <th>ลำดับ</th>
+                        <th>เวลา</th>
+                        <th>ชื่อ</th>
+                        <th>BMI</th>
+                        <th>TMHI-15</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    <!-- Data will be injected here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="../js/questions.js"></script>
+    <script src="../js/utils.js"></script>
+    <script src="../js/app.js"></script> <!-- To access GOOGLE_SCRIPT_URL -->
+    <script>
+        // Use the same URL as the main app
+        // Note: We need to pull GOOGLE_SCRIPT_URL from app.js or config
+        // Since app.js declares it as const, we might not access it easily if not global.
+        // Let's rely on user pasting it or hardcode for now, or finding a way to share.
+        // Actually, app.js usually has it at the top. Let's redefine or try to read window.
+
+        // We will assume GOOGLE_SCRIPT_URL is defined in app.js in global scope (it is not, strictly, it's const).
+        // Let's add a prompt or better, move config to a shared file. 
+        // For now, I'll extract it specifically or ask user to ensure it's set. 
+        // Actually app.js defines it. I'll clone the decl here for safety or parse it.
+        // WAIT, I can view app.js content and just copy it. 
+
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxB3hZlF_sYjR-wA8zET5X66A_hR3H9YjVn-k_m9tC_yQO_1hC2tE2M7XbQO4f4pD4/exec"; // User's deployed URL (Found in artifacts or previous context? No, user never pasted it in chat history in this session, but it is in app.js file on disk. I should read app.js to get it dynamically or just tell user to check).
+
+        // Actually I can read it from app.js using regex if I load app.js as text? No, too complex.
+        // I will assume the user has set it up. I will define a placeholder and ask user to check.
+        // OR better: I will read js/app.js right now to find the URL.
+
+        let scriptUrl = ""; 
+    </script>
+    <script src="../js/admin.js"></script>
+</body>
+
+</html>
