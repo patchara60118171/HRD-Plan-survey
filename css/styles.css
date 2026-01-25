@@ -1333,7 +1333,7 @@ body {
     height: 56px;
     margin: 0 auto 1.5rem;
     border-radius: 12px;
-    background: #0d9488;
+    background: var(--primary-gradient);
     display: flex;
     align-items: center;
     justify-content: center;

@@ -35,6 +35,9 @@ const app = {
             document.getElementById('loading-screen').classList.add('hidden');
         }, 500);
 
+        // Check for Google OAuth redirect (token in URL hash)
+        this.handleGoogleRedirectCallback();
+
         // Init Google Sign-In
         this.initGoogleSignIn();
 
@@ -74,6 +77,41 @@ const app = {
         }
     },
 
+    // Handle Google OAuth Redirect Callback (for Safari/iOS)
+    handleGoogleRedirectCallback() {
+        // Check if URL hash contains token from OAuth redirect
+        const hash = window.location.hash.substring(1);
+        if (!hash) return;
+
+        const params = new URLSearchParams(hash);
+        const idToken = params.get('id_token');
+        const accessToken = params.get('access_token');
+
+        if (idToken) {
+            try {
+                // Decode JWT token
+                const payload = JSON.parse(atob(idToken.split('.')[1]));
+                this.userInfo = {
+                    name: payload.name,
+                    email: payload.email,
+                    picture: payload.picture
+                };
+                this.accessToken = accessToken || idToken;
+
+                // Clear hash from URL
+                history.replaceState(null, '', window.location.pathname + window.location.search);
+
+                this.renderUserSection();
+                showToast(`ยินดีต้อนรับ ${this.userInfo.name}!`, 'success');
+
+                // Load draft from cloud if exists
+                this.loadDraftFromCloud();
+            } catch (e) {
+                console.error('Error parsing OAuth token:', e);
+            }
+        }
+    },
+
     // Render Google Button (Official) with Fallback
     renderGoogleButton() {
         // 1. Retry logic if google is not defined yet
@@ -97,13 +135,42 @@ const app = {
         }
     },
 
-    // Google Login
+    // Google Login - Trigger the prompt or use a workaround for Safari
     googleLogin() {
-        if (typeof google !== 'undefined' && google.accounts) {
-            google.accounts.id.prompt();
-        } else {
+        if (typeof google === 'undefined' || !google.accounts) {
             showToast('Google Sign-In ยังไม่พร้อม กรุณารอสักครู่', 'error');
+            return;
         }
+
+        // Try prompt first
+        try {
+            google.accounts.id.prompt((notification) => {
+                // If prompt is suppressed or failed, try alternative method
+                if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+                    console.log('Prompt not displayed, reason:', notification.getNotDisplayedReason() || notification.getSkippedReason());
+                    // Use redirect flow as fallback for Safari/iOS
+                    this.useGoogleRedirectFlow();
+                }
+            });
+        } catch (e) {
+            console.error('Google prompt failed:', e);
+            this.useGoogleRedirectFlow();
+        }
+    },
+
+    // Fallback: Use Google OAuth redirect flow for Safari/iOS
+    useGoogleRedirectFlow() {
+        const redirectUri = window.location.origin + window.location.pathname;
+        const scope = 'openid email profile';
+        const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
+            `client_id=${GOOGLE_CLIENT_ID}` +
+            `&redirect_uri=${encodeURIComponent(redirectUri)}` +
+            `&response_type=token id_token` +
+            `&scope=${encodeURIComponent(scope)}` +
+            `&nonce=${Math.random().toString(36).substring(2)}`;
+
+        // Redirect to Google Auth
+        window.location.href = authUrl;
     },
 
     // Render Login Screen
@@ -331,8 +398,8 @@ const app = {
             html += renderQuestion(q, this.responses[q.id], questionNum++);
         });
 
-        // Add BMI result if on BMI section
-        if (sectionKey === 'physical' && subsection.title.includes('น้ำหนัก')) {
+        // Add BMI result if on body measurement section
+        if (sectionKey === 'personal' && subsection.title.includes('ร่างกาย')) {
             html += `<div id="bmi-result">${renderBMIResult(this.responses.height, this.responses.weight)}</div>`;
         }
 
@@ -368,6 +435,24 @@ const app = {
     // Submit Survey (Final Save)
     async submitSurvey() {
         showToast('กำลังบันทึกข้อมูล...', 'info');
+
+        // Calculate and add BMI to responses before saving
+        const height = parseFloat(this.responses.height);
+        const weight = parseFloat(this.responses.weight);
+        if (height && weight) {
+            const bmi = calculateBMI(height, weight);
+            const bmiInfo = getBMICategory(bmi);
+            this.responses.bmi = bmi;
+            this.responses.bmi_category = bmiInfo ? bmiInfo.category : '';
+        }
+
+        // Calculate and add TMHI score to responses
+        const tmhiScore = calculateTMHIScore(this.responses);
+        if (tmhiScore > 0) {
+            const tmhiInfo = getTMHILevel(tmhiScore);
+            this.responses.tmhi_score = tmhiScore;
+            this.responses.tmhi_level = tmhiInfo ? tmhiInfo.level : '';
+        }
 
         // 1. Save to Google Apps Script (Cloud DB / Sheets)
         if (GOOGLE_SCRIPT_URL) {

@@ -4,6 +4,14 @@
 
 // Render Login Screen (ChatGPT Style)
 function renderLoginScreen() {
+    // Google "G" Logo SVG (inline to avoid loading issues)
+    const googleIconSvg = `<svg width="20" height="20" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+        <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+        <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+        <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+        <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+    </svg>`;
+
     return `
         <div class="login-screen fade-in">
             <div class="login-card">
@@ -12,7 +20,7 @@ function renderLoginScreen() {
                 <p class="login-subtitle">ลงชื่อเข้าใช้เพื่อทำแบบสำรวจ</p>
                 
                 <button class="google-login-btn" onclick="app.googleLogin()">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="G">
+                    ${googleIconSvg}
                     ดำเนินการต่อด้วย Google
                 </button>
                 
@@ -272,11 +280,16 @@ function renderBMIResult(height, weight) {
 
     return `
         <div class="bmi-result fade-in">
-            <div>ดัชนีมวลกาย (BMI) ของท่าน:</div>
+            <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 0.5rem;">📊 ผลการคำนวณ BMI</div>
             <div class="bmi-value">${bmi}</div>
             <div class="bmi-category ${info.class}">${info.emoji} ${info.category}</div>
-            <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.5rem;">
-                *อ้างอิงเกณฑ์สากล (WHO): ปกติ 18.5 - 24.9
+            <div style="background: #F1F5F9; padding: 0.75rem; border-radius: 8px; margin-top: 1rem; font-size: 0.8rem; color: var(--text-secondary);">
+                <div style="font-weight: 600; margin-bottom: 0.5rem;">📋 เกณฑ์ที่ใช้ (WHO สากล):</div>
+                <div>• น้ำหนักน้อย: BMI < 18.5</div>
+                <div>• น้ำหนักปกติ: BMI 18.5 - 24.9</div>
+                <div>• น้ำหนักเกิน: BMI 25.0 - 29.9</div>
+                <div>• อ้วน: BMI ≥ 30.0</div>
+                <div style="margin-top: 0.5rem; font-style: italic;">*สูตร: น้ำหนัก(กก.) ÷ ส่วนสูง(ม.)²</div>
             </div>
         </div>
     `;

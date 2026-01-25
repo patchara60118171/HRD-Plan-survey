@@ -101,8 +101,8 @@ const SURVEY_DATA = {
             {
                 title: 'ข้อมูลร่างกายเบื้องต้น',
                 questions: [
-                    { id: 'weight', text: 'น้ำหนัก (กิโลกรัม)', type: 'number', required: true },
                     { id: 'height', text: 'ส่วนสูง (เซนติเมตร)', type: 'number', required: true },
+                    { id: 'weight', text: 'น้ำหนัก (กิโลกรัม)', type: 'number', required: true },
                     { id: 'waist', text: 'เส้นรอบเอว (เซนติเมตร)', type: 'number', required: true }
                 ]
             }
