@@ -20,24 +20,43 @@ function getBMICategory(bmi) {
     return { category: 'อ้วน', class: 'obese', emoji: '🔴' };
 }
 
-// Calculate Depression Score (PHQ-9 style)
-function calculateDepressionScore(responses) {
+// Calculate TMHI-15 Score
+function calculateTMHIScore(responses) {
     let score = 0;
-    const phqKeys = ['phq_1', 'phq_2', 'phq_3', 'phq_4', 'phq_5', 'phq_6', 'phq_7', 'phq_8', 'phq_9', 'phq_10', 'phq_11'];
-    phqKeys.forEach(key => {
-        if (responses[key] !== undefined) {
-            score += parseInt(responses[key]) || 0;
+    // TMHI-15 items: tmhi_1 to tmhi_15
+    // Scoring: Not at all=1, A little=2, Much=3, Very much=4
+    // Negative items (reverse score): 4, 5, 6 (1=4, 2=3, 3=2, 4=1)
+
+    // Check if TMHI section is done
+    if (!responses['tmhi_1']) return 0;
+
+    const reverseItems = ['tmhi_4', 'tmhi_5', 'tmhi_6'];
+
+    for (let i = 1; i <= 15; i++) {
+        const key = `tmhi_${i}`;
+        const val = parseInt(responses[key]) || 0;
+        if (val === 0) continue; // Skip if not answered
+
+        if (reverseItems.includes(key)) {
+            score += (5 - val); // Reverse: 1->4, 2->3, 3->2, 4->1
+        } else {
+            score += val;
         }
-    });
+    }
     return score;
 }
 
-// Get Depression Level
-function getDepressionLevel(score) {
-    if (score < 7) return { level: 'ไม่มีภาวะซึมเศร้า', class: 'none', emoji: '😊' };
-    if (score <= 12) return { level: 'ซึมเศร้าระดับน้อย', class: 'mild', emoji: '😐' };
-    if (score <= 18) return { level: 'ซึมเศร้าระดับปานกลาง', class: 'moderate', emoji: '😔' };
-    return { level: 'ซึมเศร้าระดับรุนแรง', class: 'severe', emoji: '😰' };
+// Get Mental Health Level (TMHI-15)
+function getTMHILevel(score) {
+    // Criteria:
+    // <= 43: Poor (ต่ำกว่าคนทั่วไป)
+    // 44 - 50: Average (เท่ากับคนทั่วไป)
+    // 51 - 60: Good (สูงกว่าคนทั่วไป)
+
+    if (score === 0) return { level: 'ยังทำไม่ครบ', class: 'none', emoji: '⚪' };
+    if (score <= 43) return { level: 'ต่ำกว่าเกณฑ์เฉลี่ย (ควรดูแลใจ)', class: 'poor', emoji: '🌧️' };
+    if (score <= 50) return { level: 'เกณฑ์ปกติ (ใจแข็งแรงดี)', class: 'average', emoji: '⛅' };
+    return { level: 'สูงกว่าเกณฑ์เฉลี่ย (ใจฟูมาก)', class: 'good', emoji: '☀️' };
 }
 
 // Format time

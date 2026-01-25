@@ -41,6 +41,9 @@ function renderWelcome() {
                 <span>ใช้เวลาประมาณ 30-45 นาที</span>
             </div>
             
+            <!-- Login Button for Mobile/Easy Access -->
+            <div id="welcome-login-btn" style="display: flex; justify-content: center; margin-bottom: 2rem; min-height: 50px;"></div>
+
             <button class="btn-start" onclick="app.startSurvey()">
                 เริ่มทำแบบสำรวจ <span>→</span>
             </button>
@@ -50,14 +53,22 @@ function renderWelcome() {
 
 // Render Section Header
 function renderSectionHeader(section) {
-    const icons = { physical: '💪', mental: '🧠', social: '👥', environment: '🏢' };
-    const names = { physical: 'สุขภาวะทางกาย', mental: 'สุขภาวะทางใจ', social: 'สุขภาวะทางสังคม', environment: 'สุขภาวะทางสภาพแวดล้อม' };
+    const icons = { physical: '💪', mental: '🧠', consumption: '🍷', nutrition: '🥗', safety: '⛑️', activity: '🏃', environment: '🌳' };
+    const names = {
+        physical: 'ข้อมูลส่วนบุคคล/ร่างกาย',
+        mental: 'สุขภาพจิต',
+        consumption: 'พฤติกรรมเสี่ยง',
+        nutrition: 'โภชนาการ',
+        safety: 'ความปลอดภัย',
+        activity: 'กิจกรรมทางกาย',
+        environment: 'สิ่งแวดล้อม'
+    };
 
     return `
         <div class="section-header fade-in">
             <div class="section-badge ${section.type}">
-                <span>${icons[section.type]}</span>
-                <span>${names[section.type]}</span>
+                <span>${icons[section.type] || icons.physical}</span>
+                <span>${names[section.type] || section.title}</span>
             </div>
             <h2 class="section-title">${section.title}</h2>
             <p class="section-desc">${section.description || ''}</p>
@@ -202,7 +213,7 @@ function renderTime(question, value) {
                     onchange="app.handleTimeChange('${question.id}')">
                 ${minuteOptions}
             </select>
-            <span class="time-unit">น.</span>
+            <span class="time-unit">ชม./นาที</span>
         </div>
         <input type="hidden" id="${question.id}" value="${value || ''}">
     `;
@@ -271,8 +282,10 @@ function renderResults(responses, userInfo) {
     const weight = parseFloat(responses.weight);
     const bmi = calculateBMI(height, weight);
     const bmiInfo = getBMICategory(bmi);
-    const depressionScore = calculateDepressionScore(responses);
-    const depressionInfo = getDepressionLevel(depressionScore);
+
+    // Updated: TMHI-15 instead of Depression
+    const tmhiScore = calculateTMHIScore(responses);
+    const tmhiInfo = getTMHILevel(tmhiScore);
 
     return `
         <div class="results-screen fade-in">
@@ -286,22 +299,17 @@ function renderResults(responses, userInfo) {
                 <div class="result-card physical">
                     <div class="result-icon">💪</div>
                     <div class="result-title">สุขภาวะทางกาย</div>
-                    <div class="result-status complete">✓ เสร็จสิ้น</div>
+                    <div class="result-status complete">✓ บันทึกแล้ว</div>
                 </div>
                 <div class="result-card mental">
                     <div class="result-icon">🧠</div>
-                    <div class="result-title">สุขภาวะทางใจ</div>
-                    <div class="result-status complete">✓ เสร็จสิ้น</div>
-                </div>
-                <div class="result-card social">
-                    <div class="result-icon">👥</div>
-                    <div class="result-title">สุขภาวะทางสังคม</div>
-                    <div class="result-status complete">✓ เสร็จสิ้น</div>
+                    <div class="result-title">สุขภาพจิต</div>
+                    <div class="result-status complete">✓ บันทึกแล้ว</div>
                 </div>
                 <div class="result-card environment">
-                    <div class="result-icon">🏢</div>
-                    <div class="result-title">สภาพแวดล้อม</div>
-                    <div class="result-status complete">✓ เสร็จสิ้น</div>
+                    <div class="result-icon">🛡️</div>
+                    <div class="result-title">ความปลอดภัย/สิ่งแวดล้อม</div>
+                    <div class="result-status complete">✓ บันทึกแล้ว</div>
                 </div>
             </div>
             
@@ -315,9 +323,9 @@ function renderResults(responses, userInfo) {
                 ` : ''}
                 
                 <div class="special-card">
-                    <div class="special-card-title">ผลประเมินภาวะซึมเศร้า</div>
-                    <div class="score-value">${depressionScore}<span class="score-max"> / 33</span></div>
-                    <div class="score-level ${depressionInfo.class}">${depressionInfo.emoji} ${depressionInfo.level}</div>
+                    <div class="special-card-title">คะแนนสุขภาพจิต (TMHI-15)</div>
+                    <div class="score-value">${tmhiScore}<span class="score-max"> / 60</span></div>
+                    <div class="score-level ${tmhiInfo.class}">${tmhiInfo.emoji} ${tmhiInfo.level}</div>
                 </div>
             </div>
             
@@ -334,7 +342,7 @@ function renderResults(responses, userInfo) {
                 </button>
                 ` : ''}
                 <button class="btn-action primary" onclick="app.startNew()">
-                    <span class="btn-action-icon">🔄</span> เริ่มใหม่
+                    <span class="btn-action-icon">🔄</span> ทำแบบสำรวจใหม่
                 </button>
             </div>
         </div>

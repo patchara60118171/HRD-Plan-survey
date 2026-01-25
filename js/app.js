@@ -73,11 +73,23 @@ const app = {
 
     // Render Google Button (Official)
     renderGoogleButton() {
-        const btnContainer = document.getElementById('g_id_signin_button');
-        if (btnContainer && typeof google !== 'undefined') {
+        if (typeof google === 'undefined') return;
+
+        // Header button
+        const headerBtn = document.getElementById('g_id_signin_button');
+        if (headerBtn) {
             google.accounts.id.renderButton(
-                btnContainer,
-                { theme: "outline", size: "large", type: "standard", shape: "pill", text: "signin_with" }  // customization
+                headerBtn,
+                { theme: "outline", size: "large", type: "standard", shape: "pill", text: "signin_with" }
+            );
+        }
+
+        // Welcome screen button
+        const welcomeBtn = document.getElementById('welcome-login-btn');
+        if (welcomeBtn && !this.userInfo) {
+            google.accounts.id.renderButton(
+                welcomeBtn,
+                { theme: "filled_blue", size: "large", shape: "pill", text: "signin_with", width: "250" }
             );
         }
     },
@@ -265,6 +277,9 @@ const app = {
         document.getElementById('main-content').innerHTML = renderWelcome();
         document.getElementById('nav-buttons').style.display = 'none';
         document.getElementById('progress-container').style.display = 'none';
+
+        // Render login button on welcome screen if needed
+        setTimeout(() => this.renderGoogleButton(), 100);
     },
 
     // Start Survey
