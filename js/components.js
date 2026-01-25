@@ -45,15 +45,18 @@ function renderWelcome() {
     // Check if user is logged in
     const isLoggedIn = app.userInfo !== null;
 
-    // Different button based on login status
-    const actionButton = isLoggedIn
-        ? `<button class="btn-start" onclick="app.startSurvey()">
-               เริ่มทำแบบสำรวจ <span>→</span>
-           </button>`
-        : `<button class="google-login-btn-welcome" onclick="app.googleLogin()">
+    // Login button (only show if not logged in)
+    const loginButton = !isLoggedIn
+        ? `<button class="google-login-btn-welcome" onclick="app.googleLogin()">
                ${googleIconSvg}
-               เข้าสู่ระบบด้วย Google เพื่อเริ่มทำแบบสำรวจ
-           </button>`;
+               เข้าสู่ระบบด้วย Google
+           </button>`
+        : '';
+
+    // Start button (always show)
+    const startButton = `<button class="btn-start" onclick="app.startSurvey()">
+        เริ่มทำแบบสำรวจ <span>→</span>
+    </button>`;
 
     return `
         <div class="welcome-screen fade-in">
@@ -87,7 +90,10 @@ function renderWelcome() {
                 <span>ใช้เวลาประมาณ 30-45 นาที</span>
             </div>
             
-            ${actionButton}
+            <div class="welcome-buttons">
+                ${loginButton}
+                ${startButton}
+            </div>
         </div>
     `;
 }

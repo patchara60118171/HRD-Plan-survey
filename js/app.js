@@ -133,43 +133,58 @@ const app = {
         }
     },
 
-    // Google Login - Trigger the prompt or use a workaround for Safari
+    // Google Login - Trigger the prompt or show button for Safari/iOS
     googleLogin() {
         if (typeof google === 'undefined' || !google.accounts) {
             showToast('Google Sign-In ยังไม่พร้อม กรุณารอสักครู่', 'error');
             return;
         }
 
-        // Try prompt first
+        // Try prompt first (works on Chrome, Windows, Android)
         try {
             google.accounts.id.prompt((notification) => {
-                // If prompt is suppressed or failed, try alternative method
+                // If prompt is suppressed or failed, show sign-in button modal
                 if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
                     console.log('Prompt not displayed, reason:', notification.getNotDisplayedReason() || notification.getSkippedReason());
-                    // Use redirect flow as fallback for Safari/iOS
-                    this.useGoogleRedirectFlow();
+                    // Show manual button modal for Safari/iOS
+                    this.showGoogleSignInModal();
                 }
             });
         } catch (e) {
             console.error('Google prompt failed:', e);
-            this.useGoogleRedirectFlow();
+            this.showGoogleSignInModal();
         }
     },
 
-    // Fallback: Use Google OAuth redirect flow for Safari/iOS
-    useGoogleRedirectFlow() {
-        // Use origin only (without pathname) to match Google Cloud Console settings
-        const redirectUri = window.location.origin;
-        const scope = 'openid email profile';
-        const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
-            `client_id=${GOOGLE_CLIENT_ID}` +
-            `&redirect_uri=${encodeURIComponent(redirectUri)}` +
-            `&response_type=token id_token` +
-            `&scope=${encodeURIComponent(scope)}` +
-            `&nonce=${Math.random().toString(36).substring(2)}`;
+    // Show Google Sign-In Modal for Safari/iOS
+    showGoogleSignInModal() {
+        // Create modal with Google Sign-In button
+        const modal = document.createElement('div');
+        modal.id = 'google-signin-modal';
+        modal.innerHTML = `
+            <div class="signin-modal-overlay">
+                <div class="signin-modal-content">
+                    <button class="signin-modal-close" onclick="document.getElementById('google-signin-modal').remove()">✕</button>
+                    <h3 style="margin-bottom: 1rem; color: #1E293B;">เข้าสู่ระบบด้วย Google</h3>
+                    <p style="color: #64748B; margin-bottom: 1.5rem; font-size: 0.9rem;">กรุณากดปุ่มด้านล่างเพื่อเข้าสู่ระบบ</p>
+                    <div id="google-signin-btn-modal"></div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
 
-        // Redirect to Google Auth
-        window.location.href = authUrl;
+        // Render Google button in modal
+        google.accounts.id.renderButton(
+            document.getElementById('google-signin-btn-modal'),
+            {
+                theme: 'outline',
+                size: 'large',
+                type: 'standard',
+                shape: 'pill',
+                text: 'signin_with',
+                width: 280
+            }
+        );
     },
 
     // Render Login Screen
