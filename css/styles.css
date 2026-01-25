@@ -1695,17 +1695,21 @@ body {
     color: var(--primary-color);
 }
 
-.progress-bar {
+.survey-progress-bar {
     width: 100%;
     height: 8px;
     background: #E2E8F0;
     border-radius: 4px;
     overflow: hidden;
+    position: relative;
+    /* Ensure visibility */
+    z-index: 1;
 }
 
-.progress-fill {
+.survey-progress-fill {
     height: 100%;
-    background: var(--primary-gradient);
+    background: linear-gradient(135deg, #06B6D4 0%, #3B82F6 100%);
+    /* Force gradient */
     border-radius: 4px;
     transition: width 0.3s ease;
     width: 0%;
