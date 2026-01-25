@@ -64,6 +64,21 @@ const app = {
                 client_id: GOOGLE_CLIENT_ID,
                 callback: (response) => this.handleGoogleCallback(response)
             });
+            // Also render button if user section is waiting
+            if (!this.userInfo && document.getElementById('g_id_signin_button')) {
+                this.renderGoogleButton();
+            }
+        }
+    },
+
+    // Render Google Button (Official)
+    renderGoogleButton() {
+        const btnContainer = document.getElementById('g_id_signin_button');
+        if (btnContainer && typeof google !== 'undefined') {
+            google.accounts.id.renderButton(
+                btnContainer,
+                { theme: "outline", size: "large", type: "standard", shape: "pill", text: "signin_with" }  // customization
+            );
         }
     },
 
@@ -115,6 +130,10 @@ const app = {
             container.innerHTML = renderUserProfile(this.userInfo);
         } else {
             container.innerHTML = renderLoginButton();
+            // Try to render official button
+            setTimeout(() => {
+                this.renderGoogleButton();
+            }, 100); // Small delay to ensure DOM is ready
         }
     },
 

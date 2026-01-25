@@ -341,14 +341,9 @@ function renderResults(responses, userInfo) {
     `;
 }
 
-// Render Login Button
+// Render Login Button (Container for GSI)
 function renderLoginButton() {
-    return `
-        <button class="btn-login" onclick="app.googleLogin()">
-            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
-            เข้าสู่ระบบ
-        </button>
-    `;
+    return `<div id="g_id_signin_button"></div>`;
 }
 
 // Render User Profile
