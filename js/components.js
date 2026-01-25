@@ -179,10 +179,11 @@ function renderTime(question, value) {
         hourOptions += `<option value="${h}" ${selected}>${h}</option>`;
     }
 
-    // Generate Minutes 00-59 (step 5 for easier selection, or every minute? User said "24 hours", usually fine with every minute but 5-min steps are cleaner for UX. I'll stick to every minute to be safe, or just 00, 15, 30, 45? Let's do 00, 05, 10... for cleaner UX, or full range. Let's do full range but maybe grouped. Actually full range 00-59 is standard).
-    // Let's do 00-59
+    // Generate Minutes 00, 15, 30, 45 (as requested)
     let minuteOptions = '<option value="" disabled selected>นาที</option>';
-    for (let i = 0; i < 60; i++) {
+    const minuteSteps = [0, 15, 30, 45];
+
+    for (const i of minuteSteps) {
         const m = String(i).padStart(2, '0');
         const selected = savedMinute === m ? 'selected' : '';
         minuteOptions += `<option value="${m}" ${selected}>${m}</option>`;
