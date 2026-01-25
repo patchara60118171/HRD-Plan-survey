@@ -3,6 +3,14 @@
 // Admin Password (Client-side simple check)
 const ADMIN_PASS = "admin";
 
+// Initialize Supabase Helper
+let supabaseAdmin = null;
+function initSupabaseAdmin() {
+    if (typeof supabase !== 'undefined' && typeof SUPABASE_URL !== 'undefined') {
+        supabaseAdmin = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    }
+}
+
 // Check if logged in
 if (localStorage.getItem('admin_logged_in') === 'true') {
     showDashboard();
@@ -21,6 +29,10 @@ function adminLogin() {
 function showDashboard() {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('dashboard-screen').style.display = 'block';
+
+    // Init Supabase if not already
+    initSupabaseAdmin();
+
     fetchData();
 }
 
@@ -29,11 +41,14 @@ function logout() {
     location.reload();
 }
 
-// Fetch Data
+// Fetch Data from Supabase
 async function fetchData() {
-    if (!SCRIPT_URL) {
-        alert('Configuration Error: Script URL not found.');
-        return;
+    if (!supabaseAdmin) {
+        initSupabaseAdmin();
+        if (!supabaseAdmin) {
+            alert('Supabase Client initialization failed. Check config.');
+            return;
+        }
     }
 
     const loading = document.getElementById('loading');
@@ -42,29 +57,191 @@ async function fetchData() {
     tableBody.innerHTML = '';
 
     try {
-        // Use GET with action getAllResponses
-        // Since GAS doPost/doGet might be separate, check Setup. 
-        // We implemented getAllResponses in doGet.
-        const url = `${SCRIPT_URL}?action=getAllResponses&password=${ADMIN_PASS}`;
-
-        const response = await fetch(url);
-        const data = await response.json();
+        // Fetch ALL data from Supabase
+        // Ordering by submitted_at desc (or timestamp)
+        const { data, error } = await supabaseAdmin
+            .from('survey_responses')
+            .select('*')
+            .order('timestamp', { ascending: false });
 
         loading.style.display = 'none';
 
-        if (data.result === 'error') {
-            alert('Error: ' + data.message);
+        if (error) {
+            console.error('Supabase Error:', error);
+            alert('Error fetching data: ' + error.message);
             return;
         }
 
         renderTable(data);
         window.currentData = data; // Store for export
 
+        // Update Dashboard Stats & Charts
+        processDataForDashboard(data);
+
     } catch (e) {
         loading.style.display = 'none';
         console.error(e);
         alert('Failed to fetch data');
     }
+}
+
+// Calculate and Render Dashboard Stats
+function processDataForDashboard(data) {
+    if (!data || data.length === 0) return;
+
+    let totalBMI = 0;
+    let totalTMHI = 0;
+    let riskCount = 0;
+    let bmiCounts = { underweight: 0, normal: 0, overweight: 0, obese: 0 };
+    let tmhiLevels = { excellent: 0, good: 0, fair: 0, poor: 0 };
+    let validBMICount = 0;
+    let validTMHICount = 0;
+
+    // Daily Responses Map
+    let dateMap = {};
+
+    data.forEach(row => {
+        // 1. BMI Stats
+        if (row.bmi && !isNaN(row.bmi)) {
+            const bmi = parseFloat(row.bmi);
+            totalBMI += bmi;
+            validBMICount++;
+
+            // Count Categories (Manual check if category is missing)
+            if (bmi < 18.5) bmiCounts.underweight++;
+            else if (bmi < 25) bmiCounts.normal++;
+            else if (bmi < 30) bmiCounts.overweight++;
+            else bmiCounts.obese++;
+        }
+
+        // 2. TMHI Stats
+        if (row.tmhi_score && !isNaN(row.tmhi_score)) {
+            const score = parseInt(row.tmhi_score);
+            totalTMHI += score;
+            validTMHICount++;
+
+            // Levels: Excellent(52-60), Good(44-51), Fair(33-43), Poor(0-32)
+            if (score >= 52) tmhiLevels.excellent++;
+            else if (score >= 44) tmhiLevels.good++;
+            else if (score >= 33) tmhiLevels.fair++;
+            else tmhiLevels.poor++;
+        }
+
+        // 3. Risk Calculation (Obese OR Poor Mental Health)
+        const isObese = row.bmi >= 30;
+        const isPoorMental = row.tmhi_score !== null && row.tmhi_score <= 32;
+        if (isObese || isPoorMental) {
+            riskCount++;
+        }
+
+        // 4. Timeline Stats
+        if (row.timestamp) {
+            const dateKey = new Date(row.timestamp).toISOString().split('T')[0];
+            dateMap[dateKey] = (dateMap[dateKey] || 0) + 1;
+        }
+    });
+
+    // Update Cards
+    document.getElementById('stat-total').innerText = data.length;
+    document.getElementById('stat-bmi').innerText = validBMICount ? (totalBMI / validBMICount).toFixed(1) : '0.0';
+    document.getElementById('stat-tmhi').innerText = validTMHICount ? (totalTMHI / validTMHICount).toFixed(1) : '0.0';
+
+    const riskPercent = ((riskCount / data.length) * 100).toFixed(1);
+    document.getElementById('stat-risk').innerText = `${riskPercent}%`;
+
+    // Render Charts
+    renderCharts(bmiCounts, tmhiLevels, dateMap);
+}
+
+let charts = {}; // Store chart instances to destroy before re-creating
+
+function renderCharts(bmiCounts, tmhiLevels, dateMap) {
+    // 1. BMI Pie Chart
+    const ctxBMI = document.getElementById('chart-bmi').getContext('2d');
+    if (charts.bmi) charts.bmi.destroy();
+
+    charts.bmi = new Chart(ctxBMI, {
+        type: 'doughnut',
+        data: {
+            labels: ['น้ำหนักน้อย', 'ปกติ', 'ท้วม', 'อ้วน'],
+            datasets: [{
+                data: [bmiCounts.underweight, bmiCounts.normal, bmiCounts.overweight, bmiCounts.obese],
+                backgroundColor: ['#60A5FA', '#34D399', '#FBBF24', '#F87171'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom' }
+            }
+        }
+    });
+
+    // 2. TMHI Bar Chart
+    const ctxTMHI = document.getElementById('chart-tmhi').getContext('2d');
+    if (charts.tmhi) charts.tmhi.destroy();
+
+    charts.tmhi = new Chart(ctxTMHI, {
+        type: 'bar',
+        data: {
+            labels: ['ดีมาก (ใจแกร่ง)', 'ปกติ (ใจแข็งแรง)', 'ปานกลาง (พอไหว)', 'ควรปรับปรุง (อ่อนล้า)'],
+            datasets: [{
+                label: 'จำนวนคน',
+                data: [tmhiLevels.excellent, tmhiLevels.good, tmhiLevels.fair, tmhiLevels.poor],
+                backgroundColor: ['#34D399', '#60A5FA', '#FBBF24', '#F87171'],
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: { beginAtZero: true, ticks: { stepSize: 1 } }
+            }
+        }
+    });
+
+    // 3. Timeline Line Chart
+    const sortedDates = Object.keys(dateMap).sort();
+    const timelineData = sortedDates.map(d => dateMap[d]);
+    // Format dates for label
+    const dateLabels = sortedDates.map(d => {
+        const date = new Date(d);
+        return `${date.getDate()}/${date.getMonth() + 1}`;
+    });
+
+    const ctxTimeline = document.getElementById('chart-timeline').getContext('2d');
+    if (charts.timeline) charts.timeline.destroy();
+
+    charts.timeline = new Chart(ctxTimeline, {
+        type: 'line',
+        data: {
+            labels: dateLabels,
+            datasets: [{
+                label: 'ผู้ตอบแบบสอบถาม (คน)',
+                data: timelineData,
+                borderColor: '#6366F1',
+                backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                tension: 0.3,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: { beginAtZero: true, ticks: { stepSize: 1 } }
+            }
+        }
+    });
 }
 
 function renderTable(data) {
@@ -120,60 +297,9 @@ function renderTable(data) {
 }
 
 // Initialize Headers
-async function initializeHeaders() {
-    if (!confirm('ต้องการสร้างหัวตาราง (Columns) ใน Google Sheet หรือไม่?')) return;
-
-    // 1. Collect all Question IDs from SURVEY_DATA
-    const keys = ['email', 'timestamp']; // Default keys
-
-    // Traverse SURVEY_DATA
-    Object.values(SURVEY_DATA).forEach(section => {
-        section.subsections.forEach(sub => {
-            sub.questions.forEach(q => {
-                keys.push(q.id);
-            });
-        });
-    });
-
-    console.log('Syncing headers:', keys);
-
-    // 2. Send to GAS
-    try {
-        console.log('Sending request to:', GOOGLE_SCRIPT_URL);
-        const response = await fetch(GOOGLE_SCRIPT_URL, {
-            method: 'POST',
-            redirect: 'follow', // Ensure redirects are followed
-            headers: {
-                'Content-Type': 'text/plain;charset=utf-8', // Explicitly set simple content type to avoid preflight
-            },
-            body: JSON.stringify({
-                action: 'setupHeaders',
-                keys: keys
-            })
-        });
-
-        const text = await response.text();
-        console.log('Raw Response:', text);
-
-        let result;
-        try {
-            result = JSON.parse(text);
-        } catch (e) {
-            console.error('JSON Parse Error:', e);
-            alert('Server Error: ได้รับข้อมูลที่ไม่ใช่ JSON (อาจเกิดจากสิทธิ์การเข้าถึง)');
-            return;
-        }
-
-        if (result.result === 'success') {
-            alert(`สำเร็จ! ${result.message}`);
-        } else {
-            alert('เกิดข้อผิดพลาด: ' + result.error);
-        }
-
-    } catch (e) {
-        console.error('Network/Fetch Error:', e);
-        alert('Failed to sync headers (Network Error)');
-    }
+// Initialize Headers (Not needed for Supabase)
+function initializeHeaders() {
+    alert('สำหรับ Supabase ไม่จำเป็นต้องตั้งค่าหัวตารางครับ ข้อมูลจะถูกบันทึกโดยอัตโนมัติ');
 }
 
 // Download Excel

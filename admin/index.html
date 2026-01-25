@@ -85,8 +85,74 @@
             background: #FEE2E2;
             color: #991B1B;
         }
+
+        /* Dashboard Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid #E2E8F0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .stat-title {
+            color: #64748B;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1E293B;
+            line-height: 1.2;
+        }
+
+        .stat-desc {
+            font-size: 0.75rem;
+            color: #94A3B8;
+            margin-top: 0.25rem;
+        }
+
+        /* Charts Grid */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .chart-container {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid #E2E8F0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .chart-container h3 {
+            margin: 0 0 1rem 0;
+            font-size: 1rem;
+            color: #475569;
+        }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Supabase Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
 <body>
@@ -111,11 +177,61 @@
             </div>
         </div>
 
-        <div class="actions-bar">
+        <!-- Overview Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-title">ผู้ตอบแบบสอบถามทั้งหมด</div>
+                <div class="stat-value" id="stat-total">0</div>
+                <div class="stat-desc">คน</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">BMI เฉลี่ย</div>
+                <div class="stat-value" id="stat-bmi">0.0</div>
+                <div class="stat-desc">kg/m²</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">คะแนนสุขภาวะจิตเฉลี่ย</div>
+                <div class="stat-value" id="stat-tmhi">0.0</div>
+                <div class="stat-desc">คะแนน (เต็ม 60)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">กลุ่มเสี่ยงสูง</div>
+                <div class="stat-value" id="stat-risk" style="color: #EF4444;">0%</div>
+                <div class="stat-desc">BMI เกิน / สุขภาพจิตต่ำ</div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="charts-grid">
+            <div class="chart-container">
+                <h3>สัดส่วน BMI (ดัชนีมวลกาย)</h3>
+                <div style="height: 300px; position: relative;">
+                    <canvas id="chart-bmi"></canvas>
+                </div>
+            </div>
+            <div class="chart-container">
+                <h3>ระดับสุขภาพจิต (TMHI-15)</h3>
+                <div style="height: 300px; position: relative;">
+                    <canvas id="chart-tmhi"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="charts-grid" style="grid-template-columns: 1fr;">
+            <div class="chart-container">
+                <h3>แนวโน้มการตอบแบบสอบถาม (รายวัน)</h3>
+                <div style="height: 300px; position: relative;">
+                    <canvas id="chart-timeline"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="actions-bar" style="margin-top: 2rem; border-top: 1px solid #E2E8F0; padding-top: 2rem;">
+            <div style="flex: 1;">
+                <h2 style="margin: 0 0 1rem 0;">📋 ข้อมูลดิบ (Raw Data)</h2>
+            </div>
             <button onclick="fetchData()" class="btn-action">🔄 รีเฟรชข้อมูล</button>
             <button onclick="downloadExcel()" class="btn-action primary">📥 Export Excel</button>
-            <button onclick="initializeHeaders()" class="btn-action" style="background: #F59E0B; color: white;">⚡
-                สร้างหัวตาราง (Setup Headers)</button>
         </div>
 
         <div id="loading" style="display: none; text-align: center; padding: 2rem;">กำลังโหลดข้อมูล...</div>
@@ -137,6 +253,9 @@
             </table>
         </div>
     </div>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script src="../js/questions.js"></script>
     <script src="../js/utils.js"></script>
