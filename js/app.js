@@ -160,7 +160,8 @@ const app = {
 
     // Fallback: Use Google OAuth redirect flow for Safari/iOS
     useGoogleRedirectFlow() {
-        const redirectUri = window.location.origin + window.location.pathname;
+        // Use origin only (without pathname) to match Google Cloud Console settings
+        const redirectUri = window.location.origin;
         const scope = 'openid email profile';
         const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
             `client_id=${GOOGLE_CLIENT_ID}` +
