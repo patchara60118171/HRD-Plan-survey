@@ -452,6 +452,40 @@ body {
     transform: translateY(0);
 }
 
+/* Google Login Button on Welcome Page */
+.google-login-btn-welcome {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: var(--spacing-md) var(--spacing-2xl);
+    background: var(--primary-gradient);
+    border: none;
+    border-radius: var(--radius-full);
+    font-family: var(--font-thai);
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-white);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    box-shadow: var(--shadow-md);
+}
+
+.google-login-btn-welcome:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.google-login-btn-welcome:active {
+    transform: translateY(0);
+}
+
+.google-login-btn-welcome svg {
+    background: white;
+    border-radius: 4px;
+    padding: 2px;
+}
+
 /* ========================================
    Section Header
    ======================================== */

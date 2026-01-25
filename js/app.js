@@ -41,15 +41,13 @@ const app = {
         // Init Google Sign-In
         this.initGoogleSignIn();
 
-        // Wait briefly for GSI to potentially restore session (if we were using that)
-        // But since we rely on explicit sign-in for this flow:
-        if (Object.keys(this.responses).length > 0 && this.currentSectionIndex > 0) {
+        // Show Welcome page first (with login button if not logged in)
+        // If user has in-progress responses, continue survey
+        if (Object.keys(this.responses).length > 0 && this.currentSectionIndex > 0 && this.userInfo) {
             this.currentView = 'survey';
             this.renderSurvey();
-        } else if (this.userInfo) {
-            this.renderWelcome();
         } else {
-            this.renderLoginScreen();
+            this.renderWelcome();
         }
 
         // Setup navigation buttons
