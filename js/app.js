@@ -50,6 +50,9 @@ const app = {
         // Render user section
         this.renderUserSection();
 
+        // Initialize cloud save debounce
+        this.debouncedSaveCloud = debounce(() => this.saveDraftToCloud(), 2000);
+
         // Init Google Sign-In
         this.initGoogleSignIn();
     },
@@ -85,7 +88,11 @@ const app = {
             };
             this.accessToken = response.credential;
             this.renderUserSection();
+            this.renderUserSection();
             showToast(`ยินดีต้อนรับ ${this.userInfo.name}!`, 'success');
+
+            // Load draft from cloud if exists
+            this.loadDraftFromCloud();
         }
     },
 
@@ -143,14 +150,43 @@ const app = {
                 <h2 style="margin-bottom: 1.5rem;">ประวัติการส่งแบบสอบถาม</h2>
         `;
 
-        if (history.length === 0) {
+        if (history.length === 0 && Object.keys(loadResponses()).length === 0) {
             html += `
                 <div class="card text-center" style="padding: 2rem;">
                     <p>ยังไม่พบประวัติการทำแบบสอบถาม</p>
                 </div>
             `;
         } else {
+            console.log('Rendering history list...');
             html += `<div class="history-list">`;
+
+            // 1. Show Local Draft if exists
+            const localDraft = loadResponses();
+            const lastUpdated = localStorage.getItem('wellbeing_survey_timestamp');
+
+            if (Object.keys(localDraft).length > 0) {
+                const date = lastUpdated ? new Date(lastUpdated).toLocaleString('th-TH') : 'วันนี้';
+                // Estimate completion
+                const totalQuestions = Object.keys(localDraft).length; // rough estimate
+
+                html += `
+                    <div class="card history-item draft" onclick="app.editResponses()" style="cursor: pointer; margin-bottom: 1rem; border-left: 4px solid #F59E0B; background: #FFFBEB;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h3 style="font-size: 1.1rem; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                                    📝 แบบร่าง (ยังไม่ส่ง)
+                                    <span style="font-size: 0.75rem; background: #F59E0B; color: white; padding: 2px 6px; border-radius: 4px;">กำลังทำ</span>
+                                </h3>
+                                <p style="color: var(--text-secondary); margin: 0.25rem 0 0;">แก้ไขล่าสุด: ${date}</p>
+                                <p style="font-size: 0.875rem; color: var(--text-secondary); margin-top: 0.25rem;">ตอบไปแล้วประมาณ ${totalQuestions} ข้อ</p>
+                            </div>
+                            <span class="btn-icon">✏️ แก้ไขต่อ</span>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // 2. Show History Items
             history.forEach((item, index) => {
                 const date = new Date(item.timestamp).toLocaleString('th-TH');
                 // Calculate basic score summary if available
@@ -298,6 +334,7 @@ const app = {
     handleChange(id, value) {
         this.responses[id] = value;
         saveResponses(this.responses);
+        if (this.userInfo) this.debouncedSaveCloud(); // Auto-save to cloud
 
         // Update BMI if height or weight changed
         if (id === 'height' || id === 'weight') {
@@ -337,6 +374,7 @@ const app = {
 
         this.responses[id] = arr;
         saveResponses(this.responses);
+        if (this.userInfo) this.debouncedSaveCloud(); // Auto-save to cloud
         showToast('บันทึกแล้ว', 'success');
     },
 
@@ -419,6 +457,24 @@ const app = {
         }
     },
 
+    // Handle time input change
+    handleTimeChange(questionId) {
+        const hour = document.getElementById(`${questionId}_hour`).value;
+        const minute = document.getElementById(`${questionId}_minute`).value;
+
+        if (hour && minute) {
+            const timeValue = `${hour}:${minute}`;
+            this.responses[questionId] = timeValue;
+            saveResponses(this.responses);
+
+            // Update hidden input used for other logic if any
+            const hiddenInput = document.getElementById(questionId);
+            if (hiddenInput) hiddenInput.value = timeValue;
+
+            showToast('บันทึกเวลาแล้ว', 'success');
+        }
+    },
+
     // Edit responses (go back to survey)
     editResponses() {
         this.currentView = 'survey';
@@ -432,10 +488,68 @@ const app = {
         if (confirm('ต้องการเริ่มใหม่หรือไม่? ข้อมูลเดิมจะถูกลบ')) {
             clearResponses();
             this.responses = {};
+            // Also clear cloud draft? Maybe not automatically, but let's assume new start overrides.
+            // Actually better to keep cloud draft until explicitly overwritten or separate action?
+            // For now, local start new just clears local. Cloud overwrite happens on next specific save.
+
             this.currentSectionIndex = 0;
             this.currentSubsectionIndex = 0;
             this.renderWelcome();
             showToast('เริ่มใหม่แล้ว', 'success');
+        }
+    },
+
+    // Save Draft to Cloud
+    async saveDraftToCloud() {
+        if (!this.userInfo || !GOOGLE_SCRIPT_URL) return;
+
+        try {
+            await fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: 'saveDraft',
+                    email: this.userInfo.email,
+                    data: this.responses
+                })
+            });
+            console.log('Draft saved to cloud');
+        } catch (e) {
+            console.error('Failed to save draft', e);
+        }
+    },
+
+    // Load Draft from Cloud
+    async loadDraftFromCloud() {
+        if (!this.userInfo || !GOOGLE_SCRIPT_URL) return;
+
+        try {
+            const url = `${GOOGLE_SCRIPT_URL}?action=getDraft&email=${encodeURIComponent(this.userInfo.email)}`;
+            const res = await fetch(url);
+            const data = await res.json();
+
+            if (data && Object.keys(data).length > 0) {
+                // Determine if cloud draft is newer or has more data than local?
+                // Simple logic: If local is empty, use cloud. If both exist, prompt user?
+                // For seamless experience: Merge changes? 
+                // Let's go with: If local is empty or user just logged in and we want to sync state.
+
+                const localData = loadResponses();
+                if (Object.keys(localData).length === 0) {
+                    this.responses = data;
+                    saveResponses(this.responses);
+                    showToast('โหลดข้อมูลเดิมจาก Cloud แล้ว', 'success');
+                    if (this.currentView === 'welcome') {
+                        // Optional: Auto start if data loaded?
+                        // Let user decide to click start.
+                    }
+                } else {
+                    // Conflict resolution: complex. 
+                    // Simple approach: Toast "Found cloud draft"
+                    console.log('Found cloud draft, but local data exists.');
+                }
+            }
+        } catch (e) {
+            console.error('Failed to load draft', e);
         }
     }
 };

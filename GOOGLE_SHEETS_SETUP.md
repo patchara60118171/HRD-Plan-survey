@@ -18,57 +18,56 @@ function doPost(e) {
   lock.tryLock(10000);
 
   try {
+    const params = JSON.parse(e.postData.contents);
+    const action = params.action;
+
+    // Handle Draft Save
+    if (action === 'saveDraft') {
+        return saveDraft(params.email, params.data);
+    }
+
+    // Default: Submit Response
     const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-    const nextRow = sheet.getLastRow() + 1;
+    const data = params; // If no action, assume it's data
+    if (data.action) delete data.action; // Cleanup
 
-    // Parse data
-    const data = JSON.parse(e.postData.contents);
-    data.timestamp = new Date(); // Add server timestamp
+    data.timestamp = new Date(); 
 
-    const newRow = [];
-
-    // If header doesn't exist, create it
+    // Header Handling
     if (headerLength() === 0) {
       const keys = Object.keys(data);
       sheet.getRange(1, 1, 1, keys.length).setValues([keys]);
     }
-
-    // Map data to headers
-    const currentHeaders = sheet.getRange(1, 1, 1, sheet.getLastColumn() || 1).getValues()[0];
+    const nextRow = Math.max(sheet.getLastRow() + 1, 2); 
     
-    // Add missing headers if any
+    // ... (Same submission logic as before, abbreviated for clarity but essentially maps headers) ...
+    // Note: For simplicity in this edit, I will include the full submission logic again effectively
+    const currentHeaders = sheet.getRange(1, 1, 1, sheet.getLastColumn() || 1).getValues()[0];
     const missingHeaders = [];
     Object.keys(data).forEach(key => {
-      if (!currentHeaders.includes(key) && key !== 'timestamp') {
-        missingHeaders.push(key);
-      }
+      if (!currentHeaders.includes(key) && key !== 'timestamp') missingHeaders.push(key);
     });
-    
     if (missingHeaders.length > 0) {
       const startCol = currentHeaders.length + (currentHeaders[0] === "" ? 0 : 1);
       sheet.getRange(1, startCol, 1, missingHeaders.length).setValues([missingHeaders]);
     }
-
-    // Refresh headers after update
     const finalHeaders = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
-
+    const newRow = [];
     finalHeaders.forEach(header => {
       let value = data[header];
       if (Array.isArray(value)) value = value.join(', ');
       if (header === 'timestamp') value = new Date();
       newRow.push(value !== undefined ? value : '');
     });
-
     sheet.getRange(nextRow, 1, 1, newRow.length).setValues([newRow]);
+    
+    // Should we clear draft after submission? Optional, but good practice.
+    // For now, let client handle deletion or just overwrite next time.
 
-    return ContentService
-      .createTextOutput(JSON.stringify({ 'result': 'success', 'row': nextRow }))
-      .setMimeType(ContentService.MimeType.JSON);
+    return ContentService.createTextOutput(JSON.stringify({ 'result': 'success', 'row': nextRow })).setMimeType(ContentService.MimeType.JSON);
 
   } catch (e) {
-    return ContentService
-      .createTextOutput(JSON.stringify({ 'result': 'error', 'error': e.toString() }))
-      .setMimeType(ContentService.MimeType.JSON);
+    return ContentService.createTextOutput(JSON.stringify({ 'result': 'error', 'error': e.toString() })).setMimeType(ContentService.MimeType.JSON);
   } finally {
     lock.releaseLock();
   }
@@ -84,22 +83,94 @@ function doGet(e) {
     if (action === 'getHistory') {
        return getHistory(e.parameter.email);
     }
+    if (action === 'getDraft') {
+       return getDraft(e.parameter.email);
+    }
     
-    return ContentService.createTextOutput(JSON.stringify({ 'result': 'error', 'message': 'Invalid action' }))
-      .setMimeType(ContentService.MimeType.JSON);
+    return ContentService.createTextOutput(JSON.stringify({ 'result': 'error', 'message': 'Invalid action' })).setMimeType(ContentService.MimeType.JSON);
       
   } catch (e) {
-     return ContentService.createTextOutput(JSON.stringify({ 'result': 'error', 'error': e.toString() }))
-      .setMimeType(ContentService.MimeType.JSON);
+     return ContentService.createTextOutput(JSON.stringify({ 'result': 'error', 'error': e.toString() })).setMimeType(ContentService.MimeType.JSON);
   } finally {
      lock.releaseLock();
   }
 }
 
+// --- Draft Functions ---
+
+function getDraftSheet() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let sheet = ss.getSheetByName("Drafts");
+  if (!sheet) {
+    sheet = ss.insertSheet("Drafts");
+    sheet.appendRow(["email", "timestamp", "data"]); // Key columns
+    sheet.setFrozenRows(1);
+  }
+  return sheet;
+}
+
+function saveDraft(email, data) {
+  if (!email) return ContentService.createTextOutput(JSON.stringify({ 'result': 'error', 'message': 'Email required' })).setMimeType(ContentService.MimeType.JSON);
+  
+  const sheet = getDraftSheet();
+  const lastRow = sheet.getLastRow();
+  let foundRow = -1;
+  
+  // Find existing draft for this email
+  if (lastRow > 1) {
+      const emails = sheet.getRange(2, 1, lastRow - 1, 1).getValues().flat();
+      const idx = emails.indexOf(email);
+      if (idx !== -1) foundRow = idx + 2;
+  }
+  
+  const jsonData = JSON.stringify(data);
+  const timestamp = new Date();
+  
+  if (foundRow !== -1) {
+    // Update existing
+    sheet.getRange(foundRow, 2).setValue(timestamp);
+    sheet.getRange(foundRow, 3).setValue(jsonData);
+  } else {
+    // Insert new
+    sheet.appendRow([email, timestamp, jsonData]);
+  }
+  
+  return ContentService.createTextOutput(JSON.stringify({ 'result': 'success', 'message': 'Draft saved' })).setMimeType(ContentService.MimeType.JSON);
+}
+
+function getDraft(email) {
+  if (!email) return ContentService.createTextOutput(JSON.stringify({ 'result': 'error' })).setMimeType(ContentService.MimeType.JSON);
+  
+  const sheet = getDraftSheet();
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 2) return ContentService.createTextOutput(JSON.stringify(null)).setMimeType(ContentService.MimeType.JSON);
+  
+  const emails = sheet.getRange(2, 1, lastRow - 1, 1).getValues().flat();
+  const idx = emails.indexOf(email);
+  
+  if (idx !== -1) {
+      const dataStr = sheet.getRange(idx + 2, 3).getValue();
+      // Return the inner JSON data directly, wrapper will be handled by fetch
+      return ContentService.createTextOutput(dataStr).setMimeType(ContentService.MimeType.JSON);
+  }
+  
+  return ContentService.createTextOutput(JSON.stringify(null)).setMimeType(ContentService.MimeType.JSON);
+}
+
+
 function getHistory(email) {
   if (!email) return ContentService.createTextOutput(JSON.stringify({ 'result': 'error', 'message': 'Email required' })).setMimeType(ContentService.MimeType.JSON);
 
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  // Assumes active sheet is the main responses sheet or the first sheet if "Drafts" is active
+  // Better to explicitly find "Survey Responses" or similar? For now, standard behavior is ActiveSheet.
+  // BUT, if Drafts is active, this fails. Let's iterate sheets to find one that is NOT "Drafts".
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let sheet = ss.getSheets()[0]; // Default to first sheet
+  // Helper to find the main sheet if likely named something else or just not "Drafts"
+  if (sheet.getName() === "Drafts" && ss.getNumSheets() > 1) {
+      sheet = ss.getSheets()[1]; 
+  }
+
   const lastRow = sheet.getLastRow();
   if (lastRow < 2) return ContentService.createTextOutput(JSON.stringify([])).setMimeType(ContentService.MimeType.JSON);
 
@@ -125,7 +196,11 @@ function getHistory(email) {
 }
 
 function headerLength() {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+    let sheet = ss.getSheets()[0]; 
+    if (sheet.getName() === "Drafts" && ss.getNumSheets() > 1) {
+      sheet = ss.getSheets()[1]; 
+    }
   if (sheet.getLastColumn() == 0) return 0;
   return sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0].filter(String).length;
 }

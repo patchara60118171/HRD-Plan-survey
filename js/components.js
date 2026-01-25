@@ -167,16 +167,43 @@ function renderText(question, value) {
     `;
 }
 
-// Render Time Input
+// Render Time Input (24-hour format)
 function renderTime(question, value) {
+    const [savedHour, savedMinute] = (value || ':').split(':');
+
+    // Generate Hours 00-23
+    let hourOptions = '<option value="" disabled selected>ชม.</option>';
+    for (let i = 0; i < 24; i++) {
+        const h = String(i).padStart(2, '0');
+        const selected = savedHour === h ? 'selected' : '';
+        hourOptions += `<option value="${h}" ${selected}>${h}</option>`;
+    }
+
+    // Generate Minutes 00-59 (step 5 for easier selection, or every minute? User said "24 hours", usually fine with every minute but 5-min steps are cleaner for UX. I'll stick to every minute to be safe, or just 00, 15, 30, 45? Let's do 00, 05, 10... for cleaner UX, or full range. Let's do full range but maybe grouped. Actually full range 00-59 is standard).
+    // Let's do 00-59
+    let minuteOptions = '<option value="" disabled selected>นาที</option>';
+    for (let i = 0; i < 60; i++) {
+        const m = String(i).padStart(2, '0');
+        const selected = savedMinute === m ? 'selected' : '';
+        minuteOptions += `<option value="${m}" ${selected}>${m}</option>`;
+    }
+
     return `
-        <div class="time-input">
-            <input type="time" 
-                   class="input-field" 
-                   id="${question.id}"
-                   value="${value || ''}"
-                   onchange="app.handleChange('${question.id}', this.value)">
+        <div class="time-input-group">
+            <select class="input-field time-select" 
+                    id="${question.id}_hour"
+                    onchange="app.handleTimeChange('${question.id}')">
+                ${hourOptions}
+            </select>
+            <span class="time-separator">:</span>
+            <select class="input-field time-select" 
+                    id="${question.id}_minute"
+                    onchange="app.handleTimeChange('${question.id}')">
+                ${minuteOptions}
+            </select>
+            <span class="time-unit">น.</span>
         </div>
+        <input type="hidden" id="${question.id}" value="${value || ''}">
     `;
 }
 
