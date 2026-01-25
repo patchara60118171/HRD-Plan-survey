@@ -397,9 +397,21 @@ const app = {
     logout() {
         this.userInfo = null;
         this.accessToken = null;
+        this.responses = {}; // Clear responses in memory
+
+        // Clear LocalStorage
+        localStorage.removeItem('wellbeing_survey_responses');
+        localStorage.removeItem('wellbeing_survey_section');
+        localStorage.removeItem('wellbeing_survey_timestamp');
+
         if (typeof google !== 'undefined' && google.accounts) {
             google.accounts.id.disableAutoSelect();
         }
+
+        // Close profile dropdown if open
+        const dropdown = document.getElementById('profile-dropdown');
+        if (dropdown) dropdown.classList.remove('show');
+
         this.renderUserSection();
         this.renderWelcome(); // Redirect to home
         showToast('ออกจากระบบแล้ว', 'info');
