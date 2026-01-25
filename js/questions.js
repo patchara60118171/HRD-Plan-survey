@@ -16,7 +16,14 @@ const SURVEY_DATA = {
             {
                 title: 'ข้อมูลส่วนบุคคล',
                 questions: [
-                    { id: 'name', text: 'ชื่อ-นามสกุล', type: 'text', placeholder: 'ระบุชื่อและนามสกุล', required: true },
+                    {
+                        id: 'title',
+                        text: 'คำนำหน้า',
+                        type: 'radio',
+                        options: ['นาย', 'นาง', 'นางสาว', 'อื่นๆ'],
+                        required: true
+                    },
+                    { id: 'name', text: 'ชื่อ-สกุล', type: 'text', placeholder: 'ระบุชื่อและนามสกุล', required: true },
                     {
                         id: 'gender',
                         text: 'เพศ',

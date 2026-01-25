@@ -1302,3 +1302,166 @@ body {
 .question-card:nth-child(5) {
     animation-delay: 200ms;
 }
+
+/* ========================================
+   Login Screen (ChatGPT Style)
+   ======================================== */
+.login-screen {
+    position: fixed;
+    inset: 0;
+    background: #0d0d0d;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 9998;
+    padding: 1rem;
+}
+
+.login-card {
+    background: #212121;
+    border-radius: 16px;
+    padding: 2.5rem 2rem;
+    max-width: 400px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+}
+
+.login-logo {
+    width: 56px;
+    height: 56px;
+    margin: 0 auto 1.5rem;
+    border-radius: 12px;
+    background: #0d9488;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+}
+
+.login-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 0.75rem;
+}
+
+.login-subtitle {
+    font-size: 0.9rem;
+    color: #888;
+    margin-bottom: 2rem;
+    line-height: 1.5;
+}
+
+.google-login-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 14px 20px;
+    background: transparent;
+    border: 1px solid #444;
+    border-radius: 9999px;
+    font-family: var(--font-thai);
+    font-size: 1rem;
+    font-weight: 500;
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.google-login-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: #666;
+}
+
+.google-login-btn img {
+    width: 20px;
+    height: 20px;
+}
+
+.login-footer {
+    margin-top: 2rem;
+    font-size: 0.75rem;
+    color: #666;
+}
+
+.login-footer a {
+    color: #888;
+    text-decoration: underline;
+}
+
+.login-screen.hidden {
+    display: none;
+}
+
+/* ========================================
+   Review Screen
+   ======================================== */
+.review-section {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.review-section-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #f1f5f9;
+}
+
+.review-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.review-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 0.5rem 0;
+    border-bottom: 1px dashed #e2e8f0;
+}
+
+.review-item:last-child {
+    border-bottom: none;
+}
+
+.review-label {
+    flex: 2;
+    font-size: 0.95rem;
+    color: #475569;
+}
+
+.review-value {
+    flex: 1;
+    text-align: right;
+    font-weight: 500;
+    color: #0f172a;
+}
+
+.review-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.display-card {
+    transition: transform 0.2s;
+}
+
+.display-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+}

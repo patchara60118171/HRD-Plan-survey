@@ -2,6 +2,28 @@
 // UI Components
 // ========================================
 
+// Render Login Screen (ChatGPT Style)
+function renderLoginScreen() {
+    return `
+        <div class="login-screen fade-in">
+            <div class="login-card">
+                <div class="login-logo">🌿</div>
+                <h2 class="login-title">ยินดีต้อนรับ</h2>
+                <p class="login-subtitle">ลงชื่อเข้าใช้เพื่อทำแบบสำรวจ</p>
+                
+                <button class="google-login-btn" onclick="app.googleLogin()">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="G">
+                    ดำเนินการต่อด้วย Google
+                </button>
+                
+                <div class="login-footer">
+                    โดยการดำเนินการต่อท่านยอมรับ <a href="#">ข้อกำหนด</a> และ <a href="#">นโยบายความเป็นส่วนตัว</a>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
 // Render Welcome Screen
 function renderWelcome() {
     return `
@@ -37,9 +59,6 @@ function renderWelcome() {
                 <span>ใช้เวลาประมาณ 30-45 นาที</span>
             </div>
             
-            <!-- Login Button for Mobile/Easy Access -->
-            <div id="welcome-login-btn" style="display: flex; justify-content: center; margin-bottom: 2rem; min-height: 50px;"></div>
-
             <button class="btn-start" onclick="app.startSurvey()">
                 เริ่มทำแบบสำรวจ <span>→</span>
             </button>
@@ -187,12 +206,15 @@ function renderTime(question, value) {
     }
 
     // Generate Minutes 00, 15, 30, 45 (as requested)
-    let minuteOptions = '<option value="" disabled selected>นาที</option>';
+    let minuteOptions = '';
     const minuteSteps = [0, 15, 30, 45];
 
     for (const i of minuteSteps) {
         const m = String(i).padStart(2, '0');
-        const selected = savedMinute === m ? 'selected' : '';
+        // Default to 00 if no saved value, otherwise match saved value
+        const isDefault = !savedMinute && m === '00';
+        const isSaved = savedMinute === m;
+        const selected = (isSaved || isDefault) ? 'selected' : '';
         minuteOptions += `<option value="${m}" ${selected}>${m}</option>`;
     }
 
@@ -272,6 +294,71 @@ function renderDepressionScore(score) {
     `;
 }
 
+// Render Review Screen
+function renderReviewScreen(responses) {
+    let html = `
+        <div class="review-screen fade-in">
+            <h2 class="section-title">ตรวจสอบคำตอบของท่าน</h2>
+            <p class="section-desc">โปรดตรวจสอบข้อมูลก่อนยืนยันการส่งแบบสำรวจ</p>
+    `;
+
+    SECTIONS_ORDER.forEach(sectionKey => {
+        const section = SURVEY_DATA[sectionKey];
+        html += `<div class="review-section">
+            <h3 class="review-section-title">${section.title}</h3>
+            <div class="review-list">`;
+
+        section.subsections.forEach(sub => {
+            sub.questions.forEach(q => {
+                let answer = responses[q.id];
+                let displayAnswer = '-';
+
+                if (answer) {
+                    if (q.type === 'radio' || q.type === 'scale') {
+                        // Find label if possible
+                        if (q.options) {
+                            const opt = q.options.find(o => (o.value || o) == answer || (o.value || o) === answer); // Loose comparison for numbers
+                            displayAnswer = opt ? (opt.label || opt) : answer;
+                        } else if (q.labels) {
+                            displayAnswer = `${answer} (${q.labels[parseInt(answer) - 1] || ''})`;
+                        } else {
+                            displayAnswer = answer;
+                        }
+                    } else if (q.type === 'checkbox') {
+                        displayAnswer = Array.isArray(answer) ? answer.join(', ') : answer;
+                    } else if (q.type === 'time') {
+                        displayAnswer = answer + ' น.';
+                    } else {
+                        displayAnswer = answer;
+                    }
+                }
+
+                html += `
+                    <div class="review-item">
+                        <div class="review-label">${q.id === 'title' ? 'คำนำหน้า' : q.text}</div>
+                        <div class="review-value">${displayAnswer}</div>
+                    </div>
+                `;
+            });
+        });
+
+        html += `</div></div>`;
+    });
+
+    html += `
+            <div class="review-actions">
+                <button class="btn btn-secondary" onclick="app.editResponses()">
+                    <span class="btn-icon">✏️</span> แก้ไขข้อมูล
+                </button>
+                <button class="btn btn-primary" onclick="app.submitSurvey()">
+                    ยืนยันและส่งข้อมูล <span class="btn-icon">✓</span>
+                </button>
+            </div>
+        </div>
+    `;
+    return html;
+}
+
 // Render Results Screen
 function renderResults(responses, userInfo) {
     const height = parseFloat(responses.height);
@@ -289,6 +376,9 @@ function renderResults(responses, userInfo) {
                 <div class="results-icon">🎉</div>
                 <h1 class="results-title">ขอบคุณที่ทำแบบสำรวจ!</h1>
                 <p class="results-subtitle">สรุปผลสุขภาวะของท่าน</p>
+                <div style="margin-top: 10px; color: var(--primary-teal); font-weight: 500;">
+                    ✓ บันทึกข้อมูลเรียบร้อยแล้ว
+                </div>
             </div>
             
             <div class="results-grid">
@@ -309,34 +399,33 @@ function renderResults(responses, userInfo) {
                 </div>
             </div>
             
-            <div class="special-results">
+            <!-- BMI & Mental Health Results -->
+            <div class="special-results-container" style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 2rem;">
                 ${bmi ? `
-                <div class="special-card">
-                    <div class="special-card-title">ดัชนีมวลกาย (BMI)</div>
-                    <div class="bmi-value">${bmi}</div>
-                    <div class="bmi-category ${bmiInfo.class}">${bmiInfo.emoji} ${bmiInfo.category}</div>
+                <div class="display-card" style="flex: 1; min-width: 300px; background: white; padding: 20px; border-radius: 12px; border: 1px solid #eee; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+                    <div class="special-card-title" style="color: #64748B; font-size: 0.9rem; margin-bottom: 10px;">ดัชนีมวลกาย (BMI)</div>
+                    <div class="bmi-value" style="font-size: 2.5rem; font-weight: 700; color: #1E293B; margin-bottom: 5px;">${bmi}</div>
+                    <div class="bmi-category ${bmiInfo.class}" style="display: inline-flex; align-items: center; gap: 5px; font-weight: 600;">
+                        ${bmiInfo.emoji} ${bmiInfo.category}
+                    </div>
                 </div>
                 ` : ''}
                 
-                <div class="special-card">
-                    <div class="special-card-title">คะแนนสุขภาพจิต (TMHI-15)</div>
-                    <div class="score-value">${tmhiScore}<span class="score-max"> / 60</span></div>
-                    <div class="score-level ${tmhiInfo.class}">${tmhiInfo.emoji} ${tmhiInfo.level}</div>
+                <div class="display-card" style="flex: 1; min-width: 300px; background: white; padding: 20px; border-radius: 12px; border: 1px solid #eee; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+                    <div class="special-card-title" style="color: #64748B; font-size: 0.9rem; margin-bottom: 10px;">คะแนนสุขภาพจิต (TMHI-15)</div>
+                    <div class="score-value" style="font-size: 2.5rem; font-weight: 700; color: #1E293B; margin-bottom: 5px;">
+                        ${tmhiScore}<span class="score-max" style="font-size: 1.25rem; color: #94A3B8; font-weight: 400;"> / 60</span>
+                    </div>
+                    <div class="score-level ${tmhiInfo.class}" style="display: inline-flex; align-items: center; gap: 5px; font-weight: 600;">
+                        ${tmhiInfo.emoji} ${tmhiInfo.level}
+                    </div>
                 </div>
             </div>
             
-            <div class="results-actions">
-                <button class="btn-action" onclick="app.editResponses()">
-                    <span class="btn-action-icon">✏️</span> แก้ไขคำตอบ
-                </button>
+            <div class="results-actions" style="margin-top: 3rem;">
                 <button class="btn-action" onclick="exportToExcel(app.responses, app.userInfo)">
                     <span class="btn-action-icon">📊</span> ดาวน์โหลด Excel
                 </button>
-                ${app.accessToken ? `
-                <button class="btn-action" onclick="exportToGoogleSheets(app.responses, app.accessToken)">
-                    <span class="btn-action-icon">📋</span> บันทึกใน Google Sheets
-                </button>
-                ` : ''}
                 <button class="btn-action primary" onclick="app.startNew()">
                     <span class="btn-action-icon">🔄</span> ทำแบบสำรวจใหม่
                 </button>

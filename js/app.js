@@ -35,12 +35,18 @@ const app = {
             document.getElementById('loading-screen').classList.add('hidden');
         }, 500);
 
-        // Render initial view
+        // Init Google Sign-In
+        this.initGoogleSignIn();
+
+        // Wait briefly for GSI to potentially restore session (if we were using that)
+        // But since we rely on explicit sign-in for this flow:
         if (Object.keys(this.responses).length > 0 && this.currentSectionIndex > 0) {
             this.currentView = 'survey';
             this.renderSurvey();
-        } else {
+        } else if (this.userInfo) {
             this.renderWelcome();
+        } else {
+            this.renderLoginScreen();
         }
 
         // Setup navigation buttons
@@ -52,9 +58,6 @@ const app = {
 
         // Initialize cloud save debounce
         this.debouncedSaveCloud = debounce(() => this.saveDraftToCloud(), 2000);
-
-        // Init Google Sign-In
-        this.initGoogleSignIn();
     },
 
     // Initialize Google Sign-In
@@ -80,8 +83,6 @@ const app = {
             if (this.retryCount < 10) {
                 this.retryCount++;
                 setTimeout(() => this.renderGoogleButton(), 500);
-            } else {
-                this.renderManualLoginButton(); // Fallback after timeout
             }
             return;
         }
@@ -94,54 +95,6 @@ const app = {
                 { theme: "outline", size: "large", type: "standard", shape: "pill", text: "signin_with" }
             );
         }
-
-        // 3. Render Welcome Button
-        const welcomeBtn = document.getElementById('welcome-login-btn');
-        if (welcomeBtn && !this.userInfo) {
-            try {
-                google.accounts.id.renderButton(
-                    welcomeBtn,
-                    { theme: "filled_blue", size: "large", shape: "pill", text: "signin_with", width: "250" }
-                );
-                // Double check: If the container is still empty after 1 sec (iframe blocked?), force manual
-                setTimeout(() => {
-                    if (welcomeBtn.children.length === 0 || welcomeBtn.offsetHeight === 0) {
-                        this.renderManualLoginButton();
-                    }
-                }, 1500);
-            } catch (e) {
-                console.error('GSI Render Error:', e);
-                this.renderManualLoginButton();
-            }
-        }
-    },
-
-    // Manual Fallback Login Button (for iOS/Blocked scenarios)
-    renderManualLoginButton() {
-        const welcomeBtn = document.getElementById('welcome-login-btn');
-        if (welcomeBtn && !this.userInfo) {
-            welcomeBtn.innerHTML = `
-                <button onclick="app.googleLogin()" class="btn-login-manual" style="
-                    background: #1a73e8; 
-                    color: white; 
-                    border: none; 
-                    padding: 12px 24px; 
-                    border-radius: 24px; 
-                    font-size: 16px; 
-                    font-weight: 500; 
-                    cursor: pointer; 
-                    display: flex; 
-                    align-items: center; 
-                    gap: 10px;
-                    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-                ">
-                    <span style="background: white; border-radius: 50%; padding: 2px; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" width="18" height="18" alt="G">
-                    </span>
-                    Sign in with Google
-                </button>
-            `;
-        }
     },
 
     // Google Login
@@ -151,6 +104,16 @@ const app = {
         } else {
             showToast('Google Sign-In ยังไม่พร้อม กรุณารอสักครู่', 'error');
         }
+    },
+
+    // Render Login Screen
+    renderLoginScreen() {
+        this.currentView = 'login';
+        document.getElementById('main-content').innerHTML = renderLoginScreen();
+        document.getElementById('nav-buttons').style.display = 'none';
+        document.getElementById('progress-container').style.display = 'none';
+
+        // Hide Header User Section while on login screen? No, keep it.
     },
 
     // Handle Google callback
@@ -393,20 +356,41 @@ const app = {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     },
 
-    // Render Results
-    async renderResults() {
-        this.currentView = 'results';
+    // Render Review Screen
+    renderReview() {
+        this.currentView = 'review';
+        document.getElementById('main-content').innerHTML = renderReviewScreen(this.responses);
+        document.getElementById('nav-buttons').style.display = 'none';
+        document.getElementById('progress-container').style.display = 'none';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    },
 
-        // Auto-save to central server if configured
+    // Submit Survey (Final Save)
+    async submitSurvey() {
+        showToast('กำลังบันทึกข้อมูล...', 'info');
+
+        // 1. Save to Google Apps Script (Cloud DB / Sheets)
         if (GOOGLE_SCRIPT_URL) {
-            showToast('กำลังบันทึกข้อมูล...', 'info');
             const success = await submitResponseToGAS(this.responses, GOOGLE_SCRIPT_URL);
-            if (success) {
-                showToast('ส่งข้อมูลเรียบร้อยแล้ว', 'success');
-            } else {
-                showToast('ไม่สามารถส่งข้อมูลได้', 'error');
+            if (!success) {
+                showToast('ไม่สามารถส่งข้อมูลไปยัง Server ได้ แต่บันทึกในเครื่องแล้ว', 'warning');
+                // Proceed anyway? Or stop? Let's proceed to show results but warn.
             }
         }
+
+        // 2. Mark as complete locally (clearing draft status basically)
+        // In a real app we might move this to a 'submitted_history'
+        // For now, we just show the results.
+
+        // 3. Show Results
+        this.renderResults();
+    },
+
+    // Render Results (Read Only)
+    renderResults() {
+        this.currentView = 'results';
+
+        // No auto-save here anymore, moved to submitSurvey
 
         document.getElementById('main-content').innerHTML = renderResults(this.responses, this.userInfo);
         document.getElementById('nav-buttons').style.display = 'none';
@@ -501,7 +485,7 @@ const app = {
             this.currentSubsectionIndex === lastSection.subsections.length - 1);
 
         if (isLast) {
-            nextBtn.innerHTML = 'ดูผลสรุป <span class="btn-icon">✓</span>';
+            nextBtn.innerHTML = 'ตรวจสอบคำตอบ <span class="btn-icon">✓</span>';
         } else {
             nextBtn.innerHTML = 'ถัดไป <span class="btn-icon">→</span>';
         }
@@ -522,8 +506,8 @@ const app = {
             this.currentSubsectionIndex = 0;
             this.renderSurvey();
         } else {
-            // Survey complete
-            this.renderResults();
+            // Survey complete -> Go to Review
+            this.renderReview();
         }
     },
 
