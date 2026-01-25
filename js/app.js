@@ -71,34 +71,76 @@ const app = {
         }
     },
 
-    // Render Google Button (Official)
+    // Render Google Button (Official) with Fallback
     renderGoogleButton() {
+        // 1. Retry logic if google is not defined yet
         if (typeof google === 'undefined' || !google.accounts || !google.accounts.id) {
-            // Retry if library not ready
-            setTimeout(() => this.renderGoogleButton(), 500);
+            // Retry for 5 seconds total (10 * 500ms)
+            if (!this.retryCount) this.retryCount = 0;
+            if (this.retryCount < 10) {
+                this.retryCount++;
+                setTimeout(() => this.renderGoogleButton(), 500);
+            } else {
+                this.renderManualLoginButton(); // Fallback after timeout
+            }
             return;
         }
 
-        // Header button
+        // 2. Render Header Button
         const headerBtn = document.getElementById('g_id_signin_button');
         if (headerBtn) {
-            // Check if already rendered to avoid duplicates/errors? GSI handles it usually.
             google.accounts.id.renderButton(
                 headerBtn,
                 { theme: "outline", size: "large", type: "standard", shape: "pill", text: "signin_with" }
             );
         }
 
-        // Welcome screen button
-        // Always try to render if container exists, even if logic thinks userInfo might be there (safety)
+        // 3. Render Welcome Button
         const welcomeBtn = document.getElementById('welcome-login-btn');
-        if (welcomeBtn) {
-            if (!this.userInfo) {
+        if (welcomeBtn && !this.userInfo) {
+            try {
                 google.accounts.id.renderButton(
                     welcomeBtn,
                     { theme: "filled_blue", size: "large", shape: "pill", text: "signin_with", width: "250" }
                 );
+                // Double check: If the container is still empty after 1 sec (iframe blocked?), force manual
+                setTimeout(() => {
+                    if (welcomeBtn.children.length === 0 || welcomeBtn.offsetHeight === 0) {
+                        this.renderManualLoginButton();
+                    }
+                }, 1500);
+            } catch (e) {
+                console.error('GSI Render Error:', e);
+                this.renderManualLoginButton();
             }
+        }
+    },
+
+    // Manual Fallback Login Button (for iOS/Blocked scenarios)
+    renderManualLoginButton() {
+        const welcomeBtn = document.getElementById('welcome-login-btn');
+        if (welcomeBtn && !this.userInfo) {
+            welcomeBtn.innerHTML = `
+                <button onclick="app.googleLogin()" class="btn-login-manual" style="
+                    background: #1a73e8; 
+                    color: white; 
+                    border: none; 
+                    padding: 12px 24px; 
+                    border-radius: 24px; 
+                    font-size: 16px; 
+                    font-weight: 500; 
+                    cursor: pointer; 
+                    display: flex; 
+                    align-items: center; 
+                    gap: 10px;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                ">
+                    <span style="background: white; border-radius: 50%; padding: 2px; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" width="18" height="18" alt="G">
+                    </span>
+                    Sign in with Google
+                </button>
+            `;
         }
     },
 
