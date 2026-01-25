@@ -73,10 +73,14 @@ async function fetchData() {
         }
 
         renderTable(data);
-        window.currentData = data; // Store for export
+        window.originalData = data; // Store original for filtering
+        window.currentData = data; // Store for export/display
+
+        // Populate Filters
+        updateFilterCounts();
 
         // Update Dashboard Stats & Charts
-        processDataForDashboard(data);
+        processAdvancedStats(window.currentData);
 
     } catch (e) {
         loading.style.display = 'none';
@@ -85,173 +89,332 @@ async function fetchData() {
     }
 }
 
-// Calculate and Render Dashboard Stats
-function processDataForDashboard(data) {
-    if (!data || data.length === 0) return;
+// ========================================
+// Filter Logic
+// ========================================
+function applyFilters() {
+    const gender = document.getElementById('filter-gender').value;
+    const ageGroup = document.getElementById('filter-age').value;
+    const region = document.getElementById('filter-region').value;
 
-    let totalBMI = 0;
-    let totalTMHI = 0;
-    let riskCount = 0;
-    let bmiCounts = { underweight: 0, normal: 0, overweight: 0, obese: 0 };
-    let tmhiLevels = { excellent: 0, good: 0, fair: 0, poor: 0 };
-    let validBMICount = 0;
-    let validTMHICount = 0;
+    let filtered = window.originalData.filter(row => {
+        let pass = true;
+        // Gender Filter
+        if (gender !== 'all') {
+            if (row.raw_responses?.gender !== gender && row.gender !== gender) pass = false;
+        }
+        // Region Filter
+        if (region !== 'all') {
+            if (row.raw_responses?.region !== region && row.region !== region) pass = false;
+        }
+        // Age Group Filter
+        if (ageGroup !== 'all') {
+            const age = parseInt(row.age || row.raw_responses?.age || 0);
+            if (ageGroup === 'GenZ' && age >= 27) pass = false; // < 27
+            else if (ageGroup === 'GenY' && (age < 27 || age > 42)) pass = false;
+            else if (ageGroup === 'GenX' && (age < 43 || age > 58)) pass = false;
+            else if (ageGroup === 'BabyBoomer' && age <= 58) pass = false;
+        }
+        return pass;
+    });
 
-    // Daily Responses Map
-    let dateMap = {};
+    window.currentData = filtered;
+    updateFilterCounts();
+    renderTable(filtered);
+    processAdvancedStats(filtered);
+}
+
+function updateFilterCounts() {
+    document.getElementById('filtered-count').innerText = window.currentData.length.toLocaleString();
+}
+
+// ========================================
+// Advanced Statistics Processing
+// ========================================
+let charts = {}; // Store chart instances
+
+function processAdvancedStats(data) {
+    if (!data) return;
+
+    // --- 1. Overview Stats ---
+    let totalBMI = 0, totalTMHI = 0, riskCount = 0;
+    let validBMI = 0, validTMHI = 0, totalAge = 0, validAge = 0;
+
+    // Aggregation Containers
+    let counts = {
+        gender: {}, ageGroup: {}, region: {},
+        tmhiLevel: { 'Excellent': 0, 'Good': 0, 'Fair': 0, 'Poor': 0 },
+        bmi: { 'Underweight': 0, 'Normal': 0, 'Overweight': 0, 'Obese': 0 },
+        smoke: { 'Never': 0, 'Regular': 0, 'Occasional': 0 },
+        alcohol: { 'Never': 0, 'Regular': 0, 'Occasional': 0 },
+        pm25Impact: {},
+        envImpact: { glare: 0, noise: 0, smell: 0, smoke: 0, posture: 0 },
+        diseases: {},
+        dietRisk: {} // Will count frequency of "Everyday" answers
+    };
 
     data.forEach(row => {
-        // 1. BMI Stats
-        if (row.bmi && !isNaN(row.bmi)) {
-            const bmi = parseFloat(row.bmi);
-            totalBMI += bmi;
-            validBMICount++;
+        const r = row.raw_responses || {}; // Shortcut to raw answers
 
-            // Count Categories (Manual check if category is missing)
-            if (bmi < 18.5) bmiCounts.underweight++;
-            else if (bmi < 25) bmiCounts.normal++;
-            else if (bmi < 30) bmiCounts.overweight++;
-            else bmiCounts.obese++;
+        // Age
+        const age = parseInt(row.age || r.age || 0);
+        if (age > 0) { totalAge += age; validAge++; }
+
+        // Age Group
+        let ag = 'Unknown';
+        if (age < 27) ag = 'Gen Z';
+        else if (age <= 42) ag = 'Gen Y';
+        else if (age <= 58) ag = 'Gen X';
+        else ag = 'Baby Boomer';
+        counts.ageGroup[ag] = (counts.ageGroup[ag] || 0) + 1;
+
+        // Gender & Region
+        const g = row.gender || r.gender || 'ไม่ระบุ';
+        counts.gender[g] = (counts.gender[g] || 0) + 1;
+
+        const reg = row.region || r.region || 'ไม่ระบุ';
+        counts.region[reg] = (counts.region[reg] || 0) + 1;
+
+        // BMI
+        const bmi = parseFloat(row.bmi);
+        if (!isNaN(bmi)) {
+            totalBMI += bmi; validBMI++;
+            if (bmi < 18.5) counts.bmi.Underweight++;
+            else if (bmi < 25) counts.bmi.Normal++;
+            else if (bmi < 30) counts.bmi.Overweight++;
+            else counts.bmi.Obese++;
         }
 
-        // 2. TMHI Stats
-        if (row.tmhi_score && !isNaN(row.tmhi_score)) {
-            const score = parseInt(row.tmhi_score);
-            totalTMHI += score;
-            validTMHICount++;
-
-            // Levels: Excellent(52-60), Good(44-51), Fair(33-43), Poor(0-32)
-            if (score >= 52) tmhiLevels.excellent++;
-            else if (score >= 44) tmhiLevels.good++;
-            else if (score >= 33) tmhiLevels.fair++;
-            else tmhiLevels.poor++;
+        // TMHI
+        const tmhi = parseFloat(row.tmhi_score);
+        if (!isNaN(tmhi)) {
+            totalTMHI += tmhi; validTMHI++;
+            if (tmhi >= 52) counts.tmhiLevel.Excellent++;
+            else if (tmhi >= 44) counts.tmhiLevel.Good++;
+            else if (tmhi >= 33) counts.tmhiLevel.Fair++;
+            else counts.tmhiLevel.Poor++;
         }
 
-        // 3. Risk Calculation (Obese OR Poor Mental Health)
-        const isObese = row.bmi >= 30;
-        const isPoorMental = row.tmhi_score !== null && row.tmhi_score <= 32;
-        if (isObese || isPoorMental) {
-            riskCount++;
-        }
+        // Risk (BMI Obese OR Mental Poor)
+        if ((bmi >= 30) || (tmhi <= 32)) riskCount++;
 
-        // 4. Timeline Stats
-        if (row.timestamp) {
-            const dateKey = new Date(row.timestamp).toISOString().split('T')[0];
-            dateMap[dateKey] = (dateMap[dateKey] || 0) + 1;
+        // Health Behaviors
+        // Smoking (q2001)
+        const smoke = r.q2001 || 'ไม่เคยสูบ';
+        if (smoke.includes('ไม่เคย')) counts.smoke.Never++;
+        else if (smoke.includes('ประจำ')) counts.smoke.Regular++;
+        else counts.smoke.Occasional++;
+
+        // Alcohol (q2003)
+        const alc = r.q2003 || 'ไม่เคยดื่ม';
+        if (alc.includes('ไม่เคย')) counts.alcohol.Never++;
+        else if (alc.includes('ประจำ')) counts.alcohol.Regular++;
+        else counts.alcohol.Occasional++;
+
+        // Diet Risks (Count "Everyday" answers)
+        // Check sweet_1..5, fat_1..5, salt_1..5
+        ['sweet', 'fat', 'salt'].forEach(cat => {
+            for (let i = 1; i <= 5; i++) {
+                const key = `${cat}_${i}`;
+                const val = r[key];
+                if (val && (val.includes('ทุกวัน') || val.includes('ประจำ'))) {
+                    // Map key to label? (Optional, simplified for now)
+                    counts.dietRisk[key] = (counts.dietRisk[key] || 0) + 1;
+                }
+            }
+        });
+
+        // Environment (check for "ใช่ (มีตอสุขภาพ)")
+        if (r.env_glare?.includes('มีผล')) counts.envImpact.glare++;
+        if (r.env_noise?.includes('มีผล')) counts.envImpact.noise++;
+        if (r.env_smell?.includes('มีผล')) counts.envImpact.smell++;
+        if (r.env_smoke?.includes('มีผล')) counts.envImpact.smoke++;
+        if (r.env_posture?.includes('มีผล') || r.env_awkward?.includes('มีผล')) counts.envImpact.posture++;
+
+        // PM2.5
+        const pm = r.pm25_impact || 'ไม่ระบุ';
+        counts.pm25Impact[pm] = (counts.pm25Impact[pm] || 0) + 1;
+
+        // Diseases
+        if (Array.isArray(r.diseases)) {
+            r.diseases.forEach(d => {
+                if (d !== 'ไม่มี') counts.diseases[d] = (counts.diseases[d] || 0) + 1;
+            });
         }
     });
 
     // Update Cards
-    document.getElementById('stat-total').innerText = data.length;
-    document.getElementById('stat-bmi').innerText = validBMICount ? (totalBMI / validBMICount).toFixed(1) : '0.0';
-    document.getElementById('stat-tmhi').innerText = validTMHICount ? (totalTMHI / validTMHICount).toFixed(1) : '0.0';
+    document.getElementById('stat-total').innerText = data.length.toLocaleString();
+    document.getElementById('stat-age').innerText = validAge ? (totalAge / validAge).toFixed(1) : '-';
+    document.getElementById('stat-bmi').innerText = validBMI ? (totalBMI / validBMI).toFixed(1) : '-';
+    // Count TMHI avg
+    const avgTMHI = validTMHI ? (totalTMHI / validTMHI).toFixed(1) : 0; // Don't set text here, will use in gauge chart
 
-    const riskPercent = ((riskCount / data.length) * 100).toFixed(1);
-    document.getElementById('stat-risk').innerText = `${riskPercent}%`;
+    // Risk percent
+    const riskPct = data.length ? ((riskCount / data.length) * 100).toFixed(1) : 0;
+    document.getElementById('stat-risk').innerText = `${riskPct}%`;
 
-    // Render Charts
-    renderCharts(bmiCounts, tmhiLevels, dateMap);
+
+    // --- Render Charts ---
+    renderAllCharts(counts, avgTMHI);
 }
 
-let charts = {}; // Store chart instances to destroy before re-creating
+function renderAllCharts(counts, avgTMHI) {
+    // Helper colors
+    const colors = {
+        primary: ['#3B82F6', '#60A5FA', '#93C5FD', '#BFDBFE'],
+        risk: ['#22C55E', '#EAB308', '#F97316', '#EF4444'], // Good -> Bad
+        gender: ['#3B82F6', '#EC4899', '#94A3B8']
+    };
 
-function renderCharts(bmiCounts, tmhiLevels, dateMap) {
-    // 1. BMI Pie Chart
-    const ctxBMI = document.getElementById('chart-bmi').getContext('2d');
-    if (charts.bmi) charts.bmi.destroy();
+    // 1. Gender (Doughnut)
+    createChart('chart-gender', 'doughnut', {
+        labels: Object.keys(counts.gender),
+        datasets: [{ data: Object.values(counts.gender), backgroundColor: colors.gender }]
+    });
 
-    charts.bmi = new Chart(ctxBMI, {
+    // 2. Age Group (Bar)
+    createChart('chart-age-group', 'bar', {
+        labels: Object.keys(counts.ageGroup),
+        datasets: [{ label: 'จำนวนคน', data: Object.values(counts.ageGroup), backgroundColor: '#8B5CF6' }]
+    });
+
+    // 3. Region (Bar/Pie)
+    createChart('chart-region', 'bar', {
+        labels: Object.keys(counts.region),
+        datasets: [{ label: 'จำนวนคน', data: Object.values(counts.region), backgroundColor: '#10B981' }],
+    }, { indexAxis: 'y' }); // Horizontal bar
+
+    // 4. TMHI Gauge (Doughnut - workaround)
+    // We simulate a gauge by showing "Score" vs "Remaining"
+    // Max score 60.
+    const score = parseFloat(avgTMHI);
+    const empty = 60 - score;
+    let gaugeColor = score > 43 ? '#22C55E' : (score > 33 ? '#EAB308' : '#EF4444');
+
+    // Destroy manually to customize center text later if needed
+    if (charts['chart-tmhi-gauge']) charts['chart-tmhi-gauge'].destroy();
+    charts['chart-tmhi-gauge'] = new Chart(document.getElementById('chart-tmhi-gauge'), {
         type: 'doughnut',
         data: {
-            labels: ['น้ำหนักน้อย', 'ปกติ', 'ท้วม', 'อ้วน'],
-            datasets: [{
-                data: [bmiCounts.underweight, bmiCounts.normal, bmiCounts.overweight, bmiCounts.obese],
-                backgroundColor: ['#60A5FA', '#34D399', '#FBBF24', '#F87171'],
-                borderWidth: 0
-            }]
+            labels: ['คะแนนเฉลี่ย', 'ส่วนที่เหลือ'],
+            datasets: [{ data: [score, empty], backgroundColor: [gaugeColor, '#E2E8F0'], cutout: '70%' }]
         },
         options: {
-            responsive: true,
-            maintainAspectRatio: false,
+            rotation: -90, circumference: 180, // Half circle
             plugins: {
-                legend: { position: 'bottom' }
+                legend: { display: false },
+                title: { display: true, text: `${score} / 60`, position: 'bottom', font: { size: 24 } }
             }
         }
     });
 
-    // 2. TMHI Bar Chart
-    const ctxTMHI = document.getElementById('chart-tmhi').getContext('2d');
-    if (charts.tmhi) charts.tmhi.destroy();
-
-    charts.tmhi = new Chart(ctxTMHI, {
-        type: 'bar',
-        data: {
-            labels: ['ดีมาก (ใจแกร่ง)', 'ปกติ (ใจแข็งแรง)', 'ปานกลาง (พอไหว)', 'ควรปรับปรุง (อ่อนล้า)'],
-            datasets: [{
-                label: 'จำนวนคน',
-                data: [tmhiLevels.excellent, tmhiLevels.good, tmhiLevels.fair, tmhiLevels.poor],
-                backgroundColor: ['#34D399', '#60A5FA', '#FBBF24', '#F87171'],
-                borderRadius: 4
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false }
-            },
-            scales: {
-                y: { beginAtZero: true, ticks: { stepSize: 1 } }
-            }
-        }
+    // 5. TMHI Levels (Bar)
+    createChart('chart-tmhi-levels', 'bar', {
+        labels: ['ดีมาก', 'ปกติ', 'ปานกลาง', 'ควรปรับปรุง'],
+        datasets: [{
+            label: 'จำนวนคน',
+            data: [counts.tmhiLevel.Excellent, counts.tmhiLevel.Good, counts.tmhiLevel.Fair, counts.tmhiLevel.Poor],
+            backgroundColor: ['#22C55E', '#3B82F6', '#EAB308', '#EF4444']
+        }]
     });
 
-    // 3. Timeline Line Chart
-    const sortedDates = Object.keys(dateMap).sort();
-    const timelineData = sortedDates.map(d => dateMap[d]);
-    // Format dates for label
-    const dateLabels = sortedDates.map(d => {
-        const date = new Date(d);
-        return `${date.getDate()}/${date.getMonth() + 1}`;
+    // 6. Smoking & Alcohol (Pie)
+    createChart('chart-smoke', 'pie', {
+        labels: ['ไม่เคย', 'ประจำ', 'นานๆครั้ง'],
+        datasets: [{ data: [counts.smoke.Never, counts.smoke.Regular, counts.smoke.Occasional], backgroundColor: ['#10B981', '#EF4444', '#F59E0B'] }]
+    });
+    createChart('chart-alcohol', 'pie', {
+        labels: ['ไม่เคย', 'ประจำ', 'นานๆครั้ง'],
+        datasets: [{ data: [counts.alcohol.Never, counts.alcohol.Regular, counts.alcohol.Occasional], backgroundColor: ['#10B981', '#EF4444', '#F59E0B'] }]
     });
 
-    const ctxTimeline = document.getElementById('chart-timeline').getContext('2d');
-    if (charts.timeline) charts.timeline.destroy();
+    // 7. Activity vs Screen Time (Bar - Mock data mapping needed, using placeholders for now as strict data structure might vary)
+    // For now, let's visualize just BMI Categories here as proxy or skip specific time calc if complex
+    // Actually, let's put BMI Categories here as it fits "Physical Body"
+    const ctxActivity = document.getElementById('chart-activity');
+    if (ctxActivity) {
+        createChart('chart-activity', 'bar', {
+            labels: ['ผอม', 'ปกติ', 'ท้วม', 'อ้วน'],
+            datasets: [{ label: 'BMI Categories', data: Object.values(counts.bmi), backgroundColor: ['#60A5FA', '#22C55E', '#EAB308', '#EF4444'] }]
+        });
+    }
 
-    charts.timeline = new Chart(ctxTimeline, {
-        type: 'line',
-        data: {
-            labels: dateLabels,
-            datasets: [{
-                label: 'ผู้ตอบแบบสอบถาม (คน)',
-                data: timelineData,
-                borderColor: '#6366F1',
-                backgroundColor: 'rgba(99, 102, 241, 0.1)',
-                tension: 0.3,
-                fill: true
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false }
-            },
-            scales: {
-                y: { beginAtZero: true, ticks: { stepSize: 1 } }
-            }
-        }
+    // 8. Diet Risk (Horizontal Bar)
+    // Top 5 risks
+    const sortedRisks = Object.entries(counts.dietRisk)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5);
+
+    createChart('chart-diet-risk', 'bar', {
+        labels: sortedRisks.map(i => mapDietLabel(i[0])),
+        datasets: [{ label: 'จำนวนคนที่ทานทุกวัน', data: sortedRisks.map(i => i[1]), backgroundColor: '#F43F5E' }]
+    }, { indexAxis: 'y' });
+
+    // 9. Environment Radar
+    createChart('chart-env-radar', 'radar', {
+        labels: ['แสงจ้า', 'เสียงดัง', 'กลิ่นเหม็น', 'ควัน/ไอระเหย', 'ท่าทางไม่เหมาะสม'],
+        datasets: [{
+            label: 'ผู้ได้รับผลกระทบ',
+            data: [counts.envImpact.glare, counts.envImpact.noise, counts.envImpact.smell, counts.envImpact.smoke, counts.envImpact.posture],
+            backgroundColor: 'rgba(239, 68, 68, 0.2)',
+            borderColor: '#EF4444',
+            pointBackgroundColor: '#EF4444'
+        }]
+    });
+
+    // 10. PM2.5 (Bar)
+    createChart('chart-pm25', 'bar', {
+        labels: Object.keys(counts.pm25Impact),
+        datasets: [{ label: 'ระดับผลกระทบ', data: Object.values(counts.pm25Impact), backgroundColor: '#64748B' }]
+    });
+
+    // 11. Top Diseases (Bar)
+    const sortedDiseases = Object.entries(counts.diseases)
+        .sort((a, b) => b[1] - a[1]);
+
+    createChart('chart-diseases', 'bar', {
+        labels: sortedDiseases.map(d => d[0]),
+        datasets: [{ label: 'จำนวนผู้ป่วย', data: sortedDiseases.map(d => d[1]), backgroundColor: '#8B5CF6' }]
+    }, { indexAxis: 'y' });
+}
+
+// Chart Helper
+function createChart(canvasId, type, data, options = {}) {
+    const ctx = document.getElementById(canvasId);
+    if (!ctx) return;
+
+    // Destroy existing
+    if (charts[canvasId]) charts[canvasId].destroy();
+
+    const defaultOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { position: 'bottom' } }
+    };
+
+    charts[canvasId] = new Chart(ctx, {
+        type: type,
+        data: data,
+        options: { ...defaultOptions, ...options }
     });
 }
 
+// Helper to map Question ID to readable label
+function mapDietLabel(key) {
+    const map = {
+        'sweet_1': 'น้ำอัดลม', 'sweet_2': 'เครื่องดื่มชง', 'sweet_3': 'น้ำผลไม้กล่อง', 'sweet_4': 'ขนมหวาน/เบเกอรี่', 'sweet_5': 'เติมน้ำตาล',
+        'fat_1': 'ของมัน/หนังไก่', 'fat_2': 'ของทอด', 'fat_3': 'กะทิ', 'fat_4': 'ครีมเทียม', 'fat_5': 'ราดน้ำแกง',
+        'salt_1': 'ปรุงก่อนชิม', 'salt_2': 'ไม่ใช้สมุนไพร', 'salt_3': 'อาหารแปรรูป', 'salt_4': 'บะหมี่กึ่งฯ', 'salt_5': 'ของดอง'
+    };
+    return map[key] || key;
+}
+
+// Render Data Table
 function renderTable(data) {
     const tbody = document.getElementById('table-body');
-    const thead = document.getElementById('table-headers');
-
-    // Auto-generate headers based on data keys if needed? 
-    // Or stick to fixed columns + expandable details?
-    // Let's stick to key columns: Time, Name, BMI, TMHI Score
-    // But data is dynamic.
+    if (!tbody) return;
+    tbody.innerHTML = '';
 
     if (data.length === 0) {
         tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">ไม่พบข้อมูล</td></tr>';
@@ -264,33 +427,17 @@ function renderTable(data) {
     data.forEach((row, index) => {
         const tr = document.createElement('tr');
         const date = row.timestamp ? new Date(row.timestamp).toLocaleString('th-TH') : '-';
+        const raw = row.raw_responses || {};
 
-        // Calculate Scores on the fly if not in sheet? 
-        // Or assume sheet has raw values.
-        // Let's try to calculate.
-        const height = row.height;
-        const weight = row.weight;
         let bmi = '-';
-        if (height && weight) {
-            bmi = (weight / ((height / 100) ** 2)).toFixed(1);
-        }
-
-        // TMHI Score Calculation (need all tmhi_x)
-        let tmhi = 0;
-        let tmhiCount = 0;
-        // Basic check if data has keys like 'tmhi_1'
-        // If row is object { header: value }
-
-        // Re-use calculation logic from utils if possible?
-        // But utils functions expect pure numbers mostly.
-        const tmhiScore = calculateTMHIScore(row); // Should work if row has keys
+        if (row.bmi) bmi = parseFloat(row.bmi).toFixed(1);
 
         tr.innerHTML = `
             <td>${index + 1}</td>
             <td>${date}</td>
-            <td>${row.name || 'Anonymous'}</td>
+            <td>${row.name || raw.name || 'ไม่ระบุ'}</td>
             <td>${bmi}</td>
-            <td>${tmhiScore || '-'}</td>
+            <td>${row.tmhi_score || '-'}</td>
         `;
         tbody.appendChild(tr);
     });
@@ -311,24 +458,15 @@ function downloadExcel() {
 
     // Flatten data for Export
     const exportData = window.currentData.map(row => {
-        // 1. Extract basic fields
         const { raw_responses, ...baseFields } = row;
-
-        // 2. Format timestamp
         const formattedDate = baseFields.timestamp ? new Date(baseFields.timestamp).toLocaleString('th-TH') : '-';
-
-        // 3. Merge with raw_responses (all questions)
-        // We prioritize baseFields (calculated stats) over raw_responses if conflict, or vice versa depending on need.
-        // Usually raw_responses has the source truth.
         return {
             ...baseFields,
             timestamp_formatted: formattedDate,
-            ...raw_responses // Spread all survey answers (q1, q2, etc.) here
+            ...raw_responses
         };
     });
 
     const ws = XLSX.utils.json_to_sheet(exportData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Responses");
     XLSX.writeFile(wb, `survey_data_${new Date().toISOString().slice(0, 10)}.xlsx`);
 }

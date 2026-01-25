@@ -224,13 +224,6 @@ const SURVEY_DATA = {
             {
                 title: 'โซเดียม (เค็ม)',
                 questions: [
-                    { id: 'salt_1', text: 'ชิมก่อนปรุง (ถ้าไม่ชิมแล้วปรุงเลย เลือก "ทุกวัน")', type: 'radio', options: ['ปรุงเพิ่มประจำ', 'ปรุงบ้าง', 'ไม่ปรุงเพิ่มเลย'], required: true }, // Adjusted question for clarity based on context "ชิมอาหารก่อนปรุง... ปรุงน้อย หรือไม่ปรุงเพิ่ม" -> wait, text says "ชิมอาหารก่อนปรุง น้ำปลา... ปรุงน้อย หรือไม่ปรุงเพิ่ม" is the behavior? 
-                    // Let's copy specific text: "ชิมอาหารก่อนปรุง น้ำปลา ซีอิ้ว ซอส ปรุงน้อย หรือไม่ปรุงเพิ่ม" -> This sounds like a positive behavior?
-                    // Text header: "ท่านทำพฤติกรรมเหล่านี้บ่อยเพียงใด"
-                    // If behavior is "Season less", "Everyday" is GOOD.
-                    // But items 2037-2039 are BAD behaviors (Processed food).
-                    // Item 2035 "Season less" -> Good.
-                    // Let's stick to the text.
                     { id: 'salt_1', text: 'ชิมอาหารก่อนปรุง น้ำปลา ซีอิ้ว ซอส ปรุงน้อย หรือไม่ปรุงเพิ่ม', type: 'radio', options: ['ทุกวัน / เกือบทุกวัน', '3-4 ครั้งต่อสัปดาห์', 'แทบไม่ทำ / ไม่ทำเลย'], required: true },
                     { id: 'salt_2', text: 'ใช้สมุนไพร หรือเครื่องเทศแทนเครื่องปรุงรสเค็ม', type: 'radio', options: ['ทุกวัน / เกือบทุกวัน', '3-4 ครั้งต่อสัปดาห์', 'แทบไม่ทำ / ไม่ทำเลย'], required: true },
                     { id: 'salt_3', text: 'กินเนื้อสัตว์แปรรูป (ไส้กรอก หมูยอ แฮม ปลาเค็ม)', type: 'radio', options: ['ทุกวัน / เกือบทุกวัน', '3-4 ครั้งต่อสัปดาห์', 'แทบไม่ทำ / ไม่ทำเลย'], required: true },
