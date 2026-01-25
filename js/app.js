@@ -6,7 +6,107 @@
 const GOOGLE_CLIENT_ID = '1089240671162-befa46lipnu4q9a4bokkjbr40qke6tcu.apps.googleusercontent.com';
 
 // Google Apps Script URL (User must fill this)
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby30NantvJX36X9ZHIw5DOSi-tMqGAXGoVUh9mWaZCEV5egrWckHgMS6Btw3k37FUtL/exec'; // ใส่ URL ที่ได้จากขั้นตอน Deploy ที่นี่
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby30NantvJX36X9ZHIw5DOSi-tMqGAXGoVUh9mWaZCEV5egrWckHgMS6Btw3k37FUtL/exec';
+
+// Supabase Configuration
+const SUPABASE_URL = 'https://fgdommhiqhzvsedfzyrr.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZnZG9tbWhpcWh6dnNlZGZ6eXJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkzMzY2MzUsImV4cCI6MjA4NDkxMjYzNX0.GFMOeDArhq-9lPt39OizkBOFFgK4TDpVDJrk_HRQ6Xc';
+let supabaseClient = null;
+
+// Initialize Supabase (called after page load)
+function initSupabase() {
+    if (typeof supabase !== 'undefined') {
+        supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        console.log('Supabase initialized');
+    }
+}
+
+// Save to Supabase
+async function saveToSupabase(email, responses, isDraft = false) {
+    if (!supabaseClient || !email) return false;
+
+    try {
+        // Calculate BMI if height and weight exist
+        const height = parseFloat(responses.height);
+        const weight = parseFloat(responses.weight);
+        let bmi = null, bmiCategory = '';
+        if (height && weight) {
+            bmi = parseFloat(calculateBMI(height, weight));
+            const bmiInfo = getBMICategory(bmi);
+            bmiCategory = bmiInfo ? bmiInfo.category : '';
+        }
+
+        // Calculate TMHI score
+        const tmhiScore = calculateTMHIScore(responses);
+        const tmhiInfo = getTMHILevel(tmhiScore);
+
+        const dataToSave = {
+            email: email,
+            name: responses.name || null,
+            title: responses.title || null,
+            gender: responses.gender || null,
+            age: responses.age ? parseInt(responses.age) : null,
+            height: height || null,
+            weight: weight || null,
+            waist: responses.waist ? parseFloat(responses.waist) : null,
+            bmi: bmi,
+            bmi_category: bmiCategory,
+            tmhi_score: tmhiScore || null,
+            tmhi_level: tmhiInfo ? tmhiInfo.level : null,
+            raw_responses: responses,
+            is_draft: isDraft,
+            submitted_at: isDraft ? null : new Date().toISOString()
+        };
+
+        // Upsert: update if exists, insert if not
+        const { data, error } = await supabaseClient
+            .from('survey_responses')
+            .upsert(dataToSave, {
+                onConflict: 'email',
+                ignoreDuplicates: false
+            });
+
+        if (error) {
+            console.error('Supabase save error:', error);
+            return false;
+        }
+
+        console.log('Saved to Supabase:', isDraft ? 'draft' : 'submitted');
+        return true;
+    } catch (e) {
+        console.error('Supabase save exception:', e);
+        return false;
+    }
+}
+
+// Load from Supabase by email
+async function loadFromSupabase(email) {
+    if (!supabaseClient || !email) return null;
+
+    try {
+        const { data, error } = await supabaseClient
+            .from('survey_responses')
+            .select('*')
+            .eq('email', email)
+            .eq('is_draft', true)
+            .single();
+
+        if (error && error.code !== 'PGRST116') { // PGRST116 = no rows
+            console.error('Supabase load error:', error);
+            return null;
+        }
+
+        if (data && data.raw_responses) {
+            console.log('Loaded draft from Supabase');
+            return data.raw_responses;
+        }
+
+        return null;
+    } catch (e) {
+        console.error('Supabase load exception:', e);
+        return null;
+    }
+}
 
 // App State
 const app = {
@@ -19,6 +119,9 @@ const app = {
 
     // Initialize app
     init() {
+        // Initialize Supabase
+        initSupabase();
+
         // Load saved responses
         this.responses = loadResponses();
 
@@ -208,12 +311,21 @@ const app = {
                 picture: payload.picture
             };
             this.accessToken = response.credential;
-            this.renderUserSection();
+
+            // Close modal if open
+            const modal = document.getElementById('google-signin-modal');
+            if (modal) modal.remove();
+
             this.renderUserSection();
             showToast(`ยินดีต้อนรับ ${this.userInfo.name}!`, 'success');
 
-            // Load draft from cloud if exists
-            this.loadDraftFromCloud();
+            // Load draft from Supabase if exists
+            this.loadDraftFromSupabase();
+
+            // Re-render Welcome to update buttons
+            if (this.currentView === 'welcome') {
+                this.renderWelcome();
+            }
         }
     },
 
@@ -227,6 +339,22 @@ const app = {
         this.renderUserSection();
         this.renderWelcome(); // Redirect to home
         showToast('ออกจากระบบแล้ว', 'info');
+    },
+
+    // Load draft from Supabase
+    async loadDraftFromSupabase() {
+        if (!this.userInfo || !this.userInfo.email) return;
+
+        const cloudDraft = await loadFromSupabase(this.userInfo.email);
+        if (cloudDraft && Object.keys(cloudDraft).length > 0) {
+            // Check if cloud draft is newer than local
+            const localDraft = loadResponses();
+            if (Object.keys(cloudDraft).length >= Object.keys(localDraft).length) {
+                this.responses = cloudDraft;
+                saveResponses(cloudDraft);
+                showToast('โหลดข้อมูลจาก Cloud สำเร็จ!', 'success');
+            }
+        }
     },
 
     // Render user section in header
@@ -468,18 +596,21 @@ const app = {
             this.responses.tmhi_level = tmhiInfo ? tmhiInfo.level : '';
         }
 
-        // 1. Save to Google Apps Script (Cloud DB / Sheets)
-        if (GOOGLE_SCRIPT_URL) {
-            const success = await submitResponseToGAS(this.responses, GOOGLE_SCRIPT_URL);
-            if (!success) {
-                showToast('ไม่สามารถส่งข้อมูลไปยัง Server ได้ แต่บันทึกในเครื่องแล้ว', 'warning');
-                // Proceed anyway? Or stop? Let's proceed to show results but warn.
+        // 1. Save to Supabase (Primary)
+        if (this.userInfo && this.userInfo.email) {
+            const supabaseSuccess = await saveToSupabase(this.userInfo.email, this.responses, false);
+            if (supabaseSuccess) {
+                showToast('บันทึกข้อมูลสำเร็จ!', 'success');
             }
         }
 
-        // 2. Mark as complete locally (clearing draft status basically)
-        // In a real app we might move this to a 'submitted_history'
-        // For now, we just show the results.
+        // 2. Also save to Google Apps Script (Backup)
+        if (GOOGLE_SCRIPT_URL) {
+            const success = await submitResponseToGAS(this.responses, GOOGLE_SCRIPT_URL);
+            if (!success) {
+                console.log('GAS backup save failed, but Supabase succeeded');
+            }
+        }
 
         // 3. Show Results
         this.renderResults();
