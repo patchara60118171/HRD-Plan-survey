@@ -28,53 +28,34 @@ const SURVEY_DATA = {
                         id: 'gender',
                         text: 'เพศ',
                         type: 'radio',
-                        options: ['ชาย', 'หญิง', 'อื่นๆ'],
+                        options: ['ชาย', 'หญิง', 'LGBTQ+'],
                         required: true
                     },
                     { id: 'age', text: 'อายุ (ปี)', type: 'number', required: true },
                     {
-                        id: 'status',
-                        text: 'สถานภาพสมรสปัจจุบัน',
+                        id: 'org_type',
+                        text: 'ประเภทหน่วยงาน',
                         type: 'radio',
-                        options: ['โสด', 'สมรส', 'หม้าย', 'หย่า/เลิก', 'อื่นๆ'],
-                        required: true
-                    },
-                    {
-                        id: 'region',
-                        text: 'ภูมิภาคที่ท่านอาศัยอยู่',
-                        type: 'radio',
-                        options: ['กรุงเทพฯ', 'ภาคกลาง', 'ภาคเหนือ', 'ภาคตะวันออกเฉียงเหนือ', 'ภาคใต้'],
-                        required: true
-                    },
-                    {
-                        id: 'education',
-                        text: 'ระดับการศึกษาสูงสุด',
-                        type: 'radio',
-                        options: ['มัธยมศึกษาตอนต้น หรือต่ำกว่า', 'มัธยมศึกษาตอนปลาย/ปวช.', 'ปวส./อนุปริญญา', 'ปริญญาตรีและสูงกว่า'],
-                        required: true
-                    },
-                    {
-                        id: 'religion',
-                        text: 'ศาสนา',
-                        type: 'radio',
-                        options: ['พุทธ', 'คริสต์', 'อิสลาม', 'อื่นๆ'],
+                        options: ['นโยบาย', 'ปฏิบัติการ', 'สนับสนุน'],
                         required: true
                     },
                     {
                         id: 'job',
                         text: 'ตำแหน่งงานปัจจุบัน',
                         type: 'radio',
-                        options: ['ไม่ได้ทำงาน', 'พนักงานปฏิบัติการ', 'พนักงานสำนักงาน', 'หัวหน้าฝ่าย/แผนก', 'ผู้จัดการ / ผู้บริหาร', { label: 'อื่นๆ', value: 'other', hasInput: true }], // Simplify other input for now or just text
+                        options: [
+                            'ปฏิบัติการ',
+                            'ปฏิบัติงาน',
+                            'ชำนาญการ',
+                            'ชำนาญงาน',
+                            'ชำนาญการพิเศษ',
+                            'หัวหน้า',
+                            'ผู้บริหารระดับกลาง',
+                            { label: 'อื่นๆ', value: 'other', hasInput: true }
+                        ],
                         required: true
                     },
                     { id: 'job_duration', text: 'ระยะเวลาที่ทำงานในตำแหน่งปัจจุบัน (ปี)', type: 'number', required: true },
-                    {
-                        id: 'income',
-                        text: 'รายได้เฉลี่ยต่อเดือน',
-                        type: 'radio',
-                        options: ['ต่ำกว่า 15,000', '15,000-25,000', '25,001-35,000', '35,001-50,000', 'มากกว่า 50,000'],
-                        required: true
-                    },
                     {
                         id: 'activity_org',
                         text: 'ท่านเคยเข้ารับกิจกรรมส่งเสริมสุขภาพของพนักงานในองค์กรหรือไม่',
