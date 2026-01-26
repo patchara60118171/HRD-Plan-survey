@@ -46,6 +46,7 @@ async function saveToSupabase(email, responses, isDraft = false) {
             title: responses.title || null,
             gender: responses.gender || null,
             age: responses.age ? parseInt(responses.age) : null,
+            org_type: responses.org_type || null, // Added new field
             height: height || null,
             weight: weight || null,
             waist: responses.waist ? parseFloat(responses.waist) : null,
