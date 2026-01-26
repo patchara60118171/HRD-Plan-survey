@@ -162,7 +162,8 @@
         <h2>🔐 Admin Login</h2>
         <p style="color: #64748B; margin-bottom: 1.5rem;">กรุณากรอกรหัสผ่านเพื่อเข้าถึงข้อมูล</p>
         <input type="password" id="admin-pass" class="input-field" placeholder="Password" style="margin-bottom: 1rem;">
-        <button onclick="adminLogin()" class="btn-start" style="width: 100%; padding: 0.75rem; justify-content: center;">เข้าสู่ระบบ</button>
+        <button onclick="adminLogin()" class="btn-start"
+            style="width: 100%; padding: 0.75rem; justify-content: center;">เข้าสู่ระบบ</button>
     </div>
 
     <!-- Dashboard Screen -->
@@ -200,15 +201,8 @@
                 <option value="GenX">Gen X (43-58)</option>
                 <option value="BabyBoomer">Baby Boomer (> 58)</option>
             </select>
-            <select id="filter-region" class="input-field" style="width: auto; margin: 0; padding: 0.5rem;"
-                onchange="applyFilters()">
-                <option value="all">ทั้งหมด (ภูมิภาค)</option>
-                <option value="กรุงเทพฯ">กรุงเทพฯ</option>
-                <option value="ภาคกลาง">ภาคกลาง</option>
-                <option value="ภาคเหนือ">ภาคเหนือ</option>
-                <option value="ภาคตะวันออกเฉียงเหนือ">ภาคอีสาน</option>
-                <option value="ภาคใต้">ภาคใต้</option>
-            </select>
+            <!-- Region Filter Removed -->
+            <!-- <select id="filter-region" ...> </select> -->
             <div style="flex: 1; text-align: right; color: #64748B; font-size: 0.9rem;">
                 แสดงข้อมูล: <span id="filtered-count" style="font-weight: bold; color: #0F172A;">0</span> รายการ
             </div>
@@ -254,12 +248,7 @@
                     <canvas id="chart-age-group"></canvas>
                 </div>
             </div>
-            <div class="chart-container">
-                <h3>ภูมิภาค (Region)</h3>
-                <div style="height: 250px; position: relative;">
-                    <canvas id="chart-region"></canvas>
-                </div>
-            </div>
+            <!-- Region Chart Removed -->
         </div>
 
         <!-- 2. Mental Health -->
