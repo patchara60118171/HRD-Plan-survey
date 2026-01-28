@@ -183,11 +183,11 @@ function renderScale(question, value) {
             <input type="radio" 
                    id="${question.id}_${i}" 
                    name="${question.id}" 
-                   value="${i + 1}"
-                   ${value === String(i + 1) ? 'checked' : ''}
+                   value="${i}"
+                   ${value === String(i) ? 'checked' : ''}
                    onchange="app.handleChange('${question.id}', this.value)">
             <label for="${question.id}_${i}">
-                <span class="scale-value">${i + 1}</span>
+                <span class="scale-value">${i}</span>
                 <span class="scale-text">${label}</span>
             </label>
         </div>
