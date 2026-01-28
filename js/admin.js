@@ -334,14 +334,14 @@ function renderAllCharts(counts, avgTMHI) {
         }]
     });
 
-    // 6. Smoking & Alcohol (Pie)
-    createChart('chart-smoke', 'pie', {
+    // 6. Smoking & Alcohol (Bar)
+    createChart('chart-smoke', 'bar', {
         labels: ['ไม่เคย', 'ประจำ', 'นานๆครั้ง'],
-        datasets: [{ data: [counts.smoke.Never, counts.smoke.Regular, counts.smoke.Occasional], backgroundColor: ['#10B981', '#EF4444', '#F59E0B'] }]
+        datasets: [{ label: 'จำนวนคน', data: [counts.smoke.Never, counts.smoke.Regular, counts.smoke.Occasional], backgroundColor: ['#10B981', '#EF4444', '#F59E0B'] }]
     });
-    createChart('chart-alcohol', 'pie', {
+    createChart('chart-alcohol', 'bar', {
         labels: ['ไม่เคย', 'ประจำ', 'นานๆครั้ง'],
-        datasets: [{ data: [counts.alcohol.Never, counts.alcohol.Regular, counts.alcohol.Occasional], backgroundColor: ['#10B981', '#EF4444', '#F59E0B'] }]
+        datasets: [{ label: 'จำนวนคน', data: [counts.alcohol.Never, counts.alcohol.Regular, counts.alcohol.Occasional], backgroundColor: ['#10B981', '#EF4444', '#F59E0B'] }]
     });
 
     // 7. Activity vs Screen Time (Bar - Mock data mapping needed, using placeholders for now as strict data structure might vary)
