@@ -2,9 +2,6 @@
 // Main Application - Survey Controller
 // ========================================
 
-// Google OAuth Client ID
-const GOOGLE_CLIENT_ID = '1089240671162-befa46lipnu4q9a4bokkjbr40qke6tcu.apps.googleusercontent.com';
-
 // Google Apps Script URL (User must fill this)
 const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby30NantvJX36X9ZHIw5DOSi-tMqGAXGoVUh9mWaZCEV5egrWckHgMS6Btw3k37FUtL/exec';
 
@@ -116,7 +113,6 @@ const app = {
     currentSubsectionIndex: 0,
     responses: {},
     userInfo: null,
-    accessToken: null,
 
     // Initialize app
     init() {
@@ -139,13 +135,7 @@ const app = {
             document.getElementById('loading-screen').classList.add('hidden');
         }, 500);
 
-        // Check for Google OAuth redirect (token in URL hash)
-        this.handleGoogleRedirectCallback();
-
-        // Init Google Sign-In
-        this.initGoogleSignIn();
-
-        // Show Welcome page first (with login button if not logged in)
+        // Show Welcome page first
         // If user has in-progress responses, continue survey
         if (Object.keys(this.responses).length > 0 && this.currentSectionIndex > 0 && this.userInfo) {
             this.currentView = 'survey';
@@ -165,249 +155,41 @@ const app = {
         this.debouncedSaveCloud = debounce(() => this.saveDraftToCloud(), 2000);
     },
 
-    // Initialize Google Sign-In
-    initGoogleSignIn() {
-        if (typeof google !== 'undefined' && google.accounts) {
-            google.accounts.id.initialize({
-                client_id: GOOGLE_CLIENT_ID,
-                callback: (response) => this.handleGoogleCallback(response),
-                ux_mode: 'popup', // Force popup mode to avoid auto-redirect mismatch issues
-                auto_select: false
-            });
-            // Also render button if user section is waiting
-            if (!this.userInfo && document.getElementById('g_id_signin_button')) {
-                this.renderGoogleButton();
-            }
-        }
-    },
-
-    // Handle Google OAuth Redirect Callback (for Safari/iOS Manual Flow)
-    handleGoogleRedirectCallback() {
-        // Check if URL hash contains token from OAuth redirect
-        const hash = window.location.hash.substring(1);
-        if (!hash) return;
-
-        const params = new URLSearchParams(hash);
-        const idToken = params.get('id_token');
-        const accessToken = params.get('access_token');
-
-        if (idToken) {
-            try {
-                // Decode JWT token
-                const payload = JSON.parse(atob(idToken.split('.')[1]));
-                this.userInfo = {
-                    name: payload.name,
-                    email: payload.email,
-                    picture: payload.picture
-                };
-                this.accessToken = accessToken || idToken;
-
-                // Clear hash from URL cleanly
-                const cleanUrl = window.location.pathname + window.location.search;
-                history.replaceState(null, '', cleanUrl);
-
-                this.renderUserSection();
-                showToast(`ยินดีต้อนรับ ${this.userInfo.name}!`, 'success');
-
-                // Load draft from Supabase if exists
-                if (this.loadDraftFromSupabase) {
-                    this.loadDraftFromSupabase();
-                }
-
-                // Re-render Welcome if needed
-                if (this.currentView === 'welcome') {
-                    this.renderWelcome();
-                }
-            } catch (e) {
-                console.error('Error parsing OAuth token:', e);
-                showToast('เกิดข้อผิดพลาดในการเข้าสู่ระบบ', 'error');
-            }
-        }
-    },
-
-    // Render Google Button (Official) with Fallback
-    renderGoogleButton() {
-        // 1. Retry logic if google is not defined yet
-        if (typeof google === 'undefined' || !google.accounts || !google.accounts.id) {
-            // Retry for 5 seconds total (10 * 500ms)
-            if (!this.retryCount) this.retryCount = 0;
-            if (this.retryCount < 10) {
-                this.retryCount++;
-                setTimeout(() => this.renderGoogleButton(), 500);
-            }
+    // Set user email
+    setEmail() {
+        const emailInput = document.getElementById('user-email-input');
+        const email = emailInput.value.trim();
+        
+        if (!email) {
+            showToast('กรุณากรอกอีเมล', 'error');
             return;
         }
-
-        // 2. Render Header Button
-        const headerBtn = document.getElementById('g_id_signin_button');
-        if (headerBtn) {
-            google.accounts.id.renderButton(
-                headerBtn,
-                { theme: "outline", size: "large", type: "standard", shape: "pill", text: "signin_with" }
-            );
-        }
-    },
-
-    // Helper: Use Manual Google OAuth Redirect Flow (Best for iOS/Safari)
-    useGoogleRedirectFlow() {
-        // Must match EXACTLY what is in Google Cloud Console
-        // We ensure no trailing slash (unless root) and no index.html
-        let redirectUri = window.location.origin;
-        if (redirectUri.endsWith('/')) {
-            redirectUri = redirectUri.slice(0, -1);
-        }
-
-        // If we are on production, force the known good URI
-        if (window.location.hostname === 'nidawellbeing.vercel.app') {
-            redirectUri = 'https://nidawellbeing.vercel.app';
-        }
-
-        const scope = 'openid email profile';
-        const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
-            `client_id=${GOOGLE_CLIENT_ID}` +
-            `&redirect_uri=${encodeURIComponent(redirectUri)}` +
-            `&response_type=token id_token` +
-            `&scope=${encodeURIComponent(scope)}` +
-            `&nonce=${Math.random().toString(36).substring(2)}`;
-
-        console.log('Redirecting to Google Auth:', authUrl);
-        window.location.href = authUrl;
-    },
-
-    // Google Login - Trigger strategy based on device
-    googleLogin() {
-        if (typeof google === 'undefined' || !google.accounts) {
-            showToast('Google Sign-In ยังไม่พร้อม กรุณารอสักครู่', 'error');
+        
+        // Simple email validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            showToast('กรุณากรอกอีเมลให้ถูกต้อง', 'error');
             return;
         }
-
-        // iOS/Safari detection
-        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-        const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-
-        // Use Manual Redirect Flow for iOS or Safari to avoid Popup blocking and Mismatch issues
-        if (isIOS || isSafari) {
-            this.showGoogleSignInModal(true); // Show modal but trigger redirect on click
-            return;
-        }
-
-        // Try prompt for others
-        try {
-            google.accounts.id.prompt((notification) => {
-                if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-                    this.showGoogleSignInModal(false);
-                }
-            });
-        } catch (e) {
-            console.error('Google prompt failed:', e);
-            this.showGoogleSignInModal(false);
-        }
-    },
-
-    // Show Google Sign-In Modal for Safari/iOS
-    showGoogleSignInModal(isManualRedirect = false) {
-        // Create modal with Google Sign-In button
-        const modal = document.createElement('div');
-        modal.id = 'google-signin-modal';
-        modal.innerHTML = `
-            <div class="signin-modal-overlay">
-                <div class="signin-modal-content">
-                    <button class="signin-modal-close" onclick="document.getElementById('google-signin-modal').remove()">✕</button>
-                    <h3 style="margin-bottom: 1rem; color: #1E293B;">เข้าสู่ระบบด้วย Google</h3>
-                    <p style="color: #64748B; margin-bottom: 1.5rem; font-size: 0.9rem;">กรุณากดปุ่มด้านล่างเพื่อเข้าสู่ระบบ</p>
-                    <div id="google-signin-btn-modal" style="display: flex; justify-content: center;"></div>
-                </div>
-            </div>
-        `;
-        document.body.appendChild(modal);
-
-        const btnContainer = document.getElementById('google-signin-btn-modal');
-
-        if (isManualRedirect) {
-            // Manual Button for iOS/Safari Redirect Flow
-            const googleIconSvg = `<svg width="20" height="20" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-                <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-                <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-                <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-                <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-            </svg>`;
-
-            const manualBtn = document.createElement('button');
-            manualBtn.className = 'google-login-btn-welcome';
-            manualBtn.style.width = '280px';
-            manualBtn.style.justifyContent = 'center';
-            manualBtn.innerHTML = `${googleIconSvg} เข้าสู่ระบบด้วย Google`;
-            manualBtn.onclick = () => this.useGoogleRedirectFlow();
-            btnContainer.appendChild(manualBtn);
-        } else {
-            // Standard renderButton for other browsers fallback
-            google.accounts.id.renderButton(
-                btnContainer,
-                {
-                    theme: 'outline',
-                    size: 'large',
-                    type: 'standard',
-                    shape: 'pill',
-                    text: 'signin_with',
-                    width: 280
-                }
-            );
-        }
-    },
-
-    // Render Login Screen
-    renderLoginScreen() {
-        this.currentView = 'login';
-        document.getElementById('main-content').innerHTML = renderLoginScreen();
-        document.getElementById('nav-buttons').style.display = 'none';
-        document.getElementById('progress-container').style.display = 'none';
-
-        // Hide Header User Section while on login screen? No, keep it.
-    },
-
-    // Handle Google callback
-    handleGoogleCallback(response) {
-        if (response.credential) {
-            // Decode JWT token
-            const payload = JSON.parse(atob(response.credential.split('.')[1]));
-            this.userInfo = {
-                name: payload.name,
-                email: payload.email,
-                picture: payload.picture
-            };
-            this.accessToken = response.credential;
-
-            // Close modal if open
-            const modal = document.getElementById('google-signin-modal');
-            if (modal) modal.remove();
-
-            this.renderUserSection();
-            showToast(`ยินดีต้อนรับ ${this.userInfo.name}!`, 'success');
-
-            // Load draft from Supabase if exists
-            this.loadDraftFromSupabase();
-
-            // Re-render Welcome to update buttons
-            if (this.currentView === 'welcome') {
-                this.renderWelcome();
-            }
-        }
+        
+        this.userInfo = { email: email };
+        this.renderUserSection();
+        this.renderWelcome();
+        showToast(`ยินดีต้อนรับ!`);
+        
+        // Load draft from Supabase if exists
+        this.loadDraftFromSupabase();
     },
 
     // Logout
     logout() {
         this.userInfo = null;
-        this.accessToken = null;
         this.responses = {}; // Clear responses in memory
 
         // Clear LocalStorage
         localStorage.removeItem('wellbeing_survey_responses');
         localStorage.removeItem('wellbeing_survey_section');
         localStorage.removeItem('wellbeing_survey_timestamp');
-
-        if (typeof google !== 'undefined' && google.accounts) {
-            google.accounts.id.disableAutoSelect();
-        }
 
         // Close profile dropdown if open
         const dropdown = document.getElementById('profile-dropdown');
@@ -440,11 +222,7 @@ const app = {
         if (this.userInfo) {
             container.innerHTML = renderUserProfile(this.userInfo);
         } else {
-            container.innerHTML = renderLoginButton();
-            // Try to render official button
-            setTimeout(() => {
-                this.renderGoogleButton();
-            }, 100); // Small delay to ensure DOM is ready
+            container.innerHTML = '';
         }
     },
 
@@ -576,16 +354,12 @@ const app = {
         document.getElementById('main-content').innerHTML = renderWelcome();
         document.getElementById('nav-buttons').style.display = 'none';
         document.getElementById('progress-container').style.display = 'none';
-
-        // Render login button on welcome screen if needed
-        setTimeout(() => this.renderGoogleButton(), 100);
     },
 
     // Start Survey
     startSurvey() {
         if (!this.userInfo) {
-            showToast('กรุณาเข้าสู่ระบบก่อนเริ่มทำแบบสำรวจ', 'error');
-            this.googleLogin();
+            showToast('กรุณากรอกอีเมลก่อนเริ่มทำแบบสำรวจ', 'error');
             return;
         }
 
