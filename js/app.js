@@ -159,24 +159,24 @@ const app = {
     setEmail() {
         const emailInput = document.getElementById('user-email-input');
         const email = emailInput.value.trim();
-        
+
         if (!email) {
             showToast('กรุณากรอกอีเมล', 'error');
             return;
         }
-        
+
         // Simple email validation
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
             showToast('กรุณากรอกอีเมลให้ถูกต้อง', 'error');
             return;
         }
-        
+
         this.userInfo = { email: email };
         this.renderUserSection();
         this.renderWelcome();
         showToast(`ยินดีต้อนรับ!`);
-        
+
         // Load draft from Supabase if exists
         this.loadDraftFromSupabase();
     },
@@ -386,7 +386,14 @@ const app = {
         }
 
         // Render questions
+        // Calculate starting question number
         let questionNum = 1;
+        for (let i = 0; i < this.currentSubsectionIndex; i++) {
+            if (section.subsections[i].questions) {
+                questionNum += section.subsections[i].questions.length;
+            }
+        }
+
         subsection.questions.forEach(q => {
             html += renderQuestion(q, this.responses[q.id], questionNum++);
         });
