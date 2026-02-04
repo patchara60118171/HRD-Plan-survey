@@ -2,11 +2,24 @@
 // Survey Questions Data (Updated)
 // ========================================
 
-const SECTIONS_ORDER = ['personal', 'consumption', 'mental', 'nutrition', 'safety', 'activity', 'environment', 'loneliness'];
+const SECTIONS_ORDER = [
+    // 1. Physical (กาย)
+    'personal',
+    'consumption',
+    'nutrition',
+    'activity',
+    // 2. Mental (ใจ)
+    'mental',
+    // 3. Social (สังคม)
+    'loneliness',
+    // 4. Environment (แวดล้อม)
+    'safety',
+    'environment'
+];
 
 const SURVEY_DATA = {
     // ----------------------------------------
-    // Part 1: Personal Info & Body
+    // Part 1: Personal Info & Body (Physical)
     // ----------------------------------------
     personal: {
         title: 'ส่วนที่ 1 ข้อมูลส่วนบุคคล และการตรวจวัดร่างกาย',
@@ -91,7 +104,7 @@ const SURVEY_DATA = {
     },
 
     // ----------------------------------------
-    // Part 2: Consumption (Smoke/Alcohol)
+    // Part 2: Consumption (Smoke/Alcohol) (Physical)
     // ----------------------------------------
     consumption: {
         title: 'การบริโภคยาสูบและแอลกอฮอล์',
@@ -142,39 +155,7 @@ const SURVEY_DATA = {
     },
 
     // ----------------------------------------
-    // Part 3: Mental Health (TMHI-15)
-    // ----------------------------------------
-    mental: {
-        title: 'สุขภาพจิต (TMHI-15)',
-        type: 'mental',
-        description: 'วัดสุขภาพจิตคนไทยฉบับสั้น',
-        subsections: [
-            {
-                title: 'ความรู้สึกในช่วง 1 เดือนที่ผ่านมา',
-                hint: 'ระดับ: ไม่เลย, เล็กน้อย, มาก, มากที่สุด',
-                questions: [
-                    { id: 'tmhi_1', text: 'ท่านรู้สึกพึงพอใจในชีวิต', type: 'scale', labels: ['ไม่เลย', 'เล็กน้อย', 'มาก', 'มากที่สุด'], required: true },
-                    { id: 'tmhi_2', text: 'ท่านรู้สึกสบายใจ', type: 'scale', labels: ['ไม่เลย', 'เล็กน้อย', 'มาก', 'มากที่สุด'], required: true },
-                    { id: 'tmhi_3', text: 'ท่านรู้สึกภูมิใจในตนเอง', type: 'scale', labels: ['ไม่เลย', 'เล็กน้อย', 'มาก', 'มากที่สุด'], required: true },
-                    { id: 'tmhi_4', text: 'ท่านรู้สึกเบื่อหน่ายท้อแท้กับการดำเนินชีวิตประจำวัน', type: 'scale', labels: ['ไม่เลย', 'เล็กน้อย', 'มาก', 'มากที่สุด'], required: true },
-                    { id: 'tmhi_5', text: 'ท่านรู้สึกผิดหวังในตนเอง', type: 'scale', labels: ['ไม่เลย', 'เล็กน้อย', 'มาก', 'มากที่สุด'], required: true },
-                    { id: 'tmhi_6', text: 'ท่านรู้สึกว่าชีวิตมีแต่ความทุกข์', type: 'scale', labels: ['ไม่เลย', 'เล็กน้อย', 'มาก', 'มากที่สุด'], required: true },
-                    { id: 'tmhi_7', text: 'ท่านสามารถทำใจยอมรับได้สำหรับปัญหาที่ยากจะแก้ไข', type: 'scale', labels: ['ไม่เลย', 'เล็กน้อย', 'มาก', 'มากที่สุด'], required: true },
-                    { id: 'tmhi_8', text: 'ท่านมั่นใจว่าจะสามารถควบคุมอารมณ์ได้เมื่อมีเหตุการณ์คับขัน', type: 'scale', labels: ['ไม่เลย', 'เล็กน้อย', 'มาก', 'มากที่สุด'], required: true },
-                    { id: 'tmhi_9', text: 'ท่านมั่นใจที่จะเผชิญกับเหตุการณ์ร้ายแรงที่เกิดขึ้นในชีวิต', type: 'scale', labels: ['ไม่เลย', 'เล็กน้อย', 'มาก', 'มากที่สุด'], required: true },
-                    { id: 'tmhi_10', text: 'ท่านรู้สึกเห็นอกเห็นใจเมื่อผู้อื่นมีความทุกข์', type: 'scale', labels: ['ไม่เลย', 'เล็กน้อย', 'มาก', 'มากที่สุด'], required: true },
-                    { id: 'tmhi_11', text: 'ท่านรู้สึกเป็นสุขในการช่วยเหลือผู้อื่นที่มีปัญหา', type: 'scale', labels: ['ไม่เลย', 'เล็กน้อย', 'มาก', 'มากที่สุด'], required: true },
-                    { id: 'tmhi_12', text: 'ท่านให้ความช่วยเหลือแก่ผู้อื่นเมื่อมีโอกาส', type: 'scale', labels: ['ไม่เลย', 'เล็กน้อย', 'มาก', 'มากที่สุด'], required: true },
-                    { id: 'tmhi_13', text: 'ท่านรู้สึกมั่นคงปลอดภัยเมื่ออยู่ในครอบครัว', type: 'scale', labels: ['ไม่เลย', 'เล็กน้อย', 'มาก', 'มากที่สุด'], required: true },
-                    { id: 'tmhi_14', text: 'หากท่านป่วยหนัก ท่านเชื่อว่าคนในครอบครัวจะดูแลท่านเป็นอย่างดี', type: 'scale', labels: ['ไม่เลย', 'เล็กน้อย', 'มาก', 'มากที่สุด'], required: true },
-                    { id: 'tmhi_15', text: 'สมาชิกในครอบครัวมีความรักและผูกพันต่อกัน', type: 'scale', labels: ['ไม่เลย', 'เล็กน้อย', 'มาก', 'มากที่สุด'], required: true }
-                ]
-            }
-        ]
-    },
-
-    // ----------------------------------------
-    // Part 4: Nutrition (Sweet/Fat/Salt)
+    // Part 3: Nutrition (Sweet/Fat/Salt) (Physical)
     // ----------------------------------------
     nutrition: {
         title: 'พฤติกรรมการบริโภค',
@@ -216,41 +197,7 @@ const SURVEY_DATA = {
     },
 
     // ----------------------------------------
-    // Part 5: Safety
-    // ----------------------------------------
-    safety: {
-        title: 'อุบัติเหตุและความปลอดภัย',
-        type: 'environment',
-        description: 'พฤติกรรมความปลอดภัย',
-        subsections: [
-            {
-                title: 'การขับขี่และการเดินทาง',
-                questions: [
-                    { id: 'helmet_driver', text: 'ในช่วง 30 วันที่ผ่านมา ท่านสวมหมวกนิรภัยขณะขับขี่รถจักรยานยนต์หรือไม่', type: 'radio', options: ['ใช้ทุกครั้ง', 'ใช้บางครั้ง', 'ไม่เคยใช้', 'ไม่เคยขี่'], required: true },
-                    { id: 'helmet_passenger', text: 'ในช่วง 30 วันที่ผ่านมา ท่านสวมหมวกนิรภัยขณะโดยสารรถจักรยานยนต์หรือไม่', type: 'radio', options: ['ใช้ทุกครั้ง', 'ใช้บางครั้ง', 'ไม่เคยใช้', 'ไม่เคยนั่งซ้อนท้าย'], required: true },
-                    { id: 'seatbelt_driver', text: 'ในช่วง 30 วันที่ผ่านมา ท่านใช้เข็มขัดนิรภัยขณะขับรถยนต์หรือไม่', type: 'radio', options: ['ใช้ทุกครั้ง', 'ใช้บางครั้ง', 'ไม่เคยใช้', 'ไม่เคยขับ'], required: true },
-                    { id: 'seatbelt_passenger', text: 'ในช่วง 30 วันที่ผ่านมา ท่านใช้เข็มขัดนิรภัยขณะเป็นผู้โดยสารข้างคนขับหรือไม่', type: 'radio', options: ['ใช้ทุกครั้ง', 'ใช้บางครั้ง', 'ไม่เคยใช้', 'ไม่เคยนั่งข้างคนขับ'], required: true },
-                    {
-                        id: 'accident_hist',
-                        text: 'ในช่วง 12 เดือนที่ผ่านมา ท่านเคยประสบอุบัติเหตุจราจรในลักษณะใดบ้าง (เลือกได้มากกว่า 1 ข้อ)',
-                        type: 'checkbox',
-                        options: ['คนขับรถยนต์', 'ผู้โดยสารรถยนต์', 'คนขี่จักรยานยนต์', 'ผู้โดยสารจักรยานยนต์', 'คนขี่จักรยาน', 'คนเดินเท้า', 'ไม่เคย'],
-                        required: true
-                    },
-                    {
-                        id: 'drunk_drive',
-                        text: 'ในช่วง 12 เดือนที่ผ่านมา เคยขับขี่หลังดื่มแอลกอฮอล์หรือไม่',
-                        type: 'radio',
-                        options: ['ไม่เคย', 'เคย 1 ครั้ง/เดือนหรือน้อยกว่า', 'เคย 2-3 ครั้ง/เดือน', 'เคย > 3 ครั้ง/เดือน', 'ไม่เคยขับขี่'],
-                        required: true
-                    }
-                ]
-            }
-        ]
-    },
-
-    // ----------------------------------------
-    // Part 6: Physical Activity
+    // Part 4: Physical Activity (Physical)
     // ----------------------------------------
     activity: {
         title: 'กิจกรรมทางกาย (TPAX)',
@@ -290,47 +237,44 @@ const SURVEY_DATA = {
     },
 
     // ----------------------------------------
-    // Part 7: Environment
+    // Part 5: Mental Health (TMHI-15) (Mental)
     // ----------------------------------------
-    environment: {
-        title: 'สิ่งแวดล้อมและโรคอุบัติใหม่',
-        type: 'environment',
-        description: 'สภาพแวดล้อมและผลกระทบ',
+    mental: {
+        title: 'สุขภาพจิต (TMHI-15)',
+        type: 'mental',
+        description: 'วัดสุขภาพจิตคนไทยฉบับสั้น',
         subsections: [
             {
-                title: 'สภาพแวดล้อมในที่ทำงาน',
+                title: 'ความรู้สึกในช่วง 1 เดือนที่ผ่านมา',
+                hint: 'ระดับ: ไม่เลย, เล็กน้อย, มาก, มากที่สุด',
                 questions: [
-                    { id: 'env_satisfaction', text: 'ความพึงพอใจในสิ่งแวดล้อมที่ทำงาน', type: 'scale', labels: ['แย่มาก', 'แย่', 'ปานกลาง', 'ดี', 'ดีมาก'], required: true },
-                    { id: 'env_glare', text: 'แสงจ้า/ทำงานกลางแดด', type: 'radio', options: ['ใช่ (มีผลต่อสุขภาพ)', 'ใช่ (ไม่มีผล)', 'ไม่ใช่'], required: true },
-                    { id: 'env_noise', text: 'เสียงดัง/แรงสั่นสะเทือน', type: 'radio', options: ['ใช่ (มีผลต่อสุขภาพ)', 'ใช่ (ไม่มีผล)', 'ไม่ใช่'], required: true },
-                    { id: 'env_smell', text: 'กลิ่นเหม็น/สารเคมี', type: 'radio', options: ['ใช่ (มีผลต่อสุขภาพ)', 'ใช่ (ไม่มีผล)', 'ไม่ใช่'], required: true },
-                    { id: 'env_smoke', text: 'ควัน/ไอระเหย', type: 'radio', options: ['ใช่ (มีผลต่อสุขภาพ)', 'ใช่ (ไม่มีผล)', 'ไม่ใช่'], required: true },
-                    { id: 'env_posture', text: 'ท่าทางเดิมนานๆ/ก้มเงย', type: 'radio', options: ['ใช่ (มีผลต่อสุขภาพ)', 'ใช่ (ไม่มีผล)', 'ไม่ใช่'], required: true },
-                    { id: 'env_awkward', text: 'ท่าทางฝืนธรรมชาติ (ยกของ/เขย่ง)', type: 'radio', options: ['ใช่ (มีผลต่อสุขภาพ)', 'ใช่ (ไม่มีผล)', 'ไม่ใช่'], required: true }
-                ]
-            },
-            {
-                title: 'มลพิษและโรคอุบัติใหม่',
-                questions: [
-                    { id: 'pm25_impact', text: 'ปัญหา PM 2.5 ในพื้นที่ (1 ปีที่ผ่านมา)', type: 'radio', options: ['ไม่มีเลย', 'น้อย', 'ปานกลาง', 'มาก', 'รุนแรงมาก'], required: true },
-                    { id: 'pm25_symptom', text: 'อาการเจ็บป่วยจาก PM 2.5', type: 'checkbox', options: ['ไม่มี', 'ไอ/คัดจมูก/แสบคอ', 'หายใจไม่เต็มอิ่ม', 'แสบตา', 'ปวดศีรษะ'], required: true },
-                    { id: 'life_quality', text: 'คุณภาพชีวิตโดยรวม', type: 'scale', labels: ['แย่มาก', 'แย่', 'ปานกลาง', 'ดี', 'ดีมาก'], required: true },
-                    { id: 'emerging_known', text: 'รู้จัก "โรคอุบัติใหม่" หรือไม่', type: 'radio', options: ['เคยได้ยิน', 'ไม่เคย'], required: true },
-                    { id: 'emerging_list', text: 'โรคอุบัติใหม่ที่รู้จัก', type: 'checkbox', options: ['COVID-19', 'ไข้หวัดนก', 'ไข้ซิกา', 'อื่นๆ'], required: true },
-                    { id: 'climate_impact', text: 'ผลกระทบจากโลกร้อนต่อสุขภาพ', type: 'radio', options: ['ไม่มีเลย', 'น้อย', 'ปานกลาง', 'มาก', 'รุนแรงมาก'], required: true },
-                    { id: 'covid_history', text: 'ติด COVID-19 ใน 6 เดือนที่ผ่านมา', type: 'radio', options: ['ไม่เคย', '1 ครั้ง', '> 1 ครั้ง'], required: true }
+                    { id: 'tmhi_1', text: 'ท่านรู้สึกพึงพอใจในชีวิต', type: 'scale', labels: ['ไม่เลย', 'เล็กน้อย', 'มาก', 'มากที่สุด'], required: true },
+                    { id: 'tmhi_2', text: 'ท่านรู้สึกสบายใจ', type: 'scale', labels: ['ไม่เลย', 'เล็กน้อย', 'มาก', 'มากที่สุด'], required: true },
+                    { id: 'tmhi_3', text: 'ท่านรู้สึกภูมิใจในตนเอง', type: 'scale', labels: ['ไม่เลย', 'เล็กน้อย', 'มาก', 'มากที่สุด'], required: true },
+                    { id: 'tmhi_4', text: 'ท่านรู้สึกเบื่อหน่ายท้อแท้กับการดำเนินชีวิตประจำวัน', type: 'scale', labels: ['ไม่เลย', 'เล็กน้อย', 'มาก', 'มากที่สุด'], required: true },
+                    { id: 'tmhi_5', text: 'ท่านรู้สึกผิดหวังในตนเอง', type: 'scale', labels: ['ไม่เลย', 'เล็กน้อย', 'มาก', 'มากที่สุด'], required: true },
+                    { id: 'tmhi_6', text: 'ท่านรู้สึกว่าชีวิตมีแต่ความทุกข์', type: 'scale', labels: ['ไม่เลย', 'เล็กน้อย', 'มาก', 'มากที่สุด'], required: true },
+                    { id: 'tmhi_7', text: 'ท่านสามารถทำใจยอมรับได้สำหรับปัญหาที่ยากจะแก้ไข', type: 'scale', labels: ['ไม่เลย', 'เล็กน้อย', 'มาก', 'มากที่สุด'], required: true },
+                    { id: 'tmhi_8', text: 'ท่านมั่นใจว่าจะสามารถควบคุมอารมณ์ได้เมื่อมีเหตุการณ์คับขัน', type: 'scale', labels: ['ไม่เลย', 'เล็กน้อย', 'มาก', 'มากที่สุด'], required: true },
+                    { id: 'tmhi_9', text: 'ท่านมั่นใจที่จะเผชิญกับเหตุการณ์ร้ายแรงที่เกิดขึ้นในชีวิต', type: 'scale', labels: ['ไม่เลย', 'เล็กน้อย', 'มาก', 'มากที่สุด'], required: true },
+                    { id: 'tmhi_10', text: 'ท่านรู้สึกเห็นอกเห็นใจเมื่อผู้อื่นมีความทุกข์', type: 'scale', labels: ['ไม่เลย', 'เล็กน้อย', 'มาก', 'มากที่สุด'], required: true },
+                    { id: 'tmhi_11', text: 'ท่านรู้สึกเป็นสุขในการช่วยเหลือผู้อื่นที่มีปัญหา', type: 'scale', labels: ['ไม่เลย', 'เล็กน้อย', 'มาก', 'มากที่สุด'], required: true },
+                    { id: 'tmhi_12', text: 'ท่านให้ความช่วยเหลือแก่ผู้อื่นเมื่อมีโอกาส', type: 'scale', labels: ['ไม่เลย', 'เล็กน้อย', 'มาก', 'มากที่สุด'], required: true },
+                    { id: 'tmhi_13', text: 'ท่านรู้สึกมั่นคงปลอดภัยเมื่ออยู่ในครอบครัว', type: 'scale', labels: ['ไม่เลย', 'เล็กน้อย', 'มาก', 'มากที่สุด'], required: true },
+                    { id: 'tmhi_14', text: 'หากท่านป่วยหนัก ท่านเชื่อว่าคนในครอบครัวจะดูแลท่านเป็นอย่างดี', type: 'scale', labels: ['ไม่เลย', 'เล็กน้อย', 'มาก', 'มากที่สุด'], required: true },
+                    { id: 'tmhi_15', text: 'สมาชิกในครอบครัวมีความรักและผูกพันต่อกัน', type: 'scale', labels: ['ไม่เลย', 'เล็กน้อย', 'มาก', 'มากที่สุด'], required: true }
                 ]
             }
         ]
     },
 
     // ----------------------------------------
-    // Part 8: Loneliness (UCLA Loneliness Scale)
+    // Part 6: Social Dimension (Loneliness) (Social)
     // ----------------------------------------
     loneliness: {
         title: 'แบบสำรวจความเหงา (UCLA Loneliness Scale)',
-        type: 'mental',
-        description: 'วัดระดับความเหงาและความโดดเดี่ยว',
+        type: 'social',
+        description: 'การมีปฏิสัมพันธ์กับผู้อื่นในที่ทำงาน ความสัมพันธ์และการติดต่อสื่อสารกับเพื่อนร่วมงาน',
         subsections: [
             {
                 title: 'ความรู้สึกโดดเดี่ยว',
@@ -374,6 +318,75 @@ const SURVEY_DATA = {
                     { id: 'lonely_18', text: 'ท่านรู้สึกไม่สบายใจเมื่อต้องพูดคุยกับคนแปลกหน้าบ่อยแค่ไหน?', type: 'scale', labels: ['0 - ฉันไม่เคยรู้สึกเช่นนี้เลย', '1 - ฉันแทบไม่เคยรู้สึกเช่นนี้', '2 - ฉันรู้สึกเช่นนี้เป็นบางครั้ง', '3 - ฉันรู้สึกเช่นนี้บ่อยครั้ง'], required: true },
                     { id: 'lonely_19', text: 'ท่านรู้สึกยากลำบากในการเริ่มต้นบทสนทนากับผู้อื่นบ่อยแค่ไหน?', type: 'scale', labels: ['0 - ฉันไม่เคยรู้สึกเช่นนี้เลย', '1 - ฉันแทบไม่เคยรู้สึกเช่นนี้', '2 - ฉันรู้สึกเช่นนี้เป็นบางครั้ง', '3 - ฉันรู้สึกเช่นนี้บ่อยครั้ง'], required: true },
                     { id: 'lonely_20', text: 'ท่านรู้สึกกังวลว่าคนอื่นจะปฏิเสธท่านบ่อยแค่ไหน?', type: 'scale', labels: ['0 - ฉันไม่เคยรู้สึกเช่นนี้เลย', '1 - ฉันแทบไม่เคยรู้สึกเช่นนี้', '2 - ฉันรู้สึกเช่นนี้เป็นบางครั้ง', '3 - ฉันรู้สึกเช่นนี้บ่อยครั้ง'], required: true }
+                ]
+            }
+        ]
+    },
+
+    // ----------------------------------------
+    // Part 7: Safety (Environment)
+    // ----------------------------------------
+    safety: {
+        title: 'อุบัติเหตุและความปลอดภัย',
+        type: 'environment', // Kept as environment or typically 'physical'? But accidents are external. Stick to environment-ish for now.
+        description: 'พฤติกรรมความปลอดภัย',
+        subsections: [
+            {
+                title: 'การขับขี่และการเดินทาง',
+                questions: [
+                    { id: 'helmet_driver', text: 'ในช่วง 30 วันที่ผ่านมา ท่านสวมหมวกนิรภัยขณะขับขี่รถจักรยานยนต์หรือไม่', type: 'radio', options: ['ใช้ทุกครั้ง', 'ใช้บางครั้ง', 'ไม่เคยใช้', 'ไม่เคยขี่'], required: true },
+                    { id: 'helmet_passenger', text: 'ในช่วง 30 วันที่ผ่านมา ท่านสวมหมวกนิรภัยขณะโดยสารรถจักรยานยนต์หรือไม่', type: 'radio', options: ['ใช้ทุกครั้ง', 'ใช้บางครั้ง', 'ไม่เคยใช้', 'ไม่เคยนั่งซ้อนท้าย'], required: true },
+                    { id: 'seatbelt_driver', text: 'ในช่วง 30 วันที่ผ่านมา ท่านใช้เข็มขัดนิรภัยขณะขับรถยนต์หรือไม่', type: 'radio', options: ['ใช้ทุกครั้ง', 'ใช้บางครั้ง', 'ไม่เคยใช้', 'ไม่เคยขับ'], required: true },
+                    { id: 'seatbelt_passenger', text: 'ในช่วง 30 วันที่ผ่านมา ท่านใช้เข็มขัดนิรภัยขณะเป็นผู้โดยสารข้างคนขับหรือไม่', type: 'radio', options: ['ใช้ทุกครั้ง', 'ใช้บางครั้ง', 'ไม่เคยใช้', 'ไม่เคยนั่งข้างคนขับ'], required: true },
+                    {
+                        id: 'accident_hist',
+                        text: 'ในช่วง 12 เดือนที่ผ่านมา ท่านเคยประสบอุบัติเหตุจราจรในลักษณะใดบ้าง (เลือกได้มากกว่า 1 ข้อ)',
+                        type: 'checkbox',
+                        options: ['คนขับรถยนต์', 'ผู้โดยสารรถยนต์', 'คนขี่จักรยานยนต์', 'ผู้โดยสารจักรยานยนต์', 'คนขี่จักรยาน', 'คนเดินเท้า', 'ไม่เคย'],
+                        required: true
+                    },
+                    {
+                        id: 'drunk_drive',
+                        text: 'ในช่วง 12 เดือนที่ผ่านมา เคยขับขี่หลังดื่มแอลกอฮอล์หรือไม่',
+                        type: 'radio',
+                        options: ['ไม่เคย', 'เคย 1 ครั้ง/เดือนหรือน้อยกว่า', 'เคย 2-3 ครั้ง/เดือน', 'เคย > 3 ครั้ง/เดือน', 'ไม่เคยขับขี่'],
+                        required: true
+                    }
+                ]
+            }
+        ]
+    },
+
+    // ----------------------------------------
+    // Part 8: Environment (Environment)
+    // ----------------------------------------
+    environment: {
+        title: 'สิ่งแวดล้อมและโรคอุบัติใหม่',
+        type: 'environment',
+        description: 'สภาพแวดล้อมและผลกระทบ',
+        subsections: [
+            {
+                title: 'สภาพแวดล้อมในที่ทำงาน',
+                questions: [
+                    { id: 'env_satisfaction', text: 'ความพึงพอใจในสิ่งแวดล้อมที่ทำงาน', type: 'scale', labels: ['แย่มาก', 'แย่', 'ปานกลาง', 'ดี', 'ดีมาก'], required: true },
+                    { id: 'env_glare', text: 'แสงจ้า/ทำงานกลางแดด', type: 'radio', options: ['ใช่ (มีผลต่อสุขภาพ)', 'ใช่ (ไม่มีผล)', 'ไม่ใช่'], required: true },
+                    { id: 'env_noise', text: 'เสียงดัง/แรงสั่นสะเทือน', type: 'radio', options: ['ใช่ (มีผลต่อสุขภาพ)', 'ใช่ (ไม่มีผล)', 'ไม่ใช่'], required: true },
+                    { id: 'env_smell', text: 'กลิ่นเหม็น/สารเคมี', type: 'radio', options: ['ใช่ (มีผลต่อสุขภาพ)', 'ใช่ (ไม่มีผล)', 'ไม่ใช่'], required: true },
+                    { id: 'env_smoke', text: 'ควัน/ไอระเหย', type: 'radio', options: ['ใช่ (มีผลต่อสุขภาพ)', 'ใช่ (ไม่มีผล)', 'ไม่ใช่'], required: true },
+                    { id: 'env_posture', text: 'ท่าทางเดิมนานๆ/ก้มเงย', type: 'radio', options: ['ใช่ (มีผลต่อสุขภาพ)', 'ใช่ (ไม่มีผล)', 'ไม่ใช่'], required: true },
+                    { id: 'env_awkward', text: 'ท่าทางฝืนธรรมชาติ (ยกของ/เขย่ง)', type: 'radio', options: ['ใช่ (มีผลต่อสุขภาพ)', 'ใช่ (ไม่มีผล)', 'ไม่ใช่'], required: true }
+                ]
+            },
+            {
+                title: 'มลพิษและโรคอุบัติใหม่',
+                questions: [
+                    { id: 'pm25_impact', text: 'ปัญหา PM 2.5 ในพื้นที่ (1 ปีที่ผ่านมา)', type: 'radio', options: ['ไม่มีเลย', 'น้อย', 'ปานกลาง', 'มาก', 'รุนแรงมาก'], required: true },
+                    { id: 'pm25_symptom', text: 'อาการเจ็บป่วยจาก PM 2.5', type: 'checkbox', options: ['ไม่มี', 'ไอ/คัดจมูก/แสบคอ', 'หายใจไม่เต็มอิ่ม', 'แสบตา', 'ปวดศีรษะ'], required: true },
+                    { id: 'life_quality', text: 'คุณภาพชีวิตโดยรวม', type: 'scale', labels: ['แย่มาก', 'แย่', 'ปานกลาง', 'ดี', 'ดีมาก'], required: true },
+                    { id: 'emerging_known', text: 'รู้จัก "โรคอุบัติใหม่" หรือไม่', type: 'radio', options: ['เคยได้ยิน', 'ไม่เคย'], required: true },
+                    { id: 'emerging_list', text: 'โรคอุบัติใหม่ที่รู้จัก', type: 'checkbox', options: ['COVID-19', 'ไข้หวัดนก', 'ไข้ซิกา', 'อื่นๆ'], required: true },
+                    { id: 'climate_impact', text: 'ผลกระทบจากโลกร้อนต่อสุขภาพ', type: 'radio', options: ['ไม่มีเลย', 'น้อย', 'ปานกลาง', 'มาก', 'รุนแรงมาก'], required: true },
+                    { id: 'covid_history', text: 'ติด COVID-19 ใน 6 เดือนที่ผ่านมา', type: 'radio', options: ['ไม่เคย', '1 ครั้ง', '> 1 ครั้ง'], required: true }
                 ]
             }
         ]

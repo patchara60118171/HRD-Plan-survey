@@ -80,6 +80,11 @@ function renderWelcome() {
                     <div class="info-title">สุขภาวะทางใจ</div>
                     <div class="info-desc">ความเครียด อารมณ์ จิตใจ ความกังวล</div>
                 </div>
+                <div class="info-card social">
+                    <div class="info-icon">👥</div>
+                    <div class="info-title">สุขภาวะทางสังคม</div>
+                    <div class="info-desc">ความสัมพันธ์ ความเหงา การเข้าสังคม</div>
+                </div>
                 <div class="info-card environment">
                     <div class="info-icon">🏢</div>
                     <div class="info-title">สภาพแวดล้อม</div>
@@ -102,10 +107,11 @@ function renderWelcome() {
 
 // Render Section Header
 function renderSectionHeader(section) {
-    const icons = { physical: '💪', mental: '🧠', consumption: '🍷', nutrition: '🥗', safety: '⛑️', activity: '🏃', environment: '🌳' };
+    const icons = { physical: '💪', mental: '🧠', social: '👥', consumption: '🍷', nutrition: '🥗', safety: '⛑️', activity: '🏃', environment: '🌳' };
     const names = {
         physical: 'ข้อมูลส่วนบุคคล/ร่างกาย',
         mental: 'สุขภาพจิต',
+        social: 'มิติทางสังคม',
         consumption: 'พฤติกรรมเสี่ยง',
         nutrition: 'โภชนาการ',
         safety: 'ความปลอดภัย',
@@ -429,6 +435,11 @@ function renderResults(responses, userInfo) {
                 <div class="result-card mental">
                     <div class="result-icon">🧠</div>
                     <div class="result-title">สุขภาพจิต</div>
+                    <div class="result-status complete">✓ บันทึกแล้ว</div>
+                </div>
+                <div class="result-card social">
+                    <div class="result-icon">👥</div>
+                    <div class="result-title">สุขภาวะทางสังคม</div>
                     <div class="result-status complete">✓ บันทึกแล้ว</div>
                 </div>
                 <div class="result-card environment">
