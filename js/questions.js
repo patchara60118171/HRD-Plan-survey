@@ -280,44 +280,44 @@ const SURVEY_DATA = {
                 title: '',
                 hint: '3 = ฉันรู้สึกเช่นนี้บ่อยครั้ง, 2 = ฉันรู้สึกเช่นนี้เป็นบางครั้ง, 1 = ฉันแทบไม่เคยรู้สึกเช่นนี้, 0 = ฉันไม่เคยรู้สึกเช่นนี้เลย',
                 questions: [
-                    { id: 'lonely_1', text: '1. ฉันไม่มีความสุขที่ต้องทำหลายสิ่งหลายอย่างคนเดียว', type: 'scale', labels: ['0', '1', '2', '3'], required: true },
-                    { id: 'lonely_2', text: '2. ฉันไม่มีใครคุยด้วย', type: 'scale', labels: ['0', '1', '2', '3'], required: true },
-                    { id: 'lonely_3', text: '3. ฉันทนไม่ได้ที่จะอยู่คนเดียวอย่างนี้', type: 'scale', labels: ['0', '1', '2', '3'], required: true },
-                    { id: 'lonely_4', text: '4. ฉันขาดมิตรภาพ', type: 'scale', labels: ['0', '1', '2', '3'], required: true },
-                    { id: 'lonely_5', text: '5. ฉันรู้สึกราวกับว่าไม่มีใครเข้าใจฉันจริงๆ', type: 'scale', labels: ['0', '1', '2', '3'], required: true }
+                    { id: 'lonely_1', text: 'ฉันไม่มีความสุขที่ต้องทำหลายสิ่งหลายอย่างคนเดียว', type: 'scale', labels: ['0', '1', '2', '3'], required: true },
+                    { id: 'lonely_2', text: 'ฉันไม่มีใครคุยด้วย', type: 'scale', labels: ['0', '1', '2', '3'], required: true },
+                    { id: 'lonely_3', text: 'ฉันทนไม่ได้ที่จะอยู่คนเดียวอย่างนี้', type: 'scale', labels: ['0', '1', '2', '3'], required: true },
+                    { id: 'lonely_4', text: 'ฉันขาดมิตรภาพ', type: 'scale', labels: ['0', '1', '2', '3'], required: true },
+                    { id: 'lonely_5', text: 'ฉันรู้สึกราวกับว่าไม่มีใครเข้าใจฉันจริงๆ', type: 'scale', labels: ['0', '1', '2', '3'], required: true }
                 ]
             },
             {
                 title: '',
                 hint: '3 = ฉันรู้สึกเช่นนี้บ่อยครั้ง, 2 = ฉันรู้สึกเช่นนี้เป็นบางครั้ง, 1 = ฉันแทบไม่เคยรู้สึกเช่นนี้, 0 = ฉันไม่เคยรู้สึกเช่นนี้เลย',
                 questions: [
-                    { id: 'lonely_6', text: '6. ฉันพบว่าตัวเองรอคนโทรหา', type: 'scale', labels: ['0', '1', '2', '3'], required: true },
-                    { id: 'lonely_7', text: '7. ฉันไม่มีใครให้พึ่ง', type: 'scale', labels: ['0', '1', '2', '3'], required: true },
-                    { id: 'lonely_8', text: '8. ฉันไม่สนิทกับใคร', type: 'scale', labels: ['0', '1', '2', '3'], required: true },
-                    { id: 'lonely_9', text: '9. ความเห็นจากคนอื่นไม่มีผลต่อความสนใจหรือแนวคิดของฉัน', type: 'scale', labels: ['0', '1', '2', '3'], required: true },
-                    { id: 'lonely_10', text: '10. ฉันรู้สึกถูกทอดทิ้ง', type: 'scale', labels: ['0', '1', '2', '3'], required: true }
+                    { id: 'lonely_6', text: 'ฉันพบว่าตัวเองรอคนโทรหา', type: 'scale', labels: ['0', '1', '2', '3'], required: true },
+                    { id: 'lonely_7', text: 'ฉันไม่มีใครให้พึ่ง', type: 'scale', labels: ['0', '1', '2', '3'], required: true },
+                    { id: 'lonely_8', text: 'ฉันไม่สนิทกับใคร', type: 'scale', labels: ['0', '1', '2', '3'], required: true },
+                    { id: 'lonely_9', text: 'ความเห็นจากคนอื่นไม่มีผลต่อความสนใจหรือแนวคิดของฉัน', type: 'scale', labels: ['0', '1', '2', '3'], required: true },
+                    { id: 'lonely_10', text: 'ฉันรู้สึกถูกทอดทิ้ง', type: 'scale', labels: ['0', '1', '2', '3'], required: true }
                 ]
             },
             {
                 title: '',
                 hint: '3 = ฉันรู้สึกเช่นนี้บ่อยครั้ง, 2 = ฉันรู้สึกเช่นนี้เป็นบางครั้ง, 1 = ฉันแทบไม่เคยรู้สึกเช่นนี้, 0 = ฉันไม่เคยรู้สึกเช่นนี้เลย',
                 questions: [
-                    { id: 'lonely_11', text: '11. ฉันรู้สึกโดดเดี่ยว', type: 'scale', labels: ['0', '1', '2', '3'], required: true },
-                    { id: 'lonely_12', text: '12. ฉันไม่สามารถติดต่อสื่อสารกับคนรอบข้างได้', type: 'scale', labels: ['0', '1', '2', '3'], required: true },
-                    { id: 'lonely_13', text: '13. ความสัมพันธ์ทางสังคมของฉันเป็นเพียงผิวเผิน', type: 'scale', labels: ['0', '1', '2', '3'], required: true },
-                    { id: 'lonely_14', text: '14. ฉันโหยหาการมีเพื่อนพ้อง', type: 'scale', labels: ['0', '1', '2', '3'], required: true },
-                    { id: 'lonely_15', text: '15. ไม่มีใครรู้จักฉันดีพอ', type: 'scale', labels: ['0', '1', '2', '3'], required: true }
+                    { id: 'lonely_11', text: 'ฉันรู้สึกโดดเดี่ยว', type: 'scale', labels: ['0', '1', '2', '3'], required: true },
+                    { id: 'lonely_12', text: 'ฉันไม่สามารถติดต่อสื่อสารกับคนรอบข้างได้', type: 'scale', labels: ['0', '1', '2', '3'], required: true },
+                    { id: 'lonely_13', text: 'ความสัมพันธ์ทางสังคมของฉันเป็นเพียงผิวเผิน', type: 'scale', labels: ['0', '1', '2', '3'], required: true },
+                    { id: 'lonely_14', text: 'ฉันโหยหาการมีเพื่อนพ้อง', type: 'scale', labels: ['0', '1', '2', '3'], required: true },
+                    { id: 'lonely_15', text: 'ไม่มีใครรู้จักฉันดีพอ', type: 'scale', labels: ['0', '1', '2', '3'], required: true }
                 ]
             },
             {
                 title: '',
                 hint: '3 = ฉันรู้สึกเช่นนี้บ่อยครั้ง, 2 = ฉันรู้สึกเช่นนี้เป็นบางครั้ง, 1 = ฉันแทบไม่เคยรู้สึกเช่นนี้, 0 = ฉันไม่เคยรู้สึกเช่นนี้เลย',
                 questions: [
-                    { id: 'lonely_16', text: '16. ฉันรู้สึกถูกแยกออกจากคนอื่นๆ', type: 'scale', labels: ['0', '1', '2', '3'], required: true },
-                    { id: 'lonely_17', text: '17. ฉันรู้สึกไม่มีความสุขเมื่อต้องเริ่มออกห่างจากบางสิ่งบางอย่าง', type: 'scale', labels: ['0', '1', '2', '3'], required: true },
-                    { id: 'lonely_18', text: '18. เป็นการยากสำหรับฉันที่จะหาเพื่อน', type: 'scale', labels: ['0', '1', '2', '3'], required: true },
-                    { id: 'lonely_19', text: '19. ฉันรู้สึกถูกกีดกัน และถูกตัดขาดออกจากผู้อื่น', type: 'scale', labels: ['0', '1', '2', '3'], required: true },
-                    { id: 'lonely_20', text: '20. แม้มีคนมากมายอยู่รอบตัวแต่ฉันก็ยังรู้สึกโดดเดี่ยว', type: 'scale', labels: ['0', '1', '2', '3'], required: true }
+                    { id: 'lonely_16', text: 'ฉันรู้สึกถูกแยกออกจากคนอื่นๆ', type: 'scale', labels: ['0', '1', '2', '3'], required: true },
+                    { id: 'lonely_17', text: 'ฉันรู้สึกไม่มีความสุขเมื่อต้องเริ่มออกห่างจากบางสิ่งบางอย่าง', type: 'scale', labels: ['0', '1', '2', '3'], required: true },
+                    { id: 'lonely_18', text: 'เป็นการยากสำหรับฉันที่จะหาเพื่อน', type: 'scale', labels: ['0', '1', '2', '3'], required: true },
+                    { id: 'lonely_19', text: 'ฉันรู้สึกถูกกีดกัน และถูกตัดขาดออกจากผู้อื่น', type: 'scale', labels: ['0', '1', '2', '3'], required: true },
+                    { id: 'lonely_20', text: 'แม้มีคนมากมายอยู่รอบตัวแต่ฉันก็ยังรู้สึกโดดเดี่ยว', type: 'scale', labels: ['0', '1', '2', '3'], required: true }
                 ]
             }
         ]
