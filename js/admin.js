@@ -104,7 +104,7 @@ async function fetchData() {
 function applyFilters() {
     const gender = document.getElementById('filter-gender').value;
     const ageGroup = document.getElementById('filter-age').value;
-    // const region = document.getElementById('filter-region').value; // Removed
+
 
     let filtered = window.originalData.filter(row => {
         let pass = true;
@@ -112,8 +112,7 @@ function applyFilters() {
         if (gender !== 'all') {
             if (row.raw_responses?.gender !== gender && row.gender !== gender) pass = false;
         }
-        // Region Filter Removed
-        // if (region !== 'all') { ... }
+
         // Age Group Filter
         if (ageGroup !== 'all') {
             const age = parseInt(row.age || row.raw_responses?.age || 0);
@@ -180,9 +179,7 @@ function processAdvancedStats(data) {
         const g = row.gender || r.gender || 'ไม่ระบุ';
         counts.gender[g] = (counts.gender[g] || 0) + 1;
 
-        // Region Removed
-        // const reg = row.region || r.region || 'ไม่ระบุ';
-        // counts.region[reg] = (counts.region[reg] || 0) + 1;
+
 
         // BMI
         const bmi = parseFloat(row.bmi);
@@ -297,8 +294,7 @@ function renderAllCharts(counts, avgTMHI) {
         datasets: [{ label: 'จำนวนคน', data: Object.values(counts.ageGroup), backgroundColor: '#8B5CF6' }]
     });
 
-    // 3. Region Chart Removed
-    // createChart('chart-region', ...);
+
 
     // 4. TMHI Gauge (Doughnut - workaround)
     // We simulate a gauge by showing "Score" vs "Remaining"
