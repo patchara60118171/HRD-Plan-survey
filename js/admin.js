@@ -465,23 +465,73 @@ function initializeHeaders() {
 }
 
 // Download Excel
+// Download Excel
 function downloadExcel() {
     if (!window.currentData || window.currentData.length === 0) {
         alert('ไม่มีข้อมูลให้ดาวน์โหลด');
         return;
     }
 
-    // Flatten data for Export
+    // 1. Build Header Map
+    const headerMap = {
+        'timestamp': 'วัน-เวลาที่บันทึก',
+        'created_at': 'วัน-เวลาที่สร้าง',
+        'name': 'ชื่อ-สกุล',
+        'gender': 'เพศ',
+        'age': 'อายุ',
+        'height': 'ส่วนสูง',
+        'weight': 'น้ำหนัก',
+        'waist': 'รอบเอว',
+        'bmi': 'BMI',
+        'tmhi_score': 'คะแนนสุขภาพจิต (เต็ม 60)'
+    };
+
+    // Map Question IDs to Thai Text from SURVEY_DATA
+    if (typeof SURVEY_DATA !== 'undefined') {
+        Object.values(SURVEY_DATA).forEach(section => {
+            if (section.subsections) {
+                section.subsections.forEach(sub => {
+                    if (sub.questions) {
+                        sub.questions.forEach(q => {
+                            headerMap[q.id] = q.text;
+                        });
+                    }
+                });
+            }
+        });
+    }
+
+    // 2. Prepare Data for Export
     const exportData = window.currentData.map(row => {
-        const { raw_responses, ...baseFields } = row;
-        const formattedDate = baseFields.timestamp ? new Date(baseFields.timestamp).toLocaleString('th-TH') : '-';
-        return {
-            ...baseFields,
-            timestamp_formatted: formattedDate,
-            ...raw_responses
-        };
+        const raw = row.raw_responses || {};
+        const newRow = {};
+
+        // 2.1 Add System Columns First (Ordered)
+        newRow['ลำดับ'] = row.id || '-';
+        newRow[headerMap['timestamp']] = row.timestamp ? new Date(row.timestamp).toLocaleString('th-TH') : '-';
+        newRow[headerMap['name']] = row.name || raw.name || '-';
+        newRow[headerMap['bmi']] = row.bmi ? parseFloat(row.bmi).toFixed(1) : '-';
+        newRow[headerMap['tmhi_score']] = row.tmhi_score || '-';
+
+        // 2.2 Add Detail Columns (Iterate through map to respect logical order if possible, or just dump raw)
+        // To be safe and get all data, we iterate the raw keys
+        Object.keys(raw).forEach(key => {
+            // Skip if already handled manually above (optional, but good for cleanliness)
+            if (['name', 'bmi'].includes(key)) return;
+
+            const thaiHeader = headerMap[key] || key; // Use Thai if available, else key
+
+            // Format arrays (checkboxes)
+            const val = Array.isArray(raw[key]) ? raw[key].join(', ') : raw[key];
+            newRow[thaiHeader] = val;
+        });
+
+        return newRow;
     });
 
+    // 3. Create Workbook & Export
+    const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.json_to_sheet(exportData);
-    XLSX.writeFile(wb, `survey_data_${new Date().toISOString().slice(0, 10)}.xlsx`);
+    XLSX.utils.book_append_sheet(wb, ws, "Survey Data");
+    XLSX.writeFile(wb, `WellBeing_Survey_${new Date().toISOString().slice(0, 10)}.xlsx`);
 }
