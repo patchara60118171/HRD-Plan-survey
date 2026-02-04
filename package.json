@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Well-being Survey",
   "scripts": {
-    "build": "echo 'No build step required - Static Site'"
+    "build": "mkdir -p public && cp index.html public/ && cp -r css js admin assets surveys docs public/"
   },
   "dependencies": {}
 }
