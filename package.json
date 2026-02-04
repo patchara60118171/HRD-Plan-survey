@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Well-being Survey",
   "scripts": {
-    "build": "mkdir -p public && cp index.html public/ && cp -r css js admin assets surveys docs public/"
+    "build": "echo 'Build step skipped (Handled by vercel.json)'"
   },
   "dependencies": {}
 }
