@@ -461,7 +461,6 @@ function initializeHeaders() {
 }
 
 // Download Excel
-// Download Excel
 function downloadExcel() {
     if (!window.currentData || window.currentData.length === 0) {
         alert('ไม่มีข้อมูลให้ดาวน์โหลด');
