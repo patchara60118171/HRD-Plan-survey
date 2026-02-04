@@ -1,0 +1,9 @@
+{
+  "name": "well-being-survey",
+  "version": "1.0.0",
+  "description": "Well-being Survey",
+  "scripts": {
+    "build": "echo 'No build step required - Static Site'"
+  },
+  "dependencies": {}
+}
