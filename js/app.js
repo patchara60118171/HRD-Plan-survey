@@ -188,6 +188,11 @@ const app = {
             this.responses.organization = this.organization;
             console.log(`Organization detected: ${this.organization} (${orgCode})`);
             
+            // Show welcome toast for organization
+            setTimeout(() => {
+                showToast(`ยินดีต้อนรับบุคลากรจาก ${this.organization}`, 'success');
+            }, 1000); // Delay slightly so it shows after loading screen
+            
             // Cleanup URL to make it look clean (optional, prevents copy-pasting wrong org)
             // history.replaceState(null, '', window.location.pathname);
         } else if (orgCode && !this.orgMap[orgCode]) {
