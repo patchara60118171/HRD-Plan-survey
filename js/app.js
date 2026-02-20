@@ -41,6 +41,7 @@ async function saveToSupabase(email, responses, isDraft = false) {
             title: responses.title || null,
             gender: responses.gender || null,
             age: responses.age ? parseInt(responses.age) : null,
+            organization: responses.organization || null, // Organization from URL Parameter
             org_type: responses.org_type || null, // Added new field
             height: height || null,
             weight: weight || null,
@@ -111,9 +112,31 @@ const app = {
     currentSubsectionIndex: 0,
     responses: {},
     userInfo: null,
+    organization: null, // To store organization from URL parameter
+    
+    // Organization Mapping
+    orgMap: {
+        'nesdc': 'สำนักงานสภาพัฒนาการเศรษฐกิจและสังคมแห่งชาติ',
+        'dss': 'กรมวิทยาศาสตร์บริการ',
+        'tmd': 'กรมอุตุนิยมวิทยา',
+        'probation': 'กรมคุมประพฤติ',
+        'dmh': 'กรมสุขภาพจิต',
+        'onep': 'สำนักงานนโยบายและแผนทรัพยากรธรรมชาติและสิ่งแวดล้อม',
+        'nrct': 'สำนักงานการวิจัยแห่งชาติ',
+        'opdc': 'สำนักงานคณะกรรมการพัฒนาระบบราชการ (ก.พ.ร.)',
+        'rid': 'กรมชลประทาน',
+        'doh': 'กองฝึกอบรม กรมทางหลวง',
+        'mots': 'สำนักงานปลัดกระทรวงการท่องเที่ยวและกีฬา',
+        'tpso': 'สำนักงานนโยบายและยุทธศาสตร์การค้า',
+        'dcp': 'กรมส่งเสริมวัฒนธรรม',
+        'acfs': 'สำนักงานมาตรฐานสินค้าเกษตรและอาหารแห่งชาติ'
+    },
 
     // Initialize app
     init() {
+        // Parse URL Parameters for organization
+        this.parseUrlParameters();
+        
         // Initialize Supabase
         initSupabase();
 
@@ -151,6 +174,26 @@ const app = {
 
         // Initialize cloud save debounce
         this.debouncedSaveCloud = debounce(() => this.saveDraftToCloud(), 2000);
+    },
+
+    // Parse URL Parameters
+    parseUrlParameters() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const orgCode = urlParams.get('org');
+        
+        if (orgCode && this.orgMap[orgCode]) {
+            this.organization = this.orgMap[orgCode];
+            // Initialize or update responses with the mapped organization name
+            if (!this.responses) this.responses = {};
+            this.responses.organization = this.organization;
+            console.log(`Organization detected: ${this.organization} (${orgCode})`);
+            
+            // Cleanup URL to make it look clean (optional, prevents copy-pasting wrong org)
+            // history.replaceState(null, '', window.location.pathname);
+        } else if (orgCode && !this.orgMap[orgCode]) {
+            console.warn(`Unknown organization code: ${orgCode}`);
+            showToast('รหัสองค์กรไม่ถูกต้อง', 'error');
+        }
     },
 
     // Set user email

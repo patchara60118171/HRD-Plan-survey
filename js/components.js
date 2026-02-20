@@ -60,10 +60,18 @@ function renderWelcome() {
         </button>`
         : '';
 
+    // Organization display
+    const orgDisplay = app.organization 
+        ? `<div style="background: #E0F2FE; color: #0369A1; padding: 0.5rem 1rem; border-radius: 8px; margin-top: 0.5rem; margin-bottom: 1rem; display: inline-block; font-weight: 600; font-size: 0.95rem; border: 1px solid #BAE6FD;">
+             🏢 สำหรับบุคลากร: ${app.organization}
+           </div>`
+        : '';
+
     return `
         <div class="welcome-screen fade-in">
             <div class="welcome-icon">🌿</div>
             <h1 class="welcome-title">แบบสำรวจสุขภาวะบุคลากร</h1>
+            ${orgDisplay}
             <p class="welcome-subtitle">
                 แบบสำรวจนี้จะช่วยให้เราเข้าใจสุขภาวะของท่านในด้านต่างๆ 
                 เพื่อนำไปพัฒนาและสนับสนุนให้ท่านมีคุณภาพชีวิตที่ดีขึ้น
