@@ -482,20 +482,7 @@ const app = {
 
     // Submit Survey (Final Save)
     async submitSurvey() {
-        // Prevent double submission
-        if (this.isSubmitting) return;
-        this.isSubmitting = true;
-
-        // Change button to loading state
-        const submitBtn = document.querySelector('.review-actions .btn-primary');
-        if (submitBtn) {
-            submitBtn.innerHTML = '<span class="loading-spinner" style="width: 16px; height: 16px; border-width: 2px; margin-right: 8px;"></span> กำลังบันทึกข้อมูล...';
-            submitBtn.style.opacity = '0.7';
-            submitBtn.style.cursor = 'not-allowed';
-            submitBtn.disabled = true;
-        }
-
-        showToast('กำลังบันทึกข้อมูล กรุณารอสักครู่...', 'info');
+        showToast('กำลังบันทึกข้อมูล...', 'info');
 
         // Calculate and add BMI to responses before saving
         const height = parseFloat(this.responses.height);
@@ -510,50 +497,29 @@ const app = {
         // Calculate and add TMHI score to responses
         const tmhiScore = calculateTMHIScore(this.responses);
         if (tmhiScore > 0) {
-            this.responses.tmhi_score = tmhiScore;
             const tmhiInfo = getTMHILevel(tmhiScore);
+            this.responses.tmhi_score = tmhiScore;
             this.responses.tmhi_level = tmhiInfo ? tmhiInfo.level : '';
         }
 
-        // Flag to track successful save
-        let saveSuccess = false;
-
-        try {
-            // Save to Supabase (Primary)
-            const isSupabaseSaved = await saveToSupabase(this.userInfo.email, this.responses, false);
-
-            if (isSupabaseSaved) {
-                saveSuccess = true;
-            } else {
-                throw new Error('Supabase save failed');
+        // 1. Save to Supabase (Primary)
+        if (this.userInfo && this.userInfo.email) {
+            const supabaseSuccess = await saveToSupabase(this.userInfo.email, this.responses, false);
+            if (supabaseSuccess) {
+                showToast('บันทึกข้อมูลสำเร็จ!', 'success');
             }
-        } catch (error) {
-            console.error('Submit error:', error);
-            // Re-enable button
-            this.isSubmitting = false;
-            if (submitBtn) {
-                submitBtn.innerHTML = 'ส่งแบบประเมิน <span>→</span>';
-                submitBtn.style.opacity = '1';
-                submitBtn.style.cursor = 'pointer';
-                submitBtn.disabled = false;
-            }
-            showToast('พบปัญหาในการบันทึกข้อมูล (อาจเกิดจากอินเทอร์เน็ต) ข้อมูลของท่านยังถูกบันทึกไว้ในเครื่อง กรุณาลองใหม่อีกครั้ง', 'error');
-            return; // Stop here, keep local storage intact
         }
 
-        if (saveSuccess) {
-            // Clear local storage ONLY on success
-            localStorage.removeItem('wellbeing_survey_responses');
-            localStorage.removeItem('wellbeing_survey_section');
-            localStorage.removeItem('wellbeing_survey_timestamp');
-            this.responses = {}; // Reset local responses
-
-            // Render Results
-            this.renderResults();
-            showToast('ส่งแบบสำรวจสำเร็จ!', 'success');
+        // 2. Also save to Google Apps Script (Backup)
+        if (GOOGLE_SCRIPT_URL) {
+            const success = await submitResponseToGAS(this.responses, GOOGLE_SCRIPT_URL);
+            if (!success) {
+                console.log('GAS backup save failed, but Supabase succeeded');
+            }
         }
-        
-        this.isSubmitting = false;
+
+        // 3. Show Results
+        this.renderResults();
     },
 
     // Render Results (Read Only)
@@ -663,60 +629,36 @@ const app = {
 
     // Next section
     nextSection() {
-        if (this.isNavigating) return;
-        this.isNavigating = true;
+        const sectionKey = SECTIONS_ORDER[this.currentSectionIndex];
+        const section = SURVEY_DATA[sectionKey];
 
-        const nextBtn = document.getElementById('btn-next');
-        const originalText = nextBtn.innerHTML;
-        nextBtn.innerHTML = '<span class="loading-spinner" style="width: 14px; height: 14px; border-width: 2px;"></span>';
-        nextBtn.disabled = true;
-
-        setTimeout(() => {
-            const sectionKey = SECTIONS_ORDER[this.currentSectionIndex];
-            const section = SURVEY_DATA[sectionKey];
-
-            // Check if there are more subsections
-            if (this.currentSubsectionIndex < section.subsections.length - 1) {
-                this.currentSubsectionIndex++;
-                this.renderSurvey();
-            } else if (this.currentSectionIndex < SECTIONS_ORDER.length - 1) {
-                // Move to next section
-                this.currentSectionIndex++;
-                this.currentSubsectionIndex = 0;
-                this.renderSurvey();
-            } else {
-                // Survey complete -> Go to Review
-                this.renderReview();
-            }
-            
-            this.isNavigating = false;
-        }, 300); // Small delay to prevent rapid clicking and allow DOM to update smoothly
+        // Check if there are more subsections
+        if (this.currentSubsectionIndex < section.subsections.length - 1) {
+            this.currentSubsectionIndex++;
+            this.renderSurvey();
+        } else if (this.currentSectionIndex < SECTIONS_ORDER.length - 1) {
+            // Move to next section
+            this.currentSectionIndex++;
+            this.currentSubsectionIndex = 0;
+            this.renderSurvey();
+        } else {
+            // Survey complete -> Go to Review
+            this.renderReview();
+        }
     },
 
     // Previous section
     prevSection() {
-        if (this.isNavigating) return;
-        this.isNavigating = true;
-
-        const prevBtn = document.getElementById('btn-prev');
-        const originalText = prevBtn.innerHTML;
-        prevBtn.innerHTML = '<span class="loading-spinner" style="width: 14px; height: 14px; border-width: 2px;"></span>';
-        prevBtn.disabled = true;
-
-        setTimeout(() => {
-            if (this.currentSubsectionIndex > 0) {
-                this.currentSubsectionIndex--;
-                this.renderSurvey();
-            } else if (this.currentSectionIndex > 0) {
-                this.currentSectionIndex--;
-                const prevSectionKey = SECTIONS_ORDER[this.currentSectionIndex];
-                const prevSection = SURVEY_DATA[prevSectionKey];
-                this.currentSubsectionIndex = prevSection.subsections.length - 1;
-                this.renderSurvey();
-            }
-            
-            this.isNavigating = false;
-        }, 300);
+        if (this.currentSubsectionIndex > 0) {
+            this.currentSubsectionIndex--;
+            this.renderSurvey();
+        } else if (this.currentSectionIndex > 0) {
+            this.currentSectionIndex--;
+            const prevSectionKey = SECTIONS_ORDER[this.currentSectionIndex];
+            const prevSection = SURVEY_DATA[prevSectionKey];
+            this.currentSubsectionIndex = prevSection.subsections.length - 1;
+            this.renderSurvey();
+        }
     },
 
     // Handle time input change
