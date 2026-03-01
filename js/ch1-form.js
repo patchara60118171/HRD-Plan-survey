@@ -361,17 +361,17 @@ async function submitWithRetry(formData, attempt = 1) {
             form_version: 'ch1-v1'
         };
 
-        const { data, error } = await ch1Supabase
+        const { error } = await ch1Supabase
             .from(TARGET_TABLE)
-            .insert([record])
-            .select();
+            .insert([record]);
 
         if (error) throw error;
 
         hideState('loading');
-        const refId = data[0].id.substring(0, 8);
+        // Since we cannot read data back due to RLS, generate a random Ref ID for the UI
+        const refId = Math.random().toString(36).substring(2, 10).toUpperCase();
         document.getElementById('success-msg').textContent =
-            `ขอบคุณที่ส่งแบบสอบถาม — Ref: ${refId}`;
+            `ขอบคุณที่ส่งข้อมูล — Ref: ${refId}`;
         showState('success');
 
     } catch (err) {
