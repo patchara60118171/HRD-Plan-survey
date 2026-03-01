@@ -206,6 +206,19 @@ function validateStaff() {
     if (!total || total < 1) { showError('err-staff'); return false; }
     hideError('err-staff');
 
+    // Age validation
+    const u30 = parseInt(document.getElementById('age-u30').value) || 0;
+    const a3039 = parseInt(document.getElementById('age-30-39').value) || 0;
+    const a4049 = parseInt(document.getElementById('age-40-49').value) || 0;
+    const a50p = parseInt(document.getElementById('age-50-plus').value) || 0;
+    const totalAge = u30 + a3039 + a4049 + a50p;
+
+    if (totalAge > total) {
+        showError('err-age-sum');
+        return false;
+    }
+    hideError('err-age-sum');
+
     const ncd = parseInt(document.getElementById('ncd-count').value) || 0;
     if (ncd > total) { showError('err-ncd'); return false; }
     hideError('err-ncd');
