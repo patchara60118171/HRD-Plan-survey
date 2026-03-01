@@ -1,3 +1,8 @@
 {
-    "outputDirectory": "."
+    "outputDirectory": ".",
+    "rewrites": [
+        { "source": "/ch1", "destination": "/ch1.html" },
+        { "source": "/ch1-admin", "destination": "/ch1-admin.html" },
+        { "source": "/admin-login", "destination": "/admin-login.html" }
+    ]
 }
