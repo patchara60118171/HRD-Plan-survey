@@ -11,7 +11,7 @@
         },
         {
             "source": "/admin-login",
-            "destination": "/แบบสอบถามบท 1/admin-login.html"
+            "destination": "/admin-login.html"
         }
     ]
 }
