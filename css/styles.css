@@ -200,6 +200,12 @@ body {
     height: 32px;
     border-radius: 50%;
     object-fit: cover;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--primary-teal);
+    color: white;
+    font-size: 16px;
 }
 
 .user-name {
@@ -226,7 +232,14 @@ body {
 
 .btn-login:hover {
     background: var(--bg-hover);
-    border-color: var(--text-muted);
+}
+
+.email-input-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-md);
+    margin: var(--spacing-lg) 0;
 }
 
 .btn-login img {
@@ -1196,9 +1209,21 @@ body {
 
 .results-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
     gap: var(--spacing-lg);
     margin-bottom: var(--spacing-2xl);
+}
+
+@media (min-width: 1024px) {
+    .results-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (max-width: 640px) {
+    .results-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 .result-card {

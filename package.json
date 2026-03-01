@@ -1,0 +1,9 @@
+{
+  "name": "well-being-survey",
+  "version": "1.0.0",
+  "description": "Well-being Survey",
+  "scripts": {
+    "build": "echo 'Build step skipped (Handled by vercel.json)'"
+  },
+  "dependencies": {}
+}

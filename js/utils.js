@@ -133,42 +133,90 @@ function showToast(message, type = 'info') {
 function exportToExcel(responses, userInfo) {
     const data = [];
 
-    // Header row
+    // Header Metadata
     data.push(['แบบสำรวจสุขภาวะบุคลากร', '']);
     data.push(['วันที่ทำแบบสำรวจ', new Date().toLocaleString('th-TH')]);
-    if (userInfo?.name) data.push(['ผู้ตอบ', userInfo.name]);
+    if (userInfo?.name || userInfo?.email) data.push(['ผู้ตอบ', userInfo.name || userInfo.email]);
     data.push(['', '']);
 
-    // Add all responses
+    // Map Question IDs to Thai Text if available
+    const headerMap = {
+        'timestamp': 'วัน-เวลาที่บันทึก',
+        'name': 'ชื่อ-สกุล',
+        'gender': 'เพศ',
+        'age': 'อายุ',
+        'height': 'ส่วนสูง',
+        'weight': 'น้ำหนัก',
+        'waist': 'รอบเอว',
+        'bmi': 'BMI',
+        'tmhi_score': 'คะแนนสุขภาพจิต'
+    };
+
+    if (typeof SURVEY_DATA !== 'undefined') {
+        Object.values(SURVEY_DATA).forEach(section => {
+            if (section.subsections) {
+                section.subsections.forEach(sub => {
+                    if (sub.questions) {
+                        sub.questions.forEach(q => {
+                            headerMap[q.id] = q.text;
+                        });
+                    }
+                });
+            }
+        });
+    }
+
+    // Add Responses with Thai Headers
+    // Prioritize system fields order if desired, or just list all keys
+    // For single user export, typically we list "Question | Answer"
+    data.push(['คำถาม', 'คำตอบ']); // Column Headers
+
+    // 1. Personal & Physical (explicit check or just iterate)
     Object.entries(responses).forEach(([key, value]) => {
+        const thaiHeader = headerMap[key] || key;
+        let displayValue = value;
         if (Array.isArray(value)) {
-            data.push([key, value.join(', ')]);
-        } else {
-            data.push([key, value]);
+            displayValue = value.join(', ');
         }
+        data.push([thaiHeader, displayValue]);
     });
 
-    // Add calculated scores
+    // 2. Calculated Scores
     const height = parseFloat(responses.height);
     const weight = parseFloat(responses.weight);
     if (height && weight) {
         const bmi = calculateBMI(height, weight);
         const bmiInfo = getBMICategory(bmi);
         data.push(['', '']);
+        data.push(['--- ผลการประเมิน ---', '']);
         data.push(['BMI', bmi]);
         data.push(['ระดับ BMI', bmiInfo?.category || '-']);
     }
 
-    const depressionScore = calculateDepressionScore(responses);
-    const depressionLevel = getDepressionLevel(depressionScore);
-    data.push(['', '']);
-    data.push(['คะแนนซึมเศร้า', depressionScore]);
-    data.push(['ระดับ', depressionLevel.level]);
+    // Fix: Use TMHI instead of Depression
+    const tmhiScore = calculateTMHIScore(responses);
+    const tmhiLevel = getTMHILevel(tmhiScore);
+
+    // Only show if score > 0 (meaning section done)
+    if (tmhiScore > 0) {
+        data.push(['', '']);
+        data.push(['คะแนนสุขภาพจิต (TMHI-15)', tmhiScore]);
+        data.push(['ระดับ', tmhiLevel.level]);
+        data.push(['คำแนะนำ', tmhiLevel.level.includes('ต่ำกว่า') ? 'ควรปรึกษาผู้เชี่ยวชาญ' : 'รักษาระดับสุขภาพจิตให้ดีต่อไป']);
+    }
 
     // Create workbook
     const ws = XLSX.utils.aoa_to_sheet(data);
+
+    // Auto-width for better readability
+    const wscols = [
+        { wch: 50 }, // Question width
+        { wch: 30 }  // Answer width
+    ];
+    ws['!cols'] = wscols;
+
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'แบบสำรวจ');
+    XLSX.utils.book_append_sheet(wb, ws, 'ผลการสำรวจ');
 
     // Download
     const filename = `wellbeing_survey_${new Date().toISOString().slice(0, 10)}.xlsx`;
