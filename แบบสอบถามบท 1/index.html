@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>แบบสอบถาม HRD บท 1</title>
+    <meta name="description" content="แบบสอบถามข้อมูลสถานการณ์ภายในองค์กร สำหรับจัดทำแผน HRD ระดับประเทศ" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap');
+
+        body {
+            font-family: 'Sarabun', sans-serif;
+        }
+
+        .step {
+            display: none;
+        }
+
+        .step.active {
+            display: block;
+            animation: fadeUp .35s ease;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        .pill-btn {
+            transition: all 0.2s;
+        }
+
+        .pill-btn.selected {
+            background-color: #1d4ed8;
+            color: white;
+            border-color: #1d4ed8;
+        }
+
+        .pill-btn.selected .sub-text {
+            color: rgba(255, 255, 255, .7);
+        }
+
+        .progress-bar {
+            transition: width 0.4s ease;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: #1d4ed8;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(37, 99, 235, .3);
+        }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            height: 6px;
+            border-radius: 4px;
+            background: #e2e8f0;
+            outline: none;
+        }
+
+        .shake {
+            animation: shake .4s ease;
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0)
+            }
+
+            25% {
+                transform: translateX(-6px)
+            }
+
+            75% {
+                transform: translateX(6px)
+            }
+        }
+
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, .3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin .6s linear infinite;
+            display: inline-block;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg)
+            }
+        }
+
+        .field-error {
+            border-color: #ef4444 !important;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, .15) !important;
+        }
+    </style>
+</head>
+
+<body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen p-4">
+
+    <!-- ============ SUPABASE CONFIG ============ -->
+    <script>
+        const SUPABASE_URL = 'https://YOUR_PROJECT_ID.supabase.co';
+        const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY_HERE';
+    </script>
+
+    <div class="max-w-2xl mx-auto">
+        <!-- Header -->
+        <div class="bg-white rounded-2xl shadow-lg p-6 mb-4">
+            <div class="flex items-center gap-3 mb-2">
+                <div
+                    class="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-md">
+                    H</div>
+                <div>
+                    <h1 class="text-lg font-bold text-gray-800">แบบสอบถาม HRD</h1>
+                    <p class="text-sm text-gray-500">บท 1: ข้อมูลสถานการณ์ภายในองค์กร</p>
+                </div>
+            </div>
+            <div class="mt-3">
+                <div class="flex justify-between text-xs text-gray-400 mb-1">
+                    <span id="step-label">ขั้นตอน 1 จาก 5: เลือกองค์กร</span>
+                    <span id="pct-label">20%</span>
+                </div>
+                <div class="w-full bg-gray-100 rounded-full h-2">
+                    <div id="progress-bar"
+                        class="progress-bar bg-gradient-to-r from-blue-500 to-blue-700 h-2 rounded-full"
+                        style="width:20%"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 0: เลือกองค์กร -->
+        <div class="step active bg-white rounded-2xl shadow-lg p-6 mb-4" id="step-0">
+            <div class="flex items-center gap-2 mb-4">
+                <span class="bg-blue-100 text-blue-700 text-xs font-semibold px-2.5 py-1 rounded-full">เริ่มต้น</span>
+                <h2 class="text-base font-bold text-gray-700">องค์กร/หน่วยงานของท่าน</h2>
+            </div>
+            <p class="text-sm text-gray-500 mb-3">กรุณาเลือกหน่วยงานที่ท่านสังกัด</p>
+            <select id="org-select"
+                class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-300 transition">
+                <option value="">-- เลือกหน่วยงาน --</option>
+                <option>กรมกิจการเด็กและเยาวชน</option>
+                <option>กรมคุมประพฤติ</option>
+                <option>กรมชลประทาน</option>
+                <option>กรมทางหลวง</option>
+                <option>กรมวิทยาศาสตร์บริการ</option>
+                <option>กรมส่งเสริมวัฒนธรรม</option>
+                <option>กรมสุขภาพจิต</option>
+                <option>กรมอุตุนิยมวิทยา</option>
+                <option>สำนักงานมาตรฐานสินค้าเกษตรและอาหารแห่งชาติ</option>
+                <option>สำนักงานคณะกรรมการพัฒนาระบบราชการ</option>
+                <option>สำนักงานนโยบายและแผนทรัพยากรธรรมชาติและสิ่งแวดล้อม</option>
+                <option>สำนักงานนโยบายและยุทธศาสตร์การค้า</option>
+                <option>สำนักงานปลัดกระทรวงการท่องเที่ยวและกีฬา</option>
+                <option>สำนักงานการวิจัยแห่งชาติ</option>
+                <option>สำนักงานสภาพัฒนาการเศรษฐกิจและสังคมแห่งชาติ</option>
+            </select>
+            <div id="org-error" class="text-red-500 text-xs mt-2" style="display:none">⚠️ กรุณาเลือกหน่วยงาน</div>
+        </div>
+
+        <!-- STEP 1: ข้อมูลบุคลากร -->
+        <div class="step bg-white rounded-2xl shadow-lg p-6 mb-4" id="step-1">
+            <div class="flex items-center gap-2 mb-4">
+                <span class="bg-indigo-100 text-indigo-700 text-xs font-semibold px-2.5 py-1 rounded-full">ข้อ 1</span>
+                <h2 class="text-base font-bold text-gray-700">ข้อมูลพื้นฐานบุคลากร</h2>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="text-sm font-semibold text-gray-600 block mb-1">จำนวนบุคลากรทั้งหมด <span
+                            class="text-red-400">*</span></label>
+                    <input type="number" id="total-staff" min="1" placeholder="ตัวอย่าง: 350"
+                        class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 transition" />
+                    <div id="staff-error" class="text-red-500 text-xs mt-1" style="display:none"></div>
+                </div>
+                <div>
+                    <label class="text-sm font-semibold text-gray-600 block mb-2">จำนวนบุคลากรแต่ละช่วงอายุ <span
+                            class="text-gray-400 font-normal">(กรอกเท่าที่มีข้อมูล)</span></label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="bg-gray-50 rounded-xl p-3">
+                            <p class="text-xs text-gray-400 mb-1">ต่ำกว่า 30 ปี</p><input type="number" id="age-u30"
+                                min="0" placeholder="จำนวน (คน)"
+                                class="w-full bg-transparent border-b border-gray-200 text-sm py-1 focus:outline-none focus:border-blue-400 transition" />
+                        </div>
+                        <div class="bg-gray-50 rounded-xl p-3">
+                            <p class="text-xs text-gray-400 mb-1">30 – 39 ปี</p><input type="number" id="age-30" min="0"
+                                placeholder="จำนวน (คน)"
+                                class="w-full bg-transparent border-b border-gray-200 text-sm py-1 focus:outline-none focus:border-blue-400 transition" />
+                        </div>
+                        <div class="bg-gray-50 rounded-xl p-3">
+                            <p class="text-xs text-gray-400 mb-1">40 – 49 ปี</p><input type="number" id="age-40" min="0"
+                                placeholder="จำนวน (คน)"
+                                class="w-full bg-transparent border-b border-gray-200 text-sm py-1 focus:outline-none focus:border-blue-400 transition" />
+                        </div>
+                        <div class="bg-gray-50 rounded-xl p-3">
+                            <p class="text-xs text-gray-400 mb-1">50 ปีขึ้นไป</p><input type="number" id="age-50"
+                                min="0" placeholder="จำนวน (คน)"
+                                class="w-full bg-transparent border-b border-gray-200 text-sm py-1 focus:outline-none focus:border-blue-400 transition" />
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <label class="text-sm font-semibold text-gray-600 block mb-1">จำนวนบุคลากรที่ป่วยเป็นโรค NCD</label>
+                    <input type="number" id="ncd-count" min="0" placeholder="ตัวอย่าง: 45"
+                        class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 transition" />
+                    <p class="text-xs text-gray-400 mt-1">เบาหวาน / ความดัน / หัวใจ / ไขมัน ฯลฯ</p>
+                    <div id="ncd-error" class="text-red-500 text-xs mt-1" style="display:none"></div>
+                </div>
+                <div>
+                    <label class="text-sm font-semibold text-gray-600 block mb-2">มีข้อมูลค่าเบิกจ่ายรักษาพยาบาลย้อนหลัง
+                        5 ปีหรือไม่?</label>
+                    <div class="flex gap-3">
+                        <button onclick="toggleMed(this,'yes')"
+                            class="pill-btn flex-1 border-2 border-gray-200 rounded-xl py-2 text-sm text-gray-600"
+                            id="med-yes">✅ มีข้อมูล</button>
+                        <button onclick="toggleMed(this,'no')"
+                            class="pill-btn flex-1 border-2 border-gray-200 rounded-xl py-2 text-sm text-gray-600"
+                            id="med-no">❌ ไม่มี</button>
+                    </div>
+                </div>
+                <div id="med-detail" style="display:none" class="bg-blue-50 rounded-xl p-4">
+                    <p class="text-sm font-semibold text-blue-700 mb-3">ค่าเบิกจ่ายรวม (บาท) แต่ละปี</p>
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-3"><span class="text-xs text-gray-500 w-12">2563</span><input
+                                type="number" id="med-2563" min="0" placeholder="บาท"
+                                class="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
+                        </div>
+                        <div class="flex items-center gap-3"><span class="text-xs text-gray-500 w-12">2564</span><input
+                                type="number" id="med-2564" min="0" placeholder="บาท"
+                                class="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
+                        </div>
+                        <div class="flex items-center gap-3"><span class="text-xs text-gray-500 w-12">2565</span><input
+                                type="number" id="med-2565" min="0" placeholder="บาท"
+                                class="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
+                        </div>
+                        <div class="flex items-center gap-3"><span class="text-xs text-gray-500 w-12">2566</span><input
+                                type="number" id="med-2566" min="0" placeholder="บาท"
+                                class="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
+                        </div>
+                        <div class="flex items-center gap-3"><span class="text-xs text-gray-500 w-12">2567</span><input
+                                type="number" id="med-2567" min="0" placeholder="บาท"
+                                class="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 2: Synopsis -->
+        <div class="step bg-white rounded-2xl shadow-lg p-6 mb-4" id="step-2">
+            <div class="flex items-center gap-2 mb-4">
+                <span class="bg-yellow-100 text-yellow-700 text-xs font-semibold px-2.5 py-1 rounded-full">ข้อ 2</span>
+                <h2 class="text-base font-bold text-gray-700">ปัญหาสุขภาพในองค์กร (Synopsis)</h2>
+            </div>
+            <p class="text-sm text-gray-500 mb-4">เลือกปัญหาที่คิดว่าสำคัญที่สุดในองค์กรของท่าน <span
+                    class="text-gray-400">(เลือกได้หลายข้อ, อย่างน้อย 1 ข้อ)</span></p>
+            <div class="grid grid-cols-2 gap-2 mb-2" id="health-issues">
+                <button onclick="toggleIssue(this)"
+                    class="pill-btn border-2 border-gray-200 rounded-xl py-3 px-2 text-sm text-gray-600 text-left"
+                    data-val="NCD (เบาหวาน/ความดัน/ไขมัน)">🩺 NCD<br><span
+                        class="sub-text text-xs text-gray-400">เบาหวาน/ความดัน/ไขมัน</span></button>
+                <button onclick="toggleIssue(this)"
+                    class="pill-btn border-2 border-gray-200 rounded-xl py-3 px-2 text-sm text-gray-600 text-left"
+                    data-val="โรคซึมเศร้า/ความเครียด/Burnout">🧠 สุขภาพจิต<br><span
+                        class="sub-text text-xs text-gray-400">ซึมเศร้า/เครียด/Burnout</span></button>
+                <button onclick="toggleIssue(this)"
+                    class="pill-btn border-2 border-gray-200 rounded-xl py-3 px-2 text-sm text-gray-600 text-left"
+                    data-val="โรคอ้วน/น้ำหนักเกิน">⚖️ น้ำหนัก<br><span
+                        class="sub-text text-xs text-gray-400">โรคอ้วน/น้ำหนักเกิน</span></button>
+                <button onclick="toggleIssue(this)"
+                    class="pill-btn border-2 border-gray-200 rounded-xl py-3 px-2 text-sm text-gray-600 text-left"
+                    data-val="ปัญหาการนอนหลับ">😴 การนอนหลับ<br><span
+                        class="sub-text text-xs text-gray-400">นอนไม่หลับ/พักผ่อนน้อย</span></button>
+                <button onclick="toggleIssue(this)"
+                    class="pill-btn border-2 border-gray-200 rounded-xl py-3 px-2 text-sm text-gray-600 text-left"
+                    data-val="ออฟฟิศซินโดรม/กล้ามเนื้อกระดูก">🦴 ออฟฟิศซินโดรม<br><span
+                        class="sub-text text-xs text-gray-400">กล้ามเนื้อ/กระดูก</span></button>
+                <button onclick="toggleIssue(this)"
+                    class="pill-btn border-2 border-gray-200 rounded-xl py-3 px-2 text-sm text-gray-600 text-left"
+                    data-val="แอลกอฮอล์/บุหรี่">🚬 แอลกอฮอล์/บุหรี่<br><span
+                        class="sub-text text-xs text-gray-400">การสูบ/การดื่ม</span></button>
+            </div>
+            <div id="issues-error" class="text-red-500 text-xs mb-3" style="display:none">⚠️
+                กรุณาเลือกปัญหาสุขภาพอย่างน้อย 1 ข้อ</div>
+            <div>
+                <label class="text-sm font-semibold text-gray-600 block mb-1">ปัญหาอื่นๆ (ถ้ามี)</label>
+                <input type="text" id="issue-other" placeholder="ระบุเพิ่มเติม..."
+                    class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-300 transition" />
+            </div>
+            <div class="mt-4">
+                <label class="text-sm font-semibold text-gray-600 block mb-2">ระดับความรุนแรงของปัญหาโดยรวม</label>
+                <div class="flex items-center gap-3">
+                    <span class="text-xs text-gray-400">น้อย</span>
+                    <input type="range" id="severity" min="1" max="5" value="3" class="flex-1"
+                        oninput="document.getElementById('sev-val').textContent=this.value" />
+                    <span class="text-xs text-gray-400">มาก</span>
+                    <span class="bg-blue-100 text-blue-700 font-bold text-sm px-2.5 py-1 rounded-lg"
+                        id="sev-val">3</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 3: National Strategies -->
+        <div class="step bg-white rounded-2xl shadow-lg p-6 mb-4" id="step-3">
+            <div class="flex items-center gap-2 mb-4">
+                <span class="bg-green-100 text-green-700 text-xs font-semibold px-2.5 py-1 rounded-full">ข้อ 3</span>
+                <h2 class="text-base font-bold text-gray-700">ความเชื่อมโยงกับแผนระดับประเทศ</h2>
+            </div>
+            <p class="text-sm text-gray-500 mb-4">ติ๊กแผนที่เกี่ยวข้องกับปัญหาสุขภาพที่ระบุไว้ <span
+                    class="text-gray-400">(อย่างน้อย 1 ข้อ)</span></p>
+            <div class="space-y-2 mb-2" id="national-plans">
+                <label
+                    class="flex items-center gap-3 bg-gray-50 rounded-xl px-4 py-3 cursor-pointer hover:bg-green-50 transition"><input
+                        type="checkbox" class="plan-check w-4 h-4 accent-green-600" value="ยุทธศาสตร์ชาติ 20 ปี" />
+                    <div>
+                        <p class="text-sm font-medium text-gray-700">ยุทธศาสตร์ชาติ 20 ปี</p>
+                    </div>
+                </label>
+                <label
+                    class="flex items-center gap-3 bg-gray-50 rounded-xl px-4 py-3 cursor-pointer hover:bg-green-50 transition"><input
+                        type="checkbox" class="plan-check w-4 h-4 accent-green-600"
+                        value="แผนพัฒนาเศรษฐกิจและสังคมแห่งชาติ ฉบับที่ 13" />
+                    <div>
+                        <p class="text-sm font-medium text-gray-700">แผนพัฒนาเศรษฐกิจและสังคมแห่งชาติ ฉบับที่ 13</p>
+                        <p class="text-xs text-gray-400">สภาพัฒน์</p>
+                    </div>
+                </label>
+                <label
+                    class="flex items-center gap-3 bg-gray-50 rounded-xl px-4 py-3 cursor-pointer hover:bg-green-50 transition"><input
+                        type="checkbox" class="plan-check w-4 h-4 accent-green-600"
+                        value="แผนแม่บทของกระทรวงที่สังกัด" />
+                    <div>
+                        <p class="text-sm font-medium text-gray-700">แผนแม่บทของกระทรวงที่สังกัด</p>
+                    </div>
+                </label>
+                <label
+                    class="flex items-center gap-3 bg-gray-50 rounded-xl px-4 py-3 cursor-pointer hover:bg-green-50 transition"><input
+                        type="checkbox" class="plan-check w-4 h-4 accent-green-600" value="แผน HRD ของหน่วยงาน" />
+                    <div>
+                        <p class="text-sm font-medium text-gray-700">แผน HRD ของหน่วยงาน</p>
+                    </div>
+                </label>
+                <label
+                    class="flex items-center gap-3 bg-gray-50 rounded-xl px-4 py-3 cursor-pointer hover:bg-green-50 transition"><input
+                        type="checkbox" class="plan-check w-4 h-4 accent-green-600" value="ไม่แน่ใจ/ไม่ทราบ" />
+                    <div>
+                        <p class="text-sm font-medium text-gray-700">ไม่แน่ใจ / ไม่ทราบ</p>
+                    </div>
+                </label>
+            </div>
+            <div id="plans-error" class="text-red-500 text-xs mb-3" style="display:none">⚠️ กรุณาเลือกแผนอย่างน้อย 1 ข้อ
+            </div>
+            <div>
+                <label class="text-sm font-semibold text-gray-600 block mb-2">หน่วยงานมีแผน HRD หรือไม่?</label>
+                <div class="flex gap-2">
+                    <button onclick="toggleHRD(this,'yes')"
+                        class="pill-btn flex-1 border-2 border-gray-200 rounded-xl py-2 text-sm text-gray-600">✅
+                        มี</button>
+                    <button onclick="toggleHRD(this,'inprogress')"
+                        class="pill-btn flex-1 border-2 border-gray-200 rounded-xl py-2 text-sm text-gray-600">🔄
+                        กำลังจัดทำ</button>
+                    <button onclick="toggleHRD(this,'no')"
+                        class="pill-btn flex-1 border-2 border-gray-200 rounded-xl py-2 text-sm text-gray-600">❌
+                        ไม่มี</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 4: Summary -->
+        <div class="step bg-white rounded-2xl shadow-lg p-6 mb-4" id="step-4">
+            <div class="flex items-center gap-2 mb-4">
+                <span class="bg-purple-100 text-purple-700 text-xs font-semibold px-2.5 py-1 rounded-full">สรุป</span>
+                <h2 class="text-base font-bold text-gray-700">ตรวจสอบข้อมูลก่อนส่ง</h2>
+            </div>
+            <div id="summary-box" class="bg-gray-50 rounded-xl p-4 text-sm text-gray-600 space-y-3"></div>
+            <div class="mt-4 bg-blue-50 rounded-xl p-3">
+                <p class="text-xs text-blue-600">📌 ข้อมูลของท่านจะถูกนำไปวิเคราะห์รวมกับข้อมูลจากทุกหน่วยงาน
+                    เพื่อจัดทำแผน HRD ระดับประเทศ</p>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="flex gap-3" id="nav-buttons">
+            <button id="btn-prev" onclick="navigate(-1)"
+                class="flex-1 bg-gray-100 text-gray-600 rounded-xl py-3 font-semibold text-sm hover:bg-gray-200 transition"
+                style="display:none">← ย้อนกลับ</button>
+            <button id="btn-next" onclick="navigate(1)"
+                class="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl py-3 font-semibold text-sm shadow-md hover:shadow-lg transition transform hover:-translate-y-0.5">ถัดไป
+                →</button>
+            <button id="btn-submit" onclick="submitForm()"
+                class="flex-1 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl py-3 font-semibold text-sm shadow-md hover:shadow-lg transition transform hover:-translate-y-0.5"
+                style="display:none">✅ ส่งแบบสอบถาม</button>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loading-msg" style="display:none" class="bg-white rounded-2xl shadow-lg p-8 text-center mt-4">
+            <div class="spinner mx-auto mb-4"
+                style="border-color:rgba(37,99,235,.2);border-top-color:#2563eb;width:36px;height:36px;border-width:4px">
+            </div>
+            <h2 class="text-lg font-bold text-blue-600 mb-1">กำลังบันทึกข้อมูล...</h2>
+            <p class="text-sm text-gray-500">กรุณารอสักครู่</p>
+        </div>
+
+        <!-- Success -->
+        <div id="success-msg" style="display:none" class="bg-white rounded-2xl shadow-lg p-8 text-center mt-4">
+            <div class="text-5xl mb-3">🎉</div>
+            <h2 class="text-lg font-bold text-green-600 mb-2">ส่งข้อมูลสำเร็จแล้ว!</h2>
+            <p class="text-sm text-gray-500 mb-1">ขอบคุณสำหรับข้อมูล ทีมงานจะนำไปวิเคราะห์ในขั้นตอนต่อไป</p>
+            <p class="text-xs text-gray-400 mb-4" id="response-id"></p>
+            <div id="json-output"
+                class="bg-gray-50 rounded-xl p-4 text-left text-xs text-gray-600 overflow-auto max-h-60 font-mono">
+            </div>
+        </div>
+
+        <!-- Error -->
+        <div id="error-msg" style="display:none" class="bg-white rounded-2xl shadow-lg p-8 text-center mt-4">
+            <div class="text-5xl mb-3">❌</div>
+            <h2 class="text-lg font-bold text-red-600 mb-2">เกิดข้อผิดพลาด</h2>
+            <p class="text-sm text-gray-500 mb-4" id="error-detail"></p>
+            <button onclick="retrySubmit()"
+                class="bg-blue-600 text-white rounded-xl px-6 py-3 text-sm font-semibold hover:bg-blue-700 transition">🔄
+                ลองใหม่อีกครั้ง</button>
+        </div>
+    </div>
+
+    <script>
+        // ============ STATE ============
+        let currentStep = 0;
+        const totalSteps = 5;
+        const steps = ['step-0', 'step-1', 'step-2', 'step-3', 'step-4'];
+        const stepLabels = ['เลือกองค์กร', 'ข้อมูลบุคลากร', 'ปัญหาสุขภาพ', 'แผนระดับชาติ', 'ตรวจสอบ'];
+        let medStatus = '';
+        let hrdStatus = '';
+        let selectedIssues = [];
+        let lastPayload = null;
+        let retryCount = 0;
+        const MAX_RETRY = 3;
+
+        // ============ NAVIGATION ============
+        function showStep(n) {
+            steps.forEach((id, i) => document.getElementById(id).classList.toggle('active', i === n));
+            const pct = Math.round(((n + 1) / totalSteps) * 100);
+            document.getElementById('progress-bar').style.width = pct + '%';
+            document.getElementById('step-label').textContent = `ขั้นตอน ${n + 1} จาก ${totalSteps}: ${stepLabels[n]}`;
+            document.getElementById('pct-label').textContent = pct + '%';
+            document.getElementById('btn-prev').style.display = n > 0 ? 'block' : 'none';
+            document.getElementById('btn-next').style.display = n < totalSteps - 1 ? 'block' : 'none';
+            document.getElementById('btn-submit').style.display = n === totalSteps - 1 ? 'block' : 'none';
+            if (n === totalSteps - 1) buildSummary();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function navigate(dir) {
+            if (dir === 1 && !validateStep()) return;
+            currentStep = Math.max(0, Math.min(totalSteps - 1, currentStep + dir));
+            showStep(currentStep);
+        }
+
+        // ============ VALIDATION ============
+        function clearErrors() {
+            document.querySelectorAll('.field-error').forEach(el => el.classList.remove('field-error'));
+            ['org-error', 'staff-error', 'ncd-error', 'issues-error', 'plans-error'].forEach(id => {
+                document.getElementById(id).style.display = 'none';
+            });
+        }
+
+        function showFieldError(inputId, errorId, msg) {
+            const input = document.getElementById(inputId);
+            const err = document.getElementById(errorId);
+            if (input) { input.classList.add('field-error'); input.closest('.step')?.classList.add('shake'); setTimeout(() => input.closest('.step')?.classList.remove('shake'), 400); }
+            if (err) { err.textContent = '⚠️ ' + msg; err.style.display = 'block'; }
+            return false;
+        }
+
+        function validateStep() {
+            clearErrors();
+            if (currentStep === 0) {
+                if (!document.getElementById('org-select').value) {
+                    document.getElementById('org-error').style.display = 'block';
+                    document.getElementById('org-select').classList.add('field-error');
+                    return false;
+                }
+            }
+            if (currentStep === 1) {
+                const total = document.getElementById('total-staff').value;
+                if (!total || Number(total) <= 0) return showFieldError('total-staff', 'staff-error', 'กรุณากรอกจำนวนบุคลากรทั้งหมด (ต้องมากกว่า 0)');
+                const ncd = document.getElementById('ncd-count').value;
+                if (ncd && Number(ncd) > Number(total)) return showFieldError('ncd-count', 'ncd-error', 'จำนวน NCD ต้องไม่เกินจำนวนบุคลากรทั้งหมด');
+            }
+            if (currentStep === 2) {
+                const other = document.getElementById('issue-other').value.trim();
+                if (selectedIssues.length === 0 && !other) {
+                    document.getElementById('issues-error').style.display = 'block';
+                    return false;
+                }
+            }
+            if (currentStep === 3) {
+                const plans = [...document.querySelectorAll('.plan-check:checked')];
+                if (plans.length === 0) {
+                    document.getElementById('plans-error').style.display = 'block';
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        // ============ TOGGLES ============
+        function toggleMed(btn, val) {
+            medStatus = val;
+            document.getElementById('med-yes').classList.toggle('selected', val === 'yes');
+            document.getElementById('med-no').classList.toggle('selected', val === 'no');
+            document.getElementById('med-detail').style.display = val === 'yes' ? 'block' : 'none';
+        }
+        function toggleIssue(btn) {
+            btn.classList.toggle('selected');
+            const v = btn.dataset.val;
+            if (btn.classList.contains('selected')) { if (!selectedIssues.includes(v)) selectedIssues.push(v); }
+            else { selectedIssues = selectedIssues.filter(x => x !== v); }
+            document.getElementById('issues-error').style.display = 'none';
+        }
+        function toggleHRD(btn, val) {
+            hrdStatus = val;
+            document.querySelectorAll('#step-3 .pill-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+        }
+
+        // ============ SUMMARY ============
+        function buildSummary() {
+            const org = document.getElementById('org-select').value;
+            const total = document.getElementById('total-staff').value;
+            const ncd = document.getElementById('ncd-count').value || '-';
+            const sev = document.getElementById('severity').value;
+            const other = document.getElementById('issue-other').value;
+            const plans = [...document.querySelectorAll('.plan-check:checked')].map(x => x.value);
+            const allIssues = [...selectedIssues, ...(other ? [other] : [])];
+
+            const medData = medStatus === 'yes' ? ['2563', '2564', '2565', '2566', '2567'].map(y => {
+                const v = document.getElementById('med-' + y)?.value;
+                return v ? `${y}: ${Number(v).toLocaleString()} บาท` : null;
+            }).filter(Boolean).join(', ') : (medStatus === 'no' ? 'ไม่มีข้อมูล' : '-');
+
+            document.getElementById('summary-box').innerHTML = `
+      <div class="border-b pb-2"><p class="font-semibold text-gray-700 text-xs uppercase tracking-wide mb-1">🏢 หน่วยงาน</p><p>${org}</p></div>
+      <div class="border-b pb-2"><p class="font-semibold text-gray-700 text-xs uppercase tracking-wide mb-1">👥 ข้อมูลบุคลากร</p>
+        <p>จำนวนรวม: <strong>${total} คน</strong></p>
+        <p>ผู้ป่วย NCD: <strong>${ncd} คน</strong>${ncd !== '-' && total ? ' (' + ((Number(ncd) / Number(total)) * 100).toFixed(1) + '%)' : ''}</p>
+        <p>ค่ารักษา 5 ปี: ${medData}</p></div>
+      <div class="border-b pb-2"><p class="font-semibold text-gray-700 text-xs uppercase tracking-wide mb-1">🩺 ปัญหาสุขภาพ</p>
+        <p>${allIssues.length > 0 ? allIssues.join(', ') : '-'}</p>
+        <p>ระดับความรุนแรง: <strong>${sev}/5</strong></p></div>
+      <div><p class="font-semibold text-gray-700 text-xs uppercase tracking-wide mb-1">📋 แผนระดับชาติ</p>
+        <p>${plans.length > 0 ? plans.join(', ') : '-'}</p>
+        <p>แผน HRD: <strong>${hrdStatus === 'yes' ? 'มี' : hrdStatus === 'inprogress' ? 'กำลังจัดทำ' : hrdStatus === 'no' ? 'ไม่มี' : '-'}</strong></p></div>`;
+        }
+
+        // ============ DATA HELPERS ============
+        function getAgeData() { return { "ต่ำกว่า 30 ปี": document.getElementById('age-u30').value || null, "30-39 ปี": document.getElementById('age-30').value || null, "40-49 ปี": document.getElementById('age-40').value || null, "50 ปีขึ้นไป": document.getElementById('age-50').value || null }; }
+        function getMedData() { if (medStatus !== 'yes') return null; return Object.fromEntries(['2563', '2564', '2565', '2566', '2567'].map(y => [y, document.getElementById('med-' + y)?.value || null])); }
+        function toIntOrNull(v) { return v ? parseInt(v, 10) : null; }
+        function toBigIntOrNull(v) { return v ? parseInt(v, 10) : null; }
+
+        function buildPayload() {
+            const other = document.getElementById('issue-other').value.trim();
+            const allIssues = [...selectedIssues, ...(other ? [other] : [])];
+            const plans = [...document.querySelectorAll('.plan-check:checked')].map(x => x.value);
+            const totalStaff = Number(document.getElementById('total-staff').value);
+            const ncdVal = document.getElementById('ncd-count').value ? Number(document.getElementById('ncd-count').value) : null;
+            const sevScore = Number(document.getElementById('severity').value);
+            const sevLabels = ["", "น้อยมาก", "น้อย", "ปานกลาง", "มาก", "มากที่สุด"];
+
+            return {
+                organization: document.getElementById('org-select').value,
+                total_staff: totalStaff,
+                age_u30: toIntOrNull(document.getElementById('age-u30').value),
+                age_30_39: toIntOrNull(document.getElementById('age-30').value),
+                age_40_49: toIntOrNull(document.getElementById('age-40').value),
+                age_50_plus: toIntOrNull(document.getElementById('age-50').value),
+                ncd_count: ncdVal,
+                ncd_ratio_pct: ncdVal !== null && totalStaff ? parseFloat(((ncdVal / totalStaff) * 100).toFixed(2)) : null,
+                med_expense_available: medStatus || null,
+                med_expense_2563: toBigIntOrNull(document.getElementById('med-2563')?.value),
+                med_expense_2564: toBigIntOrNull(document.getElementById('med-2564')?.value),
+                med_expense_2565: toBigIntOrNull(document.getElementById('med-2565')?.value),
+                med_expense_2566: toBigIntOrNull(document.getElementById('med-2566')?.value),
+                med_expense_2567: toBigIntOrNull(document.getElementById('med-2567')?.value),
+                health_issues: allIssues,
+                health_issues_other: other || null,
+                severity_score: sevScore,
+                severity_label: sevLabels[sevScore],
+                linked_plans: plans,
+                hrd_plan_status: hrdStatus || null,
+                raw_payload: {
+                    metadata: { submitted_at: new Date().toISOString(), form_version: "1.0", chapter: "บท 1" },
+                    organization: document.getElementById('org-select').value,
+                    section_1: { total_staff: totalStaff, age_distribution: getAgeData(), ncd_count: ncdVal, medical_expense: getMedData() },
+                    section_2: { health_issues: allIssues, severity_score: sevScore, severity_label: sevLabels[sevScore] },
+                    section_3: { linked_plans: plans, hrd_plan_status: hrdStatus }
+                }
+            };
+        }
+
+        // ============ SUPABASE SUBMIT ============
+        function showUI(state) {
+            ['step-4', 'nav-buttons', 'loading-msg', 'success-msg', 'error-msg'].forEach(id => {
+                document.getElementById(id).style.display = 'none';
+            });
+            if (state === 'loading') document.getElementById('loading-msg').style.display = 'block';
+            else if (state === 'success') document.getElementById('success-msg').style.display = 'block';
+            else if (state === 'error') document.getElementById('error-msg').style.display = 'block';
+            else if (state === 'form') {
+                document.getElementById('step-4').style.display = 'block';
+                document.getElementById('step-4').classList.add('active');
+                document.getElementById('nav-buttons').style.display = 'flex';
+            }
+        }
+
+        async function submitToSupabase(payload) {
+            const res = await fetch(`${SUPABASE_URL}/rest/v1/survey_responses`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                    'Prefer': 'return=representation'
+                },
+                body: JSON.stringify(payload)
+            });
+            if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.message || `HTTP ${res.status}`); }
+            return await res.json();
+        }
+
+        async function submitForm() {
+            lastPayload = buildPayload();
+            retryCount = 0;
+            await doSubmit();
+        }
+
+        async function doSubmit() {
+            showUI('loading');
+            try {
+                const result = await submitToSupabase(lastPayload);
+                // Audit log (fire-and-forget)
+                if (result && result[0]?.id) {
+                    fetch(`${SUPABASE_URL}/rest/v1/survey_audit_log`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }, body: JSON.stringify({ response_id: result[0].id, event: 'submitted', detail: { organization: lastPayload.organization } }) }).catch(() => { });
+                }
+                showUI('success');
+                const rid = result && result[0]?.id ? result[0].id : '';
+                document.getElementById('response-id').textContent = rid ? `Response ID: ${rid}` : '';
+                document.getElementById('json-output').textContent = JSON.stringify(lastPayload.raw_payload, null, 2);
+            } catch (err) {
+                retryCount++;
+                if (retryCount < MAX_RETRY) {
+                    await new Promise(r => setTimeout(r, 2000));
+                    return doSubmit();
+                }
+                showUI('error');
+                document.getElementById('error-detail').textContent = err.message || 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่';
+            }
+        }
+
+        function retrySubmit() { retryCount = 0; doSubmit(); }
+
+        // ============ INIT ============
+        showStep(0);
+    </script>
+</body>
+
+</html>
