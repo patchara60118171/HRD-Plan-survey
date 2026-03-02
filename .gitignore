@@ -1,5 +1,18 @@
 # Ignore
 .DS_Store
+Thumbs.db
 *.log
+npm-debug.log*
 node_modules/
 .vercel
+
+# Test files
+test-*.js
+qa-*.js
+*.test.js
+*.spec.js
+debug-*.js
+screenshots/
+test-results/
+playwright-report/
+playwright.config.*
