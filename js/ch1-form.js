@@ -385,7 +385,7 @@ function confirmEmailAndStart() {
     // Clear error
     errEl.textContent = '';
 
-    // Validate
+    // ── Validate ───────────────────────────────────
     if (!email) {
         errEl.textContent = 'กรุณากรอกอีเมลของท่าน';
         input.focus();
@@ -397,27 +397,31 @@ function confirmEmailAndStart() {
         return;
     }
 
-    // Valid
+    // ── Valid ───────────────────────────────────
     respondentEmail = email;
     btn.disabled = true;
     btn.textContent = 'กำลังดำเนินการ...';
 
-    // Save to draft
+    // ① บันทึกร่าง (silent — ไม่ block flow หลัก ถ้า fail ก็ข้ามไป)
     try {
         const draft = JSON.parse(localStorage.getItem('ch1_draft') || '{}');
         draft.respondent_email = email;
         localStorage.setItem('ch1_draft', JSON.stringify(draft));
-    } catch (e) { }
+    } catch (e) {
+        // localStorage ไม่พร้อม — ข้ามไปเงียบๆ ไม่แสดง error ไม่หยุด flow
+        console.warn('localStorage unavailable (private mode?):', e.message);
+    }
 
+    // ② ไป Step 1 เสมอ (ไม่ว่า localStorage จะ fail หรือไม่)
     setTimeout(() => {
-        // FIX 2: Force hide step-0 before showing step-1
+        // Force hide step-0
         const step0 = document.getElementById('step-0');
         if (step0) {
             step0.classList.remove('active');
             step0.style.display = 'none';
         }
 
-        showStep(1); // Show Step 1 (organization info)
+        showStep(1); // Show Step 1
         btn.disabled = false;
         btn.textContent = 'ยืนยันอีเมล →';
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -796,7 +800,10 @@ function saveDraft() {
         const data = collectAllData();
         localStorage.setItem('ch1_draft', JSON.stringify({ data, step: currentStep, priorities: prioritySelected, ts: Date.now() }));
         showToast('💾 บันทึกร่างเรียบร้อยแล้ว');
-    } catch (e) { showToast('ไม่สามารถบันทึกร่างได้'); }
+    } catch (e) {
+        // silent fail — ไม่รบกวน user ด้วย toast เมื่อ manual save fail
+        console.warn('Draft save failed (non-critical):', e.message);
+    }
 }
 
 function loadDraft() {
@@ -847,14 +854,13 @@ function restoreDraft(d, priorities) {
 
 function startAutoSave() {
     setInterval(() => {
+        if (currentStep === 0) return; // ไม่ auto-save ตอน landing
         try {
-            // Robust draft save with error handling at each step
             let data;
             try {
                 data = collectAllData();
             } catch (collectErr) {
-                console.error('collectAllData error:', collectErr);
-                // Fallback: save only safe fields
+                console.warn('autoSave collectAllData error:', collectErr);
                 data = collectSafeData();
             }
 
@@ -862,22 +868,20 @@ function startAutoSave() {
             try {
                 jsonStr = JSON.stringify({ data, step: currentStep, priorities: prioritySelected, ts: Date.now() });
             } catch (jsonErr) {
-                console.error('JSON.stringify error:', jsonErr);
-                showToast('ไม่สามารถบันทึกร่างได้ (ข้อมูลผิดรูปแบบ)', 'error');
-                return;
+                console.warn('autoSave JSON.stringify error:', jsonErr);
+                return; // silent — ไม่แสดง toast
             }
 
             try {
                 localStorage.setItem('ch1_draft', jsonStr);
-                showToast('✅ บันทึกร่างอัตโนมัติแล้ว');
-                console.log('Draft saved, size:', jsonStr.length, 'bytes');
+                console.log('[ch1] Draft auto-saved, size:', jsonStr.length, 'bytes');
             } catch (storageErr) {
-                console.error('localStorage error:', storageErr);
-                showToast('พื้นที่จัดเก็บเต็ม ไม่สามารถบันทึกร่างได้', 'error');
+                console.warn('autoSave localStorage error (storage full?):', storageErr);
+                // silent — ไม่แสดง toast เพราะจะรบกวนขณะกรอกสองถาม
             }
         } catch (e) {
-            console.error('autoSaveDraft unexpected error:', e);
-            showToast('ไม่สามารถบันทึกร่างได้', 'error');
+            console.warn('autoSave unexpected error:', e);
+            // silent — ไม่แสดง toast
         }
     }, 30000);
 }
