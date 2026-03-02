@@ -90,8 +90,14 @@ document.addEventListener('DOMContentLoaded', () => {
     buildPriorityChips();
     setupAgeWatcher();
     setupNcdWatcher();
-    setupNegativeGuards();
     updateUI();
+    
+    // Setup input guards AFTER all elements are built
+    setTimeout(() => {
+        setupNegativeGuards();
+        console.log('setupNegativeGuards called after timeout');
+    }, 100);
+    
     startAutoSave();
 });
 
