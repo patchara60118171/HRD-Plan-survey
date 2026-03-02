@@ -4,209 +4,38 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>HRD บท 1 – แบบสอบถามระดับองค์กร | NIDA Well-being</title>
-    <meta name="description" content="แบบสอบถามข้อมูลระดับองค์กร สำหรับการพัฒนาทรัพยากรบุคคล (HRD) บท 1" />
-
-    <!-- Fonts (same as main project) -->
+    <title>HRD บท 1 — แบบสำรวจข้อมูลองค์กร | NIDA Well-being</title>
+    <meta name="description"
+        content="แบบสำรวจข้อมูลระดับองค์กร เพื่อจัดทำแผนพัฒนาทรัพยากรบุคคล (HRD) บูรณาการสุขภาวะองค์กร" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-        href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap"
         rel="stylesheet" />
-
-    <!-- Supabase SDK -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0F4C81',
+                        'primary-dark': '#0A3560',
+                        'primary-light': '#E8F1FB',
+                        accent: '#00A86B',
+                        'accent-light': '#E6F7F1',
+                    },
+                    fontFamily: { sarabun: ['Sarabun', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
     <style>
-        *,
-        *::before,
-        *::after {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        :root {
-            --primary: #0D9488;
-            --primary-dark: #0F766E;
-            --primary-light: #CCFBF1;
-            --blue: #3B82F6;
-            --gradient: linear-gradient(135deg, #0D9488 0%, #3B82F6 100%);
-            --bg: #F8FAFC;
-            --card: #FFFFFF;
-            --border: #E2E8F0;
-            --text: #1E293B;
-            --text2: #64748B;
-            --text3: #94A3B8;
-            --red: #EF4444;
-            --green: #10B981;
-            --yellow: #F59E0B;
-            --radius: 12px;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-
-        html {
-            font-size: 16px;
-            scroll-behavior: smooth;
-        }
-
         body {
-            font-family: 'Noto Sans Thai', 'Inter', sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            line-height: 1.6;
-            min-height: 100vh;
-        }
-
-        /* Header */
-        .header {
-            background: var(--card);
-            border-bottom: 1px solid var(--border);
-            padding: 1rem 1.5rem;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-        }
-
-        .header-inner {
-            max-width: 800px;
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .header-brand {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .header-brand img {
-            height: 36px;
-        }
-
-        .header-brand span {
-            font-weight: 600;
-            font-size: 1.1rem;
-        }
-
-        .header-links {
-            display: flex;
-            gap: 0.75rem;
-            align-items: center;
-        }
-
-        .header-links a {
-            font-size: 0.85rem;
-            color: var(--text2);
-            text-decoration: none;
-            padding: 0.4rem 0.75rem;
-            border-radius: 8px;
-            transition: all 0.2s;
-        }
-
-        .header-links a:hover {
-            background: var(--bg);
-            color: var(--text);
-        }
-
-        /* Progress */
-        .progress-bar-container {
-            max-width: 800px;
-            margin: 1rem auto;
-            padding: 0 1.5rem;
-        }
-
-        .progress-steps {
-            display: flex;
-            justify-content: space-between;
-            position: relative;
-            margin-bottom: 0.5rem;
-        }
-
-        .progress-steps::before {
-            content: '';
-            position: absolute;
-            top: 14px;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: var(--border);
-            z-index: 0;
-        }
-
-        .progress-step {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.4rem;
-            z-index: 1;
-            cursor: pointer;
-        }
-
-        .step-dot {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            background: var(--card);
-            border: 3px solid var(--border);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.75rem;
-            font-weight: 700;
-            color: var(--text3);
-            transition: all 0.3s;
-        }
-
-        .step-label {
-            font-size: 0.7rem;
-            color: var(--text3);
-            text-align: center;
-            max-width: 70px;
-        }
-
-        .progress-step.active .step-dot {
-            border-color: var(--primary);
-            background: var(--primary);
-            color: white;
-        }
-
-        .progress-step.active .step-label {
-            color: var(--primary);
-            font-weight: 600;
-        }
-
-        .progress-step.done .step-dot {
-            border-color: var(--green);
-            background: var(--green);
-            color: white;
-        }
-
-        .progress-step.done .step-label {
-            color: var(--green);
-        }
-
-        /* Form Container */
-        .form-container {
-            max-width: 800px;
-            margin: 1.5rem auto;
-            padding: 0 1.5rem;
-        }
-
-        .form-card {
-            background: var(--card);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            padding: 2rem;
-            border: 1px solid var(--border);
+            font-family: 'Sarabun', sans-serif;
         }
 
         .form-step {
             display: none;
-            animation: fadeIn 0.3s ease;
+            animation: fadeIn .3s ease;
         }
 
         .form-step.active {
@@ -216,791 +45,556 @@
         @keyframes fadeIn {
             from {
                 opacity: 0;
-                transform: translateY(10px);
+                transform: translateY(8px)
             }
 
             to {
                 opacity: 1;
-                transform: translateY(0);
+                transform: translateY(0)
             }
         }
 
-        .step-title {
-            font-size: 1.35rem;
-            font-weight: 700;
-            margin-bottom: 0.25rem;
-            background: var(--gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+        .radio-card input:checked~.radio-inner {
+            border-color: #0F4C81;
+            background: #E8F1FB;
         }
 
-        .step-subtitle {
-            color: var(--text2);
-            margin-bottom: 1.5rem;
-            font-size: 0.95rem;
+        .cb-card input:checked~.cb-inner {
+            border-color: #00A86B;
+            background: #E6F7F1;
         }
 
-        /* Form Fields */
-        .field {
-            margin-bottom: 1.25rem;
+        input[type=number]::-webkit-inner-spin-button {
+            opacity: .6;
         }
 
-        .field label {
-            display: block;
-            font-weight: 500;
-            margin-bottom: 0.4rem;
-            font-size: 0.95rem;
-        }
-
-        .field .required {
-            color: var(--red);
-        }
-
-        .field input[type="number"],
-        .field input[type="text"],
-        .field select {
-            width: 100%;
-            padding: 0.75rem 1rem;
-            border: 2px solid var(--border);
-            border-radius: 8px;
-            font-family: inherit;
-            font-size: 0.95rem;
-            transition: border-color 0.2s;
-            background: white;
-        }
-
-        .field input:focus,
-        .field select:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
-        }
-
-        .field .hint {
-            font-size: 0.8rem;
-            color: var(--text3);
-            margin-top: 0.25rem;
-        }
-
-        .field .error-msg {
-            font-size: 0.8rem;
-            color: var(--red);
-            margin-top: 0.25rem;
-            display: none;
-        }
-
-        .field-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-        }
-
-        @media (max-width: 600px) {
-            .field-row {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* Toggle Switch */
-        .toggle-group {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            padding: 0.75rem 1rem;
-            background: var(--bg);
-            border-radius: 8px;
-            margin-bottom: 1rem;
-        }
-
-        .toggle-switch {
-            position: relative;
-            width: 48px;
-            height: 26px;
-            flex-shrink: 0;
-        }
-
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .toggle-slider {
-            position: absolute;
-            inset: 0;
-            background: #CBD5E1;
-            border-radius: 13px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .toggle-slider::before {
-            content: '';
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            left: 3px;
-            bottom: 3px;
-            background: white;
-            border-radius: 50%;
-            transition: 0.3s;
-        }
-
-        .toggle-switch input:checked+.toggle-slider {
-            background: var(--primary);
-        }
-
-        .toggle-switch input:checked+.toggle-slider::before {
-            transform: translateX(22px);
-        }
-
-        .med-expense-fields {
-            display: none;
-            animation: fadeIn 0.3s;
-        }
-
-        .med-expense-fields.show {
-            display: block;
-        }
-
-        /* Pill Selector */
-        .pill-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.6rem;
-            margin-bottom: 1rem;
-        }
-
-        .pill {
-            display: flex;
-            align-items: center;
-            gap: 0.4rem;
-            padding: 0.6rem 1rem;
-            border: 2px solid var(--border);
-            border-radius: 50px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: all 0.2s;
-            user-select: none;
-            background: white;
-        }
-
-        .pill:hover {
-            border-color: var(--primary);
-            background: var(--primary-light);
-        }
-
-        .pill.selected {
-            border-color: var(--primary);
-            background: var(--primary);
+        .priority-chip.selected {
+            background: #0F4C81;
             color: white;
+            border-color: #0F4C81;
         }
 
-        .pill input {
-            display: none;
-        }
-
-        /* Severity Slider */
-        .slider-container {
-            margin: 1.5rem 0;
-        }
-
-        .slider-labels {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.75rem;
-            color: var(--text3);
-            margin-bottom: 0.5rem;
-        }
-
-        .slider-track {
-            position: relative;
-            width: 100%;
-            height: 8px;
-            background: linear-gradient(90deg, var(--green), var(--yellow), var(--red));
-            border-radius: 4px;
-        }
-
-        input[type="range"] {
-            -webkit-appearance: none;
-            width: 100%;
-            height: 8px;
-            background: transparent;
-            margin: 0;
-            position: relative;
-            z-index: 2;
-        }
-
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 24px;
-            height: 24px;
-            background: white;
-            border: 3px solid var(--primary);
-            border-radius: 50%;
-            cursor: pointer;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-            margin-top: -8px;
-        }
-
-        input[type="range"]::-moz-range-thumb {
-            width: 24px;
-            height: 24px;
-            background: white;
-            border: 3px solid var(--primary);
-            border-radius: 50%;
-            cursor: pointer;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-        }
-
-        .severity-value {
-            text-align: center;
-            margin-top: 0.75rem;
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: var(--primary);
-        }
-
-        /* Checkbox List */
-        .checkbox-list {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .checkbox-item {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem 1rem;
-            background: var(--bg);
-            border: 2px solid var(--border);
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .checkbox-item:hover {
-            border-color: var(--primary);
-        }
-
-        .checkbox-item.checked {
-            border-color: var(--primary);
-            background: var(--primary-light);
-        }
-
-        .checkbox-item input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            accent-color: var(--primary);
-            cursor: pointer;
-        }
-
-        /* Radio Group */
-        .radio-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-            margin-top: 1rem;
-        }
-
-        .radio-item {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem 1rem;
-            background: var(--bg);
-            border: 2px solid var(--border);
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .radio-item:hover {
-            border-color: var(--primary);
-        }
-
-        .radio-item.checked {
-            border-color: var(--primary);
-            background: var(--primary-light);
-        }
-
-        .radio-item input[type="radio"] {
-            width: 18px;
-            height: 18px;
-            accent-color: var(--primary);
-            cursor: pointer;
-        }
-
-        /* Summary (Step 4) */
-        .summary-section {
-            padding: 1rem;
-            background: var(--bg);
-            border-radius: 8px;
-            margin-bottom: 1rem;
-            border-left: 4px solid var(--primary);
-        }
-
-        .summary-section h4 {
-            font-size: 0.95rem;
-            color: var(--primary);
-            margin-bottom: 0.5rem;
-        }
-
-        .summary-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 0.3rem 0;
-            font-size: 0.9rem;
-        }
-
-        .summary-row .label {
-            color: var(--text2);
-        }
-
-        .summary-row .value {
-            font-weight: 500;
-        }
-
-        .summary-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.4rem;
-            margin-top: 0.3rem;
-        }
-
-        .summary-tag {
-            display: inline-block;
-            padding: 0.2rem 0.6rem;
-            background: var(--primary-light);
-            color: var(--primary-dark);
-            border-radius: 50px;
-            font-size: 0.8rem;
-            font-weight: 500;
-        }
-
-        /* Navigation Buttons */
-        .nav-buttons {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 2rem;
-            padding-top: 1.5rem;
-            border-top: 1px solid var(--border);
-        }
-
-        .btn {
+        .priority-chip.selected .rank-badge {
             display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 8px;
-            font-family: inherit;
-            font-size: 0.95rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
         }
 
-        .btn-prev {
-            background: var(--bg);
-            color: var(--text2);
-            border: 1px solid var(--border);
-        }
-
-        .btn-prev:hover {
-            background: var(--border);
-        }
-
-        .btn-next {
-            background: var(--gradient);
-            color: white;
-            box-shadow: 0 2px 8px rgba(13, 148, 136, 0.3);
-        }
-
-        .btn-next:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(13, 148, 136, 0.4);
-        }
-
-        .btn-next:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .btn-submit {
-            background: var(--green);
-            color: white;
-            font-size: 1rem;
-            padding: 0.85rem 2rem;
-        }
-
-        .btn-submit:hover {
-            background: #059669;
-        }
-
-        /* States */
-        .state-overlay {
+        .rank-badge {
             display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 999;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(4px);
         }
 
-        .state-overlay.show {
-            display: flex;
-        }
-
-        .state-box {
-            background: white;
-            padding: 2.5rem;
-            border-radius: var(--radius);
-            text-align: center;
-            max-width: 420px;
-            width: 90%;
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
-        }
-
-        .state-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-        }
-
-        .state-title {
-            font-size: 1.25rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-        }
-
-        .state-msg {
-            color: var(--text2);
-            margin-bottom: 1.5rem;
-            font-size: 0.95rem;
-        }
-
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid var(--border);
-            border-top-color: var(--primary);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin: 0 auto 1rem;
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        /* Footer */
-        .footer {
-            text-align: center;
-            padding: 1.5rem;
-            color: var(--text3);
-            font-size: 0.85rem;
-            margin-top: 2rem;
+        #toast {
+            transition: opacity .3s, transform .3s;
         }
     </style>
 </head>
 
-<body>
+<body class="bg-[#F8FAFC] min-h-screen">
+
     <!-- Header -->
-    <header class="header">
-        <div class="header-inner">
-            <div class="header-brand">
-                <img src="assets/logo.png" alt="NIDA Well-being" />
-                <span>HRD Survey — บท 1</span>
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <img src="assets/logo.png" alt="NIDA" class="h-9" onerror="this.style.display='none'" />
+                <div>
+                    <div class="font-bold text-primary text-base">HRD Survey — บท 1</div>
+                    <div class="text-xs text-slate-400">ข้อมูลระดับองค์กร (v2)</div>
+                </div>
             </div>
-            <div class="header-links">
-                <a href="/">👥 แบบสอบถามรายบุคคล</a>
+            <div class="flex gap-2">
+                <button onclick="saveDraft()"
+                    class="text-xs px-3 py-1.5 border border-slate-300 rounded-lg hover:bg-slate-50 text-slate-600">💾
+                    บันทึกร่าง</button>
+                <button onclick="loadDraft()"
+                    class="text-xs px-3 py-1.5 border border-slate-300 rounded-lg hover:bg-slate-50 text-slate-600">📂
+                    โหลดร่าง</button>
             </div>
         </div>
     </header>
 
-    <!-- Progress Steps -->
-    <div class="progress-bar-container">
-        <div class="progress-steps" id="progress-steps">
-            <div class="progress-step active" data-step="0">
-                <div class="step-dot">1</div>
-                <div class="step-label">เลือกองค์กร</div>
-            </div>
-            <div class="progress-step" data-step="1">
-                <div class="step-dot">2</div>
-                <div class="step-label">ข้อมูลบุคลากร</div>
-            </div>
-            <div class="progress-step" data-step="2">
-                <div class="step-dot">3</div>
-                <div class="step-label">ปัญหาสุขภาพ</div>
-            </div>
-            <div class="progress-step" data-step="3">
-                <div class="step-dot">4</div>
-                <div class="step-label">แผนระดับชาติ</div>
-            </div>
-            <div class="progress-step" data-step="4">
-                <div class="step-dot">5</div>
-                <div class="step-label">สรุปและยืนยัน</div>
+    <!-- Progress -->
+    <div class="max-w-3xl mx-auto px-4 pt-5 pb-2">
+        <div class="flex items-center justify-between mb-1">
+            <span id="step-label" class="text-sm font-semibold text-primary">ส่วนที่ 1 จาก 7</span>
+            <span id="step-pct" class="text-sm text-slate-400">14%</span>
+        </div>
+        <div class="w-full bg-slate-200 rounded-full h-2">
+            <div id="progress-bar" class="bg-primary h-2 rounded-full transition-all duration-500" style="width:14%">
             </div>
         </div>
+        <div class="flex justify-between mt-2 px-0.5" id="step-dots-row"></div>
     </div>
 
-    <!-- Form Card -->
-    <div class="form-container">
-        <div class="form-card">
+    <!-- Form -->
+    <main class="max-w-3xl mx-auto px-4 pb-16">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 md:p-8">
 
-            <!-- STEP 0: Organization -->
+            <!-- STEP 1: ข้อมูลพื้นฐาน -->
             <div class="form-step active" data-step="0">
-                <div class="step-title">🏢 เลือกหน่วยงาน</div>
-                <div class="step-subtitle">กรุณาเลือกหน่วยงานของท่าน</div>
+                <h2 class="text-xl font-bold text-primary mb-1">🏢 ส่วนที่ 1: ข้อมูลพื้นฐานหน่วยงาน</h2>
+                <p class="text-slate-500 text-sm mb-6">กรุณากรอกข้อมูลพื้นฐานของหน่วยงาน</p>
 
-                <div class="field">
-                    <label>หน่วยงาน <span class="required">*</span></label>
-                    <select id="org-select">
-                        <option value="">-- เลือกหน่วยงาน --</option>
-                    </select>
-                    <div class="error-msg" id="err-org">กรุณาเลือกหน่วยงาน</div>
+                <div class="space-y-5">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1.5">ชื่อหน่วยงาน <span
+                                class="text-red-500">*</span></label>
+                        <select id="organization"
+                            class="w-full border-2 border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-primary focus:outline-none transition">
+                            <option value="">-- เลือกหน่วยงาน --</option>
+                            <option>กรมอนามัย</option>
+                            <option>กรมควบคุมโรค</option>
+                            <option>กรมการแพทย์</option>
+                            <option>กรมสุขภาพจิต</option>
+                            <option>กรมวิทยาศาสตร์การแพทย์</option>
+                            <option>สำนักงานคณะกรรมการอาหารและยา</option>
+                            <option>กรมสนับสนุนบริการสุขภาพ</option>
+                            <option>กรมการแพทย์แผนไทยและการแพทย์ทางเลือก</option>
+                            <option>สถาบันการแพทย์ฉุกเฉินแห่งชาติ</option>
+                            <option>สำนักงานหลักประกันสุขภาพแห่งชาติ</option>
+                            <option>สำนักงานประกันสังคม</option>
+                            <option>กรมพัฒนาฝีมือแรงงาน</option>
+                            <option>กรมสวัสดิการและคุ้มครองแรงงาน</option>
+                            <option>สำนักงานปลัดกระทรวงสาธารณสุข</option>
+                            <option>สำนักงานปลัดกระทรวงแรงงาน</option>
+                        </select>
+                        <p class="text-red-500 text-xs mt-1 hidden" id="err-org">กรุณาเลือกหน่วยงาน</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1.5">วิสัยทัศน์ / พันธกิจ /
+                            ภารกิจหลัก</label>
+                        <textarea id="vision_mission" rows="3" placeholder="กรอกสรุปวิสัยทัศน์และภารกิจหลักขององค์กร"
+                            class="w-full border-2 border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-primary focus:outline-none transition resize-none"></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1.5">สรุปแผนปฏิบัติราชการ/ยุทธศาสตร์
+                            (ย้อนหลัง 5 ปี)</label>
+                        <textarea id="strategic_plan_summary" rows="3" placeholder="สรุปแผนสำคัญ หรือวาง URL ไฟล์"
+                            class="w-full border-2 border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-primary focus:outline-none transition resize-none"></textarea>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1.5">จำนวนข้าราชการรวม <span
+                                    class="text-red-500">*</span></label>
+                            <input type="number" id="total_staff" min="0" placeholder="เช่น 500"
+                                class="w-full border-2 border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-primary focus:outline-none transition" />
+                            <p class="text-red-500 text-xs mt-1 hidden" id="err-staff">กรุณากรอกจำนวนบุคลากร</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1.5">URL
+                                ผังโครงสร้างองค์กร</label>
+                            <input type="text" id="org_chart_url" placeholder="https://drive.google.com/..."
+                                class="w-full border-2 border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-primary focus:outline-none transition" />
+                        </div>
+                    </div>
+
+                    <!-- Age Groups -->
+                    <div class="bg-slate-50 rounded-xl p-4">
+                        <h3 class="text-sm font-bold text-slate-700 mb-3">จำแนกตามช่วงอายุ <span
+                                class="text-slate-400 font-normal">(ไม่บังคับ)</span></h3>
+                        <div id="age-sum-warn"
+                            class="hidden text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-3">
+                            ⚠️ ผลรวมช่วงอายุเกินจำนวนบุคลากรรวม</div>
+                        <div class="grid grid-cols-3 gap-3 sm:grid-cols-5">
+                            <div><label class="block text-xs text-slate-500 mb-1">≤ 30 ปี</label><input type="number"
+                                    id="age_u30" min="0" value="0"
+                                    class="age-field w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center focus:border-primary focus:outline-none" />
+                            </div>
+                            <div><label class="block text-xs text-slate-500 mb-1">31–40 ปี</label><input type="number"
+                                    id="age_31_40" min="0" value="0"
+                                    class="age-field w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center focus:border-primary focus:outline-none" />
+                            </div>
+                            <div><label class="block text-xs text-slate-500 mb-1">41–50 ปี</label><input type="number"
+                                    id="age_41_50" min="0" value="0"
+                                    class="age-field w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center focus:border-primary focus:outline-none" />
+                            </div>
+                            <div><label class="block text-xs text-slate-500 mb-1">51–60 ปี</label><input type="number"
+                                    id="age_51_60" min="0" value="0"
+                                    class="age-field w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center focus:border-primary focus:outline-none" />
+                            </div>
+                            <div><label class="block text-xs text-slate-500 mb-1">> 60 ปี</label><input type="number"
+                                    id="age_over60" min="0" value="0"
+                                    class="age-field w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center focus:border-primary focus:outline-none" />
+                            </div>
+                        </div>
+                        <div class="text-right text-xs text-slate-400 mt-2">ผลรวม: <span id="age-total"
+                                class="font-semibold">0</span> คน</div>
+                    </div>
+
+                    <!-- Service Years -->
+                    <div class="bg-slate-50 rounded-xl p-4">
+                        <h3 class="text-sm font-bold text-slate-700 mb-3">จำแนกตามอายุราชการ <span
+                                class="text-slate-400 font-normal">(ไม่บังคับ)</span></h3>
+                        <div class="grid grid-cols-3 gap-3">
+                            <div><label class="block text-xs text-slate-500 mb-1">≤ 5 ปี</label><input type="number"
+                                    id="service_u5" min="0" value="0"
+                                    class="w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center focus:border-primary focus:outline-none" />
+                            </div>
+                            <div><label class="block text-xs text-slate-500 mb-1">6–10 ปี</label><input type="number"
+                                    id="service_6_10" min="0" value="0"
+                                    class="w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center focus:border-primary focus:outline-none" />
+                            </div>
+                            <div><label class="block text-xs text-slate-500 mb-1">> 10 ปี</label><input type="number"
+                                    id="service_over10" min="0" value="0"
+                                    class="w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center focus:border-primary focus:outline-none" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1.5">ตำแหน่งที่มีแนวโน้มเกษียณใน 3–5
+                            ปี</label>
+                        <textarea id="retirement_risk_positions" rows="2"
+                            placeholder="เช่น นักวิชาการสาธารณสุขชำนาญการพิเศษ 5 อัตรา"
+                            class="w-full border-2 border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-primary focus:outline-none transition resize-none"></textarea>
+                    </div>
                 </div>
             </div>
 
-            <!-- STEP 1: Staff Data -->
+            <!-- STEP 2: สุขภาวะทางกาย -->
             <div class="form-step" data-step="1">
-                <div class="step-title">👥 ข้อมูลบุคลากร</div>
-                <div class="step-subtitle">กรอกข้อมูลบุคลากรในหน่วยงาน</div>
+                <h2 class="text-xl font-bold text-primary mb-1">🩺 ส่วนที่ 2: สุขภาวะทางกาย</h2>
+                <p class="text-slate-500 text-sm mb-6">ข้อมูลโรค NCD การลาป่วย และห้องพยาบาล</p>
 
-                <div class="field">
-                    <label>จำนวนบุคลากรทั้งหมด <span class="required">*</span></label>
-                    <input type="number" id="total-staff" min="1" placeholder="เช่น 150" />
-                    <div class="error-msg" id="err-staff">กรุณากรอกจำนวนบุคลากร (อย่างน้อย 1 คน)</div>
+                <!-- 2.1 NCD -->
+                <h3 class="text-base font-bold text-slate-700 mb-3 pb-2 border-b border-slate-100">2.1 โรค NCD (จำนวนคน)
+                </h3>
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div><label class="block text-xs text-slate-500 mb-1">🩸 เบาหวาน</label><input type="number"
+                            id="disease_diabetes" min="0" value="0"
+                            class="ncd-field w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-primary focus:outline-none" />
+                    </div>
+                    <div><label class="block text-xs text-slate-500 mb-1">💊 ความดันโลหิตสูง</label><input type="number"
+                            id="disease_hypertension" min="0" value="0"
+                            class="ncd-field w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-primary focus:outline-none" />
+                    </div>
+                    <div><label class="block text-xs text-slate-500 mb-1">🫀 โรคหัวใจและหลอดเลือด</label><input
+                            type="number" id="disease_cardiovascular" min="0" value="0"
+                            class="ncd-field w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-primary focus:outline-none" />
+                    </div>
+                    <div><label class="block text-xs text-slate-500 mb-1">🫘 โรคไต</label><input type="number"
+                            id="disease_kidney" min="0" value="0"
+                            class="ncd-field w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-primary focus:outline-none" />
+                    </div>
+                    <div><label class="block text-xs text-slate-500 mb-1">🫁 โรคตับ</label><input type="number"
+                            id="disease_liver" min="0" value="0"
+                            class="ncd-field w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-primary focus:outline-none" />
+                    </div>
+                    <div><label class="block text-xs text-slate-500 mb-1">🎗️ โรคมะเร็ง</label><input type="number"
+                            id="disease_cancer" min="0" value="0"
+                            class="ncd-field w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-primary focus:outline-none" />
+                    </div>
+                    <div><label class="block text-xs text-slate-500 mb-1">⚖️ ภาวะอ้วน/น้ำหนักเกิน</label><input
+                            type="number" id="disease_obesity" min="0" value="0"
+                            class="ncd-field w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-primary focus:outline-none" />
+                    </div>
+                    <div><label class="block text-xs text-slate-500 mb-1">อื่นๆ (จำนวนคน)</label><input type="number"
+                            id="disease_other_count" min="0" value="0"
+                            class="ncd-field w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-primary focus:outline-none" />
+                    </div>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-xs text-slate-500 mb-1">อื่นๆ — ระบุชื่อโรค</label>
+                    <input type="text" id="disease_other_detail" placeholder="เช่น โรคไทรอยด์ โรคข้อ"
+                        class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-primary focus:outline-none" />
+                </div>
+                <div class="bg-primary-light rounded-xl px-4 py-2 text-sm text-primary mb-6">NCD รวมทุกประเภท: <strong
+                        id="ncd-total">0</strong> คน</div>
+
+                <!-- 2.2 วันลาป่วย -->
+                <h3 class="text-base font-bold text-slate-700 mb-3 pb-2 border-b border-slate-100">2.2 ข้อมูลการลาป่วย
+                    (ย้อนหลัง 5 ปี)</h3>
+                <div class="overflow-x-auto mb-6">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="text-xs text-slate-500 border-b border-slate-200">
+                                <th class="text-left py-2 pr-3">ปีงบประมาณ</th>
+                                <th class="text-left py-2 pr-3">วันลาป่วยรวม</th>
+                                <th class="text-left py-2 pr-3">เฉลี่ยต่อคน/ปี</th>
+                                <th class="text-center py-2">ไม่มีข้อมูล</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sick-leave-tbody"></tbody>
+                    </table>
                 </div>
 
-                <div class="field">
-                    <label>จำนวนบุคลากรแบ่งตามช่วงอายุ</label>
-                    <div class="hint">ไม่บังคับกรอก — เพื่อวิเคราะห์โครงสร้างอายุ</div>
-                    <div class="field-row" style="margin-top: 0.5rem;">
-                        <div class="field">
-                            <label style="font-size:0.85rem;">ต่ำกว่า 30 ปี</label>
-                            <input type="number" id="age-u30" min="0" placeholder="0" />
-                        </div>
-                        <div class="field">
-                            <label style="font-size:0.85rem;">30–39 ปี</label>
-                            <input type="number" id="age-30-39" min="0" placeholder="0" />
-                        </div>
+                <!-- 2.3 ห้องพยาบาล -->
+                <h3 class="text-base font-bold text-slate-700 mb-3 pb-2 border-b border-slate-100">2.3 ห้องพยาบาล</h3>
+                <div class="space-y-4">
+                    <div><label class="block text-sm font-medium text-slate-700 mb-1">จำนวนผู้ใช้บริการต่อปี
+                            (ล่าสุด)</label><input type="number" id="clinic_users_per_year" min="0" placeholder="0"
+                            class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-primary focus:outline-none" />
                     </div>
-                    <div class="field-row">
-                        <div class="field">
-                            <label style="font-size:0.85rem;">40–49 ปี</label>
-                            <input type="number" id="age-40-49" min="0" placeholder="0" />
-                        </div>
-                        <div class="field">
-                            <label style="font-size:0.85rem;">50 ปีขึ้นไป</label>
-                            <input type="number" id="age-50-plus" min="0" placeholder="0" />
-                        </div>
+                    <div><label
+                            class="block text-sm font-medium text-slate-700 mb-1">กลุ่มอาการที่พบบ่อย</label><textarea
+                            id="clinic_top_symptoms" rows="2" placeholder="เช่น ปวดหัว ปวดกล้ามเนื้อ ความดันสูง"
+                            class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-primary focus:outline-none resize-none"></textarea>
                     </div>
-                    <div class="error-msg" id="err-age-sum">ผลรวมช่วงอายุต้องเท่ากับจำนวนบุคลากรทั้งหมด</div>
-                </div>
-
-                <div class="field">
-                    <label>จำนวนผู้ป่วย NCD (โรคไม่ติดต่อเรื้อรัง)</label>
-                    <input type="number" id="ncd-count" min="0" placeholder="0" />
-                    <div class="hint">เช่น เบาหวาน ความดันโลหิตสูง ไขมัน หัวใจ</div>
-                    <div class="error-msg" id="err-ncd">จำนวน NCD ต้องไม่เกินจำนวนบุคลากรทั้งหมด</div>
-                </div>
-
-                <div class="field">
-                    <label>มีข้อมูลค่าใช้จ่ายการรักษาพยาบาลไหม?</label>
-                    <div class="toggle-group">
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="med-toggle" />
-                            <span class="toggle-slider"></span>
-                        </label>
-                        <span id="med-toggle-label">ไม่มีข้อมูล</span>
-                    </div>
-
-                    <div class="med-expense-fields" id="med-fields">
-                        <div class="hint" style="margin-bottom: 0.75rem;">กรอกค่าเบิกจ่ายรักษาพยาบาล (บาท)</div>
-                        <div class="field-row">
-                            <div class="field">
-                                <label style="font-size:0.85rem;">ปี 2563</label>
-                                <input type="number" id="med-2563" min="0" placeholder="0" />
-                            </div>
-                            <div class="field">
-                                <label style="font-size:0.85rem;">ปี 2564</label>
-                                <input type="number" id="med-2564" min="0" placeholder="0" />
-                            </div>
-                        </div>
-                        <div class="field-row">
-                            <div class="field">
-                                <label style="font-size:0.85rem;">ปี 2565</label>
-                                <input type="number" id="med-2565" min="0" placeholder="0" />
-                            </div>
-                            <div class="field">
-                                <label style="font-size:0.85rem;">ปี 2566</label>
-                                <input type="number" id="med-2566" min="0" placeholder="0" />
-                            </div>
-                        </div>
-                        <div class="field-row">
-                            <div class="field">
-                                <label style="font-size:0.85rem;">ปี 2567</label>
-                                <input type="number" id="med-2567" min="0" placeholder="0" />
-                            </div>
-                            <div class="field"></div>
-                        </div>
+                    <div><label
+                            class="block text-sm font-medium text-slate-700 mb-1">ประเภทยาที่จ่ายบ่อย</label><textarea
+                            id="clinic_top_medications" rows="2" placeholder="เช่น พาราเซตามอล ยาลดความดัน ยาลดน้ำตาล"
+                            class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-primary focus:outline-none resize-none"></textarea>
                     </div>
                 </div>
             </div>
 
-            <!-- STEP 2: Health Issues -->
+            <!-- STEP 3: สุขภาวะทางจิตใจ -->
             <div class="form-step" data-step="2">
-                <div class="step-title">🩺 ปัญหาสุขภาพที่พบในองค์กร</div>
-                <div class="step-subtitle">เลือกปัญหาสุขภาพที่พบในบุคลากร (เลือกได้หลายข้อ)</div>
+                <h2 class="text-xl font-bold text-primary mb-1">🧠 ส่วนที่ 3: สุขภาวะทางจิตใจ</h2>
+                <p class="text-slate-500 text-sm mb-6">ข้อมูลสุขภาพจิต Engagement และการเคลื่อนย้ายบุคลากร</p>
 
-                <div class="field">
-                    <label>ปัญหาสุขภาพหลัก <span class="required">*</span></label>
-                    <div class="pill-grid" id="health-pills">
-                        <label class="pill" data-value="NCD">
-                            <input type="checkbox" /> 🩺 NCD (โรคเรื้อรัง)
-                        </label>
-                        <label class="pill" data-value="สุขภาพจิต">
-                            <input type="checkbox" /> 🧠 สุขภาพจิต
-                        </label>
-                        <label class="pill" data-value="น้ำหนักเกิน">
-                            <input type="checkbox" /> ⚖️ น้ำหนักเกิน / อ้วน
-                        </label>
-                        <label class="pill" data-value="การนอนหลับ">
-                            <input type="checkbox" /> 😴 การนอนหลับ
-                        </label>
-                        <label class="pill" data-value="ออฟฟิศซินโดรม">
-                            <input type="checkbox" /> 🦴 ออฟฟิศซินโดรม
-                        </label>
-                        <label class="pill" data-value="แอลกอฮอล์/บุหรี่">
-                            <input type="checkbox" /> 🚬 แอลกอฮอล์ / บุหรี่
-                        </label>
+                <h3 class="text-base font-bold text-slate-700 mb-2 pb-2 border-b border-slate-100">3.1 ผลสำรวจสุขภาพจิต
+                </h3>
+                <p class="text-xs text-slate-400 mb-3">หากไม่มีข้อมูลสำรวจ ข้ามได้ (กรอก 0)</p>
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div><label class="block text-xs text-slate-500 mb-1">😟 ภาวะเครียดเรื้อรัง (คน)</label><input
+                            type="number" id="mental_stress_count" min="0" value="0"
+                            class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-primary focus:outline-none" />
                     </div>
-                    <div class="error-msg" id="err-health">กรุณาเลือกปัญหาสุขภาพอย่างน้อย 1 รายการ</div>
+                    <div><label class="block text-xs text-slate-500 mb-1">😰 ภาวะวิตกกังวล (คน)</label><input
+                            type="number" id="mental_anxiety_count" min="0" value="0"
+                            class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-primary focus:outline-none" />
+                    </div>
+                    <div><label class="block text-xs text-slate-500 mb-1">😴 ปัญหาการนอนหลับ (คน)</label><input
+                            type="number" id="mental_sleep_count" min="0" value="0"
+                            class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-primary focus:outline-none" />
+                    </div>
+                    <div><label class="block text-xs text-slate-500 mb-1">🔥 ภาวะหมดไฟ / Burnout (คน)</label><input
+                            type="number" id="mental_burnout_count" min="0" value="0"
+                            class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-primary focus:outline-none" />
+                    </div>
+                    <div><label class="block text-xs text-slate-500 mb-1">😔 ภาวะซึมเศร้า (คน)</label><input
+                            type="number" id="mental_depression_count" min="0" value="0"
+                            class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-primary focus:outline-none" />
+                    </div>
+                    <div><label class="block text-xs text-slate-500 mb-1">อื่นๆ ระบุ</label><input type="text"
+                            id="mental_other" placeholder="เช่น โรคกลัวสังคม"
+                            class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-primary focus:outline-none" />
+                    </div>
                 </div>
 
-                <div class="field">
-                    <label>อื่นๆ (ระบุ)</label>
-                    <input type="text" id="health-other" placeholder="เช่น ปัญหาสายตา ปัญหาการได้ยิน" />
+                <h3 class="text-base font-bold text-slate-700 mb-3 pb-2 border-b border-slate-100">3.2 Employee
+                    Engagement (ย้อนหลัง 5 ปี)</h3>
+                <div class="overflow-x-auto mb-4">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="text-xs text-slate-500 border-b border-slate-200">
+                                <th class="text-left py-2 pr-3">ปีงบประมาณ</th>
+                                <th class="text-left py-2 pr-3">คะแนนภาพรวม (0–100)</th>
+                                <th class="text-left py-2 pr-3">ประเด็นคะแนนต่ำ</th>
+                                <th class="text-center py-2">ไม่มีข้อมูล</th>
+                            </tr>
+                        </thead>
+                        <tbody id="engagement-tbody"></tbody>
+                    </table>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-slate-700 mb-1">แนวโน้มภาพรวม Engagement</label>
+                    <textarea id="engagement_trend" rows="2"
+                        placeholder="เช่น คะแนนมีแนวโน้มเพิ่มขึ้นในช่วง 2565-2567 แต่ยังต่ำในด้านค่าตอบแทน"
+                        class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-primary focus:outline-none resize-none"></textarea>
                 </div>
 
-                <div class="field">
-                    <label>ระดับความรุนแรงของปัญหาสุขภาพโดยรวม <span class="required">*</span></label>
-                    <div class="slider-container">
-                        <div class="slider-labels">
-                            <span>น้อยมาก</span><span>น้อย</span><span>ปานกลาง</span><span>มาก</span><span>มากที่สุด</span>
-                        </div>
-                        <div class="slider-track">
-                            <input type="range" id="severity-slider" min="1" max="5" value="3" step="1" />
-                        </div>
-                        <div class="severity-value" id="severity-display">ปานกลาง (3/5)</div>
+                <h3 class="text-base font-bold text-slate-700 mb-3 pb-2 border-b border-slate-100">3.3
+                    การเคลื่อนย้ายบุคลากร</h3>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">อัตราการลาออกเฉลี่ย (%)</label>
+                        <input type="number" id="turnover_rate" min="0" max="100" step="0.01" placeholder="เช่น 2.5"
+                            class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-primary focus:outline-none" />
+                        <p class="text-red-500 text-xs mt-1 hidden" id="err-turnover">ต้องอยู่ระหว่าง 0–100</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">อัตราการโอนย้ายเฉลี่ย (%)</label>
+                        <input type="number" id="transfer_rate" min="0" max="100" step="0.01" placeholder="เช่น 5.0"
+                            class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-primary focus:outline-none" />
+                        <p class="text-red-500 text-xs mt-1 hidden" id="err-transfer">ต้องอยู่ระหว่าง 0–100</p>
                     </div>
                 </div>
             </div>
 
-            <!-- STEP 3: National Plans -->
+            <!-- STEP 4: ระบบสนับสนุน -->
             <div class="form-step" data-step="3">
-                <div class="step-title">📋 แผนระดับชาติที่เชื่อมโยง</div>
-                <div class="step-subtitle">เลือกแผนยุทธศาสตร์ที่หน่วยงานเชื่อมโยงการ ดำเนินงาน</div>
+                <h2 class="text-xl font-bold text-primary mb-1">⚙️ ส่วนที่ 4: ระบบสนับสนุนและการพัฒนา</h2>
+                <p class="text-slate-500 text-sm mb-6">สถานะของระบบสนับสนุนบุคลากรในหน่วยงาน</p>
 
-                <div class="field">
-                    <label>แผนที่เชื่อมโยง <span class="required">*</span></label>
-                    <div class="checkbox-list" id="plans-list">
-                        <label class="checkbox-item" data-value="ยุทธศาสตร์ชาติ 20 ปี">
-                            <input type="checkbox" /> ยุทธศาสตร์ชาติ 20 ปี
-                        </label>
-                        <label class="checkbox-item" data-value="แผนพัฒนาเศรษฐกิจและสังคมแห่งชาติ ฉบับที่ 13">
-                            <input type="checkbox" /> แผนพัฒนาเศรษฐกิจและสังคมแห่งชาติ ฉบับที่ 13
-                        </label>
-                        <label class="checkbox-item" data-value="แผนแม่บทของกระทรวงที่สังกัด">
-                            <input type="checkbox" /> แผนแม่บทของกระทรวงที่สังกัด
-                        </label>
-                        <label class="checkbox-item" data-value="แผน HRD ของหน่วยงาน">
-                            <input type="checkbox" /> แผน HRD ของหน่วยงาน
-                        </label>
-                        <label class="checkbox-item" data-value="ไม่แน่ใจ / ไม่ทราบ">
-                            <input type="checkbox" /> ไม่แน่ใจ / ไม่ทราบ
-                        </label>
-                    </div>
-                    <div class="error-msg" id="err-plans">กรุณาเลือกอย่างน้อย 1 รายการ</div>
+                <div class="space-y-6" id="support-systems">
+                    <!-- Rendered by JS -->
                 </div>
 
-                <div class="field" style="margin-top: 1.5rem;">
-                    <label>สถานะแผน HRD ของหน่วยงาน <span class="required">*</span></label>
-                    <div class="radio-group" id="hrd-status-group">
-                        <label class="radio-item" data-value="yes">
-                            <input type="radio" name="hrd-status" value="yes" /> ✅ มีแผน HRD แล้ว
-                        </label>
-                        <label class="radio-item" data-value="inprogress">
-                            <input type="radio" name="hrd-status" value="inprogress" /> 🔄 กำลังจัดทำ
-                        </label>
-                        <label class="radio-item" data-value="no">
-                            <input type="radio" name="hrd-status" value="no" /> ❌ ยังไม่มี
-                        </label>
+                <div class="mt-6">
+                    <h3 class="text-sm font-bold text-slate-700 mb-3">4.4 ชั่วโมงการอบรมเฉลี่ยต่อคนต่อปี</h3>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2" id="training-hours-group">
+                        <!-- Rendered by JS -->
                     </div>
-                    <div class="error-msg" id="err-hrd">กรุณาเลือกสถานะแผน HRD</div>
+                    <p class="text-red-500 text-xs mt-1 hidden" id="err-training">กรุณาเลือกชั่วโมงอบรม</p>
                 </div>
             </div>
 
-            <!-- STEP 4: Summary -->
+            <!-- STEP 5: สภาพแวดล้อม -->
             <div class="form-step" data-step="4">
-                <div class="step-title">✅ สรุปข้อมูลก่อนส่ง</div>
-                <div class="step-subtitle">กรุณาตรวจสอบความถูกต้องก่อนยืนยันการส่ง</div>
+                <h2 class="text-xl font-bold text-primary mb-1">🏗️ ส่วนที่ 5: สภาพแวดล้อมการทำงาน</h2>
+                <p class="text-slate-500 text-sm mb-6">การจัดสภาพแวดล้อมและระบบสนับสนุนดิจิทัล</p>
 
-                <div id="summary-content">
-                    <!-- Filled by JS -->
+                <h3 class="text-sm font-bold text-slate-700 mb-3">5.1 การจัดสภาพแวดล้อมตามหลักการยศาสตร์ (Ergonomics)
+                </h3>
+                <div class="space-y-2 mb-4" id="ergonomics-group">
+                    <!-- Rendered by JS -->
+                </div>
+                <p class="text-red-500 text-xs mb-4 hidden" id="err-ergonomics">กรุณาเลือกสถานะ</p>
+                <div id="ergonomics-detail-wrap" class="hidden mb-6">
+                    <label class="block text-sm font-medium text-slate-700 mb-1">รายละเอียดเพิ่มเติม</label>
+                    <textarea id="ergonomics_detail" rows="2"
+                        placeholder="เช่น ปรับเก้าอี้ตามหลักการยศาสตร์ในสำนักงาน 3 ชั้น"
+                        class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-primary focus:outline-none resize-none"></textarea>
+                </div>
+
+                <h3 class="text-sm font-bold text-slate-700 mb-3">5.2 ระบบสนับสนุนดิจิทัล (เลือกได้หลายข้อ)</h3>
+                <div class="space-y-2" id="digital-systems-group">
+                    <!-- Rendered by JS -->
+                </div>
+                <div id="digital-other-wrap" class="hidden mt-3">
+                    <input type="text" id="digital_other" placeholder="ระบุระบบดิจิทัลอื่นๆ"
+                        class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-primary focus:outline-none" />
                 </div>
             </div>
 
-            <!-- Nav Buttons -->
-            <div class="nav-buttons">
-                <button class="btn btn-prev" id="btn-prev" style="visibility: hidden;" onclick="prevStep()">←
+            <!-- STEP 6: ระบบ HRD -->
+            <div class="form-step" data-step="5">
+                <h2 class="text-xl font-bold text-primary mb-1">📚 ส่วนที่ 6: ระบบ HRD</h2>
+                <p class="text-slate-500 text-sm mb-6">เอกสาร HRD และโอกาสพัฒนาระบบ</p>
+
+                <h3 class="text-sm font-bold text-slate-700 mb-3">6.1 ลิงก์เอกสาร HRD</h3>
+                <div class="space-y-4 mb-6">
+                    <div><label class="block text-xs text-slate-500 mb-1">แผน HRD (ย้อนหลัง 3–5 ปี)</label><input
+                            type="text" id="hrd_plan_url" placeholder="https://drive.google.com/..."
+                            class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-primary focus:outline-none" />
+                    </div>
+                    <div><label class="block text-xs text-slate-500 mb-1">งบประมาณพัฒนาข้าราชการ</label><input
+                            type="text" id="hrd_budget_url" placeholder="https://drive.google.com/..."
+                            class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-primary focus:outline-none" />
+                    </div>
+                    <div><label class="block text-xs text-slate-500 mb-1">กรอบสมรรถนะหลัก (Core
+                            Competency)</label><input type="text" id="core_competency_url"
+                            placeholder="https://drive.google.com/..."
+                            class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-primary focus:outline-none" />
+                    </div>
+                    <div><label class="block text-xs text-slate-500 mb-1">สมรรถนะเฉพาะตำแหน่ง (Functional
+                            Competency)</label><input type="text" id="functional_competency_url"
+                            placeholder="https://drive.google.com/..."
+                            class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-primary focus:outline-none" />
+                    </div>
+                </div>
+
+                <h3 class="text-sm font-bold text-slate-700 mb-3">6.2 โอกาสพัฒนาระบบ HRD <span
+                        class="text-slate-400 font-normal">(เลือกได้หลายข้อ)</span></h3>
+                <div class="space-y-2" id="hrd-opportunities-group">
+                    <!-- Rendered by JS -->
+                </div>
+                <div id="hrd-opp-other-wrap" class="hidden mt-3">
+                    <textarea id="hrd_opportunities_other" rows="2" placeholder="ระบุโอกาสพัฒนาอื่นๆ"
+                        class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-primary focus:outline-none resize-none"></textarea>
+                </div>
+            </div>
+
+            <!-- STEP 7: ยุทธศาสตร์ -->
+            <div class="form-step" data-step="6">
+                <h2 class="text-xl font-bold text-primary mb-1">🎯 ส่วนที่ 7: ความสอดคล้องเชิงยุทธศาสตร์</h2>
+                <p class="text-slate-500 text-sm mb-6">สรุปก่อนส่งข้อมูล</p>
+
+                <div class="mb-5">
+                    <label class="block text-sm font-semibold text-slate-700 mb-1.5">URL HR Strategy Map (ถ้ามี)</label>
+                    <input type="text" id="hr_strategy_map_url" placeholder="https://drive.google.com/..."
+                        class="w-full border-2 border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-primary focus:outline-none transition" />
+                </div>
+
+                <h3 class="text-sm font-bold text-slate-700 mb-2">ประเด็นยุทธศาสตร์สำคัญ <span
+                        class="text-slate-400 font-normal">(เลือกได้ไม่เกิน 3 ข้อ)</span></h3>
+                <p class="text-xs text-slate-400 mb-3">คลิกเลือก แล้วจัดลำดับความสำคัญ</p>
+                <div class="flex flex-wrap gap-2 mb-4" id="priority-chips">
+                    <!-- Rendered by JS -->
+                </div>
+                <p class="text-red-500 text-xs mb-4 hidden" id="err-priority">กรุณาเลือกอย่างน้อย 1 ประเด็น (ไม่เกิน 3
+                    ประเด็น)</p>
+
+                <div id="priority-rank-section" class="hidden mb-4">
+                    <h4 class="text-xs font-semibold text-slate-600 mb-2">จัดลำดับความสำคัญ (ลากเพื่อเรียง)</h4>
+                    <div id="priority-rank-list" class="space-y-2"></div>
+                </div>
+
+                <div id="strategic-other-wrap" class="hidden mb-5">
+                    <label class="block text-sm font-medium text-slate-700 mb-1">อื่นๆ — ระบุ</label>
+                    <textarea id="strategic_priorities_other" rows="2" placeholder="ระบุประเด็นยุทธศาสตร์อื่นๆ"
+                        class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-primary focus:outline-none resize-none"></textarea>
+                </div>
+
+                <!-- Summary Card -->
+                <div class="bg-gradient-to-br from-primary to-blue-700 rounded-2xl p-5 text-white mt-6"
+                    id="summary-card">
+                    <h3 class="font-bold text-lg mb-3">📋 สรุปข้อมูลก่อนส่ง</h3>
+                    <div id="summary-content" class="space-y-2 text-sm text-blue-100"></div>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <div class="flex justify-between items-center mt-8 pt-5 border-t border-slate-100">
+                <button id="btn-prev" onclick="prevStep()"
+                    class="invisible px-5 py-2.5 border border-slate-300 rounded-xl text-slate-600 text-sm font-semibold hover:bg-slate-50 transition flex items-center gap-2">←
                     ย้อนกลับ</button>
-                <button class="btn btn-next" id="btn-next" onclick="nextStep()">ถัดไป →</button>
+                <button id="btn-next" onclick="nextStep()"
+                    class="px-6 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary-dark transition flex items-center gap-2 shadow-sm">ถัดไป
+                    →</button>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Loading Overlay -->
+    <div id="overlay-loading"
+        class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+        <div class="bg-white rounded-2xl p-8 text-center shadow-xl">
+            <div class="w-12 h-12 border-4 border-slate-200 border-t-primary rounded-full animate-spin mx-auto mb-4">
+            </div>
+            <p class="font-semibold text-slate-700">กำลังบันทึกข้อมูล...</p>
+            <p class="text-sm text-slate-400 mt-1">กรุณารอสักครู่</p>
+        </div>
+    </div>
+
+    <!-- Success Overlay -->
+    <div id="overlay-success"
+        class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+        <div class="bg-white rounded-2xl p-8 text-center shadow-xl max-w-sm w-full mx-4">
+            <div class="text-5xl mb-4">🎉</div>
+            <h2 class="text-xl font-bold text-slate-800 mb-2">ส่งข้อมูลสำเร็จ!</h2>
+            <p id="success-ref" class="text-sm text-slate-500 mb-6"></p>
+            <button onclick="location.reload()"
+                class="w-full py-3 bg-primary text-white rounded-xl font-semibold hover:bg-primary-dark transition">กรอกใหม่</button>
+        </div>
+    </div>
+
+    <!-- Error Overlay -->
+    <div id="overlay-error"
+        class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+        <div class="bg-white rounded-2xl p-8 text-center shadow-xl max-w-sm w-full mx-4">
+            <div class="text-5xl mb-4">❌</div>
+            <h2 class="text-xl font-bold text-slate-800 mb-2">เกิดข้อผิดพลาด</h2>
+            <p id="error-msg" class="text-sm text-slate-500 mb-6"></p>
+            <div class="flex gap-3">
+                <button onclick="hideOverlay('error')"
+                    class="flex-1 py-3 border border-slate-300 text-slate-600 rounded-xl font-semibold hover:bg-slate-50 transition">ยกเลิก</button>
+                <button onclick="retrySubmit()"
+                    class="flex-1 py-3 bg-primary text-white rounded-xl font-semibold hover:bg-primary-dark transition">ลองอีกครั้ง
+                    🔄</button>
             </div>
         </div>
     </div>
 
-    <!-- State Overlays -->
-    <div class="state-overlay" id="state-loading">
-        <div class="state-box">
-            <div class="spinner"></div>
-            <div class="state-title">กำลังบันทึกข้อมูล...</div>
-            <div class="state-msg">กรุณารอสักครู่</div>
-        </div>
+    <!-- Toast -->
+    <div id="toast"
+        class="fixed bottom-6 right-6 bg-slate-800 text-white text-sm px-4 py-2.5 rounded-xl shadow-lg opacity-0 pointer-events-none z-50 flex items-center gap-2">
     </div>
 
-    <div class="state-overlay" id="state-success">
-        <div class="state-box">
-            <div class="state-icon">🎉</div>
-            <div class="state-title">ส่งข้อมูลสำเร็จ!</div>
-            <div class="state-msg" id="success-msg">ขอบคุณที่ส่งแบบสอบถาม</div>
-            <button class="btn btn-next" onclick="location.href='/'">กลับหน้าหลัก</button>
-        </div>
-    </div>
-
-    <div class="state-overlay" id="state-error">
-        <div class="state-box">
-            <div class="state-icon">❌</div>
-            <div class="state-title">เกิดข้อผิดพลาด</div>
-            <div class="state-msg" id="error-msg">ไม่สามารถส่งข้อมูลได้</div>
-            <button class="btn btn-next" id="btn-retry" onclick="retrySubmit()">ลองอีกครั้ง 🔄</button>
-        </div>
-    </div>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <p>แบบสอบถามข้อมูลระดับองค์กร — HRD บท 1 | NIDA Well-being Survey</p>
-    </footer>
-
-    <!-- Scripts -->
     <script src="js/supabase-config.js"></script>
     <script src="js/ch1-form.js"></script>
 </body>

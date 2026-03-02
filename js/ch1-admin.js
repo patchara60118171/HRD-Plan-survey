@@ -1,46 +1,46 @@
-// ========================================
-// js/ch1-admin.js — HRD Ch1 Admin Dashboard Logic
-// ========================================
+// =============================================
+// js/ch1-admin.js — HRD Ch1 Admin Dashboard v2
+// =============================================
 
 const ch1Admin = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const ORGANIZATIONS = [
-    "กรมกิจการเด็กและเยาวชน",
-    "กรมคุมประพฤติ",
-    "กรมชลประทาน",
-    "กรมทางหลวง",
-    "กรมวิทยาศาสตร์บริการ",
-    "กรมส่งเสริมวัฒนธรรม",
-    "กรมสุขภาพจิต",
-    "กรมอุตุนิยมวิทยา",
-    "สำนักงานมาตรฐานสินค้าเกษตรและอาหารแห่งชาติ",
-    "สำนักงานคณะกรรมการพัฒนาระบบราชการ",
-    "สำนักงานนโยบายและแผนทรัพยากรธรรมชาติและสิ่งแวดล้อม",
-    "สำนักงานนโยบายและยุทธศาสตร์การค้า",
-    "สำนักงานปลัดกระทรวงการท่องเที่ยวและกีฬา",
-    "สำนักงานการวิจัยแห่งชาติ",
-    "สำนักงานสภาพัฒนาการเศรษฐกิจและสังคมแห่งชาติ"
+    'กรมอนามัย', 'กรมควบคุมโรค', 'กรมการแพทย์', 'กรมสุขภาพจิต',
+    'กรมวิทยาศาสตร์การแพทย์', 'สำนักงานคณะกรรมการอาหารและยา',
+    'กรมสนับสนุนบริการสุขภาพ', 'กรมการแพทย์แผนไทยและการแพทย์ทางเลือก',
+    'สถาบันการแพทย์ฉุกเฉินแห่งชาติ', 'สำนักงานหลักประกันสุขภาพแห่งชาติ',
+    'สำนักงานประกันสังคม', 'กรมพัฒนาฝีมือแรงงาน',
+    'กรมสวัสดิการและคุ้มครองแรงงาน', 'สำนักงานปลัดกระทรวงสาธารณสุข',
+    'สำนักงานปลัดกระทรวงแรงงาน',
 ];
 
-const HEALTH_ISSUES_ALL = ['NCD', 'สุขภาพจิต', 'น้ำหนักเกิน', 'การนอนหลับ', 'ออฟฟิศซินโดรม', 'แอลกอฮอล์/บุหรี่'];
-const PLANS_ALL = [
-    'ยุทธศาสตร์ชาติ 20 ปี',
-    'แผนพัฒนาเศรษฐกิจและสังคมแห่งชาติ ฉบับที่ 13',
-    'แผนแม่บทของกระทรวงที่สังกัด',
-    'แผน HRD ของหน่วยงาน',
-    'ไม่แน่ใจ / ไม่ทราบ'
-];
+const TRAINING_LABELS = {
+    over40: '> 40 ชม.', '30_40': '30–40 ชม.', '20_29': '20–29 ชม.',
+    '10_19': '10–19 ชม.', under10: '< 10 ชม.', no_data: 'ไม่มีข้อมูล',
+};
+const HRD_OPP_LABELS = {
+    strategic_align: 'สอดคล้องเชิงยุทธศาสตร์', tna: 'TNA',
+    eval: 'ติดตามผล', wellbeing: 'บูรณาการสุขภาวะ',
+    career: 'Career Path', leader: 'พัฒนาผู้นำ', digital: 'ดิจิทัล/E-learning', other: 'อื่นๆ',
+};
+const DIGITAL_LABELS = {
+    e_doc: 'เอกสารอิเล็กทรอนิกส์', e_sign: 'E-Signature', cloud: 'Cloud',
+    hr_digital: 'HR Digital', health_db: 'ฐานข้อมูลสุขภาพ', none: 'ไม่มี', other: 'อื่นๆ',
+};
+const SUPPORT_LABELS = { full: 'ครบ', partial: 'บางส่วน', none: 'ไม่มี' };
 
 let allResponses = [];
+let filteredResponses = [];
 let chartInstances = {};
+let currentPage = 1;
+const PAGE_SIZE = 10;
 
-// --- Session Guard ---
+// =============================================
+// SESSION GUARD
+// =============================================
 (async () => {
     const { data: { session } } = await ch1Admin.auth.getSession();
-    if (!session) {
-        window.location.href = '/admin-login.html';
-        return;
-    }
+    if (!session) { window.location.href = 'admin-login.html'; return; }
     document.getElementById('loading-screen').style.display = 'none';
     document.getElementById('dashboard').style.display = 'block';
     await initDashboard();
@@ -48,16 +48,23 @@ let chartInstances = {};
 
 async function logout() {
     await ch1Admin.auth.signOut();
-    window.location.href = '/admin-login.html';
+    window.location.href = 'admin-login.html';
 }
 
-// --- Tab Switching ---
+// =============================================
+// TAB
+// =============================================
 function switchTab(tabId) {
     document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tabId));
     document.querySelectorAll('.tab-content').forEach(c => c.classList.toggle('active', c.id === `tab-${tabId}`));
+    // Lazy-render new tabs on first visit
+    if (tabId === 'workforce' && !chartInstances['age-donut']) renderWorkforceTab();
+    if (tabId === 'hrd' && !chartInstances['support-systems']) renderHRDTab();
 }
 
-// --- Init ---
+// =============================================
+// INIT
+// =============================================
 async function initDashboard() {
     try {
         await loadAllData();
@@ -67,415 +74,414 @@ async function initDashboard() {
         renderPlansTab();
         renderExportTab();
     } catch (err) {
-        console.error('Dashboard init error:', err);
+        console.error('[ch1-admin] init error:', err);
     }
 }
 
 async function loadAllData() {
+    console.log('[ch1-admin] Fetching all responses...');
     const { data, error } = await ch1Admin
         .from('hrd_ch1_responses')
         .select('*')
         .order('submitted_at', { ascending: false });
-
     if (error) throw error;
     allResponses = data || [];
+    filteredResponses = [...allResponses];
+    console.log('[ch1-admin] Loaded', allResponses.length, 'records');
 }
 
-// ========================================
-// TAB: Overview
-// ========================================
+// =============================================
+// OVERVIEW
+// =============================================
 function renderOverview() {
-    const submitted = new Set(allResponses.map(r => r.organization));
-    const submittedCount = submitted.size;
-    const pendingCount = 15 - submittedCount;
+    const submitted = [...new Set(allResponses.map(r => r.organization))];
+    const pending = ORGANIZATIONS.filter(o => !submitted.includes(o));
+    const totalStaff = allResponses.reduce((s, r) => s + (r.total_staff || 0), 0);
+    const ncdVals = allResponses.filter(r => r.ncd_ratio_pct != null).map(r => r.ncd_ratio_pct);
+    const avgNcd = ncdVals.length ? (ncdVals.reduce((a, b) => a + b, 0) / ncdVals.length).toFixed(1) : '—';
 
-    const totalStaff = allResponses.reduce((sum, r) => sum + (r.total_staff || 0), 0);
-    const ncdRatios = allResponses.filter(r => r.ncd_ratio_pct != null).map(r => r.ncd_ratio_pct);
-    const avgNcd = ncdRatios.length > 0
-        ? (ncdRatios.reduce((s, v) => s + Number(v), 0) / ncdRatios.length).toFixed(1)
-        : '-';
+    // Turnover KPI
+    const tvVals = allResponses.filter(r => r.turnover_rate != null).map(r => parseFloat(r.turnover_rate));
+    const avgTv = tvVals.length ? (tvVals.reduce((a, b) => a + b, 0) / tvVals.length).toFixed(1) : '—';
 
-    document.getElementById('kpi-submitted').textContent = `${submittedCount} / 15`;
-    document.getElementById('kpi-pending').textContent = pendingCount;
+    // Training Mode KPI
+    const trainingArr = allResponses.filter(r => r.training_hours_range).map(r => r.training_hours_range);
+    const modeTraining = mode(trainingArr);
+    const modeLabel = modeTraining ? (TRAINING_LABELS[modeTraining] || modeTraining) : '—';
+
+    document.getElementById('kpi-submitted').textContent = submitted.length;
+    document.getElementById('kpi-pending').textContent = pending.length;
     document.getElementById('kpi-staff').textContent = totalStaff.toLocaleString();
-    document.getElementById('kpi-ncd').textContent = avgNcd === '-' ? '-' : `${avgNcd}%`;
+    document.getElementById('kpi-ncd').textContent = avgNcd + (avgNcd !== '—' ? '%' : '');
+    document.getElementById('kpi-turnover').textContent = avgTv + (avgTv !== '—' ? '%' : '');
+    document.getElementById('kpi-training').textContent = modeLabel;
 
-    // Progress list
-    const container = document.getElementById('org-progress-items');
-    container.innerHTML = ORGANIZATIONS.map(org => {
-        const done = submitted.has(org);
-        return `
-            <div class="org-item">
-                <div class="org-status ${done ? 'done' : 'pending'}">${done ? '✅' : '⏳'}</div>
-                <span style="flex:1">${org}</span>
-                <span style="font-size:0.8rem;color:${done ? '#059669' : '#94A3B8'}">${done ? 'ส่งแล้ว' : 'รอการส่ง'}</span>
-            </div>
-        `;
+    // Org progress list
+    const items = ORGANIZATIONS.map(org => {
+        const rec = allResponses.find(r => r.organization === org);
+        return `<div style="display:flex;justify-content:space-between;align-items:center;padding:.6rem 0;border-bottom:1px solid #f1f5f9;">
+      <span style="font-size:.9rem;">${org}</span>
+      ${rec
+                ? `<span style="background:#D1FAE5;color:#065F46;font-size:.75rem;padding:.2rem .6rem;border-radius:50px;font-weight:600;">✓ ส่งแล้ว</span>`
+                : `<span style="background:#FEE2E2;color:#991B1B;font-size:.75rem;padding:.2rem .6rem;border-radius:50px;font-weight:600;">รอ</span>`
+            }
+    </div>`;
     }).join('');
+    document.getElementById('org-progress-items').innerHTML = items;
 }
 
-// ========================================
-// TAB: Organizations Table
-// ========================================
+// =============================================
+// ORG TABLE (with search + pagination)
+// =============================================
 function renderOrgTable() {
+    currentPage = 1;
+    renderTablePage();
+    renderPagination();
+}
+
+function renderTablePage() {
+    const start = (currentPage - 1) * PAGE_SIZE;
+    const rows = filteredResponses.slice(start, start + PAGE_SIZE);
     const tbody = document.getElementById('org-table-body');
-    if (allResponses.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:2rem;color:#94A3B8;">ยังไม่มีข้อมูล</td></tr>';
-        return;
+    if (!rows.length) { tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:2rem;color:#94A3B8;">ไม่พบข้อมูล</td></tr>`; return; }
+    tbody.innerHTML = rows.map((r, i) => `
+    <tr onclick="showDetail(${allResponses.indexOf(r)})" style="cursor:pointer;">
+      <td>${r.organization || '—'}</td>
+      <td>${(r.total_staff || 0).toLocaleString()}</td>
+      <td>${r.ncd_count || 0}</td>
+      <td>${r.ncd_ratio_pct != null ? r.ncd_ratio_pct + '%' : '—'}</td>
+      <td>${r.turnover_rate != null ? r.turnover_rate + '%' : '—'}</td>
+      <td>${TRAINING_LABELS[r.training_hours_range] || r.training_hours_range || '—'}</td>
+      <td style="font-size:.8rem;">${r.submitted_at ? new Date(r.submitted_at).toLocaleDateString('th-TH') : '—'}</td>
+    </tr>`).join('');
+
+    const total = filteredResponses.length;
+    const end = Math.min(start + PAGE_SIZE, total);
+    document.getElementById('table-info').textContent = total ? `แสดง ${start + 1}–${end} จาก ${total} รายการ` : '';
+    document.getElementById('page-info').textContent = total ? `แสดง ${start + 1}–${end} จาก ${total} รายการ` : '';
+}
+
+function renderPagination() {
+    const total = filteredResponses.length;
+    const totalPages = Math.ceil(total / PAGE_SIZE);
+    const btns = document.getElementById('page-buttons');
+    if (totalPages <= 1) { btns.innerHTML = ''; return; }
+
+    let html = `<button onclick="goToPage(1)" style="${pgStyle(currentPage === 1)}">«</button>
+              <button onclick="goToPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''} style="${pgStyle(false)}">‹</button>`;
+    for (let i = 1; i <= totalPages; i++) {
+        if (i === 1 || i === totalPages || Math.abs(i - currentPage) <= 1) {
+            html += `<button onclick="goToPage(${i})" style="${pgStyle(i === currentPage)}">${i}</button>`;
+        } else if (Math.abs(i - currentPage) === 2) {
+            html += `<span style="padding:.4rem;">…</span>`;
+        }
     }
-
-    tbody.innerHTML = allResponses.map((r, i) => {
-        const sevBadge = severityBadge(r.severity_score);
-        const hrdBadge = hrdStatusBadge(r.hrd_plan_status);
-        const topIssues = (r.health_issues || []).slice(0, 2).join(', ');
-        const date = new Date(r.submitted_at).toLocaleDateString('th-TH', {
-            day: '2-digit', month: 'short', year: 'numeric'
-        });
-
-        return `
-            <tr style="cursor:pointer" onclick="showDetail(${i})">
-                <td style="font-weight:500">${r.organization}</td>
-                <td>${(r.total_staff || 0).toLocaleString()}</td>
-                <td>${r.ncd_count ?? '-'}</td>
-                <td>${r.ncd_ratio_pct != null ? r.ncd_ratio_pct + '%' : '-'}</td>
-                <td>${topIssues || '-'}</td>
-                <td>${sevBadge}</td>
-                <td>${hrdBadge}</td>
-                <td>${date}</td>
-            </tr>
-        `;
-    }).join('');
+    html += `<button onclick="goToPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''} style="${pgStyle(false)}">›</button>
+           <button onclick="goToPage(${totalPages})" style="${pgStyle(currentPage === totalPages)}">»</button>`;
+    btns.innerHTML = html;
 }
 
-function severityBadge(score) {
-    if (score == null) return '-';
-    if (score <= 2) return `<span class="badge badge-green">${score}/5</span>`;
-    if (score === 3) return `<span class="badge badge-yellow">${score}/5</span>`;
-    return `<span class="badge badge-red">${score}/5</span>`;
+function pgStyle(active) {
+    return `border:1px solid ${active ? 'var(--primary)' : 'var(--border)'};background:${active ? 'var(--primary)' : 'white'};color:${active ? 'white' : 'var(--text)'};border-radius:8px;padding:.35rem .65rem;cursor:pointer;font-family:inherit;font-size:.85rem;`;
 }
 
-function hrdStatusBadge(status) {
-    const map = {
-        yes: '<span class="badge badge-green">มีแล้ว</span>',
-        inprogress: '<span class="badge badge-yellow">กำลังจัดทำ</span>',
-        no: '<span class="badge badge-red">ยังไม่มี</span>'
-    };
-    return map[status] || '-';
+function goToPage(p) {
+    const totalPages = Math.ceil(filteredResponses.length / PAGE_SIZE);
+    if (p < 1 || p > totalPages) return;
+    currentPage = p;
+    renderTablePage();
+    renderPagination();
 }
 
-function showDetail(index) {
-    const r = allResponses[index];
+function filterTable() {
+    const q = document.getElementById('search-org').value.toLowerCase().trim();
+    filteredResponses = q ? allResponses.filter(r => r.organization?.toLowerCase().includes(q)) : [...allResponses];
+    currentPage = 1;
+    renderTablePage();
+    renderPagination();
+}
+
+// =============================================
+// DETAIL MODAL
+// =============================================
+function showDetail(i) {
+    const r = allResponses[i];
     if (!r) return;
-
-    const hrdLabels = { yes: '✅ มีแล้ว', inprogress: '🔄 กำลังจัดทำ', no: '❌ ยังไม่มี' };
-    const sevLabels = ['', 'น้อยมาก', 'น้อย', 'ปานกลาง', 'มาก', 'มากที่สุด'];
-    const date = new Date(r.submitted_at).toLocaleString('th-TH');
-
-    let html = `
-        <button class="modal-close" onclick="closeModal()">&times;</button>
-        <div class="modal-title">🏢 ${r.organization}</div>
-        <div class="modal-row"><span class="lbl">บุคลากรทั้งหมด</span><span class="val">${(r.total_staff || 0).toLocaleString()} คน</span></div>
-        ${r.age_u30 ? `<div class="modal-row"><span class="lbl">อายุ < 30</span><span class="val">${r.age_u30} คน</span></div>` : ''}
-        ${r.age_30_39 ? `<div class="modal-row"><span class="lbl">อายุ 30-39</span><span class="val">${r.age_30_39} คน</span></div>` : ''}
-        ${r.age_40_49 ? `<div class="modal-row"><span class="lbl">อายุ 40-49</span><span class="val">${r.age_40_49} คน</span></div>` : ''}
-        ${r.age_50_plus ? `<div class="modal-row"><span class="lbl">อายุ 50+</span><span class="val">${r.age_50_plus} คน</span></div>` : ''}
-        <div class="modal-row"><span class="lbl">ผู้ป่วย NCD</span><span class="val">${r.ncd_count ?? '-'} คน (${r.ncd_ratio_pct != null ? r.ncd_ratio_pct + '%' : '-'})</span></div>
-        <div class="modal-row"><span class="lbl">ค่ารักษาพยาบาล</span><span class="val">${r.med_expense_available === 'yes' ? 'มีข้อมูล' : 'ไม่มีข้อมูล'}</span></div>
-        ${r.med_expense_available === 'yes' ? `
-        <div class="modal-row"><span class="lbl">ค่ารักษา 2563-2567</span><span class="val">${[r.med_expense_2563, r.med_expense_2564, r.med_expense_2565, r.med_expense_2566, r.med_expense_2567].map(v => v != null ? Number(v).toLocaleString() : '-').join(' / ')}</span></div>
-        ` : ''}
-        <div style="margin-top:1rem">
-            <span class="lbl" style="font-size:0.85rem;color:#64748B;">ปัญหาสุขภาพ</span>
-            <div class="modal-tags">${(r.health_issues || []).map(i => `<span class="modal-tag">${i}</span>`).join('')}</div>
-            ${r.health_issues_other ? `<div style="margin-top:0.3rem;font-size:0.85rem;color:#64748B;">อื่นๆ: ${r.health_issues_other}</div>` : ''}
-        </div>
-        <div class="modal-row"><span class="lbl">ความรุนแรง</span><span class="val">${sevLabels[r.severity_score] || '-'} (${r.severity_score}/5)</span></div>
-        <div style="margin-top:1rem">
-            <span class="lbl" style="font-size:0.85rem;color:#64748B;">แผนที่เชื่อมโยง</span>
-            <div class="modal-tags">${(r.linked_plans || []).map(p => `<span class="modal-tag">${p}</span>`).join('')}</div>
-        </div>
-        <div class="modal-row"><span class="lbl">สถานะ HRD</span><span class="val">${hrdLabels[r.hrd_plan_status] || '-'}</span></div>
-        <div class="modal-row"><span class="lbl">วันที่ส่ง</span><span class="val">${date}</span></div>
-    `;
-
+    const wrap = id => `<div class="modal-row"><span class="lbl">${id[0]}</span><span class="val">${id[1] ?? '—'}</span></div>`;
+    const html = `
+    <button class="modal-close" onclick="document.getElementById('detail-modal').classList.remove('show')">✕</button>
+    <div class="modal-title">🏢 ${r.organization}</div>
+    ${wrap(['วันที่ส่ง', r.submitted_at ? new Date(r.submitted_at).toLocaleString('th-TH') : null])}
+    ${wrap(['บุคลากรรวม', r.total_staff ? r.total_staff.toLocaleString() + ' คน' : null])}
+    ${wrap(['NCD รวม', r.ncd_count ? r.ncd_count + ' คน (' + (r.ncd_ratio_pct || 0) + '%)' : null])}
+    ${wrap(['อัตราลาออก', r.turnover_rate != null ? r.turnover_rate + '%' : null])}
+    ${wrap(['ชั่วโมงอบรม', TRAINING_LABELS[r.training_hours_range] || r.training_hours_range])}
+    ${wrap(['ระบบพี่เลี้ยง', SUPPORT_LABELS[r.mentoring_system] || r.mentoring_system])}
+    ${wrap(['Job Rotation', SUPPORT_LABELS[r.job_rotation] || r.job_rotation])}
+    ${wrap(['IDP', SUPPORT_LABELS[r.idp_system] || r.idp_system])}
+    ${wrap(['Career Path', SUPPORT_LABELS[r.career_path_system] || r.career_path_system])}
+    ${wrap(['Ergonomics', r.ergonomics_status])}
+    ${wrap(['version', r.form_version])}
+    ${r.strategic_priorities ? `<div class="modal-row"><span class="lbl">ยุทธศาสตร์</span><span class="val">${(r.strategic_priorities).map(p => p.rank + '. ' + p.label).join(', ')}</span></div>` : ''}
+  `;
     document.getElementById('modal-content').innerHTML = html;
     document.getElementById('detail-modal').classList.add('show');
 }
-
-function closeModal() {
-    document.getElementById('detail-modal').classList.remove('show');
-}
-
-// Close modal on overlay click
-document.getElementById('detail-modal')?.addEventListener('click', (e) => {
-    if (e.target === document.getElementById('detail-modal')) closeModal();
+document.getElementById('detail-modal')?.addEventListener('click', e => {
+    if (e.target === document.getElementById('detail-modal')) document.getElementById('detail-modal').classList.remove('show');
 });
 
-// ========================================
-// TAB: Health Issues
-// ========================================
+// =============================================
+// HEALTH TAB (existing)
+// =============================================
 function renderHealthTab() {
-    // Count issues
-    const issueCounts = {};
-    const issueSeverity = {};
-    HEALTH_ISSUES_ALL.forEach(iss => { issueCounts[iss] = 0; issueSeverity[iss] = []; });
+    const diseases = ['disease_diabetes', 'disease_hypertension', 'disease_cardiovascular', 'disease_kidney', 'disease_liver', 'disease_cancer', 'disease_obesity'];
+    const labels = ['เบาหวาน', 'ความดัน', 'หัวใจ', 'ไต', 'ตับ', 'มะเร็ง', 'อ้วน'];
+    const totals = diseases.map(d => allResponses.reduce((s, r) => s + (r[d] || 0), 0));
 
-    allResponses.forEach(r => {
-        (r.health_issues || []).forEach(iss => {
-            if (issueCounts[iss] !== undefined) {
-                issueCounts[iss]++;
-                if (r.severity_score) issueSeverity[iss].push(r.severity_score);
-            }
-        });
-    });
-
-    const labels = HEALTH_ISSUES_ALL;
-    const counts = labels.map(l => issueCounts[l]);
-    const avgSev = labels.map(l => {
-        const arr = issueSeverity[l];
-        return arr.length > 0 ? +(arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(1) : 0;
-    });
-
-    // Chart 1: Horizontal bar
-    destroyChart('chart-issues');
-    chartInstances['chart-issues'] = new Chart(document.getElementById('chart-issues'), {
+    destroyChart('ncd-bar');
+    chartInstances['ncd-bar'] = new Chart(document.getElementById('chart-issues'), {
         type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'จำนวนหน่วยงาน',
-                data: counts,
-                backgroundColor: ['#EF4444', '#8B5CF6', '#F59E0B', '#6366F1', '#10B981', '#EC4899'],
-                borderRadius: 6,
-                barThickness: 28
-            }]
-        },
-        options: {
-            indexAxis: 'y',
-            responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-                x: { beginAtZero: true, title: { display: true, text: 'จำนวนหน่วยงาน' } }
-            }
-        }
+        data: { labels, datasets: [{ label: 'จำนวนคน', data: totals, backgroundColor: '#0F4C81', borderRadius: 6 }] },
+        options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
     });
 
-    // Chart 2: Scatter-like bar
-    destroyChart('chart-severity');
-    chartInstances['chart-severity'] = new Chart(document.getElementById('chart-severity'), {
+    const ncdTotals = allResponses.map(r => r.ncd_count || 0);
+    const labels2 = allResponses.map(r => r.organization?.substring(0, 6) || '—');
+    destroyChart('ncd-severity');
+    chartInstances['ncd-severity'] = new Chart(document.getElementById('chart-severity'), {
         type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'ความรุนแรงเฉลี่ย',
-                data: avgSev,
-                backgroundColor: avgSev.map(v => v <= 2 ? '#10B981' : v <= 3 ? '#F59E0B' : '#EF4444'),
-                borderRadius: 6,
-                barThickness: 28
-            }]
-        },
-        options: {
-            indexAxis: 'y',
-            responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-                x: { beginAtZero: true, max: 5, title: { display: true, text: 'ความรุนแรงเฉลี่ย (1-5)' } }
-            }
-        }
+        data: { labels: labels2, datasets: [{ label: 'NCD (คน)', data: ncdTotals, backgroundColor: '#00A86B', borderRadius: 4 }] },
+        options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
     });
 
-    // Heatmap Matrix
-    renderHealthMatrix();
+    // Heatmap: org × disease
+    const matrix = document.getElementById('health-matrix');
+    const header = `<tr><th></th>${labels.map(l => `<th>${l}</th>`).join('')}</tr>`;
+    const body = allResponses.map(r => `
+    <tr><td>${r.organization?.substring(0, 8) || '—'}</td>
+    ${diseases.map(d => { const v = r[d] || 0; return `<td class="${v > 20 ? 'yes' : v > 0 ? '' : 'unknown'}">${v || 0}</td>`; }).join('')}
+    </tr>`).join('');
+    matrix.innerHTML = header + body;
 }
 
-function renderHealthMatrix() {
-    const submitted = {};
-    allResponses.forEach(r => { submitted[r.organization] = r.health_issues || []; });
-
-    let html = '<thead><tr><th>หน่วยงาน</th>';
-    HEALTH_ISSUES_ALL.forEach(iss => { html += `<th>${iss}</th>`; });
-    html += '</tr></thead><tbody>';
-
-    ORGANIZATIONS.forEach(org => {
-        html += `<tr><td>${org}</td>`;
-        const issues = submitted[org];
-        HEALTH_ISSUES_ALL.forEach(iss => {
-            if (!issues) {
-                html += '<td class="unknown">?</td>';
-            } else if (issues.includes(iss)) {
-                html += '<td class="yes">✅</td>';
-            } else {
-                html += '<td class="no">─</td>';
-            }
-        });
-        html += '</tr>';
-    });
-    html += '</tbody>';
-
-    document.getElementById('health-matrix').innerHTML = html;
-}
-
-// ========================================
-// TAB: Plans
-// ========================================
+// =============================================
+// PLANS TAB (existing — kept simple)
+// =============================================
 function renderPlansTab() {
-    const submitted = {};
+    const priority_counts = {};
     allResponses.forEach(r => {
-        submitted[r.organization] = {
-            plans: r.linked_plans || [],
-            hrdStatus: r.hrd_plan_status
-        };
-    });
-
-    // Plan counts
-    const planCounts = {};
-    PLANS_ALL.forEach(p => planCounts[p] = 0);
-    allResponses.forEach(r => {
-        (r.linked_plans || []).forEach(p => {
-            if (planCounts[p] !== undefined) planCounts[p]++;
+        (r.strategic_priorities || []).forEach(p => {
+            priority_counts[p.label] = (priority_counts[p.label] || 0) + 1;
         });
     });
+    const entries = Object.entries(priority_counts).sort((a, b) => b[1] - a[1]);
+    document.getElementById('plans-progress').innerHTML = entries.length
+        ? entries.map(([label, count]) => `
+      <div style="margin-bottom:.75rem;">
+        <div style="display:flex;justify-content:space-between;font-size:.85rem;margin-bottom:.25rem;">
+          <span>${label}</span><span><b>${count}</b> หน่วยงาน</span>
+        </div>
+        <div style="background:#e2e8f0;border-radius:99px;height:8px;">
+          <div style="background:#0F4C81;border-radius:99px;height:8px;width:${Math.round(count / Math.max(allResponses.length, 1) * 100)}%;"></div>
+        </div>
+      </div>`).join('')
+        : '<p style="color:#94A3B8;font-size:.9rem;">ยังไม่มีข้อมูลยุทธศาสตร์</p>';
 
-    // Progress bars
-    const progressHtml = PLANS_ALL.map(plan => {
-        const count = planCounts[plan];
-        const pct = Math.round((count / 15) * 100);
-        return `
-            <div style="margin-bottom:1rem">
-                <div style="display:flex;justify-content:space-between;font-size:0.85rem;margin-bottom:0.3rem">
-                    <span>${plan}</span>
-                    <span style="font-weight:600">${count}/15 (${pct}%)</span>
-                </div>
-                <div style="background:#E2E8F0;border-radius:50px;height:12px;overflow:hidden">
-                    <div style="width:${pct}%;height:100%;background:linear-gradient(90deg,#0D9488,#3B82F6);border-radius:50px;transition:width 0.5s"></div>
-                </div>
-            </div>
-        `;
-    }).join('');
-    document.getElementById('plans-progress').innerHTML = progressHtml;
-
-    // HRD Status
-    let yesCount = 0, ipCount = 0, noCount = 0;
-    allResponses.forEach(r => {
-        if (r.hrd_plan_status === 'yes') yesCount++;
-        else if (r.hrd_plan_status === 'inprogress') ipCount++;
-        else if (r.hrd_plan_status === 'no') noCount++;
-    });
-    document.getElementById('hrd-status-summary').innerHTML = `
-        <div class="status-card yes-card"><div class="val">${yesCount}</div><div class="lbl">มีแผน HRD แล้ว</div></div>
-        <div class="status-card inprogress-card"><div class="val">${ipCount}</div><div class="lbl">กำลังจัดทำ</div></div>
-        <div class="status-card no-card"><div class="val">${noCount}</div><div class="lbl">ยังไม่มี</div></div>
-    `;
-
-    // Plans Matrix
-    let mHtml = '<thead><tr><th>หน่วยงาน</th>';
-    PLANS_ALL.forEach(p => { mHtml += `<th style="font-size:0.65rem;">${p}</th>`; });
-    mHtml += '<th>HRD</th></tr></thead><tbody>';
-
-    ORGANIZATIONS.forEach(org => {
-        const info = submitted[org];
-        mHtml += `<tr><td>${org}</td>`;
-        PLANS_ALL.forEach(plan => {
-            if (!info) {
-                mHtml += '<td class="unknown">?</td>';
-            } else if (info.plans.includes(plan)) {
-                mHtml += '<td class="yes">✅</td>';
-            } else {
-                mHtml += '<td class="no">❌</td>';
-            }
-        });
-        if (!info) {
-            mHtml += '<td class="unknown">?</td>';
-        } else {
-            const hrdBadge = info.hrdStatus === 'yes' ? '✅' : info.hrdStatus === 'inprogress' ? '🔄' : '❌';
-            mHtml += `<td>${hrdBadge}</td>`;
-        }
-        mHtml += '</tr>';
-    });
-    mHtml += '</tbody>';
-    document.getElementById('plans-matrix').innerHTML = mHtml;
+    document.getElementById('hrd-status-summary').innerHTML = '<p style="color:#94A3B8;font-size:.9rem;">ข้อมูลจะแสดงเมื่อมีการส่งแบบฟอร์ม v2</p>';
+    document.getElementById('plans-matrix').innerHTML = '';
 }
 
-// ========================================
-// TAB: Export
-// ========================================
-function renderExportTab() {
-    const count = allResponses.length;
-    const orgs = new Set(allResponses.map(r => r.organization)).size;
-    const latest = allResponses.length > 0
-        ? new Date(allResponses[0].submitted_at).toLocaleString('th-TH')
-        : '-';
+// =============================================
+// WORKFORCE TAB (NEW)
+// =============================================
+function renderWorkforceTab() {
+    // Age donut
+    const ageSums = { '≤30': 0, '31–40': 0, '41–50': 0, '51–60': 0, '>60': 0 };
+    allResponses.forEach(r => {
+        ageSums['≤30'] += r.age_u30 || r.age_u30 || 0;
+        ageSums['31–40'] += r.age_31_40 || r.age_30_39 || 0;
+        ageSums['41–50'] += r.age_41_50 || r.age_40_49 || 0;
+        ageSums['51–60'] += r.age_51_60 || r.age_50_plus || 0;
+        ageSums['>60'] += r.age_over60 || 0;
+    });
+    destroyChart('age-donut');
+    chartInstances['age-donut'] = new Chart(document.getElementById('chart-age-donut'), {
+        type: 'doughnut',
+        data: { labels: Object.keys(ageSums), datasets: [{ data: Object.values(ageSums), backgroundColor: ['#0F4C81', '#1a73c8', '#3b82f6', '#60a5fa', '#93c5fd'], borderWidth: 2 }] },
+        options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+    });
 
+    // Service donut
+    const svcSums = { '≤ 5 ปี': 0, '6–10 ปี': 0, '> 10 ปี': 0 };
+    allResponses.forEach(r => {
+        svcSums['≤ 5 ปี'] += r.service_u5 || 0;
+        svcSums['6–10 ปี'] += r.service_6_10 || 0;
+        svcSums['> 10 ปี'] += r.service_over10 || 0;
+    });
+    destroyChart('service-donut');
+    chartInstances['service-donut'] = new Chart(document.getElementById('chart-service-donut'), {
+        type: 'doughnut',
+        data: { labels: Object.keys(svcSums), datasets: [{ data: Object.values(svcSums), backgroundColor: ['#00A86B', '#34d399', '#6ee7b7'], borderWidth: 2 }] },
+        options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+    });
+
+    // Engagement line (aggregate by year)
+    const yearScores = {};
+    const yearCounts = {};
+    allResponses.forEach(r => {
+        (r.engagement_data || []).forEach(e => {
+            if (e.year && e.score != null) {
+                yearScores[e.year] = (yearScores[e.year] || 0) + e.score;
+                yearCounts[e.year] = (yearCounts[e.year] || 0) + 1;
+            }
+        });
+    });
+    const years = Object.keys(yearScores).sort();
+    const avgScores = years.map(y => +(yearScores[y] / yearCounts[y]).toFixed(1));
+    destroyChart('engagement-line');
+    chartInstances['engagement-line'] = new Chart(document.getElementById('chart-engagement-line'), {
+        type: 'line',
+        data: { labels: years, datasets: [{ label: 'คะแนน Engagement เฉลี่ย', data: avgScores, borderColor: '#0F4C81', backgroundColor: 'rgba(15,76,129,0.1)', tension: 0.4, fill: true, pointRadius: 5 }] },
+        options: { responsive: true, scales: { y: { min: 0, max: 100 } }, plugins: { legend: { display: false } } }
+    });
+}
+
+// =============================================
+// HRD TAB (NEW)
+// =============================================
+function renderHRDTab() {
+    const systems = [
+        { key: 'mentoring_system', label: 'พี่เลี้ยง' },
+        { key: 'job_rotation', label: 'Job Rotation' },
+        { key: 'idp_system', label: 'IDP' },
+        { key: 'career_path_system', label: 'Career Path' },
+    ];
+    const fullData = systems.map(s => allResponses.filter(r => r[s.key] === 'full').length);
+    const partialData = systems.map(s => allResponses.filter(r => r[s.key] === 'partial').length);
+    const noneData = systems.map(s => allResponses.filter(r => r[s.key] === 'none').length);
+    destroyChart('support-systems');
+    chartInstances['support-systems'] = new Chart(document.getElementById('chart-support-systems'), {
+        type: 'bar',
+        data: {
+            labels: systems.map(s => s.label),
+            datasets: [
+                { label: 'ครบ', data: fullData, backgroundColor: '#00A86B', borderRadius: 4 },
+                { label: 'บางส่วน', data: partialData, backgroundColor: '#F59E0B', borderRadius: 4 },
+                { label: 'ไม่มี', data: noneData, backgroundColor: '#EF4444', borderRadius: 4 },
+            ]
+        },
+        options: { responsive: true, scales: { x: { stacked: false }, y: { beginAtZero: true, max: Math.max(allResponses.length, 5) } }, plugins: { legend: { position: 'top' } } }
+    });
+
+    // HRD Opportunities frequency
+    const oppCounts = {};
+    allResponses.forEach(r => (r.hrd_opportunities || []).forEach(o => { oppCounts[o] = (oppCounts[o] || 0) + 1; }));
+    const oppEntries = Object.entries(oppCounts).sort((a, b) => b[1] - a[1]);
+    destroyChart('hrd-opps');
+    chartInstances['hrd-opps'] = new Chart(document.getElementById('chart-hrd-opps'), {
+        type: 'bar',
+        data: { labels: oppEntries.map(([k]) => HRD_OPP_LABELS[k] || k), datasets: [{ data: oppEntries.map(([, v]) => v), backgroundColor: '#0F4C81', borderRadius: 4 }] },
+        options: { indexAxis: 'y', responsive: true, plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true } } }
+    });
+
+    // Digital systems pie
+    const digCounts = {};
+    allResponses.forEach(r => (r.digital_systems || []).forEach(d => { digCounts[d] = (digCounts[d] || 0) + 1; }));
+    const digEntries = Object.entries(digCounts).sort((a, b) => b[1] - a[1]);
+    const COLORS = ['#0F4C81', '#1a73c8', '#3b82f6', '#00A86B', '#34d399', '#F59E0B', '#EF4444'];
+    destroyChart('digital');
+    chartInstances['digital'] = new Chart(document.getElementById('chart-digital'), {
+        type: 'pie',
+        data: { labels: digEntries.map(([k]) => DIGITAL_LABELS[k] || k), datasets: [{ data: digEntries.map(([, v]) => v), backgroundColor: COLORS }] },
+        options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+    });
+}
+
+// =============================================
+// EXPORT TAB
+// =============================================
+function renderExportTab() {
+    const today = new Date().toLocaleDateString('th-TH');
     document.getElementById('export-info').innerHTML = `
-        <div class="export-stat">ข้อมูล <strong>${count}</strong> รายการ</div>
-        <div class="export-stat"><strong>${orgs}</strong> หน่วยงาน</div>
-        <div class="export-stat">อัปเดตล่าสุด: <strong>${latest}</strong></div>
-    `;
+    <span class="export-stat">จำนวน <strong>${allResponses.length}</strong> รายการ</span>
+    <span class="export-stat">ส่งล่าสุด: <strong>${allResponses[0]?.submitted_at ? new Date(allResponses[0].submitted_at).toLocaleString('th-TH') : '—'}</strong></span>
+    <span class="export-stat">วันที่ export: <strong>${today}</strong></span>`;
+}
+
+function flattenRecord(r) {
+    return {
+        'หน่วยงาน': r.organization,
+        'บุคลากรรวม': r.total_staff,
+        'วันที่ส่ง': r.submitted_at ? new Date(r.submitted_at).toLocaleString('th-TH') : '',
+        'เบาหวาน': r.disease_diabetes || 0,
+        'ความดัน': r.disease_hypertension || 0,
+        'หัวใจ': r.disease_cardiovascular || 0,
+        'ไต': r.disease_kidney || 0,
+        'ตับ': r.disease_liver || 0,
+        'มะเร็ง': r.disease_cancer || 0,
+        'อ้วน': r.disease_obesity || 0,
+        'NCD รวม': r.ncd_count || 0,
+        'NCD%': r.ncd_ratio_pct || '',
+        'อัตราลาออก%': r.turnover_rate || '',
+        'อัตราโอนย้าย%': r.transfer_rate || '',
+        'ระบบพี่เลี้ยง': SUPPORT_LABELS[r.mentoring_system] || '',
+        'Job Rotation': SUPPORT_LABELS[r.job_rotation] || '',
+        'IDP': SUPPORT_LABELS[r.idp_system] || '',
+        'Career Path': SUPPORT_LABELS[r.career_path_system] || '',
+        'ชั่วโมงอบรม': TRAINING_LABELS[r.training_hours_range] || '',
+        'Ergonomics': r.ergonomics_status || '',
+        'ระบบดิจิทัล': (r.digital_systems || []).join(', '),
+        'ยุทธศาสตร์': (r.strategic_priorities || []).map(p => p.rank + '.' + p.label).join(' | '),
+        'form_version': r.form_version || '',
+    };
 }
 
 function exportCSV() {
-    if (allResponses.length === 0) { alert('ไม่มีข้อมูลให้ export'); return; }
-
-    const BOM = '\uFEFF';
-    const headers = [
-        'หน่วยงาน', 'บุคลากรรวม',
-        'อายุต่ำกว่า30', 'อายุ30-39', 'อายุ40-49', 'อายุ50ขึ้นไป',
-        'NCD(คน)', 'NCD(%)', 'มีข้อมูลค่ารักษา',
-        'ค่ารักษา2563', 'ค่ารักษา2564', 'ค่ารักษา2565', 'ค่ารักษา2566', 'ค่ารักษา2567',
-        'ปัญหาสุขภาพ', 'ปัญหาอื่นๆ', 'ระดับความรุนแรง',
-        'แผนชาติที่เชื่อมโยง', 'สถานะHRD', 'วันที่ส่ง'
-    ];
-
-    const rows = allResponses.map(r => [
-        r.organization, r.total_staff,
-        r.age_u30, r.age_30_39, r.age_40_49, r.age_50_plus,
-        r.ncd_count, r.ncd_ratio_pct, r.med_expense_available,
-        r.med_expense_2563, r.med_expense_2564,
-        r.med_expense_2565, r.med_expense_2566, r.med_expense_2567,
-        (r.health_issues || []).join('; '),
-        r.health_issues_other || '',
-        r.severity_score,
-        (r.linked_plans || []).join('; '),
-        r.hrd_plan_status,
-        new Date(r.submitted_at).toLocaleDateString('th-TH')
-    ]);
-
-    const csv = BOM + [headers, ...rows]
-        .map(row => row.map(v => `"${v ?? ''}"`).join(','))
-        .join('\n');
-
-    downloadFile(csv, `HRD_ch1_${todayStr()}.csv`, 'text/csv;charset=utf-8');
+    const rows = allResponses.map(flattenRecord);
+    if (!rows.length) { alert('ไม่มีข้อมูล'); return; }
+    const keys = Object.keys(rows[0]);
+    const csv = [keys.join(','), ...rows.map(r => keys.map(k => `"${String(r[k] ?? '').replace(/"/g, '""')}"`).join(','))].join('\n');
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    downloadFile(blob, `hrd_ch1_${today()}.csv`);
 }
 
 function exportJSON() {
-    if (allResponses.length === 0) { alert('ไม่มีข้อมูลให้ export'); return; }
-    downloadFile(
-        JSON.stringify(allResponses, null, 2),
-        `HRD_ch1_${todayStr()}.json`,
-        'application/json'
-    );
+    const blob = new Blob([JSON.stringify(allResponses, null, 2)], { type: 'application/json' });
+    downloadFile(blob, `hrd_ch1_${today()}.json`);
 }
 
-function downloadFile(content, filename, type) {
-    const blob = new Blob([content], { type });
-    const url = URL.createObjectURL(blob);
+function exportExcel() {
+    if (!window.XLSX) { alert('กำลังโหลด SheetJS...'); return; }
+    const rows = allResponses.map(flattenRecord);
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'HRD Ch1');
+    XLSX.writeFile(wb, `hrd_ch1_${today()}.xlsx`);
+}
+
+function downloadFile(blob, filename) {
     const a = document.createElement('a');
-    a.href = url; a.download = filename;
-    document.body.appendChild(a);
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
     a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    URL.revokeObjectURL(a.href);
 }
 
-function todayStr() {
-    const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+function today() {
+    return new Date().toISOString().slice(0, 10);
 }
 
-// --- Chart helpers ---
-function destroyChart(id) {
-    if (chartInstances[id]) {
-        chartInstances[id].destroy();
-        delete chartInstances[id];
-    }
+// =============================================
+// UTILS
+// =============================================
+function destroyChart(key) {
+    if (chartInstances[key]) { chartInstances[key].destroy(); delete chartInstances[key]; }
+}
+
+function mode(arr) {
+    if (!arr.length) return null;
+    const freq = {};
+    arr.forEach(v => (freq[v] = (freq[v] || 0) + 1));
+    return Object.entries(freq).sort((a, b) => b[1] - a[1])[0]?.[0] || null;
 }

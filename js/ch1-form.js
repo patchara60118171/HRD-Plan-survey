@@ -1,414 +1,698 @@
-// ========================================
-// js/ch1-form.js — HRD Chapter 1 Form Logic
-// ========================================
+// =============================================
+// js/ch1-form.js — HRD Chapter 1 Form v2
+// 7-step form logic, validation, auto-save
+// =============================================
 
-// --- Supabase is already loaded from supabase-config.js ---
-const ch1Supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const ch1Sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const TARGET_TABLE = 'hrd_ch1_responses';
-
-const ORGANIZATIONS = [
-    "กรมกิจการเด็กและเยาวชน",
-    "กรมคุมประพฤติ",
-    "กรมชลประทาน",
-    "กรมทางหลวง",
-    "กรมวิทยาศาสตร์บริการ",
-    "กรมส่งเสริมวัฒนธรรม",
-    "กรมสุขภาพจิต",
-    "กรมอุตุนิยมวิทยา",
-    "สำนักงานมาตรฐานสินค้าเกษตรและอาหารแห่งชาติ",
-    "สำนักงานคณะกรรมการพัฒนาระบบราชการ",
-    "สำนักงานนโยบายและแผนทรัพยากรธรรมชาติและสิ่งแวดล้อม",
-    "สำนักงานนโยบายและยุทธศาสตร์การค้า",
-    "สำนักงานปลัดกระทรวงการท่องเที่ยวและกีฬา",
-    "สำนักงานการวิจัยแห่งชาติ",
-    "สำนักงานสภาพัฒนาการเศรษฐกิจและสังคมแห่งชาติ"
-];
-
-const SEVERITY_LABELS = ['', 'น้อยมาก', 'น้อย', 'ปานกลาง', 'มาก', 'มากที่สุด'];
-
-// --- State ---
+const TOTAL_STEPS = 7;
 let currentStep = 0;
-const TOTAL_STEPS = 5;
-let lastFormData = null;
+let lastPayload = null;
+let prioritySelected = []; // [{id, label}]
+let dragSrcIdx = null;
 
-// --- Init ---
+// =============================================
+// STATIC DATA
+// =============================================
+const SUPPORT_SYSTEMS = [
+    { id: 'mentoring_system', label: '4.1 ระบบพี่เลี้ยง (Mentoring)' },
+    { id: 'job_rotation', label: '4.2 ระบบหมุนเวียนงาน (Job Rotation)' },
+    { id: 'idp_system', label: '4.3 การจัดทำแผนพัฒนารายบุคคล (IDP)' },
+    { id: 'career_path_system', label: '4.5 เส้นทางความก้าวหน้า (Career Path)' },
+];
+const SUPPORT_OPTIONS = [
+    { v: 'full', l: 'ครบทุกตำแหน่ง' },
+    { v: 'partial', l: 'มีบางตำแหน่ง' },
+    { v: 'none', l: 'ไม่มี' },
+];
+const TRAINING_OPTIONS = [
+    { v: 'over40', l: 'มากกว่า 40 ชั่วโมง' },
+    { v: '30_40', l: '30–40 ชั่วโมง' },
+    { v: '20_29', l: '20–29 ชั่วโมง' },
+    { v: '10_19', l: '10–19 ชั่วโมง' },
+    { v: 'under10', l: 'ต่ำกว่า 10 ชั่วโมง' },
+    { v: 'no_data', l: 'ไม่มีข้อมูล' },
+];
+const ERGONOMICS_OPTIONS = [
+    { v: 'none', l: 'ยังไม่มี' },
+    { v: 'planned', l: 'มีแผนแต่ยังไม่ดำเนินการ' },
+    { v: 'in_progress', l: 'อยู่ระหว่างดำเนินการ' },
+    { v: 'done', l: 'ดำเนินการแล้ว' },
+];
+const DIGITAL_SYSTEMS = [
+    { v: 'e_doc', l: 'ระบบเอกสารอิเล็กทรอนิกส์' },
+    { v: 'e_sign', l: 'ระบบลงนามอิเล็กทรอนิกส์ (E-Signature)' },
+    { v: 'cloud', l: 'ระบบ Cloud' },
+    { v: 'hr_digital', l: 'ระบบ HR Digital' },
+    { v: 'health_db', l: 'ระบบฐานข้อมูลสุขภาพ' },
+    { v: 'none', l: 'ไม่มีระบบดังกล่าว' },
+    { v: 'other', l: 'อื่นๆ' },
+];
+const HRD_OPPORTUNITIES = [
+    { v: 'strategic_align', l: 'การเพิ่มความสอดคล้องเชิงยุทธศาสตร์ของ HRD' },
+    { v: 'tna', l: 'การวิเคราะห์ความต้องการพัฒนา (TNA)' },
+    { v: 'eval', l: 'การติดตามและประเมินผลหลังการพัฒนา' },
+    { v: 'wellbeing', l: 'การบูรณาการสุขภาวะเข้ากับแผน HRD' },
+    { v: 'career', l: 'การพัฒนาเส้นทางความก้าวหน้าในสายอาชีพ' },
+    { v: 'leader', l: 'การพัฒนาศักยภาพผู้นำระดับต้นและกลาง' },
+    { v: 'digital', l: 'การเพิ่มประสิทธิภาพด้วยดิจิทัล/E-learning' },
+    { v: 'other', l: 'อื่นๆ' },
+];
+const STRATEGY_TOPICS = [
+    { id: 'A', label: 'การเพิ่มประสิทธิภาพการให้บริการประชาชน' },
+    { id: 'B', label: 'การพัฒนาศักยภาพด้านดิจิทัล' },
+    { id: 'C', label: 'การพัฒนาผู้นำรุ่นใหม่' },
+    { id: 'D', label: 'การลดอัตราการลาป่วย' },
+    { id: 'E', label: 'การลดอัตราการลาออก' },
+    { id: 'F', label: 'อื่นๆ' },
+];
+const CURRENT_YEAR = 2568;
+
+// =============================================
+// INIT
+// =============================================
 document.addEventListener('DOMContentLoaded', () => {
-    populateOrgDropdown();
-    setupPills();
-    setupCheckboxList();
-    setupRadioGroup();
-    setupSlider();
-    setupMedToggle();
+    // Build step-dot labels (replaces document.write approach)
+    const STEP_NAMES = ['ข้อมูลพื้นฐาน', 'สุขภาวะกาย', 'สุขภาวะจิต', 'ระบบสนับสนุน', 'สภาพแวดล้อม', 'ระบบ HRD', 'ยุทธศาสตร์'];
+    const dotsRow = document.getElementById('step-dots-row');
+    if (dotsRow) {
+        dotsRow.innerHTML = STEP_NAMES.map((n, i) =>
+            `<span class="step-dot text-xs text-slate-400 text-center" style="width:${100 / 7}%" id="dot-${i}">${i + 1}</span>`
+        ).join('');
+    }
+    buildSickLeaveTable();
+    buildEngagementTable();
+    buildSupportSystems();
+    buildTrainingOptions();
+    buildErgonomicsOptions();
+    buildDigitalSystems();
+    buildHrdOpportunities();
+    buildPriorityChips();
+    setupAgeWatcher();
+    setupNcdWatcher();
+    setupNegativeGuards();
     updateUI();
+    startAutoSave();
 });
 
-// --- Org Dropdown ---
-function populateOrgDropdown() {
-    const sel = document.getElementById('org-select');
-    ORGANIZATIONS.forEach(org => {
-        const opt = document.createElement('option');
-        opt.value = org;
-        opt.textContent = org;
-        sel.appendChild(opt);
+// =============================================
+// DYNAMIC UI BUILDERS
+// =============================================
+function buildSickLeaveTable() {
+    const tbody = document.getElementById('sick-leave-tbody');
+    let rows = '';
+    for (let i = 0; i < 5; i++) {
+        const yr = CURRENT_YEAR - i;
+        rows += `<tr class="border-b border-slate-100">
+      <td class="py-2 pr-3 text-slate-600 font-medium">${yr}</td>
+      <td class="py-2 pr-3"><input type="number" id="sick_days_${yr}" min="0" placeholder="0" class="sick-input w-full border border-slate-200 rounded-lg px-2 py-1.5 text-sm focus:border-primary focus:outline-none"/></td>
+      <td class="py-2 pr-3"><input type="number" id="sick_avg_${yr}" min="0" step="0.1" placeholder="0.0" class="sick-input w-full border border-slate-200 rounded-lg px-2 py-1.5 text-sm focus:border-primary focus:outline-none"/></td>
+      <td class="py-2 text-center"><input type="checkbox" id="sick_na_${yr}" class="sick-na w-4 h-4 accent-primary" onchange="toggleSickRow(${yr}, this.checked)"/></td>
+    </tr>`;
+    }
+    tbody.innerHTML = rows;
+}
+
+function toggleSickRow(yr, disabled) {
+    ['sick_days_', 'sick_avg_'].forEach(prefix => {
+        const el = document.getElementById(prefix + yr);
+        el.disabled = disabled;
+        el.classList.toggle('opacity-40', disabled);
     });
 }
 
-// --- Pills (Health Issues) ---
-function setupPills() {
-    document.querySelectorAll('#health-pills .pill').forEach(pill => {
-        pill.addEventListener('click', () => {
-            const cb = pill.querySelector('input');
-            cb.checked = !cb.checked;
-            pill.classList.toggle('selected', cb.checked);
-            hideError('err-health');
-        });
+function buildEngagementTable() {
+    const tbody = document.getElementById('engagement-tbody');
+    let rows = '';
+    for (let i = 0; i < 5; i++) {
+        const yr = CURRENT_YEAR - i;
+        rows += `<tr class="border-b border-slate-100">
+      <td class="py-2 pr-3 text-slate-600 font-medium">${yr}</td>
+      <td class="py-2 pr-3"><input type="number" id="eng_score_${yr}" min="0" max="100" placeholder="0–100" class="eng-input w-full border border-slate-200 rounded-lg px-2 py-1.5 text-sm focus:border-primary focus:outline-none"/></td>
+      <td class="py-2 pr-3"><input type="text" id="eng_low_${yr}" placeholder="เช่น ค่าตอบแทน ความก้าวหน้า" class="eng-input w-full border border-slate-200 rounded-lg px-2 py-1.5 text-sm focus:border-primary focus:outline-none"/></td>
+      <td class="py-2 text-center"><input type="checkbox" id="eng_na_${yr}" class="w-4 h-4 accent-primary" onchange="toggleEngRow(${yr}, this.checked)"/></td>
+    </tr>`;
+    }
+    tbody.innerHTML = rows;
+}
+
+function toggleEngRow(yr, disabled) {
+    ['eng_score_', 'eng_low_'].forEach(prefix => {
+        const el = document.getElementById(prefix + yr);
+        el.disabled = disabled;
+        el.classList.toggle('opacity-40', disabled);
     });
 }
 
-// --- Checkbox List (Plans) ---
-function setupCheckboxList() {
-    document.querySelectorAll('#plans-list .checkbox-item').forEach(item => {
-        item.addEventListener('click', (e) => {
-            if (e.target.type === 'checkbox') return; // let native work
-            const cb = item.querySelector('input');
-            cb.checked = !cb.checked;
-            item.classList.toggle('checked', cb.checked);
-            hideError('err-plans');
-        });
-        item.querySelector('input').addEventListener('change', function () {
-            item.classList.toggle('checked', this.checked);
-            hideError('err-plans');
-        });
-    });
-}
-
-// --- Radio Group (HRD Status) ---
-function setupRadioGroup() {
-    document.querySelectorAll('#hrd-status-group .radio-item').forEach(item => {
-        item.addEventListener('click', (e) => {
-            if (e.target.type === 'radio') {
-                // native click
-            } else {
-                const rb = item.querySelector('input');
-                rb.checked = true;
-            }
-            // Update visual
-            document.querySelectorAll('#hrd-status-group .radio-item').forEach(ri => {
-                ri.classList.toggle('checked', ri.querySelector('input').checked);
+function buildSupportSystems() {
+    const container = document.getElementById('support-systems');
+    container.innerHTML = SUPPORT_SYSTEMS.map(sys => `
+    <div>
+      <h3 class="text-sm font-bold text-slate-700 mb-2">${sys.label}</h3>
+      <div class="flex flex-wrap gap-2" id="grp-${sys.id}">
+        ${SUPPORT_OPTIONS.map(opt => `
+          <label class="radio-card flex-1 min-w-[120px]">
+            <input type="radio" name="${sys.id}" value="${opt.v}" class="hidden"/>
+            <div class="radio-inner border-2 border-slate-200 rounded-xl px-3 py-2.5 text-sm text-center cursor-pointer hover:border-primary transition">${opt.l}</div>
+          </label>`).join('')}
+      </div>
+      <p class="text-red-500 text-xs mt-1 hidden" id="err-${sys.id}">กรุณาเลือก</p>
+    </div>
+  `).join('');
+    // Radio visual
+    document.querySelectorAll('.radio-card input').forEach(inp => {
+        inp.addEventListener('change', () => {
+            document.querySelectorAll(`input[name="${inp.name}"]`).forEach(r => {
+                r.closest('.radio-card').querySelector('.radio-inner').classList.remove('border-primary', 'bg-primary-light', 'text-primary', 'font-semibold');
             });
-            hideError('err-hrd');
+            inp.closest('.radio-card').querySelector('.radio-inner').classList.add('border-primary', 'bg-primary-light', 'text-primary', 'font-semibold');
         });
     });
 }
 
-// --- Severity Slider ---
-function setupSlider() {
-    const slider = document.getElementById('severity-slider');
-    const display = document.getElementById('severity-display');
-    slider.addEventListener('input', () => {
-        const v = parseInt(slider.value);
-        display.textContent = `${SEVERITY_LABELS[v]} (${v}/5)`;
+function buildTrainingOptions() {
+    const grp = document.getElementById('training-hours-group');
+    grp.innerHTML = TRAINING_OPTIONS.map(opt => `
+    <label class="radio-card">
+      <input type="radio" name="training_hours_range" value="${opt.v}" class="hidden"/>
+      <div class="radio-inner border-2 border-slate-200 rounded-xl px-3 py-2.5 text-sm text-center cursor-pointer hover:border-primary transition">${opt.l}</div>
+    </label>`).join('');
+    grp.querySelectorAll('input').forEach(inp => {
+        inp.addEventListener('change', () => {
+            grp.querySelectorAll('.radio-inner').forEach(d => d.classList.remove('border-primary', 'bg-primary-light', 'text-primary', 'font-semibold'));
+            inp.closest('.radio-card').querySelector('.radio-inner').classList.add('border-primary', 'bg-primary-light', 'text-primary', 'font-semibold');
+            document.getElementById('err-training').classList.add('hidden');
+        });
     });
 }
 
-// --- Med Expense Toggle ---
-function setupMedToggle() {
-    const toggle = document.getElementById('med-toggle');
-    const label = document.getElementById('med-toggle-label');
-    const fields = document.getElementById('med-fields');
-    toggle.addEventListener('change', () => {
-        if (toggle.checked) {
-            label.textContent = 'มีข้อมูล';
-            fields.classList.add('show');
-        } else {
-            label.textContent = 'ไม่มีข้อมูล';
-            fields.classList.remove('show');
+function buildErgonomicsOptions() {
+    const grp = document.getElementById('ergonomics-group');
+    grp.innerHTML = ERGONOMICS_OPTIONS.map(opt => `
+    <label class="radio-card flex">
+      <input type="radio" name="ergonomics_status" value="${opt.v}" class="hidden" onchange="handleErgoChange('${opt.v}')"/>
+      <div class="radio-inner flex-1 border-2 border-slate-200 rounded-xl px-4 py-3 text-sm cursor-pointer hover:border-primary transition">${opt.l}</div>
+    </label>`).join('');
+    grp.querySelectorAll('input').forEach(inp => {
+        inp.addEventListener('change', () => {
+            grp.querySelectorAll('.radio-inner').forEach(d => d.classList.remove('border-primary', 'bg-primary-light', 'text-primary', 'font-semibold'));
+            inp.closest('.radio-card').querySelector('.radio-inner').classList.add('border-primary', 'bg-primary-light', 'text-primary', 'font-semibold');
+        });
+    });
+}
+
+function handleErgoChange(val) {
+    const wrap = document.getElementById('ergonomics-detail-wrap');
+    wrap.classList.toggle('hidden', val === 'none');
+    document.getElementById('err-ergonomics').classList.add('hidden');
+}
+
+function buildDigitalSystems() {
+    const grp = document.getElementById('digital-systems-group');
+    grp.innerHTML = DIGITAL_SYSTEMS.map(opt => `
+    <label class="cb-card flex items-center gap-3 p-3 border-2 border-slate-200 rounded-xl cursor-pointer hover:border-accent transition cb-inner">
+      <input type="checkbox" value="${opt.v}" class="digital-cb w-4 h-4 accent-accent" onchange="handleDigitalChange()"/>
+      <span class="text-sm">${opt.l}</span>
+    </label>`).join('');
+}
+
+function handleDigitalChange() {
+    const hasOther = [...document.querySelectorAll('.digital-cb')].some(c => c.value === 'other' && c.checked);
+    document.getElementById('digital-other-wrap').classList.toggle('hidden', !hasOther);
+    document.querySelectorAll('.digital-cb').forEach(cb => {
+        cb.closest('.cb-card').classList.toggle('border-accent', cb.checked);
+        cb.closest('.cb-card').classList.toggle('bg-accent-light', cb.checked);
+    });
+}
+
+function buildHrdOpportunities() {
+    const grp = document.getElementById('hrd-opportunities-group');
+    grp.innerHTML = HRD_OPPORTUNITIES.map(opt => `
+    <label class="cb-card flex items-center gap-3 p-3 border-2 border-slate-200 rounded-xl cursor-pointer hover:border-accent transition cb-inner">
+      <input type="checkbox" value="${opt.v}" class="hrd-opp-cb w-4 h-4 accent-accent" onchange="handleHrdOppChange()"/>
+      <span class="text-sm">${opt.l}</span>
+    </label>`).join('');
+}
+
+function handleHrdOppChange() {
+    const hasOther = [...document.querySelectorAll('.hrd-opp-cb')].some(c => c.value === 'other' && c.checked);
+    document.getElementById('hrd-opp-other-wrap').classList.toggle('hidden', !hasOther);
+    document.querySelectorAll('.hrd-opp-cb').forEach(cb => {
+        cb.closest('.cb-card').classList.toggle('border-accent', cb.checked);
+        cb.closest('.cb-card').classList.toggle('bg-accent-light', cb.checked);
+    });
+}
+
+function buildPriorityChips() {
+    const grp = document.getElementById('priority-chips');
+    grp.innerHTML = STRATEGY_TOPICS.map(t => `
+    <button type="button" class="priority-chip relative border-2 border-slate-300 rounded-full px-4 py-2 text-sm font-medium hover:border-primary transition" data-id="${t.id}" data-label="${t.label}" onclick="togglePriority('${t.id}','${t.label}')">
+      <span class="rank-badge absolute -top-2 -right-2 w-5 h-5 bg-primary text-white text-xs rounded-full items-center justify-center font-bold"></span>
+      ${t.label}
+    </button>`).join('');
+}
+
+function togglePriority(id, label) {
+    const chip = document.querySelector(`.priority-chip[data-id="${id}"]`);
+    const idx = prioritySelected.findIndex(p => p.id === id);
+    if (idx >= 0) {
+        prioritySelected.splice(idx, 1);
+        chip.classList.remove('selected');
+    } else {
+        if (prioritySelected.length >= 3) { showToast('เลือกได้ไม่เกิน 3 ประเด็น'); return; }
+        prioritySelected.push({ id, label });
+        chip.classList.add('selected');
+    }
+    document.getElementById('strategic-other-wrap').classList.toggle('hidden', !prioritySelected.some(p => p.id === 'F'));
+    updatePriorityRanks();
+    document.getElementById('err-priority').classList.add('hidden');
+}
+
+function updatePriorityRanks() {
+    // Update rank badges on chips
+    document.querySelectorAll('.priority-chip').forEach(chip => {
+        const i = prioritySelected.findIndex(p => p.id === chip.dataset.id);
+        const badge = chip.querySelector('.rank-badge');
+        if (i >= 0) { badge.textContent = i + 1; badge.style.display = 'inline-flex'; }
+        else { badge.style.display = 'none'; }
+    });
+
+    const section = document.getElementById('priority-rank-section');
+    const list = document.getElementById('priority-rank-list');
+    if (prioritySelected.length === 0) { section.classList.add('hidden'); return; }
+    section.classList.remove('hidden');
+    list.innerHTML = prioritySelected.map((p, i) => `
+    <div class="flex items-center gap-3 bg-slate-50 rounded-xl p-3 cursor-grab" draggable="true"
+      ondragstart="dragStart(${i})" ondragover="dragOver(event,${i})" ondrop="dropItem(${i})" ondragend="dragEnd()">
+      <span class="w-7 h-7 bg-primary text-white text-sm rounded-full flex items-center justify-center font-bold flex-shrink-0">${i + 1}</span>
+      <span class="text-sm font-medium text-slate-700">${p.label}</span>
+      <span class="ml-auto text-slate-400 text-xs">☰ ลาก</span>
+    </div>`).join('');
+}
+
+function dragStart(i) { dragSrcIdx = i; }
+function dragOver(e, i) { e.preventDefault(); }
+function dropItem(i) {
+    if (dragSrcIdx === i) return;
+    const moved = prioritySelected.splice(dragSrcIdx, 1)[0];
+    prioritySelected.splice(i, 0, moved);
+    updatePriorityRanks();
+}
+function dragEnd() { dragSrcIdx = null; }
+
+// =============================================
+// AGE & NCD WATCHERS
+// =============================================
+function setupAgeWatcher() {
+    const ageIds = ['age_u30', 'age_31_40', 'age_41_50', 'age_51_60', 'age_over60'];
+    const allIds = [...ageIds, 'total_staff'];
+    allIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('input', checkAgeSum);
+            el.addEventListener('change', checkAgeSum);
         }
     });
 }
-
-// --- Navigation ---
-function nextStep() {
-    if (!validateStep(currentStep)) return;
-
-    if (currentStep === TOTAL_STEPS - 2) {
-        // Going to summary step
-        buildSummary();
-    }
-
-    if (currentStep < TOTAL_STEPS - 1) {
-        currentStep++;
-        updateUI();
-    }
+function checkAgeSum() {
+    const total = parseInt(document.getElementById('total_staff').value) || 0;
+    const ageFields = ['age_u30', 'age_31_40', 'age_41_50', 'age_51_60', 'age_over60'];
+    const sum = ageFields.reduce((s, id) => s + (parseInt(document.getElementById(id).value) || 0), 0);
+    document.getElementById('age-total').textContent = sum;
+    document.getElementById('age-sum-warn').classList.toggle('hidden', total === 0 || sum <= total);
 }
 
-function prevStep() {
-    if (currentStep > 0) {
-        currentStep--;
+function setupNcdWatcher() {
+    document.querySelectorAll('.ncd-field').forEach(el => el.addEventListener('input', updateNcdTotal));
+}
+function updateNcdTotal() {
+    const ncdIds = ['disease_diabetes', 'disease_hypertension', 'disease_cardiovascular', 'disease_kidney', 'disease_liver', 'disease_cancer', 'disease_obesity', 'disease_other_count'];
+    const sum = ncdIds.reduce((s, id) => s + Math.max(0, parseInt(document.getElementById(id)?.value) || 0), 0);
+    document.getElementById('ncd-total').textContent = sum;
+}
+
+// Clamp all number inputs with min=0 to prevent negative values from being submitted
+function setupNegativeGuards() {
+    document.querySelectorAll('input[type="number"][min="0"]').forEach(el => {
+        el.addEventListener('change', () => {
+            if (parseFloat(el.value) < 0) el.value = 0;
+        });
+    });
+}
+
+// =============================================
+// NAVIGATION
+// =============================================
+function nextStep() {
+    if (!validateStep(currentStep)) return;
+    if (currentStep < TOTAL_STEPS - 1) {
+        currentStep++;
+        if (currentStep === TOTAL_STEPS - 1) buildSummary();
         updateUI();
+    } else {
+        handleSubmit();
     }
+}
+function prevStep() {
+    if (currentStep > 0) { currentStep--; updateUI(); }
 }
 
 function updateUI() {
-    // Steps
-    document.querySelectorAll('.form-step').forEach(el => {
-        el.classList.toggle('active', parseInt(el.dataset.step) === currentStep);
-    });
-
-    // Progress dots
-    document.querySelectorAll('.progress-step').forEach(el => {
-        const s = parseInt(el.dataset.step);
-        el.classList.remove('active', 'done');
-        if (s === currentStep) el.classList.add('active');
-        else if (s < currentStep) el.classList.add('done');
-    });
-
-    // Buttons
-    const btnPrev = document.getElementById('btn-prev');
+    document.querySelectorAll('.form-step').forEach(el => el.classList.toggle('active', parseInt(el.dataset.step) === currentStep));
+    document.getElementById('btn-prev').style.visibility = currentStep === 0 ? 'hidden' : 'visible';
     const btnNext = document.getElementById('btn-next');
-    btnPrev.style.visibility = currentStep === 0 ? 'hidden' : 'visible';
-
     if (currentStep === TOTAL_STEPS - 1) {
-        // Summary step — show submit button
-        btnNext.className = 'btn btn-submit';
-        btnNext.innerHTML = 'ส่งแบบสอบถาม ✅';
-        btnNext.onclick = submitHandler;
+        btnNext.textContent = 'ยืนยันและส่งข้อมูล ✅';
+        btnNext.className = 'px-6 py-2.5 bg-accent text-white rounded-xl text-sm font-semibold hover:bg-green-700 transition flex items-center gap-2 shadow-sm';
     } else {
-        btnNext.className = 'btn btn-next';
         btnNext.innerHTML = 'ถัดไป →';
-        btnNext.onclick = nextStep;
+        btnNext.className = 'px-6 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary-dark transition flex items-center gap-2 shadow-sm';
     }
-
-    // Scroll to top of form
+    const pct = Math.round(((currentStep + 1) / TOTAL_STEPS) * 100);
+    document.getElementById('progress-bar').style.width = pct + '%';
+    document.getElementById('step-label').textContent = `ส่วนที่ ${currentStep + 1} จาก ${TOTAL_STEPS}`;
+    document.getElementById('step-pct').textContent = pct + '%';
+    document.querySelectorAll('[id^="dot-"]').forEach((el, i) => {
+        el.className = `step-dot text-xs text-center ${i < currentStep ? 'text-accent font-bold' : i === currentStep ? 'text-primary font-bold' : 'text-slate-400'}`;
+        el.style.width = `${100 / TOTAL_STEPS}%`;
+    });
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// --- Validation ---
+// =============================================
+// VALIDATION
+// =============================================
 function validateStep(step) {
     switch (step) {
-        case 0: return validateOrg();
-        case 1: return validateStaff();
-        case 2: return validateHealth();
-        case 3: return validatePlans();
+        case 0: return validateStep1();
+        case 2: return validateStep3();
+        case 3: return validateStep4();
+        case 4: return validateStep5();
+        case 6: return validateStep7();
         default: return true;
     }
 }
+function show(id) { document.getElementById(id)?.classList.remove('hidden'); }
+function hide(id) { document.getElementById(id)?.classList.add('hidden'); }
 
-function validateOrg() {
-    const val = document.getElementById('org-select').value;
-    if (!val) { showError('err-org'); return false; }
-    hideError('err-org');
+function validateStep1() {
+    let ok = true;
+    if (!document.getElementById('organization').value) { show('err-org'); ok = false; } else hide('err-org');
+    const s = parseInt(document.getElementById('total_staff').value);
+    if (!s || s < 1) { show('err-staff'); ok = false; } else hide('err-staff');
+    return ok;
+}
+function validateStep3() {
+    let ok = true;
+    const t = parseFloat(document.getElementById('turnover_rate').value);
+    if (document.getElementById('turnover_rate').value !== '' && (t < 0 || t > 100)) { show('err-turnover'); ok = false; } else hide('err-turnover');
+    const r = parseFloat(document.getElementById('transfer_rate').value);
+    if (document.getElementById('transfer_rate').value !== '' && (r < 0 || r > 100)) { show('err-transfer'); ok = false; } else hide('err-transfer');
+    return ok;
+}
+function validateStep4() {
+    let ok = true;
+    SUPPORT_SYSTEMS.forEach(sys => {
+        const checked = document.querySelector(`input[name="${sys.id}"]:checked`);
+        if (!checked) { show(`err-${sys.id}`); ok = false; } else hide(`err-${sys.id}`);
+    });
+    if (!document.querySelector('input[name="training_hours_range"]:checked')) { show('err-training'); ok = false; } else hide('err-training');
+    return ok;
+}
+function validateStep5() {
+    if (!document.querySelector('input[name="ergonomics_status"]:checked')) { show('err-ergonomics'); return false; }
+    hide('err-ergonomics');
+    return true;
+}
+function validateStep7() {
+    if (prioritySelected.length === 0) { show('err-priority'); return false; }
+    if (prioritySelected.length > 3) { show('err-priority'); return false; }
+    hide('err-priority');
     return true;
 }
 
-function validateStaff() {
-    const total = parseInt(document.getElementById('total-staff').value);
-    if (!total || total < 1) { showError('err-staff'); return false; }
-    hideError('err-staff');
+// =============================================
+// COLLECT ALL DATA
+// =============================================
+function collectAllData() {
+    // Step 1
+    const organization = document.getElementById('organization').value;
+    const vision_mission = document.getElementById('vision_mission').value.trim();
+    const strategic_plan_summary = document.getElementById('strategic_plan_summary').value.trim();
+    const total_staff = parseInt(document.getElementById('total_staff').value) || null;
+    const org_chart_url = document.getElementById('org_chart_url').value.trim() || null;
+    const age_u30 = parseInt(document.getElementById('age_u30').value) || 0;
+    const age_31_40 = parseInt(document.getElementById('age_31_40').value) || 0;
+    const age_41_50 = parseInt(document.getElementById('age_41_50').value) || 0;
+    const age_51_60 = parseInt(document.getElementById('age_51_60').value) || 0;
+    const age_over60 = parseInt(document.getElementById('age_over60').value) || 0;
+    const service_u5 = parseInt(document.getElementById('service_u5').value) || 0;
+    const service_6_10 = parseInt(document.getElementById('service_6_10').value) || 0;
+    const service_over10 = parseInt(document.getElementById('service_over10').value) || 0;
+    const retirement_risk_positions = document.getElementById('retirement_risk_positions').value.trim() || null;
 
-    // Age validation
-    const u30 = parseInt(document.getElementById('age-u30').value) || 0;
-    const a3039 = parseInt(document.getElementById('age-30-39').value) || 0;
-    const a4049 = parseInt(document.getElementById('age-40-49').value) || 0;
-    const a50p = parseInt(document.getElementById('age-50-plus').value) || 0;
-    const totalAge = u30 + a3039 + a4049 + a50p;
+    // Step 2 — NCD
+    const disease_diabetes = parseInt(document.getElementById('disease_diabetes').value) || 0;
+    const disease_hypertension = parseInt(document.getElementById('disease_hypertension').value) || 0;
+    const disease_cardiovascular = parseInt(document.getElementById('disease_cardiovascular').value) || 0;
+    const disease_kidney = parseInt(document.getElementById('disease_kidney').value) || 0;
+    const disease_liver = parseInt(document.getElementById('disease_liver').value) || 0;
+    const disease_cancer = parseInt(document.getElementById('disease_cancer').value) || 0;
+    const disease_obesity = parseInt(document.getElementById('disease_obesity').value) || 0;
+    const disease_other_detail = document.getElementById('disease_other_detail').value.trim() || null;
+    const ncd_count = disease_diabetes + disease_hypertension + disease_cardiovascular + disease_kidney + disease_liver + disease_cancer + disease_obesity + (parseInt(document.getElementById('disease_other_count').value) || 0);
 
-    if (totalAge > total) {
-        showError('err-age-sum');
-        return false;
+    // Step 2 — Sick Leave
+    const sick_leave_data = [];
+    for (let i = 0; i < 5; i++) {
+        const yr = CURRENT_YEAR - i;
+        const na = document.getElementById(`sick_na_${yr}`)?.checked;
+        if (!na) {
+            sick_leave_data.push({
+                year: yr,
+                total_days: parseInt(document.getElementById(`sick_days_${yr}`)?.value) || 0,
+                avg_per_person: parseFloat(document.getElementById(`sick_avg_${yr}`)?.value) || 0,
+            });
+        }
     }
-    hideError('err-age-sum');
 
-    const ncd = parseInt(document.getElementById('ncd-count').value) || 0;
-    if (ncd > total) { showError('err-ncd'); return false; }
-    hideError('err-ncd');
+    // Step 2 — Clinic
+    const clinic_users_per_year = parseInt(document.getElementById('clinic_users_per_year').value) || null;
+    const clinic_top_symptoms = document.getElementById('clinic_top_symptoms').value.trim() || null;
+    const clinic_top_medications = document.getElementById('clinic_top_medications').value.trim() || null;
 
-    return true;
-}
+    // Step 3 — Mental
+    const mental_stress_count = parseInt(document.getElementById('mental_stress_count').value) || 0;
+    const mental_anxiety_count = parseInt(document.getElementById('mental_anxiety_count').value) || 0;
+    const mental_sleep_count = parseInt(document.getElementById('mental_sleep_count').value) || 0;
+    const mental_burnout_count = parseInt(document.getElementById('mental_burnout_count').value) || 0;
+    const mental_depression_count = parseInt(document.getElementById('mental_depression_count').value) || 0;
+    const mental_other = document.getElementById('mental_other').value.trim() || null;
 
-function validateHealth() {
-    const selected = document.querySelectorAll('#health-pills .pill.selected');
-    if (selected.length === 0) { showError('err-health'); return false; }
-    hideError('err-health');
-    return true;
-}
+    // Step 3 — Engagement
+    const engagement_data = [];
+    for (let i = 0; i < 5; i++) {
+        const yr = CURRENT_YEAR - i;
+        const na = document.getElementById(`eng_na_${yr}`)?.checked;
+        if (!na) {
+            const score = parseFloat(document.getElementById(`eng_score_${yr}`)?.value);
+            const low = document.getElementById(`eng_low_${yr}`)?.value.trim();
+            if (!isNaN(score) || low) {
+                engagement_data.push({ year: yr, score: isNaN(score) ? null : score, low_areas: low ? low.split(/[,،]/).map(s => s.trim()) : [] });
+            }
+        }
+    }
+    const engagement_trend = document.getElementById('engagement_trend').value.trim() || null;
 
-function validatePlans() {
-    const checked = document.querySelectorAll('#plans-list .checkbox-item input:checked');
-    if (checked.length === 0) { showError('err-plans'); return false; }
-    hideError('err-plans');
+    // Step 3 — Movement
+    const turnover_rate = document.getElementById('turnover_rate').value !== '' ? parseFloat(document.getElementById('turnover_rate').value) : null;
+    const transfer_rate = document.getElementById('transfer_rate').value !== '' ? parseFloat(document.getElementById('transfer_rate').value) : null;
 
-    const hrdStatus = document.querySelector('input[name="hrd-status"]:checked');
-    if (!hrdStatus) { showError('err-hrd'); return false; }
-    hideError('err-hrd');
+    // Step 4 — Support Systems
+    const mentoring_system = document.querySelector('input[name="mentoring_system"]:checked')?.value || null;
+    const job_rotation = document.querySelector('input[name="job_rotation"]:checked')?.value || null;
+    const idp_system = document.querySelector('input[name="idp_system"]:checked')?.value || null;
+    const career_path_system = document.querySelector('input[name="career_path_system"]:checked')?.value || null;
+    const training_hours_range = document.querySelector('input[name="training_hours_range"]:checked')?.value || null;
 
-    return true;
-}
+    // Step 5 — Environment
+    const ergonomics_status = document.querySelector('input[name="ergonomics_status"]:checked')?.value || null;
+    const ergonomics_detail = document.getElementById('ergonomics_detail').value.trim() || null;
+    const digital_systems = [...document.querySelectorAll('.digital-cb:checked')].map(c => c.value).filter(v => v !== 'other');
+    const digital_other = document.getElementById('digital_other').value.trim() || null;
 
-function showError(id) { document.getElementById(id).style.display = 'block'; }
-function hideError(id) { document.getElementById(id).style.display = 'none'; }
+    // Step 6 — HRD
+    const hrd_plan_url = document.getElementById('hrd_plan_url').value.trim() || null;
+    const hrd_budget_url = document.getElementById('hrd_budget_url').value.trim() || null;
+    const core_competency_url = document.getElementById('core_competency_url').value.trim() || null;
+    const functional_competency_url = document.getElementById('functional_competency_url').value.trim() || null;
+    const hrd_opportunities = [...document.querySelectorAll('.hrd-opp-cb:checked')].map(c => c.value).filter(v => v !== 'other');
+    const hrd_opportunities_other = document.getElementById('hrd_opportunities_other').value.trim() || null;
 
-// --- Collect Form Data ---
-function collectFormData() {
-    const totalStaff = parseInt(document.getElementById('total-staff').value) || 0;
-    const ncdCount = parseInt(document.getElementById('ncd-count').value) || 0;
-    const medToggle = document.getElementById('med-toggle').checked;
-
-    const healthIssues = [];
-    document.querySelectorAll('#health-pills .pill.selected').forEach(p => {
-        healthIssues.push(p.dataset.value);
-    });
-
-    const linkedPlans = [];
-    document.querySelectorAll('#plans-list .checkbox-item input:checked').forEach(cb => {
-        linkedPlans.push(cb.closest('.checkbox-item').dataset.value);
-    });
-
-    const severity = parseInt(document.getElementById('severity-slider').value);
-    const hrdStatus = document.querySelector('input[name="hrd-status"]:checked')?.value || '';
+    // Step 7
+    const hr_strategy_map_url = document.getElementById('hr_strategy_map_url').value.trim() || null;
+    const strategic_priorities = prioritySelected.map((p, i) => ({ rank: i + 1, topic: p.id, label: p.label }));
+    const strategic_priorities_other = document.getElementById('strategic_priorities_other')?.value.trim() || null;
 
     return {
-        organization: document.getElementById('org-select').value,
-        totalStaff,
-        ageU30: parseInt(document.getElementById('age-u30').value) || null,
-        age3039: parseInt(document.getElementById('age-30-39').value) || null,
-        age4049: parseInt(document.getElementById('age-40-49').value) || null,
-        age50plus: parseInt(document.getElementById('age-50-plus').value) || null,
-        ncdCount: ncdCount || null,
-        medExpenseAvail: medToggle ? 'yes' : 'no',
-        med2563: medToggle ? (parseInt(document.getElementById('med-2563').value) || null) : null,
-        med2564: medToggle ? (parseInt(document.getElementById('med-2564').value) || null) : null,
-        med2565: medToggle ? (parseInt(document.getElementById('med-2565').value) || null) : null,
-        med2566: medToggle ? (parseInt(document.getElementById('med-2566').value) || null) : null,
-        med2567: medToggle ? (parseInt(document.getElementById('med-2567').value) || null) : null,
-        healthIssues,
-        healthOther: document.getElementById('health-other').value.trim() || null,
-        severity,
-        linkedPlans,
-        hrdStatus
+        organization, vision_mission, strategic_plan_summary, total_staff, org_chart_url,
+        age_u30, age_31_40, age_41_50, age_51_60, age_over60,
+        age_30_39: age_31_40, age_40_49: age_41_50, age_50_plus: age_51_60 + age_over60, // backward compat
+        service_u5, service_6_10, service_over10, retirement_risk_positions,
+        disease_diabetes, disease_hypertension, disease_cardiovascular, disease_kidney,
+        disease_liver, disease_cancer, disease_obesity, disease_other_detail,
+        ncd_count, ncd_ratio_pct: (total_staff && ncd_count) ? +((ncd_count / total_staff) * 100).toFixed(2) : null,
+        sick_leave_data: sick_leave_data.length ? sick_leave_data : null,
+        clinic_users_per_year, clinic_top_symptoms, clinic_top_medications,
+        mental_stress_count, mental_anxiety_count, mental_sleep_count,
+        mental_burnout_count, mental_depression_count, mental_other,
+        engagement_data: engagement_data.length ? engagement_data : null, engagement_trend,
+        turnover_rate, transfer_rate,
+        mentoring_system, job_rotation, idp_system, career_path_system, training_hours_range,
+        ergonomics_status, ergonomics_detail,
+        digital_systems: digital_systems.length ? digital_systems : null, digital_other,
+        hrd_plan_url, hrd_budget_url, core_competency_url, functional_competency_url,
+        hrd_opportunities: hrd_opportunities.length ? hrd_opportunities : null, hrd_opportunities_other,
+        hr_strategy_map_url,
+        strategic_priorities: strategic_priorities.length ? strategic_priorities : null,
+        strategic_priorities_other,
+        health_issues: [], linked_plans: [], hrd_plan_status: null, severity_score: null,
+        form_version: 'ch1-v2',
     };
 }
 
-// --- Build Summary ---
+// =============================================
+// SUMMARY CARD (Step 7)
+// =============================================
 function buildSummary() {
-    const d = collectFormData();
-    const ncdPct = d.ncdCount && d.totalStaff ? ((d.ncdCount / d.totalStaff) * 100).toFixed(2) : '-';
-    const hrdLabels = { yes: '✅ มีแล้ว', inprogress: '🔄 กำลังจัดทำ', no: '❌ ยังไม่มี' };
-
-    let html = '';
-
-    // Section 1: Organization
-    html += `
-    <div class="summary-section">
-        <h4>🏢 หน่วยงาน</h4>
-        <div class="summary-row"><span class="label">หน่วยงาน</span><span class="value">${d.organization}</span></div>
-    </div>`;
-
-    // Section 2: Staff
-    html += `
-    <div class="summary-section">
-        <h4>👥 ข้อมูลบุคลากร</h4>
-        <div class="summary-row"><span class="label">บุคลากรทั้งหมด</span><span class="value">${d.totalStaff.toLocaleString()} คน</span></div>
-        ${d.ageU30 !== null ? `<div class="summary-row"><span class="label">อายุต่ำกว่า 30</span><span class="value">${d.ageU30} คน</span></div>` : ''}
-        ${d.age3039 !== null ? `<div class="summary-row"><span class="label">อายุ 30-39</span><span class="value">${d.age3039} คน</span></div>` : ''}
-        ${d.age4049 !== null ? `<div class="summary-row"><span class="label">อายุ 40-49</span><span class="value">${d.age4049} คน</span></div>` : ''}
-        ${d.age50plus !== null ? `<div class="summary-row"><span class="label">อายุ 50+</span><span class="value">${d.age50plus} คน</span></div>` : ''}
-        ${d.ncdCount !== null ? `<div class="summary-row"><span class="label">ผู้ป่วย NCD</span><span class="value">${d.ncdCount} คน (${ncdPct}%)</span></div>` : ''}
-        <div class="summary-row"><span class="label">ข้อมูลค่ารักษา</span><span class="value">${d.medExpenseAvail === 'yes' ? '✅ มี' : '❌ ไม่มี'}</span></div>
-    </div>`;
-
-    // Section 3: Health
-    html += `
-    <div class="summary-section">
-        <h4>🩺 ปัญหาสุขภาพ</h4>
-        <div class="summary-tags">${d.healthIssues.map(i => `<span class="summary-tag">${i}</span>`).join('')}</div>
-        ${d.healthOther ? `<div class="summary-row" style="margin-top:0.5rem"><span class="label">อื่นๆ</span><span class="value">${d.healthOther}</span></div>` : ''}
-        <div class="summary-row"><span class="label">ระดับความรุนแรง</span><span class="value">${SEVERITY_LABELS[d.severity]} (${d.severity}/5)</span></div>
-    </div>`;
-
-    // Section 4: Plans
-    html += `
-    <div class="summary-section">
-        <h4>📋 แผนระดับชาติ</h4>
-        <div class="summary-tags">${d.linkedPlans.map(p => `<span class="summary-tag">${p}</span>`).join('')}</div>
-        <div class="summary-row" style="margin-top:0.5rem"><span class="label">สถานะ HRD</span><span class="value">${hrdLabels[d.hrdStatus] || '-'}</span></div>
-    </div>`;
-
-    document.getElementById('summary-content').innerHTML = html;
+    const d = collectAllData();
+    const ncdTotal = d.ncd_count || 0;
+    const strategyText = (d.strategic_priorities || []).map(p => `${p.rank}. ${p.label}`).join(' | ') || '—';
+    const trainingLabel = TRAINING_OPTIONS.find(o => o.v === d.training_hours_range)?.l || '—';
+    document.getElementById('summary-content').innerHTML = `
+    <div class="flex justify-between py-1 border-b border-blue-600"><span>หน่วยงาน</span><span class="font-semibold text-white">${d.organization}</span></div>
+    <div class="flex justify-between py-1 border-b border-blue-600"><span>บุคลากรรวม</span><span class="font-semibold text-white">${(d.total_staff || 0).toLocaleString()} คน</span></div>
+    <div class="flex justify-between py-1 border-b border-blue-600"><span>NCD รวมทุกประเภท</span><span class="font-semibold text-white">${ncdTotal} คน</span></div>
+    <div class="flex justify-between py-1 border-b border-blue-600"><span>ชั่วโมงอบรม</span><span class="font-semibold text-white">${trainingLabel}</span></div>
+    <div class="py-1"><span>ยุทธศาสตร์สำคัญ</span><div class="text-white font-semibold mt-1 text-xs leading-5">${strategyText}</div></div>
+  `;
 }
 
-// --- Submit ---
-async function submitHandler() {
-    const formData = collectFormData();
-    lastFormData = formData;
-    await submitWithRetry(formData);
+// =============================================
+// SUBMIT
+// =============================================
+async function handleSubmit() {
+    const data = collectAllData();
+    lastPayload = data;
+    await submitWithRetry(data);
 }
 
-async function submitWithRetry(formData, attempt = 1) {
-    showState('loading');
+async function submitWithRetry(data, attempt = 1) {
+    showOverlay('loading');
     try {
-        const record = {
-            organization: formData.organization,
-            total_staff: formData.totalStaff,
-            age_u30: formData.ageU30,
-            age_30_39: formData.age3039,
-            age_40_49: formData.age4049,
-            age_50_plus: formData.age50plus,
-            ncd_count: formData.ncdCount,
-            ncd_ratio_pct: formData.ncdCount && formData.totalStaff
-                ? +((formData.ncdCount / formData.totalStaff) * 100).toFixed(2)
-                : null,
-            med_expense_available: formData.medExpenseAvail,
-            med_expense_2563: formData.med2563,
-            med_expense_2564: formData.med2564,
-            med_expense_2565: formData.med2565,
-            med_expense_2566: formData.med2566,
-            med_expense_2567: formData.med2567,
-            health_issues: formData.healthIssues,
-            health_issues_other: formData.healthOther,
-            severity_score: formData.severity,
-            severity_label: SEVERITY_LABELS[formData.severity],
-            linked_plans: formData.linkedPlans,
-            hrd_plan_status: formData.hrdStatus,
-            raw_payload: formData,
-            form_version: 'ch1-v1'
-        };
-
-        const { error } = await ch1Supabase
-            .from(TARGET_TABLE)
-            .insert([record]);
-
+        const record = { ...data, raw_payload: data };
+        console.log('[ch1] Submitting (attempt', attempt, '):', record);
+        const { error } = await ch1Sb.from(TARGET_TABLE).insert([record]);
         if (error) throw error;
-
-        hideState('loading');
-        // Since we cannot read data back due to RLS, generate a random Ref ID for the UI
-        const refId = Math.random().toString(36).substring(2, 10).toUpperCase();
-        document.getElementById('success-msg').textContent =
-            `ขอบคุณที่ส่งข้อมูล — Ref: ${refId}`;
-        showState('success');
-
+        hideOverlay('loading');
+        const refId = crypto.randomUUID().slice(0, 8).toUpperCase();
+        document.getElementById('success-ref').textContent = `หมายเลขอ้างอิง: ${refId} | ขอบคุณที่ส่งข้อมูล ทีมงาน NIDA จะติดต่อกลับ`;
+        showOverlay('success');
+        localStorage.removeItem('ch1_draft');
+        console.log('[ch1] Submit success, ref:', refId);
     } catch (err) {
-        hideState('loading');
+        console.error('[ch1] Submit error:', err);
+        hideOverlay('loading');
         if (attempt < 3) {
+            showToast(`ลองใหม่... (ครั้งที่ ${attempt + 1})`);
             await new Promise(r => setTimeout(r, 2000));
-            return submitWithRetry(formData, attempt + 1);
+            return submitWithRetry(data, attempt + 1);
         }
-        document.getElementById('error-msg').textContent =
-            `ไม่สามารถส่งข้อมูลได้: ${err.message || 'Unknown error'}`;
-        showState('error');
-        console.error('Submit error:', err);
+        document.getElementById('error-msg').textContent = `ไม่สามารถส่งข้อมูลได้: ${err.message || 'Unknown error'}`;
+        showOverlay('error');
     }
 }
 
-function retrySubmit() {
-    hideState('error');
-    if (lastFormData) submitWithRetry(lastFormData);
+function retrySubmit() { hideOverlay('error'); if (lastPayload) submitWithRetry(lastPayload); }
+
+function showOverlay(name) { document.getElementById(`overlay-${name}`)?.classList.remove('hidden'); }
+function hideOverlay(name) { document.getElementById(`overlay-${name}`)?.classList.add('hidden'); }
+
+// =============================================
+// AUTO-SAVE / DRAFT
+// =============================================
+function saveDraft() {
+    try {
+        const data = collectAllData();
+        localStorage.setItem('ch1_draft', JSON.stringify({ data, step: currentStep, priorities: prioritySelected, ts: Date.now() }));
+        showToast('💾 บันทึกร่างเรียบร้อยแล้ว');
+    } catch (e) { showToast('ไม่สามารถบันทึกร่างได้'); }
 }
 
-// --- State Management ---
-function showState(name) {
-    document.getElementById(`state-${name}`).classList.add('show');
+function loadDraft() {
+    const raw = localStorage.getItem('ch1_draft');
+    if (!raw) { showToast('ไม่พบข้อมูลร่าง'); return; }
+    if (!confirm('โหลดร่างที่บันทึกไว้? ข้อมูลปัจจุบันจะถูกแทนที่')) return;
+    try {
+        const { data, step, priorities } = JSON.parse(raw);
+        restoreDraft(data, priorities || []);
+        currentStep = step || 0;
+        updateUI();
+        showToast('📂 โหลดร่างสำเร็จ');
+    } catch (e) { showToast('ข้อมูลร่างเสียหาย'); }
 }
-function hideState(name) {
-    document.getElementById(`state-${name}`).classList.remove('show');
+
+function restoreDraft(d, priorities) {
+    const setVal = (id, val) => { const el = document.getElementById(id); if (el && val != null) el.value = val; };
+    setVal('organization', d.organization);
+    setVal('vision_mission', d.vision_mission);
+    setVal('strategic_plan_summary', d.strategic_plan_summary);
+    setVal('total_staff', d.total_staff);
+    setVal('org_chart_url', d.org_chart_url);
+    ['age_u30', 'age_31_40', 'age_41_50', 'age_51_60', 'age_over60', 'service_u5', 'service_6_10', 'service_over10'].forEach(id => setVal(id, d[id]));
+    setVal('retirement_risk_positions', d.retirement_risk_positions);
+    ['disease_diabetes', 'disease_hypertension', 'disease_cardiovascular', 'disease_kidney', 'disease_liver', 'disease_cancer', 'disease_obesity'].forEach(id => setVal(id, d[id]));
+    setVal('disease_other_detail', d.disease_other_detail);
+    setVal('clinic_users_per_year', d.clinic_users_per_year);
+    setVal('clinic_top_symptoms', d.clinic_top_symptoms);
+    setVal('clinic_top_medications', d.clinic_top_medications);
+    ['mental_stress_count', 'mental_anxiety_count', 'mental_sleep_count', 'mental_burnout_count', 'mental_depression_count'].forEach(id => setVal(id, d[id]));
+    setVal('mental_other', d.mental_other);
+    setVal('engagement_trend', d.engagement_trend);
+    setVal('turnover_rate', d.turnover_rate);
+    setVal('transfer_rate', d.transfer_rate);
+    ['hrd_plan_url', 'hrd_budget_url', 'core_competency_url', 'functional_competency_url', 'hr_strategy_map_url'].forEach(id => setVal(id, d[id]));
+    // Radio restore
+    const setRadio = (name, val) => { const r = document.querySelector(`input[name="${name}"][value="${val}"]`); if (r) { r.checked = true; r.dispatchEvent(new Event('change')); } };
+    if (d.ergonomics_status) setRadio('ergonomics_status', d.ergonomics_status);
+    if (d.training_hours_range) setRadio('training_hours_range', d.training_hours_range);
+    SUPPORT_SYSTEMS.forEach(s => { if (d[s.id]) setRadio(s.id, d[s.id]); });
+    // Priority
+    prioritySelected = priorities;
+    updatePriorityRanks();
+    document.querySelectorAll('.priority-chip').forEach(chip => {
+        chip.classList.toggle('selected', priorities.some(p => p.id === chip.dataset.id));
+    });
+}
+
+function startAutoSave() {
+    setInterval(() => {
+        try {
+            const data = collectAllData();
+            localStorage.setItem('ch1_draft', JSON.stringify({ data, step: currentStep, priorities: prioritySelected, ts: Date.now() }));
+            showToast('✅ บันทึกร่างอัตโนมัติแล้ว');
+        } catch (e) { /* silent */ }
+    }, 30000);
+}
+
+// =============================================
+// TOAST
+// =============================================
+let toastTimer;
+function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.style.opacity = '1'; t.style.transform = 'translateY(0)';
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateY(8px)'; }, 3000);
 }

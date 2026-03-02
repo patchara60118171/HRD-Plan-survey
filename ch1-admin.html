@@ -10,8 +10,7 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-        href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap"
         rel="stylesheet" />
 
     <!-- Supabase SDK -->
@@ -33,19 +32,19 @@
         }
 
         :root {
-            --primary: #0D9488;
-            --primary-dark: #0F766E;
-            --primary-light: #CCFBF1;
+            --primary: #0F4C81;
+            --primary-dark: #0A3560;
+            --primary-light: #E8F1FB;
             --blue: #3B82F6;
-            --gradient: linear-gradient(135deg, #0D9488 0%, #3B82F6 100%);
-            --bg: #F1F5F9;
+            --gradient: linear-gradient(135deg, #0F4C81 0%, #1a73c8 100%);
+            --bg: #F8FAFC;
             --card: #FFFFFF;
             --border: #E2E8F0;
             --text: #1E293B;
             --text2: #64748B;
             --text3: #94A3B8;
             --red: #EF4444;
-            --green: #10B981;
+            --green: #00A86B;
             --yellow: #F59E0B;
             --purple: #8B5CF6;
             --radius: 12px;
@@ -57,7 +56,7 @@
         }
 
         body {
-            font-family: 'Noto Sans Thai', 'Inter', sans-serif;
+            font-family: 'Sarabun', sans-serif;
             background: var(--bg);
             color: var(--text);
             line-height: 1.6;
@@ -675,6 +674,8 @@
             <button class="tab" data-tab="orgs" onclick="switchTab('orgs')">🏢 รายองค์กร</button>
             <button class="tab" data-tab="health" onclick="switchTab('health')">🩺 ปัญหาสุขภาพ</button>
             <button class="tab" data-tab="plans" onclick="switchTab('plans')">📋 แผนชาติ</button>
+            <button class="tab" data-tab="workforce" onclick="switchTab('workforce')">👥 กำลังคน</button>
+            <button class="tab" data-tab="hrd" onclick="switchTab('hrd')">📚 ระบบ HRD</button>
             <button class="tab" data-tab="export" onclick="switchTab('export')">📥 Export</button>
         </div>
 
@@ -705,6 +706,18 @@
                     <div class="kpi-value" id="kpi-ncd">-</div>
                     <div class="kpi-sub">% ของบุคลากร</div>
                 </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon">📉</div>
+                    <div class="kpi-label">อัตราลาออกเฉลี่ย</div>
+                    <div class="kpi-value" id="kpi-turnover">-</div>
+                    <div class="kpi-sub">% ต่อปี</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon">🕐</div>
+                    <div class="kpi-label">ชั่วโมงอบรม (โหมด)</div>
+                    <div class="kpi-value" id="kpi-training" style="font-size:1.1rem;">-</div>
+                    <div class="kpi-sub">ชั่วโมงต่อคนต่อปี</div>
+                </div>
             </div>
 
             <div class="org-progress-list" id="org-progress">
@@ -715,6 +728,12 @@
 
         <!-- TAB: Organizations -->
         <div class="tab-content" id="tab-orgs">
+            <div style="display:flex;gap:.75rem;align-items:center;margin-bottom:1rem;flex-wrap:wrap;">
+                <input type="text" id="search-org" placeholder="🔍 ค้นหาชื่อหน่วยงาน..." oninput="filterTable()"
+                    style="border:2px solid var(--border);border-radius:10px;padding:.5rem 1rem;font-family:inherit;font-size:.9rem;width:260px;outline:none;"
+                    onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'" />
+                <span id="table-info" style="font-size:.85rem;color:var(--text2);"></span>
+            </div>
             <div class="table-container">
                 <table class="data-table">
                     <thead>
@@ -723,14 +742,18 @@
                             <th>บุคลากร</th>
                             <th>NCD (คน)</th>
                             <th>NCD (%)</th>
-                            <th>ปัญหาหลัก</th>
-                            <th>ความรุนแรง</th>
-                            <th>HRD</th>
+                            <th>อัตราลาออก%</th>
+                            <th>ชั่วโมงอบรม</th>
                             <th>วันที่ส่ง</th>
                         </tr>
                     </thead>
                     <tbody id="org-table-body"></tbody>
                 </table>
+            </div>
+            <div id="pagination"
+                style="display:flex;gap:.5rem;align-items:center;justify-content:space-between;margin-top:1rem;flex-wrap:wrap;">
+                <span id="page-info" style="font-size:.85rem;color:var(--text2);"></span>
+                <div id="page-buttons" style="display:flex;gap:.4rem;"></div>
             </div>
         </div>
 
@@ -774,6 +797,42 @@
             </div>
         </div>
 
+        <!-- TAB: Workforce (NEW) -->
+        <div class="tab-content" id="tab-workforce">
+            <div class="charts-row">
+                <div class="chart-box">
+                    <h3>สัดส่วนอายุบุคลากร</h3>
+                    <div class="chart-wrap"><canvas id="chart-age-donut"></canvas></div>
+                </div>
+                <div class="chart-box">
+                    <h3>สัดส่วนอายุราชการ</h3>
+                    <div class="chart-wrap"><canvas id="chart-service-donut"></canvas></div>
+                </div>
+            </div>
+            <div class="chart-box">
+                <h3>แนวโน้ม Employee Engagement รายปี (คะแนนเฉลี่ย)</h3>
+                <div class="chart-wrap" style="max-height:280px;"><canvas id="chart-engagement-line"></canvas></div>
+            </div>
+        </div>
+
+        <!-- TAB: HRD System (NEW) -->
+        <div class="tab-content" id="tab-hrd">
+            <div class="chart-box">
+                <h3>สถานะระบบสนับสนุน (จำนวนหน่วยงาน)</h3>
+                <div class="chart-wrap" style="max-height:300px;"><canvas id="chart-support-systems"></canvas></div>
+            </div>
+            <div class="charts-row">
+                <div class="chart-box">
+                    <h3>โอกาสพัฒนา HRD ที่เลือกบ่อย</h3>
+                    <div class="chart-wrap"><canvas id="chart-hrd-opps"></canvas></div>
+                </div>
+                <div class="chart-box">
+                    <h3>ระบบดิจิทัลที่ใช้งาน</h3>
+                    <div class="chart-wrap"><canvas id="chart-digital"></canvas></div>
+                </div>
+            </div>
+        </div>
+
         <!-- TAB: Export -->
         <div class="tab-content" id="tab-export">
             <div class="export-section">
@@ -781,6 +840,7 @@
                 <div class="export-info" id="export-info"></div>
                 <div class="export-buttons">
                     <button class="export-btn primary" onclick="exportCSV()">📊 Export CSV</button>
+                    <button class="export-btn" onclick="exportExcel()">📗 Export Excel</button>
                     <button class="export-btn" onclick="exportJSON()">🗂️ Export JSON</button>
                     <button class="export-btn" onclick="window.print()">🖨️ พิมพ์รายงาน</button>
                 </div>
