@@ -411,8 +411,7 @@ function confirmEmailAndStart() {
 
     setTimeout(() => {
         // Hide step-0, show step-1
-        document.getElementById('step-0').style.display = 'none';
-        currentStep = 0;
+        document.getElementById('step-0').classList.remove('active');
         showStep(1);   // Show Step 1 (organization info)
         btn.disabled = false;
         btn.textContent = 'ยืนยันอีเมล →';
@@ -422,11 +421,11 @@ function confirmEmailAndStart() {
 
 // Helper: Show specific step
 function showStep(stepNum) {
-    currentStep = stepNum - 1; // Convert to 0-indexed
-    document.querySelectorAll('.form-step').forEach((el, idx) => {
-        el.classList.toggle('active', idx === currentStep);
+    currentStep = stepNum; // Use stepNum directly to match data-step attribute
+    document.querySelectorAll('.form-step').forEach((el) => {
+        el.classList.toggle('active', parseInt(el.dataset.step) === currentStep);
     });
-    if (currentStep === TOTAL_STEPS - 1) buildSummary();
+    if (currentStep === TOTAL_STEPS) buildSummary(); // Step 7 (index 6) is last
     updateUI();
 }
 
