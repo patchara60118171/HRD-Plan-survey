@@ -450,16 +450,18 @@ function nextStep() {
     }
 
     if (currentStep < TOTAL_STEPS - 1) {
-        currentStep++;
-        console.log('Moving to step:', currentStep);
-        if (currentStep === TOTAL_STEPS - 1) buildSummary(); // step 7 = summary
-        updateUI();
+        const nextStepNum = currentStep + 1;
+        console.log('Moving to step:', nextStepNum);
+        if (nextStepNum === TOTAL_STEPS - 1) buildSummary(); // step 7 = summary
+        showStep(nextStepNum);   // ← ใช้ showStep() แทน updateUI() โดยตรง
     } else {
         handleSubmit(); // only on step 7
     }
 }
 function prevStep() {
-    if (currentStep > 1) { currentStep--; updateUI(); }
+    if (currentStep > 1) {
+        showStep(currentStep - 1);   // ← ใช้ showStep() ด้วย
+    }
 }
 
 function updateUI() {
