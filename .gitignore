@@ -6,13 +6,25 @@ npm-debug.log*
 node_modules/
 .vercel
 
-# Test files
+# ===== ห้าม commit ไฟล์พวกนี้อีก =====
+# Debug files
+debug-*.js
+debug-*.html
+
+# Test files  
 test-*.js
-qa-*.js
 *.test.js
 *.spec.js
-debug-*.js
+qa-*.js
+connection-test.js
+correct-inspector.js
+playwright.config.*
+
+# Test output
 screenshots/
 test-results/
 playwright-report/
-playwright.config.*
+
+# Temp
+add-email-column.js
+*.tmp
