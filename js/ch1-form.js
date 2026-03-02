@@ -410,9 +410,14 @@ function confirmEmailAndStart() {
     } catch (e) { }
 
     setTimeout(() => {
-        // Hide step-0, show step-1
-        document.getElementById('step-0').classList.remove('active');
-        showStep(1);   // Show Step 1 (organization info)
+        // FIX 2: Force hide step-0 before showing step-1
+        const step0 = document.getElementById('step-0');
+        if (step0) {
+            step0.classList.remove('active');
+            step0.style.display = 'none';
+        }
+
+        showStep(1); // Show Step 1 (organization info)
         btn.disabled = false;
         btn.textContent = 'ยืนยันอีเมล →';
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -454,15 +459,22 @@ function prevStep() {
 }
 
 function updateUI() {
-    // Toggle active class on all panels based on currentStep
+    // FIX 3: Explicitly manage step-0 visibility first
+    const step0 = document.getElementById('step-0');
+    if (step0) {
+        step0.style.display = currentStep === 0 ? 'block' : 'none';
+        step0.classList.toggle('active', currentStep === 0);
+    }
+
+    // Toggle active + explicit display on all form-step panels (FIX 4)
     document.querySelectorAll('.form-step').forEach(el => {
+        if (el === step0) return; // already handled above
         const isActive = parseInt(el.dataset.step) === currentStep;
         el.classList.toggle('active', isActive);
-        // Force display as safety net (CSS .active uses display:block)
-        el.style.display = isActive ? '' : '';
+        el.style.display = isActive ? 'block' : 'none';
     });
 
-    // On landing page (step 0) hide nav bar and progress
+    // Show/hide nav bar and progress bar based on landing state
     const isLanding = currentStep === 0;
     const navBar = document.getElementById('form-nav');
     const progressWrap = document.getElementById('form-progress');
