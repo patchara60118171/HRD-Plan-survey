@@ -5,7 +5,7 @@
 
 const ch1Sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const TARGET_TABLE = 'hrd_ch1_responses';
-const TOTAL_STEPS = 7;
+const TOTAL_STEPS = 8; // steps 0–7 (0=landing, 1–7=form steps)
 let currentStep = 0;
 let lastPayload = null;
 let prioritySelected = []; // [{id, label}]
@@ -78,7 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const dotsRow = document.getElementById('step-dots-row');
     if (dotsRow) {
         dotsRow.innerHTML = STEP_NAMES.map((n, i) =>
-            `<span class="step-dot text-xs text-slate-400 text-center" style="width:${100 / 7}%;${i===0 ? 'display:none;' : ''}" id="dot-${i}">${i + 1}</span>`
+            `<span class="step-dot text-xs text-slate-400 text-center" style="width:${100 / 7}%;${i === 0 ? 'display:none;' : ''}" id="dot-${i}">${i + 1}</span>`
         ).join('');
     }
     buildSickLeaveTable();
@@ -92,13 +92,13 @@ document.addEventListener('DOMContentLoaded', () => {
     setupAgeWatcher();
     setupNcdWatcher();
     updateUI();
-    
+
     // Setup input guards AFTER all elements are built
     setTimeout(() => {
         setupNegativeGuards();
         console.log('setupNegativeGuards called after timeout');
     }, 100);
-    
+
     // Setup email input Enter key handler
     const emailInput = document.getElementById('respondent_email');
     if (emailInput) {
@@ -106,12 +106,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (e.key === 'Enter') confirmEmailAndStart();
         });
     }
-    
+
     // Hide all steps except step-0 (landing page)
     document.querySelectorAll('.form-step').forEach(el => {
         if (el.id !== 'step-0') el.classList.remove('active');
     });
-    
+
     startAutoSave();
 });
 
@@ -379,7 +379,7 @@ function setupNegativeGuards() {
 function confirmEmailAndStart() {
     const input = document.getElementById('respondent_email');
     const errEl = document.getElementById('email-error-msg');
-    const btn   = document.getElementById('btn-confirm-email');
+    const btn = document.getElementById('btn-confirm-email');
     const email = input.value.trim().toLowerCase();
 
     // Clear error
@@ -407,7 +407,7 @@ function confirmEmailAndStart() {
         const draft = JSON.parse(localStorage.getItem('ch1_draft') || '{}');
         draft.respondent_email = email;
         localStorage.setItem('ch1_draft', JSON.stringify(draft));
-    } catch(e) {}
+    } catch (e) { }
 
     setTimeout(() => {
         // Hide step-0, show step-1
@@ -434,43 +434,56 @@ function showStep(stepNum) {
 // =============================================
 function nextStep() {
     console.log('nextStep called, currentStep:', currentStep);
-    
+
     if (!validateStep(currentStep)) {
         console.log('Validation failed, staying on step', currentStep);
         return;
     }
-    
+
     if (currentStep < TOTAL_STEPS - 1) {
         currentStep++;
         console.log('Moving to step:', currentStep);
-        if (currentStep === TOTAL_STEPS - 1) buildSummary();
+        if (currentStep === TOTAL_STEPS - 1) buildSummary(); // step 7 = summary
         updateUI();
     } else {
-        handleSubmit();
+        handleSubmit(); // only on step 7
     }
 }
 function prevStep() {
-    if (currentStep > 0) { currentStep--; updateUI(); }
+    if (currentStep > 1) { currentStep--; updateUI(); }
 }
 
 function updateUI() {
+    // Show/hide correct step panel
     document.querySelectorAll('.form-step').forEach(el => el.classList.toggle('active', parseInt(el.dataset.step) === currentStep));
-    document.getElementById('btn-prev').style.visibility = currentStep === 0 ? 'hidden' : 'visible';
+
+    // On landing page (step 0) hide nav bar and progress
+    const isLanding = currentStep === 0;
+    const navBar = document.querySelector('.flex.justify-between.items-center.mt-8');
+    const progressWrap = document.querySelector('.max-w-3xl.mx-auto.px-4.pt-5');
+    if (navBar) navBar.style.display = isLanding ? 'none' : 'flex';
+    if (progressWrap) progressWrap.style.display = isLanding ? 'none' : 'block';
+    if (isLanding) return; // skip rest for landing
+
+    document.getElementById('btn-prev').style.visibility = currentStep === 1 ? 'hidden' : 'visible';
     const btnNext = document.getElementById('btn-next');
-    if (currentStep === TOTAL_STEPS - 1) {
+    const isLastStep = currentStep === TOTAL_STEPS - 1;
+    if (isLastStep) {
         btnNext.textContent = 'ยืนยันและส่งข้อมูล ✅';
         btnNext.className = 'px-6 py-2.5 bg-accent text-white rounded-xl text-sm font-semibold hover:bg-green-700 transition flex items-center gap-2 shadow-sm';
     } else {
         btnNext.innerHTML = 'ถัดไป →';
         btnNext.className = 'px-6 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary-dark transition flex items-center gap-2 shadow-sm';
     }
-    const pct = Math.round(((currentStep + 1) / TOTAL_STEPS) * 100);
+    // Progress: steps 1–7 only (exclude landing)
+    const formStep = currentStep; // 1–7
+    const pct = Math.round((formStep / (TOTAL_STEPS - 1)) * 100);
     document.getElementById('progress-bar').style.width = pct + '%';
-    document.getElementById('step-label').textContent = `ส่วนที่ ${currentStep + 1} จาก ${TOTAL_STEPS}`;
+    document.getElementById('step-label').textContent = `ส่วนที่ ${formStep} จาก ${TOTAL_STEPS - 1}`;
     document.getElementById('step-pct').textContent = pct + '%';
     document.querySelectorAll('[id^="dot-"]').forEach((el, i) => {
-        el.className = `step-dot text-xs text-center ${i < currentStep ? 'text-accent font-bold' : i === currentStep ? 'text-primary font-bold' : 'text-slate-400'}`;
-        el.style.width = `${100 / TOTAL_STEPS}%`;
+        el.className = `step-dot text-xs text-center ${i < formStep ? 'text-accent font-bold' : i === formStep ? 'text-primary font-bold' : 'text-slate-400'}`;
+        el.style.width = `${100 / (TOTAL_STEPS - 1)}%`;
     });
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -479,14 +492,18 @@ function updateUI() {
 // VALIDATION
 // =============================================
 function validateStep(step) {
+    // step 0 = email landing (validated by confirmEmailAndStart, skip here)
+    // step 1 = org info,  step 2 = physical, step 3 = mental/movement
+    // step 4 = support,   step 5 = environment, step 6 = HRD, step 7 = strategy
     switch (step) {
-        case 0: return validateStep1();
-        case 1: return validateStep2();
-        case 2: return validateStep3();
-        case 3: return validateStep4();
-        case 4: return validateStep5();
-        case 5: return validateStep6();
-        case 6: return validateStep7();
+        case 0: return true;              // email landing — already validated
+        case 1: return validateStep1();   // organization required fields
+        case 2: return true;              // physical — optional
+        case 3: return validateStep3();   // turnover range check
+        case 4: return validateStep4();   // support systems + training required
+        case 5: return validateStep5();   // ergonomics required
+        case 6: return true;              // HRD docs — optional
+        case 7: return validateStep7();   // strategic priority required
         default: return true;
     }
 }
@@ -496,31 +513,31 @@ function hide(id) { document.getElementById(id)?.classList.add('hidden'); }
 function validateStep1() {
     console.log('validateStep1 called');
     let ok = true;
-    
+
     const orgEl = document.getElementById('organization');
     const orgValue = orgEl ? orgEl.value : '';
     console.log('organization value:', orgValue);
-    
+
     if (!orgValue || orgValue === '') {
         console.log('FAIL: organization empty');
-        show('err-org'); 
-        ok = false; 
+        show('err-org');
+        ok = false;
     } else {
         hide('err-org');
     }
-    
+
     const staffEl = document.getElementById('total_staff');
     const staffValue = staffEl ? parseInt(staffEl.value) : 0;
     console.log('total_staff value:', staffValue);
-    
+
     if (!staffValue || staffValue < 1) {
         console.log('FAIL: total_staff invalid');
-        show('err-staff'); 
-        ok = false; 
+        show('err-staff');
+        ok = false;
     } else {
         hide('err-staff');
     }
-    
+
     console.log('validateStep1 result:', ok);
     return ok;
 }
@@ -818,7 +835,7 @@ function startAutoSave() {
                 // Fallback: save only safe fields
                 data = collectSafeData();
             }
-            
+
             let jsonStr;
             try {
                 jsonStr = JSON.stringify({ data, step: currentStep, priorities: prioritySelected, ts: Date.now() });
@@ -827,7 +844,7 @@ function startAutoSave() {
                 showToast('ไม่สามารถบันทึกร่างได้ (ข้อมูลผิดรูปแบบ)', 'error');
                 return;
             }
-            
+
             try {
                 localStorage.setItem('ch1_draft', jsonStr);
                 showToast('✅ บันทึกร่างอัตโนมัติแล้ว');
@@ -851,7 +868,7 @@ function collectSafeData() {
             return el ? el.value : null;
         } catch { return null; }
     };
-    
+
     return {
         organization: safeGet('organization'),
         total_staff: safeGet('total_staff'),
