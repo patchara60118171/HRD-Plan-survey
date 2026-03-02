@@ -204,13 +204,23 @@ function filterTable() {
 // =============================================
 // DETAIL MODAL
 // =============================================
+function escapeHtml(text) {
+    if (text == null) return '';
+    return String(text)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
 function showDetail(i) {
     const r = allResponses[i];
     if (!r) return;
-    const wrap = id => `<div class="modal-row"><span class="lbl">${id[0]}</span><span class="val">${id[1] ?? '—'}</span></div>`;
+    const wrap = (id) => `<div class="modal-row"><span class="lbl">${escapeHtml(id[0])}</span><span class="val">${escapeHtml(id[1]) ?? '—'}</span></div>`;
     const html = `
     <button class="modal-close" onclick="document.getElementById('detail-modal').classList.remove('show')">✕</button>
-    <div class="modal-title">🏢 ${r.organization}</div>
+    <div class="modal-title">🏢 ${escapeHtml(r.organization)}</div>
     ${wrap(['วันที่ส่ง', r.submitted_at ? new Date(r.submitted_at).toLocaleString('th-TH') : null])}
     ${wrap(['บุคลากรรวม', r.total_staff ? r.total_staff.toLocaleString() + ' คน' : null])}
     ${wrap(['NCD รวม', r.ncd_count ? r.ncd_count + ' คน (' + (r.ncd_ratio_pct || 0) + '%)' : null])}
@@ -222,7 +232,7 @@ function showDetail(i) {
     ${wrap(['Career Path', SUPPORT_LABELS[r.career_path_system] || r.career_path_system])}
     ${wrap(['Ergonomics', r.ergonomics_status])}
     ${wrap(['version', r.form_version])}
-    ${r.strategic_priorities ? `<div class="modal-row"><span class="lbl">ยุทธศาสตร์</span><span class="val">${(r.strategic_priorities).map(p => p.rank + '. ' + p.label).join(', ')}</span></div>` : ''}
+    ${r.strategic_priorities ? `<div class="modal-row"><span class="lbl">ยุทธศาสตร์</span><span class="val">${escapeHtml((r.strategic_priorities).map(p => p.rank + '. ' + p.label).join(', '))}</span></div>` : ''}
   `;
     document.getElementById('modal-content').innerHTML = html;
     document.getElementById('detail-modal').classList.add('show');

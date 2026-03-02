@@ -336,6 +336,17 @@ function setupNegativeGuards() {
     document.querySelectorAll('input[type="number"][min="0"]').forEach(el => {
         el.addEventListener('change', () => {
             if (parseFloat(el.value) < 0) el.value = 0;
+            // Strip leading zeros
+            if (el.value !== '' && el.value !== '0') {
+                el.value = parseInt(el.value, 10) || 0;
+            }
+        });
+        // Also strip leading zeros on input
+        el.addEventListener('input', () => {
+            if (el.value.length > 1 && el.value.startsWith('0')) {
+                el.value = el.value.replace(/^0+/, '');
+                if (el.value === '') el.value = '0';
+            }
         });
     });
 }
@@ -385,9 +396,11 @@ function updateUI() {
 function validateStep(step) {
     switch (step) {
         case 0: return validateStep1();
+        case 1: return validateStep2();
         case 2: return validateStep3();
         case 3: return validateStep4();
         case 4: return validateStep5();
+        case 5: return validateStep6();
         case 6: return validateStep7();
         default: return true;
     }
@@ -401,6 +414,10 @@ function validateStep1() {
     const s = parseInt(document.getElementById('total_staff').value);
     if (!s || s < 1) { show('err-staff'); ok = false; } else hide('err-staff');
     return ok;
+}
+function validateStep2() {
+    // Step 2 (สุขภาวะทางกาย) - optional fields, always pass
+    return true;
 }
 function validateStep3() {
     let ok = true;
@@ -422,6 +439,10 @@ function validateStep4() {
 function validateStep5() {
     if (!document.querySelector('input[name="ergonomics_status"]:checked')) { show('err-ergonomics'); return false; }
     hide('err-ergonomics');
+    return true;
+}
+function validateStep6() {
+    // Step 6 (ระบบ HRD) - optional fields (URLs), always pass
     return true;
 }
 function validateStep7() {
@@ -678,11 +699,56 @@ function restoreDraft(d, priorities) {
 function startAutoSave() {
     setInterval(() => {
         try {
-            const data = collectAllData();
-            localStorage.setItem('ch1_draft', JSON.stringify({ data, step: currentStep, priorities: prioritySelected, ts: Date.now() }));
-            showToast('✅ บันทึกร่างอัตโนมัติแล้ว');
-        } catch (e) { /* silent */ }
+            // Robust draft save with error handling at each step
+            let data;
+            try {
+                data = collectAllData();
+            } catch (collectErr) {
+                console.error('collectAllData error:', collectErr);
+                // Fallback: save only safe fields
+                data = collectSafeData();
+            }
+            
+            let jsonStr;
+            try {
+                jsonStr = JSON.stringify({ data, step: currentStep, priorities: prioritySelected, ts: Date.now() });
+            } catch (jsonErr) {
+                console.error('JSON.stringify error:', jsonErr);
+                showToast('ไม่สามารถบันทึกร่างได้ (ข้อมูลผิดรูปแบบ)', 'error');
+                return;
+            }
+            
+            try {
+                localStorage.setItem('ch1_draft', jsonStr);
+                showToast('✅ บันทึกร่างอัตโนมัติแล้ว');
+                console.log('Draft saved, size:', jsonStr.length, 'bytes');
+            } catch (storageErr) {
+                console.error('localStorage error:', storageErr);
+                showToast('พื้นที่จัดเก็บเต็ม ไม่สามารถบันทึกร่างได้', 'error');
+            }
+        } catch (e) {
+            console.error('autoSaveDraft unexpected error:', e);
+            showToast('ไม่สามารถบันทึกร่างได้', 'error');
+        }
     }, 30000);
+}
+
+// Fallback: save only fields that are safe to read
+function collectSafeData() {
+    const safeGet = (id) => {
+        try {
+            const el = document.getElementById(id);
+            return el ? el.value : null;
+        } catch { return null; }
+    };
+    
+    return {
+        organization: safeGet('organization'),
+        total_staff: safeGet('total_staff'),
+        vision_mission: safeGet('vision_mission'),
+        _savedAt: new Date().toISOString(),
+        _isFallback: true
+    };
 }
 
 // =============================================
