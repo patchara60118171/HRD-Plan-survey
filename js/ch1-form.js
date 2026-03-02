@@ -331,11 +331,13 @@ function updateNcdTotal() {
     document.getElementById('ncd-total').textContent = sum;
 }
 
-// Clamp all number inputs with min=0 to prevent negative values from being submitted
+// Clamp all number inputs and strip leading zeros
 function setupNegativeGuards() {
-    document.querySelectorAll('input[type="number"][min="0"]').forEach(el => {
+    // Target all number inputs, not just min="0"
+    document.querySelectorAll('input[type="number"]').forEach(el => {
         el.addEventListener('change', () => {
-            if (parseFloat(el.value) < 0) el.value = 0;
+            const min = parseFloat(el.getAttribute('min')) || 0;
+            if (parseFloat(el.value) < min) el.value = min;
             // Strip leading zeros
             if (el.value !== '' && el.value !== '0') {
                 el.value = parseInt(el.value, 10) || 0;
@@ -355,9 +357,16 @@ function setupNegativeGuards() {
 // NAVIGATION
 // =============================================
 function nextStep() {
-    if (!validateStep(currentStep)) return;
+    console.log('nextStep called, currentStep:', currentStep);
+    
+    if (!validateStep(currentStep)) {
+        console.log('Validation failed, staying on step', currentStep);
+        return;
+    }
+    
     if (currentStep < TOTAL_STEPS - 1) {
         currentStep++;
+        console.log('Moving to step:', currentStep);
         if (currentStep === TOTAL_STEPS - 1) buildSummary();
         updateUI();
     } else {
@@ -409,10 +418,34 @@ function show(id) { document.getElementById(id)?.classList.remove('hidden'); }
 function hide(id) { document.getElementById(id)?.classList.add('hidden'); }
 
 function validateStep1() {
+    console.log('validateStep1 called');
     let ok = true;
-    if (!document.getElementById('organization').value) { show('err-org'); ok = false; } else hide('err-org');
-    const s = parseInt(document.getElementById('total_staff').value);
-    if (!s || s < 1) { show('err-staff'); ok = false; } else hide('err-staff');
+    
+    const orgEl = document.getElementById('organization');
+    const orgValue = orgEl ? orgEl.value : '';
+    console.log('organization value:', orgValue);
+    
+    if (!orgValue || orgValue === '') {
+        console.log('FAIL: organization empty');
+        show('err-org'); 
+        ok = false; 
+    } else {
+        hide('err-org');
+    }
+    
+    const staffEl = document.getElementById('total_staff');
+    const staffValue = staffEl ? parseInt(staffEl.value) : 0;
+    console.log('total_staff value:', staffValue);
+    
+    if (!staffValue || staffValue < 1) {
+        console.log('FAIL: total_staff invalid');
+        show('err-staff'); 
+        ok = false; 
+    } else {
+        hide('err-staff');
+    }
+    
+    console.log('validateStep1 result:', ok);
     return ok;
 }
 function validateStep2() {
