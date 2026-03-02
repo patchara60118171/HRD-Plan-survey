@@ -1,5 +1,5 @@
 // =============================================
-// js/ch1-form.js — HRD Chapter 1 Form v2
+// js/ch1-form.js — HRD Chapter 1 Form v2.1
 // 7-step form logic, validation, auto-save
 // =============================================
 
