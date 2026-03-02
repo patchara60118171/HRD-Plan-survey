@@ -454,19 +454,26 @@ function prevStep() {
 }
 
 function updateUI() {
-    // Show/hide correct step panel
-    document.querySelectorAll('.form-step').forEach(el => el.classList.toggle('active', parseInt(el.dataset.step) === currentStep));
+    // Toggle active class on all panels based on currentStep
+    document.querySelectorAll('.form-step').forEach(el => {
+        const isActive = parseInt(el.dataset.step) === currentStep;
+        el.classList.toggle('active', isActive);
+        // Force display as safety net (CSS .active uses display:block)
+        el.style.display = isActive ? '' : '';
+    });
 
     // On landing page (step 0) hide nav bar and progress
     const isLanding = currentStep === 0;
-    const navBar = document.querySelector('.flex.justify-between.items-center.mt-8');
-    const progressWrap = document.querySelector('.max-w-3xl.mx-auto.px-4.pt-5');
+    const navBar = document.getElementById('form-nav');
+    const progressWrap = document.getElementById('form-progress');
     if (navBar) navBar.style.display = isLanding ? 'none' : 'flex';
     if (progressWrap) progressWrap.style.display = isLanding ? 'none' : 'block';
     if (isLanding) return; // skip rest for landing
 
-    document.getElementById('btn-prev').style.visibility = currentStep === 1 ? 'hidden' : 'visible';
+    const btnPrev = document.getElementById('btn-prev');
+    if (btnPrev) btnPrev.style.visibility = currentStep === 1 ? 'hidden' : 'visible';
     const btnNext = document.getElementById('btn-next');
+    if (!btnNext) return;
     const isLastStep = currentStep === TOTAL_STEPS - 1;
     if (isLastStep) {
         btnNext.textContent = 'ยืนยันและส่งข้อมูล ✅';
@@ -478,9 +485,12 @@ function updateUI() {
     // Progress: steps 1–7 only (exclude landing)
     const formStep = currentStep; // 1–7
     const pct = Math.round((formStep / (TOTAL_STEPS - 1)) * 100);
-    document.getElementById('progress-bar').style.width = pct + '%';
-    document.getElementById('step-label').textContent = `ส่วนที่ ${formStep} จาก ${TOTAL_STEPS - 1}`;
-    document.getElementById('step-pct').textContent = pct + '%';
+    const progressBar = document.getElementById('progress-bar');
+    const stepLabel = document.getElementById('step-label');
+    const stepPct = document.getElementById('step-pct');
+    if (progressBar) progressBar.style.width = pct + '%';
+    if (stepLabel) stepLabel.textContent = `ส่วนที่ ${formStep} จาก ${TOTAL_STEPS - 1}`;
+    if (stepPct) stepPct.textContent = pct + '%';
     document.querySelectorAll('[id^="dot-"]').forEach((el, i) => {
         el.className = `step-dot text-xs text-center ${i < formStep ? 'text-accent font-bold' : i === formStep ? 'text-primary font-bold' : 'text-slate-400'}`;
         el.style.width = `${100 / (TOTAL_STEPS - 1)}%`;

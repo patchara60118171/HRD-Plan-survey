@@ -112,7 +112,7 @@
     </header>
 
     <!-- Progress -->
-    <div class="max-w-3xl mx-auto px-4 pt-5 pb-2">
+    <div id="form-progress" class="max-w-3xl mx-auto px-4 pt-5 pb-2" style="display:none">
         <div class="flex items-center justify-between mb-1">
             <span id="step-label" class="text-sm font-semibold text-primary">ส่วนที่ 1 จาก 7</span>
             <span id="step-pct" class="text-sm text-slate-400">14%</span>
@@ -130,11 +130,12 @@
 
             <!-- ===================== STEP 0: LANDING ===================== -->
             <div id="step-0" class="form-step active" data-step="0">
-                <div style="max-width:680px; margin:0 auto; padding:2rem 1.5rem; text-align:center; font-family:inherit">
-                    
+                <div
+                    style="max-width:680px; margin:0 auto; padding:2rem 1.5rem; text-align:center; font-family:inherit">
+
                     <!-- Icon -->
                     <div style="font-size:3.5rem; margin-bottom:1rem">🌿</div>
-                    
+
                     <!-- Title -->
                     <h1 style="font-size:1.75rem; font-weight:700; color:#2563EB; margin-bottom:0.75rem">
                         แบบสำรวจสุขภาวะบุคลากร
@@ -145,27 +146,22 @@
                     </p>
 
                     <!-- Duration -->
-                    <div style="background:#F3F4F6; border-radius:8px; padding:0.75rem 1.5rem; display:inline-block; color:#4B5563; font-size:0.9rem; margin-bottom:2rem">
+                    <div
+                        style="background:#F3F4F6; border-radius:8px; padding:0.75rem 1.5rem; display:inline-block; color:#4B5563; font-size:0.9rem; margin-bottom:2rem">
                         ⏱ ใช้เวลาประมาณ 30–45 นาที
                     </div>
 
                     <!-- Email Section -->
                     <div style="max-width:400px; margin:0 auto 1.5rem">
-                        <input 
-                            type="email" 
-                            id="respondent_email"
-                            placeholder="กรุณากรอกอีเมลของท่าน..."
+                        <input type="email" id="respondent_email" placeholder="กรุณากรอกอีเมลของท่าน..."
                             autocomplete="email"
                             style="width:100%; padding:0.875rem 1rem; border:1.5px solid #D1D5DB; border-radius:10px; font-size:0.95rem; outline:none; margin-bottom:0.5rem; box-sizing:border-box; font-family:inherit"
-                            onfocus="this.style.borderColor='#3B82F6'"
-                            onblur="this.style.borderColor='#D1D5DB'"
-                        >
-                        <div id="email-error-msg" style="color:#EF4444; font-size:0.82rem; min-height:1.2rem; text-align:left; margin-bottom:0.5rem"></div>
-                        <button 
-                            id="btn-confirm-email"
-                            onclick="confirmEmailAndStart()"
-                            style="width:100%; padding:0.875rem; background:linear-gradient(135deg,#3B82F6,#06B6D4); color:#fff; border:none; border-radius:10px; font-size:1rem; font-weight:600; cursor:pointer; font-family:inherit"
-                        >
+                            onfocus="this.style.borderColor='#3B82F6'" onblur="this.style.borderColor='#D1D5DB'">
+                        <div id="email-error-msg"
+                            style="color:#EF4444; font-size:0.82rem; min-height:1.2rem; text-align:left; margin-bottom:0.5rem">
+                        </div>
+                        <button id="btn-confirm-email" onclick="confirmEmailAndStart()"
+                            style="width:100%; padding:0.875rem; background:linear-gradient(135deg,#3B82F6,#06B6D4); color:#fff; border:none; border-radius:10px; font-size:1rem; font-weight:600; cursor:pointer; font-family:inherit">
                             ยืนยันอีเมล →
                         </button>
                     </div>
@@ -589,7 +585,8 @@
             </div>
 
             <!-- Navigation -->
-            <div class="flex justify-between items-center mt-8 pt-5 border-t border-slate-100">
+            <div id="form-nav" class="flex justify-between items-center mt-8 pt-5 border-t border-slate-100"
+                style="display:none">
                 <button id="btn-prev" onclick="prevStep()"
                     class="invisible px-5 py-2.5 border border-slate-300 rounded-xl text-slate-600 text-sm font-semibold hover:bg-slate-50 transition flex items-center gap-2">←
                     ย้อนกลับ</button>
