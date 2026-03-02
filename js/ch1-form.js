@@ -10,6 +10,7 @@ let currentStep = 0;
 let lastPayload = null;
 let prioritySelected = []; // [{id, label}]
 let dragSrcIdx = null;
+let respondentEmail = ''; // ← NEW: email from landing page
 
 // =============================================
 // STATIC DATA
@@ -77,7 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const dotsRow = document.getElementById('step-dots-row');
     if (dotsRow) {
         dotsRow.innerHTML = STEP_NAMES.map((n, i) =>
-            `<span class="step-dot text-xs text-slate-400 text-center" style="width:${100 / 7}%" id="dot-${i}">${i + 1}</span>`
+            `<span class="step-dot text-xs text-slate-400 text-center" style="width:${100 / 7}%;${i===0 ? 'display:none;' : ''}" id="dot-${i}">${i + 1}</span>`
         ).join('');
     }
     buildSickLeaveTable();
@@ -97,6 +98,19 @@ document.addEventListener('DOMContentLoaded', () => {
         setupNegativeGuards();
         console.log('setupNegativeGuards called after timeout');
     }, 100);
+    
+    // Setup email input Enter key handler
+    const emailInput = document.getElementById('respondent_email');
+    if (emailInput) {
+        emailInput.addEventListener('keydown', e => {
+            if (e.key === 'Enter') confirmEmailAndStart();
+        });
+    }
+    
+    // Hide all steps except step-0 (landing page)
+    document.querySelectorAll('.form-step').forEach(el => {
+        if (el.id !== 'step-0') el.classList.remove('active');
+    });
     
     startAutoSave();
 });
@@ -360,6 +374,63 @@ function setupNegativeGuards() {
 }
 
 // =============================================
+// EMAIL GATE — Landing Page
+// =============================================
+function confirmEmailAndStart() {
+    const input = document.getElementById('respondent_email');
+    const errEl = document.getElementById('email-error-msg');
+    const btn   = document.getElementById('btn-confirm-email');
+    const email = input.value.trim().toLowerCase();
+
+    // Clear error
+    errEl.textContent = '';
+
+    // Validate
+    if (!email) {
+        errEl.textContent = 'กรุณากรอกอีเมลของท่าน';
+        input.focus();
+        return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
+        errEl.textContent = 'รูปแบบอีเมลไม่ถูกต้อง เช่น name@mail.com';
+        input.focus();
+        return;
+    }
+
+    // Valid
+    respondentEmail = email;
+    btn.disabled = true;
+    btn.textContent = 'กำลังดำเนินการ...';
+
+    // Save to draft
+    try {
+        const draft = JSON.parse(localStorage.getItem('ch1_draft') || '{}');
+        draft.respondent_email = email;
+        localStorage.setItem('ch1_draft', JSON.stringify(draft));
+    } catch(e) {}
+
+    setTimeout(() => {
+        // Hide step-0, show step-1
+        document.getElementById('step-0').style.display = 'none';
+        currentStep = 0;
+        showStep(1);   // Show Step 1 (organization info)
+        btn.disabled = false;
+        btn.textContent = 'ยืนยันอีเมล →';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 350);
+}
+
+// Helper: Show specific step
+function showStep(stepNum) {
+    currentStep = stepNum - 1; // Convert to 0-indexed
+    document.querySelectorAll('.form-step').forEach((el, idx) => {
+        el.classList.toggle('active', idx === currentStep);
+    });
+    if (currentStep === TOTAL_STEPS - 1) buildSummary();
+    updateUI();
+}
+
+// =============================================
 // NAVIGATION
 // =============================================
 function nextStep() {
@@ -595,6 +666,7 @@ function collectAllData() {
     const strategic_priorities_other = document.getElementById('strategic_priorities_other')?.value.trim() || null;
 
     return {
+        respondent_email: respondentEmail || null,
         organization, vision_mission, strategic_plan_summary, total_staff, org_chart_url,
         age_u30, age_31_40, age_41_50, age_51_60, age_over60,
         age_30_39: age_31_40, age_40_49: age_41_50, age_50_plus: age_51_60 + age_over60, // backward compat
