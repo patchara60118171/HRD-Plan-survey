@@ -51,9 +51,8 @@ document.addEventListener('DOMContentLoaded', () => {
     buildSupportSystems();
     updateUI();
     setupNegativeGuards();
+    setupAgeWatcher();
     startAutoSave();
-    
-    console.log('Well-being Survey v3.0 initialized');
 });
 
 // =============================================
@@ -554,6 +553,51 @@ function setupNegativeGuards() {
             if (this.value < 0) this.value = 0;
         });
     });
+}
+
+function setupAgeWatcher() {
+    const ageInputs = ['age_u30', 'age_31_40', 'age_41_50', 'age_51_60'];
+    const totalStaffInput = document.getElementById('total_staff');
+    const ageTotalSpan = document.getElementById('age-total');
+    const ageSumWarn = document.getElementById('age-sum-warn');
+    
+    function updateAgeTotal() {
+        const total = ageInputs.reduce((sum, id) => {
+            const val = parseInt(document.getElementById(id)?.value) || 0;
+            return sum + val;
+        }, 0);
+        
+        const totalStaff = parseInt(totalStaffInput?.value) || 0;
+        
+        if (ageTotalSpan) ageTotalSpan.textContent = total;
+        
+        // Show warning if age total exceeds total staff
+        if (ageSumWarn && totalStaff > 0) {
+            if (total > totalStaff) {
+                ageSumWarn.classList.remove('hidden');
+                ageSumWarn.textContent = `⚠️ ผลรวมช่วงอายุ (${total} คน) เกินจำนวนบุคลากรรวม (${totalStaff} คน)`;
+            } else {
+                ageSumWarn.classList.add('hidden');
+            }
+        }
+    }
+    
+    // Add event listeners
+    ageInputs.forEach(id => {
+        const input = document.getElementById(id);
+        if (input) {
+            input.addEventListener('input', updateAgeTotal);
+            input.addEventListener('change', updateAgeTotal);
+        }
+    });
+    
+    if (totalStaffInput) {
+        totalStaffInput.addEventListener('input', updateAgeTotal);
+        totalStaffInput.addEventListener('change', updateAgeTotal);
+    }
+    
+    // Initial update
+    updateAgeTotal();
 }
 
 // =============================================
