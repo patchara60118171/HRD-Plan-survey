@@ -216,61 +216,38 @@
       font-size: .7rem
     }
 
-    .sbtg {
-      margin-left: auto;
-      background: none;
-      border: none;
-      color: rgba(255, 255, 255, .6);
-      cursor: pointer;
-      font-size: 1rem;
-      padding: .25rem;
-      flex-shrink: 0
-    }
-
-    .sbtg:hover {
-      color: #fff
-    }
-
-    .sb.col .sbtg {
-      margin-left: 0;
-      margin-right: auto;
-      background: rgba(255, 255, 255, .15);
-      border-radius: 8px;
-      padding: .5rem;
-      font-size: 1.2rem
-    }
-
-    .sb.col .sbtg:hover {
-      background: rgba(255, 255, 255, .25)
-    }
-
-    /* EXPAND FLOATING BTN */
-    #sb-exp {
+    /* SIDEBAR TOGGLE TAB */
+    #sb-tog {
       position: fixed;
-      top: 12px;
-      left: calc(var(--sc) + 8px);
+      top: 50%;
+      left: var(--sw);
+      transform: translateY(-50%);
       z-index: 300;
-      display: none;
       background: var(--P);
-      color: #fff;
+      color: rgba(255, 255, 255, .8);
       border: none;
-      border-radius: 8px;
-      width: 36px;
-      height: 36px;
-      font-size: 1.2rem;
+      border-radius: 0 8px 8px 0;
+      width: 18px;
+      height: 48px;
       cursor: pointer;
+      display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, .25);
-      transition: background .15s
+      font-size: .7rem;
+      box-shadow: 3px 0 10px rgba(0, 0, 0, .2);
+      transition: left .3s, background .15s, color .15s;
+      padding: 0;
+      line-height: 1;
     }
 
-    #sb-exp:hover {
-      background: var(--A)
+    #sb-tog:hover {
+      background: var(--A);
+      color: #fff;
     }
 
-    #sb-exp.show {
-      display: flex
+    .sb.col~#sb-tog,
+    #app.col-sb #sb-tog {
+      left: var(--sc);
     }
 
     .sbn {
@@ -1255,7 +1232,6 @@
           <div class="t">NIDA Wellbeing</div>
           <div class="s">Admin Portal</div>
         </div>
-        <button class="sbtg" id="sbtgb" onclick="toggleSB()">◀</button>
       </div>
       <nav class="sbn">
         <div class="nsc">MAIN</div>
@@ -1290,8 +1266,8 @@
         </div>
       </div>
     </aside>
-    <!-- SIDEBAR EXPAND FLOATING BUTTON -->
-    <button id="sb-exp" onclick="toggleSB()" title="ขยาย Sidebar">☰</button>
+    <!-- SIDEBAR TOGGLE TAB -->
+    <button id="sb-tog" onclick="toggleSB()" title="ยุบ/ขยาย Sidebar">◀</button>
     <!-- MAIN WRAP -->
     <div class="mw" id="mw">
       <!-- TOPBAR -->
@@ -1869,8 +1845,10 @@ CREATE INDEX IF NOT EXISTS idx_ch1_sub ON hrd_ch1_responses(submitted_at);</pre>
     const SUP_LABELS = { full: 'ครบ', partial: 'บางส่วน', none: 'ไม่มี' };
     const DIG_LABELS = { e_doc: 'เอกสารอิเล็กทรอนิกส์', e_sign: 'E-Signature', cloud: 'Cloud', hr_digital: 'HR Digital', health_db: 'ฐานข้อมูลสุขภาพ', none: 'ไม่มี', other: 'อื่นๆ' };
     const WB_ORGS = [
+      { code: 'dcy', name: 'กรมกิจการเด็กและเยาวชน', url: 'https://nidawellbeing.vercel.app/?org=dcy' },
       { code: 'probation', name: 'กรมคุมประพฤติ', url: 'https://nidawellbeing.vercel.app/?org=probation' },
       { code: 'rid', name: 'กรมชลประทาน', url: 'https://nidawellbeing.vercel.app/?org=rid' },
+      { code: 'doh_main', name: 'กรมทางหลวง', url: 'https://nidawellbeing.vercel.app/?org=doh_main' },
       { code: 'dss', name: 'กรมวิทยาศาสตร์บริการ', url: 'https://nidawellbeing.vercel.app/?org=dss' },
       { code: 'dcp', name: 'กรมส่งเสริมวัฒนธรรม', url: 'https://nidawellbeing.vercel.app/?org=dcp' },
       { code: 'dmh', name: 'กรมสุขภาพจิต', url: 'https://nidawellbeing.vercel.app/?org=dmh' },
@@ -2018,8 +1996,7 @@ CREATE INDEX IF NOT EXISTS idx_ch1_sub ON hrd_ch1_responses(submitted_at);</pre>
       sbCollapsed = !sbCollapsed;
       el('sb').classList.toggle('col', sbCollapsed);
       el('mw').classList.toggle('exp', sbCollapsed);
-      el('sbtgb').textContent = sbCollapsed ? '▶' : '◀';
-      el('sb-exp').classList.toggle('show', sbCollapsed);
+      el('sb-tog').textContent = sbCollapsed ? '▶' : '◀';
     }
 
     // ═══════════════════════════════════════════════
