@@ -133,8 +133,8 @@ python -m http.server 8000
 - ทดสอบการ submit ข้อมูล
 
 ### Deployment
+- **Vercel**: สำหรับ production (recommended)
 - **GitHub Pages**: สำหรับ demo
-- **Vercel/Netlify**: สำหรับ production
 - **Custom Domain**: สำหรับการใช้งานจริง
 
 ## 📝 การบำรุงรักษา

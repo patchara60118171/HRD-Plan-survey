@@ -1,21 +1,77 @@
-{
-    "outputDirectory": ".",
-    "rewrites": [
-        {
-            "source": "/ch1",
-            "destination": "/ch1.html"
-        },
-        {
-            "source": "/ch1-admin",
-            "destination": "/ch1-admin.html"
-        },
-        {
-            "source": "/ch1-admin-login",
-            "destination": "/ch1-admin-login.html"
-        },
-        {
-            "source": "/admin-login",
-            "destination": "/admin-login.html"
-        }
-    ]
+﻿{
+    "outputDirectory":  ".",
+    "cleanUrls":  true,
+    "trailingSlash":  false,
+    "rewrites":  [
+                     {
+                         "destination":  "/admin.html",
+                         "source":  "/admin"
+                     },
+                     {
+                         "source":  "/ch1",
+                         "destination":  "/ch1.html"
+                     },
+                     {
+                         "source":  "/ch1-admin",
+                         "destination":  "/ch1-admin.html"
+                     },
+                     {
+                         "source":  "/ch1-admin-login",
+                         "destination":  "/ch1-admin-login.html"
+                     },
+                     {
+                         "source":  "/admin-login",
+                         "destination":  "/admin-login.html"
+                     }
+                 ],
+    "headers":  [
+                    {
+                        "source":  "/(.*)",
+                        "headers":  [
+                                        {
+                                            "key":  "X-Content-Type-Options",
+                                            "value":  "nosniff"
+                                        },
+                                        {
+                                            "key":  "X-Frame-Options",
+                                            "value":  "DENY"
+                                        },
+                                        {
+                                            "key":  "X-XSS-Protection",
+                                            "value":  "1; mode=block"
+                                        },
+                                        {
+                                            "key":  "Referrer-Policy",
+                                            "value":  "strict-origin-when-cross-origin"
+                                        }
+                                    ]
+                    },
+                    {
+                        "source":  "/js/(.*)",
+                        "headers":  [
+                                        {
+                                            "key":  "Cache-Control",
+                                            "value":  "public, max-age=31536000, immutable"
+                                        }
+                                    ]
+                    },
+                    {
+                        "source":  "/css/(.*)",
+                        "headers":  [
+                                        {
+                                            "key":  "Cache-Control",
+                                            "value":  "public, max-age=31536000, immutable"
+                                        }
+                                    ]
+                    },
+                    {
+                        "source":  "/assets/(.*)",
+                        "headers":  [
+                                        {
+                                            "key":  "Cache-Control",
+                                            "value":  "public, max-age=31536000, immutable"
+                                        }
+                                    ]
+                    }
+                ]
 }

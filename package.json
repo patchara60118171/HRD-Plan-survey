@@ -1,19 +1,30 @@
 {
   "name": "well-being-survey",
-  "version": "1.0.0",
-  "description": "Well-being Survey",
+  "version": "3.1.0",
+  "description": "Well-being Survey - HRD Chapter 1 Form with enhanced security and performance",
   "scripts": {
     "dev": "npx serve",
-    "build": "echo 'Build step skipped (Handled by vercel.json)'"
+    "build": "echo 'Static site - no build required'",
+    "deploy": "vercel --prod",
+    "deploy:preview": "vercel"
   },
   "main": "index.js",
   "directories": {
     "doc": "docs"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "well-being",
+    "survey",
+    "hrd",
+    "supabase",
+    "vercel"
+  ],
+  "author": "NIDA Well-being Project",
   "license": "ISC",
   "dependencies": {
     "@supabase/supabase-js": "^2.98.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }
