@@ -159,27 +159,28 @@
 
     <!-- Login Screen -->
     <div id="login-screen" class="login-box">
-        <h2>≡ƒöÉ Admin Login</h2>
-        <p style="color: #64748B; margin-bottom: 1.5rem;">α╕üα╕úα╕╕α╕ôα╕▓α╕üα╕úα╕¡α╕üα╕úα╕½α╕▒α╕¬α╕£α╣êα╕▓α╕Öα╣Çα╕₧α╕╖α╣êα╕¡α╣Çα╕éα╣ëα╕▓α╕ûα╕╢α╕çα╕éα╣ëα╕¡α╕íα╕╣α╕Ñ</p>
-        <input type="password" id="admin-pass" class="input-field" placeholder="Password" style="margin-bottom: 1rem;">
+        <h2>🔐 Admin Login</h2>
+        <p style="color: #64748B; margin-bottom: 1.5rem;">กรุณาเข้าสู่ระบบด้วยบัญชีผู้ดูแล</p>
+        <input type="email" id="admin-email" class="input-field" placeholder="admin@example.com" style="margin-bottom: 0.75rem;">
+        <input type="password" id="admin-pass" class="input-field" placeholder="รหัสผ่าน" style="margin-bottom: 1rem;">
         <button onclick="adminLogin()" class="btn-start"
-            style="width: 100%; padding: 0.75rem; justify-content: center;">α╣Çα╕éα╣ëα╕▓α╕¬α╕╣α╣êα╕úα╕░α╕Üα╕Ü</button>
+            style="width: 100%; padding: 0.75rem; justify-content: center;">เข้าสู่ระบบ</button>
     </div>
 
     <!-- Dashboard Screen -->
     <div id="dashboard-screen" class="admin-container" style="display: none;">
         <div class="admin-header">
             <div>
-                <h1 style="margin: 0;">≡ƒôè Dashboard Analytics</h1>
-                <p style="color: #64748B; margin: 0;">α╕áα╕▓α╕₧α╕úα╕ºα╕íα╕£α╕Ñα╕üα╕▓α╕úα╕¢α╕úα╕░α╣Çα╕íα╕┤α╕Öα╕¬α╕╕α╕éα╕áα╕▓α╕ºα╕░α╕¡α╕çα╕äα╣îα╕üα╕ú</p>
+                <h1 style="margin: 0;">📊 Dashboard Analytics</h1>
+                <p style="color: #64748B; margin: 0;">ภาพรวมผลการประเมินสุขภาวะ</p>
             </div>
             <div style="display: flex; gap: 1rem;">
                 <button onclick="fetchData()" class="btn-login"
-                    style="background: #EFF6FF; color: #1D4ED8; border: 1px solid #BFDBFE;">≡ƒöä α╕úα╕╡α╣Çα╕ƒα╕úα╕èα╕éα╣ëα╕¡α╕íα╕╣α╕Ñ</button>
+                    style="background: #EFF6FF; color: #1D4ED8; border: 1px solid #BFDBFE;">🔄 รีเฟรชข้อมูล</button>
                 <button onclick="location.href='../index.html'" class="btn-login"
-                    style="background: transparent; color: #64748B; border: 1px solid #CBD5E1;">≡ƒÅá α╕½α╕Öα╣ëα╕▓α╕½α╕Ñα╕▒α╕ü</button>
+                    style="background: transparent; color: #64748B; border: 1px solid #CBD5E1;">🏠 หน้าหลัก</button>
                 <button onclick="logout()" class="btn-login"
-                    style="background: #FEE2E2; color: #991B1B; border: 1px solid #FCA5A5;">≡ƒÜ¬ α╕¡α╕¡α╕üα╕êα╕▓α╕üα╕úα╕░α╕Üα╕Ü</button>
+                    style="background: #FEE2E2; color: #991B1B; border: 1px solid #FCA5A5;">🚪 ออกจากระบบ</button>
             </div>
         </div>
 
