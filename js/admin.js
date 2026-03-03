@@ -1,43 +1,62 @@
 // Admin Dashboard Logic
 
-// Admin Password (Client-side simple check)
-const ADMIN_PASS = "admin";
-
 // Initialize Supabase Helper
 let supabaseAdmin = null;
 function initSupabaseAdmin() {
-    if (typeof supabase !== 'undefined' && typeof SUPABASE_URL !== 'undefined') {
+    if (!supabaseAdmin && typeof supabase !== 'undefined' && typeof SUPABASE_URL !== 'undefined') {
         supabaseAdmin = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     }
 }
 
-// Check if logged in
-if (localStorage.getItem('admin_logged_in') === 'true') {
-    showDashboard();
-}
+initSupabaseAdmin();
 
-function adminLogin() {
-    const input = document.getElementById('admin-pass').value;
-    if (input === ADMIN_PASS) {
-        localStorage.setItem('admin_logged_in', 'true');
+// Check Supabase session on load
+(async () => {
+    if (!supabaseAdmin) return;
+    const { data: { session } } = await supabaseAdmin.auth.getSession();
+    if (session) {
         showDashboard();
-    } else {
-        alert('รหัสผ่านไม่ถูกต้อง');
     }
+})();
+
+async function adminLogin() {
+    initSupabaseAdmin();
+    if (!supabaseAdmin) {
+        alert('Supabase Client initialization failed. Check config.');
+        return;
+    }
+
+    const email = document.getElementById('admin-email')?.value?.trim();
+    const password = document.getElementById('admin-pass')?.value || '';
+
+    if (!email || !password) {
+        alert('กรุณากรอกอีเมลและรหัสผ่าน');
+        return;
+    }
+
+    const { error } = await supabaseAdmin.auth.signInWithPassword({ email, password });
+    if (error) {
+        alert(error.message === 'Invalid login credentials'
+            ? 'อีเมลหรือรหัสผ่านไม่ถูกต้อง'
+            : (error.message || 'เข้าสู่ระบบไม่สำเร็จ'));
+        return;
+    }
+
+    showDashboard();
 }
 
 function showDashboard() {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('dashboard-screen').style.display = 'block';
 
-    // Init Supabase if not already
     initSupabaseAdmin();
-
     fetchData();
 }
 
-function logout() {
-    localStorage.removeItem('admin_logged_in');
+async function logout() {
+    if (supabaseAdmin) {
+        await supabaseAdmin.auth.signOut();
+    }
     location.reload();
 }
 

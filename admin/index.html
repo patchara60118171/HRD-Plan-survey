@@ -1,19 +1,374 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="th">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Redirecting to Admin Login...</title>
-    <meta http-equiv="refresh" content="0; url=../admin-login.html" />
-    <script>
-        window.location.replace('../admin-login.html');
-    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Well-being Survey</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        body {
+            background: #F1F5F9;
+            padding: 2rem;
+        }
+
+        .admin-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid #E2E8F0;
+            padding-bottom: 1rem;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            display: block;
+            overflow-x: auto;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 0.75rem;
+            border: 1px solid #E2E8F0;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        .data-table th {
+            background: #F8FAFC;
+            font-weight: 600;
+        }
+
+        .login-box {
+            max-width: 400px;
+            margin: 100px auto;
+            text-align: center;
+            padding: 2rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .actions-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+        }
+
+        .status-badge.good {
+            background: #D1FAE5;
+            color: #065F46;
+        }
+
+        .status-badge.poor {
+            background: #FEE2E2;
+            color: #991B1B;
+        }
+
+        /* Dashboard Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid #E2E8F0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .stat-title {
+            color: #64748B;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1E293B;
+            line-height: 1.2;
+        }
+
+        .stat-desc {
+            font-size: 0.75rem;
+            color: #94A3B8;
+            margin-top: 0.25rem;
+        }
+
+        /* Charts Grid */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .chart-container {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid #E2E8F0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .chart-container h3 {
+            margin: 0 0 1rem 0;
+            font-size: 1rem;
+            color: #475569;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Supabase Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
 <body>
-    <p>กำลังพาไปหน้าเข้าสู่ระบบผู้ดูแล...</p>
-    <p><a href="../admin-login.html">คลิกที่นี่หากระบบไม่พาไปอัตโนมัติ</a></p>
+
+    <!-- Login Screen -->
+    <div id="login-screen" class="login-box">
+        <h2>🔐 Admin Login</h2>
+        <p style="color: #64748B; margin-bottom: 1.5rem;">กรุณาเข้าสู่ระบบด้วยบัญชีผู้ดูแล (Supabase Auth)</p>
+        <input type="email" id="admin-email" class="input-field" placeholder="admin@example.com"
+            style="margin-bottom: 0.75rem;">
+        <input type="password" id="admin-pass" class="input-field" placeholder="Password"
+            style="margin-bottom: 1rem;">
+        <button onclick="adminLogin()" class="btn-start"
+            style="width: 100%; padding: 0.75rem; justify-content: center;">เข้าสู่ระบบ</button>
+    </div>
+
+    <!-- Dashboard Screen -->
+    <div id="dashboard-screen" class="admin-container" style="display: none;">
+        <div class="admin-header">
+            <div>
+                <h1 style="margin: 0;">≡ƒôè Dashboard Analytics</h1>
+                <p style="color: #64748B; margin: 0;">α╕áα╕▓α╕₧α╕úα╕ºα╕íα╕£α╕Ñα╕üα╕▓α╕úα╕¢α╕úα╕░α╣Çα╕íα╕┤α╕Öα╕¬α╕╕α╕éα╕áα╕▓α╕ºα╕░α╕¡α╕çα╕äα╣îα╕üα╕ú</p>
+            </div>
+            <div style="display: flex; gap: 1rem;">
+                <button onclick="fetchData()" class="btn-login"
+                    style="background: #EFF6FF; color: #1D4ED8; border: 1px solid #BFDBFE;">≡ƒöä α╕úα╕╡α╣Çα╕ƒα╕úα╕èα╕éα╣ëα╕¡α╕íα╕╣α╕Ñ</button>
+                <button onclick="location.href='../index.html'" class="btn-login"
+                    style="background: transparent; color: #64748B; border: 1px solid #CBD5E1;">≡ƒÅá α╕½α╕Öα╣ëα╕▓α╕½α╕Ñα╕▒α╕ü</button>
+                <button onclick="logout()" class="btn-login"
+                    style="background: #FEE2E2; color: #991B1B; border: 1px solid #FCA5A5;">≡ƒÜ¬ α╕¡α╕¡α╕üα╕êα╕▓α╕üα╕úα╕░α╕Üα╕Ü</button>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div
+            style="background: white; padding: 1rem; border-radius: 8px; border: 1px solid #E2E8F0; margin-bottom: 2rem; display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+            <div style="font-weight: 600; color: #475569;">≡ƒöì α╕òα╕▒α╕ºα╕üα╕úα╕¡α╕ç:</div>
+            <select id="filter-gender" class="input-field" style="width: auto; margin: 0; padding: 0.5rem;"
+                onchange="applyFilters()">
+                <option value="all">α╕ùα╕▒α╣ëα╕çα╕½α╕íα╕ö (α╣Çα╕₧α╕¿)</option>
+                <option value="α╕èα╕▓α╕ó">α╕èα╕▓α╕ó</option>
+                <option value="α╕½α╕ìα╕┤α╕ç">α╕½α╕ìα╕┤α╕ç</option>
+            </select>
+            <select id="filter-age" class="input-field" style="width: auto; margin: 0; padding: 0.5rem;"
+                onchange="applyFilters()">
+                <option value="all">α╕ùα╕▒α╣ëα╕çα╕½α╕íα╕ö (α╕èα╣êα╕ºα╕çα╕¡α╕▓α╕óα╕╕)</option>
+                <option value="GenZ">Gen Z (< 27)</option>
+                <option value="GenY">Gen Y (27-42)</option>
+                <option value="GenX">Gen X (43-58)</option>
+                <option value="BabyBoomer">Baby Boomer (> 58)</option>
+            </select>
+            <!-- Region Filter -->
+            <div style="flex: 1; text-align: right; color: #64748B; font-size: 0.9rem;">
+                α╣üα╕¬α╕öα╕çα╕éα╣ëα╕¡α╕íα╕╣α╕Ñ: <span id="filtered-count" style="font-weight: bold; color: #0F172A;">0</span> α╕úα╕▓α╕óα╕üα╕▓α╕ú
+            </div>
+        </div>
+
+        <!-- 1. Demographics Overview -->
+        <h2
+            style="font-size: 1.25rem; color: #1E293B; margin-bottom: 1rem; border-left: 4px solid #3B82F6; padding-left: 0.75rem;">
+            1. α╕áα╕▓α╕₧α╕úα╕ºα╕íα╕£α╕╣α╣ëα╕òα╕¡α╕Üα╣üα╕Üα╕Üα╕¬α╕¡α╕Üα╕ûα╕▓α╕í (Demographics)</h2>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-title">α╕£α╕╣α╣ëα╕òα╕¡α╕Üα╣üα╕Üα╕Üα╕¬α╕¡α╕Üα╕ûα╕▓α╕í</div>
+                <div class="stat-value" id="stat-total">0</div>
+                <div class="stat-desc">α╕äα╕Ö</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">α╕¡α╕▓α╕óα╕╕α╣Çα╕ëα╕Ñα╕╡α╣êα╕ó</div>
+                <div class="stat-value" id="stat-age">0</div>
+                <div class="stat-desc">α╕¢α╕╡</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">BMI α╣Çα╕ëα╕Ñα╕╡α╣êα╕ó</div>
+                <div class="stat-value" id="stat-bmi">0.0</div>
+                <div class="stat-desc">kg/m┬▓</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">α╕üα╕Ñα╕╕α╣êα╕íα╣Çα╕¬α╕╡α╣êα╕óα╕çα╕¬α╕╣α╕ç</div>
+                <div class="stat-value" id="stat-risk" style="color: #EF4444;">0%</div>
+                <div class="stat-desc">α╕äα╕ºα╕▓α╕íα╣Çα╕¬α╕╡α╣êα╕óα╕çα╕¬α╕╕α╕éα╕áα╕▓α╕₧</div>
+            </div>
+        </div>
+
+        <div class="charts-grid">
+            <div class="chart-container">
+                <h3>α╕¬α╕▒α╕öα╕¬α╣êα╕ºα╕Öα╣Çα╕₧α╕¿ (Gender)</h3>
+                <div style="height: 250px; position: relative;">
+                    <canvas id="chart-gender"></canvas>
+                </div>
+            </div>
+            <div class="chart-container">
+                <h3>α╕èα╣êα╕ºα╕çα╕¡α╕▓α╕óα╕╕ (Generations)</h3>
+                <div style="height: 250px; position: relative;">
+                    <canvas id="chart-age-group"></canvas>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- 2. Mental Health -->
+        <h2
+            style="font-size: 1.25rem; color: #1E293B; margin-bottom: 1rem; border-left: 4px solid #8B5CF6; padding-left: 0.75rem; margin-top: 2rem;">
+            2. α╕¬α╕╕α╕éα╕áα╕▓α╕₧α╕êα╕┤α╕ò (Mental Health)</h2>
+        <div class="charts-grid">
+            <div class="chart-container">
+                <h3>α╕äα╕░α╣üα╕Öα╕Öα╣Çα╕ëα╕Ñα╕╡α╣êα╕óα╣Çα╕ùα╕╡α╕óα╕Üα╣Çα╕üα╕ôα╕æα╣î (Target > 43)</h3>
+                <div
+                    style="height: 250px; position: relative; display: flex; align-items: center; justify-content: center;">
+                    <canvas id="chart-tmhi-gauge"></canvas>
+                </div>
+            </div>
+            <div class="chart-container" style="grid-column: span 2;">
+                <h3>α╕úα╕░α╕öα╕▒α╕Üα╕¬α╕╕α╕éα╕áα╕▓α╕₧α╕êα╕┤α╕ò (TMHI Levels)</h3>
+                <div style="height: 250px; position: relative;">
+                    <canvas id="chart-tmhi-levels"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Health Behaviors -->
+        <h2
+            style="font-size: 1.25rem; color: #1E293B; margin-bottom: 1rem; border-left: 4px solid #10B981; padding-left: 0.75rem; margin-top: 2rem;">
+            3. α╕₧α╕ñα╕òα╕┤α╕üα╕úα╕úα╕íα╕¬α╕╕α╕éα╕áα╕▓α╕₧ (Health Behaviors)</h2>
+        <div class="charts-grid">
+            <div class="chart-container">
+                <h3>α╕üα╕▓α╕úα╕¬α╕╣α╕Üα╕Üα╕╕α╕½α╕úα╕╡α╣ê</h3>
+                <div style="height: 250px; position: relative;">
+                    <canvas id="chart-smoke"></canvas>
+                </div>
+            </div>
+            <div class="chart-container">
+                <h3>α╕üα╕▓α╕úα╕öα╕╖α╣êα╕íα╣üα╕¡α╕Ñα╕üα╕¡α╕«α╕¡α╕Ñα╣î</h3>
+                <div style="height: 250px; position: relative;">
+                    <canvas id="chart-alcohol"></canvas>
+                </div>
+            </div>
+            <div class="chart-container">
+                <h3>α╣Çα╕ºα╕Ñα╕▓α╕½α╕Öα╣ëα╕▓α╕êα╕¡ vs α╕¡α╕¡α╕üα╕üα╕│α╕Ñα╕▒α╕çα╕üα╕▓α╕ó (α╣Çα╕ëα╕Ñα╕╡α╣êα╕óα╕òα╣êα╕¡α╕ºα╕▒α╕Ö)</h3>
+                <div style="height: 250px; position: relative;">
+                    <canvas id="chart-activity"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="chart-container" style="margin-bottom: 2rem;">
+            <h3>α╕₧α╕ñα╕òα╕┤α╕üα╕úα╕úα╕íα╕üα╕▓α╕úα╕Üα╕úα╕┤α╣éα╕áα╕ä (α╕½α╕ºα╕▓α╕Ö/α╕íα╕▒α╕Ö/α╣Çα╕äα╣çα╕í) - Top 5 α╕äα╕ºα╕▓α╕íα╣Çα╕¬α╕╡α╣êα╕óα╕ç</h3>
+            <p style="font-size: 0.85rem; color: #64748B;">α╣üα╕¬α╕öα╕çα╕₧α╕ñα╕òα╕┤α╕üα╕úα╕úα╕íα╕ùα╕╡α╣êα╕íα╕╡α╕£α╕╣α╣ëα╕òα╕¡α╕Üα╕ºα╣êα╕▓ "α╕ùα╕│α╕ùα╕╕α╕üα╕ºα╕▒α╕Ö" α╕íα╕▓α╕üα╕ùα╕╡α╣êα╕¬α╕╕α╕ö</p>
+            <div style="height: 300px; position: relative;">
+                <canvas id="chart-diet-risk"></canvas>
+            </div>
+        </div>
+
+        <!-- 4. Environment & Safety -->
+        <h2
+            style="font-size: 1.25rem; color: #1E293B; margin-bottom: 1rem; border-left: 4px solid #F59E0B; padding-left: 0.75rem; margin-top: 2rem;">
+            4. α╕¬α╕┤α╣êα╕çα╣üα╕ºα╕öα╕Ñα╣ëα╕¡α╕íα╣üα╕Ñα╕░α╕äα╕ºα╕▓α╕íα╕¢α╕Ñα╕¡α╕öα╕áα╕▒α╕ó</h2>
+        <div class="charts-grid">
+            <div class="chart-container">
+                <h3>α╕£α╕Ñα╕üα╕úα╕░α╕ùα╕Üα╕¬α╕┤α╣êα╕çα╣üα╕ºα╕öα╕Ñα╣ëα╕¡α╕íα╕ùα╕▓α╕çα╕üα╕▓α╕óα╕áα╕▓α╕₧</h3>
+                <div style="height: 300px; position: relative;">
+                    <canvas id="chart-env-radar"></canvas>
+                </div>
+            </div>
+            <div class="chart-container">
+                <h3>α╕£α╕Ñα╕üα╕úα╕░α╕ùα╕Üα╕êα╕▓α╕ü PM 2.5</h3>
+                <div style="height: 300px; position: relative;">
+                    <canvas id="chart-pm25"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. Risks -->
+        <h2
+            style="font-size: 1.25rem; color: #1E293B; margin-bottom: 1rem; border-left: 4px solid #EF4444; padding-left: 0.75rem; margin-top: 2rem;">
+            5. α╕¢α╕▒α╕ìα╕½α╕▓α╕¬α╕╕α╕éα╕áα╕▓α╕₧α╣üα╕Ñα╕░α╣éα╕úα╕äα╕¢α╕úα╕░α╕êα╕│α╕òα╕▒α╕º</h2>
+        <div class="chart-container" style="margin-bottom: 2rem;">
+            <h3>α╣éα╕úα╕äα╕¢α╕úα╕░α╕êα╕│α╕òα╕▒α╕ºα╕ùα╕╡α╣êα╕₧α╕Üα╕Üα╣êα╕¡α╕ó (Top Diseases)</h3>
+            <div style="height: 300px; position: relative;">
+                <canvas id="chart-diseases"></canvas>
+            </div>
+        </div>
+
+        <div class="actions-bar" style="margin-top: 2rem; border-top: 1px solid #E2E8F0; padding-top: 2rem;">
+            <div style="flex: 1;">
+                <h2 style="margin: 0 0 1rem 0;">≡ƒôï α╕éα╣ëα╕¡α╕íα╕╣α╕Ñα╕öα╕┤α╕Ü (Raw Data)</h2>
+            </div>
+
+            <button onclick="downloadExcel()" class="btn-action primary">≡ƒôÑ Export Excel</button>
+        </div>
+
+        <div id="loading" style="display: none; text-align: center; padding: 2rem;">α╕üα╕│α╕Ñα╕▒α╕çα╣éα╕½α╕Ñα╕öα╕éα╣ëα╕¡α╕íα╕╣α╕Ñ...</div>
+
+        <div style="overflow-x: auto;">
+            <table class="data-table" id="responses-table">
+                <thead>
+                    <tr id="table-headers">
+                        <th>α╕Ñα╕│α╕öα╕▒α╕Ü</th>
+                        <th>α╣Çα╕ºα╕Ñα╕▓</th>
+                        <th>α╕èα╕╖α╣êα╕¡</th>
+                        <th>BMI</th>
+                        <th>TMHI-15</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    <!-- Data will be injected here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script src="../js/supabase-config.js"></script>
+    <script src="../js/admin.js"></script>
 </body>
 
 </html>

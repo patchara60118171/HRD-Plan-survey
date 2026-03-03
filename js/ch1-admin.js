@@ -40,7 +40,7 @@ const PAGE_SIZE = 10;
 // =============================================
 (async () => {
     const { data: { session } } = await ch1Admin.auth.getSession();
-    if (!session) { window.location.href = 'admin-login.html'; return; }
+    if (!session) { window.location.href = 'ch1-admin-login.html'; return; }
     document.getElementById('loading-screen').style.display = 'none';
     document.getElementById('dashboard').style.display = 'block';
     await initDashboard();
@@ -48,7 +48,7 @@ const PAGE_SIZE = 10;
 
 async function logout() {
     await ch1Admin.auth.signOut();
-    window.location.href = 'admin-login.html';
+    window.location.href = 'ch1-admin-login.html';
 }
 
 // =============================================

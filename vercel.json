@@ -2,16 +2,16 @@
     "outputDirectory": ".",
     "rewrites": [
         {
-            "source": "/admin",
-            "destination": "/admin-login.html"
-        },
-        {
             "source": "/ch1",
             "destination": "/ch1.html"
         },
         {
             "source": "/ch1-admin",
             "destination": "/ch1-admin.html"
+        },
+        {
+            "source": "/ch1-admin-login",
+            "destination": "/ch1-admin-login.html"
         },
         {
             "source": "/admin-login",
