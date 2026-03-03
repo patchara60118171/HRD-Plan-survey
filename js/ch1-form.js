@@ -556,48 +556,91 @@ function setupNegativeGuards() {
 }
 
 function setupAgeWatcher() {
-    const ageInputs = ['age_u30', 'age_31_40', 'age_41_50', 'age_51_60'];
     const totalStaffInput = document.getElementById('total_staff');
+    
+    // Age distribution validation
+    const ageInputs = ['age_u30', 'age_31_40', 'age_41_50', 'age_51_60'];
     const ageTotalSpan = document.getElementById('age-total');
     const ageSumWarn = document.getElementById('age-sum-warn');
     
-    function updateAgeTotal() {
-        const total = ageInputs.reduce((sum, id) => {
-            const val = parseInt(document.getElementById(id)?.value) || 0;
-            return sum + val;
-        }, 0);
-        
+    // Type distribution validation
+    const typeInputs = ['type_official', 'type_employee', 'type_contract', 'type_other'];
+    const typeTotalSpan = document.getElementById('type-total');
+    const typeSumWarn = document.getElementById('type-sum-warn');
+    
+    // Service years validation
+    const serviceInputs = ['service_u1', 'service_1_5', 'service_6_10', 'service_11_15', 'service_16_20', 'service_21_25', 'service_26_30', 'service_over30'];
+    const serviceTotalSpan = document.getElementById('service-total');
+    const serviceSumWarn = document.getElementById('service-sum-warn');
+    
+    // Position validation
+    const positionInputs = ['pos_o1', 'pos_o2', 'pos_o3', 'pos_o4', 'pos_k1', 'pos_k2', 'pos_k3', 'pos_k4', 'pos_k5', 'pos_m1', 'pos_m2', 'pos_s1', 'pos_s2'];
+    const positionTotalSpan = document.getElementById('position-total');
+    const positionSumWarn = document.getElementById('position-sum-warn');
+    
+    function updateTotals() {
         const totalStaff = parseInt(totalStaffInput?.value) || 0;
         
-        if (ageTotalSpan) ageTotalSpan.textContent = total;
-        
-        // Show warning if age total exceeds total staff
+        // Update age total
+        const ageTotal = ageInputs.reduce((sum, id) => sum + (parseInt(document.getElementById(id)?.value) || 0), 0);
+        if (ageTotalSpan) ageTotalSpan.textContent = ageTotal;
         if (ageSumWarn && totalStaff > 0) {
-            if (total > totalStaff) {
+            if (ageTotal > totalStaff) {
                 ageSumWarn.classList.remove('hidden');
-                ageSumWarn.textContent = `⚠️ ผลรวมช่วงอายุ (${total} คน) เกินจำนวนบุคลากรรวม (${totalStaff} คน)`;
+                ageSumWarn.textContent = `⚠️ ผลรวมช่วงอายุ (${ageTotal} คน) เกินจำนวนบุคลากรรวม (${totalStaff} คน)`;
             } else {
                 ageSumWarn.classList.add('hidden');
             }
         }
+        
+        // Update type total
+        const typeTotal = typeInputs.reduce((sum, id) => sum + (parseInt(document.getElementById(id)?.value) || 0), 0);
+        if (typeTotalSpan) typeTotalSpan.textContent = typeTotal;
+        if (typeSumWarn && totalStaff > 0) {
+            if (typeTotal > totalStaff) {
+                typeSumWarn.classList.remove('hidden');
+                typeSumWarn.textContent = `⚠️ ผลรวมประเภทอัตรากำลัง (${typeTotal} คน) เกินจำนวนบุคลากรรวม (${totalStaff} คน)`;
+            } else {
+                typeSumWarn.classList.add('hidden');
+            }
+        }
+        
+        // Update service total
+        const serviceTotal = serviceInputs.reduce((sum, id) => sum + (parseInt(document.getElementById(id)?.value) || 0), 0);
+        if (serviceTotalSpan) serviceTotalSpan.textContent = serviceTotal;
+        if (serviceSumWarn && totalStaff > 0) {
+            if (serviceTotal > totalStaff) {
+                serviceSumWarn.classList.remove('hidden');
+                serviceSumWarn.textContent = `⚠️ ผลรวมอายุราชการ (${serviceTotal} คน) เกินจำนวนบุคลากรรวม (${totalStaff} คน)`;
+            } else {
+                serviceSumWarn.classList.add('hidden');
+            }
+        }
+        
+        // Update position total
+        const positionTotal = positionInputs.reduce((sum, id) => sum + (parseInt(document.getElementById(id)?.value) || 0), 0);
+        if (positionTotalSpan) positionTotalSpan.textContent = positionTotal;
+        if (positionSumWarn && totalStaff > 0) {
+            if (positionTotal > totalStaff) {
+                positionSumWarn.classList.remove('hidden');
+                positionSumWarn.textContent = `⚠️ ผลรวมประเภทและระดับตำแหน่ง (${positionTotal} คน) เกินจำนวนบุคลากรรวม (${totalStaff} คน)`;
+            } else {
+                positionSumWarn.classList.add('hidden');
+            }
+        }
     }
     
-    // Add event listeners
-    ageInputs.forEach(id => {
+    // Add event listeners for all inputs
+    [...ageInputs, ...typeInputs, ...serviceInputs, ...positionInputs, 'total_staff'].forEach(id => {
         const input = document.getElementById(id);
         if (input) {
-            input.addEventListener('input', updateAgeTotal);
-            input.addEventListener('change', updateAgeTotal);
+            input.addEventListener('input', updateTotals);
+            input.addEventListener('change', updateTotals);
         }
     });
     
-    if (totalStaffInput) {
-        totalStaffInput.addEventListener('input', updateAgeTotal);
-        totalStaffInput.addEventListener('change', updateAgeTotal);
-    }
-    
     // Initial update
-    updateAgeTotal();
+    updateTotals();
 }
 
 // =============================================
