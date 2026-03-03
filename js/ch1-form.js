@@ -529,6 +529,32 @@ function startAutoSave() {
 // =============================================
 // UTILITIES
 // =============================================
+function calculateTurnoverRate() {
+    const turnoverCount = parseInt(document.getElementById('turnover_count')?.value) || 0;
+    const totalStaff = parseInt(document.getElementById('total_staff')?.value) || 0;
+    const turnoverRateInput = document.getElementById('turnover_rate');
+    
+    if (totalStaff > 0 && turnoverRateInput) {
+        const rate = ((turnoverCount / totalStaff) * 100).toFixed(2);
+        turnoverRateInput.value = rate;
+    } else if (turnoverRateInput) {
+        turnoverRateInput.value = '';
+    }
+}
+
+function calculateTransferRate() {
+    const transferCount = parseInt(document.getElementById('transfer_count')?.value) || 0;
+    const totalStaff = parseInt(document.getElementById('total_staff')?.value) || 0;
+    const transferRateInput = document.getElementById('transfer_rate');
+    
+    if (totalStaff > 0 && transferRateInput) {
+        const rate = ((transferCount / totalStaff) * 100).toFixed(2);
+        transferRateInput.value = rate;
+    } else if (transferRateInput) {
+        transferRateInput.value = '';
+    }
+}
+
 function showToast(msg, type = 'info') {
     const toast = document.getElementById('toast');
     if (!toast) return;
@@ -636,6 +662,13 @@ function setupAgeWatcher() {
         if (input) {
             input.addEventListener('input', updateTotals);
             input.addEventListener('change', updateTotals);
+            // Also calculate turnover rate when total staff changes
+            if (id === 'total_staff') {
+                input.addEventListener('input', calculateTurnoverRate);
+                input.addEventListener('change', calculateTurnoverRate);
+                input.addEventListener('input', calculateTransferRate);
+                input.addEventListener('change', calculateTransferRate);
+            }
         }
     });
     
@@ -653,3 +686,5 @@ window.saveDraft = saveDraft;
 window.loadDraft = loadDraft;
 window.retrySubmit = retrySubmit;
 window.hideOverlay = hideOverlay;
+window.calculateTurnoverRate = calculateTurnoverRate;
+window.calculateTransferRate = calculateTransferRate;
