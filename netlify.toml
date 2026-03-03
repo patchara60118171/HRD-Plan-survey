@@ -2,6 +2,11 @@
   publish = "."
 
 [[redirects]]
+  from = "/admin"
+  to = "/admin-login.html"
+  status = 200
+
+[[redirects]]
   from = "/ch1"
   to = "/ch1.html"
   status = 200
