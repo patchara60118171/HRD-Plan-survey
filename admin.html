@@ -47,6 +47,8 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--tx);line-
 .sbt .s{color:rgba(255,255,255,.5);font-size:.7rem}
 .sbtg{margin-left:auto;background:none;border:none;color:rgba(255,255,255,.6);cursor:pointer;font-size:1rem;padding:.25rem;flex-shrink:0}
 .sbtg:hover{color:#fff}
+.sb.col .sbtg{margin-left:0;margin-right:auto;background:rgba(255,255,255,.15);border-radius:8px;padding:.5rem;font-size:1.2rem}
+.sb.col .sbtg:hover{background:rgba(255,255,255,.25)}
 .sbn{flex:1;overflow-y:auto;padding:.75rem 0}
 .sbn::-webkit-scrollbar{width:4px}
 .sbn::-webkit-scrollbar-thumb{background:rgba(255,255,255,.2);border-radius:2px}
@@ -546,6 +548,22 @@ let surveyForms=[],chartInst={};
 const TYPE_LABELS={government:'ราชการ',private:'เอกชน',ngo:'NGO',other:'อื่นๆ'};
 const SUP_LABELS={full:'ครบ',partial:'บางส่วน',none:'ไม่มี'};
 const DIG_LABELS={e_doc:'เอกสารอิเล็กทรอนิกส์',e_sign:'E-Signature',cloud:'Cloud',hr_digital:'HR Digital',health_db:'ฐานข้อมูลสุขภาพ',none:'ไม่มี',other:'อื่นๆ'};
+const WB_ORGS=[
+  {code:'probation',name:'กรมคุมประพฤติ',url:'https://nidawellbeing.vercel.app/?org=probation'},
+  {code:'rid',name:'กรมชลประทาน',url:'https://nidawellbeing.vercel.app/?org=rid'},
+  {code:'dss',name:'กรมวิทยาศาสตร์บริการ',url:'https://nidawellbeing.vercel.app/?org=dss'},
+  {code:'dcp',name:'กรมส่งเสริมวัฒนธรรม',url:'https://nidawellbeing.vercel.app/?org=dcp'},
+  {code:'dmh',name:'กรมสุขภาพจิต',url:'https://nidawellbeing.vercel.app/?org=dmh'},
+  {code:'tmd',name:'กรมอุตุนิยมวิทยา',url:'https://nidawellbeing.vercel.app/?org=tmd'},
+  {code:'doh',name:'กองฝึกอบรม กรมทางหลวง',url:'https://nidawellbeing.vercel.app/?org=doh'},
+  {code:'nrct',name:'สำนักงานการวิจัยแห่งชาติ (วช.)',url:'https://nidawellbeing.vercel.app/?org=nrct'},
+  {code:'opdc',name:'สำนักงานคณะกรรมการพัฒนาระบบราชการ (ก.พ.ร.)',url:'https://nidawellbeing.vercel.app/?org=opdc'},
+  {code:'onep',name:'สำนักงานนโยบายและแผนทรัพยากรธรรมชาติและสิ่งแวดล้อม',url:'https://nidawellbeing.vercel.app/?org=onep'},
+  {code:'tpso',name:'สำนักงานนโยบายและยุทธศาสตร์การค้า',url:'https://nidawellbeing.vercel.app/?org=tpso'},
+  {code:'mots',name:'สำนักงานปลัดกระทรวงการท่องเที่ยวและกีฬา',url:'https://nidawellbeing.vercel.app/?org=mots'},
+  {code:'acfs',name:'สำนักงานมาตรฐานสินค้าเกษตรและอาหารแห่งชาติ',url:'https://nidawellbeing.vercel.app/?org=acfs'},
+  {code:'nesdc',name:'สำนักงานสภาพัฒนาการเศรษฐกิจและสังคมแห่งชาติ',url:'https://nidawellbeing.vercel.app/?org=nesdc'}
+];
 
 // ═══════════════════════════════════════════════
 // INIT
@@ -1030,8 +1048,9 @@ function renderWbPage(){popWbFilters();filterWb();}
 function popWbFilters(){
   const sel=el('wof');if(!sel)return;
   const ov=sel.value;
-  const orgs=[...new Set(wbData.map(r=>r.org_code).filter(Boolean))];
-  sel.innerHTML='<option value="">ทุกองค์กร</option>'+orgs.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');
+  // Use predefined WB_ORGS instead of extracting from data
+  const orgOpts=WB_ORGS.map(o=>`<option value="${esc(o.code)}">${esc(o.name)}</option>`).join('');
+  sel.innerHTML='<option value="">ทุกองค์กร</option>'+orgOpts;
   sel.value=ov;
 }
 function filterWb(){
@@ -1428,13 +1447,6 @@ async function chgPW(){
 // ═══════════════════════════════════════════════
 // POPULATE FILTERS (WB & CH1)
 // ═══════════════════════════════════════════════
-function popWbFilters(){
-  const sel=el('wof');if(!sel)return;
-  const ov=sel.value;
-  const orgs=[...new Set(wbData.map(r=>r.org_code).filter(Boolean))];
-  sel.innerHTML='<option value="">ทุกองค์กร</option>'+orgs.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');
-  sel.value=ov;
-}
 function popCh1Filters(){
   const sel=el('cof');if(!sel)return;
   const ov=sel.value;
