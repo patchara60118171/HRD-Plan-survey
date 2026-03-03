@@ -272,6 +272,13 @@ function collectAllData() {
     const pos_s1 = parseInt(document.getElementById('pos_s1')?.value) || 0;
     const pos_s2 = parseInt(document.getElementById('pos_s2')?.value) || 0;
     
+    // Staff types
+    const type_official = parseInt(document.getElementById('type_official')?.value) || 0;
+    const type_employee = parseInt(document.getElementById('type_employee')?.value) || 0;
+    const type_contract = parseInt(document.getElementById('type_contract')?.value) || 0;
+    const type_other = parseInt(document.getElementById('type_other')?.value) || 0;
+    const type_other_name = document.getElementById('type_other_name')?.value.trim() || null;
+    
     // Turnover and transfer
     const turnover_count = parseInt(document.getElementById('turnover_count')?.value) || null;
     const turnover_rate = parseFloat(document.getElementById('turnover_rate')?.value) || null;
@@ -370,6 +377,7 @@ function collectAllData() {
         pos_o1, pos_o2, pos_o3, pos_o4,
         pos_k1, pos_k2, pos_k3, pos_k4, pos_k5,
         pos_m1, pos_m2, pos_s1, pos_s2,
+        type_official, type_employee, type_contract, type_other, type_other_name,
         turnover_count, turnover_rate,
         transfer_count, transfer_rate,
         
