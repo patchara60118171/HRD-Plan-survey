@@ -1,7 +1,10 @@
-// Admin Dashboard Logic
+// Admin Dashboard Logic - Well-being Survey v3.0
 
 // Initialize Supabase Helper
 let supabaseAdmin = null;
+let allData = [];
+let filteredData = [];
+
 function initSupabaseAdmin() {
     if (!supabaseAdmin && typeof supabase !== 'undefined' && typeof SUPABASE_URL !== 'undefined') {
         supabaseAdmin = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -16,6 +19,7 @@ initSupabaseAdmin();
     const { data: { session } } = await supabaseAdmin.auth.getSession();
     if (session) {
         showDashboard();
+        fetchData();
     }
 })();
 
@@ -43,21 +47,269 @@ async function adminLogin() {
     }
 
     showDashboard();
+    fetchData();
 }
 
 function showDashboard() {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('dashboard-screen').style.display = 'block';
-
-    initSupabaseAdmin();
-    fetchData();
 }
 
 async function logout() {
-    if (supabaseAdmin) {
-        await supabaseAdmin.auth.signOut();
+    if (!supabaseAdmin) return;
+    await supabaseAdmin.auth.signOut();
+    document.getElementById('login-screen').style.display = 'block';
+    document.getElementById('dashboard-screen').style.display = 'none';
+}
+
+// Fetch data from Supabase
+async function fetchData() {
+    if (!supabaseAdmin) return;
+    
+    document.getElementById('loading').style.display = 'block';
+    
+    try {
+        const { data, error } = await supabaseAdmin
+            .from('hrd_ch1_responses')
+            .select('*')
+            .order('submitted_at', { ascending: false });
+            
+        if (error) throw error;
+        
+        allData = data || [];
+        filteredData = [...allData];
+        
+        updateStats();
+        updateCharts();
+        updateTable();
+        
+    } catch (error) {
+        console.error('Fetch error:', error);
+        alert('ไม่สามารถดึงข้อมูลได้: ' + error.message);
+    } finally {
+        document.getElementById('loading').style.display = 'none';
     }
-    location.reload();
+}
+
+// Update statistics
+function updateStats() {
+    const total = filteredData.length;
+    const avgStaff = filteredData.reduce((sum, d) => sum + (d.total_staff || 0), 0) / (total || 1);
+    const totalNcd = filteredData.reduce((sum, d) => sum + (d.ncd_count || 0), 0);
+    const avgNcdRatio = filteredData.reduce((sum, d) => sum + (d.ncd_ratio_pct || 0), 0) / (total || 1);
+    const avgTraining = filteredData.reduce((sum, d) => sum + (d.training_hours || 0), 0) / (total || 1);
+    
+    document.getElementById('stat-total').textContent = total;
+    document.getElementById('stat-age').textContent = Math.round(avgStaff);
+    document.getElementById('stat-bmi').textContent = avgNcdRatio.toFixed(1);
+    document.getElementById('stat-risk').textContent = avgTraining.toFixed(1);
+    document.getElementById('filtered-count').textContent = total;
+}
+
+// Update charts
+function updateCharts() {
+    updateDiseasesChart();
+    updateOrganizationsChart();
+    updateNcdRatioChart();
+    updateTrainingHoursChart();
+}
+
+// Diseases chart
+function updateDiseasesChart() {
+    const ctx = document.getElementById('chart-diseases');
+    if (!ctx) return;
+    
+    const diseases = {};
+    filteredData.forEach(d => {
+        ['disease_diabetes', 'disease_hypertension', 'disease_cardiovascular', 
+         'disease_kidney', 'disease_liver', 'disease_cancer', 'disease_obesity'].forEach(key => {
+            const count = d[key] || 0;
+            if (count > 0) {
+                const name = key.replace('disease_', '');
+                diseases[name] = (diseases[name] || 0) + count;
+            }
+        });
+    });
+    
+    const sortedDiseases = Object.entries(diseases)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5);
+    
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: sortedDiseases.map(d => d[0]),
+            datasets: [{
+                label: 'จำนวนผู้ป่วย',
+                data: sortedDiseases.map(d => d[1]),
+                backgroundColor: '#EF4444'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+}
+
+// Organizations chart
+function updateOrganizationsChart() {
+    const ctx = document.getElementById('chart-gender');
+    if (!ctx) return;
+    
+    const orgCounts = {};
+    filteredData.forEach(d => {
+        const org = d.organization || 'ไม่ระบุ';
+        orgCounts[org] = (orgCounts[org] || 0) + 1;
+    });
+    
+    const sortedOrgs = Object.entries(orgCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 10);
+    
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: sortedOrgs.map(d => d[0]),
+            datasets: [{
+                label: 'จำนวนแบบสอบถาม',
+                data: sortedOrgs.map(d => d[1]),
+                backgroundColor: '#3B82F6'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+}
+
+// NCD Ratio chart
+function updateNcdRatioChart() {
+    const ctx = document.getElementById('chart-age-group');
+    if (!ctx) return;
+    
+    const ratios = filteredData.map(d => d.ncd_ratio_pct || 0);
+    
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: filteredData.map((_, i) => `ข้อมูล ${i + 1}`),
+            datasets: [{
+                label: 'อัตรา NCD (%)',
+                data: ratios,
+                borderColor: '#8B5CF6',
+                backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: { beginAtZero: true, max: 100 }
+            }
+        }
+    });
+}
+
+// Training hours chart
+function updateTrainingHoursChart() {
+    const ctx = document.getElementById('chart-smoke');
+    if (!ctx) return;
+    
+    const trainingData = filteredData.map(d => d.training_hours || 0);
+    
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: filteredData.map(d => d.organization || 'ไม่ระบุ'),
+            datasets: [{
+                label: 'ชั่วโมงอบรม',
+                data: trainingData,
+                backgroundColor: '#10B981'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+}
+
+// Update table
+function updateTable() {
+    const tbody = document.getElementById('table-body');
+    tbody.innerHTML = '';
+    
+    filteredData.forEach((d, i) => {
+        const row = tbody.insertRow();
+        row.innerHTML = `
+            <td>${i + 1}</td>
+            <td>${new Date(d.submitted_at).toLocaleString('th-TH')}</td>
+            <td>${d.organization || 'ไม่ระบุ'}</td>
+            <td>${(d.total_staff || 0).toLocaleString()}</td>
+            <td>${d.ncd_count || 0}</td>
+            <td>${(d.ncd_ratio_pct || 0).toFixed(2)}%</td>
+            <td>${d.training_hours || 0}</td>
+            <td>${(d.strategic_priorities || []).map(p => p.label).join(', ') || 'ไม่ระบุ'}</td>
+        `;
+    });
+}
+
+// Apply filters
+function applyFilters() {
+    const orgFilter = document.getElementById('filter-gender').value;
+    const ageFilter = document.getElementById('filter-age').value;
+    
+    filteredData = allData.filter(d => {
+        if (orgFilter !== 'all' && d.organization !== orgFilter) return false;
+        // Add more filter logic as needed
+        return true;
+    });
+    
+    updateStats();
+    updateCharts();
+    updateTable();
+}
+
+// Export to Excel
+function downloadExcel() {
+    if (filteredData.length === 0) {
+        alert('ไม่มีข้อมูลสำหรับส่งออก');
+        return;
+    }
+    
+    const ws_data = [
+        ['ลำดับ', 'วันที่', 'หน่วยงาน', 'บุคลากรรวม', 'NCD รวม', 'อัตรา NCD (%)', 'ชั่วโมงอบรม', 'จุดเน้นพัฒนา']
+    ];
+    
+    filteredData.forEach((d, i) => {
+        ws_data.push([
+            i + 1,
+            new Date(d.submitted_at).toLocaleString('th-TH'),
+            d.organization || 'ไม่ระบุ',
+            d.total_staff || 0,
+            d.ncd_count || 0,
+            (d.ncd_ratio_pct || 0).toFixed(2) + '%',
+            d.training_hours || 0,
+            (d.strategic_priorities || []).map(p => p.label).join(', ') || 'ไม่ระบุ'
+        ]);
+    });
+    
+    const ws = XLSX.utils.aoa_to_sheet(ws_data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Well-being Survey Data');
+    XLSX.writeFile(wb, `well-being-survey-${new Date().toISOString().split('T')[0]}.xlsx`);
 }
 
 // Fetch Data from Supabase
