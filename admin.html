@@ -1,0 +1,1453 @@
+﻿<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NIDA Wellbeing — Admin Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --P:#1e3a5f;--PD:#152d4a;--PL:#e8f0fb;
+  --A:#2563eb;--G:#16a34a;--W:#d97706;--D:#dc2626;
+  --bg:#f1f5f9;--card:#fff;--bdr:#e2e8f0;--tx:#1e293b;--tx2:#64748b;--tx3:#94a3b8;
+  --sw:260px;--sc:64px;--R:12px;
+  --sh:0 1px 3px rgba(0,0,0,.08),0 4px 6px rgba(0,0,0,.04);
+  --shL:0 10px 15px -3px rgba(0,0,0,.1);}
+html{font-size:15px}
+body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--tx);line-height:1.6;min-height:100vh}
+/* LOGIN */
+#lo{position:fixed;inset:0;background:linear-gradient(135deg,#1e3a5f,#2563eb);display:flex;align-items:center;justify-content:center;z-index:9999}
+.lc{background:#fff;border-radius:20px;padding:2.5rem;width:100%;max-width:420px;box-shadow:0 25px 50px rgba(0,0,0,.25)}
+.ll{text-align:center;margin-bottom:1.5rem}
+.ll .lbp{display:inline-block;background:var(--PL);color:var(--P);font-size:.75rem;font-weight:700;padding:.25rem .75rem;border-radius:50px;margin-bottom:.75rem}
+.ll h1{font-size:1.4rem;font-weight:700;color:var(--P)}
+.ll p{color:var(--tx2);font-size:.875rem;margin-top:.25rem}
+.lf{margin-bottom:1rem}
+.lf label{display:block;font-size:.85rem;font-weight:600;color:var(--tx2);margin-bottom:.4rem}
+.lf input{width:100%;padding:.75rem 1rem;border:2px solid var(--bdr);border-radius:10px;font-family:inherit;font-size:.9rem;outline:none;transition:border-color .2s}
+.lf input:focus{border-color:var(--A)}
+.lb{width:100%;padding:.875rem;background:linear-gradient(135deg,var(--P),var(--A));color:#fff;border:none;border-radius:10px;font-family:inherit;font-size:1rem;font-weight:600;cursor:pointer;transition:opacity .2s}
+.lb:hover{opacity:.92}
+.le{color:var(--D);font-size:.8rem;margin-top:.5rem;min-height:1.2rem}
+/* APP */
+#app{display:none;height:100vh;overflow:hidden}
+/* SIDEBAR */
+.sb{position:fixed;left:0;top:0;bottom:0;width:var(--sw);background:var(--P);display:flex;flex-direction:column;z-index:200;transition:width .3s}
+.sb.col{width:var(--sc)}
+.sbh{padding:1.25rem 1rem;display:flex;align-items:center;gap:.75rem;border-bottom:1px solid rgba(255,255,255,.1);flex-shrink:0}
+.sbi{width:36px;height:36px;background:rgba(255,255,255,.15);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+.sbt{overflow:hidden;white-space:nowrap}
+.sbt .t{color:#fff;font-weight:700;font-size:.9rem}
+.sbt .s{color:rgba(255,255,255,.5);font-size:.7rem}
+.sbtg{margin-left:auto;background:none;border:none;color:rgba(255,255,255,.6);cursor:pointer;font-size:1rem;padding:.25rem;flex-shrink:0}
+.sbtg:hover{color:#fff}
+.sbn{flex:1;overflow-y:auto;padding:.75rem 0}
+.sbn::-webkit-scrollbar{width:4px}
+.sbn::-webkit-scrollbar-thumb{background:rgba(255,255,255,.2);border-radius:2px}
+.nsc{font-size:.65rem;font-weight:700;color:rgba(255,255,255,.35);letter-spacing:.1em;text-transform:uppercase;padding:.5rem 1.25rem .25rem;white-space:nowrap}
+.sb.col .nsc{opacity:0}
+.ni{display:flex;align-items:center;gap:.75rem;padding:.65rem 1.25rem;color:rgba(255,255,255,.7);cursor:pointer;transition:all .15s;border-left:3px solid transparent;white-space:nowrap;user-select:none}
+.ni:hover{background:rgba(255,255,255,.08);color:#fff}
+.ni.active{background:rgba(255,255,255,.12);color:#fff;border-left-color:rgba(255,255,255,.8)}
+.ni .nic{font-size:1.1rem;flex-shrink:0;width:20px;text-align:center}
+.ni .nil{font-size:.875rem;font-weight:500;overflow:hidden}
+.sb.col .nil,.sb.col .nsc{display:none}
+.sbf{padding:1rem;border-top:1px solid rgba(255,255,255,.1);flex-shrink:0}
+.sbu{display:flex;align-items:center;gap:.75rem}
+.sbav{width:32px;height:32px;background:rgba(255,255,255,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.85rem;flex-shrink:0}
+.sbui{overflow:hidden;white-space:nowrap}
+.sbui .un{color:#fff;font-size:.8rem;font-weight:600}
+.sbui .ur{color:rgba(255,255,255,.45);font-size:.7rem}
+.sb.col .sbui{display:none}
+.lob{background:none;border:none;color:rgba(255,255,255,.5);cursor:pointer;font-size:.85rem;margin-left:auto;padding:.25rem;flex-shrink:0}
+.lob:hover{color:#fca5a5}
+.sb.col .lob{display:none}
+/* MAIN */
+.mw{margin-left:var(--sw);height:100vh;overflow-y:auto;display:flex;flex-direction:column;transition:margin-left .3s}
+.mw.exp{margin-left:var(--sc)}
+/* TOPBAR */
+.tb{background:#fff;border-bottom:1px solid var(--bdr);padding:.875rem 1.5rem;display:flex;align-items:center;gap:1rem;flex-shrink:0;position:sticky;top:0;z-index:100}
+.tbi{flex:1}
+.tbt{font-size:1.05rem;font-weight:700;color:var(--tx)}
+.tbs{font-size:.8rem;color:var(--tx2)}
+.tba{display:flex;align-items:center;gap:.5rem}
+/* PAGES */
+.pg{display:none;padding:1.5rem;flex:1}
+.pg.active{display:block;animation:fi .25s}
+@keyframes fi{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+/* CARDS */
+.card{background:var(--card);border-radius:var(--R);border:1px solid var(--bdr);box-shadow:var(--sh)}
+.cb{padding:1.25rem}
+.ch{padding:1rem 1.25rem;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;gap:.75rem}
+.ch h3{font-size:.95rem;font-weight:700;color:var(--tx)}
+/* STATS */
+.sg{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-bottom:1.5rem}
+.sc{background:var(--card);border-radius:var(--R);border:1px solid var(--bdr);padding:1.25rem;box-shadow:var(--sh);transition:transform .2s;border-top:3px solid var(--bdr)}
+.sc:hover{transform:translateY(-2px);box-shadow:var(--shL)}
+.sc.cn{border-top-color:var(--P)}.sc.ca{border-top-color:var(--A)}
+.sc.cg{border-top-color:var(--G)}.sc.cw{border-top-color:var(--W)}
+.sc.cd{border-top-color:var(--D)}.sc.cp{border-top-color:#7c3aed}
+.si{font-size:1.6rem;margin-bottom:.5rem}
+.sl{font-size:.8rem;color:var(--tx2);font-weight:500}
+.sv{font-size:1.8rem;font-weight:700;color:var(--tx);line-height:1.2;margin-top:.15rem}
+.ss{font-size:.75rem;color:var(--tx3);margin-top:.2rem}
+/* CHARTS */
+.cg2{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:1rem;margin-bottom:1.5rem}
+.cw2{position:relative;height:260px}
+/* TABLE */
+.tw{overflow-x:auto}
+table.dt{width:100%;border-collapse:collapse;font-size:.85rem}
+table.dt th{background:#f8fafc;padding:.75rem 1rem;text-align:left;font-weight:600;color:var(--tx2);border-bottom:2px solid var(--bdr);white-space:nowrap;cursor:pointer;user-select:none}
+table.dt th:hover{background:#f1f5f9}
+table.dt td{padding:.7rem 1rem;border-bottom:1px solid var(--bdr);vertical-align:middle;white-space:nowrap}
+table.dt tr:last-child td{border-bottom:none}
+table.dt tbody tr:hover td{background:#fafafa}
+/* BADGES */
+.bdg{display:inline-block;padding:.2rem .6rem;border-radius:50px;font-size:.72rem;font-weight:700}
+.bg{background:#d1fae5;color:#065f46}.br{background:#fee2e2;color:#991b1b}
+.bb{background:#dbeafe;color:#1d4ed8}.bw{background:#fef3c7;color:#92400e}
+.bgr{background:#f1f5f9;color:#475569}.bpp{background:#ede9fe;color:#5b21b6}
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.55rem 1rem;border-radius:8px;border:none;font-family:inherit;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .15s}
+.bp{background:var(--P);color:#fff}.bp:hover{background:var(--PD)}
+.ba{background:var(--A);color:#fff}.ba:hover{background:#1d4ed8}
+.bgs{background:var(--G);color:#fff}.bgs:hover{background:#15803d}
+.bd{background:var(--D);color:#fff}.bd:hover{background:#b91c1c}
+.bo{background:#fff;color:var(--tx2);border:1.5px solid var(--bdr)}.bo:hover{background:var(--bg)}
+.bgh{background:transparent;color:var(--tx2);border:none;padding:.4rem .6rem}.bgh:hover{background:var(--bg)}
+.bsm{padding:.35rem .75rem;font-size:.78rem}
+.bxs{padding:.2rem .5rem;font-size:.72rem}
+/* FORMS */
+.fg{margin-bottom:1rem}
+.fg label{display:block;font-size:.85rem;font-weight:600;color:var(--tx);margin-bottom:.4rem}
+.fg .req{color:var(--D)}
+.fc{width:100%;padding:.65rem .875rem;border:1.5px solid var(--bdr);border-radius:8px;font-family:inherit;font-size:.875rem;outline:none;transition:border-color .2s;background:#fff}
+.fc:focus{border-color:var(--A)}
+.fsl{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2364748b' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .75rem center}
+.ft{font-size:.78rem;color:var(--tx3);margin-top:.3rem}
+.fer{font-size:.78rem;color:var(--D);margin-top:.3rem}
+.tgl{position:relative;width:44px;height:24px;cursor:pointer;display:inline-block}
+.tgl input{opacity:0;width:0;height:0}
+.tsl{position:absolute;inset:0;background:#cbd5e1;border-radius:50px;transition:.3s}
+.tsl::before{content:'';position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s}
+.tgl input:checked+.tsl{background:var(--G)}
+.tgl input:checked+.tsl::before{transform:translateX(20px)}
+/* MODAL */
+.mbd{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:500;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.mbd.show{display:flex}
+.ml{background:#fff;border-radius:16px;width:90%;max-width:560px;max-height:88vh;overflow-y:auto;box-shadow:0 25px 50px rgba(0,0,0,.2)}
+.ml-lg{max-width:760px}
+.mh{padding:1.25rem 1.5rem;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between}
+.mh h2{font-size:1.05rem;font-weight:700}
+.mc{background:none;border:none;color:var(--tx3);font-size:1.3rem;cursor:pointer;padding:.25rem;line-height:1;border-radius:6px}
+.mc:hover{background:var(--bg);color:var(--tx)}
+.mb{padding:1.5rem}
+.mf{padding:1rem 1.5rem;border-top:1px solid var(--bdr);display:flex;justify-content:flex-end;gap:.75rem}
+/* FILTER BAR */
+.fbar{display:flex;flex-wrap:wrap;gap:.75rem;align-items:center;margin-bottom:1.25rem}
+.fbar .fc{min-width:160px;flex:1;max-width:260px}
+/* PAGINATION */
+.pag{display:flex;align-items:center;justify-content:space-between;padding:.875rem 0;gap:1rem;flex-wrap:wrap}
+.pi{font-size:.82rem;color:var(--tx2)}
+.pb2{display:flex;gap:.3rem}
+.pbtn{min-width:32px;height:32px;border:1.5px solid var(--bdr);background:#fff;color:var(--tx2);border-radius:6px;cursor:pointer;font-family:inherit;font-size:.8rem;display:inline-flex;align-items:center;justify-content:center;padding:0 .4rem;transition:all .15s}
+.pbtn:hover:not(:disabled){border-color:var(--A);color:var(--A)}
+.pbtn.active{background:var(--P);border-color:var(--P);color:#fff}
+.pbtn:disabled{opacity:.4;cursor:not-allowed}
+/* TOAST */
+#tc{position:fixed;bottom:1.5rem;right:1.5rem;z-index:9998;display:flex;flex-direction:column;gap:.5rem;pointer-events:none}
+.tst{display:flex;align-items:center;gap:.75rem;padding:.75rem 1rem;border-radius:10px;font-size:.875rem;font-weight:500;box-shadow:var(--shL);min-width:240px;max-width:380px;animation:tin .3s;pointer-events:auto}
+.tst.success{background:#065f46;color:#fff}.tst.error{background:#991b1b;color:#fff}
+.tst.info{background:#1e293b;color:#fff}.tst.warning{background:#92400e;color:#fff}
+.tcl{margin-left:auto;background:none;border:none;color:rgba(255,255,255,.7);cursor:pointer;font-size:1rem;padding:.1rem}
+@keyframes tin{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+/* EMPTY */
+.emp{text-align:center;padding:3rem 1rem;color:var(--tx2)}
+.emp .ei{font-size:2.5rem;margin-bottom:.75rem}
+/* LOADING */
+.lov{position:fixed;inset:0;background:rgba(255,255,255,.7);backdrop-filter:blur(4px);z-index:8000;display:none;align-items:center;justify-content:center;flex-direction:column;gap:1rem}
+.lov.show{display:flex}
+.spn{width:40px;height:40px;border:4px solid var(--bdr);border-top-color:var(--P);border-radius:50%;animation:spn .8s linear infinite}
+@keyframes spn{to{transform:rotate(360deg)}}
+/* ANALYTICS */
+.atabs{display:flex;gap:.25rem;background:#f1f5f9;border-radius:10px;padding:.3rem;margin-bottom:1.5rem;width:fit-content;flex-wrap:wrap}
+.at{padding:.5rem 1.1rem;border-radius:7px;border:none;font-family:inherit;font-size:.82rem;font-weight:600;cursor:pointer;color:var(--tx2);background:none;transition:all .15s}
+.at.active{background:#fff;color:var(--P);box-shadow:var(--sh)}
+.atc{display:none}
+.atc.active{display:block}
+/* SETTINGS */
+.ss2{margin-bottom:2rem}
+.ss2 h3{font-size:.95rem;font-weight:700;margin-bottom:1rem;padding-bottom:.5rem;border-bottom:2px solid var(--bdr)}
+.cst{display:inline-flex;align-items:center;gap:.5rem;padding:.35rem .75rem;border-radius:50px;font-size:.82rem;font-weight:600}
+.cok{background:#d1fae5;color:#065f46}.cer{background:#fee2e2;color:#991b1b}.cck{background:#fef3c7;color:#92400e}
+/* URL */
+.ucl{max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.8rem;color:var(--tx2);font-family:monospace}
+/* QR */
+#qrc{display:inline-block;padding:1rem;background:#fff;border:2px solid var(--bdr);border-radius:12px;margin:1rem 0}
+@media(max-width:768px){
+  .sb{transform:translateX(-100%)}.sb.mop{transform:translateX(0);width:260px}
+  .mw,.mw.exp{margin-left:0}.cg2{grid-template-columns:1fr}
+  .sg{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<!-- LOGIN -->
+<div id="lo">
+  <div class="lc">
+    <div class="ll"><div class="lbp">NIDA WELLBEING</div><h1>🏛️ Admin Portal</h1><p>ระบบจัดการข้อมูลสุขภาวะบุคลากร</p></div>
+    <div class="lf"><label>อีเมล</label><input type="email" id="l-em" placeholder="admin@example.com" onkeydown="if(event.key==='Enter')doLogin()" /></div>
+    <div class="lf"><label>รหัสผ่าน</label><input type="password" id="l-pw" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()" /></div>
+    <div id="l-err" class="le"></div>
+    <button class="lb" onclick="doLogin()" id="l-btn">เข้าสู่ระบบ</button>
+  </div>
+</div>
+<!-- APP -->
+<div id="app">
+  <!-- SIDEBAR -->
+  <aside class="sb" id="sb">
+    <div class="sbh">
+      <div class="sbi">🏛️</div>
+      <div class="sbt"><div class="t">NIDA Wellbeing</div><div class="s">Admin Portal</div></div>
+      <button class="sbtg" id="sbtgb" onclick="toggleSB()">◀</button>
+    </div>
+    <nav class="sbn">
+      <div class="nsc">MAIN</div>
+      <div class="ni active" data-pg="dashboard" onclick="nav('dashboard')"><span class="nic">📊</span><span class="nil">แดชบอร์ด</span></div>
+      <div class="ni" data-pg="organizations" onclick="nav('organizations')"><span class="nic">🏢</span><span class="nil">จัดการองค์กร</span></div>
+      <div class="ni" data-pg="urls" onclick="nav('urls')"><span class="nic">🔗</span><span class="nil">URL Manager</span></div>
+      <div class="nsc">RESPONSES</div>
+      <div id="rni">
+        <div class="ni" data-pg="resp-wellbeing" onclick="nav('resp-wellbeing')"><span class="nic">💚</span><span class="nil">Wellbeing Survey</span></div>
+        <div class="ni" data-pg="resp-ch1" onclick="nav('resp-ch1')"><span class="nic">📋</span><span class="nil">HRD บทที่ 1</span></div>
+      </div>
+      <div class="nsc">ANALYSIS</div>
+      <div class="ni" data-pg="analytics" onclick="nav('analytics')"><span class="nic">📈</span><span class="nil">สถิติ & Analytics</span></div>
+      <div class="nsc">SYSTEM</div>
+      <div class="ni" data-pg="settings" onclick="nav('settings')"><span class="nic">⚙️</span><span class="nil">ตั้งค่า</span></div>
+    </nav>
+    <div class="sbf">
+      <div class="sbu">
+        <div class="sbav" id="sbav">A</div>
+        <div class="sbui"><div class="un" id="sbnm">Admin</div><div class="ur">ผู้ดูแลระบบ</div></div>
+        <button class="lob" onclick="doLogout()" title="ออก">⏻</button>
+      </div>
+    </div>
+  </aside>
+  <!-- MAIN WRAP -->
+  <div class="mw" id="mw">
+    <!-- TOPBAR -->
+    <div class="tb">
+      <div class="tbi"><div class="tbt" id="tbt">แดชบอร์ด</div><div class="tbs" id="tbsub">ภาพรวมระบบ</div></div>
+      <div class="tba">
+        <button class="btn bo bsm" onclick="refreshPg()">🔄 รีเฟรช</button>
+        <button class="btn bo bsm" onclick="doLogout()">⏻ ออก</button>
+      </div>
+    </div>
+    <!-- PAGE: DASHBOARD -->
+    <div class="pg active" id="pg-dashboard">
+      <div class="sg">
+        <div class="sc cn"><div class="si">🏢</div><div class="sl">องค์กรทั้งหมด</div><div class="sv" id="ds-o">—</div><div class="ss" id="ds-os">กำลังโหลด...</div></div>
+        <div class="sc ca"><div class="si">📝</div><div class="sl">ทั้งหมด (ทุกฟอร์ม)</div><div class="sv" id="ds-t">—</div><div class="ss">การตอบกลับ</div></div>
+        <div class="sc cg"><div class="si">💚</div><div class="sl">Wellbeing Survey</div><div class="sv" id="ds-w">—</div><div class="ss">การตอบกลับ</div></div>
+        <div class="sc cw"><div class="si">📋</div><div class="sl">HRD บทที่ 1</div><div class="sv" id="ds-c">—</div><div class="ss">การตอบกลับ</div></div>
+        <div class="sc cp"><div class="si">📅</div><div class="sl">วันนี้</div><div class="sv" id="ds-td">—</div><div class="ss">การตอบกลับ</div></div>
+        <div class="sc cd"><div class="si">📆</div><div class="sl">เดือนนี้</div><div class="sv" id="ds-mo">—</div><div class="ss">การตอบกลับ</div></div>
+      </div>
+      <div class="cg2">
+        <div class="card"><div class="ch"><h3>📈 การตอบกลับ 30 วันล่าสุด</h3></div><div class="cb"><div class="cw2"><canvas id="ch-tr"></canvas></div></div></div>
+        <div class="card"><div class="ch"><h3>🥧 สัดส่วนตามฟอร์ม</h3></div><div class="cb"><div class="cw2"><canvas id="ch-pi"></canvas></div></div></div>
+        <div class="card" style="grid-column:1/-1"><div class="ch"><h3>🏢 Top 10 การตอบกลับตามองค์กร</h3></div><div class="cb"><div class="cw2" style="height:280px"><canvas id="ch-ob"></canvas></div></div></div>
+      </div>
+      <div class="card">
+        <div class="ch"><h3>🕒 กิจกรรมล่าสุด (10 รายการ)</h3></div>
+        <div class="tw"><table class="dt"><thead><tr><th>เวลา</th><th>องค์กร</th><th>ฟอร์ม</th><th>org_code</th></tr></thead><tbody id="rec-tb"></tbody></table></div>
+      </div>
+    </div>
+    <!-- PAGE: ORGANIZATIONS -->
+    <div class="pg" id="pg-organizations">
+      <div class="fbar">
+        <input class="fc" id="os" placeholder="🔍 ค้นหา..." oninput="filterOrgs()" style="max-width:280px" />
+        <select class="fc fsl" id="otf" onchange="filterOrgs()" style="max-width:160px">
+          <option value="">ทุกประเภท</option><option value="government">ราชการ</option>
+          <option value="private">เอกชน</option><option value="ngo">NGO</option><option value="other">อื่นๆ</option>
+        </select>
+        <select class="fc fsl" id="osf" onchange="filterOrgs()" style="max-width:140px">
+          <option value="">ทุกสถานะ</option><option value="active">ใช้งาน</option><option value="inactive">ปิดใช้</option>
+        </select>
+        <button class="btn bp" onclick="openOM()">＋ เพิ่มองค์กร</button>
+        <button class="btn bo bsm" onclick="expOrgsCSV()">📊 CSV</button>
+      </div>
+      <div class="card">
+        <div class="tw">
+          <table class="dt"><thead><tr>
+            <th>#</th><th onclick="sortO('org_code')">org_code</th><th onclick="sortO('org_name_th')">ชื่อ (TH)</th>
+            <th onclick="sortO('org_name_en')">Name (EN)</th><th onclick="sortO('org_type')">ประเภท</th>
+            <th onclick="sortO('is_active')">สถานะ</th><th onclick="sortO('created_at')">วันที่เพิ่ม</th><th>Actions</th>
+          </tr></thead><tbody id="o-tb"></tbody></table>
+        </div>
+        <div style="padding:.75rem 1.25rem;border-top:1px solid var(--bdr)">
+          <div class="pag"><span class="pi" id="o-pi"></span><div class="pb2" id="o-pb"></div></div>
+        </div>
+      </div>
+    </div>
+    <!-- PAGE: URL MANAGER -->
+    <div class="pg" id="pg-urls">
+      <div class="fbar">
+        <select class="fc fsl" id="uo" onchange="filterUrls()" style="max-width:220px"><option value="">ทุกองค์กร</option></select>
+        <select class="fc fsl" id="uf" onchange="filterUrls()" style="max-width:180px"><option value="">ทุกฟอร์ม</option></select>
+        <button class="btn bp" onclick="genAllUrls()">⚡ สร้าง URL ทั้งหมด</button>
+        <button class="btn bo bsm" onclick="expUrlsCSV()">📊 CSV</button>
+      </div>
+      <div class="card">
+        <div class="tw">
+          <table class="dt"><thead><tr><th>#</th><th>องค์กร</th><th>ฟอร์ม</th><th>Generated URL</th><th>สถานะ</th><th>Actions</th></tr></thead>
+          <tbody id="u-tb"></tbody></table>
+        </div>
+        <div style="padding:.75rem 1.25rem;border-top:1px solid var(--bdr)">
+          <div class="pag"><span class="pi" id="u-pi"></span><div class="pb2" id="u-pb"></div></div>
+        </div>
+      </div>
+    </div>
+    <!-- PAGE: RESP WELLBEING -->
+    <div class="pg" id="pg-resp-wellbeing">
+      <div class="fbar">
+        <select class="fc fsl" id="wof" onchange="filterWb()" style="max-width:220px"><option value="">ทุกองค์กร</option></select>
+        <input type="date" class="fc" id="wdf" onchange="filterWb()" style="max-width:160px" />
+        <input type="date" class="fc" id="wdt" onchange="filterWb()" style="max-width:160px" />
+        <button class="btn bgs bsm" onclick="expWbCSV()">📊 CSV</button>
+        <button class="btn bo bsm" onclick="expWbXLSX()">📗 Excel</button>
+        <button class="btn bgh bsm" onclick="clrWb()">✕ ล้าง</button>
+      </div>
+      <div class="card">
+        <div class="tw">
+          <table class="dt"><thead><tr><th>#</th><th>วันที่</th><th>org_code</th><th>องค์กร</th><th>อีเมล</th><th>Actions</th></tr></thead>
+          <tbody id="wb-tb"></tbody></table>
+        </div>
+        <div style="padding:.75rem 1.25rem;border-top:1px solid var(--bdr)">
+          <div class="pag"><span class="pi" id="wb-pi"></span><div class="pb2" id="wb-pb"></div></div>
+        </div>
+      </div>
+    </div>
+    <!-- PAGE: RESP CH1 -->
+    <div class="pg" id="pg-resp-ch1">
+      <div class="fbar">
+        <select class="fc fsl" id="cof" onchange="filterCh1()" style="max-width:220px"><option value="">ทุกองค์กร</option></select>
+        <input type="date" class="fc" id="cdf" onchange="filterCh1()" style="max-width:160px" />
+        <input type="date" class="fc" id="cdt" onchange="filterCh1()" style="max-width:160px" />
+        <button class="btn bgs bsm" onclick="expCh1CSV()">📊 CSV</button>
+        <button class="btn bo bsm" onclick="expCh1XLSX()">📗 Excel</button>
+        <button class="btn bgh bsm" onclick="clrCh1()">✕ ล้าง</button>
+      </div>
+      <div class="card">
+        <div class="tw">
+          <table class="dt"><thead><tr><th>#</th><th>วันที่</th><th>org_code</th><th>หน่วยงาน</th><th>บุคลากร</th><th>NCD รวม</th><th>NCD %</th><th>ลาออก%</th><th>Actions</th></tr></thead>
+          <tbody id="c1-tb"></tbody></table>
+        </div>
+        <div style="padding:.75rem 1.25rem;border-top:1px solid var(--bdr)">
+          <div class="pag"><span class="pi" id="c1-pi"></span><div class="pb2" id="c1-pb"></div></div>
+        </div>
+      </div>
+    </div>
+    <!-- PAGE: ANALYTICS -->
+    <div class="pg" id="pg-analytics">
+      <div class="atabs">
+        <button class="at active" onclick="swAT('overview')">ภาพรวม</button>
+        <button class="at" onclick="swAT('by-org')">ตามองค์กร</button>
+        <button class="at" onclick="swAT('by-form')">ตามฟอร์ม</button>
+        <button class="at" onclick="swAT('trends')">แนวโน้ม</button>
+      </div>
+      <div class="atc active" id="at-overview">
+        <div class="cg2">
+          <div class="card"><div class="ch"><h3>🩺 NCD รายประเภท</h3></div><div class="cb"><div class="cw2"><canvas id="an-ncd"></canvas></div></div></div>
+          <div class="card"><div class="ch"><h3>👥 สัดส่วนอายุบุคลากร</h3></div><div class="cb"><div class="cw2"><canvas id="an-age"></canvas></div></div></div>
+          <div class="card"><div class="ch"><h3>📚 ระบบสนับสนุน HRD</h3></div><div class="cb"><div class="cw2"><canvas id="an-sup"></canvas></div></div></div>
+          <div class="card"><div class="ch"><h3>💻 ระบบดิจิทัล</h3></div><div class="cb"><div class="cw2"><canvas id="an-dig"></canvas></div></div></div>
+        </div>
+        <div class="card"><div class="ch"><h3>🗺️ Heatmap: หน่วยงาน × NCD</h3></div><div class="cb"><div style="overflow-x:auto"><table class="dt" id="hm-tbl" style="font-size:.78rem"></table></div></div></div>
+      </div>
+      <div class="atc" id="at-by-org">
+        <div class="fbar"><select class="fc fsl" id="an-os" onchange="rndrByOrg()" style="max-width:280px"><option value="">-- เลือกองค์กร --</option></select></div>
+        <div id="boc" class="cg2"><div class="card" style="grid-column:1/-1"><div class="cb emp"><div class="ei">🏢</div><p>เลือกองค์กรเพื่อดูข้อมูล</p></div></div></div>
+      </div>
+      <div class="atc" id="at-by-form">
+        <div class="cg2">
+          <div class="card"><div class="ch"><h3>📊 การตอบกลับต่อฟอร์ม ตามองค์กร</h3></div><div class="cb"><div class="cw2" style="height:300px"><canvas id="an-fo"></canvas></div></div></div>
+          <div class="card"><div class="ch"><h3>📋 อัตราการส่งข้อมูล (%)</h3></div><div class="cb"><div class="cw2"><canvas id="an-cp"></canvas></div></div></div>
+        </div>
+      </div>
+      <div class="atc" id="at-trends">
+        <div class="card" style="margin-bottom:1rem"><div class="ch"><h3>📈 แนวโน้มรายเดือน</h3></div><div class="cb"><div class="cw2" style="height:300px"><canvas id="an-mo"></canvas></div></div></div>
+        <div class="card"><div class="ch"><h3>📊 รายสัปดาห์ (12 สัปดาห์ล่าสุด)</h3></div><div class="cb"><div class="cw2" style="height:260px"><canvas id="an-wk"></canvas></div></div></div>
+      </div>
+    </div>
+    <!-- PAGE: SETTINGS -->
+    <div class="pg" id="pg-settings">
+      <div style="max-width:760px">
+        <div class="ss2"><h3>🔌 การเชื่อมต่อ Supabase</h3>
+          <div class="card cb">
+            <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.25rem;flex-wrap:wrap">
+              สถานะ: <span class="cst cck" id="cbdg">กำลังตรวจสอบ...</span>
+              <button class="btn bo bsm" onclick="testConn()">🔄 ทดสอบ</button>
+            </div>
+            <div class="fg"><label>Supabase URL</label><input class="fc" id="s-url" /></div>
+            <div class="fg"><label>Supabase Anon Key</label><input class="fc" id="s-key" type="password" /></div>
+            <button class="btn bp" onclick="saveSBCfg()">💾 บันทึก</button>
+            <p class="ft" style="margin-top:.75rem">⚠️ การเปลี่ยนค่าจะรีเฟรชหน้าเว็บ</p>
+          </div>
+        </div>
+        <div class="ss2"><h3>🌐 Base URL</h3>
+          <div class="card cb">
+            <div class="fg"><label>Base URL สำหรับ Survey Links</label><input class="fc" id="s-bu" /></div>
+            <button class="btn bp" onclick="saveBU()">💾 บันทึก</button>
+          </div>
+        </div>
+        <div class="ss2"><h3>📋 ทะเบียนฟอร์มสำรวจ</h3>
+          <div class="card" style="margin-bottom:1rem">
+            <div class="tw"><table class="dt"><thead><tr><th>form_key</th><th>ชื่อฟอร์ม</th><th>URL Path</th><th>สถานะ</th><th>Actions</th></tr></thead><tbody id="sf-tb"></tbody></table></div>
+          </div>
+          <button class="btn bp" onclick="openSFM()">＋ เพิ่มฟอร์มใหม่</button>
+        </div>
+        <div class="ss2"><h3>🔑 เปลี่ยนรหัสผ่าน</h3>
+          <div class="card cb">
+            <div class="fg"><label>รหัสผ่านใหม่</label><input class="fc" id="s-np" type="password" /></div>
+            <div class="fg"><label>ยืนยันรหัสผ่าน</label><input class="fc" id="s-cp" type="password" /></div>
+            <button class="btn bp" onclick="chgPW()">💾 เปลี่ยนรหัสผ่าน</button>
+          </div>
+        </div>
+        <div class="ss2"><h3>🗄️ SQL Scripts</h3>
+          <div class="card cb">
+            <button class="btn bo bsm" onclick="document.getElementById('sqlb').style.display=document.getElementById('sqlb').style.display==='none'?'block':'none'">📋 แสดง / ซ่อน SQL</button>
+            <pre id="sqlb" style="display:none;margin-top:.75rem;background:#1e293b;color:#e2e8f0;padding:1rem;border-radius:8px;font-size:.72rem;overflow-x:auto;white-space:pre-wrap;line-height:1.6">-- Run in Supabase SQL Editor
+CREATE TABLE IF NOT EXISTS organizations (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  org_code TEXT UNIQUE NOT NULL, org_name_th TEXT NOT NULL, org_name_en TEXT,
+  org_type TEXT DEFAULT 'government', contact_email TEXT, is_active BOOLEAN DEFAULT true,
+  logo_url TEXT, settings JSONB DEFAULT '{}',
+  created_at TIMESTAMPTZ DEFAULT NOW(), updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE TABLE IF NOT EXISTS survey_forms (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  form_key TEXT UNIQUE NOT NULL, form_name TEXT NOT NULL,
+  form_url_path TEXT NOT NULL, description TEXT,
+  is_active BOOLEAN DEFAULT true, created_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE TABLE IF NOT EXISTS org_form_links (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  org_id UUID REFERENCES organizations(id) ON DELETE CASCADE,
+  form_id UUID REFERENCES survey_forms(id) ON DELETE CASCADE,
+  full_url TEXT NOT NULL, is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT NOW(), UNIQUE(org_id, form_id)
+);
+CREATE TABLE IF NOT EXISTS wellbeing_responses (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  org_id UUID REFERENCES organizations(id), org_code TEXT,
+  submitted_at TIMESTAMPTZ DEFAULT NOW(), raw_data JSONB DEFAULT '{}'
+);
+INSERT INTO survey_forms (form_key,form_name,form_url_path,description) VALUES
+  ('wellbeing','Wellbeing Survey','/','แบบสำรวจรายบุคคล'),
+  ('ch1','HRD บทที่ 1','/ch1.html','แบบสำรวจระดับองค์กร บทที่ 1')
+ON CONFLICT (form_key) DO NOTHING;
+CREATE INDEX IF NOT EXISTS idx_org_code ON organizations(org_code);
+CREATE INDEX IF NOT EXISTS idx_ofl_org ON org_form_links(org_id);
+CREATE INDEX IF NOT EXISTS idx_wb_sub ON wellbeing_responses(submitted_at);
+CREATE INDEX IF NOT EXISTS idx_ch1_sub ON hrd_ch1_responses(submitted_at);</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /mw -->
+</div><!-- /app -->
+
+<!-- MODALS -->
+<div class="mbd" id="om-bd">
+  <div class="ml">
+    <div class="mh"><h2 id="om-t">เพิ่มองค์กร</h2><button class="mc" onclick="closeOM()">✕</button></div>
+    <div class="mb">
+      <input type="hidden" id="o-id" />
+      <div class="fg"><label>org_code <span class="req">*</span></label><input class="fc" id="o-cd" placeholder="เช่น probation" /><p class="ft">ตัวพิมพ์เล็ก ไม่มีช่องว่าง</p><p class="fer" id="o-cde" style="display:none"></p></div>
+      <div class="fg"><label>ชื่อองค์กร (TH) <span class="req">*</span></label><input class="fc" id="o-nth" /></div>
+      <div class="fg"><label>Organization Name (EN)</label><input class="fc" id="o-nen" /></div>
+      <div class="fg"><label>ประเภท</label><select class="fc fsl" id="o-tp"><option value="government">ราชการ</option><option value="private">เอกชน</option><option value="ngo">NGO</option><option value="other">อื่นๆ</option></select></div>
+      <div class="fg"><label>อีเมลติดต่อ</label><input class="fc" id="o-em" type="email" /></div>
+      <div class="fg"><div style="display:flex;align-items:center;gap:.75rem"><label class="tgl"><input type="checkbox" id="o-ac" checked /><span class="tsl"></span></label><span style="font-size:.875rem;font-weight:600">เปิดใช้งาน</span></div></div>
+    </div>
+    <div class="mf"><button class="btn bo" onclick="closeOM()">ยกเลิก</button><button class="btn bp" onclick="saveOrg()">บันทึก</button></div>
+  </div>
+</div>
+<div class="mbd" id="cf-bd">
+  <div class="ml" style="max-width:420px">
+    <div class="mb" style="text-align:center;padding:2rem">
+      <div style="font-size:2.5rem;margin-bottom:.75rem">🗑️</div>
+      <div style="font-size:1.05rem;font-weight:700;margin-bottom:.5rem" id="cf-t">ยืนยันการลบ</div>
+      <div style="font-size:.875rem;color:var(--tx2);line-height:1.6" id="cf-m"></div>
+    </div>
+    <div class="mf"><button class="btn bo" onclick="closeCF()">ยกเลิก</button><button class="btn bd" id="cf-ok">ยืนยัน</button></div>
+  </div>
+</div>
+<div class="mbd" id="qr-bd">
+  <div class="ml">
+    <div class="mh"><h2>QR Code</h2><button class="mc" onclick="closeQR()">✕</button></div>
+    <div class="mb" style="text-align:center">
+      <div id="qrc"><div id="qrcv"></div></div>
+      <p id="qrt" style="font-size:.8rem;color:var(--tx2);word-break:break-all;max-width:360px;margin:0 auto"></p>
+    </div>
+    <div class="mf"><button class="btn bo" onclick="dlQR()">⬇️ Download</button><button class="btn bo" onclick="closeQR()">ปิด</button></div>
+  </div>
+</div>
+<div class="mbd" id="sfm-bd">
+  <div class="ml">
+    <div class="mh"><h2 id="sfm-t">เพิ่มฟอร์มใหม่</h2><button class="mc" onclick="closeSFM()">✕</button></div>
+    <div class="mb">
+      <input type="hidden" id="sf-id" />
+      <div class="fg"><label>form_key <span class="req">*</span></label><input class="fc" id="sf-k" placeholder="เช่น ch2" /></div>
+      <div class="fg"><label>ชื่อฟอร์ม <span class="req">*</span></label><input class="fc" id="sf-n" /></div>
+      <div class="fg"><label>URL Path <span class="req">*</span></label><input class="fc" id="sf-p" placeholder="/ch2.html" /></div>
+      <div class="fg"><label>คำอธิบาย</label><input class="fc" id="sf-d" /></div>
+      <div class="fg"><div style="display:flex;align-items:center;gap:.75rem"><label class="tgl"><input type="checkbox" id="sf-a" checked /><span class="tsl"></span></label><span style="font-size:.875rem;font-weight:600">เปิดใช้งาน</span></div></div>
+    </div>
+    <div class="mf"><button class="btn bo" onclick="closeSFM()">ยกเลิก</button><button class="btn bp" onclick="saveSF()">บันทึก</button></div>
+  </div>
+</div>
+<div class="mbd" id="raw-bd">
+  <div class="ml ml-lg">
+    <div class="mh"><h2>ข้อมูลดิบ (raw_data)</h2><button class="mc" onclick="closeRaw()">✕</button></div>
+    <div class="mb"><pre id="rawp" style="background:#1e293b;color:#e2e8f0;padding:1.25rem;border-radius:10px;font-size:.75rem;overflow:auto;white-space:pre-wrap;max-height:65vh"></pre></div>
+    <div class="mf"><button class="btn bo" onclick="closeRaw()">ปิด</button></div>
+  </div>
+</div>
+<div id="tc"></div>
+<div class="lov" id="lov"><div class="spn"></div><p style="color:var(--tx2);font-size:.875rem">กำลังดำเนินการ...</p></div>
+<script>
+'use strict';
+// ═══════════════════════════════════════════════
+// CONFIG & STATE
+// ═══════════════════════════════════════════════
+let CFG={
+  supabaseUrl:localStorage.getItem('sb_url')||'https://fgdommhiqhzvsedfzyrr.supabase.co',
+  supabaseKey:localStorage.getItem('sb_key')||'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZnZG9tbWhpcWh6dnNlZGZ6eXJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkzMzY2MzUsImV4cCI6MjA4NDkxMjYzNX0.GFMOeDArhq-9lPt39OizkBOFFgK4TDpVDJrk_HRQ6Xc',
+  baseUrl:localStorage.getItem('base_url')||'https://nidawellbeing.vercel.app'
+};
+let sb=null,currentUser=null,currentPg='dashboard',sbCollapsed=false;
+let orgsData=[],orgsFilt=[],orgsSort={col:'created_at',dir:'desc'},orgPage=1;
+const ORG_PPG=20;
+let urlsData=[],urlsFilt=[],urlPage=1;
+const URL_PPG=20;
+let wbData=[],wbFilt=[],wbPage=1;
+const WB_PPG=20;
+let ch1Data=[],ch1Filt=[],ch1Page=1;
+const CH1_PPG=20;
+let surveyForms=[],chartInst={};
+const TYPE_LABELS={government:'ราชการ',private:'เอกชน',ngo:'NGO',other:'อื่นๆ'};
+const SUP_LABELS={full:'ครบ',partial:'บางส่วน',none:'ไม่มี'};
+const DIG_LABELS={e_doc:'เอกสารอิเล็กทรอนิกส์',e_sign:'E-Signature',cloud:'Cloud',hr_digital:'HR Digital',health_db:'ฐานข้อมูลสุขภาพ',none:'ไม่มี',other:'อื่นๆ'};
+
+// ═══════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════
+function initSB(){
+  try{sb=window.supabase.createClient(CFG.supabaseUrl,CFG.supabaseKey);return true;}
+  catch(e){console.error(e);return false;}
+}
+async function boot(){
+  if(!initSB()){showToast('Supabase init failed','error');return;}
+  const{data:{session}}=await sb.auth.getSession();
+  if(session){currentUser=session.user;showApp();}
+}
+async function doLogin(){
+  const email=v('l-em').trim(),pass=v('l-pw');
+  const errEl=el('l-err'),btn=el('l-btn');
+  errEl.textContent='';
+  if(!email||!pass){errEl.textContent='กรุณากรอกอีเมลและรหัสผ่าน';return;}
+  btn.textContent='กำลังเข้าสู่ระบบ...';btn.disabled=true;
+  try{
+    if(!sb)initSB();
+    const{data,error}=await sb.auth.signInWithPassword({email,password:pass});
+    if(error)throw error;
+    currentUser=data.user;showApp();
+  }catch(e){errEl.textContent=e.message||'เข้าสู่ระบบไม่สำเร็จ';btn.textContent='เข้าสู่ระบบ';btn.disabled=false;}
+}
+async function doLogout(){
+  if(sb)await sb.auth.signOut();
+  el('app').style.display='none';el('lo').style.display='flex';
+  el('l-em').value='';el('l-pw').value='';
+}
+function showApp(){
+  el('lo').style.display='none';el('app').style.display='block';
+  const email=currentUser?.email||'';
+  el('sbav').textContent=email.charAt(0).toUpperCase();
+  el('sbnm').textContent=email.split('@')[0];
+  loadAll();
+}
+
+// ═══════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════
+const el=id=>document.getElementById(id);
+const v=id=>el(id)?.value||'';
+const esc=s=>String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const today=()=>new Date().toISOString().slice(0,10);
+function dlBlob(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();URL.revokeObjectURL(a.href);}
+function showLoading(show){el('lov').classList.toggle('show',show);}
+
+// ═══════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════
+function showToast(msg,type='info'){
+  const icons={success:'✓',error:'✕',info:'ℹ',warning:'⚠'};
+  const div=document.createElement('div');
+  div.className=`tst ${type}`;
+  div.innerHTML=`<span>${icons[type]||'ℹ'}</span><span style="flex:1">${esc(msg)}</span><button class="tcl" onclick="this.parentElement.remove()">✕</button>`;
+  el('tc').appendChild(div);
+  setTimeout(()=>{div.style.animation='tin .3s reverse';setTimeout(()=>div.remove(),300);},4000);
+}
+
+// ═══════════════════════════════════════════════
+// PAGINATION
+// ═══════════════════════════════════════════════
+function renderPag(key,total,page,perPage){
+  const totalPages=Math.max(1,Math.ceil(total/perPage));
+  const start=(page-1)*perPage;
+  const end=Math.min(start+perPage,total);
+  const infoEl=el(`${key}-pi`),btnsEl=el(`${key}-pb`);
+  if(!infoEl||!btnsEl)return;
+  infoEl.textContent=total?`แสดง ${start+1}–${end} จาก ${total} รายการ`:'ไม่มีข้อมูล';
+  if(totalPages<=1){btnsEl.innerHTML='';return;}
+  let html=`<button class="pbtn" onclick="pgTo('${key}',1)" ${page===1?'disabled':''}>«</button>`;
+  html+=`<button class="pbtn" onclick="pgTo('${key}',${page-1})" ${page===1?'disabled':''}>‹</button>`;
+  for(let i=1;i<=totalPages;i++){
+    if(i===1||i===totalPages||Math.abs(i-page)<=1)
+      html+=`<button class="pbtn ${i===page?'active':''}" onclick="pgTo('${key}',${i})">${i}</button>`;
+    else if(Math.abs(i-page)===2)html+=`<span style="padding:.4rem">…</span>`;
+  }
+  html+=`<button class="pbtn" onclick="pgTo('${key}',${page+1})" ${page===totalPages?'disabled':''}>›</button>`;
+  html+=`<button class="pbtn" onclick="pgTo('${key}',${totalPages})" ${page===totalPages?'disabled':''}>»</button>`;
+  btnsEl.innerHTML=html;
+}
+function pgTo(key,p){
+  const totalPages={org:Math.ceil(orgsFilt.length/ORG_PPG),url:Math.ceil(urlsFilt.length/URL_PPG),wb:Math.ceil(wbFilt.length/WB_PPG),c1:Math.ceil(ch1Filt.length/CH1_PPG)};
+  const tp=totalPages[key]||1;
+  if(p<1||p>tp)return;
+  if(key==='org'){orgPage=p;renderOrgsTable();}
+  else if(key==='url'){urlPage=p;renderUrlsTable();}
+  else if(key==='wb'){wbPage=p;renderWbTable();}
+  else if(key==='c1'){ch1Page=p;renderCh1Table();}
+}
+
+// ═══════════════════════════════════════════════
+// CHART UTILS
+// ═══════════════════════════════════════════════
+function destroyChart(k){if(chartInst[k]){chartInst[k].destroy();delete chartInst[k];}}
+
+// ═══════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════
+const PG_META={
+  dashboard:['แดชบอร์ด','ภาพรวมระบบ NIDA Wellbeing'],
+  organizations:['จัดการองค์กร','เพิ่ม แก้ไข ลบ ข้อมูลองค์กร'],
+  urls:['URL Manager','จัดการลิงก์สำรวจสำหรับแต่ละองค์กร'],
+  'resp-wellbeing':['Wellbeing Survey — ข้อมูลตอบกลับ','ข้อมูลจาก wellbeing_responses'],
+  'resp-ch1':['HRD บทที่ 1 — ข้อมูลตอบกลับ','ข้อมูลจาก hrd_ch1_responses'],
+  analytics:['สถิติ & Analytics','วิเคราะห์ข้อมูลเชิงลึก'],
+  settings:['ตั้งค่าระบบ','Supabase และการตั้งค่าอื่นๆ']
+};
+function nav(page){
+  currentPg=page;
+  document.querySelectorAll('.pg').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+  const pEl=el('pg-'+page);if(pEl)pEl.classList.add('active');
+  const nEl=document.querySelector(`.ni[data-pg="${page}"]`);if(nEl)nEl.classList.add('active');
+  const[title,sub]=PG_META[page]||[page,''];
+  el('tbt').textContent=title;el('tbsub').textContent=sub;
+  refreshPg();
+}
+function refreshPg(){
+  const p=currentPg;
+  if(p==='dashboard')renderDash();
+  else if(p==='organizations')renderOrgsPage();
+  else if(p==='urls')renderUrlsPage();
+  else if(p==='resp-wellbeing')renderWbPage();
+  else if(p==='resp-ch1')renderCh1Page();
+  else if(p==='analytics')renderAnalyticsPage();
+  else if(p==='settings')renderSettingsPage();
+}
+function toggleSB(){
+  sbCollapsed=!sbCollapsed;
+  el('sb').classList.toggle('col',sbCollapsed);
+  el('mw').classList.toggle('exp',sbCollapsed);
+  el('sbtgb').textContent=sbCollapsed?'▶':'◀';
+}
+
+// ═══════════════════════════════════════════════
+// DATA LOADING
+// ═══════════════════════════════════════════════
+async function loadAll(){
+  showLoading(true);
+  try{
+    await Promise.all([loadOrgs(),loadForms(),loadUrls(),loadWb(),loadCh1()]);
+    renderDash();
+    popOrgFilters();popUrlFilters();popWbFilters();popCh1Filters();
+    buildDynSB();
+  }catch(e){console.error(e);showToast('โหลดข้อมูลล้มเหลว: '+e.message,'error');}
+  finally{showLoading(false);}
+}
+async function loadOrgs(){
+  const{data,error}=await sb.from('organizations').select('*').order('created_at',{ascending:false});
+  if(error){console.warn('orgs:',error.message);orgsData=[];return;}
+  orgsData=data||[];orgsFilt=[...orgsData];
+}
+async function loadForms(){
+  const{data,error}=await sb.from('survey_forms').select('*').order('created_at');
+  if(error){console.warn('forms:',error.message);surveyForms=dfForms();return;}
+  surveyForms=(data&&data.length)?data:dfForms();
+}
+function dfForms(){
+  return[
+    {id:'_wb',form_key:'wellbeing',form_name:'Wellbeing Survey',form_url_path:'/',is_active:true},
+    {id:'_ch1',form_key:'ch1',form_name:'HRD บทที่ 1',form_url_path:'/ch1.html',is_active:true}
+  ];
+}
+async function loadUrls(){
+  const{data,error}=await sb.from('org_form_links')
+    .select('*, org:organizations(org_code,org_name_th), form:survey_forms(form_key,form_name)')
+    .order('created_at',{ascending:false});
+  if(error){console.warn('urls:',error.message);urlsData=[];return;}
+  urlsData=data||[];urlsFilt=[...urlsData];
+}
+async function loadWb(){
+  const{data,error}=await sb.from('wellbeing_responses')
+    .select('*, org:organizations(org_name_th)')
+    .order('submitted_at',{ascending:false}).limit(500);
+  if(error){console.warn('wb:',error.message);wbData=[];return;}
+  wbData=data||[];wbFilt=[...wbData];
+}
+async function loadCh1(){
+  const{data,error}=await sb.from('hrd_ch1_responses')
+    .select('*').order('submitted_at',{ascending:false}).limit(500);
+  if(error){console.warn('ch1:',error.message);ch1Data=[];return;}
+  ch1Data=data||[];ch1Filt=[...ch1Data];
+}
+
+// ═══════════════════════════════════════════════
+// DYNAMIC SIDEBAR
+// ═══════════════════════════════════════════════
+function buildDynSB(){
+  const c=el('rni');c.innerHTML='';
+  surveyForms.filter(f=>f.is_active).forEach(f=>{
+    const pid='resp-'+f.form_key;
+    const icon=f.form_key==='wellbeing'?'💚':f.form_key==='ch1'?'📋':'📄';
+    const d=document.createElement('div');
+    d.className='ni';d.dataset.pg=pid;
+    d.onclick=()=>navResp(f);
+    d.innerHTML=`<span class="nic">${icon}</span><span class="nil">${esc(f.form_name)}</span>`;
+    c.appendChild(d);
+  });
+}
+function navResp(f){
+  if(f.form_key==='wellbeing')nav('resp-wellbeing');
+  else if(f.form_key==='ch1')nav('resp-ch1');
+  else showToast('ฟอร์ม '+f.form_name+' ยังไม่มีหน้า responses','info');
+}
+
+// ═══════════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════════
+function renderDash(){
+  const td=today(),mo=td.slice(0,7);
+  const allR=[...wbData,...ch1Data];
+  const actOrgs=orgsData.filter(o=>o.is_active).length;
+  el('ds-o').textContent=orgsData.length;
+  el('ds-os').textContent=`${actOrgs} ใช้งาน / ${orgsData.length-actOrgs} ปิดใช้`;
+  el('ds-t').textContent=wbData.length+ch1Data.length;
+  el('ds-w').textContent=wbData.length;
+  el('ds-c').textContent=ch1Data.length;
+  el('ds-td').textContent=allR.filter(r=>(r.submitted_at||'').slice(0,10)===td).length;
+  el('ds-mo').textContent=allR.filter(r=>(r.submitted_at||'').slice(0,7)===mo).length;
+  renderTrend();renderPie();renderOrgBar();renderRecent();
+}
+function renderTrend(){
+  destroyChart('tr');
+  const ctx=el('ch-tr');if(!ctx)return;
+  const lbls=[],wbC=[],ch1C=[];
+  for(let i=29;i>=0;i--){
+    const d=new Date();d.setDate(d.getDate()-i);
+    const ds=d.toISOString().slice(0,10);
+    lbls.push(ds.slice(5));
+    wbC.push(wbData.filter(r=>(r.submitted_at||'').slice(0,10)===ds).length);
+    ch1C.push(ch1Data.filter(r=>(r.submitted_at||'').slice(0,10)===ds).length);
+  }
+  chartInst['tr']=new Chart(ctx,{type:'line',data:{labels:lbls,datasets:[
+    {label:'Wellbeing',data:wbC,borderColor:'#16a34a',backgroundColor:'rgba(22,163,74,.1)',fill:true,tension:.4,pointRadius:2},
+    {label:'HRD Ch1',data:ch1C,borderColor:'#d97706',backgroundColor:'rgba(217,119,6,.1)',fill:true,tension:.4,pointRadius:2}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}},scales:{y:{beginAtZero:true,ticks:{precision:0}}}}});
+}
+function renderPie(){
+  destroyChart('pi');
+  const ctx=el('ch-pi');if(!ctx)return;
+  chartInst['pi']=new Chart(ctx,{type:'doughnut',data:{labels:['Wellbeing Survey','HRD บทที่ 1'],datasets:[{data:[wbData.length,ch1Data.length],backgroundColor:['#16a34a','#d97706'],borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}}});
+}
+function renderOrgBar(){
+  destroyChart('ob');
+  const ctx=el('ch-ob');if(!ctx)return;
+  const cnt={};
+  ch1Data.forEach(r=>{if(r.organization)cnt[r.organization]=(cnt[r.organization]||0)+1;});
+  wbData.forEach(r=>{const n=r.org?.org_name_th||r.org_code||'ไม่ระบุ';cnt[n]=(cnt[n]||0)+1;});
+  const sorted=Object.entries(cnt).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  chartInst['ob']=new Chart(ctx,{type:'bar',data:{labels:sorted.map(e=>e[0].substring(0,14)),datasets:[{label:'การตอบกลับ',data:sorted.map(e=>e[1]),backgroundColor:'#2563eb',borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{precision:0}}}}});
+}
+function renderRecent(){
+  const all=[
+    ...wbData.slice(0,10).map(r=>({time:r.submitted_at,org:r.org?.org_name_th||r.org_code||'—',form:'Wellbeing',code:r.org_code||'—'})),
+    ...ch1Data.slice(0,10).map(r=>({time:r.submitted_at,org:r.organization||'—',form:'HRD Ch1',code:r.org_code||'—'}))
+  ].sort((a,b)=>(b.time||'').localeCompare(a.time||'')).slice(0,10);
+  const tb=el('rec-tb');
+  if(!all.length){tb.innerHTML=`<tr><td colspan="4" style="text-align:center;padding:2rem;color:var(--tx3)">ยังไม่มีข้อมูล</td></tr>`;return;}
+  tb.innerHTML=all.map(r=>`<tr>
+    <td style="color:var(--tx3);font-size:.8rem">${r.time?new Date(r.time).toLocaleString('th-TH',{dateStyle:'short',timeStyle:'short'}):'—'}</td>
+    <td>${esc(r.org)}</td>
+    <td><span class="bdg ${r.form==='Wellbeing'?'bg':'bw'}">${r.form}</span></td>
+    <td><code style="font-size:.78rem;color:var(--tx2)">${esc(r.code)}</code></td>
+  </tr>`).join('');
+}
+
+// ═══════════════════════════════════════════════
+// ORGANIZATIONS
+// ═══════════════════════════════════════════════
+function renderOrgsPage(){popOrgFilters();filterOrgs();}
+function filterOrgs(){
+  const q=(v('os')).toLowerCase();
+  const t=v('otf'),s=v('osf');
+  orgsFilt=orgsData.filter(o=>{
+    const mq=!q||(o.org_code||'').toLowerCase().includes(q)||(o.org_name_th||'').toLowerCase().includes(q)||(o.org_name_en||'').toLowerCase().includes(q);
+    const mt=!t||o.org_type===t;
+    const ms=!s||(s==='active'?o.is_active:!o.is_active);
+    return mq&&mt&&ms;
+  });
+  const{col,dir}=orgsSort;
+  orgsFilt.sort((a,b)=>dir==='asc'?String(a[col]||'').localeCompare(String(b[col]||'')):String(b[col]||'').localeCompare(String(a[col]||'')));
+  orgPage=1;renderOrgsTable();
+}
+function sortO(col){
+  if(orgsSort.col===col)orgsSort.dir=orgsSort.dir==='asc'?'desc':'asc';
+  else{orgsSort.col=col;orgsSort.dir='asc';}
+  filterOrgs();
+}
+function renderOrgsTable(){
+  const start=(orgPage-1)*ORG_PPG,rows=orgsFilt.slice(start,start+ORG_PPG);
+  const tb=el('o-tb');
+  if(!rows.length){tb.innerHTML=`<tr><td colspan="8"><div class="emp"><div class="ei">🏢</div><p>ไม่พบข้อมูลองค์กร</p></div></td></tr>`;renderPag('org',orgsFilt.length,orgPage,ORG_PPG);return;}
+  tb.innerHTML=rows.map((o,i)=>`<tr>
+    <td style="color:var(--tx3);font-size:.8rem">${start+i+1}</td>
+    <td><code style="background:var(--bg);padding:.15rem .4rem;border-radius:4px;font-size:.8rem">${esc(o.org_code)}</code></td>
+    <td style="font-weight:600">${esc(o.org_name_th||'—')}</td>
+    <td style="color:var(--tx2);font-size:.85rem">${esc(o.org_name_en||'—')}</td>
+    <td><span class="bdg bb">${TYPE_LABELS[o.org_type]||o.org_type||'—'}</span></td>
+    <td><span class="bdg ${o.is_active?'bg':'br'}">${o.is_active?'ใช้งาน':'ปิดใช้'}</span></td>
+    <td style="font-size:.8rem;color:var(--tx2)">${o.created_at?new Date(o.created_at).toLocaleDateString('th-TH'):'—'}</td>
+    <td style="display:flex;gap:.25rem">
+      <button class="btn bo bxs" onclick="editOrg('${o.id}')">✏️ แก้ไข</button>
+      <button class="btn bd bxs" onclick="confirmDelOrg('${o.id}','${esc(o.org_name_th)}')">🗑️</button>
+    </td>
+  </tr>`).join('');
+  renderPag('org',orgsFilt.length,orgPage,ORG_PPG);
+}
+function popOrgFilters(){}
+function openOM(org=null){
+  el('om-t').textContent=org?'แก้ไของค์กร':'เพิ่มองค์กรใหม่';
+  el('o-id').value=org?.id||'';
+  el('o-cd').value=org?.org_code||'';el('o-cd').disabled=!!org;
+  el('o-nth').value=org?.org_name_th||'';
+  el('o-nen').value=org?.org_name_en||'';
+  el('o-tp').value=org?.org_type||'government';
+  el('o-em').value=org?.contact_email||'';
+  el('o-ac').checked=org?!!org.is_active:true;
+  el('o-cde').style.display='none';
+  el('om-bd').classList.add('show');
+}
+function closeOM(){el('om-bd').classList.remove('show');}
+function editOrg(id){const o=orgsData.find(x=>x.id===id);if(o)openOM(o);}
+async function saveOrg(){
+  const id=v('o-id');
+  const code=v('o-cd').toLowerCase().replace(/\s+/g,'').trim();
+  const nth=v('o-nth').trim(),nen=v('o-nen').trim();
+  const tp=v('o-tp'),em=v('o-em').trim();
+  const ac=el('o-ac').checked;
+  const errEl=el('o-cde');
+  if(!code||!nth){showToast('กรุณากรอกข้อมูลที่จำเป็น','error');return;}
+  if(!id){
+    const dup=orgsData.find(o=>o.org_code===code);
+    if(dup){errEl.textContent=`org_code "${code}" มีอยู่แล้ว`;errEl.style.display='block';return;}
+  }
+  errEl.style.display='none';
+  const payload={org_code:code,org_name_th:nth,org_name_en:nen||null,org_type:tp,contact_email:em||null,is_active:ac,updated_at:new Date().toISOString()};
+  showLoading(true);
+  try{
+    let error;
+    if(id)({error}=await sb.from('organizations').update(payload).eq('id',id));
+    else({error}=await sb.from('organizations').insert([payload]));
+    if(error)throw error;
+    showToast(id?'แก้ไของค์กรสำเร็จ ✓':'เพิ่มองค์กรสำเร็จ ✓','success');
+    closeOM();
+    await loadOrgs();await loadUrls();
+    popOrgFilters();popUrlFilters();popWbFilters();popCh1Filters();buildDynSB();filterOrgs();
+  }catch(e){showToast('เกิดข้อผิดพลาด: '+e.message,'error');}
+  finally{showLoading(false);}
+}
+function confirmDelOrg(id,name){
+  el('cf-m').textContent=`ต้องการลบองค์กร "${name}"? การลบจะไม่ลบข้อมูลการตอบกลับ แต่จะลบ URL ที่เชื่อมโยงทั้งหมด`;
+  el('cf-ok').onclick=()=>delOrg(id);
+  el('cf-bd').classList.add('show');
+}
+async function delOrg(id){
+  closeCF();showLoading(true);
+  try{
+    const{error}=await sb.from('organizations').delete().eq('id',id);
+    if(error)throw error;
+    showToast('ลบองค์กรสำเร็จ','success');
+    await loadOrgs();await loadUrls();
+    popOrgFilters();popUrlFilters();filterOrgs();
+  }catch(e){showToast('เกิดข้อผิดพลาด: '+e.message,'error');}
+  finally{showLoading(false);}
+}
+function closeCF(){el('cf-bd').classList.remove('show');}
+function expOrgsCSV(){
+  if(!orgsFilt.length){showToast('ไม่มีข้อมูล','warning');return;}
+  const keys=['org_code','org_name_th','org_name_en','org_type','contact_email','is_active','created_at'];
+  const rows=[keys.join(','),...orgsFilt.map(o=>keys.map(k=>`"${String(o[k]??'').replace(/"/g,'""')}"`).join(','))].join('\n');
+  dlBlob(new Blob(['\uFEFF'+rows],{type:'text/csv'}),'organizations_'+today()+'.csv');
+  showToast('Export สำเร็จ ✓','success');
+}
+
+// ═══════════════════════════════════════════════
+// URL MANAGER
+// ═══════════════════════════════════════════════
+function renderUrlsPage(){popUrlFilters();filterUrls();}
+function popUrlFilters(){
+  const orgSel=el('uo'),formSel=el('uf');
+  if(!orgSel||!formSel)return;
+  const ov=orgSel.value,fv=formSel.value;
+  orgSel.innerHTML='<option value="">ทุกองค์กร</option>'+orgsData.map(o=>`<option value="${esc(o.id)}">${esc(o.org_name_th)}</option>`).join('');
+  formSel.innerHTML='<option value="">ทุกฟอร์ม</option>'+surveyForms.map(f=>`<option value="${esc(f.form_key)}">${esc(f.form_name)}</option>`).join('');
+  orgSel.value=ov;formSel.value=fv;
+}
+function filterUrls(){
+  const oid=v('uo'),fk=v('uf');
+  urlsFilt=urlsData.filter(u=>(!oid||u.org_id===oid)&&(!fk||u.form?.form_key===fk));
+  urlPage=1;renderUrlsTable();
+}
+function renderUrlsTable(){
+  const start=(urlPage-1)*URL_PPG,rows=urlsFilt.slice(start,start+URL_PPG);
+  const tb=el('u-tb');
+  if(!rows.length){
+    tb.innerHTML=`<tr><td colspan="6"><div class="emp"><div class="ei">🔗</div><p>ยังไม่มี URL</p><p style="font-size:.8rem;color:var(--tx3);margin-top:.5rem">กด "สร้าง URL ทั้งหมด" เพื่อสร้างอัตโนมัติ</p></div></td></tr>`;
+    renderPag('url',urlsFilt.length,urlPage,URL_PPG);return;
+  }
+  tb.innerHTML=rows.map((u,i)=>`<tr>
+    <td style="color:var(--tx3);font-size:.8rem">${start+i+1}</td>
+    <td style="font-weight:500">${esc(u.org?.org_name_th||'—')}</td>
+    <td><span class="bdg bb">${esc(u.form?.form_name||'—')}</span></td>
+    <td><div class="ucl" title="${esc(u.full_url)}">${esc(u.full_url)}</div></td>
+    <td><span class="bdg ${u.is_active?'bg':'br'}">${u.is_active?'ใช้งาน':'ปิดใช้'}</span></td>
+    <td style="display:flex;gap:.25rem;flex-wrap:wrap">
+      <button class="btn bo bxs" onclick="copyUrl('${esc(u.full_url)}')">📋</button>
+      <button class="btn bo bxs" onclick="showQR('${esc(u.full_url)}')">📱 QR</button>
+      <button class="btn bo bxs" onclick="toggleUrlSts('${u.id}',${u.is_active})">${u.is_active?'🔒':'🔓'}</button>
+      <button class="btn bd bxs" onclick="delUrl('${u.id}')">🗑️</button>
+    </td>
+  </tr>`).join('');
+  renderPag('url',urlsFilt.length,urlPage,URL_PPG);
+}
+async function genAllUrls(){
+  if(!orgsData.length||!surveyForms.length){showToast('ไม่พบข้อมูลองค์กรหรือฟอร์ม','warning');return;}
+  showLoading(true);
+  let created=0,skipped=0;
+  try{
+    for(const org of orgsData.filter(o=>o.is_active)){
+      for(const form of surveyForms.filter(f=>f.is_active)){
+        const urlPath=form.form_url_path==='/'?'':form.form_url_path.replace(/^\//,'');
+        const fullUrl=CFG.baseUrl+(urlPath?'/'+urlPath:'/').replace('//','/')+'?org='+org.org_code;
+        const exists=urlsData.find(u=>u.org_id===org.id&&(u.form?.form_key===form.form_key||u.form_id===form.id));
+        if(exists){skipped++;continue;}
+        const{error}=await sb.from('org_form_links').insert([{org_id:org.id,form_id:form.id,full_url:fullUrl,is_active:true}]);
+        if(!error)created++;
+      }
+    }
+    showToast(`สร้างสำเร็จ ${created} URL (ข้าม ${skipped} ที่มีอยู่แล้ว)`,'success');
+    await loadUrls();filterUrls();
+  }catch(e){showToast('เกิดข้อผิดพลาด: '+e.message,'error');}
+  finally{showLoading(false);}
+}
+async function toggleUrlSts(id,current){
+  const{error}=await sb.from('org_form_links').update({is_active:!current}).eq('id',id);
+  if(error){showToast('เกิดข้อผิดพลาด','error');return;}
+  showToast('อัปเดตสำเร็จ','success');await loadUrls();filterUrls();
+}
+async function delUrl(id){
+  if(!confirm('ต้องการลบ URL นี้?'))return;
+  const{error}=await sb.from('org_form_links').delete().eq('id',id);
+  if(error){showToast('เกิดข้อผิดพลาด','error');return;}
+  showToast('ลบสำเร็จ','success');await loadUrls();filterUrls();
+}
+function copyUrl(url){
+  navigator.clipboard.writeText(url).then(()=>showToast('คัดลอก URL แล้ว ✓','success')).catch(()=>{
+    const t=document.createElement('textarea');t.value=url;document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t);showToast('คัดลอก URL แล้ว ✓','success');
+  });
+}
+let qrObj=null;
+function showQR(url){
+  el('qrcv').innerHTML='';el('qrt').textContent=url;
+  try{qrObj=new QRCode(el('qrcv'),{text:url,width:220,height:220,correctLevel:QRCode.CorrectLevel.M});}
+  catch(e){el('qrcv').textContent='ไม่สามารถสร้าง QR ได้';}
+  el('qr-bd').classList.add('show');
+}
+function closeQR(){el('qr-bd').classList.remove('show');}
+function dlQR(){
+  const c=document.querySelector('#qrcv canvas');
+  if(!c){showToast('ไม่พบ QR image','error');return;}
+  const a=document.createElement('a');a.href=c.toDataURL('image/png');a.download='qr_code.png';a.click();
+}
+function expUrlsCSV(){
+  if(!urlsFilt.length){showToast('ไม่มีข้อมูล','warning');return;}
+  const rows=[['องค์กร','Form','URL','สถานะ'].join(','),...urlsFilt.map(u=>[
+    `"${esc(u.org?.org_name_th||'')}"`,
+    `"${esc(u.form?.form_name||'')}"`,
+    `"${esc(u.full_url||'')}"`,
+    u.is_active?'ใช้งาน':'ปิดใช้'
+  ].join(','))].join('\n');
+  dlBlob(new Blob(['\uFEFF'+rows],{type:'text/csv'}),'urls_'+today()+'.csv');
+  showToast('Export สำเร็จ ✓','success');
+}
+
+// ═══════════════════════════════════════════════
+// WELLBEING RESPONSES
+// ═══════════════════════════════════════════════
+function renderWbPage(){popWbFilters();filterWb();}
+function popWbFilters(){
+  const sel=el('wof');if(!sel)return;
+  const ov=sel.value;
+  const orgs=[...new Set(wbData.map(r=>r.org_code).filter(Boolean))];
+  sel.innerHTML='<option value="">ทุกองค์กร</option>'+orgs.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');
+  sel.value=ov;
+}
+function filterWb(){
+  const org=v('wof'),df=v('wdf'),dt=v('wdt');
+  wbFilt=wbData.filter(r=>{
+    const mc=!org||r.org_code===org;
+    const mf=!df||((r.submitted_at||'')>=df);
+    const mt=!dt||((r.submitted_at||'')<=dt+'T23:59:59');
+    return mc&&mf&&mt;
+  });
+  wbPage=1;renderWbTable();
+}
+function renderWbTable(){
+  const start=(wbPage-1)*WB_PPG,rows=wbFilt.slice(start,start+WB_PPG);
+  const tb=el('wb-tb');
+  if(!rows.length){tb.innerHTML=`<tr><td colspan="6"><div class="emp"><div class="ei">💚</div><p>ไม่พบข้อมูล</p></div></td></tr>`;renderPag('wb',wbFilt.length,wbPage,WB_PPG);return;}
+  tb.innerHTML=rows.map((r,i)=>`<tr>
+    <td style="color:var(--tx3);font-size:.8rem">${start+i+1}</td>
+    <td style="font-size:.82rem">${r.submitted_at?new Date(r.submitted_at).toLocaleString('th-TH',{dateStyle:'short',timeStyle:'short'}):'—'}</td>
+    <td><code style="font-size:.78rem">${esc(r.org_code||'—')}</code></td>
+    <td>${esc(r.org?.org_name_th||'—')}</td>
+    <td style="font-size:.82rem">${esc(r.raw_data?.email||r.raw_data?.respondent_email||'—')}</td>
+    <td><button class="btn bo bxs" onclick="showRaw(${JSON.stringify(JSON.stringify(r.raw_data||{})).replace(/"/g,'&quot;')})">🔍 ดู</button></td>
+  </tr>`).join('');
+  renderPag('wb',wbFilt.length,wbPage,WB_PPG);
+}
+function clrWb(){el('wof').value='';el('wdf').value='';el('wdt').value='';filterWb();}
+function expWbCSV(){
+  if(!wbFilt.length){showToast('ไม่มีข้อมูล','warning');return;}
+  const rows=[['#','วันที่','org_code','องค์กร','อีเมล'].join(','),...wbFilt.map((r,i)=>[
+    i+1,`"${r.submitted_at?new Date(r.submitted_at).toLocaleString('th-TH'):'—'}"`,
+    `"${r.org_code||''}"`,`"${r.org?.org_name_th||''}"`,
+    `"${r.raw_data?.email||r.raw_data?.respondent_email||''}"`
+  ].join(','))].join('\n');
+  dlBlob(new Blob(['\uFEFF'+rows],{type:'text/csv'}),'wellbeing_'+today()+'.csv');
+  showToast('Export สำเร็จ ✓','success');
+}
+function expWbXLSX(){
+  if(!window.XLSX){showToast('กำลังโหลด SheetJS...','info');return;}
+  const data=wbFilt.map((r,i)=>({
+    '#':i+1,'วันที่':r.submitted_at?new Date(r.submitted_at).toLocaleString('th-TH'):'—',
+    'org_code':r.org_code||'','องค์กร':r.org?.org_name_th||'',
+    'อีเมล':r.raw_data?.email||r.raw_data?.respondent_email||''
+  }));
+  const ws=XLSX.utils.json_to_sheet(data);
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Wellbeing');
+  XLSX.writeFile(wb,'wellbeing_'+today()+'.xlsx');
+  showToast('Export Excel สำเร็จ ✓','success');
+}
+
+// ═══════════════════════════════════════════════
+// HRD CH1 RESPONSES
+// ═══════════════════════════════════════════════
+function renderCh1Page(){popCh1Filters();filterCh1();}
+function popCh1Filters(){
+  const sel=el('cof');if(!sel)return;
+  const ov=sel.value;
+  const orgs=[...new Set(ch1Data.map(r=>r.organization).filter(Boolean))];
+  sel.innerHTML='<option value="">ทุกองค์กร</option>'+orgs.map(o=>`<option value="${esc(o)}">${esc(o)}</option>`).join('');
+  sel.value=ov;
+}
+function filterCh1(){
+  const org=v('cof'),df=v('cdf'),dt=v('cdt');
+  ch1Filt=ch1Data.filter(r=>{
+    const mc=!org||r.organization===org;
+    const mf=!df||((r.submitted_at||'')>=df);
+    const mt=!dt||((r.submitted_at||'')<=dt+'T23:59:59');
+    return mc&&mf&&mt;
+  });
+  ch1Page=1;renderCh1Table();
+}
+function renderCh1Table(){
+  const start=(ch1Page-1)*CH1_PPG,rows=ch1Filt.slice(start,start+CH1_PPG);
+  const tb=el('c1-tb');
+  if(!rows.length){tb.innerHTML=`<tr><td colspan="9"><div class="emp"><div class="ei">📋</div><p>ไม่พบข้อมูล</p></div></td></tr>`;renderPag('c1',ch1Filt.length,ch1Page,CH1_PPG);return;}
+  tb.innerHTML=rows.map((r,i)=>`<tr>
+    <td style="color:var(--tx3);font-size:.8rem">${start+i+1}</td>
+    <td style="font-size:.82rem">${r.submitted_at?new Date(r.submitted_at).toLocaleString('th-TH',{dateStyle:'short',timeStyle:'short'}):'—'}</td>
+    <td><code style="font-size:.78rem">${esc(r.org_code||'—')}</code></td>
+    <td style="font-weight:500;font-size:.85rem">${esc(r.organization||'—')}</td>
+    <td style="text-align:right">${(r.total_staff||0).toLocaleString()}</td>
+    <td style="text-align:right">${r.ncd_count||0}</td>
+    <td style="text-align:right">${r.ncd_ratio_pct!=null?r.ncd_ratio_pct+'%':'—'}</td>
+    <td style="text-align:right">${r.turnover_rate!=null?r.turnover_rate+'%':'—'}</td>
+    <td><button class="btn bo bxs" onclick="showRawStr('${esc(JSON.stringify({org:r.organization,total_staff:r.total_staff,ncd:r.ncd_count,ncd_pct:r.ncd_ratio_pct,turnover:r.turnover_rate,support:{mentoring:r.mentoring_system,job_rotation:r.job_rotation,idp:r.idp_system,career_path:r.career_path_system},mental:{stress:r.mental_stress,burnout:r.mental_burnout},priorities:r.strategic_priorities,version:r.form_version}))}')">🔍 ดู</button></td>
+  </tr>`).join('');
+  renderPag('c1',ch1Filt.length,ch1Page,CH1_PPG);
+}
+function clrCh1(){el('cof').value='';el('cdf').value='';el('cdt').value='';filterCh1();}
+function expCh1CSV(){
+  if(!ch1Filt.length){showToast('ไม่มีข้อมูล','warning');return;}
+  const SUP=v=>SUP_LABELS[v]||v||'';
+  const keys=['หน่วยงาน','org_code','วันที่ส่ง','บุคลากรรวม','NCD รวม','NCD %','อัตราลาออก%','อัตราโอนย้าย%','พี่เลี้ยง','Job Rotation','IDP','Career Path'];
+  const rows=[keys.join(','),...ch1Filt.map(r=>[
+    `"${r.organization||''}"`,`"${r.org_code||''}"`,
+    `"${r.submitted_at?new Date(r.submitted_at).toLocaleString('th-TH'):''}"`,
+    r.total_staff||0,r.ncd_count||0,r.ncd_ratio_pct||'',r.turnover_rate||'',r.transfer_rate||'',
+    SUP(r.mentoring_system),SUP(r.job_rotation),SUP(r.idp_system),SUP(r.career_path_system)
+  ].join(','))].join('\n');
+  dlBlob(new Blob(['\uFEFF'+rows],{type:'text/csv'}),'hrd_ch1_'+today()+'.csv');
+  showToast('Export สำเร็จ ✓','success');
+}
+function expCh1XLSX(){
+  if(!window.XLSX){showToast('กำลังโหลด SheetJS...','info');return;}
+  const SUP=v=>SUP_LABELS[v]||v||'';
+  const data=ch1Filt.map((r,i)=>({
+    '#':i+1,'หน่วยงาน':r.organization||'','org_code':r.org_code||'',
+    'วันที่ส่ง':r.submitted_at?new Date(r.submitted_at).toLocaleString('th-TH'):'',
+    'บุคลากรรวม':r.total_staff||0,'NCD รวม':r.ncd_count||0,
+    'NCD%':r.ncd_ratio_pct||'','อัตราลาออก%':r.turnover_rate||'',
+    'เบาหวาน':r.disease_diabetes||0,'ความดัน':r.disease_hypertension||0,
+    'หัวใจ':r.disease_cardiovascular||0,'ไต':r.disease_kidney||0,
+    'พี่เลี้ยง':SUP(r.mentoring_system),'Job Rotation':SUP(r.job_rotation),
+    'IDP':SUP(r.idp_system),'Career Path':SUP(r.career_path_system),
+    'version':r.form_version||''
+  }));
+  const ws=XLSX.utils.json_to_sheet(data);
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'HRD Ch1');
+  XLSX.writeFile(wb,'hrd_ch1_'+today()+'.xlsx');
+  showToast('Export Excel สำเร็จ ✓','success');
+}
+function showRaw(jsonStr){
+  try{el('rawp').textContent=JSON.stringify(JSON.parse(jsonStr),null,2);}
+  catch{el('rawp').textContent=jsonStr;}
+  el('raw-bd').classList.add('show');
+}
+function showRawStr(str){
+  try{el('rawp').textContent=JSON.stringify(JSON.parse(str),null,2);}
+  catch{el('rawp').textContent=str;}
+  el('raw-bd').classList.add('show');
+}
+function closeRaw(){el('raw-bd').classList.remove('show');}
+
+// ═══════════════════════════════════════════════
+// ANALYTICS
+// ═══════════════════════════════════════════════
+let curATab='overview';
+function renderAnalyticsPage(){swAT(curATab);}
+function swAT(tab){
+  curATab=tab;
+  document.querySelectorAll('.at').forEach((b,i)=>{
+    const tabs=['overview','by-org','by-form','trends'];
+    b.classList.toggle('active',tabs[i]===tab);
+  });
+  document.querySelectorAll('.atc').forEach(c=>c.classList.remove('active'));
+  const tc=el('at-'+tab);if(tc)tc.classList.add('active');
+  if(tab==='overview')renderAnOverview();
+  else if(tab==='by-org'){popAnOrgSel();}
+  else if(tab==='by-form')renderAnByForm();
+  else if(tab==='trends')renderAnTrends();
+}
+function renderAnOverview(){
+  // NCD bar
+  destroyChart('an-ncd');
+  const ctx=el('an-ncd');if(!ctx)return;
+  const diseases=['disease_diabetes','disease_hypertension','disease_cardiovascular','disease_kidney','disease_liver','disease_cancer','disease_obesity'];
+  const labels=['เบาหวาน','ความดัน','หัวใจ','ไต','ตับ','มะเร็ง','อ้วน'];
+  const totals=diseases.map(d=>ch1Data.reduce((s,r)=>s+(r[d]||0),0));
+  chartInst['an-ncd']=new Chart(ctx,{type:'bar',data:{labels,datasets:[{label:'คน',data:totals,backgroundColor:'#dc2626',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}});
+  // Age donut
+  destroyChart('an-age');
+  const ctx2=el('an-age');if(ctx2){
+    const ageSums={'≤30':0,'31-40':0,'41-50':0,'51-60':0};
+    ch1Data.forEach(r=>{
+      ageSums['≤30']+=(r.age_u30||0);ageSums['31-40']+=(r.age_31_40||0);
+      ageSums['41-50']+=(r.age_41_50||0);ageSums['51-60']+=(r.age_51_60||0);
+    });
+    chartInst['an-age']=new Chart(ctx2,{type:'doughnut',data:{labels:Object.keys(ageSums),datasets:[{data:Object.values(ageSums),backgroundColor:['#2563eb','#7c3aed','#d97706','#dc2626'],borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}}});
+  }
+  // Support bar
+  destroyChart('an-sup');
+  const ctx3=el('an-sup');if(ctx3){
+    const systems=['mentoring_system','job_rotation','idp_system','career_path_system'];
+    const lbls=['พี่เลี้ยง','Job Rotation','IDP','Career Path'];
+    const fullD=systems.map(s=>ch1Data.filter(r=>r[s]==='full').length);
+    const partD=systems.map(s=>ch1Data.filter(r=>r[s]==='partial').length);
+    const noneD=systems.map(s=>ch1Data.filter(r=>r[s]==='none').length);
+    chartInst['an-sup']=new Chart(ctx3,{type:'bar',data:{labels:lbls,datasets:[
+      {label:'ครบ',data:fullD,backgroundColor:'#16a34a',borderRadius:4},
+      {label:'บางส่วน',data:partD,backgroundColor:'#d97706',borderRadius:4},
+      {label:'ไม่มี',data:noneD,backgroundColor:'#dc2626',borderRadius:4}
+    ]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true}},plugins:{legend:{position:'top'}}}});
+  }
+  // Digital pie
+  destroyChart('an-dig');
+  const ctx4=el('an-dig');if(ctx4){
+    const digCnt={};
+    ch1Data.forEach(r=>(r.digital_systems||[]).forEach(d=>{digCnt[d]=(digCnt[d]||0)+1;}));
+    const digE=Object.entries(digCnt).sort((a,b)=>b[1]-a[1]);
+    const COLS=['#2563eb','#7c3aed','#16a34a','#d97706','#dc2626','#0891b2','#374151'];
+    chartInst['an-dig']=new Chart(ctx4,{type:'pie',data:{labels:digE.map(([k])=>DIG_LABELS[k]||k),datasets:[{data:digE.map(([,v])=>v),backgroundColor:COLS}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}}});
+  }
+  // Heatmap
+  const hmT=el('hm-tbl');if(!hmT)return;
+  const diseases2=['disease_diabetes','disease_hypertension','disease_cardiovascular','disease_kidney','disease_liver','disease_cancer','disease_obesity'];
+  const lbls2=['เบาหวาน','ความดัน','หัวใจ','ไต','ตับ','มะเร็ง','อ้วน'];
+  const hdr=`<thead><tr><th style="text-align:left">หน่วยงาน</th>${lbls2.map(l=>`<th>${l}</th>`).join('')}</tr></thead>`;
+  const body=ch1Data.slice(0,20).map(r=>`<tr>
+    <td style="white-space:nowrap;font-size:.78rem">${esc((r.organization||'—').substring(0,12))}</td>
+    ${diseases2.map(d=>{const v=r[d]||0;const bg=v>20?'#fee2e2':v>5?'#fef3c7':v>0?'#d1fae5':'#f8fafc';return`<td style="text-align:center;background:${bg}">${v}</td>`;}).join('')}
+  </tr>`).join('');
+  hmT.innerHTML=hdr+`<tbody>${body}</tbody>`;
+}
+function popAnOrgSel(){
+  const sel=el('an-os');if(!sel)return;
+  const ov=sel.value;
+  sel.innerHTML='<option value="">-- เลือกองค์กร --</option>'+orgsData.map(o=>`<option value="${esc(o.org_code)}">${esc(o.org_name_th)}</option>`).join('');
+  sel.value=ov;
+}
+function rndrByOrg(){
+  const code=v('an-os');
+  const c=el('boc');
+  if(!code){c.innerHTML='<div class="card" style="grid-column:1/-1"><div class="cb emp"><div class="ei">🏢</div><p>เลือกองค์กรเพื่อดูข้อมูล</p></div></div>';return;}
+  const orgRecs=ch1Data.filter(r=>r.organization&&orgsData.find(o=>o.org_code===code&&o.org_name_th===r.organization)||r.org_code===code);
+  if(!orgRecs.length){c.innerHTML='<div class="card" style="grid-column:1/-1"><div class="cb emp"><div class="ei">📭</div><p>ไม่พบข้อมูลสำหรับองค์กรนี้</p></div></div>';return;}
+  const rec=orgRecs[0];
+  c.innerHTML=`
+    <div class="card"><div class="ch"><h3>📊 ข้อมูลองค์กร</h3></div><div class="cb">
+      <table class="dt"><tbody>
+        <tr><td style="color:var(--tx2)">หน่วยงาน</td><td style="font-weight:600">${esc(rec.organization||'—')}</td></tr>
+        <tr><td style="color:var(--tx2)">บุคลากรรวม</td><td>${(rec.total_staff||0).toLocaleString()} คน</td></tr>
+        <tr><td style="color:var(--tx2)">NCD รวม</td><td>${rec.ncd_count||0} คน (${rec.ncd_ratio_pct||0}%)</td></tr>
+        <tr><td style="color:var(--tx2)">อัตราลาออก</td><td>${rec.turnover_rate!=null?rec.turnover_rate+'%':'—'}</td></tr>
+        <tr><td style="color:var(--tx2)">พี่เลี้ยง</td><td>${SUP_LABELS[rec.mentoring_system]||'—'}</td></tr>
+        <tr><td style="color:var(--tx2)">IDP</td><td>${SUP_LABELS[rec.idp_system]||'—'}</td></tr>
+        <tr><td style="color:var(--tx2)">วันที่ส่ง</td><td>${rec.submitted_at?new Date(rec.submitted_at).toLocaleDateString('th-TH'):'—'}</td></tr>
+      </tbody></table>
+    </div></div>
+    <div class="card"><div class="ch"><h3>🩺 NCD ของหน่วยงาน</h3></div><div class="cb"><div class="cw2"><canvas id="byorg-ncd"></canvas></div></div></div>`;
+  // NCD chart for this org
+  setTimeout(()=>{
+    const ctx=el('byorg-ncd');if(!ctx)return;
+    destroyChart('byorg-ncd');
+    const diseases=['disease_diabetes','disease_hypertension','disease_cardiovascular','disease_kidney','disease_liver','disease_cancer','disease_obesity'];
+    const lbls=['เบาหวาน','ความดัน','หัวใจ','ไต','ตับ','มะเร็ง','อ้วน'];
+    const vals=diseases.map(d=>rec[d]||0);
+    chartInst['byorg-ncd']=new Chart(ctx,{type:'bar',data:{labels:lbls,datasets:[{label:'คน',data:vals,backgroundColor:'#dc2626',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}});
+  },100);
+}
+function renderAnByForm(){
+  destroyChart('an-fo');
+  const ctx=el('an-fo');if(!ctx)return;
+  const orgNames=[...new Set([...ch1Data.map(r=>r.organization),...wbData.map(r=>r.org_code)].filter(Boolean))].slice(0,10);
+  const wbCts=orgNames.map(n=>wbData.filter(r=>r.org_code===n||r.org?.org_name_th===n).length);
+  const ch1Cts=orgNames.map(n=>ch1Data.filter(r=>r.organization===n||r.org_code===n).length);
+  chartInst['an-fo']=new Chart(ctx,{type:'bar',data:{labels:orgNames.map(n=>n.substring(0,12)),datasets:[
+    {label:'Wellbeing',data:wbCts,backgroundColor:'#16a34a',borderRadius:4},
+    {label:'HRD Ch1',data:ch1Cts,backgroundColor:'#d97706',borderRadius:4}
+  ]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true}},plugins:{legend:{position:'top'}}}});
+  // Completion rate
+  destroyChart('an-cp');
+  const ctx2=el('an-cp');if(ctx2){
+    const totalOrgs=Math.max(orgsData.length,1);
+    const wbOrgs=new Set(wbData.map(r=>r.org_code)).size;
+    const ch1Orgs=new Set(ch1Data.map(r=>r.organization)).size;
+    chartInst['an-cp']=new Chart(ctx2,{type:'doughnut',data:{
+      labels:['Wellbeing ส่งแล้ว','Wellbeing ยังไม่ส่ง','HRD Ch1 ส่งแล้ว','HRD Ch1 ยังไม่ส่ง'],
+      datasets:[{data:[wbOrgs,totalOrgs-wbOrgs,ch1Orgs,totalOrgs-ch1Orgs],backgroundColor:['#16a34a','#d1fae5','#d97706','#fef3c7']}]
+    },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}}});
+  }
+}
+function renderAnTrends(){
+  // Monthly
+  destroyChart('an-mo');
+  const ctx=el('an-mo');if(!ctx)return;
+  const months=[];
+  for(let i=11;i>=0;i--){const d=new Date();d.setMonth(d.getMonth()-i);months.push(d.toISOString().slice(0,7));}
+  const wbM=months.map(m=>wbData.filter(r=>(r.submitted_at||'').slice(0,7)===m).length);
+  const ch1M=months.map(m=>ch1Data.filter(r=>(r.submitted_at||'').slice(0,7)===m).length);
+  chartInst['an-mo']=new Chart(ctx,{type:'line',data:{labels:months.map(m=>m.slice(2)),datasets:[
+    {label:'Wellbeing',data:wbM,borderColor:'#16a34a',backgroundColor:'rgba(22,163,74,.1)',fill:true,tension:.4,pointRadius:3},
+    {label:'HRD Ch1',data:ch1M,borderColor:'#d97706',backgroundColor:'rgba(217,119,6,.1)',fill:true,tension:.4,pointRadius:3}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}},scales:{y:{beginAtZero:true,ticks:{precision:0}}}}});
+  // Weekly
+  destroyChart('an-wk');
+  const ctx2=el('an-wk');if(!ctx2)return;
+  const weeks=[];
+  for(let i=11;i>=0;i--){
+    const d=new Date();d.setDate(d.getDate()-i*7);
+    const wkStart=new Date(d);wkStart.setDate(d.getDate()-d.getDay());
+    weeks.push(wkStart.toISOString().slice(0,10));
+  }
+  const wbW=weeks.map(ws=>{const we=new Date(ws);we.setDate(we.getDate()+6);return wbData.filter(r=>{const t=r.submitted_at?.slice(0,10)||'';return t>=ws&&t<=we.toISOString().slice(0,10);}).length;});
+  const ch1W=weeks.map(ws=>{const we=new Date(ws);we.setDate(we.getDate()+6);return ch1Data.filter(r=>{const t=r.submitted_at?.slice(0,10)||'';return t>=ws&&t<=we.toISOString().slice(0,10);}).length;});
+  chartInst['an-wk']=new Chart(ctx2,{type:'bar',data:{labels:weeks.map(w=>w.slice(5)),datasets:[
+    {label:'Wellbeing',data:wbW,backgroundColor:'rgba(22,163,74,.7)',borderRadius:4},
+    {label:'HRD Ch1',data:ch1W,backgroundColor:'rgba(217,119,6,.7)',borderRadius:4}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'}},scales:{x:{stacked:false},y:{beginAtZero:true,ticks:{precision:0}}}}});
+}
+
+// ═══════════════════════════════════════════════
+// SETTINGS
+// ═══════════════════════════════════════════════
+function renderSettingsPage(){
+  el('s-url').value=CFG.supabaseUrl;
+  el('s-key').value=CFG.supabaseKey;
+  el('s-bu').value=CFG.baseUrl;
+  testConn();
+  renderFormsTable();
+}
+async function testConn(){
+  const badge=el('cbdg');
+  badge.textContent='กำลังตรวจสอบ...';badge.className='cst cck';
+  try{
+    if(!sb)initSB();
+    const{error}=await sb.from('organizations').select('id').limit(1);
+    if(error)throw error;
+    badge.textContent='✓ เชื่อมต่อสำเร็จ';badge.className='cst cok';
+  }catch(e){badge.textContent='✕ '+e.message;badge.className='cst cer';}
+}
+function saveSBCfg(){
+  const url=v('s-url').trim(),key=v('s-key').trim();
+  if(!url||!key){showToast('กรุณากรอก URL และ Key','error');return;}
+  localStorage.setItem('sb_url',url);localStorage.setItem('sb_key',key);
+  showToast('บันทึกแล้ว กำลังรีเฟรช...','success');
+  setTimeout(()=>location.reload(),1500);
+}
+function saveBU(){
+  const url=v('s-bu').trim().replace(/\/$/,'');
+  if(!url){showToast('กรุณากรอก URL','error');return;}
+  CFG.baseUrl=url;localStorage.setItem('base_url',url);
+  showToast('บันทึก Base URL สำเร็จ ✓','success');
+}
+function renderFormsTable(){
+  const tb=el('sf-tb');if(!tb)return;
+  if(!surveyForms.length){tb.innerHTML=`<tr><td colspan="5" style="text-align:center;padding:1.5rem;color:var(--tx3)">ไม่พบข้อมูลฟอร์ม</td></tr>`;return;}
+  tb.innerHTML=surveyForms.map(f=>`<tr>
+    <td><code style="font-size:.82rem">${esc(f.form_key)}</code></td>
+    <td>${esc(f.form_name)}</td>
+    <td><code style="font-size:.82rem">${esc(f.form_url_path)}</code></td>
+    <td><span class="bdg ${f.is_active?'bg':'br'}">${f.is_active?'ใช้งาน':'ปิดใช้'}</span></td>
+    <td>
+      <button class="btn bo bxs" onclick="editSF('${f.id}')">✏️</button>
+      <button class="btn bd bxs" style="margin-left:.25rem" onclick="delSF('${f.id}','${esc(f.form_name)}')">🗑️</button>
+    </td>
+  </tr>`).join('');
+}
+function openSFM(form=null){
+  el('sfm-t').textContent=form?'แก้ไขฟอร์ม':'เพิ่มฟอร์มใหม่';
+  el('sf-id').value=form?.id||'';
+  el('sf-k').value=form?.form_key||'';el('sf-k').disabled=!!form;
+  el('sf-n').value=form?.form_name||'';
+  el('sf-p').value=form?.form_url_path||'';
+  el('sf-d').value=form?.description||'';
+  el('sf-a').checked=form?!!form.is_active:true;
+  el('sfm-bd').classList.add('show');
+}
+function closeSFM(){el('sfm-bd').classList.remove('show');}
+function editSF(id){const f=surveyForms.find(x=>x.id===id);if(f)openSFM(f);}
+async function saveSF(){
+  const id=v('sf-id');
+  const key=v('sf-k').trim().toLowerCase();
+  const name=v('sf-n').trim(),path=v('sf-p').trim(),desc=v('sf-d').trim();
+  const active=el('sf-a').checked;
+  if(!key||!name||!path){showToast('กรุณากรอกข้อมูลที่จำเป็น','error');return;}
+  const payload={form_key:key,form_name:name,form_url_path:path,description:desc||null,is_active:active};
+  showLoading(true);
+  try{
+    let error;
+    if(id)({error}=await sb.from('survey_forms').update(payload).eq('id',id));
+    else({error}=await sb.from('survey_forms').insert([payload]));
+    if(error)throw error;
+    showToast('บันทึกฟอร์มสำเร็จ ✓','success');
+    closeSFM();await loadForms();buildDynSB();renderFormsTable();popUrlFilters();
+  }catch(e){showToast('เกิดข้อผิดพลาด: '+e.message,'error');}
+  finally{showLoading(false);}
+}
+async function delSF(id,name){
+  if(!confirm(`ต้องการลบฟอร์ม "${name}"?`))return;
+  showLoading(true);
+  try{
+    const{error}=await sb.from('survey_forms').delete().eq('id',id);
+    if(error)throw error;
+    showToast('ลบฟอร์มสำเร็จ','success');
+    await loadForms();buildDynSB();renderFormsTable();
+  }catch(e){showToast('เกิดข้อผิดพลาด: '+e.message,'error');}
+  finally{showLoading(false);}
+}
+async function chgPW(){
+  const np=v('s-np'),cp=v('s-cp');
+  if(!np||!cp){showToast('กรุณากรอกรหัสผ่าน','error');return;}
+  if(np!==cp){showToast('รหัสผ่านไม่ตรงกัน','error');return;}
+  if(np.length<6){showToast('รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร','error');return;}
+  showLoading(true);
+  try{
+    const{error}=await sb.auth.updateUser({password:np});
+    if(error)throw error;
+    showToast('เปลี่ยนรหัสผ่านสำเร็จ ✓','success');
+    el('s-np').value='';el('s-cp').value='';
+  }catch(e){showToast('เกิดข้อผิดพลาด: '+e.message,'error');}
+  finally{showLoading(false);}
+}
+
+// ═══════════════════════════════════════════════
+// POPULATE FILTERS (WB & CH1)
+// ═══════════════════════════════════════════════
+function popWbFilters(){
+  const sel=el('wof');if(!sel)return;
+  const ov=sel.value;
+  const orgs=[...new Set(wbData.map(r=>r.org_code).filter(Boolean))];
+  sel.innerHTML='<option value="">ทุกองค์กร</option>'+orgs.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');
+  sel.value=ov;
+}
+function popCh1Filters(){
+  const sel=el('cof');if(!sel)return;
+  const ov=sel.value;
+  const orgs=[...new Set(ch1Data.map(r=>r.organization).filter(Boolean))];
+  sel.innerHTML='<option value="">ทุกองค์กร</option>'+orgs.map(o=>`<option value="${esc(o)}">${esc(o)}</option>`).join('');
+  sel.value=ov;
+}
+
+// ═══════════════════════════════════════════════
+// BOOT
+// ═══════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded',()=>boot());
+
+</script>
+</body>
+</html>
