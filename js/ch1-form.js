@@ -272,13 +272,6 @@ function collectAllData() {
     const pos_s1 = parseInt(document.getElementById('pos_s1')?.value) || 0;
     const pos_s2 = parseInt(document.getElementById('pos_s2')?.value) || 0;
     
-    // Staff types
-    const type_official = parseInt(document.getElementById('type_official')?.value) || 0;
-    const type_employee = parseInt(document.getElementById('type_employee')?.value) || 0;
-    const type_contract = parseInt(document.getElementById('type_contract')?.value) || 0;
-    const type_other = parseInt(document.getElementById('type_other')?.value) || 0;
-    const type_other_name = document.getElementById('type_other_name')?.value.trim() || null;
-    
     // Turnover and transfer
     const turnover_count = parseInt(document.getElementById('turnover_count')?.value) || null;
     const turnover_rate = parseFloat(document.getElementById('turnover_rate')?.value) || null;
@@ -377,7 +370,6 @@ function collectAllData() {
         pos_o1, pos_o2, pos_o3, pos_o4,
         pos_k1, pos_k2, pos_k3, pos_k4, pos_k5,
         pos_m1, pos_m2, pos_s1, pos_s2,
-        type_official, type_employee, type_contract, type_other, type_other_name,
         turnover_count, turnover_rate,
         transfer_count, transfer_rate,
         
@@ -537,32 +529,6 @@ function startAutoSave() {
 // =============================================
 // UTILITIES
 // =============================================
-function calculateTurnoverRate() {
-    const turnoverCount = parseInt(document.getElementById('turnover_count')?.value) || 0;
-    const totalStaff = parseInt(document.getElementById('total_staff')?.value) || 0;
-    const turnoverRateInput = document.getElementById('turnover_rate');
-    
-    if (totalStaff > 0 && turnoverRateInput) {
-        const rate = ((turnoverCount / totalStaff) * 100).toFixed(2);
-        turnoverRateInput.value = rate;
-    } else if (turnoverRateInput) {
-        turnoverRateInput.value = '';
-    }
-}
-
-function calculateTransferRate() {
-    const transferCount = parseInt(document.getElementById('transfer_count')?.value) || 0;
-    const totalStaff = parseInt(document.getElementById('total_staff')?.value) || 0;
-    const transferRateInput = document.getElementById('transfer_rate');
-    
-    if (totalStaff > 0 && transferRateInput) {
-        const rate = ((transferCount / totalStaff) * 100).toFixed(2);
-        transferRateInput.value = rate;
-    } else if (transferRateInput) {
-        transferRateInput.value = '';
-    }
-}
-
 function showToast(msg, type = 'info') {
     const toast = document.getElementById('toast');
     if (!toast) return;
@@ -670,13 +636,6 @@ function setupAgeWatcher() {
         if (input) {
             input.addEventListener('input', updateTotals);
             input.addEventListener('change', updateTotals);
-            // Also calculate turnover rate when total staff changes
-            if (id === 'total_staff') {
-                input.addEventListener('input', calculateTurnoverRate);
-                input.addEventListener('change', calculateTurnoverRate);
-                input.addEventListener('input', calculateTransferRate);
-                input.addEventListener('change', calculateTransferRate);
-            }
         }
     });
     
@@ -694,5 +653,3 @@ window.saveDraft = saveDraft;
 window.loadDraft = loadDraft;
 window.retrySubmit = retrySubmit;
 window.hideOverlay = hideOverlay;
-window.calculateTurnoverRate = calculateTurnoverRate;
-window.calculateTransferRate = calculateTransferRate;

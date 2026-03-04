@@ -1,13 +1,16 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>แบบสำรวจสุขภาวะบุคลากร บทที่ 1 | NIDA Well-being</title>
-    <meta name="description" content="แบบสำรวจข้อมูลสุขภาวะบุคลากรสำหรับหน่วยงานภาครัฐ - โครงสร้าง 5 ส่วน">
+    <meta name="description" content="แบบสำรวจข้อมูลสุขภาวะบุคลากรสำหรับหน่วยงานภาครัฐ">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai+Looped:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai+Looped:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
@@ -27,21 +30,70 @@
         }
     </script>
     <style>
-        body { font-family: 'IBM Plex Sans Thai Looped', sans-serif; }
-        .form-step { display: none; animation: fadeIn .3s ease; }
-        .form-step.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px) } to { opacity: 1; transform: translateY(0) } }
-        .radio-card input:checked~.radio-inner { border-color: #0F4C81; background: #E8F1FB; }
-        .cb-card input:checked~.cb-inner { border-color: #00A86B; background: #E6F7F1; }
-        input[type=number]::-webkit-inner-spin-button { opacity: .6; }
-        .priority-chip.selected { background: #0F4C81; color: white; border-color: #0F4C81; }
-        .priority-chip.selected .rank-badge { display: inline-flex; }
-        .rank-badge { display: none; }
-        #toast { transition: opacity .3s, transform .3s; }
+        body {
+            font-family: 'IBM Plex Sans Thai Looped', sans-serif;
+        }
+
+        .form-step {
+            display: none;
+            animation: fadeIn .3s ease;
+        }
+
+        .form-step.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        .radio-card input:checked~.radio-inner {
+            border-color: #0F4C81;
+            background: #E8F1FB;
+        }
+
+        .cb-card input:checked~.cb-inner {
+            border-color: #00A86B;
+            background: #E6F7F1;
+        }
+
+        input[type=number]::-webkit-inner-spin-button {
+            opacity: .6;
+        }
+
+        .priority-chip.selected {
+            background: #0F4C81;
+            color: white;
+            border-color: #0F4C81;
+        }
+
+        .priority-chip.selected .rank-badge {
+            display: inline-flex;
+        }
+
+        .rank-badge {
+            display: none;
+        }
+
+        #toast {
+            transition: opacity .3s, transform .3s;
+        }
+
         /* Disable age validation */
-        .age-field { border-color: #E2E8F0 !important; }
+        .age-field {
+            border-color: #E2E8F0 !important;
+        }
     </style>
 </head>
+
 <body class="bg-[#F8FAFC] min-h-screen">
 
     <!-- Header -->
@@ -49,11 +101,14 @@
         <div class="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
             <div class="flex items-center gap-3">
                 <div class="font-bold text-primary text-base">แบบสำรวจสุขภาวะบุคลากร บทที่ 1</div>
-                <div class="text-xs text-slate-400">v3.0 (5 ส่วน)</div>
             </div>
             <div class="flex gap-2">
-                <button onclick="saveDraft()" class="text-xs px-3 py-1.5 border border-slate-300 rounded-lg hover:bg-slate-50 text-slate-600">💾 บันทึกร่าง</button>
-                <button onclick="loadDraft()" class="text-xs px-3 py-1.5 border border-slate-300 rounded-lg hover:bg-slate-50 text-slate-600">📂 โหลดร่าง</button>
+                <button onclick="saveDraft()"
+                    class="text-xs px-3 py-1.5 border border-slate-300 rounded-lg hover:bg-slate-50 text-slate-600">💾
+                    บันทึกร่าง</button>
+                <button onclick="loadDraft()"
+                    class="text-xs px-3 py-1.5 border border-slate-300 rounded-lg hover:bg-slate-50 text-slate-600">📂
+                    โหลดร่าง</button>
             </div>
         </div>
     </header>
@@ -65,7 +120,8 @@
             <span id="step-pct" class="text-sm text-slate-400">20%</span>
         </div>
         <div class="w-full bg-slate-200 rounded-full h-2">
-            <div id="progress-bar" class="bg-primary h-2 rounded-full transition-all duration-500" style="width:20%"></div>
+            <div id="progress-bar" class="bg-primary h-2 rounded-full transition-all duration-500" style="width:20%">
+            </div>
         </div>
         <div class="flex justify-between mt-2 px-0.5" id="step-dots-row"></div>
     </div>
@@ -78,16 +134,24 @@
             <div id="step-0" class="form-step active" data-step="0">
                 <div style="max-width:680px; margin:0 auto; padding:2rem 1.5rem; text-align:center">
                     <div style="font-size:3.5rem; margin-bottom:1rem">🌿</div>
-                    <h1 style="font-size:1.75rem; font-weight:700; color:#2563EB; margin-bottom:0.75rem">แบบสำรวจสุขภาวะบุคลากร บทที่ 1</h1>
+                    <h1 style="font-size:1.75rem; font-weight:700; color:#2563EB; margin-bottom:0.75rem">
+                        แบบสำรวจสุขภาวะบุคลากร บทที่ 1</h1>
                     <p style="color:#6B7280; font-size:0.95rem; line-height:1.7; max-width:520px; margin:0 auto 2rem">
                         แบบสำรวจนี้จัดทำขึ้นเพื่อรวบรวมข้อมูลจากหน่วยงานนำร่อง<br>สำหรับใช้ประกอบการจัดทำแผนปฏิบัติการสร้างเสริมสุขภาวะองค์กรข้าราชการพลเรือน
                     </p>
-                    <div style="background:#F3F4F6; border-radius:8px; padding:0.75rem 1.5rem; display:inline-block; color:#4B5563; font-size:0.9rem; margin-bottom:2rem">⏱ ใช้เวลาประมาณ 30–45 นาที</div>
+                    <div
+                        style="background:#F3F4F6; border-radius:8px; padding:0.75rem 1.5rem; display:inline-block; color:#4B5563; font-size:0.9rem; margin-bottom:2rem">
+                        ⏱ ใช้เวลาประมาณ 30–45 นาที</div>
                     <div style="max-width:400px; margin:0 auto 1.5rem">
-                        <input type="email" id="respondent_email" placeholder="กรุณากรอกอีเมลของท่าน..." autocomplete="email"
+                        <input type="email" id="respondent_email" placeholder="กรุณากรอกอีเมลของท่าน..."
+                            autocomplete="email"
                             style="width:100%; padding:0.875rem 1rem; border:1.5px solid #D1D5DB; border-radius:10px; font-size:0.95rem; outline:none; margin-bottom:0.5rem">
-                        <div id="email-error-msg" style="color:#EF4444; font-size:0.82rem; min-height:1.2rem; text-align:left; margin-bottom:0.5rem"></div>
-                        <button onclick="confirmEmailAndStart()" style="width:100%; padding:0.875rem; background:linear-gradient(135deg,#3B82F6,#06B6D4); color:#fff; border:none; border-radius:10px; font-size:1rem; font-weight:600; cursor:pointer">ยืนยันอีเมล →</button>
+                        <div id="email-error-msg"
+                            style="color:#EF4444; font-size:0.82rem; min-height:1.2rem; text-align:left; margin-bottom:0.5rem">
+                        </div>
+                        <button onclick="confirmEmailAndStart()"
+                            style="width:100%; padding:0.875rem; background:linear-gradient(135deg,#3B82F6,#06B6D4); color:#fff; border:none; border-radius:10px; font-size:1rem; font-weight:600; cursor:pointer">ยืนยันอีเมล
+                            →</button>
                     </div>
                     <p style="color:#9CA3AF; font-size:0.78rem">แบบฟอร์มนี้จัดทำโดยสถาบันบัณฑิตพัฒนบริหารศาสตร์</p>
                 </div>
@@ -101,8 +165,10 @@
                 <div class="space-y-5">
                     <!-- 1.1 ชื่อหน่วยงาน -->
                     <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-1.5">ชื่อหน่วยงาน <span class="text-red-500">*</span></label>
-                        <select id="organization" class="w-full border-2 border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-primary focus:outline-none transition">
+                        <label class="block text-sm font-semibold text-slate-700 mb-1.5">ชื่อหน่วยงาน <span
+                                class="text-red-500">*</span></label>
+                        <select id="organization"
+                            class="w-full border-2 border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-primary focus:outline-none transition">
                             <option value="">-- เลือกหน่วยงาน --</option>
                             <option>กรมอนามัย</option>
                             <option>กรมควบคุมโรค</option>
@@ -123,21 +189,27 @@
 
                     <!-- 1.2 ภาพรวมยุทธศาสตร์ -->
                     <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-1.5">1. ภาพรวมยุทธศาสตร์และทิศทางของส่วนราชการ <span class="text-slate-400 font-normal">(โปรดแนบข้อมูลหรืออธิบายโดยสังเขป)</span></label>
-                        <textarea id="strategic_overview" rows="3" placeholder="อธิบายภาพรวมยุทธศาสตร์และทิศทางของหน่วยงาน"
+                        <label class="block text-sm font-semibold text-slate-700 mb-1.5">1.
+                            ภาพรวมยุทธศาสตร์และทิศทางของส่วนราชการ <span
+                                class="text-slate-400 font-normal">(โปรดแนบข้อมูลหรืออธิบายโดยสังเขป)</span></label>
+                        <textarea id="strategic_overview" rows="3"
+                            placeholder="อธิบายภาพรวมยุทธศาสตร์และทิศทางของหน่วยงาน"
                             class="w-full border-2 border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-primary focus:outline-none transition resize-none"></textarea>
                     </div>
 
                     <!-- 1.3 โครงสร้างองค์กร -->
                     <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-1.5">2. โครงสร้างองค์กรและบทบาทหน้าที่หลัก <span class="text-slate-400 font-normal">(โปรดแนบข้อมูล)</span></label>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1.5">2.
+                            โครงสร้างองค์กรและบทบาทหน้าที่หลัก <span
+                                class="text-slate-400 font-normal">(โปรดแนบข้อมูล)</span></label>
                         <textarea id="org_structure" rows="3" placeholder="อธิบายโครงสร้างองค์กรและบทบาทหน้าที่หลัก"
                             class="w-full border-2 border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-primary focus:outline-none transition resize-none"></textarea>
                     </div>
 
                     <!-- 1.4 ข้อมูลโครงสร้างอัตรากำลัง -->
                     <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-1.5">3. ข้อมูลโครงสร้างอัตรากำลัง <span class="text-red-500">*</span></label>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1.5">3. ข้อมูลโครงสร้างอัตรากำลัง
+                            <span class="text-red-500">*</span></label>
                         <input type="number" id="total_staff" min="1" placeholder="จำนวนบุคลากรรวม (เช่น 500)"
                             class="w-full border-2 border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-primary focus:outline-none transition mb-4" />
                         <p class="text-red-500 text-xs mt-1 hidden" id="err-staff">กรุณากรอกจำนวนบุคลากร</p>
@@ -146,119 +218,220 @@
                     <!-- จำนวนอัตรากำลังจำแนกตามประเภท -->
                     <div class="bg-slate-50 rounded-xl p-4">
                         <h3 class="text-sm font-bold text-slate-700 mb-3">จำนวนอัตรากำลังจำแนกตามประเภท</h3>
-                        <div id="type-sum-warn" class="hidden text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-3">
+                        <div id="type-sum-warn"
+                            class="hidden text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-3">
                             ⚠️ ผลรวมประเภทอัตรากำลังเกินจำนวนบุคลากรรวม
                         </div>
                         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                            <div><label class="block text-xs text-slate-500 mb-1">ข้าราชการ</label><input type="number" id="type_official" min="0" value="0" class="type-field w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center" /></div>
-                            <div><label class="block text-xs text-slate-500 mb-1">พนักงานราชการ</label><input type="number" id="type_employee" min="0" value="0" class="type-field w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center" /></div>
-                            <div><label class="block text-xs text-slate-500 mb-1">ลูกจ้าง</label><input type="number" id="type_contract" min="0" value="0" class="type-field w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center" /></div>
-                            <div><label class="block text-xs text-slate-500 mb-1">อื่น ๆ</label><input type="number" id="type_other" min="0" value="0" class="type-field w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center" /></div>
+                            <div><label class="block text-xs text-slate-500 mb-1">ข้าราชการ</label><input type="number"
+                                    id="type_official" min="0" value="0"
+                                    class="type-field w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center" />
+                            </div>
+                            <div><label class="block text-xs text-slate-500 mb-1">พนักงานราชการ</label><input
+                                    type="number" id="type_employee" min="0" value="0"
+                                    class="type-field w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center" />
+                            </div>
+                            <div><label class="block text-xs text-slate-500 mb-1">ลูกจ้าง</label><input type="number"
+                                    id="type_contract" min="0" value="0"
+                                    class="type-field w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center" />
+                            </div>
+                            <div><label class="block text-xs text-slate-500 mb-1">อื่น ๆ</label><input type="number"
+                                    id="type_other" min="0" value="0"
+                                    class="type-field w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center" />
+                            </div>
                         </div>
-                        <div class="text-right text-xs text-slate-400 mt-2">ผลรวม: <span id="type-total" class="font-semibold">0</span> คน</div>
+                        <div class="text-right text-xs text-slate-400 mt-2">ผลรวม: <span id="type-total"
+                                class="font-semibold">0</span> คน</div>
                     </div>
 
                     <!-- จำแนกตามช่วงอายุ (4 กลุ่ม) -->
                     <div class="bg-slate-50 rounded-xl p-4">
                         <h3 class="text-sm font-bold text-slate-700 mb-3">จำแนกตามช่วงอายุ</h3>
-                        <div id="age-sum-warn" class="hidden text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-3">
+                        <div id="age-sum-warn"
+                            class="hidden text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-3">
                             ⚠️ ผลรวมช่วงอายุเกินจำนวนบุคลากรรวม
                         </div>
                         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                            <div><label class="block text-xs text-slate-500 mb-1">ไม่เกิน 30 ปี</label><input type="number" id="age_u30" min="0" value="0" class="age-field w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center" /></div>
-                            <div><label class="block text-xs text-slate-500 mb-1">31–40 ปี</label><input type="number" id="age_31_40" min="0" value="0" class="age-field w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center" /></div>
-                            <div><label class="block text-xs text-slate-500 mb-1">41–50 ปี</label><input type="number" id="age_41_50" min="0" value="0" class="age-field w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center" /></div>
-                            <div><label class="block text-xs text-slate-500 mb-1">51–60 ปี</label><input type="number" id="age_51_60" min="0" value="0" class="age-field w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center" /></div>
+                            <div><label class="block text-xs text-slate-500 mb-1">ไม่เกิน 30 ปี</label><input
+                                    type="number" id="age_u30" min="0" value="0"
+                                    class="age-field w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center" />
+                            </div>
+                            <div><label class="block text-xs text-slate-500 mb-1">31–40 ปี</label><input type="number"
+                                    id="age_31_40" min="0" value="0"
+                                    class="age-field w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center" />
+                            </div>
+                            <div><label class="block text-xs text-slate-500 mb-1">41–50 ปี</label><input type="number"
+                                    id="age_41_50" min="0" value="0"
+                                    class="age-field w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center" />
+                            </div>
+                            <div><label class="block text-xs text-slate-500 mb-1">51–60 ปี</label><input type="number"
+                                    id="age_51_60" min="0" value="0"
+                                    class="age-field w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center" />
+                            </div>
                         </div>
-                        <div class="text-right text-xs text-slate-400 mt-2">ผลรวม: <span id="age-total" class="font-semibold">0</span> คน</div>
+                        <div class="text-right text-xs text-slate-400 mt-2">ผลรวม: <span id="age-total"
+                                class="font-semibold">0</span> คน</div>
                     </div>
 
                     <!-- จำแนกตามอายุราชการ (8 ช่วง) -->
                     <div class="bg-slate-50 rounded-xl p-4">
                         <h3 class="text-sm font-bold text-slate-700 mb-3">จำแนกตามอายุราชการ</h3>
-                        <div id="service-sum-warn" class="hidden text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-3">
+                        <div id="service-sum-warn"
+                            class="hidden text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-3">
                             ⚠️ ผลรวมอายุราชการเกินจำนวนบุคลากรรวม
                         </div>
                         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                            <div><label class="block text-xs text-slate-500 mb-1">ไม่เกิน 1 ปี</label><input type="number" id="service_u1" min="0" value="0" class="service-field w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center" /></div>
-                            <div><label class="block text-xs text-slate-500 mb-1">1-5 ปี</label><input type="number" id="service_1_5" min="0" value="0" class="service-field w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center" /></div>
-                            <div><label class="block text-xs text-slate-500 mb-1">6-10 ปี</label><input type="number" id="service_6_10" min="0" value="0" class="service-field w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center" /></div>
-                            <div><label class="block text-xs text-slate-500 mb-1">11-15 ปี</label><input type="number" id="service_11_15" min="0" value="0" class="service-field w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center" /></div>
-                            <div><label class="block text-xs text-slate-500 mb-1">16-20 ปี</label><input type="number" id="service_16_20" min="0" value="0" class="service-field w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center" /></div>
-                            <div><label class="block text-xs text-slate-500 mb-1">21-25 ปี</label><input type="number" id="service_21_25" min="0" value="0" class="service-field w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center" /></div>
-                            <div><label class="block text-xs text-slate-500 mb-1">26-30 ปี</label><input type="number" id="service_26_30" min="0" value="0" class="service-field w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center" /></div>
-                            <div><label class="block text-xs text-slate-500 mb-1">31 ปีขึ้นไป</label><input type="number" id="service_over30" min="0" value="0" class="service-field w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center" /></div>
+                            <div><label class="block text-xs text-slate-500 mb-1">ไม่เกิน 1 ปี</label><input
+                                    type="number" id="service_u1" min="0" value="0"
+                                    class="service-field w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center" />
+                            </div>
+                            <div><label class="block text-xs text-slate-500 mb-1">1-5 ปี</label><input type="number"
+                                    id="service_1_5" min="0" value="0"
+                                    class="service-field w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center" />
+                            </div>
+                            <div><label class="block text-xs text-slate-500 mb-1">6-10 ปี</label><input type="number"
+                                    id="service_6_10" min="0" value="0"
+                                    class="service-field w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center" />
+                            </div>
+                            <div><label class="block text-xs text-slate-500 mb-1">11-15 ปี</label><input type="number"
+                                    id="service_11_15" min="0" value="0"
+                                    class="service-field w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center" />
+                            </div>
+                            <div><label class="block text-xs text-slate-500 mb-1">16-20 ปี</label><input type="number"
+                                    id="service_16_20" min="0" value="0"
+                                    class="service-field w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center" />
+                            </div>
+                            <div><label class="block text-xs text-slate-500 mb-1">21-25 ปี</label><input type="number"
+                                    id="service_21_25" min="0" value="0"
+                                    class="service-field w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center" />
+                            </div>
+                            <div><label class="block text-xs text-slate-500 mb-1">26-30 ปี</label><input type="number"
+                                    id="service_26_30" min="0" value="0"
+                                    class="service-field w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center" />
+                            </div>
+                            <div><label class="block text-xs text-slate-500 mb-1">31 ปีขึ้นไป</label><input
+                                    type="number" id="service_over30" min="0" value="0"
+                                    class="service-field w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center" />
+                            </div>
                         </div>
-                        <div class="text-right text-xs text-slate-400 mt-2">ผลรวม: <span id="service-total" class="font-semibold">0</span> คน</div>
+                        <div class="text-right text-xs text-slate-400 mt-2">ผลรวม: <span id="service-total"
+                                class="font-semibold">0</span> คน</div>
                     </div>
 
                     <!-- จำแนกตามประเภทและระดับตำแหน่ง (13 ระดับ) -->
                     <div class="bg-slate-50 rounded-xl p-4">
                         <h3 class="text-sm font-bold text-slate-700 mb-3">จำแนกตามประเภทและระดับตำแหน่ง</h3>
-                        <div id="position-sum-warn" class="hidden text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-3">
+                        <div id="position-sum-warn"
+                            class="hidden text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-3">
                             ⚠️ ผลรวมประเภทและระดับตำแหน่งเกินจำนวนบุคลากรรวม
                         </div>
-                        
+
                         <div class="mb-4">
                             <h4 class="text-xs font-semibold text-slate-600 mb-2">ประเภททั่วไป</h4>
                             <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                                <div><label class="block text-xs text-slate-500 mb-1">ปฏิบัติงาน (O1)</label><input type="number" id="pos_o1" min="0" value="0" class="position-field w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center" /></div>
-                                <div><label class="block text-xs text-slate-500 mb-1">ชำนาญงาน (O2)</label><input type="number" id="pos_o2" min="0" value="0" class="position-field w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center" /></div>
-                                <div><label class="block text-xs text-slate-500 mb-1">อาวุโส (O3)</label><input type="number" id="pos_o3" min="0" value="0" class="position-field w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center" /></div>
-                                <div><label class="block text-xs text-slate-500 mb-1">ทักษะพิเศษ (O4)</label><input type="number" id="pos_o4" min="0" value="0" class="position-field w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center" /></div>
+                                <div><label class="block text-xs text-slate-500 mb-1">ปฏิบัติงาน (O1)</label><input
+                                        type="number" id="pos_o1" min="0" value="0"
+                                        class="position-field w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center" />
+                                </div>
+                                <div><label class="block text-xs text-slate-500 mb-1">ชำนาญงาน (O2)</label><input
+                                        type="number" id="pos_o2" min="0" value="0"
+                                        class="position-field w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center" />
+                                </div>
+                                <div><label class="block text-xs text-slate-500 mb-1">อาวุโส (O3)</label><input
+                                        type="number" id="pos_o3" min="0" value="0"
+                                        class="position-field w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center" />
+                                </div>
+                                <div><label class="block text-xs text-slate-500 mb-1">ทักษะพิเศษ (O4)</label><input
+                                        type="number" id="pos_o4" min="0" value="0"
+                                        class="position-field w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center" />
+                                </div>
                             </div>
                         </div>
 
                         <div class="mb-4">
                             <h4 class="text-xs font-semibold text-slate-600 mb-2">ประเภทวิชาการ</h4>
                             <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
-                                <div><label class="block text-xs text-slate-500 mb-1">ปฏิบัติการ (K1)</label><input type="number" id="pos_k1" min="0" value="0" class="w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center" /></div>
-                                <div><label class="block text-xs text-slate-500 mb-1">ชำนาญการ (K2)</label><input type="number" id="pos_k2" min="0" value="0" class="w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center" /></div>
-                                <div><label class="block text-xs text-slate-500 mb-1">ชำนาญการพิเศษ (K3)</label><input type="number" id="pos_k3" min="0" value="0" class="w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center" /></div>
-                                <div><label class="block text-xs text-slate-500 mb-1">เชี่ยวชาญ (K4)</label><input type="number" id="pos_k4" min="0" value="0" class="w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center" /></div>
-                                <div><label class="block text-xs text-slate-500 mb-1">ทรงคุณวุฒิ (K5)</label><input type="number" id="pos_k5" min="0" value="0" class="w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center" /></div>
+                                <div><label class="block text-xs text-slate-500 mb-1">ปฏิบัติการ (K1)</label><input
+                                        type="number" id="pos_k1" min="0" value="0"
+                                        class="w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center" />
+                                </div>
+                                <div><label class="block text-xs text-slate-500 mb-1">ชำนาญการ (K2)</label><input
+                                        type="number" id="pos_k2" min="0" value="0"
+                                        class="w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center" />
+                                </div>
+                                <div><label class="block text-xs text-slate-500 mb-1">ชำนาญการพิเศษ (K3)</label><input
+                                        type="number" id="pos_k3" min="0" value="0"
+                                        class="w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center" />
+                                </div>
+                                <div><label class="block text-xs text-slate-500 mb-1">เชี่ยวชาญ (K4)</label><input
+                                        type="number" id="pos_k4" min="0" value="0"
+                                        class="w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center" />
+                                </div>
+                                <div><label class="block text-xs text-slate-500 mb-1">ทรงคุณวุฒิ (K5)</label><input
+                                        type="number" id="pos_k5" min="0" value="0"
+                                        class="w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center" />
+                                </div>
                             </div>
                         </div>
 
                         <div class="mb-4">
                             <h4 class="text-xs font-semibold text-slate-600 mb-2">ประเภทอำนวยการ</h4>
                             <div class="grid grid-cols-2 gap-3">
-                                <div><label class="block text-xs text-slate-500 mb-1">ระดับต้น (M1)</label><input type="number" id="pos_m1" min="0" value="0" class="w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center" /></div>
-                                <div><label class="block text-xs text-slate-500 mb-1">ระดับสูง (M2)</label><input type="number" id="pos_m2" min="0" value="0" class="w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center" /></div>
+                                <div><label class="block text-xs text-slate-500 mb-1">ระดับต้น (M1)</label><input
+                                        type="number" id="pos_m1" min="0" value="0"
+                                        class="w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center" />
+                                </div>
+                                <div><label class="block text-xs text-slate-500 mb-1">ระดับสูง (M2)</label><input
+                                        type="number" id="pos_m2" min="0" value="0"
+                                        class="w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center" />
+                                </div>
                             </div>
                         </div>
 
                         <div>
                             <h4 class="text-xs font-semibold text-slate-600 mb-2">ประเภทบริหาร</h4>
                             <div class="grid grid-cols-2 gap-3">
-                                <div><label class="block text-xs text-slate-500 mb-1">ระดับต้น (S1)</label><input type="number" id="pos_s1" min="0" value="0" class="position-field w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center" /></div>
-                                <div><label class="block text-xs text-slate-500 mb-1">ระดับสูง (S2)</label><input type="number" id="pos_s2" min="0" value="0" class="position-field w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center" /></div>
+                                <div><label class="block text-xs text-slate-500 mb-1">ระดับต้น (S1)</label><input
+                                        type="number" id="pos_s1" min="0" value="0"
+                                        class="position-field w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center" />
+                                </div>
+                                <div><label class="block text-xs text-slate-500 mb-1">ระดับสูง (S2)</label><input
+                                        type="number" id="pos_s2" min="0" value="0"
+                                        class="position-field w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center" />
+                                </div>
                             </div>
                         </div>
-                        <div class="text-right text-xs text-slate-400 mt-2">ผลรวม: <span id="position-total" class="font-semibold">0</span> คน</div>
+                        <div class="text-right text-xs text-slate-400 mt-2">ผลรวม: <span id="position-total"
+                                class="font-semibold">0</span> คน</div>
                     </div>
 
                     <!-- 4. อัตราการลาออกและโอนย้าย -->
                     <div class="bg-slate-50 rounded-xl p-4">
-                        <h3 class="text-sm font-bold text-slate-700 mb-3">4. อัตราการลาออกและอัตราการโอนย้าย <span class="text-slate-400 font-normal">(ย้อนหลัง 5 ปี ถ้ามี)</span></h3>
+                        <h3 class="text-sm font-bold text-slate-700 mb-3">4. อัตราการลาออกและอัตราการโอนย้าย <span
+                                class="text-slate-400 font-normal">(ย้อนหลัง 5 ปี ถ้ามี)</span></h3>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-1">การลาออก (จำนวนคน)</label>
-                                <input type="number" id="turnover_count" min="0" placeholder="0" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm" />
+                                <input type="number" id="turnover_count" min="0" placeholder="0"
+                                    class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm" />
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-1">คิดเป็นร้อยละ (%)</label>
-                                <input type="number" id="turnover_rate" min="0" max="100" step="0.01" placeholder="0.00" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm" />
+                                <input type="number" id="turnover_rate" min="0" max="100" step="0.01" placeholder="0.00"
+                                    class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm" />
                             </div>
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">การโอนย้ายไปส่วนราชการอื่น (จำนวนคน)</label>
-                                <input type="number" id="transfer_count" min="0" placeholder="0" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm" />
+                                <label class="block text-sm font-medium text-slate-700 mb-1">การโอนย้ายไปส่วนราชการอื่น
+                                    (จำนวนคน)</label>
+                                <input type="number" id="transfer_count" min="0" placeholder="0"
+                                    class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm" />
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-1">คิดเป็นร้อยละ (%)</label>
-                                <input type="number" id="transfer_rate" min="0" max="100" step="0.01" placeholder="0.00" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm" />
+                                <input type="number" id="transfer_rate" min="0" max="100" step="0.01" placeholder="0.00"
+                                    class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm" />
                             </div>
                         </div>
                     </div>
@@ -272,15 +445,19 @@
 
                 <div class="space-y-5">
                     <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-1.5">5. นโยบายและยุทธศาสตร์ที่เกี่ยวข้อง</label>
-                        <p class="text-xs text-slate-500 mb-2">โปรดระบุนโยบายที่หน่วยงานเลือกใช้ในการพัฒนาสุขภาวะบุคลากร</p>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1.5">5.
+                            นโยบายและยุทธศาสตร์ที่เกี่ยวข้อง</label>
+                        <p class="text-xs text-slate-500 mb-2">โปรดระบุนโยบายที่หน่วยงานเลือกใช้ในการพัฒนาสุขภาวะบุคลากร
+                        </p>
                         <textarea id="related_policies" rows="4" placeholder="ระบุนโยบายที่เกี่ยวข้อง..."
                             class="w-full border-2 border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-primary focus:outline-none transition resize-none"></textarea>
                     </div>
 
                     <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-1.5">6. ข้อมูลบริบทและความท้าทาย (Context & Challenges)</label>
-                        <p class="text-xs text-slate-500 mb-2">โปรดระบุบริบทที่ส่วนราชการต้องเผชิญ เช่น นโยบายระดับชาติ, การเปลี่ยนแปลงด้านกฎหมาย/เทคโนโลยี, หรือความเสี่ยงสำคัญ</p>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1.5">6. ข้อมูลบริบทและความท้าทาย
+                            (Context & Challenges)</label>
+                        <p class="text-xs text-slate-500 mb-2">โปรดระบุบริบทที่ส่วนราชการต้องเผชิญ เช่น นโยบายระดับชาติ,
+                            การเปลี่ยนแปลงด้านกฎหมาย/เทคโนโลยี, หรือความเสี่ยงสำคัญ</p>
                         <textarea id="context_challenges" rows="4" placeholder="ระบุบริบทและความท้าทาย..."
                             class="w-full border-2 border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-primary focus:outline-none transition resize-none"></textarea>
                     </div>
@@ -295,112 +472,158 @@
                 <div class="space-y-5">
                     <!-- 7. สุขภาวะทางกาย -->
                     <div class="bg-slate-50 rounded-xl p-4">
-                        <h3 class="text-sm font-bold text-slate-700 mb-3">7. สุขภาวะทางกาย <span class="text-slate-400 font-normal">(ข้อมูลปีล่าสุด หรือย้อนหลังไม่เกิน 5 ปี)</span></h3>
+                        <h3 class="text-sm font-bold text-slate-700 mb-3">7. สุขภาวะทางกาย <span
+                                class="text-slate-400 font-normal">(ข้อมูลปีล่าสุด หรือย้อนหลังไม่เกิน 5 ปี)</span></h3>
                         <p class="text-xs text-slate-500 mb-3">โปรดระบุจำนวนบุคลากรที่มีภาวะดังต่อไปนี้:</p>
                         <div class="grid grid-cols-2 gap-4">
-                            <div><label class="block text-xs text-slate-500 mb-1">เบาหวาน</label><input type="number" id="disease_diabetes" min="0" value="0" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm" /></div>
-                            <div><label class="block text-xs text-slate-500 mb-1">ความดันโลหิตสูง</label><input type="number" id="disease_hypertension" min="0" value="0" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm" /></div>
-                            <div><label class="block text-xs text-slate-500 mb-1">โรคหัวใจและหลอดเลือด</label><input type="number" id="disease_cardiovascular" min="0" value="0" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm" /></div>
-                            <div><label class="block text-xs text-slate-500 mb-1">โรคไต</label><input type="number" id="disease_kidney" min="0" value="0" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm" /></div>
-                            <div><label class="block text-xs text-slate-500 mb-1">โรคตับ</label><input type="number" id="disease_liver" min="0" value="0" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm" /></div>
-                            <div><label class="block text-xs text-slate-500 mb-1">โรคมะเร็ง</label><input type="number" id="disease_cancer" min="0" value="0" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm" /></div>
-                            <div><label class="block text-xs text-slate-500 mb-1">ภาวะอ้วน/น้ำหนักเกิน</label><input type="number" id="disease_obesity" min="0" value="0" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm" /></div>
-                            <div><label class="block text-xs text-slate-500 mb-1">อื่น ๆ (จำนวน)</label><input type="number" id="disease_other_count" min="0" value="0" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm" /></div>
+                            <div><label class="block text-xs text-slate-500 mb-1">เบาหวาน</label><input type="number"
+                                    id="disease_diabetes" min="0" value="0"
+                                    class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm" /></div>
+                            <div><label class="block text-xs text-slate-500 mb-1">ความดันโลหิตสูง</label><input
+                                    type="number" id="disease_hypertension" min="0" value="0"
+                                    class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm" /></div>
+                            <div><label class="block text-xs text-slate-500 mb-1">โรคหัวใจและหลอดเลือด</label><input
+                                    type="number" id="disease_cardiovascular" min="0" value="0"
+                                    class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm" /></div>
+                            <div><label class="block text-xs text-slate-500 mb-1">โรคไต</label><input type="number"
+                                    id="disease_kidney" min="0" value="0"
+                                    class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm" /></div>
+                            <div><label class="block text-xs text-slate-500 mb-1">โรคตับ</label><input type="number"
+                                    id="disease_liver" min="0" value="0"
+                                    class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm" /></div>
+                            <div><label class="block text-xs text-slate-500 mb-1">โรคมะเร็ง</label><input type="number"
+                                    id="disease_cancer" min="0" value="0"
+                                    class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm" /></div>
+                            <div><label class="block text-xs text-slate-500 mb-1">ภาวะอ้วน/น้ำหนักเกิน</label><input
+                                    type="number" id="disease_obesity" min="0" value="0"
+                                    class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm" /></div>
+                            <div><label class="block text-xs text-slate-500 mb-1">อื่น ๆ (จำนวน)</label><input
+                                    type="number" id="disease_other_count" min="0" value="0"
+                                    class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm" /></div>
                         </div>
                         <div class="mt-3">
                             <label class="block text-xs text-slate-500 mb-1">อื่น ๆ (ระบุ)</label>
-                            <input type="text" id="disease_other_detail" placeholder="ระบุโรคอื่นๆ" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm" />
+                            <input type="text" id="disease_other_detail" placeholder="ระบุโรคอื่นๆ"
+                                class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm" />
                         </div>
                     </div>
 
                     <!-- 8. ข้อมูลการลาป่วย -->
                     <div class="bg-slate-50 rounded-xl p-4">
-                        <h3 class="text-sm font-bold text-slate-700 mb-3">8. ข้อมูลการลาป่วย <span class="text-slate-400 font-normal">(ข้อมูลปีล่าสุด หรือย้อนหลังไม่เกิน 5 ปี)</span></h3>
+                        <h3 class="text-sm font-bold text-slate-700 mb-3">8. ข้อมูลการลาป่วย <span
+                                class="text-slate-400 font-normal">(ข้อมูลปีล่าสุด หรือย้อนหลังไม่เกิน 5 ปี)</span></h3>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">จำนวนวันลาป่วยรวมต่อปี</label>
-                                <input type="number" id="sick_leave_days" min="0" placeholder="0" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm" />
+                                <label
+                                    class="block text-sm font-medium text-slate-700 mb-1">จำนวนวันลาป่วยรวมต่อปี</label>
+                                <input type="number" id="sick_leave_days" min="0" placeholder="0"
+                                    class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm" />
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">จำนวนวันลาป่วยเฉลี่ยต่อคนต่อปี</label>
-                                <input type="number" id="sick_leave_avg" min="0" step="0.01" placeholder="0.00" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm" />
+                                <label
+                                    class="block text-sm font-medium text-slate-700 mb-1">จำนวนวันลาป่วยเฉลี่ยต่อคนต่อปี</label>
+                                <input type="number" id="sick_leave_avg" min="0" step="0.01" placeholder="0.00"
+                                    class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm" />
                             </div>
                         </div>
                     </div>
 
                     <!-- 9. ข้อมูลการใช้บริการห้องพยาบาล -->
                     <div class="bg-slate-50 rounded-xl p-4">
-                        <h3 class="text-sm font-bold text-slate-700 mb-3">9. ข้อมูลการใช้บริการห้องพยาบาล <span class="text-slate-400 font-normal">(ถ้ามี)</span></h3>
+                        <h3 class="text-sm font-bold text-slate-700 mb-3">9. ข้อมูลการใช้บริการห้องพยาบาล <span
+                                class="text-slate-400 font-normal">(ถ้ามี)</span></h3>
                         <div class="space-y-3">
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">จำนวนผู้ใช้บริการต่อปี</label>
-                                <input type="number" id="clinic_users_per_year" min="0" placeholder="0" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm" />
+                                <label
+                                    class="block text-sm font-medium text-slate-700 mb-1">จำนวนผู้ใช้บริการต่อปี</label>
+                                <input type="number" id="clinic_users_per_year" min="0" placeholder="0"
+                                    class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm" />
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">กลุ่มอาการที่พบหลัก ๆ</label>
-                                <textarea id="clinic_top_symptoms" rows="2" placeholder="เช่น ปวดหัว ปวดกล้ามเนื้อ ความดันสูง" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm resize-none"></textarea>
+                                <label class="block text-sm font-medium text-slate-700 mb-1">กลุ่มอาการที่พบหลัก
+                                    ๆ</label>
+                                <textarea id="clinic_top_symptoms" rows="2"
+                                    placeholder="เช่น ปวดหัว ปวดกล้ามเนื้อ ความดันสูง"
+                                    class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm resize-none"></textarea>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-1">ประเภทยาที่จ่ายบ่อย</label>
-                                <textarea id="clinic_top_medications" rows="2" placeholder="เช่น พาราเซตามอล ยาลดความดัน" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm resize-none"></textarea>
+                                <textarea id="clinic_top_medications" rows="2"
+                                    placeholder="เช่น พาราเซตามอล ยาลดความดัน"
+                                    class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm resize-none"></textarea>
                             </div>
                         </div>
                     </div>
 
                     <!-- 10. ผลสำรวจสุขภาพจิต -->
                     <div class="bg-slate-50 rounded-xl p-4">
-                        <h3 class="text-sm font-bold text-slate-700 mb-3">10. ผลสำรวจสุขภาพจิต <span class="text-slate-400 font-normal">(ถ้ามี)</span></h3>
+                        <h3 class="text-sm font-bold text-slate-700 mb-3">10. ผลสำรวจสุขภาพจิต <span
+                                class="text-slate-400 font-normal">(ถ้ามี)</span></h3>
                         <p class="text-xs text-slate-500 mb-3">โปรดระบุข้อมูลเกี่ยวกับ:</p>
                         <div class="space-y-3">
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-1">ภาวะเครียดเรื้อรัง</label>
-                                <textarea id="mental_stress" rows="2" placeholder="ระบุจำนวนหรือรายละเอียด" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm resize-none"></textarea>
+                                <textarea id="mental_stress" rows="2" placeholder="ระบุจำนวนหรือรายละเอียด"
+                                    class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm resize-none"></textarea>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-1">ภาวะวิตกกังวล</label>
-                                <textarea id="mental_anxiety" rows="2" placeholder="ระบุจำนวนหรือรายละเอียด" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm resize-none"></textarea>
+                                <textarea id="mental_anxiety" rows="2" placeholder="ระบุจำนวนหรือรายละเอียด"
+                                    class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm resize-none"></textarea>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-1">ปัญหาการนอนหลับ</label>
-                                <textarea id="mental_sleep" rows="2" placeholder="ระบุจำนวนหรือรายละเอียด" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm resize-none"></textarea>
+                                <textarea id="mental_sleep" rows="2" placeholder="ระบุจำนวนหรือรายละเอียด"
+                                    class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm resize-none"></textarea>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-1">ภาวะหมดไฟ (Burnout)</label>
-                                <textarea id="mental_burnout" rows="2" placeholder="ระบุจำนวนหรือรายละเอียด" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm resize-none"></textarea>
+                                <textarea id="mental_burnout" rows="2" placeholder="ระบุจำนวนหรือรายละเอียด"
+                                    class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm resize-none"></textarea>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-1">ภาวะซึมเศร้า</label>
-                                <textarea id="mental_depression" rows="2" placeholder="ระบุจำนวนหรือรายละเอียด" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm resize-none"></textarea>
+                                <textarea id="mental_depression" rows="2" placeholder="ระบุจำนวนหรือรายละเอียด"
+                                    class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm resize-none"></textarea>
                             </div>
                         </div>
                     </div>
 
                     <!-- 11. ผลสำรวจความผูกพันองค์กร -->
                     <div class="bg-slate-50 rounded-xl p-4">
-                        <h3 class="text-sm font-bold text-slate-700 mb-3">11. ผลสำรวจความผูกพันองค์กร (Employee Engagement) <span class="text-slate-400 font-normal">(ย้อนหลังไม่เกิน 5 ปี ถ้ามี)</span></h3>
+                        <h3 class="text-sm font-bold text-slate-700 mb-3">11. ผลสำรวจความผูกพันองค์กร (Employee
+                            Engagement) <span class="text-slate-400 font-normal">(ย้อนหลังไม่เกิน 5 ปี ถ้ามี)</span>
+                        </h3>
                         <div class="space-y-3">
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-1">คะแนนภาพรวมรายปี</label>
-                                <textarea id="engagement_score" rows="2" placeholder="เช่น 2567: 75/100, 2566: 72/100" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm resize-none"></textarea>
+                                <textarea id="engagement_score" rows="2" placeholder="เช่น 2567: 75/100, 2566: 72/100"
+                                    class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm resize-none"></textarea>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">ประเด็นที่ได้คะแนนต่ำ</label>
-                                <textarea id="engagement_low_areas" rows="2" placeholder="ระบุประเด็นที่ได้คะแนนต่ำ" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm resize-none"></textarea>
+                                <label
+                                    class="block text-sm font-medium text-slate-700 mb-1">ประเด็นที่ได้คะแนนต่ำ</label>
+                                <textarea id="engagement_low_areas" rows="2" placeholder="ระบุประเด็นที่ได้คะแนนต่ำ"
+                                    class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm resize-none"></textarea>
                             </div>
                         </div>
                     </div>
 
                     <!-- 12. ผลการสำรวจสุขภาวะด้วยเครื่องมืออื่น ๆ -->
                     <div class="bg-slate-50 rounded-xl p-4">
-                        <h3 class="text-sm font-bold text-slate-700 mb-3">12. ผลการสำรวจสุขภาวะด้วยเครื่องมืออื่น ๆ <span class="text-slate-400 font-normal">(ถ้ามี)</span></h3>
-                        <textarea id="other_wellbeing_surveys" rows="3" placeholder="ระบุเครื่องมือและผลสำรวจอื่นๆ..." class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm resize-none"></textarea>
+                        <h3 class="text-sm font-bold text-slate-700 mb-3">12. ผลการสำรวจสุขภาวะด้วยเครื่องมืออื่น ๆ
+                            <span class="text-slate-400 font-normal">(ถ้ามี)</span>
+                        </h3>
+                        <textarea id="other_wellbeing_surveys" rows="3" placeholder="ระบุเครื่องมือและผลสำรวจอื่นๆ..."
+                            class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm resize-none"></textarea>
                     </div>
                 </div>
             </div>
 
             <!-- STEP 4: ระบบการบริหารและสภาพแวดล้อม -->
             <div class="form-step" data-step="4">
-                <h2 class="text-xl font-bold text-primary mb-1">⚙️ ส่วนที่ 4: ระบบการบริหารและสภาพแวดล้อมที่เอื้อต่อสุขภาวะ</h2>
+                <h2 class="text-xl font-bold text-primary mb-1">⚙️ ส่วนที่ 4:
+                    ระบบการบริหารและสภาพแวดล้อมที่เอื้อต่อสุขภาวะ</h2>
                 <p class="text-slate-500 text-sm mb-6">สถานะระบบสนับสนุน การอบรม และสภาพแวดล้อม</p>
 
                 <div class="space-y-5">
@@ -417,35 +640,43 @@
                     <div class="bg-slate-50 rounded-xl p-4">
                         <h3 class="text-sm font-bold text-slate-700 mb-3">14. ชั่วโมงการอบรมเฉลี่ยต่อคนต่อปี</h3>
                         <p class="text-xs text-slate-500 mb-2">ปีล่าสุดและ 5 ปีย้อนหลัง (ถ้ามี)</p>
-                        <input type="text" id="training_hours" placeholder="เช่น 2568: 40 ชม., 2567: 35 ชม." class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm" />
+                        <input type="text" id="training_hours" placeholder="เช่น 2568: 40 ชม., 2567: 35 ชม."
+                            class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm" />
                     </div>
 
                     <!-- 15. ระบบสนับสนุนดิจิทัล -->
                     <div class="bg-slate-50 rounded-xl p-4">
-                        <h3 class="text-sm font-bold text-slate-700 mb-3">15. ระบบสนับสนุนดิจิทัล <span class="text-slate-400 font-normal">(เลือกได้มากกว่า 1 ข้อ)</span></h3>
+                        <h3 class="text-sm font-bold text-slate-700 mb-3">15. ระบบสนับสนุนดิจิทัล <span
+                                class="text-slate-400 font-normal">(เลือกได้มากกว่า 1 ข้อ)</span></h3>
                         <div class="space-y-2" id="digital-systems">
                             <label class="flex items-center gap-2 cursor-pointer">
-                                <input type="checkbox" name="digital_systems" value="e_doc" class="w-4 h-4 text-primary rounded border-slate-300 focus:ring-primary">
+                                <input type="checkbox" name="digital_systems" value="e_doc"
+                                    class="w-4 h-4 text-primary rounded border-slate-300 focus:ring-primary">
                                 <span class="text-sm text-slate-700">ระบบเอกสารอิเล็กทรอนิกส์</span>
                             </label>
                             <label class="flex items-center gap-2 cursor-pointer">
-                                <input type="checkbox" name="digital_systems" value="e_sign" class="w-4 h-4 text-primary rounded border-slate-300 focus:ring-primary">
+                                <input type="checkbox" name="digital_systems" value="e_sign"
+                                    class="w-4 h-4 text-primary rounded border-slate-300 focus:ring-primary">
                                 <span class="text-sm text-slate-700">ระบบลงนามอิเล็กทรอนิกส์ (E-signature)</span>
                             </label>
                             <label class="flex items-center gap-2 cursor-pointer">
-                                <input type="checkbox" name="digital_systems" value="cloud" class="w-4 h-4 text-primary rounded border-slate-300 focus:ring-primary">
+                                <input type="checkbox" name="digital_systems" value="cloud"
+                                    class="w-4 h-4 text-primary rounded border-slate-300 focus:ring-primary">
                                 <span class="text-sm text-slate-700">ระบบ Cloud</span>
                             </label>
                             <label class="flex items-center gap-2 cursor-pointer">
-                                <input type="checkbox" name="digital_systems" value="hr_digital" class="w-4 h-4 text-primary rounded border-slate-300 focus:ring-primary">
+                                <input type="checkbox" name="digital_systems" value="hr_digital"
+                                    class="w-4 h-4 text-primary rounded border-slate-300 focus:ring-primary">
                                 <span class="text-sm text-slate-700">ระบบ HR Digital</span>
                             </label>
                             <label class="flex items-center gap-2 cursor-pointer">
-                                <input type="checkbox" name="digital_systems" value="health_db" class="w-4 h-4 text-primary rounded border-slate-300 focus:ring-primary">
+                                <input type="checkbox" name="digital_systems" value="health_db"
+                                    class="w-4 h-4 text-primary rounded border-slate-300 focus:ring-primary">
                                 <span class="text-sm text-slate-700">ระบบฐานข้อมูลสุขภาพ</span>
                             </label>
                             <label class="flex items-center gap-2 cursor-pointer">
-                                <input type="checkbox" name="digital_systems" value="none" class="w-4 h-4 text-primary rounded border-slate-300 focus:ring-primary">
+                                <input type="checkbox" name="digital_systems" value="none"
+                                    class="w-4 h-4 text-primary rounded border-slate-300 focus:ring-primary">
                                 <span class="text-sm text-slate-700">ไม่มีระบบดังกล่าว</span>
                             </label>
                         </div>
@@ -453,31 +684,39 @@
 
                     <!-- 16. การจัดสภาพแวดล้อมตามหลักการยศาสตร์ -->
                     <div class="bg-slate-50 rounded-xl p-4">
-                        <h3 class="text-sm font-bold text-slate-700 mb-3">16. การจัดสภาพแวดล้อมตามหลักการยศาสตร์ (Ergonomics)</h3>
+                        <h3 class="text-sm font-bold text-slate-700 mb-3">16. การจัดสภาพแวดล้อมตามหลักการยศาสตร์
+                            (Ergonomics)</h3>
                         <div class="space-y-2" id="ergonomics-group">
                             <label class="flex items-start gap-2 cursor-pointer">
-                                <input type="radio" name="ergonomics_status" value="none" class="w-4 h-4 text-primary border-slate-300 focus:ring-primary mt-0.5">
+                                <input type="radio" name="ergonomics_status" value="none"
+                                    class="w-4 h-4 text-primary border-slate-300 focus:ring-primary mt-0.5">
                                 <span class="text-sm text-slate-700">ยังไม่มี</span>
                             </label>
                             <label class="flex items-start gap-2 cursor-pointer">
-                                <input type="radio" name="ergonomics_status" value="planned" class="w-4 h-4 text-primary border-slate-300 focus:ring-primary mt-0.5">
+                                <input type="radio" name="ergonomics_status" value="planned"
+                                    class="w-4 h-4 text-primary border-slate-300 focus:ring-primary mt-0.5">
                                 <div>
                                     <span class="text-sm text-slate-700">มีแผนแต่ยังไม่ดำเนินการ</span>
-                                    <input type="text" id="ergonomics_planned_detail" placeholder="โปรดระบุ" class="w-full mt-1 border border-slate-200 rounded-lg px-3 py-1.5 text-sm" />
+                                    <input type="text" id="ergonomics_planned_detail" placeholder="โปรดระบุ"
+                                        class="w-full mt-1 border border-slate-200 rounded-lg px-3 py-1.5 text-sm" />
                                 </div>
                             </label>
                             <label class="flex items-start gap-2 cursor-pointer">
-                                <input type="radio" name="ergonomics_status" value="in_progress" class="w-4 h-4 text-primary border-slate-300 focus:ring-primary mt-0.5">
+                                <input type="radio" name="ergonomics_status" value="in_progress"
+                                    class="w-4 h-4 text-primary border-slate-300 focus:ring-primary mt-0.5">
                                 <div>
                                     <span class="text-sm text-slate-700">อยู่ระหว่างดำเนินการ</span>
-                                    <input type="text" id="ergonomics_in_progress_detail" placeholder="โปรดระบุ" class="w-full mt-1 border border-slate-200 rounded-lg px-3 py-1.5 text-sm" />
+                                    <input type="text" id="ergonomics_in_progress_detail" placeholder="โปรดระบุ"
+                                        class="w-full mt-1 border border-slate-200 rounded-lg px-3 py-1.5 text-sm" />
                                 </div>
                             </label>
                             <label class="flex items-start gap-2 cursor-pointer">
-                                <input type="radio" name="ergonomics_status" value="done" class="w-4 h-4 text-primary border-slate-300 focus:ring-primary mt-0.5">
+                                <input type="radio" name="ergonomics_status" value="done"
+                                    class="w-4 h-4 text-primary border-slate-300 focus:ring-primary mt-0.5">
                                 <div>
                                     <span class="text-sm text-slate-700">ดำเนินการแล้ว</span>
-                                    <input type="text" id="ergonomics_done_detail" placeholder="โปรดระบุผลลัพธ์" class="w-full mt-1 border border-slate-200 rounded-lg px-3 py-1.5 text-sm" />
+                                    <input type="text" id="ergonomics_done_detail" placeholder="โปรดระบุผลลัพธ์"
+                                        class="w-full mt-1 border border-slate-200 rounded-lg px-3 py-1.5 text-sm" />
                                 </div>
                             </label>
                         </div>
@@ -485,9 +724,11 @@
 
                     <!-- 17. ผลการวิเคราะห์สถานการณ์สุขภาวะ -->
                     <div class="bg-slate-50 rounded-xl p-4">
-                        <h3 class="text-sm font-bold text-slate-700 mb-3">17. ผลการวิเคราะห์สถานการณ์สุขภาวะของบุคลากรจากแบบสอบถามที่จัดเก็บโดยหน่วยงาน</h3>
+                        <h3 class="text-sm font-bold text-slate-700 mb-3">17.
+                            ผลการวิเคราะห์สถานการณ์สุขภาวะของบุคลากรจากแบบสอบถามที่จัดเก็บโดยหน่วยงาน</h3>
                         <p class="text-xs text-slate-500 mb-2">โปรดแนบข้อมูล</p>
-                        <textarea id="wellbeing_analysis" rows="4" placeholder="สรุปผลการวิเคราะห์..." class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm resize-none"></textarea>
+                        <textarea id="wellbeing_analysis" rows="4" placeholder="สรุปผลการวิเคราะห์..."
+                            class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm resize-none"></textarea>
                     </div>
                 </div>
             </div>
@@ -501,56 +742,78 @@
                     <!-- 18. จุดเน้นการพัฒนา -->
                     <div class="bg-slate-50 rounded-xl p-4">
                         <h3 class="text-sm font-bold text-slate-700 mb-3">18. จุดเน้นการพัฒนา</h3>
-                        <p class="text-xs text-slate-500 mb-3">โปรดเลือกไม่เกิน 3 ประเด็นสำคัญที่ประสงค์ให้แผน HRD สนับสนุนโดยตรง และจัดลำดับ 1-3</p>
+                        <p class="text-xs text-slate-500 mb-3">โปรดเลือกไม่เกิน 3 ประเด็นสำคัญที่ประสงค์ให้แผน HRD
+                            สนับสนุนโดยตรง และจัดลำดับ 1-3</p>
                         <div class="space-y-2" id="priority-chips">
-                            <label class="flex items-center gap-2 cursor-pointer p-2 rounded-lg hover:bg-slate-100 transition">
-                                <input type="checkbox" name="strategic_priority" value="service_efficiency" class="w-4 h-4 text-primary rounded border-slate-300 focus:ring-primary strategic-priority-cb">
+                            <label
+                                class="flex items-center gap-2 cursor-pointer p-2 rounded-lg hover:bg-slate-100 transition">
+                                <input type="checkbox" name="strategic_priority" value="service_efficiency"
+                                    class="w-4 h-4 text-primary rounded border-slate-300 focus:ring-primary strategic-priority-cb">
                                 <span class="text-sm text-slate-700">การเพิ่มประสิทธิภาพการให้บริการประชาชน</span>
                             </label>
-                            <label class="flex items-center gap-2 cursor-pointer p-2 rounded-lg hover:bg-slate-100 transition">
-                                <input type="checkbox" name="strategic_priority" value="digital_capability" class="w-4 h-4 text-primary rounded border-slate-300 focus:ring-primary strategic-priority-cb">
+                            <label
+                                class="flex items-center gap-2 cursor-pointer p-2 rounded-lg hover:bg-slate-100 transition">
+                                <input type="checkbox" name="strategic_priority" value="digital_capability"
+                                    class="w-4 h-4 text-primary rounded border-slate-300 focus:ring-primary strategic-priority-cb">
                                 <span class="text-sm text-slate-700">การพัฒนาศักยภาพด้านดิจิทัล</span>
                             </label>
-                            <label class="flex items-center gap-2 cursor-pointer p-2 rounded-lg hover:bg-slate-100 transition">
-                                <input type="checkbox" name="strategic_priority" value="new_leaders" class="w-4 h-4 text-primary rounded border-slate-300 focus:ring-primary strategic-priority-cb">
+                            <label
+                                class="flex items-center gap-2 cursor-pointer p-2 rounded-lg hover:bg-slate-100 transition">
+                                <input type="checkbox" name="strategic_priority" value="new_leaders"
+                                    class="w-4 h-4 text-primary rounded border-slate-300 focus:ring-primary strategic-priority-cb">
                                 <span class="text-sm text-slate-700">การพัฒนาผู้นำรุ่นใหม่</span>
                             </label>
-                            <label class="flex items-center gap-2 cursor-pointer p-2 rounded-lg hover:bg-slate-100 transition">
-                                <input type="checkbox" name="strategic_priority" value="reduce_sick_leave" class="w-4 h-4 text-primary rounded border-slate-300 focus:ring-primary strategic-priority-cb">
+                            <label
+                                class="flex items-center gap-2 cursor-pointer p-2 rounded-lg hover:bg-slate-100 transition">
+                                <input type="checkbox" name="strategic_priority" value="reduce_sick_leave"
+                                    class="w-4 h-4 text-primary rounded border-slate-300 focus:ring-primary strategic-priority-cb">
                                 <span class="text-sm text-slate-700">การลดอัตราการลาป่วย</span>
                             </label>
-                            <label class="flex items-center gap-2 cursor-pointer p-2 rounded-lg hover:bg-slate-100 transition">
-                                <input type="checkbox" name="strategic_priority" value="reduce_turnover" class="w-4 h-4 text-primary rounded border-slate-300 focus:ring-primary strategic-priority-cb">
+                            <label
+                                class="flex items-center gap-2 cursor-pointer p-2 rounded-lg hover:bg-slate-100 transition">
+                                <input type="checkbox" name="strategic_priority" value="reduce_turnover"
+                                    class="w-4 h-4 text-primary rounded border-slate-300 focus:ring-primary strategic-priority-cb">
                                 <span class="text-sm text-slate-700">การลดอัตราการลาออก</span>
                             </label>
-                            <label class="flex items-center gap-2 cursor-pointer p-2 rounded-lg hover:bg-slate-100 transition">
-                                <input type="checkbox" name="strategic_priority" value="other" class="w-4 h-4 text-primary rounded border-slate-300 focus:ring-primary strategic-priority-cb">
+                            <label
+                                class="flex items-center gap-2 cursor-pointer p-2 rounded-lg hover:bg-slate-100 transition">
+                                <input type="checkbox" name="strategic_priority" value="other"
+                                    class="w-4 h-4 text-primary rounded border-slate-300 focus:ring-primary strategic-priority-cb">
                                 <div class="flex-1">
                                     <span class="text-sm text-slate-700">อื่น ๆ (โปรดระบุ)</span>
-                                    <input type="text" id="strategic_priority_other" placeholder="ระบุประเด็นอื่นๆ" class="w-full mt-1 border border-slate-200 rounded-lg px-3 py-1.5 text-sm" />
+                                    <input type="text" id="strategic_priority_other" placeholder="ระบุประเด็นอื่นๆ"
+                                        class="w-full mt-1 border border-slate-200 rounded-lg px-3 py-1.5 text-sm" />
                                 </div>
                             </label>
                         </div>
-                        <p class="text-red-500 text-xs mt-2 hidden" id="err-priority">กรุณาเลือกอย่างน้อย 1 ประเด็น (ไม่เกิน 3 ประเด็น)</p>
+                        <p class="text-red-500 text-xs mt-2 hidden" id="err-priority">กรุณาเลือกอย่างน้อย 1 ประเด็น
+                            (ไม่เกิน 3 ประเด็น)</p>
                     </div>
 
                     <!-- 19. ข้อเสนอแนะ Intervention Packages -->
                     <div class="bg-slate-50 rounded-xl p-4">
-                        <h3 class="text-sm font-bold text-slate-700 mb-3">19. ข้อเสนอแนะเกี่ยวกับฐานข้อมูล Intervention Packages เพิ่มเติม <span class="text-slate-400 font-normal">(ถ้ามี)</span></h3>
-                        <textarea id="intervention_suggestions" rows="4" placeholder="ข้อเสนอแนะเกี่ยวกับ Intervention Packages..." class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm resize-none"></textarea>
+                        <h3 class="text-sm font-bold text-slate-700 mb-3">19. ข้อเสนอแนะเกี่ยวกับฐานข้อมูล Intervention
+                            Packages เพิ่มเติม <span class="text-slate-400 font-normal">(ถ้ามี)</span></h3>
+                        <textarea id="intervention_suggestions" rows="4"
+                            placeholder="ข้อเสนอแนะเกี่ยวกับ Intervention Packages..."
+                            class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm resize-none"></textarea>
                     </div>
 
                     <!-- 20. ไฟล์ HRD PLAN -->
                     <div class="bg-slate-50 rounded-xl p-4">
-                        <h3 class="text-sm font-bold text-slate-700 mb-3">20. ไฟล์ HRD PLAN ปี 2567-2570 พร้อมผลการปฏิบัติงานตามแผนในปีล่าสุด</h3>
+                        <h3 class="text-sm font-bold text-slate-700 mb-3">20. ไฟล์ HRD PLAN ปี 2567-2570
+                            พร้อมผลการปฏิบัติงานตามแผนในปีล่าสุด</h3>
                         <div class="space-y-3">
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-1">ลิงก์ไฟล์แผน HRD</label>
-                                <input type="url" id="hrd_plan_url" placeholder="https://drive.google.com/..." class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm" />
+                                <input type="url" id="hrd_plan_url" placeholder="https://drive.google.com/..."
+                                    class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm" />
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">ผลการปฏิบัติงานตามแผนปีล่าสุด</label>
-                                <textarea id="hrd_plan_results" rows="3" placeholder="สรุปผลการปฏิบัติงาน..." class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm resize-none"></textarea>
+                                <label
+                                    class="block text-sm font-medium text-slate-700 mb-1">ผลการปฏิบัติงานตามแผนปีล่าสุด</label>
+                                <textarea id="hrd_plan_results" rows="3" placeholder="สรุปผลการปฏิบัติงาน..."
+                                    class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm resize-none"></textarea>
                             </div>
                         </div>
                     </div>
@@ -558,50 +821,65 @@
             </div>
 
             <!-- Navigation -->
-            <div id="form-nav" class="flex justify-between items-center mt-8 pt-5 border-t border-slate-100" style="display:none">
-                <button id="btn-prev" onclick="prevStep()" class="invisible px-5 py-2.5 border border-slate-300 rounded-xl text-slate-600 text-sm font-semibold hover:bg-slate-50 transition flex items-center gap-2">← ย้อนกลับ</button>
-                <button id="btn-next" onclick="nextStep()" class="px-6 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary-dark transition flex items-center gap-2 shadow-sm">ถัดไป →</button>
+            <div id="form-nav" class="flex justify-between items-center mt-8 pt-5 border-t border-slate-100"
+                style="display:none">
+                <button id="btn-prev" onclick="prevStep()"
+                    class="invisible px-5 py-2.5 border border-slate-300 rounded-xl text-slate-600 text-sm font-semibold hover:bg-slate-50 transition flex items-center gap-2">←
+                    ย้อนกลับ</button>
+                <button id="btn-next" onclick="nextStep()"
+                    class="px-6 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary-dark transition flex items-center gap-2 shadow-sm">ถัดไป
+                    →</button>
             </div>
 
         </div>
     </main>
 
     <!-- Loading Overlay -->
-    <div id="overlay-loading" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+    <div id="overlay-loading"
+        class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
         <div class="bg-white rounded-2xl p-8 text-center shadow-xl">
-            <div class="w-12 h-12 border-4 border-slate-200 border-t-primary rounded-full animate-spin mx-auto mb-4"></div>
+            <div class="w-12 h-12 border-4 border-slate-200 border-t-primary rounded-full animate-spin mx-auto mb-4">
+            </div>
             <p class="font-semibold text-slate-700">กำลังบันทึกข้อมูล...</p>
             <p class="text-sm text-slate-400 mt-1">กรุณารอสักครู่</p>
         </div>
     </div>
 
     <!-- Success Overlay -->
-    <div id="overlay-success" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+    <div id="overlay-success"
+        class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
         <div class="bg-white rounded-2xl p-8 text-center shadow-xl max-w-sm w-full mx-4">
             <div class="text-5xl mb-4">🎉</div>
             <h2 class="text-xl font-bold text-slate-800 mb-2">ส่งข้อมูลสำเร็จ!</h2>
             <p id="success-ref" class="text-sm text-slate-500 mb-6"></p>
-            <button onclick="location.reload()" class="w-full py-3 bg-primary text-white rounded-xl font-semibold hover:bg-primary-dark transition">กรอกใหม่</button>
+            <button onclick="location.reload()"
+                class="w-full py-3 bg-primary text-white rounded-xl font-semibold hover:bg-primary-dark transition">กรอกใหม่</button>
         </div>
     </div>
 
     <!-- Error Overlay -->
-    <div id="overlay-error" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+    <div id="overlay-error"
+        class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
         <div class="bg-white rounded-2xl p-8 text-center shadow-xl max-w-sm w-full mx-4">
             <div class="text-5xl mb-4">❌</div>
             <h2 class="text-xl font-bold text-slate-800 mb-2">เกิดข้อผิดพลาด</h2>
             <p id="error-msg" class="text-sm text-slate-500 mb-6"></p>
             <div class="flex gap-3">
-                <button onclick="hideOverlay('error')" class="flex-1 py-3 border border-slate-300 text-slate-600 rounded-xl font-semibold hover:bg-slate-50 transition">ยกเลิก</button>
-                <button onclick="retrySubmit()" class="flex-1 py-3 bg-primary text-white rounded-xl font-semibold hover:bg-primary-dark transition">ลองอีกครั้ง</button>
+                <button onclick="hideOverlay('error')"
+                    class="flex-1 py-3 border border-slate-300 text-slate-600 rounded-xl font-semibold hover:bg-slate-50 transition">ยกเลิก</button>
+                <button onclick="retrySubmit()"
+                    class="flex-1 py-3 bg-primary text-white rounded-xl font-semibold hover:bg-primary-dark transition">ลองอีกครั้ง</button>
             </div>
         </div>
     </div>
 
     <!-- Toast -->
-    <div id="toast" class="fixed bottom-6 right-6 bg-slate-800 text-white text-sm px-4 py-2.5 rounded-xl shadow-lg opacity-0 pointer-events-none z-50"></div>
+    <div id="toast"
+        class="fixed bottom-6 right-6 bg-slate-800 text-white text-sm px-4 py-2.5 rounded-xl shadow-lg opacity-0 pointer-events-none z-50">
+    </div>
 
     <script src="js/supabase-config.js"></script>
     <script src="js/ch1-form.js"></script>
 </body>
+
 </html>
