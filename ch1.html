@@ -405,36 +405,212 @@
                                 class="font-semibold">0</span> คน</div>
                     </div>
 
-                    <!-- 4. อัตราการลาออกและโอนย้าย -->
+                    <!-- 4. การลาออกและโอนย้าย -->
                     <div class="bg-slate-50 rounded-xl p-4">
-                        <h3 class="text-sm font-bold text-slate-700 mb-3">4. อัตราการลาออกและอัตราการโอนย้าย <span
-                                class="text-slate-400 font-normal">(ย้อนหลัง 5 ปี ถ้ามี)</span></h3>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">การลาออก (จำนวนคน)</label>
-                                <input type="number" id="turnover_count" min="0" placeholder="0"
-                                    class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm" />
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">คิดเป็นร้อยละ (%)</label>
-                                <input type="number" id="turnover_rate" min="0" max="100" step="0.01" placeholder="0.00"
-                                    class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm" />
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">การโอนย้ายไปส่วนราชการอื่น
-                                    (จำนวนคน)</label>
-                                <input type="number" id="transfer_count" min="0" placeholder="0"
-                                    class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm" />
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">คิดเป็นร้อยละ (%)</label>
-                                <input type="number" id="transfer_rate" min="0" max="100" step="0.01" placeholder="0.00"
-                                    class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm" />
-                            </div>
+                        <h3 class="text-sm font-bold text-slate-700 mb-3">
+                            4. การลาออกและโอนย้าย
+                            <span class="text-slate-400 font-normal">(ย้อนหลัง 5 ปี ถ้ามี)</span>
+                        </h3>
+
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm border-separate border-spacing-y-2">
+                                <thead>
+                                    <tr>
+                                        <!-- Row label column -->
+                                        <th class="w-40 text-left pb-2"></th>
+                                        <!-- Year columns -->
+                                        <th class="text-center font-bold text-slate-700 pb-2">2564</th>
+                                        <th class="text-center font-bold text-slate-700 pb-2">2565</th>
+                                        <th class="text-center font-bold text-slate-700 pb-2">2566</th>
+                                        <th class="text-center font-bold text-slate-700 pb-2">2567</th>
+                                        <th class="text-center font-bold text-slate-700 pb-2">2568</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Row 1: ต้นปี -->
+                                    <tr>
+                                        <td class="pr-3 text-slate-600 font-medium align-middle">
+                                            <div class="flex items-center gap-1">
+                                                ต้นปี (1 ต.ค.)
+                                                <span class="relative group cursor-pointer">
+                                                    <span class="text-blue-400 text-xs">ℹ️</span>
+                                                    <div
+                                                        class="absolute left-0 bottom-full mb-1 w-44 bg-slate-800 text-white text-xs rounded-lg px-2 py-1.5 opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none shadow-lg">
+                                                        จำนวนข้าราชการ ณ วันที่ 1 ต.ค. (ต้นปีงบประมาณ)
+                                                    </div>
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td class="px-1"><input type="number" id="begin_2564" min="0" placeholder="0"
+                                                oninput="calcTurnover(2564)"
+                                                class="w-full border border-slate-300 rounded-lg px-2 py-2 text-sm text-center bg-white focus:outline-none focus:ring-2 focus:ring-blue-300" />
+                                        </td>
+                                        <td class="px-1"><input type="number" id="begin_2565" min="0" placeholder="0"
+                                                oninput="calcTurnover(2565)"
+                                                class="w-full border border-slate-300 rounded-lg px-2 py-2 text-sm text-center bg-white focus:outline-none focus:ring-2 focus:ring-blue-300" />
+                                        </td>
+                                        <td class="px-1"><input type="number" id="begin_2566" min="0" placeholder="0"
+                                                oninput="calcTurnover(2566)"
+                                                class="w-full border border-slate-300 rounded-lg px-2 py-2 text-sm text-center bg-white focus:outline-none focus:ring-2 focus:ring-blue-300" />
+                                        </td>
+                                        <td class="px-1"><input type="number" id="begin_2567" min="0" placeholder="0"
+                                                oninput="calcTurnover(2567)"
+                                                class="w-full border border-slate-300 rounded-lg px-2 py-2 text-sm text-center bg-white focus:outline-none focus:ring-2 focus:ring-blue-300" />
+                                        </td>
+                                        <td class="px-1"><input type="number" id="begin_2568" min="0" placeholder="0"
+                                                oninput="calcTurnover(2568)"
+                                                class="w-full border border-slate-300 rounded-lg px-2 py-2 text-sm text-center bg-white focus:outline-none focus:ring-2 focus:ring-blue-300" />
+                                        </td>
+                                    </tr>
+
+                                    <!-- Row 2: ปลายปี -->
+                                    <tr>
+                                        <td class="pr-3 text-slate-600 font-medium align-middle">
+                                            <div class="flex items-center gap-1">
+                                                ปลายปี (30 ก.ย.)
+                                                <span class="relative group cursor-pointer">
+                                                    <span class="text-blue-400 text-xs">ℹ️</span>
+                                                    <div
+                                                        class="absolute left-0 bottom-full mb-1 w-44 bg-slate-800 text-white text-xs rounded-lg px-2 py-1.5 opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none shadow-lg">
+                                                        จำนวนข้าราชการ ณ วันที่ 30 ก.ย. ของปีถัดไป (ปลายปีงบประมาณ)
+                                                    </div>
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td class="px-1"><input type="number" id="end_2564" min="0" placeholder="0"
+                                                oninput="calcTurnover(2564)"
+                                                class="w-full border border-slate-300 rounded-lg px-2 py-2 text-sm text-center bg-white focus:outline-none focus:ring-2 focus:ring-blue-300" />
+                                        </td>
+                                        <td class="px-1"><input type="number" id="end_2565" min="0" placeholder="0"
+                                                oninput="calcTurnover(2565)"
+                                                class="w-full border border-slate-300 rounded-lg px-2 py-2 text-sm text-center bg-white focus:outline-none focus:ring-2 focus:ring-blue-300" />
+                                        </td>
+                                        <td class="px-1"><input type="number" id="end_2566" min="0" placeholder="0"
+                                                oninput="calcTurnover(2566)"
+                                                class="w-full border border-slate-300 rounded-lg px-2 py-2 text-sm text-center bg-white focus:outline-none focus:ring-2 focus:ring-blue-300" />
+                                        </td>
+                                        <td class="px-1"><input type="number" id="end_2567" min="0" placeholder="0"
+                                                oninput="calcTurnover(2567)"
+                                                class="w-full border border-slate-300 rounded-lg px-2 py-2 text-sm text-center bg-white focus:outline-none focus:ring-2 focus:ring-blue-300" />
+                                        </td>
+                                        <td class="px-1"><input type="number" id="end_2568" min="0" placeholder="0"
+                                                oninput="calcTurnover(2568)"
+                                                class="w-full border border-slate-300 rounded-lg px-2 py-2 text-sm text-center bg-white focus:outline-none focus:ring-2 focus:ring-blue-300" />
+                                        </td>
+                                    </tr>
+
+                                    <!-- Row 3: ลาออกและโอนย้าย -->
+                                    <tr>
+                                        <td class="pr-3 text-slate-600 font-medium align-middle">
+                                            <div class="flex items-center gap-1">
+                                                ลาออกและโอนย้าย
+                                                <span class="relative group cursor-pointer">
+                                                    <span class="text-blue-400 text-xs">ℹ️</span>
+                                                    <div
+                                                        class="absolute left-0 bottom-full mb-1 w-48 bg-slate-800 text-white text-xs rounded-lg px-2 py-1.5 opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none shadow-lg">
+                                                        จำนวนผู้ลาออกและโอนย้าย ตั้งแต่ 1 ต.ค. ถึง 30 ก.ย. ปีถัดไป
+                                                    </div>
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td class="px-1"><input type="number" id="leave_2564" min="0" placeholder="0"
+                                                oninput="calcTurnover(2564)"
+                                                class="w-full border border-slate-300 rounded-lg px-2 py-2 text-sm text-center bg-white focus:outline-none focus:ring-2 focus:ring-blue-300" />
+                                        </td>
+                                        <td class="px-1"><input type="number" id="leave_2565" min="0" placeholder="0"
+                                                oninput="calcTurnover(2565)"
+                                                class="w-full border border-slate-300 rounded-lg px-2 py-2 text-sm text-center bg-white focus:outline-none focus:ring-2 focus:ring-blue-300" />
+                                        </td>
+                                        <td class="px-1"><input type="number" id="leave_2566" min="0" placeholder="0"
+                                                oninput="calcTurnover(2566)"
+                                                class="w-full border border-slate-300 rounded-lg px-2 py-2 text-sm text-center bg-white focus:outline-none focus:ring-2 focus:ring-blue-300" />
+                                        </td>
+                                        <td class="px-1"><input type="number" id="leave_2567" min="0" placeholder="0"
+                                                oninput="calcTurnover(2567)"
+                                                class="w-full border border-slate-300 rounded-lg px-2 py-2 text-sm text-center bg-white focus:outline-none focus:ring-2 focus:ring-blue-300" />
+                                        </td>
+                                        <td class="px-1"><input type="number" id="leave_2568" min="0" placeholder="0"
+                                                oninput="calcTurnover(2568)"
+                                                class="w-full border border-slate-300 rounded-lg px-2 py-2 text-sm text-center bg-white focus:outline-none focus:ring-2 focus:ring-blue-300" />
+                                        </td>
+                                    </tr>
+
+                                    <!-- Divider -->
+                                    <tr>
+                                        <td colspan="6" class="py-0">
+                                            <div class="border-t border-slate-200"></div>
+                                        </td>
+                                    </tr>
+
+                                    <!-- Row 4: ร้อยละ (คำนวณอัตโนมัติ) -->
+                                    <tr>
+                                        <td class="pr-3 align-middle">
+                                            <div class="flex items-center gap-1">
+                                                <span class="text-slate-700 font-semibold">ร้อยละ</span>
+                                                <span class="relative group cursor-pointer">
+                                                    <span class="text-blue-400 text-xs">ℹ️</span>
+                                                    <div
+                                                        class="absolute left-0 bottom-full mb-1 w-56 bg-slate-800 text-white text-xs rounded-lg px-2 py-2 opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none shadow-lg leading-relaxed">
+                                                        คำนวณอัตโนมัติจากสูตร:<br>
+                                                        <span class="text-yellow-300 font-mono">(ลาออกและโอนย้าย) ÷
+                                                            ((ต้นปี + ปลายปี) ÷ 2) × 100</span>
+                                                    </div>
+                                                </span>
+                                                <span class="text-xs text-slate-400 font-normal">(อัตโนมัติ)</span>
+                                            </div>
+                                        </td>
+                                        <td class="px-1">
+                                            <div id="rate_2564"
+                                                class="w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center bg-slate-100 text-slate-500 font-medium">
+                                                -</div>
+                                        </td>
+                                        <td class="px-1">
+                                            <div id="rate_2565"
+                                                class="w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center bg-slate-100 text-slate-500 font-medium">
+                                                -</div>
+                                        </td>
+                                        <td class="px-1">
+                                            <div id="rate_2566"
+                                                class="w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center bg-slate-100 text-slate-500 font-medium">
+                                                -</div>
+                                        </td>
+                                        <td class="px-1">
+                                            <div id="rate_2567"
+                                                class="w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center bg-slate-100 text-slate-500 font-medium">
+                                                -</div>
+                                        </td>
+                                        <td class="px-1">
+                                            <div id="rate_2568"
+                                                class="w-full border border-slate-200 rounded-lg px-2 py-2 text-sm text-center bg-slate-100 text-slate-500 font-medium">
+                                                -</div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
+
+                    <script>
+                        function calcTurnover(year) {
+                            const begin = parseFloat(document.getElementById('begin_' + year).value) || 0;
+                            const end = parseFloat(document.getElementById('end_' + year).value) || 0;
+                            const leave = parseFloat(document.getElementById('leave_' + year).value) || 0;
+
+                            const rateEl = document.getElementById('rate_' + year);
+                            const denominator = (begin + end) / 2;
+
+                            if (denominator > 0) {
+                                const rate = (leave / denominator) * 100;
+                                rateEl.textContent = rate.toFixed(2) + '%';
+                                rateEl.classList.remove('text-slate-500');
+                                rateEl.classList.add('text-blue-600');
+                            } else {
+                                rateEl.textContent = '-';
+                                rateEl.classList.remove('text-blue-600');
+                                rateEl.classList.add('text-slate-500');
+                            }
+                        }
+                    </script>
                 </div>
             </div>
 
