@@ -1052,22 +1052,119 @@
             </div>
 
             <!-- STEP 5: ทิศทาง เป้าหมาย และข้อเสนอแนะ -->
+            <div class="form-step" data-step="5">
                 <h2 class="text-xl font-bold text-primary mb-1">🎯 ส่วนที่ 5: ทิศทาง เป้าหมาย และข้อเสนอแนะ</h2>
                 <p class="text-slate-500 text-sm mb-6">จุดเน้นการพัฒนาและข้อเสนอแนะ</p>
 
                 <div class="space-y-5">
                     <!-- 17. จุดเน้นการพัฒนา -->
-                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                    <div class="bg-slate-50 rounded-xl p-4">
                         <h3 class="text-sm font-bold text-slate-700 mb-1">17. จุดเน้นการพัฒนา</h3>
-                        <p class="text-xs text-gray-500 mb-5">
-                            คลิกเลือกสูงสุด 3 ประเด็น — ระบบจะจัดอันดับให้อัตโนมัติตามลำดับที่คลิก
+                        <p class="text-xs text-blue-500 mb-0.5">
+                            โปรดเลือกไม่เกิน 3 ประเด็นสำคัญที่ประสงค์ให้แผน HRD สนับสนุนโดยตรง และจัดลำดับ 1-3
+                        </p>
+                        <p class="text-xs text-slate-400 mb-3">คลิกเลือก → ระบบจัดอันดับให้อัตโนมัติ · คลิกซ้ำเพื่อยกเลิก</p>
+
+                        <!-- Rank Items -->
+                        <div class="space-y-2" id="rankList">
+
+                            <div class="rank-item flex items-center gap-3 px-3 py-2.5 rounded-lg border border-slate-200 bg-white cursor-pointer select-none"
+                                data-value="service_efficiency">
+                                <div class="rank-badge w-7 h-7 rounded-full border-2 border-slate-300 bg-white flex items-center justify-center shrink-0">
+                                    <span class="rank-icon text-slate-300 text-xs font-bold leading-none">—</span>
+                                </div>
+                                <span class="text-sm text-slate-700">การเพิ่มประสิทธิภาพการให้บริการประชาชน</span>
+                            </div>
+
+                            <div class="rank-item flex items-center gap-3 px-3 py-2.5 rounded-lg border border-slate-200 bg-white cursor-pointer select-none"
+                                data-value="digital_capability">
+                                <div class="rank-badge w-7 h-7 rounded-full border-2 border-slate-300 bg-white flex items-center justify-center shrink-0">
+                                    <span class="rank-icon text-slate-300 text-xs font-bold leading-none">—</span>
+                                </div>
+                                <span class="text-sm text-slate-700">การพัฒนาศักยภาพด้านดิจิทัล</span>
+                            </div>
+
+                            <div class="rank-item flex items-center gap-3 px-3 py-2.5 rounded-lg border border-slate-200 bg-white cursor-pointer select-none"
+                                data-value="new_leaders">
+                                <div class="rank-badge w-7 h-7 rounded-full border-2 border-slate-300 bg-white flex items-center justify-center shrink-0">
+                                    <span class="rank-icon text-slate-300 text-xs font-bold leading-none">—</span>
+                                </div>
+                                <span class="text-sm text-slate-700">การพัฒนาผู้นำรุ่นใหม่</span>
+                            </div>
+
+                            <div class="rank-item flex items-center gap-3 px-3 py-2.5 rounded-lg border border-slate-200 bg-white cursor-pointer select-none"
+                                data-value="reduce_sick_leave">
+                                <div class="rank-badge w-7 h-7 rounded-full border-2 border-slate-300 bg-white flex items-center justify-center shrink-0">
+                                    <span class="rank-icon text-slate-300 text-xs font-bold leading-none">—</span>
+                                </div>
+                                <span class="text-sm text-slate-700">การลดอัตราการลาป่วย</span>
+                            </div>
+
+                            <div class="rank-item flex items-center gap-3 px-3 py-2.5 rounded-lg border border-slate-200 bg-white cursor-pointer select-none"
+                                data-value="reduce_turnover">
+                                <div class="rank-badge w-7 h-7 rounded-full border-2 border-slate-300 bg-white flex items-center justify-center shrink-0">
+                                    <span class="rank-icon text-slate-300 text-xs font-bold leading-none">—</span>
+                                </div>
+                                <span class="text-sm text-slate-700">การลดอัตราการลาออก</span>
+                            </div>
+
+                            <!-- อื่นๆ -->
+                            <div class="rank-item flex items-start gap-3 px-3 py-2.5 rounded-lg border border-dashed border-slate-200 bg-white cursor-pointer select-none"
+                                data-value="other">
+                                <div class="rank-badge w-7 h-7 rounded-full border-2 border-slate-300 bg-white flex items-center justify-center shrink-0 mt-0.5">
+                                    <span class="rank-icon text-slate-300 text-xs font-bold leading-none">—</span>
+                                </div>
+                                <div class="flex-1">
+                                    <span class="text-sm text-slate-500">อื่น ๆ (โปรดระบุ)</span>
+                                    <input type="text" id="strategic_priority_other"
+                                        placeholder="ระบุประเด็นอื่นๆ"
+                                        class="other-rank-input hidden mt-1.5 w-full border border-slate-200 rounded-lg px-3 py-1.5 text-sm
+                                            focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-400 bg-white"
+                                        onclick="event.stopPropagation()">
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Summary (แสดงเมื่อเลือกแล้ว) -->
+                        <div id="rankSummaryWrap" class="hidden mt-3">
+                            <div class="bg-blue-50 border border-blue-100 rounded-lg px-3 py-2.5">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-xs font-semibold text-blue-600">ลำดับที่เลือก</span>
+                                    <span id="rankCounter"
+                                        class="text-xs font-bold bg-blue-500 text-white px-2 py-0.5 rounded-full">0/3</span>
+                                </div>
+                                <div id="rankSummaryChips" class="space-y-1.5"></div>
+                            </div>
+                            <button onclick="clearRankAll()"
+                                class="mt-2 w-full py-1.5 text-xs text-slate-400 hover:text-red-400
+                                    hover:bg-red-50 rounded-lg border border-dashed border-slate-200
+                                    hover:border-red-200 transition-all duration-150">
+                                ล้างการเลือกทั้งหมด
+                            </button>
+                        </div>
+
+                        <!-- Error -->
+                        <p class="text-red-500 text-xs mt-2 hidden" id="err-priority">
+                            กรุณาเลือกอย่างน้อย 1 ประเด็น (ไม่เกิน 3 ประเด็น)
                         </p>
 
-                        <div id="rankItems" class="space-y-3">
-                            <!-- Item Template -->
-                            <div class="rank-item cursor-pointer flex items-center gap-4 p-4 rounded-xl border-2 border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-200"
-                                data-value="service_efficiency">
-                            class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm resize-none"></textarea>
+                        <!-- Hidden inputs สำหรับ submit form -->
+                        <input type="hidden" id="rank_priority_1" name="strategic_priority_rank1" value="">
+                        <input type="hidden" id="rank_priority_2" name="strategic_priority_rank2" value="">
+                        <input type="hidden" id="rank_priority_3" name="strategic_priority_rank3" value="">
+                    </div>
+
+                    <!-- 18. ข้อเสนอแนะเกี่ยวกับ Intervention Packages -->
+                    <div class="bg-slate-50 rounded-xl p-4">
+                        <h3 class="text-sm font-bold text-slate-700 mb-3">
+                            18. ข้อเสนอแนะเกี่ยวกับ Intervention Packages
+                            <span class="text-slate-400 font-normal">(ถ้ามี)</span>
+                        </h3>
+                        <textarea id="intervention_packages_feedback" rows="4"
+                                placeholder="โปรดระบุข้อเสนอแนะเกี่ยวกับฐานข้อมูล Intervention Packages..."
+                                class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm resize-none
+                                    focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-400"></textarea>
                     </div>
 
                     <!-- 19. ไฟล์ HRD PLAN -->
@@ -1251,6 +1348,200 @@
 
         // ตั้งค่า Sentry DSN (แก้ไขเป็นของจริงถ้าใช้)
         // window.SENTRY_DSN = 'https://xxxx@yyyy.ingest.sentry.io/zzzz';
+    </script>
+
+    <!-- Click-to-Rank: ข้อ 17 -->
+    <script>
+    (function () {
+      const RANKS = [
+        { num:'1', label:'อันดับ 1',
+          borderColor:'#3b82f6', bgColor:'#eff6ff', badgeBg:'#3b82f6',
+          chipBg:'#dbeafe', chipText:'#1e40af', chipBorder:'#bfdbfe' },
+        { num:'2', label:'อันดับ 2',
+          borderColor:'#6366f1', bgColor:'#eef2ff', badgeBg:'#6366f1',
+          chipBg:'#e0e7ff', chipText:'#3730a3', chipBorder:'#c7d2fe' },
+        { num:'3', label:'อันดับ 3',
+          borderColor:'#8b5cf6', bgColor:'#f5f3ff', badgeBg:'#8b5cf6',
+          chipBg:'#ede9fe', chipText:'#5b21b6', chipBorder:'#ddd6fe' },
+      ];
+
+      const LABELS = {
+        service_efficiency: 'การเพิ่มประสิทธิภาพการให้บริการประชาชน',
+        digital_capability: 'การพัฒนาศักยภาพด้านดิจิทัล',
+        new_leaders:        'การพัฒนาผู้นำรุ่นใหม่',
+        reduce_sick_leave:  'การลดอัตราการลาป่วย',
+        reduce_turnover:    'การลดอัตราการลาออก',
+        other:              'อื่นๆ',
+      };
+
+      let selected = [];
+
+      // Click handler
+      document.querySelectorAll('#rankList .rank-item').forEach(item => {
+        item.addEventListener('click', () => {
+          const val = item.dataset.value;
+          const idx = selected.indexOf(val);
+
+          if (idx !== -1) {
+            // ยกเลิก
+            selected.splice(idx, 1);
+            if (val === 'other') {
+              const inp = document.getElementById('strategic_priority_other');
+              inp.classList.add('hidden');
+              inp.value = '';
+            }
+          } else {
+            if (selected.length >= 3) {
+              // แจ้งเตือนเต็มแล้ว
+              const w = document.getElementById('rankSummaryWrap');
+              w.classList.add('rank-shake');
+              setTimeout(() => w.classList.remove('rank-shake'), 300);
+              return;
+            }
+            selected.push(val);
+            if (val === 'other') {
+              const inp = document.getElementById('strategic_priority_other');
+              inp.classList.remove('hidden');
+              setTimeout(() => inp.focus(), 50);
+            }
+          }
+
+          renderRank();
+        });
+      });
+
+      function renderRank() {
+        // อัปเดต item styles
+        document.querySelectorAll('#rankList .rank-item').forEach(item => {
+          const val   = item.dataset.value;
+          const idx   = selected.indexOf(val);
+          const badge = item.querySelector('.rank-badge');
+          const icon  = item.querySelector('.rank-icon');
+
+          // Reset
+          item.style.borderColor      = '';
+          item.style.backgroundColor  = '';
+          item.classList.remove('selected', 'disabled');
+          badge.style.borderColor     = '#cbd5e1'; // slate-300
+          badge.style.backgroundColor = '#ffffff';
+          icon.style.color    = '#cbd5e1';
+          icon.textContent    = '—';
+          icon.style.fontSize = '11px';
+
+          if (idx !== -1) {
+            const r = RANKS[idx];
+            item.style.borderColor     = r.borderColor;
+            item.style.backgroundColor = r.bgColor;
+            item.classList.add('selected');
+            badge.style.borderColor     = r.borderColor;
+            badge.style.backgroundColor = r.badgeBg;
+            icon.style.color    = '#ffffff';
+            icon.textContent    = r.num;
+            icon.style.fontSize = '12px';
+            icon.classList.add('rank-pop');
+            setTimeout(() => icon.classList.remove('rank-pop'), 300);
+          }
+
+          if (selected.length >= 3 && idx === -1) {
+            item.classList.add('disabled');
+          }
+        });
+
+        // Summary
+        const wrap  = document.getElementById('rankSummaryWrap');
+        const chips = document.getElementById('rankSummaryChips');
+        chips.innerHTML = '';
+
+        if (selected.length === 0) {
+          wrap.classList.add('hidden');
+        } else {
+          wrap.classList.remove('hidden');
+          selected.forEach((val, i) => {
+            const r    = RANKS[i];
+            const text = val === 'other'
+              ? (document.getElementById('strategic_priority_other').value || 'อื่นๆ (รอระบุ)')
+              : LABELS[val];
+
+            const chip = document.createElement('div');
+            chip.className = 'rank-slide flex items-center gap-2 px-3 py-2 rounded-lg';
+            chip.style.cssText = `background:${r.chipBg}; border:1px solid ${r.chipBorder};`;
+            chip.innerHTML = `
+              <span style="color:${r.badgeBg}; font-weight:700; font-size:11px;
+                           background:${r.chipBorder}; width:18px; height:18px;
+                           border-radius:50%; display:flex; align-items:center;
+                           justify-content:center; flex-shrink:0;">${r.num}</span>
+              <span style="color:${r.chipText}; font-size:12px; flex:1; line-height:1.4;">${text}</span>
+              <button type="button"
+                      onclick="removeRankItem(${i})"
+                      style="color:#94a3b8; font-size:11px; padding:2px 4px; border-radius:4px; transition:all 0.15s; flex-shrink:0;"
+                      onmouseover="this.style.color='#ef4444';this.style.background='#fee2e2'"
+                      onmouseout="this.style.color='#94a3b8';this.style.background='transparent'">✕</button>
+            `;
+            chips.appendChild(chip);
+          });
+        }
+
+        // Counter
+        document.getElementById('rankCounter').textContent = `${selected.length}/3`;
+
+        // ซ่อน error ถ้าเลือกแล้ว
+        if (selected.length > 0) {
+          document.getElementById('err-priority').classList.add('hidden');
+        }
+
+        // sync hidden inputs (สำหรับ submit)
+        [1, 2, 3].forEach(n => {
+          const val = selected[n - 1] || '';
+          const label = val === 'other'
+            ? document.getElementById('strategic_priority_other').value
+            : (LABELS[val] || '');
+          document.getElementById(`rank_priority_${n}`).value = label;
+        });
+      }
+
+      // expose ให้ onclick ใช้ได้
+      window.removeRankItem = function (idx) {
+        const val = selected[idx];
+        selected.splice(idx, 1);
+        if (val === 'other') {
+          const inp = document.getElementById('strategic_priority_other');
+          inp.classList.add('hidden');
+          inp.value = '';
+        }
+        renderRank();
+      };
+
+      window.clearRankAll = function () {
+        selected = [];
+        const inp = document.getElementById('strategic_priority_other');
+        inp.classList.add('hidden');
+        inp.value = '';
+        renderRank();
+      };
+
+      // Validation helper (เรียกจาก submit handler ของโปรเจกต์)
+      window.validateRankPriority = function () {
+        const err = document.getElementById('err-priority');
+        if (selected.length === 0) {
+          err.classList.remove('hidden');
+          return false;
+        }
+        err.classList.add('hidden');
+        return true;
+      };
+
+      // อ่านค่าสำหรับ submit (คืน array [{rank, value, label}])
+      window.getRankPriorityValues = function () {
+        return selected.map((val, i) => ({
+          rank:  i + 1,
+          value: val,
+          label: val === 'other'
+            ? document.getElementById('strategic_priority_other').value
+            : LABELS[val],
+        }));
+      };
+
+    })();
     </script>
 </body>
 

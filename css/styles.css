@@ -1739,3 +1739,57 @@ body {
     transition: width 0.3s ease;
     width: 0%;
 }
+
+/* ========================================
+   Ranking System Styles
+   ======================================== */
+.rank-item { 
+    transition: all 0.18s ease; 
+}
+
+.rank-item:hover:not(.selected):not(.disabled) { 
+    background-color: #f8faff; 
+    border-color: #93c5fd; 
+}
+
+.rank-item.selected { 
+    background-color: #eff6ff; 
+}
+
+.rank-item.disabled { 
+    opacity: 0.35; 
+    cursor: not-allowed; 
+    pointer-events: none; 
+}
+
+.rank-badge { 
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); 
+}
+
+@keyframes popIn {
+    0%   { transform: scale(0.7); opacity: 0; }
+    100% { transform: scale(1);   opacity: 1; }
+}
+
+.rank-pop { 
+    animation: popIn 0.22s ease forwards; 
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.rank-slide { 
+    animation: slideDown 0.18s ease forwards; 
+}
+
+@keyframes rankShake {
+    0%,100% { transform: translateX(0); }
+    25%      { transform: translateX(-4px); }
+    75%      { transform: translateX(4px); }
+}
+
+.rank-shake { 
+    animation: rankShake 0.25s ease; 
+}
