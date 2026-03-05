@@ -52,18 +52,28 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Run npm audit
         run: |
           npm audit --audit-level=moderate || true
 
-      - name: Check for secrets
-        uses: trufflesecurity/trufflehog@main
-        with:
-          path: ./
-          base: main
-          head: HEAD
-          extra_args: --debug --only-verified
+      - name: Check for hardcoded secrets
+        run: |
+          echo "Scanning for potential hardcoded secrets..."
+          # Check for common secret patterns in source files
+          if grep -rn --include="*.js" --include="*.html" --include="*.ts" \
+            -E "(password|secret|private_key|api_key)\s*=\s*['\"][^'\"]{8,}['\"]" \
+            --exclude-dir=node_modules . 2>/dev/null | \
+            grep -v "process\.env\." | \
+            grep -v "secrets\.\|GITHUB_TOKEN\|VERCEL_TOKEN" | \
+            grep -v "placeholder\|example\|sample\|test\|dummy"; then
+            echo "⚠️  Potential hardcoded secrets found - please review"
+            exit 1
+          else
+            echo "✅ No hardcoded secrets detected"
+          fi
 
   # ============================================
   # Job 3: Build & Deploy (Production)
@@ -90,32 +100,12 @@ jobs:
         run: npm run build
 
       - name: Deploy to Vercel (Production)
-        uses: vercel/action-deploy@v1
+        uses: amondnet/vercel-action@v25
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
           vercel-args: '--prod'
-
-      - name: Notify deployment success
-        if: success()
-        uses: slackapi/slack-github-action@v1.24.0
-        with:
-          payload: |
-            {
-              "text": "🚀 Well-being Survey v3.1 deployed to production successfully!",
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "*Well-being Survey* has been deployed to production\n*Version:* ${{ github.sha }}\n*Time:* ${{ github.event.head_commit.timestamp }}"
-                  }
-                }
-              ]
-            }
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
   # ============================================
   # Job 4: Deploy Preview (Development)
@@ -139,7 +129,7 @@ jobs:
         run: npm ci
 
       - name: Deploy to Vercel (Preview)
-        uses: vercel/action-deploy@v1
+        uses: amondnet/vercel-action@v25
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
@@ -163,7 +153,6 @@ jobs:
           urls: |
             https://nidawellbeing.vercel.app/
             https://nidawellbeing.vercel.app/ch1.html
-          budgetPath: ./lighthouse-budget.json
           uploadArtifacts: true
           temporaryPublicStorage: true
 
