@@ -200,30 +200,18 @@ function validateStep1() {
 }
 
 function validateStep5() {
-    // Check at least one priority selected
-    const priorities = document.querySelectorAll('input[name="strategic_priority"]:checked');
-    const otherChecked = document.querySelector('input[name="strategic_priority"][value="other"]')?.checked;
-    const otherText = document.getElementById('strategic_priority_other')?.value.trim();
+    // Check at least one priority selected (using ranking system)
+    const rank1 = document.getElementById('rank_priority_1')?.value;
+    const rank2 = document.getElementById('rank_priority_2')?.value;
+    const rank3 = document.getElementById('rank_priority_3')?.value;
     
-    let valid = true;
-    
-    if (priorities.length === 0) {
-        showError('err-priority', true);
-        valid = false;
-    } else if (priorities.length > 3) {
-        showToast('กรุณาเลือกไม่เกิน 3 ประเด็น', 'error');
-        valid = false;
-    } else {
-        showError('err-priority', false);
+    if (!rank1 && !rank2 && !rank3) {
+        document.getElementById('err-priority').classList.remove('hidden');
+        return false;
     }
     
-    // If "other" selected, must have text
-    if (otherChecked && !otherText) {
-        showToast('กรุณาระบุประเด็นอื่น ๆ', 'error');
-        valid = false;
-    }
-    
-    return valid;
+    document.getElementById('err-priority').classList.add('hidden');
+    return true;
 }
 
 function showError(id, show) {
@@ -271,6 +259,12 @@ function collectAllData() {
     const pos_m2 = parseInt(document.getElementById('pos_m2')?.value) || 0;
     const pos_s1 = parseInt(document.getElementById('pos_s1')?.value) || 0;
     const pos_s2 = parseInt(document.getElementById('pos_s2')?.value) || 0;
+    
+    // Staff type distribution (4 types)
+    const type_official = parseInt(document.getElementById('type_official')?.value) || 0;
+    const type_employee = parseInt(document.getElementById('type_employee')?.value) || 0;
+    const type_contract = parseInt(document.getElementById('type_contract')?.value) || 0;
+    const type_other = parseInt(document.getElementById('type_other')?.value) || 0;
     
     // Turnover and transfer
     const turnover_count = parseInt(document.getElementById('turnover_count')?.value) || null;
@@ -344,8 +338,16 @@ function collectAllData() {
     }
     
     // Step 5: ทิศทาง เป้าหมาย และข้อเสนอแนะ
-    const selectedPriorities = [...document.querySelectorAll('input[name="strategic_priority"]:checked')].map(cb => cb.value);
+    // Ranking system - collect from hidden inputs
+    const strategic_priority_rank1 = document.getElementById('rank_priority_1')?.value || null;
+    const strategic_priority_rank2 = document.getElementById('rank_priority_2')?.value || null;
+    const strategic_priority_rank3 = document.getElementById('rank_priority_3')?.value || null;
     const strategic_priority_other = document.getElementById('strategic_priority_other')?.value.trim() || null;
+    
+    // Intervention feedback
+    const intervention_packages_feedback = document.getElementById('intervention_packages_feedback')?.value.trim() || null;
+    
+    // HRD plan
     const hrd_plan_url = document.getElementById('hrd_plan_url')?.value.trim() || null;
     const hrd_plan_results = document.getElementById('hrd_plan_results')?.value.trim() || null;
 
@@ -365,7 +367,7 @@ function collectAllData() {
     return {
         // Metadata
         respondent_email: respondentEmail || null,
-        form_version: 'ch1-v3.0',
+        form_version: 'ch1-v4.0',
         submitted_at: new Date().toISOString(),
         
         // Step 1: ข้อมูลเบื้องต้น
@@ -379,6 +381,7 @@ function collectAllData() {
         pos_o1, pos_o2, pos_o3, pos_o4,
         pos_k1, pos_k2, pos_k3, pos_k4, pos_k5,
         pos_m1, pos_m2, pos_s1, pos_s2,
+        type_official, type_employee, type_contract, type_other,
         turnover_count, turnover_rate,
         transfer_count, transfer_rate,
         
@@ -405,8 +408,11 @@ function collectAllData() {
         ergonomics_status, ergonomics_detail,
         
         // Step 5: ทิศทางและเป้าหมาย
-        strategic_priorities: selectedPriorities.length ? selectedPriorities : null,
+        strategic_priority_rank1,
+        strategic_priority_rank2,
+        strategic_priority_rank3,
         strategic_priority_other,
+        intervention_packages_feedback,
         hrd_plan_url, hrd_plan_results,
 
         // File attachments (Section 1)

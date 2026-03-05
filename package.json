@@ -22,7 +22,8 @@
   "author": "NIDA Well-being Project",
   "license": "ISC",
   "dependencies": {
-    "@supabase/supabase-js": "^2.98.0"
+    "@supabase/supabase-js": "^2.98.0",
+    "playwright": "^1.58.2"
   },
   "engines": {
     "node": ">=18.0.0"
