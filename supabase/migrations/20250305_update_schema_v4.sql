@@ -151,10 +151,19 @@ COMMENT ON COLUMN hrd_ch1_responses.type_other IS 'จำนวนอื่น�
 -- Display final column count
 SELECT 
     'hrd_ch1_responses' as table_name,
-    COUNT(*) as column_count,
-    MAX(form_version) as latest_version
+    COUNT(*) as column_count
 FROM information_schema.columns 
 WHERE table_name = 'hrd_ch1_responses';
+
+-- Display form version from actual data
+SELECT 
+    COUNT(*) as total_records,
+    COUNT(DISTINCT form_version) as version_count,
+    form_version
+FROM hrd_ch1_responses 
+WHERE form_version IS NOT NULL
+GROUP BY form_version
+ORDER BY form_version DESC;
 
 -- Display new columns added
 SELECT column_name, data_type, is_nullable
@@ -167,6 +176,7 @@ AND column_name IN (
     'strategic_priority_rank1', 'strategic_priority_rank2', 'strategic_priority_rank3',
     'strategic_priority_other', 'intervention_packages_feedback',
     'support_systems', 'ergonomics_planned_detail', 'ergonomics_in_progress_detail',
-    'ergonomics_done_detail', 'total_staff', 'sick_leave_days', 'sick_leave_avg'
+    'ergonomics_done_detail', 'total_staff', 'sick_leave_days', 'sick_leave_avg',
+    'form_version'
 )
 ORDER BY column_name;

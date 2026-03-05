@@ -6,6 +6,14 @@ npm-debug.log*
 node_modules/
 .vercel
 
+# Environment Variables (CRITICAL - DO NOT COMMIT!)
+.env
+.env.local
+.env.*.local
+.env.production
+.env.development
+.env.test
+
 # ===== ห้าม commit ไฟล์พวกนี้อีก =====
 # Debug files
 debug-*.js

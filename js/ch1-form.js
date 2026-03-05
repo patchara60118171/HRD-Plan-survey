@@ -160,6 +160,79 @@ function updateUI() {
 // =============================================
 // VALIDATION
 // =============================================
+
+// Validate numeric input bounds
+function validateNumericInput(value, fieldName, max = 999999) {
+    const num = parseInt(value);
+    if (isNaN(num)) return { valid: false, error: `${fieldName} ต้องเป็นตัวเลขเท่านั้น` };
+    if (num < 0) return { valid: false, error: `${fieldName} ต้องเป็นตัวเลขบวก` };
+    if (num > max) return { valid: false, error: `${fieldName} ต้องไม่เกิน ${max}` };
+    return { valid: true };
+}
+
+// Safe integer converter with max limit
+function toSafeInt(value, max = 999999, fieldName = 'ฟิลด์') {
+    const num = parseInt(value) || 0;
+    if (num > max) {
+        console.warn(`⚠️ ${fieldName} scaled down from ${num} to ${max}`);
+        return max;
+    }
+    return num < 0 ? 0 : num;
+}
+
+// Generate detailed error message
+function getDetailedErrorMessage(err) {
+    const errorStr = err.message || '';
+    
+    if (errorStr.includes('numeric field overflow')) {
+        return `❌ ข้อผิดพลาด: ตัวเลขเกินค่าสูงสุด\n\n` +
+               `📝 รายละเอียด:\n` +
+               `• ฟิลด์ที่รับค่าตัวเลขมีการจำกัดค่าสูงสุด\n` +
+               `• ตัวเลขที่ป้อนเกินจำนวนที่ระบบยอมรับ\n\n` +
+               `💡 วิธีแก้ไข:\n` +
+               `• โปรดตรวจสอบค่าตัวเลขทั้งหมด (ต้องไม่เกิน 999,999)\n` +
+               `• ตัวอย่างฟิลด์ที่มักเกิดข้อผิดพลาด:\n` +
+               `  - จำนวนบุคลากร\n` +
+               `  - จำนวนในแต่ละกลุ่มอายุ\n` +
+               `  - จำนวนโรค\n` +
+               `• ลองป้อนค่าใหม่ให้ตรงกับความเป็นจริง\n` +
+               `• กดปุ่ม "สอบถามใหม่" เพื่อลองอีกครั้ง`;
+    }
+    
+    if (errorStr.includes('duplicate')) {
+        return `❌ ข้อผิดพลาด: ข้อมูลซ้ำ\n\n` +
+               `📝 รายละเอียด:\n` +
+               `• อีเมลนี้ได้ส่งแบบสอบถามแล้วในช่วง 1 ชั่วโมงที่ผ่านมา\n\n` +
+               `💡 วิธีแก้ไข:\n` +
+               `• โปรดรอ 1 ชั่วโมงแล้วลองใหม่\n` +
+               `• หรือใช้อีเมลอื่นเพื่อส่งแบบสอบถาม\n` +
+               `• หากต้องการแก้ไขข้อมูล โปรดติดต่อผู้ดูแลระบบ`;
+    }
+    
+    if (errorStr.includes('email')) {
+        return `❌ ข้อผิดพลาด: ปัญหากับอีเมล\n\n` +
+               `📝 รายละเอียด:\n` +
+               `• อีเมลที่ป้อนไม่ถูกต้องหรือน่าสงสัย\n\n` +
+               `💡 วิธีแก้ไข:\n` +
+               `• ตรวจสอบการสะกดอีเมล\n` +
+               `• อีเมลต้องอยู่ในรูป: example@domain.com\n` +
+               `• อีเมลจากบริการชั่วคราวไม่ยอมรับ\n` +
+               `• ใช้อีเมลองค์กรหรืออีเมลที่ใช้จริง`;
+    }
+    
+    if (errorStr.includes('constraint')) {
+        return `❌ ข้อผิดพลาด: ข้อมูลไม่ถูกต้อง\n\n` +
+               `📝 รายละเอียด:\n` +
+               `• ข้อมูลที่ป้อนขัดแย้งกับกฎของระบบ\n\n` +
+               `💡 วิธีแก้ไข:\n` +
+               `• ตรวจสอบว่าข้อมูลทั้งหมดเหมาะสม\n` +
+               `• หากผลรวมของส่วนต่างๆ ควรตรงกับจำนวนทั้งหมด\n` +
+               `• โปรดติดต่อผู้ดูแลระบบหากยังมีปัญหา`;
+    }
+    
+    return `❌ ข้อผิดพลาด: ${errorStr}\n\n💡 หากปัญหายังไม่แก้ได้: โปรดติดต่อผู้ดูแลระบบ`;
+}
+
 function validateStep(step) {
     switch (step) {
         case 1: return validateStep1();
@@ -227,49 +300,49 @@ function collectAllData() {
     const organization = document.getElementById('organization')?.value || null;
     const strategic_overview = document.getElementById('strategic_overview')?.value.trim() || null;
     const org_structure = document.getElementById('org_structure')?.value.trim() || null;
-    const total_staff = parseInt(document.getElementById('total_staff')?.value) || null;
+    const total_staff = toSafeInt(document.getElementById('total_staff')?.value, 999999, 'จำนวนบุคลากรทั้งหมด') || null;
     
     // Age distribution (4 groups)
-    const age_u30 = parseInt(document.getElementById('age_u30')?.value) || 0;
-    const age_31_40 = parseInt(document.getElementById('age_31_40')?.value) || 0;
-    const age_41_50 = parseInt(document.getElementById('age_41_50')?.value) || 0;
-    const age_51_60 = parseInt(document.getElementById('age_51_60')?.value) || 0;
+    const age_u30 = toSafeInt(document.getElementById('age_u30')?.value, 99999, 'อายุต่ำกว่า 30');
+    const age_31_40 = toSafeInt(document.getElementById('age_31_40')?.value, 99999, 'อายุ 31-40');
+    const age_41_50 = toSafeInt(document.getElementById('age_41_50')?.value, 99999, 'อายุ 41-50');
+    const age_51_60 = toSafeInt(document.getElementById('age_51_60')?.value, 99999, 'อายุ 51-60');
     
     // Service years (8 ranges)
-    const service_u1 = parseInt(document.getElementById('service_u1')?.value) || 0;
-    const service_1_5 = parseInt(document.getElementById('service_1_5')?.value) || 0;
-    const service_6_10 = parseInt(document.getElementById('service_6_10')?.value) || 0;
-    const service_11_15 = parseInt(document.getElementById('service_11_15')?.value) || 0;
-    const service_16_20 = parseInt(document.getElementById('service_16_20')?.value) || 0;
-    const service_21_25 = parseInt(document.getElementById('service_21_25')?.value) || 0;
-    const service_26_30 = parseInt(document.getElementById('service_26_30')?.value) || 0;
-    const service_over30 = parseInt(document.getElementById('service_over30')?.value) || 0;
+    const service_u1 = toSafeInt(document.getElementById('service_u1')?.value, 99999, 'อายุราชการน้อยกว่า 1 ปี');
+    const service_1_5 = toSafeInt(document.getElementById('service_1_5')?.value, 99999, 'อายุราชการ 1-5 ปี');
+    const service_6_10 = toSafeInt(document.getElementById('service_6_10')?.value, 99999, 'อายุราชการ 6-10 ปี');
+    const service_11_15 = toSafeInt(document.getElementById('service_11_15')?.value, 99999, 'อายุราชการ 11-15 ปี');
+    const service_16_20 = toSafeInt(document.getElementById('service_16_20')?.value, 99999, 'อายุราชการ 16-20 ปี');
+    const service_21_25 = toSafeInt(document.getElementById('service_21_25')?.value, 99999, 'อายุราชการ 21-25 ปี');
+    const service_26_30 = toSafeInt(document.getElementById('service_26_30')?.value, 99999, 'อายุราชการ 26-30 ปี');
+    const service_over30 = toSafeInt(document.getElementById('service_over30')?.value, 99999, 'อายุราชการมากกว่า 30 ปี');
     
     // Position types (13 levels)
-    const pos_o1 = parseInt(document.getElementById('pos_o1')?.value) || 0;
-    const pos_o2 = parseInt(document.getElementById('pos_o2')?.value) || 0;
-    const pos_o3 = parseInt(document.getElementById('pos_o3')?.value) || 0;
-    const pos_o4 = parseInt(document.getElementById('pos_o4')?.value) || 0;
-    const pos_k1 = parseInt(document.getElementById('pos_k1')?.value) || 0;
-    const pos_k2 = parseInt(document.getElementById('pos_k2')?.value) || 0;
-    const pos_k3 = parseInt(document.getElementById('pos_k3')?.value) || 0;
-    const pos_k4 = parseInt(document.getElementById('pos_k4')?.value) || 0;
-    const pos_k5 = parseInt(document.getElementById('pos_k5')?.value) || 0;
-    const pos_m1 = parseInt(document.getElementById('pos_m1')?.value) || 0;
-    const pos_m2 = parseInt(document.getElementById('pos_m2')?.value) || 0;
-    const pos_s1 = parseInt(document.getElementById('pos_s1')?.value) || 0;
-    const pos_s2 = parseInt(document.getElementById('pos_s2')?.value) || 0;
+    const pos_o1 = toSafeInt(document.getElementById('pos_o1')?.value, 99999, 'ตำแหน่ง O1');
+    const pos_o2 = toSafeInt(document.getElementById('pos_o2')?.value, 99999, 'ตำแหน่ง O2');
+    const pos_o3 = toSafeInt(document.getElementById('pos_o3')?.value, 99999, 'ตำแหน่ง O3');
+    const pos_o4 = toSafeInt(document.getElementById('pos_o4')?.value, 99999, 'ตำแหน่ง O4');
+    const pos_k1 = toSafeInt(document.getElementById('pos_k1')?.value, 99999, 'ตำแหน่ง K1');
+    const pos_k2 = toSafeInt(document.getElementById('pos_k2')?.value, 99999, 'ตำแหน่ง K2');
+    const pos_k3 = toSafeInt(document.getElementById('pos_k3')?.value, 99999, 'ตำแหน่ง K3');
+    const pos_k4 = toSafeInt(document.getElementById('pos_k4')?.value, 99999, 'ตำแหน่ง K4');
+    const pos_k5 = toSafeInt(document.getElementById('pos_k5')?.value, 99999, 'ตำแหน่ง K5');
+    const pos_m1 = toSafeInt(document.getElementById('pos_m1')?.value, 99999, 'ตำแหน่ง M1');
+    const pos_m2 = toSafeInt(document.getElementById('pos_m2')?.value, 99999, 'ตำแหน่ง M2');
+    const pos_s1 = toSafeInt(document.getElementById('pos_s1')?.value, 99999, 'ตำแหน่ง S1');
+    const pos_s2 = toSafeInt(document.getElementById('pos_s2')?.value, 99999, 'ตำแหน่ง S2');
     
     // Staff type distribution (4 types)
-    const type_official = parseInt(document.getElementById('type_official')?.value) || 0;
-    const type_employee = parseInt(document.getElementById('type_employee')?.value) || 0;
-    const type_contract = parseInt(document.getElementById('type_contract')?.value) || 0;
-    const type_other = parseInt(document.getElementById('type_other')?.value) || 0;
+    const type_official = toSafeInt(document.getElementById('type_official')?.value, 99999, 'บุคลากรประจำ');
+    const type_employee = toSafeInt(document.getElementById('type_employee')?.value, 99999, 'พนักงาน');
+    const type_contract = toSafeInt(document.getElementById('type_contract')?.value, 99999, 'พนักงานสัญญา');
+    const type_other = toSafeInt(document.getElementById('type_other')?.value, 99999, 'อื่นๆ');
     
     // Turnover and transfer
-    const turnover_count = parseInt(document.getElementById('turnover_count')?.value) || null;
+    const turnover_count = toSafeInt(document.getElementById('turnover_count')?.value, 99999, 'จำนวนลาออก') || null;
     const turnover_rate = parseFloat(document.getElementById('turnover_rate')?.value) || null;
-    const transfer_count = parseInt(document.getElementById('transfer_count')?.value) || null;
+    const transfer_count = toSafeInt(document.getElementById('transfer_count')?.value, 99999, 'จำนวนย้าย') || null;
     const transfer_rate = parseFloat(document.getElementById('transfer_rate')?.value) || null;
 
     // Step 2: นโยบายและบริบทภายนอก
@@ -277,14 +350,14 @@ function collectAllData() {
     const context_challenges = document.getElementById('context_challenges')?.value.trim() || null;
 
     // Step 3: ข้อมูลสุขภาวะ
-    const disease_diabetes = parseInt(document.getElementById('disease_diabetes')?.value) || 0;
-    const disease_hypertension = parseInt(document.getElementById('disease_hypertension')?.value) || 0;
-    const disease_cardiovascular = parseInt(document.getElementById('disease_cardiovascular')?.value) || 0;
-    const disease_kidney = parseInt(document.getElementById('disease_kidney')?.value) || 0;
-    const disease_liver = parseInt(document.getElementById('disease_liver')?.value) || 0;
-    const disease_cancer = parseInt(document.getElementById('disease_cancer')?.value) || 0;
-    const disease_obesity = parseInt(document.getElementById('disease_obesity')?.value) || 0;
-    const disease_other_count = parseInt(document.getElementById('disease_other_count')?.value) || 0;
+    const disease_diabetes = toSafeInt(document.getElementById('disease_diabetes')?.value, 99999, 'โรคเบาหวาน');
+    const disease_hypertension = toSafeInt(document.getElementById('disease_hypertension')?.value, 99999, 'โรคความดันโลหิตสูง');
+    const disease_cardiovascular = toSafeInt(document.getElementById('disease_cardiovascular')?.value, 99999, 'โรคหัวใจและหลอดเลือด');
+    const disease_kidney = toSafeInt(document.getElementById('disease_kidney')?.value, 99999, 'โรคไต');
+    const disease_liver = toSafeInt(document.getElementById('disease_liver')?.value, 99999, 'โรคตับ');
+    const disease_cancer = toSafeInt(document.getElementById('disease_cancer')?.value, 99999, 'โรคมะเร็ง');
+    const disease_obesity = toSafeInt(document.getElementById('disease_obesity')?.value, 99999, 'โรคอ้วน');
+    const disease_other_count = toSafeInt(document.getElementById('disease_other_count')?.value, 99999, 'โรคอื่นๆ');
     const disease_other_detail = document.getElementById('disease_other_detail')?.value.trim() || null;
     
     // Calculate NCD total
@@ -292,11 +365,11 @@ function collectAllData() {
                      disease_kidney + disease_liver + disease_cancer + disease_obesity + disease_other_count;
 
     // Sick leave (new fields)
-    const sick_leave_days = parseInt(document.getElementById('sick_leave_days')?.value) || null;
+    const sick_leave_days = toSafeInt(document.getElementById('sick_leave_days')?.value, 99999, 'วันลาป่วยรวม') || null;
     const sick_leave_avg = parseFloat(document.getElementById('sick_leave_avg')?.value) || null;
 
     // Clinic
-    const clinic_users_per_year = parseInt(document.getElementById('clinic_users_per_year')?.value) || null;
+    const clinic_users_per_year = toSafeInt(document.getElementById('clinic_users_per_year')?.value, 99999, 'ผู้ใช้คลินิกต่อปี') || null;
     const clinic_top_symptoms = document.getElementById('clinic_top_symptoms')?.value.trim() || null;
     const clinic_top_medications = document.getElementById('clinic_top_medications')?.value.trim() || null;
 
@@ -463,7 +536,15 @@ async function submitForm() {
         console.error('Submit error:', err);
         document.getElementById('overlay-loading').classList.add('hidden');
         document.getElementById('overlay-error').classList.remove('hidden');
-        document.getElementById('error-msg').textContent = err.message || 'เกิดข้อผิดพลาดในการส่งข้อมูล';
+        
+        // Generate detailed error message
+        const detailedError = getDetailedErrorMessage(err);
+        const errorMsgEl = document.getElementById('error-msg');
+        
+        // Use white-space: pre-wrap for better formatting
+        errorMsgEl.style.whiteSpace = 'pre-wrap';
+        errorMsgEl.style.textAlign = 'left';
+        errorMsgEl.textContent = detailedError;
     }
 }
 
