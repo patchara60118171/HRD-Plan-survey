@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>แบบสำรวจสุขภาวะบุคลากร บทที่ 1 | NIDA Well-being</title>
-    <meta name="description" content="แบบสำรวจข้อมูลสุขภาวะบุคลากรสำหรับหน่วยงานภาครัฐ">
+    <title>แบบสำรวจสุขภาวะข้าราชการ บทที่ 1 | NIDA Well-being</title>
+    <meta name="description" content="แบบสำรวจข้อมูลสุขภาวะข้าราชการสำหรับหน่วยงานภาครัฐ">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -91,6 +91,50 @@
         .age-field {
             border-color: #E2E8F0 !important;
         }
+
+        /* Upload Zone Styles */
+        .upload-zone {
+            transition: all 0.2s ease;
+        }
+        
+        .upload-zone.drag-over {
+            border-color: #3B82F6 !important;
+            background-color: #EFF6FF !important;
+        }
+        
+        .upload-zone.uploading {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+        
+        .upload-zone .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid #E2E8F0;
+            border-top-color: #0F4C81;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* File Preview Styles */
+        .file-preview-enter {
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
 </head>
 
@@ -100,7 +144,7 @@
     <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
         <div class="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <div class="font-bold text-primary text-base">แบบสำรวจสุขภาวะบุคลากร บทที่ 1</div>
+                <div class="font-bold text-primary text-base">แบบสำรวจสุขภาวะข้าราชการ บทที่ 1</div>
             </div>
             <div class="flex gap-2">
                 <button onclick="saveDraft()"
@@ -135,7 +179,7 @@
                 <div style="max-width:680px; margin:0 auto; padding:2rem 1.5rem; text-align:center">
                     <div style="font-size:3.5rem; margin-bottom:1rem">🌿</div>
                     <h1 style="font-size:1.75rem; font-weight:700; color:#2563EB; margin-bottom:0.75rem">
-                        แบบสำรวจสุขภาวะบุคลากร บทที่ 1</h1>
+                        แบบสำรวจสุขภาวะข้าราชการ บทที่ 1</h1>
                     <p style="color:#6B7280; font-size:0.95rem; line-height:1.7; max-width:520px; margin:0 auto 2rem">
                         แบบสำรวจนี้จัดทำขึ้นเพื่อรวบรวมข้อมูลจากหน่วยงานนำร่อง<br>สำหรับใช้ประกอบการจัดทำแผนปฏิบัติการสร้างเสริมสุขภาวะองค์กรข้าราชการพลเรือน
                     </p>
@@ -195,6 +239,56 @@
                         <textarea id="strategic_overview" rows="3"
                             placeholder="อธิบายภาพรวมยุทธศาสตร์และทิศทางของหน่วยงาน"
                             class="w-full border-2 border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-primary focus:outline-none transition resize-none"></textarea>
+                        
+                        <!-- PDF Upload Zone -->
+                        <div class="mt-3">
+                            <div id="upload-zone-strategy" class="upload-zone border-2 border-dashed border-slate-300 rounded-xl p-4 text-center cursor-pointer transition hover:border-primary hover:bg-primary-light/30"
+                                 onclick="document.getElementById('file-strategy').click()"
+                                 ondrop="handleFileDrop(event, 'strategy')" 
+                                 ondragover="handleFileDragOver(event, 'strategy')"
+                                 ondragleave="handleFileDragLeave(event, 'strategy')">
+                                <input type="file" id="file-strategy" accept="application/pdf" class="hidden" onchange="handleFileSelect(event, 'strategy')">
+                                <div id="upload-content-strategy">
+                                    <div class="text-3xl mb-2">📄</div>
+                                    <p class="text-sm text-slate-600 font-medium">คลิกหรือลากไฟล์ PDF มาวางที่นี่</p>
+                                    <p class="text-xs text-slate-400 mt-1">ไฟล์ PDF เท่านั้น | ขนาดไม่เกิน 512 KB</p>
+                                </div>
+                                <div id="upload-error-strategy" class="hidden mt-2">
+                                    <p class="text-xs text-red-500"></p>
+                                </div>
+                            </div>
+                            
+                            <!-- File Preview -->
+                            <div id="file-preview-strategy" class="hidden mt-3 bg-slate-50 rounded-lg p-3 border border-slate-200">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
+                                            <svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
+                                                <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"/>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p id="preview-name-strategy" class="text-sm font-medium text-slate-700 truncate max-w-[200px]"></p>
+                                            <p id="preview-size-strategy" class="text-xs text-slate-400"></p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <a id="preview-link-strategy" href="#" target="_blank" class="text-xs text-primary hover:text-primary-dark font-medium">ดูไฟล์</a>
+                                        <button onclick="removeFile('strategy')" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-200 text-slate-400 hover:text-red-500 transition">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Hidden inputs for file metadata -->
+                            <input type="hidden" id="strategy_file_path">
+                            <input type="hidden" id="strategy_file_url">
+                            <input type="hidden" id="strategy_file_name">
+                        </div>
                     </div>
 
                     <!-- 1.3 โครงสร้างองค์กร -->
@@ -204,15 +298,65 @@
                                 class="text-slate-400 font-normal">(โปรดแนบข้อมูล)</span></label>
                         <textarea id="org_structure" rows="3" placeholder="อธิบายโครงสร้างองค์กรและบทบาทหน้าที่หลัก"
                             class="w-full border-2 border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-primary focus:outline-none transition resize-none"></textarea>
+                        
+                        <!-- PDF Upload Zone -->
+                        <div class="mt-3">
+                            <div id="upload-zone-org" class="upload-zone border-2 border-dashed border-slate-300 rounded-xl p-4 text-center cursor-pointer transition hover:border-primary hover:bg-primary-light/30"
+                                 onclick="document.getElementById('file-org').click()"
+                                 ondrop="handleFileDrop(event, 'org')" 
+                                 ondragover="handleFileDragOver(event, 'org')"
+                                 ondragleave="handleFileDragLeave(event, 'org')">
+                                <input type="file" id="file-org" accept="application/pdf" class="hidden" onchange="handleFileSelect(event, 'org')">
+                                <div id="upload-content-org">
+                                    <div class="text-3xl mb-2">📄</div>
+                                    <p class="text-sm text-slate-600 font-medium">คลิกหรือลากไฟล์ PDF มาวางที่นี่</p>
+                                    <p class="text-xs text-slate-400 mt-1">ไฟล์ PDF เท่านั้น | ขนาดไม่เกิน 512 KB</p>
+                                </div>
+                                <div id="upload-error-org" class="hidden mt-2">
+                                    <p class="text-xs text-red-500"></p>
+                                </div>
+                            </div>
+                            
+                            <!-- File Preview -->
+                            <div id="file-preview-org" class="hidden mt-3 bg-slate-50 rounded-lg p-3 border border-slate-200">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
+                                            <svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
+                                                <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"/>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p id="preview-name-org" class="text-sm font-medium text-slate-700 truncate max-w-[200px]"></p>
+                                            <p id="preview-size-org" class="text-xs text-slate-400"></p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <a id="preview-link-org" href="#" target="_blank" class="text-xs text-primary hover:text-primary-dark font-medium">ดูไฟล์</a>
+                                        <button onclick="removeFile('org')" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-200 text-slate-400 hover:text-red-500 transition">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Hidden inputs for file metadata -->
+                            <input type="hidden" id="org_structure_file_path">
+                            <input type="hidden" id="org_structure_file_url">
+                            <input type="hidden" id="org_structure_file_name">
+                        </div>
                     </div>
 
                     <!-- 1.4 ข้อมูลโครงสร้างอัตรากำลัง -->
                     <div>
                         <label class="block text-sm font-semibold text-slate-700 mb-1.5">3. ข้อมูลโครงสร้างอัตรากำลัง
                             <span class="text-red-500">*</span></label>
-                        <input type="number" id="total_staff" min="1" placeholder="จำนวนบุคลากรรวม (เช่น 500)"
+                        <input type="number" id="total_staff" min="1" placeholder="จำนวนข้าราชการรวม (เช่น 500)"
                             class="w-full border-2 border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-primary focus:outline-none transition mb-4" />
-                        <p class="text-red-500 text-xs mt-1 hidden" id="err-staff">กรุณากรอกจำนวนบุคลากร</p>
+                        <p class="text-red-500 text-xs mt-1 hidden" id="err-staff">กรุณากรอกจำนวนข้าราชการ</p>
                     </div>
 
                     <!-- จำนวนอัตรากำลังจำแนกตามประเภท -->
@@ -220,7 +364,7 @@
                         <h3 class="text-sm font-bold text-slate-700 mb-3">จำนวนอัตรากำลังจำแนกตามประเภท</h3>
                         <div id="type-sum-warn"
                             class="hidden text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-3">
-                            ⚠️ ผลรวมประเภทอัตรากำลังเกินจำนวนบุคลากรรวม
+                            ⚠️ ผลรวมประเภทอัตรากำลังเกินจำนวนข้าราชการรวม
                         </div>
                         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
                             <div><label class="block text-xs text-slate-500 mb-1">ข้าราชการ</label><input type="number"
@@ -246,10 +390,10 @@
 
                     <!-- จำแนกตามช่วงอายุ (4 กลุ่ม) -->
                     <div class="bg-slate-50 rounded-xl p-4">
-                        <h3 class="text-sm font-bold text-slate-700 mb-3">จำแนกตามช่วงอายุ</h3>
+                        <h3 class="text-sm font-bold text-slate-700 mb-3">จำแนกตามช่วงอายุ(เฉพาะข้าราชการ)</h3>
                         <div id="age-sum-warn"
                             class="hidden text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-3">
-                            ⚠️ ผลรวมช่วงอายุเกินจำนวนบุคลากรรวม
+                            ⚠️ ผลรวมช่วงอายุเกินจำนวนข้าราชการรวม
                         </div>
                         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
                             <div><label class="block text-xs text-slate-500 mb-1">ไม่เกิน 30 ปี</label><input
@@ -278,7 +422,7 @@
                         <h3 class="text-sm font-bold text-slate-700 mb-3">จำแนกตามอายุราชการ</h3>
                         <div id="service-sum-warn"
                             class="hidden text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-3">
-                            ⚠️ ผลรวมอายุราชการเกินจำนวนบุคลากรรวม
+                            ⚠️ ผลรวมอายุราชการเกินจำนวนข้าราชการรวม
                         </div>
                         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
                             <div><label class="block text-xs text-slate-500 mb-1">ไม่เกิน 1 ปี</label><input
@@ -323,7 +467,7 @@
                         <h3 class="text-sm font-bold text-slate-700 mb-3">จำแนกตามประเภทและระดับตำแหน่ง</h3>
                         <div id="position-sum-warn"
                             class="hidden text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-3">
-                            ⚠️ ผลรวมประเภทและระดับตำแหน่งเกินจำนวนบุคลากรรวม
+                            ⚠️ ผลรวมประเภทและระดับตำแหน่งเกินจำนวนข้าราชการรวม
                         </div>
 
                         <div class="mb-4">
@@ -401,8 +545,6 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="text-right text-xs text-slate-400 mt-2">ผลรวม: <span id="position-total"
-                                class="font-semibold">0</span> คน</div>
                     </div>
 
                     <!-- 4. การลาออกและโอนย้าย -->
@@ -427,11 +569,14 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <!-- Row 1: ต้นปี -->
+                                    <!-- Row 1: จำนวนข้าราชการ ณ วันที่ 1 ต.ค. -->
                                     <tr>
                                         <td class="pr-3 text-slate-600 font-medium align-middle">
-                                            <div class="flex items-center gap-1">
-                                                ต้นปี (1 ต.ค.)
+                                            <div class="flex items-start gap-1">
+                                                <div>
+                                                    <div>จำนวนข้าราชการ</div>
+                                                    <div class="text-slate-400 text-xs mt-1">ต้นปี (1 ต.ค.)</div>
+                                                </div>
                                                 <span class="relative group cursor-pointer">
                                                     <span class="text-blue-400 text-xs">ℹ️</span>
                                                     <div
@@ -463,11 +608,14 @@
                                         </td>
                                     </tr>
 
-                                    <!-- Row 2: ปลายปี -->
+                                    <!-- Row 2: จำนวนข้าราชการ ณ วันที่ 30 ก.ย. -->
                                     <tr>
                                         <td class="pr-3 text-slate-600 font-medium align-middle">
-                                            <div class="flex items-center gap-1">
-                                                ปลายปี (30 ก.ย.)
+                                            <div class="flex items-start gap-1">
+                                                <div>
+                                                    <div>จำนวนข้าราชการ</div>
+                                                    <div class="text-slate-400 text-xs mt-1">ปลายปี (30 ก.ย.)</div>
+                                                </div>
                                                 <span class="relative group cursor-pointer">
                                                     <span class="text-blue-400 text-xs">ℹ️</span>
                                                     <div
@@ -499,16 +647,19 @@
                                         </td>
                                     </tr>
 
-                                    <!-- Row 3: ลาออกและโอนย้าย -->
+                                    <!-- Row 3: จำนวนข้าราชการที่ลาออกและโอนย้าย -->
                                     <tr>
                                         <td class="pr-3 text-slate-600 font-medium align-middle">
-                                            <div class="flex items-center gap-1">
-                                                ลาออกและโอนย้าย
+                                            <div class="flex items-start gap-1">
+                                                <div>
+                                                    <div>จำนวนข้าราชการ</div>
+                                                    <div class="text-slate-400 text-xs mt-1">ลาออกและโอนย้าย</div>
+                                                </div>
                                                 <span class="relative group cursor-pointer">
                                                     <span class="text-blue-400 text-xs">ℹ️</span>
                                                     <div
                                                         class="absolute left-0 bottom-full mb-1 w-48 bg-slate-800 text-white text-xs rounded-lg px-2 py-1.5 opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none shadow-lg">
-                                                        จำนวนผู้ลาออกและโอนย้าย ตั้งแต่ 1 ต.ค. ถึง 30 ก.ย. ปีถัดไป
+                                                        จำนวนข้าราชการลาออกและโอนย้าย ตั้งแต่ 1 ต.ค. ถึง 30 ก.ย. ปีถัดไป
                                                     </div>
                                                 </span>
                                             </div>
@@ -623,7 +774,7 @@
                     <div>
                         <label class="block text-sm font-semibold text-slate-700 mb-1.5">5.
                             นโยบายและยุทธศาสตร์ที่เกี่ยวข้อง</label>
-                        <p class="text-xs text-slate-500 mb-2">โปรดระบุนโยบายที่หน่วยงานเลือกใช้ในการพัฒนาสุขภาวะบุคลากร
+                        <p class="text-xs text-slate-500 mb-2">โปรดระบุนโยบายที่หน่วยงานเลือกใช้ในการพัฒนาสุขภาวะข้าราชการ
                         </p>
                         <textarea id="related_policies" rows="4" placeholder="ระบุนโยบายที่เกี่ยวข้อง..."
                             class="w-full border-2 border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-primary focus:outline-none transition resize-none"></textarea>
@@ -640,17 +791,17 @@
                 </div>
             </div>
 
-            <!-- STEP 3: ข้อมูลสุขภาวะของบุคลากร -->
+            <!-- STEP 3: ข้อมูลสุขภาวะของข้าราชการ -->
             <div class="form-step" data-step="3">
-                <h2 class="text-xl font-bold text-primary mb-1">🩺 ส่วนที่ 3: ข้อมูลสุขภาวะของบุคลากรในปีที่ผ่านมา</h2>
-                <p class="text-slate-500 text-sm mb-6">ข้อมูลสุขภาพกาย สุขภาพจิต และการลาป่วย</p>
+                <h2 class="text-xl font-bold text-primary mb-1">🩺 ส่วนที่ 3: ข้อมูลสุขภาวะของข้าราชการในปีที่ผ่านมา</h2>
+                <p class="text-slate-500 text-sm mb-6">ข้อมูลสุขภาพกาย สุขภาพจิต และการลาป่วย (หากไม่สามารถแยกเฉพาะข้าราชการได้ ให้ระบุข้อมูลรวมของบุคลากรทั้งหมดแทน)</p>
 
                 <div class="space-y-5">
                     <!-- 7. สุขภาวะทางกาย -->
                     <div class="bg-slate-50 rounded-xl p-4">
                         <h3 class="text-sm font-bold text-slate-700 mb-3">7. สุขภาวะทางกาย <span
                                 class="text-slate-400 font-normal">(ข้อมูลปีล่าสุด หรือย้อนหลังไม่เกิน 5 ปี)</span></h3>
-                        <p class="text-xs text-slate-500 mb-3">โปรดระบุจำนวนบุคลากรที่มีภาวะดังต่อไปนี้:</p>
+                        <p class="text-xs text-slate-500 mb-3">โปรดระบุจำนวนข้าราชการที่มีภาวะดังต่อไปนี้:</p>
                         <div class="grid grid-cols-2 gap-4">
                             <div><label class="block text-xs text-slate-500 mb-1">เบาหวาน</label><input type="number"
                                     id="disease_diabetes" min="0" value="0"
@@ -805,7 +956,7 @@
                 <div class="space-y-5">
                     <!-- 13. สถานะระบบการบริหารบุคลากร -->
                     <div class="bg-slate-50 rounded-xl p-4">
-                        <h3 class="text-sm font-bold text-slate-700 mb-3">13. สถานะระบบการบริหารบุคลากร</h3>
+                        <h3 class="text-sm font-bold text-slate-700 mb-3">13. สถานะระบบการบริหารบุคลากร(เฉพาะข้าราชการ)</h3>
                         <p class="text-xs text-slate-500 mb-3">โปรดระบุว่า มีตามแผน / มีไม่ครบตามแผน / ไม่มี</p>
                         <div class="space-y-3" id="support-systems">
                             <!-- JS will render radio options here -->
@@ -897,15 +1048,6 @@
                             </label>
                         </div>
                     </div>
-
-                    <!-- 17. ผลการวิเคราะห์สถานการณ์สุขภาวะ -->
-                    <div class="bg-slate-50 rounded-xl p-4">
-                        <h3 class="text-sm font-bold text-slate-700 mb-3">17.
-                            ผลการวิเคราะห์สถานการณ์สุขภาวะของบุคลากรจากแบบสอบถามที่จัดเก็บโดยหน่วยงาน</h3>
-                        <p class="text-xs text-slate-500 mb-2">โปรดแนบข้อมูล</p>
-                        <textarea id="wellbeing_analysis" rows="4" placeholder="สรุปผลการวิเคราะห์..."
-                            class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm resize-none"></textarea>
-                    </div>
                 </div>
             </div>
 
@@ -915,9 +1057,9 @@
                 <p class="text-slate-500 text-sm mb-6">จุดเน้นการพัฒนาและข้อเสนอแนะ</p>
 
                 <div class="space-y-5">
-                    <!-- 18. จุดเน้นการพัฒนา -->
+                    <!-- 17. จุดเน้นการพัฒนา -->
                     <div class="bg-slate-50 rounded-xl p-4">
-                        <h3 class="text-sm font-bold text-slate-700 mb-3">18. จุดเน้นการพัฒนา</h3>
+                        <h3 class="text-sm font-bold text-slate-700 mb-3">17. จุดเน้นการพัฒนา</h3>
                         <p class="text-xs text-slate-500 mb-3">โปรดเลือกไม่เกิน 3 ประเด็นสำคัญที่ประสงค์ให้แผน HRD
                             สนับสนุนโดยตรง และจัดลำดับ 1-3</p>
                         <div class="space-y-2" id="priority-chips">
@@ -966,19 +1108,17 @@
                             (ไม่เกิน 3 ประเด็น)</p>
                     </div>
 
-                    <!-- 19. ข้อเสนอแนะ Intervention Packages -->
+                    <!-- 18. ข้อเสนอแนะเกี่ยวกับฐานข้อมูล Intervention Packages -->
                     <div class="bg-slate-50 rounded-xl p-4">
-                        <h3 class="text-sm font-bold text-slate-700 mb-3">19. ข้อเสนอแนะเกี่ยวกับฐานข้อมูล Intervention
-                            Packages เพิ่มเติม <span class="text-slate-400 font-normal">(ถ้ามี)</span></h3>
-                        <textarea id="intervention_suggestions" rows="4"
-                            placeholder="ข้อเสนอแนะเกี่ยวกับ Intervention Packages..."
+                        <h3 class="text-sm font-bold text-slate-700 mb-3">18. ข้อเสนอแนะเกี่ยวกับฐานข้อมูล Intervention Packages <span class="text-slate-400 font-normal">(ถ้ามี)</span></h3>
+                        <textarea id="intervention_packages_feedback" rows="4" placeholder="โปรดระบุข้อเสนอแนะเกี่ยวกับฐานข้อมูล Intervention Packages..."
                             class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm resize-none"></textarea>
                     </div>
 
-                    <!-- 20. ไฟล์ HRD PLAN -->
+                    <!-- 19. ไฟล์ HRD PLAN -->
                     <div class="bg-slate-50 rounded-xl p-4">
-                        <h3 class="text-sm font-bold text-slate-700 mb-3">20. ไฟล์ HRD PLAN ปี 2567-2570
-                            พร้อมผลการปฏิบัติงานตามแผนในปีล่าสุด</h3>
+                        <h3 class="text-sm font-bold text-slate-700 mb-3">19. ไฟล์ HRD PLAN ปี 2567-2570
+                            พร้อมผลการปฏิบัติงานตามแผนในปีล่าสุด <span class="text-slate-400 font-normal">(ถ้ามี)</span></h3>
                         <div class="space-y-3">
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-1">ลิงก์ไฟล์แผน HRD</label>
@@ -990,6 +1130,57 @@
                                     class="block text-sm font-medium text-slate-700 mb-1">ผลการปฏิบัติงานตามแผนปีล่าสุด</label>
                                 <textarea id="hrd_plan_results" rows="3" placeholder="สรุปผลการปฏิบัติงาน..."
                                     class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm resize-none"></textarea>
+                            </div>
+
+                            <!-- PDF Upload Zone -->
+                            <div class="mt-3">
+                                <label class="block text-sm font-medium text-slate-700 mb-1">หรือแนบไฟล์ PDF</label>
+                                <div id="upload-zone-hrd" class="upload-zone border-2 border-dashed border-slate-300 rounded-xl p-4 text-center cursor-pointer transition hover:border-primary hover:bg-primary-light/30"
+                                     onclick="document.getElementById('file-hrd').click()"
+                                     ondrop="handleFileDrop(event, 'hrd')" 
+                                     ondragover="handleFileDragOver(event, 'hrd')"
+                                     ondragleave="handleFileDragLeave(event, 'hrd')">
+                                    <input type="file" id="file-hrd" accept="application/pdf" class="hidden" onchange="handleFileSelect(event, 'hrd')">
+                                    <div id="upload-content-hrd">
+                                        <div class="text-3xl mb-2">📄</div>
+                                        <p class="text-sm text-slate-600 font-medium">คลิกหรือลากไฟล์ PDF มาวางที่นี่</p>
+                                        <p class="text-xs text-slate-400 mt-1">ไฟล์ PDF เท่านั้น | ขนาดไม่เกิน 512 KB</p>
+                                    </div>
+                                    <div id="upload-error-hrd" class="hidden mt-2">
+                                        <p class="text-xs text-red-500"></p>
+                                    </div>
+                                </div>
+                                
+                                <!-- File Preview -->
+                                <div id="file-preview-hrd" class="hidden mt-3 bg-slate-50 rounded-lg p-3 border border-slate-200">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
+                                                <svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
+                                                    <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"/>
+                                                </svg>
+                                            </div>
+                                            <div>
+                                                <p id="preview-name-hrd" class="text-sm font-medium text-slate-700 truncate max-w-[200px]"></p>
+                                                <p id="preview-size-hrd" class="text-xs text-slate-400"></p>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <a id="preview-link-hrd" href="#" target="_blank" class="text-xs text-primary hover:text-primary-dark font-medium">ดูไฟล์</a>
+                                            <button onclick="removeFile('hrd')" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-200 text-slate-400 hover:text-red-500 transition">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Hidden inputs for file metadata -->
+                                <input type="hidden" id="hrd_plan_file_path">
+                                <input type="hidden" id="hrd_plan_file_url">
+                                <input type="hidden" id="hrd_plan_file_name">
                             </div>
                         </div>
                     </div>
@@ -1055,7 +1246,57 @@
     </div>
 
     <script src="js/supabase-config.js"></script>
+    <script src="js/loading-states.js"></script>
+    <script src="js/rate-limiter.js"></script>
+    <script src="js/progress-persistence.js"></script>
+    <script src="js/error-tracker.js"></script>
+    <script src="js/analytics.js"></script>
+    <script src="js/web-vitals.js"></script>
     <script src="js/ch1-form.js"></script>
+    <script src="js/pdf-upload.js"></script>
+
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then((registration) => {
+                        console.log('[SW] Registered:', registration.scope);
+
+                        // ตรวจสอบ update
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    // มีเวอร์ชันใหม่
+                                    console.log('[SW] New version available');
+                                    if (confirm('มีเวอร์ชันใหม่ของแอปพลิเคชัน ต้องการอัปเดตตอนนี้หรือไม่?')) {
+                                        newWorker.postMessage({ type: 'SKIP_WAITING' });
+                                        window.location.reload();
+                                    }
+                                }
+                            });
+                        });
+                    })
+                    .catch((error) => {
+                        console.error('[SW] Registration failed:', error);
+                    });
+
+                // รับข้อความจาก Service Worker
+                navigator.serviceWorker.addEventListener('message', (event) => {
+                    if (event.data.type === 'SYNC_COMPLETE') {
+                        showToast(event.data.message, 'success');
+                    }
+                });
+            });
+        }
+
+        // ตั้งค่า Google Analytics Measurement ID (แก้ไขเป็นของจริง)
+        window.GA_MEASUREMENT_ID = 'G-XXXXXXXXXX';
+
+        // ตั้งค่า Sentry DSN (แก้ไขเป็นของจริงถ้าใช้)
+        // window.SENTRY_DSN = 'https://xxxx@yyyy.ingest.sentry.io/zzzz';
+    </script>
 </body>
 
 </html>
