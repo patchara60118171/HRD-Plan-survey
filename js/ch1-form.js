@@ -10,6 +10,15 @@ let currentStep = 0;
 let lastPayload = null;
 let respondentEmail = '';
 
+// Click to Rank Logic
+const RANK_COLORS = [
+    { bg: 'bg-yellow-400', text: 'text-white', border: 'border-yellow-400', itemBg: 'bg-yellow-50', emoji: '🥇' },
+    { bg: 'bg-slate-400', text: 'text-white', border: 'border-slate-400', itemBg: 'bg-slate-50', emoji: '🥈' },
+    { bg: 'bg-amber-600', text: 'text-white', border: 'border-amber-500', itemBg: 'bg-amber-50', emoji: '🥉' },
+];
+
+let selectedRanks = []; // เก็บ value ตามลำดับที่คลิก [rank1, rank2, rank3]
+
 // =============================================
 // STATIC DATA
 // =============================================
@@ -52,8 +61,89 @@ document.addEventListener('DOMContentLoaded', () => {
     updateUI();
     setupNegativeGuards();
     setupAgeWatcher();
+    setupRankItems();
     startAutoSave();
 });
+
+// =============================================
+// LOGIC FOR "CLICK TO RANK"
+// =============================================
+function setupRankItems() {
+    document.querySelectorAll('.rank-item').forEach(item => {
+        item.addEventListener('click', () => {
+            const value = item.dataset.value;
+            const currentIndex = selectedRanks.indexOf(value);
+
+            if (currentIndex !== -1) {
+                // ยกเลิกการเลือก
+                selectedRanks.splice(currentIndex, 1);
+            } else {
+                if (selectedRanks.length >= 3) return; // เลือกครบแล้ว
+                selectedRanks.push(value);
+            }
+
+            // toggle อื่นๆ input
+            if (value === 'other') {
+                const input = item.querySelector('.other-input');
+                if (input) {
+                    input.classList.toggle('hidden', !selectedRanks.includes('other'));
+                }
+            }
+
+            renderRanks();
+        });
+    });
+}
+
+function renderRanks() {
+    document.querySelectorAll('.rank-item').forEach(item => {
+        const value = item.dataset.value;
+        const rankIndex = selectedRanks.indexOf(value);
+        const badge = item.querySelector('.rank-badge');
+
+        // Reset styles
+        item.className = item.className
+            .replace(/border-yellow-400|border-slate-400|border-amber-500/g, 'border-gray-200')
+            .replace(/bg-yellow-50|bg-slate-50|bg-amber-50/g, '');
+
+        badge.className = `rank-badge w-10 h-10 rounded-full flex items-center justify-center 
+                           bg-gray-100 text-gray-400 font-bold text-sm shrink-0 transition-all duration-200`;
+        badge.textContent = '—';
+
+        if (rankIndex !== -1) {
+            const color = RANK_COLORS[rankIndex];
+            item.classList.replace('border-gray-200', color.border);
+            item.classList.add(color.itemBg);
+            badge.className = `rank-badge w-10 h-10 rounded-full flex items-center justify-center 
+                               ${color.bg} ${color.text} font-bold text-sm shrink-0 transition-all duration-200`;
+            badge.textContent = `${color.emoji}`;
+        }
+    });
+
+    // Update counter
+    const counterEl = document.getElementById('counter');
+    if (counterEl) {
+        counterEl.textContent = selectedRanks.length;
+    }
+
+    // Update summary bar
+    const bar = document.getElementById('summaryBar');
+    const content = document.getElementById('summaryContent');
+    if (bar && content) {
+        if (selectedRanks.length > 0) {
+            bar.classList.remove('hidden');
+            content.innerHTML = selectedRanks.map((val, i) => {
+                const label = document.querySelector(`[data-value="${val}"] span`)?.textContent || val;
+                const colors = ['bg-yellow-100 text-yellow-800', 'bg-slate-200 text-slate-800', 'bg-amber-100 text-amber-800'];
+                return `<span class="px-3 py-1 rounded-full text-xs font-medium ${colors[i]}">
+                          อันดับ ${i + 1}: ${label.substring(0, 20)}${label.length > 20 ? '...' : ''}
+                        </span>`;
+            }).join('');
+        } else {
+            bar.classList.add('hidden');
+        }
+    }
+}
 
 // =============================================
 // BUILDERS
@@ -200,25 +290,17 @@ function validateStep1() {
 }
 
 function validateStep5() {
-    // Check at least one priority selected
-    const priorities = document.querySelectorAll('input[name="strategic_priority"]:checked');
-    const otherChecked = document.querySelector('input[name="strategic_priority"][value="other"]')?.checked;
-    const otherText = document.getElementById('strategic_priority_other')?.value.trim();
-    
     let valid = true;
     
-    if (priorities.length === 0) {
+    if (selectedRanks.length === 0) {
         showError('err-priority', true);
-        valid = false;
-    } else if (priorities.length > 3) {
-        showToast('กรุณาเลือกไม่เกิน 3 ประเด็น', 'error');
         valid = false;
     } else {
         showError('err-priority', false);
     }
     
     // If "other" selected, must have text
-    if (otherChecked && !otherText) {
+    if (selectedRanks.includes('other') && !document.getElementById('strategic_priority_other')?.value.trim()) {
         showToast('กรุณาระบุประเด็นอื่น ๆ', 'error');
         valid = false;
     }
@@ -343,15 +425,23 @@ function collectAllData() {
         ergonomics_detail = document.getElementById('ergonomics_done_detail')?.value.trim() || null;
     }
     
-    // Wellbeing analysis
-    const wellbeing_analysis = document.getElementById('wellbeing_analysis')?.value.trim() || null;
-
     // Step 5: ทิศทาง เป้าหมาย และข้อเสนอแนะ
-    const selectedPriorities = [...document.querySelectorAll('input[name="strategic_priority"]:checked')].map(cb => cb.value);
     const strategic_priority_other = document.getElementById('strategic_priority_other')?.value.trim() || null;
-    const intervention_suggestions = document.getElementById('intervention_suggestions')?.value.trim() || null;
     const hrd_plan_url = document.getElementById('hrd_plan_url')?.value.trim() || null;
     const hrd_plan_results = document.getElementById('hrd_plan_results')?.value.trim() || null;
+
+    // File attachments (Section 1)
+    const strategy_file_path = document.getElementById('strategy_file_path')?.value || null;
+    const strategy_file_url = document.getElementById('strategy_file_url')?.value || null;
+    const strategy_file_name = document.getElementById('strategy_file_name')?.value || null;
+    const org_structure_file_path = document.getElementById('org_structure_file_path')?.value || null;
+    const org_structure_file_url = document.getElementById('org_structure_file_url')?.value || null;
+    const org_structure_file_name = document.getElementById('org_structure_file_name')?.value || null;
+    
+    // File attachments (Section 5 - HRD Plan)
+    const hrd_plan_file_path = document.getElementById('hrd_plan_file_path')?.value || null;
+    const hrd_plan_file_url = document.getElementById('hrd_plan_file_url')?.value || null;
+    const hrd_plan_file_name = document.getElementById('hrd_plan_file_name')?.value || null;
 
     return {
         // Metadata
@@ -394,13 +484,24 @@ function collectAllData() {
         training_hours,
         digital_systems: digitalSystems.length ? digitalSystems : null,
         ergonomics_status, ergonomics_detail,
-        wellbeing_analysis,
         
         // Step 5: ทิศทางและเป้าหมาย
-        strategic_priorities: selectedPriorities.length ? selectedPriorities : null,
+        strategic_priorities: selectedRanks.length ? selectedRanks : null,
         strategic_priority_other,
-        intervention_suggestions,
         hrd_plan_url, hrd_plan_results,
+
+        // File attachments (Section 1)
+        strategy_file_path,
+        strategy_file_url,
+        strategy_file_name,
+        org_structure_file_path,
+        org_structure_file_url,
+        org_structure_file_name,
+
+        // File attachments (Section 5 - HRD Plan)
+        hrd_plan_file_path,
+        hrd_plan_file_url,
+        hrd_plan_file_name,
     };
 }
 
@@ -423,6 +524,12 @@ async function submitForm() {
         document.getElementById('overlay-loading').classList.add('hidden');
         document.getElementById('overlay-success').classList.remove('hidden');
         document.getElementById('success-ref').textContent = `Ref: ${data[0]?.id || 'N/A'}`;
+        
+        // Mark files as saved to prevent cleanup
+        window.formSubmitted = true;
+        if (window.uploadedFiles) {
+            window.uploadedFiles.clear();
+        }
         
         // Clear draft
         localStorage.removeItem('wellbeing_ch1_draft_v3');
@@ -506,11 +613,62 @@ function restoreFormData(data) {
         });
     }
     
+    // Restore ranks
     if (data.strategic_priorities && Array.isArray(data.strategic_priorities)) {
-        data.strategic_priorities.forEach(val => {
-            const cb = document.querySelector(`input[name="strategic_priority"][value="${val}"]`);
-            if (cb) cb.checked = true;
-        });
+        selectedRanks = [...data.strategic_priorities];
+        renderRanks();
+        
+        if (selectedRanks.includes('other')) {
+            const otherInput = document.getElementById('strategic_priority_other');
+            if (otherInput) {
+                otherInput.classList.remove('hidden');
+                otherInput.value = data.strategic_priority_other || '';
+            }
+        }
+    }
+    
+    // Restore file attachments preview
+    if (data.strategy_file_path && data.strategy_file_url) {
+        document.getElementById('strategy_file_path').value = data.strategy_file_path;
+        document.getElementById('strategy_file_url').value = data.strategy_file_url;
+        document.getElementById('strategy_file_name').value = data.strategy_file_name || '';
+        if (window.showFilePreview) {
+            window.showFilePreview('strategy', {
+                path: data.strategy_file_path,
+                publicUrl: data.strategy_file_url,
+                fileName: data.strategy_file_name || 'ไฟล์ PDF',
+                fileSize: 0
+            });
+        }
+    }
+    
+    if (data.org_structure_file_path && data.org_structure_file_url) {
+        document.getElementById('org_structure_file_path').value = data.org_structure_file_path;
+        document.getElementById('org_structure_file_url').value = data.org_structure_file_url;
+        document.getElementById('org_structure_file_name').value = data.org_structure_file_name || '';
+        if (window.showFilePreview) {
+            window.showFilePreview('org', {
+                path: data.org_structure_file_path,
+                publicUrl: data.org_structure_file_url,
+                fileName: data.org_structure_file_name || 'ไฟล์ PDF',
+                fileSize: 0
+            });
+        }
+    }
+    
+    // Restore HRD file attachment preview
+    if (data.hrd_plan_file_path && data.hrd_plan_file_url) {
+        document.getElementById('hrd_plan_file_path').value = data.hrd_plan_file_path;
+        document.getElementById('hrd_plan_file_url').value = data.hrd_plan_file_url;
+        document.getElementById('hrd_plan_file_name').value = data.hrd_plan_file_name || '';
+        if (window.showFilePreview) {
+            window.showFilePreview('hrd', {
+                path: data.hrd_plan_file_path,
+                publicUrl: data.hrd_plan_file_url,
+                fileName: data.hrd_plan_file_name || 'ไฟล์ PDF',
+                fileSize: 0
+            });
+        }
     }
 }
 
@@ -653,3 +811,6 @@ window.saveDraft = saveDraft;
 window.loadDraft = loadDraft;
 window.retrySubmit = retrySubmit;
 window.hideOverlay = hideOverlay;
+
+// Export for pdf-upload.js
+window.ch1Sb = ch1Sb;
