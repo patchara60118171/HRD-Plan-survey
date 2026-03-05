@@ -14,12 +14,23 @@ node_modules/
 .env.development
 .env.test
 
-# ===== ห้าม commit ไฟล์พวกนี้อีก =====
+# ===== Test Artifacts (Auto-generated) =====
+# Screenshots from test failures
+test-*-failure.png
+error-round-*.png
+playwright-*-fail-*.png
+screenshot-*.png
+
+# Test output files
+test-results.json
+playwright-ch1-results.json
+playwright-run.log
+
 # Debug files
 debug-*.js
 debug-*.html
 
-# Test files  
+# Test files (keep only essential ones)
 test-*.js
 *.test.js
 *.spec.js
@@ -28,11 +39,19 @@ connection-test.js
 correct-inspector.js
 playwright.config.*
 
-# Test output
+# Test output directories
 screenshots/
 test-results/
 playwright-report/
 
-# Temp
+# Temp files
 add-email-column.js
 *.tmp
+
+# Generated test data (can be regenerated)
+generate-*.js
+!scripts/generate-test-pdfs.js
+
+# Old database analysis
+database-analysis.js
+database-analysis-report.md
