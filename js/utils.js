@@ -224,29 +224,58 @@ function exportToExcel(responses, userInfo) {
     showToast('ดาวน์โหลด Excel สำเร็จ!', 'success');
 }
 
-// Google Sheets Export (requires user to be logged in)
-async function exportToGoogleSheets(responses, accessToken) {
+// Retry wrapper for API calls
+async function retryApiCall(apiCall, maxRetries = 3, delay = 1000) {
+    for (let i = 0; i < maxRetries; i++) {
+        try {
+            const response = await apiCall();
+            return response;
+        } catch (error) {
+            if (i === maxRetries - 1) throw error;
+            
+            // Check if it's a 503 or rate limit error
+            if (error.status === 503 || error.status === 429) {
+                console.warn(`API call failed (attempt ${i + 1}/${maxRetries}), retrying in ${delay}ms...`);
+                await new Promise(resolve => setTimeout(resolve, delay));
+                delay *= 2; // Exponential backoff
+            } else {
+                throw error; // Don't retry on other errors
+            }
+        }
+    }
+}
+
+// Export to Google Sheets
+async function exportToGoogleSheets(responses) {
+    const accessToken = localStorage.getItem('google_access_token');
     if (!accessToken) {
         showToast('กรุณาเข้าสู่ระบบด้วย Google ก่อน', 'error');
         return;
     }
 
     try {
-        // Create new spreadsheet
-        const createResponse = await fetch('https://sheets.googleapis.com/v4/spreadsheets', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${accessToken}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                properties: {
-                    title: `แบบสำรวจสุขภาวะ - ${new Date().toLocaleDateString('th-TH')}`
-                }
-            })
+        // Create new spreadsheet with retry
+        const createResponse = await retryApiCall(async () => {
+            const response = await fetch('https://sheets.googleapis.com/v4/spreadsheets', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    properties: {
+                        title: `แบบสำรวจสุขภาวะ - ${new Date().toLocaleDateString('th-TH')}`
+                    }
+                })
+            });
+            
+            if (!response.ok) {
+                const error = new Error('Failed to create spreadsheet');
+                error.status = response.status;
+                throw error;
+            }
+            return response;
         });
-
-        if (!createResponse.ok) throw new Error('Failed to create spreadsheet');
 
         const spreadsheet = await createResponse.json();
         const spreadsheetId = spreadsheet.spreadsheetId;
@@ -262,14 +291,23 @@ async function exportToGoogleSheets(responses, accessToken) {
             values.push([key, Array.isArray(value) ? value.join(', ') : value]);
         });
 
-        // Update spreadsheet
-        await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/A1:B${values.length}?valueInputOption=RAW`, {
-            method: 'PUT',
-            headers: {
-                'Authorization': `Bearer ${accessToken}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ values })
+        // Update spreadsheet with retry
+        await retryApiCall(async () => {
+            const response = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/A1:B${values.length}?valueInputOption=RAW`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ values })
+            });
+            
+            if (!response.ok) {
+                const error = new Error('Failed to update spreadsheet');
+                error.status = response.status;
+                throw error;
+            }
+            return response;
         });
 
         // Open spreadsheet
@@ -278,7 +316,16 @@ async function exportToGoogleSheets(responses, accessToken) {
 
     } catch (error) {
         console.error('Google Sheets export error:', error);
-        showToast('ไม่สามารถสร้าง Google Sheets ได้', 'error');
+        
+        if (error.status === 503) {
+            showToast('Google Sheets มีปัญหาชั่วคราว กรุณาลองใหม่ภายหลัง', 'error');
+        } else if (error.status === 401) {
+            showToast('กรุณาเข้าสู่ระบบด้วย Google ใหม่', 'error');
+            // Clear invalid token
+            localStorage.removeItem('google_access_token');
+        } else {
+            showToast('ไม่สามารถสร้าง Google Sheets ได้: ' + error.message, 'error');
+        }
     }
 }
 
