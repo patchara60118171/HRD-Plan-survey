@@ -147,3 +147,36 @@ COMMENT ON COLUMN hrd_ch1_responses.type_other IS 'จำนวนอื่น�
 -- =============================================
 -- Migration completed successfully
 -- =============================================
+
+-- Display final column count
+SELECT 
+    'hrd_ch1_responses' as table_name,
+    COUNT(*) as column_count
+FROM information_schema.columns 
+WHERE table_name = 'hrd_ch1_responses';
+
+-- Display form version from actual data
+SELECT 
+    COUNT(*) as total_records,
+    COUNT(DISTINCT form_version) as version_count,
+    form_version
+FROM hrd_ch1_responses 
+WHERE form_version IS NOT NULL
+GROUP BY form_version
+ORDER BY form_version DESC;
+
+-- Display new columns added
+SELECT column_name, data_type, is_nullable
+FROM information_schema.columns 
+WHERE table_name = 'hrd_ch1_responses'
+AND column_name IN (
+    'strategy_file_path', 'strategy_file_url', 'strategy_file_name',
+    'org_structure_file_path', 'org_structure_file_url', 'org_structure_file_name',
+    'hrd_plan_file_path', 'hrd_plan_file_url', 'hrd_plan_file_name',
+    'strategic_priority_rank1', 'strategic_priority_rank2', 'strategic_priority_rank3',
+    'strategic_priority_other', 'intervention_packages_feedback',
+    'support_systems', 'ergonomics_planned_detail', 'ergonomics_in_progress_detail',
+    'ergonomics_done_detail', 'total_staff', 'sick_leave_days', 'sick_leave_avg',
+    'form_version'
+)
+ORDER BY column_name;

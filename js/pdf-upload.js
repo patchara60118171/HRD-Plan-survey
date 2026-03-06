@@ -4,7 +4,7 @@
 // =============================================
 
 const MAX_FILE_SIZE = 512 * 1024; // 512 KB in bytes
-const BUCKET_NAME = 'survey-attachments';
+const BUCKET_NAME = 'hrd-documents';
 
 // Store uploaded file paths for cleanup (if user leaves without saving)
 const uploadedFiles = new Set();
