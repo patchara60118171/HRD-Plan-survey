@@ -12,6 +12,9 @@
   <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+  <script src="js/sarabun-font.js"></script>
   <style>
     *,
     *::before,
@@ -1494,18 +1497,44 @@
         </div>
         <div class="card">
           <div class="tw">
-            <table class="dt">
+            <table class="dt" style="min-width:2800px">
               <thead>
                 <tr>
-                  <th>#</th>
-                  <th>วันที่</th>
-                  <th>org_code</th>
-                  <th>หน่วยงาน</th>
-                  <th>บุคลากร</th>
-                  <th>NCD รวม</th>
-                  <th>NCD %</th>
-                  <th>ลาออก%</th>
-                  <th>Actions</th>
+                  <th style="min-width:36px">#</th>
+                  <th style="min-width:110px">วันที่</th>
+                  <th style="min-width:80px">org_code</th>
+                  <th style="min-width:180px">หน่วยงาน</th>
+                  <th style="min-width:80px" title="บุคลากรรวม">บุคลากรรวม</th>
+                  <th style="min-width:70px" title="ข้าราชการ">ข้าราชการ</th>
+                  <th style="min-width:80px" title="พนักงานราชการ">พนักงานฯ</th>
+                  <th style="min-width:60px" title="ลูกจ้าง">ลูกจ้าง</th>
+                  <th style="min-width:60px" title="อายุ ≤30">อายุ≤30</th>
+                  <th style="min-width:60px" title="อายุ 31-40">31-40</th>
+                  <th style="min-width:60px" title="อายุ 41-50">41-50</th>
+                  <th style="min-width:60px" title="อายุ 51-60">51-60</th>
+                  <th style="min-width:60px" title="อัตราลาออก %">ลาออก%</th>
+                  <th style="min-width:60px" title="อัตราโอนย้าย %">โอนย้าย%</th>
+                  <th style="min-width:60px">NCD รวม</th>
+                  <th style="min-width:60px">NCD%</th>
+                  <th style="min-width:60px" title="เบาหวาน">เบาหวาน</th>
+                  <th style="min-width:60px" title="ความดัน">ความดัน</th>
+                  <th style="min-width:60px" title="หัวใจ">หัวใจ</th>
+                  <th style="min-width:60px" title="ไต">ไต</th>
+                  <th style="min-width:60px" title="ตับ">ตับ</th>
+                  <th style="min-width:60px" title="มะเร็ง">มะเร็ง</th>
+                  <th style="min-width:60px" title="อ้วน">อ้วน</th>
+                  <th style="min-width:80px" title="วันลาป่วยรวม/ปี">ลาป่วยรวม</th>
+                  <th style="min-width:80px" title="วันลาป่วยเฉลี่ย/คน">ลาป่วยเฉลี่ย</th>
+                  <th style="min-width:90px" title="Employee Engagement">Engagement</th>
+                  <th style="min-width:70px" title="ระบบพี่เลี้ยง">พี่เลี้ยง</th>
+                  <th style="min-width:80px" title="Job Rotation">Job Rot.</th>
+                  <th style="min-width:60px" title="IDP">IDP</th>
+                  <th style="min-width:80px" title="Career Path">Career Path</th>
+                  <th style="min-width:80px" title="ชั่วโมงอบรม">ชั่วโมงอบรม</th>
+                  <th style="min-width:130px" title="จุดเน้น อันดับ 1">จุดเน้น 1</th>
+                  <th style="min-width:130px" title="จุดเน้น อันดับ 2">จุดเน้น 2</th>
+                  <th style="min-width:130px" title="จุดเน้น อันดับ 3">จุดเน้น 3</th>
+                  <th style="min-width:100px">Actions</th>
                 </tr>
               </thead>
               <tbody id="c1-tb"></tbody>
@@ -2424,20 +2453,53 @@ CREATE INDEX IF NOT EXISTS idx_ch1_sub ON hrd_ch1_responses(submitted_at);</pre>
       });
       ch1Page = 1; renderCh1Table();
     }
+    const STRATEGIC_LABELS = { service_efficiency: 'เพิ่มประสิทธิภาพบริการ', digital_capability: 'พัฒนาดิจิทัล', new_leaders: 'พัฒนาผู้นำ', reduce_sick_leave: 'ลดการลาป่วย', reduce_turnover: 'ลดการลาออก', other: 'อื่น ๆ' };
     function renderCh1Table() {
       const start = (ch1Page - 1) * CH1_PPG, rows = ch1Filt.slice(start, start + CH1_PPG);
       const tb = el('c1-tb');
-      if (!rows.length) { tb.innerHTML = `<tr><td colspan="9"><div class="emp"><div class="ei">📋</div><p>ไม่พบข้อมูล</p></div></td></tr>`; renderPag('c1', ch1Filt.length, ch1Page, CH1_PPG); return; }
+      if (!rows.length) { tb.innerHTML = `<tr><td colspan="35"><div class="emp"><div class="ei">📋</div><p>ไม่พบข้อมูล</p></div></td></tr>`; renderPag('c1', ch1Filt.length, ch1Page, CH1_PPG); return; }
+      const S = v => SUP_LABELS[v] || v || '—';
+      const P = v => STRATEGIC_LABELS[v] || v || '—';
+      const N = v => (v != null && v !== '') ? v : '—';
       tb.innerHTML = rows.map((r, i) => `<tr>
     <td style="color:var(--tx3);font-size:.8rem">${start + i + 1}</td>
-    <td style="font-size:.82rem">${r.submitted_at ? new Date(r.submitted_at).toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' }) : '—'}</td>
+    <td style="font-size:.82rem;white-space:nowrap">${r.submitted_at ? new Date(r.submitted_at).toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' }) : '—'}</td>
     <td><code style="font-size:.78rem">${esc(r.org_code || '—')}</code></td>
-    <td style="font-weight:500;font-size:.85rem">${esc(r.organization || '—')}</td>
+    <td style="font-weight:500;font-size:.85rem;white-space:nowrap">${esc(r.organization || '—')}</td>
     <td style="text-align:right">${(r.total_staff || 0).toLocaleString()}</td>
-    <td style="text-align:right">${r.ncd_count || 0}</td>
-    <td style="text-align:right">${r.ncd_ratio_pct != null ? r.ncd_ratio_pct + '%' : '—'}</td>
+    <td style="text-align:right">${N(r.type_official)}</td>
+    <td style="text-align:right">${N(r.type_employee)}</td>
+    <td style="text-align:right">${N(r.type_contract)}</td>
+    <td style="text-align:right">${N(r.age_u30)}</td>
+    <td style="text-align:right">${N(r.age_31_40)}</td>
+    <td style="text-align:right">${N(r.age_41_50)}</td>
+    <td style="text-align:right">${N(r.age_51_60)}</td>
     <td style="text-align:right">${r.turnover_rate != null ? r.turnover_rate + '%' : '—'}</td>
-    <td><button class="btn bo bxs" onclick="showRawStr('${esc(JSON.stringify({ org: r.organization, total_staff: r.total_staff, ncd: r.ncd_count, ncd_pct: r.ncd_ratio_pct, turnover: r.turnover_rate, support: { mentoring: r.mentoring_system, job_rotation: r.job_rotation, idp: r.idp_system, career_path: r.career_path_system }, mental: { stress: r.mental_stress, burnout: r.mental_burnout }, priorities: r.strategic_priorities, version: r.form_version }))}')">🔍 ดู</button></td>
+    <td style="text-align:right">${r.transfer_rate != null ? r.transfer_rate + '%' : '—'}</td>
+    <td style="text-align:right;color:${(r.ncd_count || 0) > 0 ? '#dc2626' : 'inherit'}">${r.ncd_count || 0}</td>
+    <td style="text-align:right">${r.ncd_ratio_pct != null ? r.ncd_ratio_pct + '%' : '—'}</td>
+    <td style="text-align:right">${N(r.disease_diabetes)}</td>
+    <td style="text-align:right">${N(r.disease_hypertension)}</td>
+    <td style="text-align:right">${N(r.disease_cardiovascular)}</td>
+    <td style="text-align:right">${N(r.disease_kidney)}</td>
+    <td style="text-align:right">${N(r.disease_liver)}</td>
+    <td style="text-align:right">${N(r.disease_cancer)}</td>
+    <td style="text-align:right">${N(r.disease_obesity)}</td>
+    <td style="text-align:right">${N(r.sick_leave_days)}</td>
+    <td style="text-align:right">${N(r.sick_leave_avg)}</td>
+    <td style="font-size:.82rem">${esc(r.engagement_score || '—')}</td>
+    <td><span class="bdg ${r.mentoring_system === 'full' ? 'bg' : r.mentoring_system === 'partial' ? 'bw' : 'br'}" style="font-size:.7rem">${S(r.mentoring_system)}</span></td>
+    <td><span class="bdg ${r.job_rotation === 'full' ? 'bg' : r.job_rotation === 'partial' ? 'bw' : 'br'}" style="font-size:.7rem">${S(r.job_rotation)}</span></td>
+    <td><span class="bdg ${r.idp_system === 'full' ? 'bg' : r.idp_system === 'partial' ? 'bw' : 'br'}" style="font-size:.7rem">${S(r.idp_system)}</span></td>
+    <td><span class="bdg ${r.career_path_system === 'full' ? 'bg' : r.career_path_system === 'partial' ? 'bw' : 'br'}" style="font-size:.7rem">${S(r.career_path_system)}</span></td>
+    <td style="font-size:.82rem">${esc(r.training_hours || '—')}</td>
+    <td style="font-size:.8rem;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(P(r.strategic_priority_rank1))}">${esc(P(r.strategic_priority_rank1))}</td>
+    <td style="font-size:.8rem;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(P(r.strategic_priority_rank2))}">${esc(P(r.strategic_priority_rank2))}</td>
+    <td style="font-size:.8rem;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(P(r.strategic_priority_rank3))}">${esc(P(r.strategic_priority_rank3))}</td>
+    <td style="display:flex;gap:.25rem;flex-wrap:nowrap">
+      <button class="btn bo bxs" title="ดูข้อมูลทั้งหมด" onclick="showRawObj(${start + i})">🔍</button>
+      <button class="btn bg bxs" title="สร้าง PDF" onclick="generateCh1PDF(ch1Filt[${start + i}])">📄</button>
+    </td>
   </tr>`).join('');
       renderPag('c1', ch1Filt.length, ch1Page, CH1_PPG);
     }
@@ -2445,12 +2507,22 @@ CREATE INDEX IF NOT EXISTS idx_ch1_sub ON hrd_ch1_responses(submitted_at);</pre>
     function expCh1CSV() {
       if (!ch1Filt.length) { showToast('ไม่มีข้อมูล', 'warning'); return; }
       const SUP = v => SUP_LABELS[v] || v || '';
-      const keys = ['หน่วยงาน', 'org_code', 'วันที่ส่ง', 'บุคลากรรวม', 'NCD รวม', 'NCD %', 'อัตราลาออก%', 'อัตราโอนย้าย%', 'พี่เลี้ยง', 'Job Rotation', 'IDP', 'Career Path'];
+      const P2 = v => STRATEGIC_LABELS[v] || v || '';
+      const keys = ['หน่วยงาน', 'org_code', 'วันที่ส่ง', 'บุคลากรรวม', 'ข้าราชการ', 'พนักงานราชการ', 'ลูกจ้าง', 'อายุ≤30', 'อายุ31-40', 'อายุ41-50', 'อายุ51-60', 'ลาออก%', 'โอนย้าย%', 'NCD รวม', 'NCD%', 'เบาหวาน', 'ความดัน', 'หัวใจ', 'ไต', 'ตับ', 'มะเร็ง', 'อ้วน', 'วันลาป่วยรวม', 'วันลาป่วยเฉลี่ย', 'Engagement', 'พี่เลี้ยง', 'Job Rotation', 'IDP', 'Career Path', 'ชั่วโมงอบรม', 'จุดเน้น1', 'จุดเน้น2', 'จุดเน้น3'];
       const rows = [keys.join(','), ...ch1Filt.map(r => [
         `"${r.organization || ''}"`, `"${r.org_code || ''}"`,
         `"${r.submitted_at ? new Date(r.submitted_at).toLocaleString('th-TH') : ''}"`,
-        r.total_staff || 0, r.ncd_count || 0, r.ncd_ratio_pct || '', r.turnover_rate || '', r.transfer_rate || '',
-        SUP(r.mentoring_system), SUP(r.job_rotation), SUP(r.idp_system), SUP(r.career_path_system)
+        r.total_staff || 0, r.type_official || 0, r.type_employee || 0, r.type_contract || 0,
+        r.age_u30 || 0, r.age_31_40 || 0, r.age_41_50 || 0, r.age_51_60 || 0,
+        r.turnover_rate || '', r.transfer_rate || '',
+        r.ncd_count || 0, r.ncd_ratio_pct || '',
+        r.disease_diabetes || 0, r.disease_hypertension || 0, r.disease_cardiovascular || 0,
+        r.disease_kidney || 0, r.disease_liver || 0, r.disease_cancer || 0, r.disease_obesity || 0,
+        r.sick_leave_days || '', r.sick_leave_avg || '',
+        `"${r.engagement_score || ''}"`,
+        SUP(r.mentoring_system), SUP(r.job_rotation), SUP(r.idp_system), SUP(r.career_path_system),
+        `"${r.training_hours || ''}"`,
+        `"${P2(r.strategic_priority_rank1)}"`, `"${P2(r.strategic_priority_rank2)}"`, `"${P2(r.strategic_priority_rank3)}"`
       ].join(','))].join('\n');
       dlBlob(new Blob(['\uFEFF' + rows], { type: 'text/csv' }), 'hrd_ch1_' + today() + '.csv');
       showToast('Export สำเร็จ ✓', 'success');
@@ -2458,20 +2530,31 @@ CREATE INDEX IF NOT EXISTS idx_ch1_sub ON hrd_ch1_responses(submitted_at);</pre>
     function expCh1XLSX() {
       if (!window.XLSX) { showToast('กำลังโหลด SheetJS...', 'info'); return; }
       const SUP = v => SUP_LABELS[v] || v || '';
+      const P2 = v => STRATEGIC_LABELS[v] || v || '';
       const data = ch1Filt.map((r, i) => ({
         '#': i + 1, 'หน่วยงาน': r.organization || '', 'org_code': r.org_code || '',
         'วันที่ส่ง': r.submitted_at ? new Date(r.submitted_at).toLocaleString('th-TH') : '',
-        'บุคลากรรวม': r.total_staff || 0, 'NCD รวม': r.ncd_count || 0,
-        'NCD%': r.ncd_ratio_pct || '', 'อัตราลาออก%': r.turnover_rate || '',
+        'บุคลากรรวม': r.total_staff || 0,
+        'ข้าราชการ': r.type_official || 0, 'พนักงานราชการ': r.type_employee || 0, 'ลูกจ้าง': r.type_contract || 0,
+        'อายุ≤30': r.age_u30 || 0, 'อายุ31-40': r.age_31_40 || 0, 'อายุ41-50': r.age_41_50 || 0, 'อายุ51-60': r.age_51_60 || 0,
+        'ลาออก%': r.turnover_rate || '', 'โอนย้าย%': r.transfer_rate || '',
+        'NCD รวม': r.ncd_count || 0, 'NCD%': r.ncd_ratio_pct || '',
         'เบาหวาน': r.disease_diabetes || 0, 'ความดัน': r.disease_hypertension || 0,
         'หัวใจ': r.disease_cardiovascular || 0, 'ไต': r.disease_kidney || 0,
+        'ตับ': r.disease_liver || 0, 'มะเร็ง': r.disease_cancer || 0, 'อ้วน': r.disease_obesity || 0,
+        'วันลาป่วยรวม': r.sick_leave_days || '', 'วันลาป่วยเฉลี่ย': r.sick_leave_avg || '',
+        'Engagement': r.engagement_score || '',
         'พี่เลี้ยง': SUP(r.mentoring_system), 'Job Rotation': SUP(r.job_rotation),
         'IDP': SUP(r.idp_system), 'Career Path': SUP(r.career_path_system),
+        'ชั่วโมงอบรม': r.training_hours || '',
+        'จุดเน้น1': P2(r.strategic_priority_rank1), 'จุดเน้น2': P2(r.strategic_priority_rank2), 'จุดเน้น3': P2(r.strategic_priority_rank3),
+        'นโยบาย': r.related_policies || '', 'บริบท': r.context_challenges || '',
+        'Intervention': r.intervention_packages_feedback || '', 'HRD Plan URL': r.hrd_plan_url || '',
         'version': r.form_version || ''
       }));
       const ws = XLSX.utils.json_to_sheet(data);
-      const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'HRD Ch1');
-      XLSX.writeFile(wb, 'hrd_ch1_' + today() + '.xlsx');
+      const wb2 = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb2, ws, 'HRD Ch1');
+      XLSX.writeFile(wb2, 'hrd_ch1_' + today() + '.xlsx');
       showToast('Export Excel สำเร็จ ✓', 'success');
     }
     function showRaw(jsonStr) {
@@ -2484,7 +2567,218 @@ CREATE INDEX IF NOT EXISTS idx_ch1_sub ON hrd_ch1_responses(submitted_at);</pre>
       catch { el('rawp').textContent = str; }
       el('raw-bd').classList.add('show');
     }
+    function showRawObj(idx) {
+      if (!ch1Filt[idx]) return;
+      el('rawp').textContent = JSON.stringify(ch1Filt[idx], null, 2);
+      el('raw-bd').classList.add('show');
+    }
     function closeRaw() { el('raw-bd').classList.remove('show'); }
+
+    // ═══════════════════════════════════════════════
+    // PDF GENERATION (jsPDF + autoTable + Sarabun font)
+    // ═══════════════════════════════════════════════
+    function generateCh1PDF(data) {
+      if (!data) { showToast('ไม่มีข้อมูลสำหรับสร้าง PDF', 'error'); return; }
+      if (!window.jspdf) { showToast('กำลังโหลด jsPDF...', 'info'); return; }
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF('p', 'mm', 'a4');
+      // Embed Sarabun font for Thai text
+      if (typeof SARABUN_FONT_BASE64 !== 'undefined') {
+        doc.addFileToVFS('Sarabun-Regular.ttf', SARABUN_FONT_BASE64);
+        doc.addFont('Sarabun-Regular.ttf', 'Sarabun', 'normal');
+        doc.setFont('Sarabun');
+      }
+      const pageW = doc.internal.pageSize.width;
+      const margin = 20;
+      let y = 20;
+      const setFont = (style, size) => { doc.setFont(typeof SARABUN_FONT_BASE64 !== 'undefined' ? 'Sarabun' : 'Helvetica', style || 'normal'); doc.setFontSize(size || 10); };
+      const addPage = () => { doc.addPage(); y = 20; };
+      const chkY = (need) => { if (y + need > 280) addPage(); };
+
+      const printLine = (text, indent = 0, style = 'normal', size = 10, fillLine = false) => {
+        setFont(style, size);
+        let currentX = margin + indent;
+
+        if (fillLine) {
+          doc.text(text, currentX, y);
+          const textWidth = doc.getTextWidth(text);
+          doc.setDrawColor(150);
+          doc.setLineDash([1, 1], 0);
+          doc.line(currentX + textWidth + 2, y + 1, pageW - margin, y + 1);
+          doc.setLineDash([], 0);
+          y += 7;
+          return;
+        }
+
+        const lines = doc.splitTextToSize(text, pageW - margin * 2 - indent);
+        doc.text(lines, currentX, y);
+        y += lines.length * 6 + 1;
+      };
+
+      const dotItem = (label, val, indent = 15, valIndent = 70) => {
+        chkY(7);
+        setFont('normal', 10);
+        doc.text('•  ' + label, margin + indent, y);
+        if (val != null) {
+          const strVal = String(val);
+          doc.text(strVal, margin + valIndent, y);
+        }
+        y += 7;
+      };
+
+      const cbItem = (label, isChecked, indent = 15) => {
+        chkY(7);
+        setFont('normal', 10);
+        doc.text(isChecked ? '[ / ]' : '[   ]', margin + indent, y);
+        doc.text(label, margin + indent + 8, y);
+        y += 7;
+      };
+
+      // ── TITLE ──
+      setFont('bold', 12); doc.text('(ร่าง) แบบฟอร์มสำรวจข้อมูล', pageW / 2, y, { align: 'center' }); y += 7;
+      doc.text('เพื่อจัดทำแผนการพัฒนาองค์กรสุขภาวะ พ.ศ. 2566 - 2570', pageW / 2, y, { align: 'center' }); y += 10;
+
+      setFont('bold', 10); doc.text('คำชี้แจง:', margin, y);
+      setFont('normal', 10);
+      const intro = doc.splitTextToSize('แบบฟอร์มนี้จัดทำขึ้นเพื่อรวบรวมข้อมูลจากหน่วยงานนำร่อง สำหรับใช้ประกอบการจัดทำแผนปฏิบัติการสร้างเสริมสุขภาวะองค์กรข้าราชการพลเรือน', pageW - margin * 2 - 15);
+      doc.text(intro, margin + 15, y); y += intro.length * 6 + 4;
+
+      // ── PART 1 ──
+      chkY(10); setFont('bold', 11); printLine('ส่วนที่ 1: ข้อมูลเบื้องต้นของส่วนราชการ', 0, 'bold', 11);
+      chkY(10); printLine('1. ภาพรวมยุทธศาสตร์และทิศทางของส่วนราชการ', 5, 'bold');
+      if (data.strategic_overview) { printLine(data.strategic_overview, 10, 'normal'); } else { printLine('__________________________________________________________', 10, 'normal'); }
+
+      chkY(10); printLine('2. โครงสร้างองค์กรและบทบาทหน้าที่หลัก', 5, 'bold');
+      if (data.org_structure) { printLine(data.org_structure, 10, 'normal'); } else { printLine('__________________________________________________________', 10, 'normal'); }
+
+      chkY(10); printLine('3. ข้อมูลโครงสร้างอัตรากำลัง', 5, 'bold');
+      chkY(8); printLine('จำนวนอัตรากำลังจำแนกตามประเภท', 10, 'bold');
+      dotItem('ข้าราชการ', `${data.type_official ?? '______'} คน`);
+      dotItem('พนักงานราชการ', `${data.type_employee ?? '______'} คน`);
+      dotItem('ลูกจ้าง', `${data.type_contract ?? '______'} คน`);
+      dotItem(`อื่น ๆ (${data.type_other_spec || 'โปรดระบุ'})`, `${data.type_other ?? '______'} คน`);
+
+      chkY(8); printLine('จำแนกตามช่วงอายุ', 10, 'bold');
+      dotItem('ไม่เกิน 30 ปี', `${data.age_u30 ?? '______'} คน`);
+      dotItem('31-40 ปี', `${data.age_31_40 ?? '______'} คน`);
+      dotItem('41-50 ปี', `${data.age_41_50 ?? '______'} คน`);
+      dotItem('51-60 ปี', `${data.age_51_60 ?? '______'} คน`);
+
+      chkY(8); printLine('จำแนกตามอายุราชการ/ระดับ', 10, 'bold');
+      dotItem('ประเภททั่วไป:', null);
+      dotItem('ปฏิบัติงาน (O1):', `${data.pos_o1 ?? '____'} คน`, 25, 60);
+      dotItem('ชำนาญงาน (O2):', `${data.pos_o2 ?? '____'} คน`, 25, 60);
+      dotItem('อาวุโส (O3):', `${data.pos_o3 ?? '____'} คน`, 25, 60);
+      dotItem('ทักษะพิเศษ (O4):', `${data.pos_o4 ?? '____'} คน`, 25, 60);
+      dotItem('ประเภทวิชาการ:', null);
+      dotItem('ปฏิบัติการ (K1):', `${data.pos_k1 ?? '____'} คน`, 25, 60);
+      dotItem('ชำนาญการ (K2):', `${data.pos_k2 ?? '____'} คน`, 25, 60);
+      dotItem('ชำนาญการพิเศษ (K3):', `${data.pos_k3 ?? '____'} คน`, 25, 60);
+      dotItem('เชี่ยวชาญ (K4):', `${data.pos_k4 ?? '____'} คน`, 25, 60);
+      dotItem('ทรงคุณวุฒิ (K5):', `${data.pos_k5 ?? '____'} คน`, 25, 60);
+      dotItem('ประเภทอำนวยการ:', null);
+      dotItem('ระดับต้น (M1):', `${data.pos_m1 ?? '____'} คน`, 25, 60);
+      dotItem('ระดับสูง (M2):', `${data.pos_m2 ?? '____'} คน`, 25, 60);
+      dotItem('ประเภทบริหาร:', null);
+      dotItem('ระดับต้น (S1):', `${data.pos_s1 ?? '____'} คน`, 25, 60);
+      dotItem('ระดับสูง (S2):', `${data.pos_s2 ?? '____'} คน`, 25, 60);
+
+      chkY(10); printLine('4. อัตราการลาออกและอัตราการโอนย้าย ของหน่วยงาน', 5, 'bold');
+      dotItem('การลาออก', `คิดเป็นร้อยละ ${data.turnover_rate ?? '____'}`, 15, 45);
+      dotItem('การโอนย้ายไปส่วนราชการอื่น', `คิดเป็นร้อยละ ${data.transfer_rate ?? '____'}`, 15, 65);
+
+      // ── PART 2 ──
+      addPage();
+      chkY(10); setFont('bold', 11); printLine('ส่วนที่ 2: นโยบายและบริบทภายนอกองค์กร', 0, 'bold', 11);
+      chkY(10); printLine('5. นโยบายและยุทธศาสตร์ที่เกี่ยวข้อง: ', 5, 'bold');
+      printLine(data.related_policies || '__________________________________________________________', 10, 'normal');
+      chkY(10); printLine('6. ข้อมูลบริบทและความท้าทาย (Context & Challenges): ', 5, 'bold');
+      printLine(data.context_challenges || '__________________________________________________________', 10, 'normal');
+
+      // ── PART 3 ──
+      chkY(12); setFont('bold', 11); printLine('ส่วนที่ 3: ข้อมูลสุขภาวะของบุคลากรในปีที่ผ่านมา', 0, 'bold', 11);
+      chkY(8); printLine('7. สุขภาวะทางกาย', 5, 'bold');
+      dotItem('โปรดระบุจำนวนบุคลากรที่มีภาวะดังต่อไปนี้:', null, 15);
+      dotItem('เบาหวาน:', `${data.disease_diabetes ?? '______'} คน`, 25, 60);
+      dotItem('ความดันโลหิตสูง:', `${data.disease_hypertension ?? '______'} คน`, 25, 60);
+      dotItem('โรคหัวใจและหลอดเลือด:', `${data.disease_cardiovascular ?? '______'} คน`, 25, 60);
+      dotItem('โรคไต:', `${data.disease_kidney ?? '______'} คน`, 25, 60);
+      dotItem('โรคตับ:', `${data.disease_liver ?? '______'} คน`, 25, 60);
+      dotItem('โรคมะเร็ง:', `${data.disease_cancer ?? '______'} คน`, 25, 60);
+      dotItem('ภาวะอ้วน/น้ำหนักเกิน:', `${data.disease_obesity ?? '______'} คน`, 25, 60);
+
+      chkY(10); printLine('8. ข้อมูลการลาป่วย', 5, 'bold');
+      dotItem('จำนวนวันลาป่วยรวมต่อปี:', `${data.sick_leave_days ?? '______'} วัน`);
+      dotItem('จำนวนวันลาป่วยเฉลี่ยต่อคนต่อปี:', `${data.sick_leave_avg ?? '______'} วัน`);
+
+      chkY(10); printLine('9. ข้อมูลการใช้บริการห้องพยาบาล', 5, 'bold');
+      dotItem('จำนวนผู้ใช้บริการต่อปี:', `${data.clinic_users_per_year ?? '______'} คน`);
+
+      chkY(10); printLine('10. ผลสำรวจสุขภาพจิต (ความเครียด, ซึมเศร้า ฯลฯ)', 5, 'bold');
+      printLine(data.mental_stress || '__________________________________________________________', 10, 'normal');
+
+      chkY(10); printLine('11. ผลสำรวจความผูกพันองค์กร (Employee Engagement)', 5, 'bold');
+      dotItem('คะแนนภาพรวมรายปี:', `${data.engagement_score ?? '______'}`);
+
+      chkY(10); printLine('12. ผลการสำรวจสุขภาวะด้วยเครื่องมืออื่น ๆ', 5, 'bold');
+      printLine(data.other_wellbeing_surveys || '__________________________________________________________', 10, 'normal');
+
+      // ── PART 4 ──
+      addPage();
+      chkY(10); setFont('bold', 11); printLine('ส่วนที่ 4: ระบบการบริหารและสภาพแวดล้อมที่เอื้อต่อสุขภาวะ', 0, 'bold', 11);
+
+      const SUP2 = v => ({ full: 'มีตามแผน', partial: 'มีไม่ครบตามแผน', none: 'ไม่มี' }[v] || v || '______');
+      chkY(8); printLine('13. สถานะระบบการบริหารบุคลากร', 5, 'bold');
+      dotItem('ระบบพี่เลี้ยง:', SUP2(data.mentoring_system));
+      dotItem('ระบบหมุนเวียนงาน:', SUP2(data.job_rotation));
+      dotItem('การจัดทำ IDP:', SUP2(data.idp_system));
+      dotItem('เส้นทางความก้าวหน้า (Career Path):', SUP2(data.career_path_system));
+
+      chkY(10); printLine(`14. ชั่วโมงการอบรมเฉลี่ยต่อคนต่อปี:  ${data.training_hours || '______'} ชั่วโมง`, 5, 'bold');
+
+      chkY(10); printLine('15. ระบบสนับสนุนดิจิทัล', 5, 'bold');
+      const digs = data.digital_systems || [];
+      cbItem('ระบบเอกสารอิเล็กทรอนิกส์', digs.includes('e_doc'));
+      cbItem('ระบบลงนามอิเล็กทรอนิกส์ (E-signature)', digs.includes('e_sign'));
+      cbItem('ระบบ Cloud', digs.includes('cloud'));
+      cbItem('ระบบ HR Digital', digs.includes('hr_digital'));
+      cbItem('ระบบฐานข้อมูลสุขภาพ', digs.includes('health_db'));
+      cbItem('ไม่มีระบบดังกล่าว', digs.includes('none'));
+
+      chkY(10); printLine('16. การจัดสภาพแวดล้อมตามหลักการยศาสตร์ (Ergonomics)', 5, 'bold');
+      const ergStatus = data.ergonomics_status || '';
+      cbItem('ยังไม่มี', ergStatus === 'none' || ergStatus === 'ยังไม่มี');
+      cbItem(`มีแผนแต่ยังไม่ดำเนินการ:  ${ergStatus === 'planned' ? (data.ergonomics_detail || '......') : ''}`, ergStatus === 'planned' || ergStatus.includes('แผน'));
+      cbItem(`กำลังดำเนินการ:  ${ergStatus === 'in_progress' ? (data.ergonomics_detail || '......') : ''}`, ergStatus === 'in_progress' || ergStatus.includes('กำลัง'));
+      cbItem(`ดำเนินการแล้ว:  ${ergStatus === 'completed' ? (data.ergonomics_detail || '......') : ''}`, ergStatus === 'completed' || ergStatus.includes('แล้ว'));
+
+      // ── PART 5 ──
+      addPage();
+      chkY(10); setFont('bold', 11); printLine('ส่วนที่ 5: ทิศทาง เป้าหมาย และข้อเสนอแนะ', 0, 'bold', 11);
+      chkY(8); printLine('17. จุดเน้นการพัฒนา', 5, 'bold');
+      const P3 = v => ({ service_efficiency: 'การเพิ่มประสิทธิภาพการให้บริการ', digital_capability: 'การพัฒนาศักยภาพด้านดิจิทัล', new_leaders: 'การพัฒนาผู้นำรุ่นใหม่', reduce_sick_leave: 'การลดอัตราการลาป่วย', reduce_turnover: 'การลดอัตราการลาออก', other: 'อื่น ๆ' }[v] || v || '______');
+      dotItem('อันดับ 1:', P3(data.strategic_priority_rank1));
+      dotItem('อันดับ 2:', P3(data.strategic_priority_rank2));
+      dotItem('อันดับ 3:', P3(data.strategic_priority_rank3));
+
+      chkY(10); printLine('18. ข้อเสนอแนะเกี่ยวกับฐานข้อมูล Intervention Packages เพิ่มเติม', 5, 'bold');
+      printLine(data.intervention_packages_feedback || '__________________________________________________________', 10, 'normal');
+
+      chkY(10); printLine('19. ไฟล์ HRD PLAN ปี 2567-2570 พร้อมผลการปฏิบัติงาน', 5, 'bold');
+      printLine(data.hrd_plan_url || '__________________________________________________________', 10, 'normal');
+
+      // ── FOOTER ──
+      const pages = doc.internal.getNumberOfPages();
+      for (let pg = 1; pg <= pages; pg++) {
+        doc.setPage(pg);
+        setFont('normal', 8); doc.setTextColor(150);
+        doc.text(`หน่วยงาน: ${data.organization || '—'}  |  หน้า ${pg}/${pages}`, pageW / 2, 290, { align: 'center' });
+        doc.setTextColor(0);
+      }
+      const fname = 'HRD_CH1_' + (data.org_code || data.organization || 'export').replace(/[^a-zA-Z0-9ก-๙]/g, '_') + '_' + (data.submitted_at || '').slice(0, 10) + '.pdf';
+      doc.save(fname);
+      showToast('สร้าง PDF สำเร็จ ✓', 'success');
+    }
 
     // ═══════════════════════════════════════════════
     // ANALYTICS

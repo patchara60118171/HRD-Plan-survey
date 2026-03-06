@@ -1,0 +1,145 @@
+{
+  "language": {
+    "name": "English",
+    "changed": "Language changed to {{lang}}"
+  },
+  "app": {
+    "title": "Individual Well-being Survey",
+    "subtitle": "แบบสำรวจสุขภาวะบุคลากร",
+    "description": "A comprehensive well-being survey covering 4 dimensions: Physical, Mental, Social, and Environmental health"
+  },
+  "navigation": {
+    "prev": "Previous",
+    "next": "Next",
+    "submit": "Submit Survey",
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "back": "Back"
+  },
+  "welcome": {
+    "title": "Welcome to Well-being Survey",
+    "subtitle": "4-Dimension Health Assessment for Personnel",
+    "description": "This survey will help assess your health across 4 main dimensions for appropriate health planning",
+    "start": "Start Survey",
+    "login_required": "Please login to start the survey",
+    "login": "Login",
+    "logout": "Logout",
+    "history": "Survey History",
+    "no_history": "No survey history available"
+  },
+  "survey": {
+    "sections": {
+      "personal": "Personal Information & Body",
+      "consumption": "Tobacco and Alcohol Consumption",
+      "mental": "Mental Health (TMHI-15)",
+      "nutrition": "Consumption Behavior",
+      "safety": "Accidents and Safety",
+      "activity": "Physical Activity (TPAX)",
+      "environment": "Environment and Emerging Diseases",
+      "loneliness": "Loneliness Survey (UCLA)"
+    },
+    "progress": "Progress",
+    "required": "This field is required",
+    "optional": "Optional",
+    "save_draft": "Save Draft",
+    "draft_saved": "Draft saved successfully"
+  },
+  "results": {
+    "title": "Health Assessment Results",
+    "subtitle": "Summary of your health assessment",
+    "bmi": {
+      "title": "Body Mass Index (BMI)",
+      "category": "Category",
+      "underweight": "Underweight",
+      "normal": "Normal weight",
+      "overweight": "Overweight",
+      "obese": "Obese"
+    },
+    "tmhi": {
+      "title": "Mental Health Score (TMHI-15)",
+      "excellent": "Excellent mental health",
+      "good": "Good mental health",
+      "moderate": "Moderate mental health",
+      "poor": "Mental health needs attention"
+    },
+    "export": "Export Data",
+    "export_excel": "Export to Excel",
+    "export_pdf": "Export to PDF"
+  },
+  "reporting": {
+    "title": "Survey Data Reports",
+    "dashboard": "Dashboard",
+    "analytics": "Data Analytics",
+    "overview": "Overview",
+    "demographics": "Demographics",
+    "health_metrics": "Health Metrics",
+    "trends": "Trends",
+    "comparisons": "Comparisons",
+    "export_report": "Export Report",
+    "date_range": "Date Range",
+    "filters": "Filters",
+    "total_responses": "Total Responses",
+    "completion_rate": "Completion Rate",
+    "average_score": "Average Score"
+  },
+  "api": {
+    "title": "API Connections",
+    "integrations": "External Integrations",
+    "webhooks": "Webhooks",
+    "export_data": "Export Data",
+    "import_data": "Import Data",
+    "sync": "Sync Data",
+    "connected": "Connected",
+    "disconnected": "Disconnected",
+    "configure": "Configure",
+    "test_connection": "Test Connection",
+    "connection_success": "Connection successful",
+    "connection_failed": "Connection failed"
+  },
+  "errors": {
+    "required_field": "Please fill in required fields",
+    "invalid_email": "Invalid email address",
+    "network_error": "Network connection error",
+    "save_failed": "Failed to save data",
+    "load_failed": "Failed to load data",
+    "login_failed": "Login failed",
+    "session_expired": "Session expired, please login again"
+  },
+  "success": {
+    "saved": "Data saved successfully",
+    "submitted": "Survey submitted successfully",
+    "exported": "Data exported successfully",
+    "imported": "Data imported successfully",
+    "connected": "Connected successfully"
+  },
+  "loading": {
+    "loading": "Loading...",
+    "saving": "Saving...",
+    "submitting": "Submitting...",
+    "processing": "Processing..."
+  },
+  "common": {
+    "yes": "Yes",
+    "no": "No",
+    "male": "Male",
+    "female": "Female",
+    "other": "Other",
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "age": "Age",
+    "gender": "Gender",
+    "date": "Date",
+    "time": "Time",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "total": "Total",
+    "average": "Average",
+    "minimum": "Minimum",
+    "maximum": "Maximum"
+  }
+}
