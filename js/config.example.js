@@ -1,20 +1,19 @@
 // ========================================
-// Configuration File Example
+// Configuration Template - DO NOT COMMIT WITH REAL KEYS
 // ========================================
-// Rename this file to config.js and fill in your values
-// SECURITY NOTE: For production, use environment variables or backend proxy
-// Do NOT commit config.js with real API keys to public repositories
+// SECURITY NOTE: Use environment variables in production
+// Copy to config.js and add your actual keys
 
 const CONFIG = {
     // Google OAuth Client ID
-    GOOGLE_CLIENT_ID: 'YOUR_GOOGLE_CLIENT_ID_HERE',
+    GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID || 'YOUR_GOOGLE_CLIENT_ID',
 
     // Google Apps Script URL for backup storage
-    GOOGLE_SCRIPT_URL: 'YOUR_GOOGLE_SCRIPT_URL_HERE',
+    GOOGLE_SCRIPT_URL: process.env.GOOGLE_SCRIPT_URL || 'YOUR_GOOGLE_SCRIPT_URL',
 
-    // Supabase Configuration
-    SUPABASE_URL: 'YOUR_SUPABASE_URL_HERE',
-    SUPABASE_ANON_KEY: 'YOUR_SUPABASE_ANON_KEY_HERE',
+    // Supabase Configuration - Use environment variables
+    SUPABASE_URL: process.env.SUPABASE_URL || 'https://your-project.supabase.co',
+    SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY || 'YOUR_SUPABASE_ANON_KEY',
 
     // App Settings
     APP_NAME: 'Happy Workplace Survey',
