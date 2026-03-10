@@ -1276,27 +1276,29 @@
       </div>
       <nav class="sbn">
         <div class="nsc">MAIN</div>
-        <div class="ni active" data-pg="dashboard" onclick="nav('dashboard')"><span class="nic">📊</span><span
+        <div class="ni active" data-section="dashboard" data-pg="dashboard" onclick="nav('dashboard')"><span class="nic">📊</span><span
             class="nil">แดชบอร์ด</span></div>
-        <div class="ni" data-pg="organizations" onclick="nav('organizations')"><span class="nic">🏢</span><span
+        <div class="ni" data-section="orgs" data-pg="organizations" onclick="nav('organizations')"><span class="nic">🏢</span><span
             class="nil">จัดการองค์กร</span></div>
-        <div class="ni" data-pg="urls" onclick="nav('urls')"><span class="nic">🔗</span><span class="nil">URL
+        <div class="ni" data-section="urls" data-pg="urls" onclick="nav('urls')"><span class="nic">🔗</span><span class="nil">URL
             Manager</span></div>
         <div class="nsc">RESPONSES</div>
         <div id="rni">
-          <div class="ni" data-pg="resp-wellbeing" onclick="nav('resp-wellbeing')"><span class="nic">💚</span><span
+          <div class="ni" data-section="wellbeing" data-pg="resp-wellbeing" onclick="nav('resp-wellbeing')"><span class="nic">💚</span><span
               class="nil">Wellbeing Survey</span></div>
-          <div class="ni" data-pg="resp-ch1" onclick="nav('resp-ch1')"><span class="nic">📋</span><span
+          <div class="ni" data-section="ch1" data-pg="resp-ch1" onclick="nav('resp-ch1')"><span class="nic">📋</span><span
               class="nil">HRD บทที่ 1</span></div>
         </div>
         <div class="nsc">ANALYSIS</div>
-        <div class="ni" data-pg="analytics" onclick="nav('analytics')"><span class="nic">📈</span><span
+        <div class="ni" data-section="analytics" data-pg="analytics" onclick="nav('analytics')"><span class="nic">📈</span><span
             class="nil">สถิติ & Analytics</span></div>
         <div class="nsc">TOOLS</div>
         <div class="ni" data-pg="spreadsheet" onclick="nav('spreadsheet')"><span class="nic">🗃️</span><span
             class="nil">Smart Spreadsheet</span></div>
         <div class="nsc">SYSTEM</div>
-        <div class="ni" data-pg="settings" onclick="nav('settings')"><span class="nic">⚙️</span><span
+        <div class="ni" data-section="users" data-pg="users" onclick="nav('users')"><span class="nic">👥</span><span
+            class="nil">จัดการผู้ใช้</span></div>
+        <div class="ni" data-section="settings" data-pg="settings" onclick="nav('settings')"><span class="nic">⚙️</span><span
             class="nil">ตั้งค่า</span></div>
       </nav>
       <div class="sbf">
@@ -1694,10 +1696,184 @@
           </div>
         </div>
       </div>
+      <!-- PAGE: USER MANAGEMENT -->
+      <div class="pg" id="pg-users">
+        <div style="max-width:900px">
+          <!-- Current User Info -->
+          <div class="ss2">
+            <h3>👤 ข้อมูลผู้ใช้ปัจจุบัน</h3>
+            <div class="card cb">
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem">
+                <div>
+                  <div style="font-size:.75rem;color:var(--tx3);margin-bottom:.25rem">อีเมล</div>
+                  <div style="font-weight:600" id="cu-email">—</div>
+                </div>
+                <div>
+                  <div style="font-size:.75rem;color:var(--tx3);margin-bottom:.25rem">บทบาท (Role)</div>
+                  <div style="font-weight:600" id="cu-role">—</div>
+                </div>
+                <div>
+                  <div style="font-size:.75rem;color:var(--tx3);margin-bottom:.25rem">องค์กรที่รับผิดชอบ</div>
+                  <div style="font-weight:600" id="cu-org">ทั้งหมด</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Predefined Admins -->
+          <div class="ss2">
+            <h3>🔑 ผู้ดูแลระบบหลัก (Predefined)</h3>
+            <div class="card">
+              <div class="tw">
+                <table class="dt">
+                  <thead>
+                    <tr>
+                      <th>อีเมล</th>
+                      <th>บทบาท</th>
+                      <th>สิทธิ์</th>
+                      <th>สถานะ</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><code>admin@gmail.com</code></td>
+                      <td><span style="background:#dc2626;color:#fff;padding:.2rem .5rem;border-radius:4px;font-size:.75rem">Super Admin</span></td>
+                      <td>เต็มรูปแบบ (Full Access)</td>
+                      <td>✅ ใช้งาน</td>
+                    </tr>
+                    <tr>
+                      <td><code>hrdplan.wellbeing@gmail.com</code></td>
+                      <td><span style="background:#2563eb;color:#fff;padding:.2rem .5rem;border-radius:4px;font-size:.75rem">Administrator</span></td>
+                      <td>จัดการผู้ใช้, ดู/แก้ไขข้อมูล, ไม่มีสิทธิ์ระดับ Root</td>
+                      <td>✅ ใช้งาน</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Viewer Management -->
+          <div class="ss2" id="viewer-mgmt-section">
+            <h3>👥 จัดการ Viewer (ดูอย่างเดียว ตามองค์กร)</h3>
+            <div class="card cb" style="margin-bottom:1rem">
+              <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:.75rem;align-items:end">
+                <div class="fg" style="margin:0">
+                  <label>อีเมล Viewer</label>
+                  <input class="fc" id="viewer-email" type="email" placeholder="viewer@example.com" />
+                </div>
+                <div class="fg" style="margin:0">
+                  <label>องค์กรที่รับผิดชอบ</label>
+                  <select class="fc fsl" id="viewer-org">
+                    <option value="">เลือกองค์กร...</option>
+                  </select>
+                </div>
+                <button class="btn bp" onclick="addViewerFromUI()">➕ เพิ่ม Viewer</button>
+              </div>
+            </div>
+            <div class="card">
+              <div class="tw">
+                <table class="dt">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>อีเมล</th>
+                      <th>องค์กรที่รับผิดชอบ</th>
+                      <th>วันที่เพิ่ม</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="viewer-tb"></tbody>
+                </table>
+              </div>
+              <div style="padding:.75rem 1.25rem;border-top:1px solid var(--bdr)" id="viewer-empty" class="emp" style="display:none">
+                <div class="ei">👥</div>
+                <p>ยังไม่มี Viewer ที่ถูกเพิ่ม</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Role Permissions Reference -->
+          <div class="ss2">
+            <h3>📋 สรุปสิทธิ์ตามบทบาท</h3>
+            <div class="card">
+              <div class="tw">
+                <table class="dt">
+                  <thead>
+                    <tr>
+                      <th>ฟีเจอร์</th>
+                      <th>Super Admin</th>
+                      <th>Administrator</th>
+                      <th>Viewer</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>ดู Dashboard</td>
+                      <td>✅</td>
+                      <td>✅</td>
+                      <td>✅ (เฉพาะองค์กรตัวเอง)</td>
+                    </tr>
+                    <tr>
+                      <td>ดูข้อมูลตอบกลับ</td>
+                      <td>✅ ทั้งหมด</td>
+                      <td>✅ ทั้งหมด</td>
+                      <td>✅ เฉพาะองค์กรตัวเอง</td>
+                    </tr>
+                    <tr>
+                      <td>แก้ไข/ลบข้อมูล</td>
+                      <td>✅</td>
+                      <td>✅</td>
+                      <td>❌</td>
+                    </tr>
+                    <tr>
+                      <td>จัดการองค์กร</td>
+                      <td>✅</td>
+                      <td>✅</td>
+                      <td>❌</td>
+                    </tr>
+                    <tr>
+                      <td>จัดการ URL</td>
+                      <td>✅</td>
+                      <td>✅</td>
+                      <td>❌</td>
+                    </tr>
+                    <tr>
+                      <td>จัดการผู้ใช้ (เพิ่ม/ลบ Viewer)</td>
+                      <td>✅</td>
+                      <td>✅</td>
+                      <td>❌</td>
+                    </tr>
+                    <tr>
+                      <td>ตั้งค่า Role (Super Admin only)</td>
+                      <td>✅</td>
+                      <td>❌</td>
+                      <td>❌</td>
+                    </tr>
+                    <tr>
+                      <td>ตั้งค่าระบบ (Supabase, etc.)</td>
+                      <td>✅</td>
+                      <td>❌</td>
+                      <td>❌</td>
+                    </tr>
+                    <tr>
+                      <td>ดู Logs</td>
+                      <td>✅</td>
+                      <td>✅</td>
+                      <td>❌</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
       <!-- PAGE: SETTINGS -->
       <div class="pg" id="pg-settings">
         <div style="max-width:760px">
-          <div class="ss2">
+          <!-- Super Admin Only: Supabase Connection -->
+          <div class="ss2" id="sa-supabase-section">
             <h3>🔌 การเชื่อมต่อ Supabase</h3>
             <div class="card cb">
               <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.25rem;flex-wrap:wrap">
@@ -1710,14 +1886,16 @@
               <p class="ft" style="margin-top:.75rem">⚠️ การเปลี่ยนค่าจะรีเฟรชหน้าเว็บ</p>
             </div>
           </div>
-          <div class="ss2">
+          <!-- Super Admin Only: Base URL -->
+          <div class="ss2" id="sa-baseurl-section">
             <h3>🌐 Base URL</h3>
             <div class="card cb">
               <div class="fg"><label>Base URL สำหรับ Survey Links</label><input class="fc" id="s-bu" /></div>
               <button class="btn bp" onclick="saveBU()">💾 บันทึก</button>
             </div>
           </div>
-          <div class="ss2">
+          <!-- Admin & Super Admin: Survey Forms -->
+          <div class="ss2" id="admin-forms-section">
             <h3>📋 ทะเบียนฟอร์มสำรวจ</h3>
             <div class="card" style="margin-bottom:1rem">
               <div class="tw">
@@ -1737,6 +1915,7 @@
             </div>
             <button class="btn bp" onclick="openSFM()">＋ เพิ่มฟอร์มใหม่</button>
           </div>
+          <!-- All users: Change Password -->
           <div class="ss2">
             <h3>🔑 เปลี่ยนรหัสผ่าน</h3>
             <div class="card cb">
@@ -1745,7 +1924,8 @@
               <button class="btn bp" onclick="chgPW()">💾 เปลี่ยนรหัสผ่าน</button>
             </div>
           </div>
-          <div class="ss2">
+          <!-- Super Admin Only: SQL Scripts -->
+          <div class="ss2" id="sa-sql-section">
             <h3>🗄️ SQL Scripts</h3>
             <div class="card cb">
               <button class="btn bo bsm"
@@ -1753,6 +1933,21 @@
                 แสดง / ซ่อน SQL</button>
               <pre id="sqlb"
                 style="display:none;margin-top:.75rem;background:#1e293b;color:#e2e8f0;padding:1rem;border-radius:8px;font-size:.72rem;overflow-x:auto;white-space:pre-wrap;line-height:1.6">-- Run in Supabase SQL Editor
+CREATE TABLE IF NOT EXISTS system_settings (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  key TEXT UNIQUE NOT NULL,
+  value TEXT NOT NULL,
+  description TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+INSERT INTO system_settings (key, value, description) VALUES
+  ('supabase_url', 'https://fgdommhiqhzvsedfzyrr.supabase.co', 'Supabase Project URL'),
+  ('supabase_anon_key', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...', 'Supabase Anon Key'),
+  ('base_url', 'https://nidawellbeing.vercel.app', 'Base URL for Survey Links')
+ON CONFLICT (key) DO NOTHING;
+
+-- Existing tables
 CREATE TABLE IF NOT EXISTS organizations (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   org_code TEXT UNIQUE NOT NULL, org_name_th TEXT NOT NULL, org_name_en TEXT,
@@ -1976,6 +2171,234 @@ CREATE INDEX IF NOT EXISTS idx_ch1_sub ON hrd_ch1_responses(submitted_at);</pre>
     ];
 
     // ═══════════════════════════════════════════════
+    // ROLE-BASED ACCESS CONTROL (RBAC)
+    // ═══════════════════════════════════════════════
+    // Role definitions
+    const ROLES = {
+      SUPER_ADMIN: 'super_admin',
+      ADMIN: 'admin',
+      VIEWER: 'viewer'
+    };
+
+    // Predefined users with their roles
+    // Format: email -> { role, org (for viewer only) }
+    const USER_ROLES = {
+      'admin@gmail.com': { role: ROLES.SUPER_ADMIN },
+      'hrdplan.wellbeing@gmail.com': { role: ROLES.ADMIN }
+      // Viewers will be added dynamically as needed
+    };
+
+    // Current user's role info
+    let currentUserRole = null;
+
+    // Get user role from predefined list or Supabase user metadata
+    async function getUserRole(user) {
+      if (!user) return null;
+
+      // Check predefined users first
+      if (USER_ROLES[user.email]) {
+        return USER_ROLES[user.email];
+      }
+
+      // Check Supabase user metadata
+      const { data: { user: userData } } = await sb.auth.getUser();
+      if (userData?.user_metadata?.role) {
+        return {
+          role: userData.user_metadata.role,
+          org: userData.user_metadata.org || null
+        };
+      }
+
+      return null; // No role assigned - access denied
+    }
+
+    // Permission check functions
+    const PERMISSIONS = {
+      // Super Admin: Full access to everything
+      SUPER_ADMIN: {
+        canManageUsers: true,
+        canManageRoles: true,
+        canViewDashboard: true,
+        canViewAllData: true,
+        canEditAllData: true,
+        canDeleteData: true,
+        canManageSystem: true,
+        canExportData: true,
+        canViewLogs: true,
+        canChangePassword: true,
+        sections: ['dashboard', 'orgs', 'urls', 'wellbeing', 'ch1', 'analytics', 'users', 'settings']
+      },
+      // Administrator: Can manage users and view/edit all data, but not system-level configs
+      ADMIN: {
+        canManageUsers: true,
+        canManageRoles: false,
+        canViewDashboard: true,
+        canViewAllData: true,
+        canEditAllData: true,
+        canDeleteData: true,
+        canManageSystem: false,
+        canExportData: true,
+        canViewLogs: true,
+        canChangePassword: true,
+        sections: ['dashboard', 'orgs', 'urls', 'wellbeing', 'ch1', 'analytics', 'users']
+      },
+      // Viewer: View-only access, optionally filtered by organization
+      VIEWER: {
+        canManageUsers: false,
+        canManageRoles: false,
+        canViewDashboard: true,
+        canViewAllData: false, // Can only view assigned org data
+        canEditAllData: false,
+        canDeleteData: false,
+        canManageSystem: false,
+        canExportData: true,
+        canViewLogs: false,
+        canChangePassword: false,
+        sections: ['dashboard', 'wellbeing', 'ch1']
+      }
+    };
+
+    // Check if current user has a specific permission
+    function hasPermission(permission) {
+      if (!currentUserRole) return false;
+      const roleConfig = PERMISSIONS[currentUserRole.role];
+      if (!roleConfig) return false;
+      return roleConfig[permission] === true;
+    }
+
+    // Check if user can access a specific section/page
+    function canAccessSection(section) {
+      if (!currentUserRole) return false;
+      const roleConfig = PERMISSIONS[currentUserRole.role];
+      if (!roleConfig) return false;
+      return roleConfig.sections.includes(section);
+    }
+
+    // Get filtered data based on user role
+    function filterDataByRole(data, orgField = 'organization') {
+      if (!currentUserRole) return [];
+
+      // Super Admin and Admin can see all data
+      if (currentUserRole.role === ROLES.SUPER_ADMIN || currentUserRole.role === ROLES.ADMIN) {
+        return data;
+      }
+
+      // Viewer can only see data from their assigned organization
+      if (currentUserRole.role === ROLES.VIEWER && currentUserRole.org) {
+        return data.filter(item => {
+          const itemOrg = item[orgField] || item.org?.org_name_th || item.raw_data?.organization;
+          return itemOrg === currentUserRole.org;
+        });
+      }
+
+      return data;
+    }
+
+    // Apply role-based UI restrictions
+    function applyRoleBasedUI() {
+      if (!currentUserRole) {
+        showToast('คุณไม่มีสิทธิ์เข้าถึงระบบ กรุณาติดต่อผู้ดูแลระบบ', 'error');
+        doLogout();
+        return;
+      }
+
+      const role = currentUserRole.role;
+      const roleNames = {
+        [ROLES.SUPER_ADMIN]: 'Super Admin',
+        [ROLES.ADMIN]: 'Administrator',
+        [ROLES.VIEWER]: 'Viewer'
+      };
+
+      // Update sidebar with role info
+      const sbnm = el('sbnm');
+      if (sbnm) {
+        sbnm.innerHTML = `${esc(currentUser?.email?.split('@')[0] || 'User')} <span style="font-size:0.75rem;color:var(--tx3);display:block;margin-top:-4px">${roleNames[role] || role}</span>`;
+      }
+
+      // Hide/show sidebar menu items based on role
+      updateSidebarForRole();
+
+      // Hide action buttons based on permissions
+      hideActionsByPermission();
+    }
+
+    // Update sidebar visibility based on role
+    function updateSidebarForRole() {
+      const sections = ['dashboard', 'orgs', 'urls', 'wellbeing', 'ch1', 'analytics', 'users', 'settings'];
+
+      sections.forEach(section => {
+        const menuItem = document.querySelector(`[data-section="${section}"]`);
+        if (menuItem) {
+          menuItem.style.display = canAccessSection(section) ? 'flex' : 'none';
+        }
+      });
+    }
+
+    // Hide action buttons that user doesn't have permission for
+    function hideActionsByPermission() {
+      // Hide add/edit/delete buttons for viewers
+      if (!hasPermission('canEditAllData')) {
+        // Hide org management buttons
+        const orgButtons = document.querySelectorAll('#pg-orgs .btn.bp');
+        orgButtons.forEach(btn => btn.style.display = 'none');
+
+        // Hide URL generation button
+        const genUrlBtn = document.querySelector('#pg-urls .btn.bp');
+        if (genUrlBtn) genUrlBtn.style.display = 'none';
+      }
+
+      // Hide password change section for viewers
+      if (currentUserRole?.role === ROLES.VIEWER) {
+        const pwSection = document.querySelector('#pg-settings .ss2:has(#s-np)');
+        if (pwSection) pwSection.style.display = 'none';
+      }
+    }
+
+    // Add new viewer (only Super Admin and Admin can do this)
+    async function addViewer(email, org) {
+      if (!hasPermission('canManageUsers')) {
+        showToast('คุณไม่มีสิทธิ์เพิ่มผู้ใช้', 'error');
+        return false;
+      }
+
+      // Store in localStorage for now (in production, use Supabase DB)
+      const viewers = JSON.parse(localStorage.getItem('viewers') || '[]');
+      viewers.push({ email, org, createdAt: new Date().toISOString() });
+      localStorage.setItem('viewers', JSON.stringify(viewers));
+
+      // Update USER_ROLES
+      USER_ROLES[email] = { role: ROLES.VIEWER, org };
+
+      showToast(`เพิ่ม Viewer ${esc(email)} สำหรับ ${esc(org)} สำเร็จ`, 'success');
+      return true;
+    }
+
+    // Remove viewer
+    async function removeViewer(email) {
+      if (!hasPermission('canManageUsers')) {
+        showToast('คุณไม่มีสิทธิ์ลบผู้ใช้', 'error');
+        return false;
+      }
+
+      const viewers = JSON.parse(localStorage.getItem('viewers') || '[]');
+      const filtered = viewers.filter(m => m.email !== email);
+      localStorage.setItem('viewers', JSON.stringify(filtered));
+
+      delete USER_ROLES[email];
+
+      showToast(`ลบ Viewer ${esc(email)} สำเร็จ`, 'success');
+      return true;
+    }
+
+    // Load viewers from storage
+    function loadViewers() {
+      const viewers = JSON.parse(localStorage.getItem('viewers') || '[]');
+      viewers.forEach(m => {
+        USER_ROLES[m.email] = { role: ROLES.VIEWER, org: m.org };
+      });
+    }
+
+    // ═══════════════════════════════════════════════
     // INIT
     // ═══════════════════════════════════════════════
     function initSB() {
@@ -1984,6 +2407,8 @@ CREATE INDEX IF NOT EXISTS idx_ch1_sub ON hrd_ch1_responses(submitted_at);</pre>
     }
     async function boot() {
       if (!initSB()) { showToast('Supabase init failed', 'error'); return; }
+      // Load system settings from database
+      await loadSystemSettings();
       const { data: { session } } = await sb.auth.getSession();
       if (session) { currentUser = session.user; showApp(); }
     }
@@ -2009,8 +2434,14 @@ CREATE INDEX IF NOT EXISTS idx_ch1_sub ON hrd_ch1_responses(submitted_at);</pre>
       el('lo').style.display = 'none'; el('app').style.display = 'block';
       const email = currentUser?.email || '';
       el('sbav').textContent = email.charAt(0).toUpperCase();
-      el('sbnm').textContent = email.split('@')[0];
-      loadAll();
+
+      // Load viewers and user role
+      loadViewers();
+      getUserRole(currentUser).then(role => {
+        currentUserRole = role;
+        applyRoleBasedUI();
+        loadAll();
+      });
     }
 
     // ═══════════════════════════════════════════════
@@ -2083,6 +2514,7 @@ CREATE INDEX IF NOT EXISTS idx_ch1_sub ON hrd_ch1_responses(submitted_at);</pre>
       'resp-ch1': ['HRD บทที่ 1 — ข้อมูลตอบกลับ', 'ข้อมูลจาก hrd_ch1_responses'],
       analytics: ['สถิติ & Analytics', 'วิเคราะห์ข้อมูลเชิงลึก'],
       spreadsheet: ['Smart Spreadsheet', 'จัดการข้อมูลแบบ Spreadsheet ด้วย NocoDB'],
+      users: ['จัดการผู้ใช้', 'เพิ่ม/ลบ Viewer และดูสิทธิ์ผู้ใช้'],
       settings: ['ตั้งค่าระบบ', 'Supabase และการตั้งค่าอื่นๆ']
     };
     function nav(page) {
@@ -2104,6 +2536,7 @@ CREATE INDEX IF NOT EXISTS idx_ch1_sub ON hrd_ch1_responses(submitted_at);</pre>
       else if (p === 'resp-ch1') renderCh1Page();
       else if (p === 'analytics') renderAnalyticsPage();
       else if (p === 'spreadsheet') renderSpreadsheetPage();
+      else if (p === 'users') renderUsersPage();
       else if (p === 'settings') renderSettingsPage();
     }
     function toggleSB() {
@@ -2182,6 +2615,106 @@ CREATE INDEX IF NOT EXISTS idx_ch1_sub ON hrd_ch1_responses(submitted_at);</pre>
       if (f.form_key === 'wellbeing') nav('resp-wellbeing');
       else if (f.form_key === 'ch1') nav('resp-ch1');
       else showToast('ฟอร์ม ' + f.form_name + ' ยังไม่มีหน้า responses', 'info');
+    }
+
+    // ═══════════════════════════════════════════════
+    // USER MANAGEMENT
+    // ═══════════════════════════════════════════════
+    function renderUsersPage() {
+      // Update current user info
+      const cuEmail = el('cu-email');
+      const cuRole = el('cu-role');
+      const cuOrg = el('cu-org');
+
+      if (cuEmail) cuEmail.textContent = currentUser?.email || '—';
+      if (cuRole) {
+        const roleNames = {
+          [ROLES.SUPER_ADMIN]: 'Super Admin',
+          [ROLES.ADMIN]: 'Administrator',
+          [ROLES.VIEWER]: 'Viewer'
+        };
+        cuRole.textContent = currentUserRole ? (roleNames[currentUserRole.role] || currentUserRole.role) : '—';
+      }
+      if (cuOrg) {
+        cuOrg.textContent = currentUserRole?.org ? currentUserRole.org : 'ทั้งหมด (All Organizations)';
+      }
+
+      // Populate organization dropdown for viewer creation
+      const viewerOrgSelect = el('viewer-org');
+      if (viewerOrgSelect) {
+        viewerOrgSelect.innerHTML = '<option value="">เลือกองค์กร...</option>' +
+          WB_ORGS.map(o => `<option value="${esc(o.name)}">${esc(o.name)}</option>`).join('');
+      }
+
+      // Render viewers table
+      renderViewersTable();
+
+      // Show/hide viewer management section based on permissions
+      const viewerMgmtSection = el('viewer-mgmt-section');
+      if (viewerMgmtSection) {
+        viewerMgmtSection.style.display = hasPermission('canManageUsers') ? 'block' : 'none';
+      }
+    }
+
+    function renderViewersTable() {
+      const tb = el('viewer-tb');
+      const emptyDiv = el('viewer-empty');
+      if (!tb) return;
+
+      const viewers = JSON.parse(localStorage.getItem('viewers') || '[]');
+
+      if (viewers.length === 0) {
+        tb.innerHTML = '';
+        if (emptyDiv) emptyDiv.style.display = 'block';
+        return;
+      }
+
+      if (emptyDiv) emptyDiv.style.display = 'none';
+
+      tb.innerHTML = viewers.map((m, i) => `
+        <tr>
+          <td>${i + 1}</td>
+          <td><code>${esc(m.email)}</code></td>
+          <td>${esc(m.org)}</td>
+          <td>${new Date(m.createdAt).toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' })}</td>
+          <td>
+            <button class="btn bd bxs" onclick="removeViewerFromUI('${esc(m.email)}')">🗑️ ลบ</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    async function addViewerFromUI() {
+      const emailInput = el('viewer-email');
+      const orgSelect = el('viewer-org');
+
+      const email = emailInput?.value?.trim();
+      const org = orgSelect?.value;
+
+      if (!email) {
+        showToast('กรุณากรอกอีเมล', 'warning');
+        return;
+      }
+      if (!org) {
+        showToast('กรุณาเลือกองค์กร', 'warning');
+        return;
+      }
+
+      const success = await addViewer(email, org);
+      if (success) {
+        emailInput.value = '';
+        orgSelect.value = '';
+        renderViewersTable();
+      }
+    }
+
+    async function removeViewerFromUI(email) {
+      if (!confirm(`ยืนยันการลบ Viewer ${email}?`)) return;
+
+      const success = await removeViewer(email);
+      if (success) {
+        renderViewersTable();
+      }
     }
 
     // ═══════════════════════════════════════════════
@@ -2605,20 +3138,20 @@ CREATE INDEX IF NOT EXISTS idx_ch1_sub ON hrd_ch1_responses(submitted_at);</pre>
       tb.innerHTML = rows.map((r, i) => `<tr>
     <td style="color:var(--tx3);font-size:.8rem">${start + i + 1}</td>
     <td style="font-size:.82rem">${r.submitted_at ? new Date(r.submitted_at).toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' }) : '—'}</td>
-    <td><code style="font-size:.78rem">${esc(r.org_code || '—')}</code></td>
-    <td>${esc(r.org?.org_name_th || '—')}</td>
-    <td style="font-size:.82rem">${esc(r.raw_data?.email || r.raw_data?.respondent_email || '—')}</td>
-    <td style="display:flex;gap:.25rem;flex-wrap:wrap"><button class="btn bp bxs" onclick="showWbDetail(${start + i})">👁️ รายละเอียด</button><button class="btn bo bxs" onclick="showRaw(${JSON.stringify(JSON.stringify(r.raw_data || {})).replace(/"/g, '&quot;')})">🔍 Raw</button></td>
+    <td><code style="font-size:.78rem">${esc(r.org_type || '—')}</code></td>
+    <td>${esc(r.organization || '—')}</td>
+    <td style="font-size:.82rem">${esc(r.email || '—')}</td>
+    <td style="display:flex;gap:.25rem;flex-wrap:wrap"><button class="btn bp bxs" onclick="showWbDetail(${start + i})">👁️ รายละเอียด</button><button class="btn bo bxs" onclick="showRaw(${JSON.stringify(JSON.stringify(r.raw_responses || {})).replace(/"/g, '&quot;')})">🔍 Raw</button></td>
   </tr>`).join('');
       renderPag('wb', wbFilt.length, wbPage, WB_PPG);
     }
     function clrWb() { el('wof').value = ''; el('wdf').value = ''; el('wdt').value = ''; filterWb(); }
     function expWbCSV() {
       if (!wbFilt.length) { showToast('ไม่มีข้อมูล', 'warning'); return; }
-      const rows = [['#', 'วันที่', 'org_code', 'องค์กร', 'อีเมล'].join(','), ...wbFilt.map((r, i) => [
+      const rows = [['#', 'วันที่', 'org_type', 'องค์กร', 'อีเมล'].join(','), ...wbFilt.map((r, i) => [
         i + 1, `"${r.submitted_at ? new Date(r.submitted_at).toLocaleString('th-TH') : '—'}"`,
-        `"${r.org_code || ''}"`, `"${r.org?.org_name_th || ''}"`,
-        `"${r.raw_data?.email || r.raw_data?.respondent_email || ''}"`
+        `"${r.org_type || ''}"`, `"${r.organization || ''}"`,
+        `"${r.email || ''}"`
       ].join(','))].join('\n');
       dlBlob(new Blob(['\uFEFF' + rows], { type: 'text/csv' }), 'wellbeing_' + today() + '.csv');
       showToast('Export สำเร็จ ✓', 'success');
@@ -3073,6 +3606,51 @@ CREATE INDEX IF NOT EXISTS idx_ch1_sub ON hrd_ch1_responses(submitted_at);</pre>
     }
 
     // ═══════════════════════════════════════════════
+    // SYSTEM SETTINGS (DATABASE)
+    // ═══════════════════════════════════════════════
+    // Load system settings from database
+    async function loadSystemSettings() {
+      try {
+        const { data, error } = await sb.from('system_settings').select('*');
+        if (error) {
+          console.warn('system_settings:', error.message);
+          return null;
+        }
+        if (data && data.length > 0) {
+          const settings = {};
+          data.forEach(row => { settings[row.key] = row.value; });
+          // Update CFG if settings found
+          if (settings.supabase_url) CFG.supabaseUrl = settings.supabase_url;
+          if (settings.supabase_anon_key) CFG.supabaseKey = settings.supabase_anon_key;
+          if (settings.base_url) CFG.baseUrl = settings.base_url;
+          return settings;
+        }
+        return null;
+      } catch (e) {
+        console.warn('loadSystemSettings error:', e);
+        return null;
+      }
+    }
+
+    // Save system setting to database (Super Admin only)
+    async function saveSystemSetting(key, value, description = '') {
+      if (!hasPermission('canManageSystem')) {
+        showToast('คุณไม่มีสิทธิ์แก้ไขการตั้งค่าระบบ', 'error');
+        return false;
+      }
+      try {
+        const { error } = await sb.from('system_settings')
+          .upsert({ key, value, description, updated_at: new Date().toISOString() },
+                  { onConflict: 'key' });
+        if (error) throw error;
+        return true;
+      } catch (e) {
+        showToast('เกิดข้อผิดพลาด: ' + e.message, 'error');
+        return false;
+      }
+    }
+
+    // ═══════════════════════════════════════════════
     // SETTINGS
     // ═══════════════════════════════════════════════
     // ═══════════════════════════════════════════════
@@ -3314,14 +3892,38 @@ CREATE INDEX IF NOT EXISTS idx_ch1_sub ON hrd_ch1_responses(submitted_at);</pre>
     // SETTINGS
     // ═══════════════════════════════════════════════
     function renderSettingsPage() {
-      el('s-url').value = CFG.supabaseUrl;
-      el('s-key').value = CFG.supabaseKey;
-      el('s-bu').value = CFG.baseUrl;
-      testConn();
+      // Check role and show/hide sections
+      const isSuperAdmin = currentUserRole?.role === ROLES.SUPER_ADMIN;
+      const isAdmin = currentUserRole?.role === ROLES.ADMIN || isSuperAdmin;
+
+      // Super Admin Only sections
+      const supabaseSection = el('sa-supabase-section');
+      const baseUrlSection = el('sa-baseurl-section');
+      const sqlSection = el('sa-sql-section');
+
+      if (supabaseSection) supabaseSection.style.display = isSuperAdmin ? 'block' : 'none';
+      if (baseUrlSection) baseUrlSection.style.display = isSuperAdmin ? 'block' : 'none';
+      if (sqlSection) sqlSection.style.display = isSuperAdmin ? 'block' : 'none';
+
+      // Admin & Super Admin sections
+      const formsSection = el('admin-forms-section');
+      if (formsSection) formsSection.style.display = isAdmin ? 'block' : 'none';
+
+      // Load values into inputs (only if Super Admin)
+      if (isSuperAdmin) {
+        el('s-url').value = CFG.supabaseUrl;
+        el('s-key').value = CFG.supabaseKey;
+        el('s-bu').value = CFG.baseUrl;
+        testConn();
+      }
+
+      // Always render forms table (visible to admin and above)
       renderFormsTable();
     }
+
     async function testConn() {
       const badge = el('cbdg');
+      if (!badge) return;
       badge.textContent = 'กำลังตรวจสอบ...'; badge.className = 'cst cck';
       try {
         if (!sb) initSB();
@@ -3330,18 +3932,48 @@ CREATE INDEX IF NOT EXISTS idx_ch1_sub ON hrd_ch1_responses(submitted_at);</pre>
         badge.textContent = '✓ เชื่อมต่อสำเร็จ'; badge.className = 'cst cok';
       } catch (e) { badge.textContent = '✕ ' + e.message; badge.className = 'cst cer'; }
     }
-    function saveSBCfg() {
+
+    async function saveSBCfg() {
+      // Check permission
+      if (!hasPermission('canManageSystem')) {
+        showToast('คุณไม่มีสิทธิ์แก้ไขการตั้งค่าระบบ', 'error');
+        return;
+      }
+
       const url = v('s-url').trim(), key = v('s-key').trim();
       if (!url || !key) { showToast('กรุณากรอก URL และ Key', 'error'); return; }
-      localStorage.setItem('sb_url', url); localStorage.setItem('sb_key', key);
-      showToast('บันทึกแล้ว กำลังรีเฟรช...', 'success');
-      setTimeout(() => location.reload(), 1500);
+
+      // Save to database
+      const urlSaved = await saveSystemSetting('supabase_url', url, 'Supabase Project URL');
+      const keySaved = await saveSystemSetting('supabase_anon_key', key, 'Supabase Anon Key');
+
+      if (urlSaved && keySaved) {
+        // Also save to localStorage as backup
+        localStorage.setItem('sb_url', url);
+        localStorage.setItem('sb_key', key);
+        showToast('บันทึกแล้ว กำลังรีเฟรช...', 'success');
+        setTimeout(() => location.reload(), 1500);
+      }
     }
-    function saveBU() {
+
+    async function saveBU() {
+      // Check permission
+      if (!hasPermission('canManageSystem')) {
+        showToast('คุณไม่มีสิทธิ์แก้ไขการตั้งค่าระบบ', 'error');
+        return;
+      }
+
       const url = v('s-bu').trim().replace(/\/$/, '');
       if (!url) { showToast('กรุณากรอก URL', 'error'); return; }
-      CFG.baseUrl = url; localStorage.setItem('base_url', url);
-      showToast('บันทึก Base URL สำเร็จ ✓', 'success');
+
+      // Save to database
+      const saved = await saveSystemSetting('base_url', url, 'Base URL for Survey Links');
+
+      if (saved) {
+        CFG.baseUrl = url;
+        localStorage.setItem('base_url', url);
+        showToast('บันทึก Base URL สำเร็จ ✓', 'success');
+      }
     }
     function renderFormsTable() {
       const tb = el('sf-tb'); if (!tb) return;
