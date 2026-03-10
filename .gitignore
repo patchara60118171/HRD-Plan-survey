@@ -32,6 +32,11 @@ playwright.config.*
 screenshots/
 test-results/
 playwright-report/
+docs/screenshots/
+
+# Playwright test files (moved to tests/e2e/)
+playwright-*.js
+submit-200-records.js
 
 # Temp
 add-email-column.js
