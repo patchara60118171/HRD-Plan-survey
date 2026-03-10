@@ -1213,6 +1213,7 @@
     .ssheet-url-inp { flex: 1; min-width: 240px; padding: .5rem .75rem; border: 1.5px solid var(--bdr); border-radius: 8px; font-family: inherit; font-size: .85rem; outline: none; transition: border-color .2s }
     .ssheet-url-inp:focus { border-color: var(--A) }
     .ssheet-tabs { display: flex; gap: .25rem; background: var(--card); border: 1px solid var(--bdr); border-radius: var(--R); padding: .5rem .75rem; flex-wrap: wrap }
+    .ssheet-tabs.ssheet-subtabs { padding-top: 0; border-top: none; margin-top: -.5rem }
     .ssheet-tab { padding: .4rem 1rem; border-radius: 6px; border: none; background: transparent; font-family: inherit; font-size: .875rem; cursor: pointer; color: var(--tx2); transition: background .15s, color .15s }
     .ssheet-tab.active { background: var(--A); color: #fff; font-weight: 600 }
     .ssheet-tab:hover:not(.active) { background: var(--PL) }
@@ -2003,8 +2004,13 @@ CREATE INDEX IF NOT EXISTS idx_ch1_sub ON hrd_ch1_responses(submitted_at);</pre>
               <button class="btn bo bsm" onclick="refreshSpreadsheet()">🔄 Refresh</button>
             </div>
           </div>
-          <!-- Tab selector -->
+          <!-- Survey selector tabs -->
           <div class="ssheet-tabs">
+            <button class="ssheet-tab active" id="stab-survey-wellbeing" onclick="switchSheetSurvey('wellbeing')">💚 Wellbeing Survey</button>
+            <button class="ssheet-tab" id="stab-survey-ch1" onclick="switchSheetSurvey('ch1')">📋 HRD บทที่ 1</button>
+          </div>
+          <!-- View mode tabs -->
+          <div class="ssheet-tabs ssheet-subtabs">
             <button class="ssheet-tab active" id="stab-inline" onclick="switchSheetTab('inline')">📊 Spreadsheet View</button>
             <button class="ssheet-tab" id="stab-noco" onclick="switchSheetTab('noco')">🗃️ NocoDB Embed</button>
           </div>
@@ -3656,18 +3662,27 @@ CREATE INDEX IF NOT EXISTS idx_ch1_sub ON hrd_ch1_responses(submitted_at);</pre>
     // ═══════════════════════════════════════════════
     // SMART SPREADSHEET (NocoDB integration)
     // ═══════════════════════════════════════════════
-    let sheetTab = 'inline';
     let sheetData = [];
     let sheetCols = [];
     let sheetChanges = {};
     let sheetSaving = false;
+    let sheetTab = 'inline';
+    let sheetSurvey = 'wellbeing';
 
-    // Columns shown in inline spreadsheet (ordered, display-friendly)
-    const SHEET_COLS = [
+    // Columns shown in inline spreadsheet for Wellbeing Survey (survey_responses)
+    const SHEET_COLS_WB = [
+      { key: 'id', label: 'ID', ro: true, w: 80 },
+      { key: 'submitted_at', label: 'วันที่ส่ง', ro: true, w: 130 },
+      { key: 'org_code', label: 'รหัสองค์กร', ro: true, w: 120 },
+      { key: 'email', label: 'อีเมล', ro: true, w: 200 },
+    ];
+
+    // Columns shown in inline spreadsheet for HRD Chapter 1 (hrd_ch1_responses)
+    const SHEET_COLS_CH1 = [
       { key: 'id', label: 'ID', ro: true, w: 80 },
       { key: 'created_at', label: 'วันที่ส่ง', ro: true, w: 130 },
       { key: 'organization', label: 'องค์กร', w: 180 },
-      { key: 'email', label: 'อีเมล', w: 180 },
+      { key: 'respondent_email', label: 'อีเมล', w: 180 },
       { key: 'total_staff', label: 'จำนวนบุคลากร', w: 110 },
       { key: 'strategic_overview', label: 'Strategic Overview', w: 200 },
       { key: 'related_policies', label: 'นโยบายที่เกี่ยวข้อง', w: 200 },
@@ -3681,18 +3696,38 @@ CREATE INDEX IF NOT EXISTS idx_ch1_sub ON hrd_ch1_responses(submitted_at);</pre>
       { key: 'form_version', label: 'Form Version', ro: true, w: 90 },
     ];
 
+    function getSheetCols() { return sheetSurvey === 'wellbeing' ? SHEET_COLS_WB : SHEET_COLS_CH1; }
+    function getSheetTable() { return sheetSurvey === 'wellbeing' ? 'survey_responses' : 'hrd_ch1_responses'; }
+    function getSheetOrderCol() { return sheetSurvey === 'wellbeing' ? 'submitted_at' : 'created_at'; }
+
     function renderSpreadsheetPage() {
       // Restore saved NocoDB URL
       const savedUrl = localStorage.getItem('noco_url') || '';
       const inp = el('noco-url');
       if (inp && !inp.value) inp.value = savedUrl;
+      // Sync survey selector tab active state
+      document.querySelectorAll('[id^="stab-survey-"]').forEach(t => t.classList.remove('active'));
+      const activeSurveyTab = el('stab-survey-' + sheetSurvey);
+      if (activeSurveyTab) activeSurveyTab.classList.add('active');
       switchSheetTab(sheetTab, true);
+    }
+
+    function switchSheetSurvey(survey) {
+      if (survey === sheetSurvey) return;
+      sheetSurvey = survey;
+      sheetData = [];
+      sheetChanges = {};
+      document.querySelectorAll('[id^="stab-survey-"]').forEach(t => t.classList.remove('active'));
+      const activeSurveyTab = el('stab-survey-' + survey);
+      if (activeSurveyTab) activeSurveyTab.classList.add('active');
+      if (sheetTab === 'noco') renderNocoEmbed();
+      else renderInlineSheet();
     }
 
     function switchSheetTab(tab, force) {
       if (tab === sheetTab && !force && el('ssheet-body').innerHTML) return;
       sheetTab = tab;
-      document.querySelectorAll('.ssheet-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('#stab-inline, #stab-noco').forEach(t => t.classList.remove('active'));
       const activeTab = el('stab-' + tab);
       if (activeTab) activeTab.classList.add('active');
       if (tab === 'noco') renderNocoEmbed();
@@ -3748,8 +3783,8 @@ CREATE INDEX IF NOT EXISTS idx_ch1_sub ON hrd_ch1_responses(submitted_at);</pre>
       const body = el('ssheet-body');
       body.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;gap:.75rem;color:var(--tx2)"><span style="font-size:1.5rem">⏳</span> กำลังโหลดข้อมูล...</div>`;
       try {
-        const cols = SHEET_COLS.map(c => c.key).join(',');
-        const { data, error } = await sb.from('hrd_ch1_responses').select(cols).order('created_at', { ascending: false }).limit(500);
+        const cols = getSheetCols().map(c => c.key).join(',');
+        const { data, error } = await sb.from(getSheetTable()).select(cols).order(getSheetOrderCol(), { ascending: false }).limit(500);
         if (error) throw error;
         sheetData = data || [];
         sheetChanges = {};
@@ -3760,7 +3795,7 @@ CREATE INDEX IF NOT EXISTS idx_ch1_sub ON hrd_ch1_responses(submitted_at);</pre>
     }
 
     function buildInlineSheet(body) {
-      const cols = SHEET_COLS;
+      const cols = getSheetCols();
       const rows = sheetData;
       let html = `
         <div class="isheet" id="isheet-container">
@@ -3838,7 +3873,7 @@ CREATE INDEX IF NOT EXISTS idx_ch1_sub ON hrd_ch1_responses(submitted_at);</pre>
         .filter(([ri]) => sheetData[ri] && sheetData[ri].id)
         .map(([ri, changes]) => {
           const row = sheetData[ri];
-          return sb.from('hrd_ch1_responses').update(changes).eq('id', row.id)
+          return sb.from(getSheetTable()).update(changes).eq('id', row.id)
             .then(({ error }) => {
               if (error) { fail++; console.error('save row error', row.id, error); }
               else {
@@ -3860,17 +3895,19 @@ CREATE INDEX IF NOT EXISTS idx_ch1_sub ON hrd_ch1_responses(submitted_at);</pre>
     }
 
     function addSheetRow() {
-      showToast('ใช้แบบฟอร์มสำรวจ ch1.html เพื่อเพิ่มข้อมูลใหม่', 'info');
+      const hint = sheetSurvey === 'wellbeing' ? 'index.html' : 'ch1.html';
+      showToast('ใช้แบบฟอร์มสำรวจ ' + hint + ' เพื่อเพิ่มข้อมูลใหม่', 'info');
     }
 
     function refreshSpreadsheet() {
       sheetChanges = {};
-      renderInlineSheet();
+      if (sheetTab === 'noco') renderNocoEmbed();
+      else renderInlineSheet();
     }
 
     function exportSheetCSV() {
       if (!sheetData.length) { showToast('ไม่มีข้อมูลสำหรับ Export', 'error'); return; }
-      const cols = SHEET_COLS;
+      const cols = getSheetCols();
       const header = cols.map(c => '"' + c.label.replace(/"/g, '""') + '"').join(',');
       const rows = sheetData.map(row =>
         cols.map(c => {
@@ -3882,7 +3919,8 @@ CREATE INDEX IF NOT EXISTS idx_ch1_sub ON hrd_ch1_responses(submitted_at);</pre>
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
-      a.download = `wellbeing_ch1_${new Date().toISOString().slice(0, 10)}.csv`;
+      const prefix = sheetSurvey === 'wellbeing' ? 'wellbeing_survey' : 'wellbeing_ch1';
+      a.download = `${prefix}_${new Date().toISOString().slice(0, 10)}.csv`;
       a.click();
       URL.revokeObjectURL(a.href);
       showToast('Export CSV สำเร็จ ✓', 'success');
