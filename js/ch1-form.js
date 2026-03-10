@@ -114,28 +114,6 @@ function parseUrlParameters() {
             showToast(`ยินดีต้อนรับบุคลากรจาก ${orgName}`, 'success');
         }
     }, 500);
-            const welcomeName = document.getElementById('org-welcome-name');
-            
-            if (badgeContainer && badgeName) {
-                badgeName.textContent = orgName;
-                badgeContainer.classList.remove('hidden');
-            }
-            if (welcomeAlert && welcomeName) {
-                welcomeName.textContent = orgName;
-                welcomeAlert.classList.remove('hidden');
-            }
-            
-            console.log(`Organization auto-selected: ${orgName} (${orgCode})`);
-            
-            setTimeout(() => {
-                if (typeof showToast === 'function') {
-                    showToast(`ยินดีต้อนรับบุคลากรจาก ${orgName}`, 'success');
-                }
-            }, 500);
-        }
-    } else if (orgCode && !ORG_MAP[orgCode]) {
-        console.warn(`Unknown organization code: ${orgCode}`);
-    }
 }
 
 // =============================================
@@ -458,11 +436,45 @@ function collectAllData() {
     const type_contract = toSafeInt(document.getElementById('type_contract')?.value, 99999, 'พนักงานสัญญา');
     const type_other = toSafeInt(document.getElementById('type_other')?.value, 99999, 'อื่นๆ');
 
-    // Turnover and transfer
+    // Turnover and transfer (legacy fields - for backward compatibility)
     const turnover_count = toSafeInt(document.getElementById('turnover_count')?.value, 99999, 'จำนวนลาออก') || null;
     const turnover_rate = parseFloat(document.getElementById('turnover_rate')?.value) || null;
     const transfer_count = toSafeInt(document.getElementById('transfer_count')?.value, 99999, 'จำนวนย้าย') || null;
     const transfer_rate = parseFloat(document.getElementById('transfer_rate')?.value) || null;
+
+    // Section 4: การลาออกและโอนย้าย (ย้อนหลัง 5 ปี) - ข้อมูลตามปี
+    const begin_2564 = toSafeInt(document.getElementById('begin_2564')?.value, 99999, 'จำนวนต้นปี 2564');
+    const begin_2565 = toSafeInt(document.getElementById('begin_2565')?.value, 99999, 'จำนวนต้นปี 2565');
+    const begin_2566 = toSafeInt(document.getElementById('begin_2566')?.value, 99999, 'จำนวนต้นปี 2566');
+    const begin_2567 = toSafeInt(document.getElementById('begin_2567')?.value, 99999, 'จำนวนต้นปี 2567');
+    const begin_2568 = toSafeInt(document.getElementById('begin_2568')?.value, 99999, 'จำนวนต้นปี 2568');
+
+    const end_2564 = toSafeInt(document.getElementById('end_2564')?.value, 99999, 'จำนวนปลายปี 2564');
+    const end_2565 = toSafeInt(document.getElementById('end_2565')?.value, 99999, 'จำนวนปลายปี 2565');
+    const end_2566 = toSafeInt(document.getElementById('end_2566')?.value, 99999, 'จำนวนปลายปี 2566');
+    const end_2567 = toSafeInt(document.getElementById('end_2567')?.value, 99999, 'จำนวนปลายปี 2567');
+    const end_2568 = toSafeInt(document.getElementById('end_2568')?.value, 99999, 'จำนวนปลายปี 2568');
+
+    const leave_2564 = toSafeInt(document.getElementById('leave_2564')?.value, 99999, 'จำนวนลาออก 2564');
+    const leave_2565 = toSafeInt(document.getElementById('leave_2565')?.value, 99999, 'จำนวนลาออก 2565');
+    const leave_2566 = toSafeInt(document.getElementById('leave_2566')?.value, 99999, 'จำนวนลาออก 2566');
+    const leave_2567 = toSafeInt(document.getElementById('leave_2567')?.value, 99999, 'จำนวนลาออก 2567');
+    const leave_2568 = toSafeInt(document.getElementById('leave_2568')?.value, 99999, 'จำนวนลาออก 2568');
+
+    // Calculate percentage rates for each year
+    function calcRate(begin, end, leave) {
+        const denominator = (begin + end) / 2;
+        if (denominator > 0) {
+            return +((leave / denominator) * 100).toFixed(2);
+        }
+        return null;
+    }
+
+    const rate_2564 = calcRate(begin_2564, end_2564, leave_2564);
+    const rate_2565 = calcRate(begin_2565, end_2565, leave_2565);
+    const rate_2566 = calcRate(begin_2566, end_2566, leave_2566);
+    const rate_2567 = calcRate(begin_2567, end_2567, leave_2567);
+    const rate_2568 = calcRate(begin_2568, end_2568, leave_2568);
 
     // Step 2: นโยบายและบริบทภายนอก
     const related_policies = document.getElementById('related_policies')?.value.trim() || null;
@@ -580,6 +592,12 @@ function collectAllData() {
         type_official, type_employee, type_contract, type_other,
         turnover_count, turnover_rate,
         transfer_count, transfer_rate,
+
+        // Section 4: ข้อมูลรายปี (ย้อนหลัง 5 ปี)
+        begin_2564, begin_2565, begin_2566, begin_2567, begin_2568,
+        end_2564, end_2565, end_2566, end_2567, end_2568,
+        leave_2564, leave_2565, leave_2566, leave_2567, leave_2568,
+        rate_2564, rate_2565, rate_2566, rate_2567, rate_2568,
 
         // Step 2: นโยบายและบริบท
         related_policies,

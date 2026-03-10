@@ -160,7 +160,7 @@ async function uploadPDFToSupabase(file, fieldType) {
         folderName = 'other';
     }
     
-    const filePath = `section1/${folderName}/${safeFileName}`;
+    const filePath = `ch1-uploads/section1/${folderName}/${safeFileName}`;
     
     // Get Supabase client from ch1-form.js (ch1Sb)
     const supabaseClient = window.ch1Sb || (typeof ch1Sb !== 'undefined' ? ch1Sb : null);
