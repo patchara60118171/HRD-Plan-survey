@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="th">
 
 <head>
@@ -14,7 +14,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
-  <script src="js/sarabun-font.js"></script>
+  <script src="js/questions.js"></script>
   <style>
     *,
     *::before,
@@ -1248,8 +1248,8 @@
         <div id="rni">
           <div class="ni" data-pg="resp-wellbeing" onclick="nav('resp-wellbeing')"><span class="nic">💚</span><span
               class="nil">Wellbeing Survey</span></div>
-          <div class="ni" data-pg="resp-ch1" onclick="nav('resp-ch1')"><span class="nic">📋</span><span class="nil">HRD
-              บทที่ 1</span></div>
+          <div class="ni" data-pg="resp-ch1" onclick="nav('resp-ch1')"><span class="nic">📋</span><span
+              class="nil">HRD บทที่ 1</span></div>
         </div>
         <div class="nsc">ANALYSIS</div>
         <div class="ni" data-pg="analytics" onclick="nav('analytics')"><span class="nic">📈</span><span
@@ -1845,6 +1845,15 @@ CREATE INDEX IF NOT EXISTS idx_ch1_sub ON hrd_ch1_responses(submitted_at);</pre>
       <div class="mf"><button class="btn bo" onclick="closeRaw()">ปิด</button></div>
     </div>
   </div>
+  <div class="mbd" id="wb-detail-bd">
+    <div class="ml ml-lg">
+      <div class="mh">
+        <h2>รายละเอียดคำตอบแบบสอบถาม</h2><button class="mc" onclick="closeWbDetail()">✕</button>
+      </div>
+      <div class="mb" id="wb-detail-body" style="max-height:70vh;overflow:auto"></div>
+      <div class="mf"><button class="btn bo" onclick="closeWbDetail()">ปิด</button></div>
+    </div>
+  </div>
   <div id="tc"></div>
   <div class="lov" id="lov">
     <div class="spn"></div>
@@ -1864,12 +1873,14 @@ CREATE INDEX IF NOT EXISTS idx_ch1_sub ON hrd_ch1_responses(submitted_at);</pre>
     let orgsData = [], orgsFilt = [], orgsSort = { col: 'created_at', dir: 'desc' }, orgPage = 1;
     const ORG_PPG = 20;
     let urlsData = [], urlsFilt = [], urlPage = 1;
-    const URL_PPG = 20;
+    const URL_PPG = 500;
     let wbData = [], wbFilt = [], wbPage = 1;
     const WB_PPG = 20;
     let ch1Data = [], ch1Filt = [], ch1Page = 1;
     const CH1_PPG = 20;
     let surveyForms = [], chartInst = {};
+    let wbQuestionMeta = [];
+    let sarabunFontBase64 = typeof window.SARABUN_FONT_BASE64 !== 'undefined' ? window.SARABUN_FONT_BASE64 : '';
     const TYPE_LABELS = { government: 'ราชการ', private: 'เอกชน', ngo: 'NGO', other: 'อื่นๆ' };
     const SUP_LABELS = { full: 'ครบ', partial: 'บางส่วน', none: 'ไม่มี' };
     const DIG_LABELS = { e_doc: 'เอกสารอิเล็กทรอนิกส์', e_sign: 'E-Signature', cloud: 'Cloud', hr_digital: 'HR Digital', health_db: 'ฐานข้อมูลสุขภาพ', none: 'ไม่มี', other: 'อื่นๆ' };
@@ -2065,8 +2076,8 @@ CREATE INDEX IF NOT EXISTS idx_ch1_sub ON hrd_ch1_responses(submitted_at);</pre>
       urlsData = data || []; urlsFilt = [...urlsData];
     }
     async function loadWb() {
-      const { data, error } = await sb.from('wellbeing_responses')
-        .select('*, org:organizations(org_name_th)')
+      const { data, error } = await sb.from('survey_responses')  // ✅ แก้จาก wellbeing_responses เป็น survey_responses
+        .select('*')
         .order('submitted_at', { ascending: false }).limit(500);
       if (error) { console.warn('wb:', error.message); wbData = []; return; }
       wbData = data || []; wbFilt = [...wbData];
@@ -2160,7 +2171,7 @@ CREATE INDEX IF NOT EXISTS idx_ch1_sub ON hrd_ch1_responses(submitted_at);</pre>
     <td style="color:var(--tx3);font-size:.8rem">${r.time ? new Date(r.time).toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' }) : '—'}</td>
     <td>${esc(r.org)}</td>
     <td><span class="bdg ${r.form === 'Wellbeing' ? 'bg' : 'bw'}">${r.form}</span></td>
-    <td><code style="font-size:.78rem;color:var(--tx2)">${esc(r.code)}</code></td>
+    <td><code style="font-size:.78rem">${esc(r.code)}</code></td>
   </tr>`).join('');
     }
 
@@ -2189,7 +2200,7 @@ CREATE INDEX IF NOT EXISTS idx_ch1_sub ON hrd_ch1_responses(submitted_at);</pre>
     function renderOrgsTable() {
       const start = (orgPage - 1) * ORG_PPG, rows = orgsFilt.slice(start, start + ORG_PPG);
       const tb = el('o-tb');
-      if (!rows.length) { tb.innerHTML = `<tr><td colspan="8"><div class="emp"><div class="ei">🏢</div><p>ไม่พบข้อมูลองค์กร</p></div></td></tr>`; renderPag('org', orgsFilt.length, orgPage, ORG_PPG); return; }
+      if (!rows.length) { tb.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--tx3)">ยังไม่มีข้อมูล</td></tr>`; renderPag('org', orgsFilt.length, orgPage, ORG_PPG); return; }
       tb.innerHTML = rows.map((o, i) => `<tr>
     <td style="color:var(--tx3);font-size:.8rem">${start + i + 1}</td>
     <td><code style="background:var(--bg);padding:.15rem .4rem;border-radius:4px;font-size:.8rem">${esc(o.org_code)}</code></td>
@@ -2207,7 +2218,7 @@ CREATE INDEX IF NOT EXISTS idx_ch1_sub ON hrd_ch1_responses(submitted_at);</pre>
     }
     function popOrgFilters() { }
     function openOM(org = null) {
-      el('om-t').textContent = org ? 'แก้ไของค์กร' : 'เพิ่มองค์กรใหม่';
+      el('om-t').textContent = org ? 'แก้ไองค์กร' : 'เพิ่มองค์กรใหม่';
       el('o-id').value = org?.id || '';
       el('o-cd').value = org?.org_code || ''; el('o-cd').disabled = !!org;
       el('o-nth').value = org?.org_name_th || '';
@@ -2240,7 +2251,7 @@ CREATE INDEX IF NOT EXISTS idx_ch1_sub ON hrd_ch1_responses(submitted_at);</pre>
         if (id) ({ error } = await sb.from('organizations').update(payload).eq('id', id));
         else ({ error } = await sb.from('organizations').insert([payload]));
         if (error) throw error;
-        showToast(id ? 'แก้ไของค์กรสำเร็จ ✓' : 'เพิ่มองค์กรสำเร็จ ✓', 'success');
+        showToast(id ? 'แก้ไองค์กรสำเร็จ ✓' : 'เพิ่มองค์กรสำเร็จ ✓', 'success');
         closeOM();
         await loadOrgs(); await loadUrls();
         popOrgFilters(); popUrlFilters(); popWbFilters(); popCh1Filters(); buildDynSB(); filterOrgs();
@@ -2300,13 +2311,13 @@ CREATE INDEX IF NOT EXISTS idx_ch1_sub ON hrd_ch1_responses(submitted_at);</pre>
     <td style="color:var(--tx3);font-size:.8rem">${start + i + 1}</td>
     <td style="font-weight:500">${esc(u.org?.org_name_th || '—')}</td>
     <td><span class="bdg bb">${esc(u.form?.form_name || '—')}</span></td>
-    <td><div class="ucl" title="${esc(u.full_url)}">${esc(u.full_url)}</div></td>
+    <td style="max-width:400px;word-break:break-all;"><a href="${esc(u.full_url)}" target="_blank" style="color:var(--pr);text-decoration:underline;">${esc(u.full_url)}</a></td>
     <td><span class="bdg ${u.is_active ? 'bg' : 'br'}">${u.is_active ? 'ใช้งาน' : 'ปิดใช้'}</span></td>
-    <td style="display:flex;gap:.25rem;flex-wrap:wrap">
-      <button class="btn bo bxs" onclick="copyUrl('${esc(u.full_url)}')">📋</button>
-      <button class="btn bo bxs" onclick="showQR('${esc(u.full_url)}')">📱 QR</button>
-      <button class="btn bo bxs" onclick="toggleUrlSts('${u.id}',${u.is_active})">${u.is_active ? '🔒' : '🔓'}</button>
-      <button class="btn bd bxs" onclick="delUrl('${u.id}')">🗑️</button>
+    <td style="display:flex;gap:.5rem;flex-wrap:wrap">
+      <button class="btn bo bxs" onclick="copyUrl('${esc(u.full_url)}')">📋 คัดลอกลิงก์</button>
+      <button class="btn bo bxs" onclick="showQR('${esc(u.full_url)}')">📱 QR Code</button>
+      <button class="btn bo bxs" onclick="toggleUrlSts('${u.id}',${u.is_active})">${u.is_active ? '🔒 ปิดลิงก์' : '🔓 เปิดลิงก์'}</button>
+      <button class="btn bd bxs" onclick="delUrl('${u.id}')">🗑️ ลบลิงก์</button>
     </td>
   </tr>`).join('');
       renderPag('url', urlsFilt.length, urlPage, URL_PPG);
@@ -2375,6 +2386,125 @@ CREATE INDEX IF NOT EXISTS idx_ch1_sub ON hrd_ch1_responses(submitted_at);</pre>
     // ═══════════════════════════════════════════════
     // WELLBEING RESPONSES
     // ═══════════════════════════════════════════════
+    function initWbQuestionMeta() {
+      if (!Array.isArray(wbQuestionMeta) || wbQuestionMeta.length) return;
+      if (typeof SURVEY_DATA === 'undefined') return;
+      wbQuestionMeta = Object.values(SURVEY_DATA).flatMap(section =>
+        (section.subsections || []).flatMap(subsection =>
+          (subsection.questions || []).map(question => ({
+            ...question,
+            sectionTitle: section.title || '',
+            subsectionTitle: subsection.title || ''
+          }))
+        )
+      );
+    }
+    function getWbEmail(raw) {
+      return raw?.email || raw?.respondent_email || raw?.user_email || '—';
+    }
+    function getWbOrgName(record) {
+      return record?.org?.org_name_th || record?.raw_data?.organization || record?.org_code || '—';
+    }
+    function formatWbAnswer(value, question) {
+      if (value == null || value === '') return '—';
+      if (Array.isArray(value)) return value.map(v => formatWbAnswer(v, question)).join(', ');
+      if (question?.type === 'scale' && Array.isArray(question.labels)) {
+        const idx = Number(value);
+        if (!Number.isNaN(idx) && question.labels[idx] != null) return `${question.labels[idx]} (${value})`;
+      }
+      if (Array.isArray(question?.options)) {
+        const matched = question.options.find(opt => String(opt?.value !== undefined ? opt.value : opt) === String(value));
+        if (matched) return matched.label || matched;
+      }
+      return String(value);
+    }
+    function buildWbWideRow(record, index) {
+      initWbQuestionMeta();
+      const raw = record.raw_data || {};
+      const row = {
+        '#': index + 1,
+        'วันที่ส่ง': record.submitted_at ? new Date(record.submitted_at).toLocaleString('th-TH') : '—',
+        'org_code': record.org_code || '',
+        'องค์กร': getWbOrgName(record),
+        'อีเมล': getWbEmail(raw)
+      };
+      wbQuestionMeta.forEach(question => {
+        row[`${question.sectionTitle} / ${question.text}`] = formatWbAnswer(raw[question.id], question);
+      });
+      return row;
+    }
+    function buildWbLongRows(records) {
+      initWbQuestionMeta();
+      return records.flatMap((record, index) => {
+        const raw = record.raw_data || {};
+        return wbQuestionMeta.map(question => ({
+          '#': index + 1,
+          'วันที่ส่ง': record.submitted_at ? new Date(record.submitted_at).toLocaleString('th-TH') : '—',
+          'org_code': record.org_code || '',
+          'องค์กร': getWbOrgName(record),
+          'อีเมล': getWbEmail(raw),
+          'หมวดหลัก': question.sectionTitle,
+          'หมวดย่อย': question.subsectionTitle,
+          'คำถาม': question.text,
+          'คำตอบ': formatWbAnswer(raw[question.id], question)
+        }));
+      });
+    }
+    function showWbDetail(index) {
+      initWbQuestionMeta();
+      const record = wbFilt[index];
+      if (!record) return;
+      const raw = record.raw_data || {};
+      const sections = [];
+      wbQuestionMeta.forEach(question => {
+        let section = sections.find(item => item.title === question.sectionTitle);
+        if (!section) {
+          section = { title: question.sectionTitle, subsections: [] };
+          sections.push(section);
+        }
+        let subsection = section.subsections.find(item => item.title === question.subsectionTitle);
+        if (!subsection) {
+          subsection = { title: question.subsectionTitle, questions: [] };
+          section.subsections.push(subsection);
+        }
+        subsection.questions.push({
+          text: question.text,
+          answer: formatWbAnswer(raw[question.id], question)
+        });
+      });
+      const submittedAt = record.submitted_at ? new Date(record.submitted_at).toLocaleString('th-TH') : '—';
+      el('wb-detail-body').innerHTML = `
+        <div style="display:grid;gap:1rem">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.75rem">
+            <div style="padding:1rem;border:1px solid var(--bdr);border-radius:10px;background:#f8fafc"><div style="color:var(--tx3);font-size:.78rem">วันที่ส่ง</div><div style="font-weight:700;margin-top:.2rem">${esc(submittedAt)}</div></div>
+            <div style="padding:1rem;border:1px solid var(--bdr);border-radius:10px;background:#f8fafc"><div style="color:var(--tx3);font-size:.78rem">องค์กร</div><div style="font-weight:700;margin-top:.2rem">${esc(getWbOrgName(record))}</div></div>
+            <div style="padding:1rem;border:1px solid var(--bdr);border-radius:10px;background:#f8fafc"><div style="color:var(--tx3);font-size:.78rem">อีเมล</div><div style="font-weight:700;margin-top:.2rem;word-break:break-word">${esc(getWbEmail(raw))}</div></div>
+          </div>
+          ${sections.map(section => `
+            <div style="border:1px solid var(--bdr);border-radius:14px;overflow:hidden;background:#fff">
+              <div style="padding:1rem 1.25rem;background:#eff6ff;color:#1d4ed8;font-weight:700">${esc(section.title)}</div>
+              <div style="padding:1rem 1.25rem;display:grid;gap:1rem">
+                ${section.subsections.map(subsection => `
+                  <div>
+                    <div style="font-weight:700;color:var(--tx);margin-bottom:.65rem">${esc(subsection.title)}</div>
+                    <div style="display:grid;gap:.65rem">
+                      ${subsection.questions.map(question => `
+                        <div style="padding:.85rem 1rem;border:1px solid #e2e8f0;border-radius:10px;background:#fafafa">
+                          <div style="font-size:.85rem;color:var(--tx2);margin-bottom:.35rem">${esc(question.text)}</div>
+                          <div style="font-weight:600;color:var(--tx)">${esc(question.answer)}</div>
+                        </div>
+                      `).join('')}
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+      el('wb-detail-bd').classList.add('show');
+    }
+    function closeWbDetail() { el('wb-detail-bd').classList.remove('show'); }
     function renderWbPage() { popWbFilters(); filterWb(); }
     function popWbFilters() {
       const sel = el('wof'); if (!sel) return;
@@ -2404,7 +2534,7 @@ CREATE INDEX IF NOT EXISTS idx_ch1_sub ON hrd_ch1_responses(submitted_at);</pre>
     <td><code style="font-size:.78rem">${esc(r.org_code || '—')}</code></td>
     <td>${esc(r.org?.org_name_th || '—')}</td>
     <td style="font-size:.82rem">${esc(r.raw_data?.email || r.raw_data?.respondent_email || '—')}</td>
-    <td><button class="btn bo bxs" onclick="showRaw(${JSON.stringify(JSON.stringify(r.raw_data || {})).replace(/"/g, '&quot;')})">🔍 ดู</button></td>
+    <td style="display:flex;gap:.25rem;flex-wrap:wrap"><button class="btn bp bxs" onclick="showWbDetail(${start + i})">👁️ รายละเอียด</button><button class="btn bo bxs" onclick="showRaw(${JSON.stringify(JSON.stringify(r.raw_data || {})).replace(/"/g, '&quot;')})">🔍 Raw</button></td>
   </tr>`).join('');
       renderPag('wb', wbFilt.length, wbPage, WB_PPG);
     }
@@ -2421,15 +2551,16 @@ CREATE INDEX IF NOT EXISTS idx_ch1_sub ON hrd_ch1_responses(submitted_at);</pre>
     }
     function expWbXLSX() {
       if (!window.XLSX) { showToast('กำลังโหลด SheetJS...', 'info'); return; }
-      const data = wbFilt.map((r, i) => ({
-        '#': i + 1, 'วันที่': r.submitted_at ? new Date(r.submitted_at).toLocaleString('th-TH') : '—',
-        'org_code': r.org_code || '', 'องค์กร': r.org?.org_name_th || '',
-        'อีเมล': r.raw_data?.email || r.raw_data?.respondent_email || ''
-      }));
-      const ws = XLSX.utils.json_to_sheet(data);
-      const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Wellbeing');
+      initWbQuestionMeta();
+      const summaryData = wbFilt.map((r, i) => buildWbWideRow(r, i));
+      const detailData = buildWbLongRows(wbFilt);
+      const ws = XLSX.utils.json_to_sheet(summaryData);
+      const ws2 = XLSX.utils.json_to_sheet(detailData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Wellbeing Full');
+      XLSX.utils.book_append_sheet(wb, ws2, 'Answer Details');
       XLSX.writeFile(wb, 'wellbeing_' + today() + '.xlsx');
-      showToast('Export Excel สำเร็จ ✓', 'success');
+      showToast('Export Excel แบบครบทุกข้อสำเร็จ ✓', 'success');
     }
 
     // ═══════════════════════════════════════════════
@@ -2453,145 +2584,46 @@ CREATE INDEX IF NOT EXISTS idx_ch1_sub ON hrd_ch1_responses(submitted_at);</pre>
       });
       ch1Page = 1; renderCh1Table();
     }
-    const STRATEGIC_LABELS = { service_efficiency: 'เพิ่มประสิทธิภาพบริการ', digital_capability: 'พัฒนาดิจิทัล', new_leaders: 'พัฒนาผู้นำ', reduce_sick_leave: 'ลดการลาป่วย', reduce_turnover: 'ลดการลาออก', other: 'อื่น ๆ' };
-    function renderCh1Table() {
-      const start = (ch1Page - 1) * CH1_PPG, rows = ch1Filt.slice(start, start + CH1_PPG);
-      const tb = el('c1-tb');
-      if (!rows.length) { tb.innerHTML = `<tr><td colspan="35"><div class="emp"><div class="ei">📋</div><p>ไม่พบข้อมูล</p></div></td></tr>`; renderPag('c1', ch1Filt.length, ch1Page, CH1_PPG); return; }
-      const S = v => SUP_LABELS[v] || v || '—';
-      const P = v => STRATEGIC_LABELS[v] || v || '—';
-      const N = v => (v != null && v !== '') ? v : '—';
-      tb.innerHTML = rows.map((r, i) => `<tr>
-    <td style="color:var(--tx3);font-size:.8rem">${start + i + 1}</td>
-    <td style="font-size:.82rem;white-space:nowrap">${r.submitted_at ? new Date(r.submitted_at).toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' }) : '—'}</td>
-    <td><code style="font-size:.78rem">${esc(r.org_code || '—')}</code></td>
-    <td style="font-weight:500;font-size:.85rem;white-space:nowrap">${esc(r.organization || '—')}</td>
-    <td style="text-align:right">${(r.total_staff || 0).toLocaleString()}</td>
-    <td style="text-align:right">${N(r.type_official)}</td>
-    <td style="text-align:right">${N(r.type_employee)}</td>
-    <td style="text-align:right">${N(r.type_contract)}</td>
-    <td style="text-align:right">${N(r.age_u30)}</td>
-    <td style="text-align:right">${N(r.age_31_40)}</td>
-    <td style="text-align:right">${N(r.age_41_50)}</td>
-    <td style="text-align:right">${N(r.age_51_60)}</td>
-    <td style="text-align:right">${r.turnover_rate != null ? r.turnover_rate + '%' : '—'}</td>
-    <td style="text-align:right">${r.transfer_rate != null ? r.transfer_rate + '%' : '—'}</td>
-    <td style="text-align:right;color:${(r.ncd_count || 0) > 0 ? '#dc2626' : 'inherit'}">${r.ncd_count || 0}</td>
-    <td style="text-align:right">${r.ncd_ratio_pct != null ? r.ncd_ratio_pct + '%' : '—'}</td>
-    <td style="text-align:right">${N(r.disease_diabetes)}</td>
-    <td style="text-align:right">${N(r.disease_hypertension)}</td>
-    <td style="text-align:right">${N(r.disease_cardiovascular)}</td>
-    <td style="text-align:right">${N(r.disease_kidney)}</td>
-    <td style="text-align:right">${N(r.disease_liver)}</td>
-    <td style="text-align:right">${N(r.disease_cancer)}</td>
-    <td style="text-align:right">${N(r.disease_obesity)}</td>
-    <td style="text-align:right">${N(r.sick_leave_days)}</td>
-    <td style="text-align:right">${N(r.sick_leave_avg)}</td>
-    <td style="font-size:.82rem">${esc(r.engagement_score || '—')}</td>
-    <td><span class="bdg ${r.mentoring_system === 'full' ? 'bg' : r.mentoring_system === 'partial' ? 'bw' : 'br'}" style="font-size:.7rem">${S(r.mentoring_system)}</span></td>
-    <td><span class="bdg ${r.job_rotation === 'full' ? 'bg' : r.job_rotation === 'partial' ? 'bw' : 'br'}" style="font-size:.7rem">${S(r.job_rotation)}</span></td>
-    <td><span class="bdg ${r.idp_system === 'full' ? 'bg' : r.idp_system === 'partial' ? 'bw' : 'br'}" style="font-size:.7rem">${S(r.idp_system)}</span></td>
-    <td><span class="bdg ${r.career_path_system === 'full' ? 'bg' : r.career_path_system === 'partial' ? 'bw' : 'br'}" style="font-size:.7rem">${S(r.career_path_system)}</span></td>
-    <td style="font-size:.82rem">${esc(r.training_hours || '—')}</td>
-    <td style="font-size:.8rem;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(P(r.strategic_priority_rank1))}">${esc(P(r.strategic_priority_rank1))}</td>
-    <td style="font-size:.8rem;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(P(r.strategic_priority_rank2))}">${esc(P(r.strategic_priority_rank2))}</td>
-    <td style="font-size:.8rem;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(P(r.strategic_priority_rank3))}">${esc(P(r.strategic_priority_rank3))}</td>
-    <td style="display:flex;gap:.25rem;flex-wrap:nowrap">
-      <button class="btn bo bxs" title="ดูข้อมูลทั้งหมด" onclick="showRawObj(${start + i})">🔍</button>
-      <button class="btn bg bxs" title="สร้าง PDF" onclick="generateCh1PDF(ch1Filt[${start + i}])">📄</button>
-    </td>
-  </tr>`).join('');
-      renderPag('c1', ch1Filt.length, ch1Page, CH1_PPG);
-    }
-    function clrCh1() { el('cof').value = ''; el('cdf').value = ''; el('cdt').value = ''; filterCh1(); }
-    function expCh1CSV() {
-      if (!ch1Filt.length) { showToast('ไม่มีข้อมูล', 'warning'); return; }
-      const SUP = v => SUP_LABELS[v] || v || '';
-      const P2 = v => STRATEGIC_LABELS[v] || v || '';
-      const keys = ['หน่วยงาน', 'org_code', 'วันที่ส่ง', 'บุคลากรรวม', 'ข้าราชการ', 'พนักงานราชการ', 'ลูกจ้าง', 'อายุ≤30', 'อายุ31-40', 'อายุ41-50', 'อายุ51-60', 'ลาออก%', 'โอนย้าย%', 'NCD รวม', 'NCD%', 'เบาหวาน', 'ความดัน', 'หัวใจ', 'ไต', 'ตับ', 'มะเร็ง', 'อ้วน', 'วันลาป่วยรวม', 'วันลาป่วยเฉลี่ย', 'Engagement', 'พี่เลี้ยง', 'Job Rotation', 'IDP', 'Career Path', 'ชั่วโมงอบรม', 'จุดเน้น1', 'จุดเน้น2', 'จุดเน้น3'];
-      const rows = [keys.join(','), ...ch1Filt.map(r => [
-        `"${r.organization || ''}"`, `"${r.org_code || ''}"`,
-        `"${r.submitted_at ? new Date(r.submitted_at).toLocaleString('th-TH') : ''}"`,
-        r.total_staff || 0, r.type_official || 0, r.type_employee || 0, r.type_contract || 0,
-        r.age_u30 || 0, r.age_31_40 || 0, r.age_41_50 || 0, r.age_51_60 || 0,
-        r.turnover_rate || '', r.transfer_rate || '',
-        r.ncd_count || 0, r.ncd_ratio_pct || '',
-        r.disease_diabetes || 0, r.disease_hypertension || 0, r.disease_cardiovascular || 0,
-        r.disease_kidney || 0, r.disease_liver || 0, r.disease_cancer || 0, r.disease_obesity || 0,
-        r.sick_leave_days || '', r.sick_leave_avg || '',
-        `"${r.engagement_score || ''}"`,
-        SUP(r.mentoring_system), SUP(r.job_rotation), SUP(r.idp_system), SUP(r.career_path_system),
-        `"${r.training_hours || ''}"`,
-        `"${P2(r.strategic_priority_rank1)}"`, `"${P2(r.strategic_priority_rank2)}"`, `"${P2(r.strategic_priority_rank3)}"`
-      ].join(','))].join('\n');
-      dlBlob(new Blob(['\uFEFF' + rows], { type: 'text/csv' }), 'hrd_ch1_' + today() + '.csv');
-      showToast('Export สำเร็จ ✓', 'success');
-    }
-    function expCh1XLSX() {
-      if (!window.XLSX) { showToast('กำลังโหลด SheetJS...', 'info'); return; }
-      const SUP = v => SUP_LABELS[v] || v || '';
-      const P2 = v => STRATEGIC_LABELS[v] || v || '';
-      const data = ch1Filt.map((r, i) => ({
-        '#': i + 1, 'หน่วยงาน': r.organization || '', 'org_code': r.org_code || '',
-        'วันที่ส่ง': r.submitted_at ? new Date(r.submitted_at).toLocaleString('th-TH') : '',
-        'บุคลากรรวม': r.total_staff || 0,
-        'ข้าราชการ': r.type_official || 0, 'พนักงานราชการ': r.type_employee || 0, 'ลูกจ้าง': r.type_contract || 0,
-        'อายุ≤30': r.age_u30 || 0, 'อายุ31-40': r.age_31_40 || 0, 'อายุ41-50': r.age_41_50 || 0, 'อายุ51-60': r.age_51_60 || 0,
-        'ลาออก%': r.turnover_rate || '', 'โอนย้าย%': r.transfer_rate || '',
-        'NCD รวม': r.ncd_count || 0, 'NCD%': r.ncd_ratio_pct || '',
-        'เบาหวาน': r.disease_diabetes || 0, 'ความดัน': r.disease_hypertension || 0,
-        'หัวใจ': r.disease_cardiovascular || 0, 'ไต': r.disease_kidney || 0,
-        'ตับ': r.disease_liver || 0, 'มะเร็ง': r.disease_cancer || 0, 'อ้วน': r.disease_obesity || 0,
-        'วันลาป่วยรวม': r.sick_leave_days || '', 'วันลาป่วยเฉลี่ย': r.sick_leave_avg || '',
-        'Engagement': r.engagement_score || '',
-        'พี่เลี้ยง': SUP(r.mentoring_system), 'Job Rotation': SUP(r.job_rotation),
-        'IDP': SUP(r.idp_system), 'Career Path': SUP(r.career_path_system),
-        'ชั่วโมงอบรม': r.training_hours || '',
-        'จุดเน้น1': P2(r.strategic_priority_rank1), 'จุดเน้น2': P2(r.strategic_priority_rank2), 'จุดเน้น3': P2(r.strategic_priority_rank3),
-        'นโยบาย': r.related_policies || '', 'บริบท': r.context_challenges || '',
-        'Intervention': r.intervention_packages_feedback || '', 'HRD Plan URL': r.hrd_plan_url || '',
-        'version': r.form_version || ''
-      }));
-      const ws = XLSX.utils.json_to_sheet(data);
-      const wb2 = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb2, ws, 'HRD Ch1');
-      XLSX.writeFile(wb2, 'hrd_ch1_' + today() + '.xlsx');
-      showToast('Export Excel สำเร็จ ✓', 'success');
-    }
-    function showRaw(jsonStr) {
-      try { el('rawp').textContent = JSON.stringify(JSON.parse(jsonStr), null, 2); }
-      catch { el('rawp').textContent = jsonStr; }
-      el('raw-bd').classList.add('show');
-    }
-    function showRawStr(str) {
-      try { el('rawp').textContent = JSON.stringify(JSON.parse(str), null, 2); }
-      catch { el('rawp').textContent = str; }
-      el('raw-bd').classList.add('show');
-    }
-    function showRawObj(idx) {
-      if (!ch1Filt[idx]) return;
-      el('rawp').textContent = JSON.stringify(ch1Filt[idx], null, 2);
-      el('raw-bd').classList.add('show');
-    }
-    function closeRaw() { el('raw-bd').classList.remove('show'); }
+    const STRATEGIC_LABELS = { service_efficiency: 'เพิ่มประสิทธิภาพบริการ', digital_capability: 'การพัฒนาดิจิทัล', new_leaders: 'การพัฒนาผู้นำ', reduce_sick_leave: 'ลดการลาป่วย', reduce_turnover: 'ลดการลาออก', other: 'อื่น ๆ' };
 
     // ═══════════════════════════════════════════════
     // PDF GENERATION (jsPDF + autoTable + Sarabun font)
     // ═══════════════════════════════════════════════
-    function generateCh1PDF(data) {
+    async function ensureSarabunFont(doc) {
+      try {
+        if (!sarabunFontBase64 && typeof window.SARABUN_FONT_BASE64 !== 'undefined') sarabunFontBase64 = window.SARABUN_FONT_BASE64;
+        if (!sarabunFontBase64) {
+          const res = await fetch('https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/sarabun/Sarabun-Regular.ttf');
+          if (!res.ok) throw new Error('font download failed');
+          const buffer = await res.arrayBuffer();
+          const bytes = new Uint8Array(buffer);
+          let binary = '';
+          const chunkSize = 0x8000;
+          for (let i = 0; i < bytes.length; i += chunkSize) {
+            binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunkSize));
+          }
+          sarabunFontBase64 = btoa(binary);
+        }
+        doc.addFileToVFS('Sarabun-Regular.ttf', sarabunFontBase64);
+        doc.addFont('Sarabun-Regular.ttf', 'Sarabun', 'normal');
+        doc.setFont('Sarabun', 'normal');
+        return true;
+      } catch (error) {
+        console.error('Thai font load failed:', error);
+        return false;
+      }
+    }
+    async function generateCh1PDF(data) {
       if (!data) { showToast('ไม่มีข้อมูลสำหรับสร้าง PDF', 'error'); return; }
       if (!window.jspdf) { showToast('กำลังโหลด jsPDF...', 'info'); return; }
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF('p', 'mm', 'a4');
-      // Embed Sarabun font for Thai text
-      if (typeof SARABUN_FONT_BASE64 !== 'undefined') {
-        doc.addFileToVFS('Sarabun-Regular.ttf', SARABUN_FONT_BASE64);
-        doc.addFont('Sarabun-Regular.ttf', 'Sarabun', 'normal');
-        doc.setFont('Sarabun');
-      }
+      const hasThaiFont = await ensureSarabunFont(doc);
+      if (!hasThaiFont) showToast('ไม่สามารถโหลดฟอนต์ไทยได้ จะพยายามสร้างไฟล์ต่อด้วยฟอนต์สำรอง', 'warning');
       const pageW = doc.internal.pageSize.width;
       const margin = 20;
       let y = 20;
-      const setFont = (style, size) => { doc.setFont(typeof SARABUN_FONT_BASE64 !== 'undefined' ? 'Sarabun' : 'Helvetica', style || 'normal'); doc.setFontSize(size || 10); };
+      const setFont = (style, size) => { doc.setFont(hasThaiFont ? 'Sarabun' : 'Helvetica', style || 'normal'); doc.setFontSize(size || 10); };
       const addPage = () => { doc.addPage(); y = 20; };
       const chkY = (need) => { if (y + need > 280) addPage(); };
 
@@ -3075,6 +3107,9 @@ CREATE INDEX IF NOT EXISTS idx_ch1_sub ON hrd_ch1_responses(submitted_at);</pre>
     document.addEventListener('DOMContentLoaded', () => boot());
 
   </script>
-</body>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="js/hrd-ch1-fields.js"></script>
+  <script src="js/admin-ch1-enhancements.js"></script>
+ </body>
 
-</html>
+ </html>

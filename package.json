@@ -14,7 +14,8 @@
     "supabase:test": "node scripts/supabase-admin.js",
     "supabase:stats": "node -e \"require('./scripts/supabase-admin').getDatabaseStats()\"",
     "supabase:export": "node -e \"require('./scripts/supabase-admin').exportData()\"",
-    "db:status": "node scripts/supabase-admin.js"
+    "db:status": "node scripts/supabase-admin.js",
+    "db:clear-test": "node scripts/clear-ch1-test-data.js"
   },
   "main": "index.js",
   "directories": {

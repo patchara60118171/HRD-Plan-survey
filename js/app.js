@@ -1,4 +1,252 @@
 // ========================================
+// TEST MODE - Random Data Generation
+// ========================================
+
+// Test Mode Configuration
+const TEST_MODE = {
+    enabled: false,
+    totalRecords: 200,
+    currentRecord: 0,
+    orgDistribution: {}, // Will be populated with random counts per org
+    
+    // All 16 organizations
+    organizations: [
+        { code: 'probation', name: 'กรมคุมประพฤติ' },
+        { code: 'dss', name: 'กรมวิทยาศาสตร์บริการ' },
+        { code: 'dcp', name: 'กรมส่งเสริมวัฒนธรรม' },
+        { code: 'dmh', name: 'กรมสุขภาพจิต' },
+        { code: 'tmd', name: 'กรมอุตุนิยมวิทยา' },
+        { code: 'doh', name: 'กองฝึกอบรม กรมทางหลวง' },
+        { code: 'nrct', name: 'สำนักงานการวิจัยแห่งชาติ' },
+        { code: 'opdc', name: 'สำนักงานคณะกรรมการพัฒนาระบบราชการ (ก.พ.ร.)' },
+        { code: 'onep', name: 'สำนักงานนโยบายและแผนทรัพยากรธรรมชาติและสิ่งแวดล้อม' },
+        { code: 'tpso', name: 'สำนักงานนโยบายและยุทธศาสตร์การค้า' },
+        { code: 'mots', name: 'สำนักงานปลัดกระทรวงการท่องเที่ยวและกีฬา' },
+        { code: 'acfs', name: 'สำนักงานมาตรฐานสินค้าเกษตรและอาหารแห่งชาติ' },
+        { code: 'nesdc', name: 'สำนักงานสภาพัฒนาการเศรษฐกิจและสังคมแห่งชาติ' },
+        { code: 'dcy', name: 'กรมเด็กและเยาวชน' },
+        { code: 'doh_main', name: 'กรมอนามัย' },
+        { code: 'rid', name: 'กรมชลประทาน' }
+    ]
+};
+
+// Generate random test data for a single record
+function generateRandomTestData(orgCode, recordNumber) {
+    const org = TEST_MODE.organizations.find(o => o.code === orgCode) || TEST_MODE.organizations[0];
+    const timestamp = Date.now();
+    const random = Math.floor(Math.random() * 10000);
+    
+    // Generate random responses for all survey questions
+    const responses = {
+        // User info
+        email: `test.${orgCode}.${timestamp}.${random}@wellbeing.test`,
+        name: `ทดสอบ ${org.name} ${recordNumber}`,
+        title: ['เจ้าหน้าที่', 'นักวิชาการ', 'เจ้าหน้าที่บริหาร', 'ผู้ช่วย'][Math.floor(Math.random() * 4)],
+        gender: ['male', 'female'][Math.floor(Math.random() * 2)],
+        age: Math.floor(Math.random() * 35) + 20, // 20-55 years
+        organization: org.name,
+        org_type: ['หน่วยงานหลัก', 'หน่วยงานสนับสนุน'][Math.floor(Math.random() * 2)],
+        
+        // Body measurements
+        height: (Math.random() * 40 + 150).toFixed(1), // 150-190 cm
+        weight: (Math.random() * 40 + 45).toFixed(1), // 45-85 kg
+        waist: Math.floor(Math.random() * 40 + 60), // 60-100 cm
+        
+        // PHQ-9 (Depression) - 9 questions, scale 0-3
+        phq1: Math.floor(Math.random() * 4),
+        phq2: Math.floor(Math.random() * 4),
+        phq3: Math.floor(Math.random() * 4),
+        phq4: Math.floor(Math.random() * 4),
+        phq5: Math.floor(Math.random() * 4),
+        phq6: Math.floor(Math.random() * 4),
+        phq7: Math.floor(Math.random() * 4),
+        phq8: Math.floor(Math.random() * 4),
+        phq9: Math.floor(Math.random() * 4),
+        
+        // GAD-7 (Anxiety) - 7 questions, scale 0-3
+        gad1: Math.floor(Math.random() * 4),
+        gad2: Math.floor(Math.random() * 4),
+        gad3: Math.floor(Math.random() * 4),
+        gad4: Math.floor(Math.random() * 4),
+        gad5: Math.floor(Math.random() * 4),
+        gad6: Math.floor(Math.random() * 4),
+        gad7: Math.floor(Math.random() * 4),
+        
+        // Sleep quality (0-3)
+        sleep1: Math.floor(Math.random() * 4),
+        sleep2: Math.floor(Math.random() * 4),
+        sleep3: Math.floor(Math.random() * 4),
+        
+        // Work stress (0-3)
+        work1: Math.floor(Math.random() * 4),
+        work2: Math.floor(Math.random() * 4),
+        work3: Math.floor(Math.random() * 4),
+        work4: Math.floor(Math.random() * 4),
+        work5: Math.floor(Math.random() * 4),
+        
+        // Life satisfaction (1-5)
+        life1: Math.floor(Math.random() * 5) + 1,
+        life2: Math.floor(Math.random() * 5) + 1,
+        life3: Math.floor(Math.random() * 5) + 1,
+        life4: Math.floor(Math.random() * 5) + 1,
+        life5: Math.floor(Math.random() * 5) + 1,
+        
+        // Health behaviors
+        exercise: Math.floor(Math.random() * 5), // 0-4 times per week
+        smoking: ['never', 'former', 'current'][Math.floor(Math.random() * 3)],
+        alcohol: ['never', 'occasional', 'regular'][Math.floor(Math.random() * 3)],
+        
+        // Chronic diseases (checkboxes)
+        chronic: (Math.random() > 0.7) ? ['diabetes', 'hypertension', 'dyslipidemia'].slice(0, Math.floor(Math.random() * 3) + 1) : [],
+        
+        // Additional comments
+        comments: Math.random() > 0.5 ? 'ทดสอบข้อมูลระบบ wellbeing survey' : ''
+    };
+    
+    return responses;
+}
+
+// Calculate random distribution of 200 records across 16 orgs
+function calculateOrgDistribution() {
+    const totalOrgs = TEST_MODE.organizations.length;
+    let remaining = TEST_MODE.totalRecords;
+    const distribution = {};
+    
+    // Give each org at least 3 records
+    TEST_MODE.organizations.forEach(org => {
+        distribution[org.code] = 3;
+        remaining -= 3;
+    });
+    
+    // Distribute remaining randomly
+    while (remaining > 0) {
+        const randomOrg = TEST_MODE.organizations[Math.floor(Math.random() * totalOrgs)];
+        distribution[randomOrg.code]++;
+        remaining--;
+    }
+    
+    return distribution;
+}
+
+// Run test mode - generate and submit 200 records
+async function runTestMode() {
+    if (!supabaseClient) {
+        console.error('❌ Supabase not initialized');
+        showToast('กรุณารอให้ระบบโหลดเสร็จก่อน', 'error');
+        return;
+    }
+    
+    TEST_MODE.enabled = true;
+    TEST_MODE.orgDistribution = calculateOrgDistribution();
+    
+    console.log('🚀 Starting Test Mode - Generating 200 records');
+    console.log('📊 Organization distribution:', TEST_MODE.orgDistribution);
+    
+    let successCount = 0;
+    let failCount = 0;
+    
+    // Process each organization
+    for (const org of TEST_MODE.organizations) {
+        const count = TEST_MODE.orgDistribution[org.code];
+        console.log(`\n🏢 Processing ${org.name} (${org.code}): ${count} records`);
+        
+        for (let i = 0; i < count; i++) {
+            TEST_MODE.currentRecord++;
+            
+            // Generate random data
+            const responses = generateRandomTestData(org.code, i + 1);
+            
+            // Calculate derived values
+            const height = parseFloat(responses.height);
+            const weight = parseFloat(responses.weight);
+            let bmi = null, bmiCategory = '';
+            if (height && weight) {
+                bmi = parseFloat(calculateBMI(height, weight));
+                const bmiInfo = getBMICategory(bmi);
+                bmiCategory = bmiInfo ? bmiInfo.category : '';
+            }
+            
+            const tmhiScore = calculateTMHIScore(responses);
+            const tmhiInfo = getTMHILevel(tmhiScore);
+            
+            // Prepare data for Supabase
+            const dataToSave = {
+                email: responses.email,
+                name: responses.name,
+                title: responses.title,
+                gender: responses.gender,
+                age: responses.age,
+                organization: responses.organization,
+                org_type: responses.org_type,
+                height: height || null,
+                weight: weight || null,
+                waist: responses.waist || null,
+                bmi: bmi,
+                bmi_category: bmiCategory,
+                tmhi_score: tmhiScore || null,
+                tmhi_level: tmhiInfo ? tmhiInfo.level : null,
+                raw_responses: responses,
+                is_draft: false,
+                submitted_at: new Date().toISOString()
+            };
+            
+            try {
+                // Save to Supabase
+                const { data, error } = await supabaseClient
+                    .from('survey_responses')
+                    .upsert(dataToSave, {
+                        onConflict: 'email',
+                        ignoreDuplicates: false
+                    });
+                
+                if (error) {
+                    console.error(`❌ Record ${TEST_MODE.currentRecord} failed:`, error.message);
+                    failCount++;
+                } else {
+                    console.log(`✅ Record ${TEST_MODE.currentRecord}: ${responses.email}`);
+                    successCount++;
+                }
+                
+                // Small delay to avoid rate limiting
+                await new Promise(resolve => setTimeout(resolve, 100));
+                
+            } catch (e) {
+                console.error(`❌ Record ${TEST_MODE.currentRecord} exception:`, e.message);
+                failCount++;
+            }
+            
+            // Show progress every 20 records
+            if (TEST_MODE.currentRecord % 20 === 0) {
+                showToast(`กำลังบันทึก... ${TEST_MODE.currentRecord}/${TEST_MODE.totalRecords}`, 'info');
+            }
+        }
+    }
+    
+    // Final summary
+    console.log('\n🎉 Test Mode Complete!');
+    console.log(`✅ Success: ${successCount} records`);
+    console.log(`❌ Failed: ${failCount} records`);
+    
+    showToast(`บันทึกสำเร็จ ${successCount} รายการ`, 'success');
+    
+    TEST_MODE.enabled = false;
+    TEST_MODE.currentRecord = 0;
+    
+    return { success: successCount, failed: failCount };
+}
+
+// Add test mode trigger to window for console access
+window.enableTestMode = function() {
+    console.log('🧪 Test Mode Enabled');
+    console.log('ใช้คำสั่ง: runTestMode() เพื่อเริ่มสร้าง 200 records');
+    return 'Test Mode Ready - Call runTestMode() to start';
+};
+
+window.runTestMode = runTestMode;
+window.generateRandomTestData = generateRandomTestData;
+window.TEST_MODE = TEST_MODE;
+
+// ========================================
 // Main Application - Survey Controller
 // ========================================
 
@@ -187,6 +435,13 @@ const app = {
     parseUrlParameters() {
         const urlParams = new URLSearchParams(window.location.search);
         const orgCode = urlParams.get('org');
+        const testMode = urlParams.get('testmode');
+        
+        // Check for test mode trigger
+        if (testMode === 'true' || testMode === '1') {
+            console.log('🧪 Test Mode detected in URL');
+            this.showTestModeUI = true;
+        }
         
         if (orgCode && this.orgMap[orgCode]) {
             this.organization = this.orgMap[orgCode];
@@ -399,9 +654,207 @@ const app = {
     // Render Welcome Screen
     renderWelcome() {
         this.currentView = 'welcome';
+        
+        // Show test mode UI if triggered
+        if (this.showTestModeUI) {
+            this.renderTestModeUI();
+            return;
+        }
+        
         document.getElementById('main-content').innerHTML = renderWelcome();
         document.getElementById('nav-buttons').style.display = 'none';
         document.getElementById('progress-container').style.display = 'none';
+    },
+
+    // Render Test Mode UI
+    renderTestModeUI() {
+        const orgList = TEST_MODE.organizations.map(org => 
+            `<li>${org.name}: <span id="count-${org.code}">0</span> records</li>`
+        ).join('');
+        
+        const html = `
+            <div class="test-mode-container" style="padding: 2rem; max-width: 800px; margin: 0 auto;">
+                <div class="card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 2rem; border-radius: 12px; margin-bottom: 2rem;">
+                    <h1 style="margin: 0 0 1rem 0; font-size: 2rem;">🧪 Test Mode</h1>
+                    <p style="margin: 0; font-size: 1.1rem;">ระบบทดสอบสำหรับสร้างข้อมูลสุ่ม 200 records</p>
+                </div>
+                
+                <div class="card" style="padding: 2rem; margin-bottom: 2rem;">
+                    <h2 style="margin-top: 0;">📊 การกระจายข้อมูล</h2>
+                    <p>จำนวนรวม: <strong>200 records</strong> แบบสุ่มใน 16 หน่วยงาน</p>
+                    <ul style="columns: 2; margin: 1rem 0;">
+                        ${orgList}
+                    </ul>
+                </div>
+                
+                <div class="card" style="padding: 2rem; margin-bottom: 2rem;">
+                    <h2 style="margin-top: 0;">⚙️ ตั้งค่า</h2>
+                    <label style="display: block; margin-bottom: 1rem;">
+                        จำนวน records:
+                        <input type="number" id="test-record-count" value="200" min="1" max="500" style="width: 100%; padding: 0.5rem; margin-top: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
+                    </label>
+                    <p style="color: #666; font-size: 0.9rem;">* แต่ละ org จะได้รับขั้นต่ำ 3 records เสมอ</p>
+                </div>
+                
+                <div style="display: flex; gap: 1rem;">
+                    <button onclick="app.startTestMode()" class="btn btn-primary" style="flex: 1; padding: 1rem; font-size: 1.2rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; color: white; border-radius: 8px; cursor: pointer;">
+                        🚀 เริ่มสร้างข้อมูล 200 Records
+                    </button>
+                    <button onclick="app.renderWelcome()" class="btn btn-secondary" style="padding: 1rem; font-size: 1rem; border-radius: 8px; cursor: pointer;">
+                        ← กลับ
+                    </button>
+                </div>
+                
+                <div id="test-progress" style="margin-top: 2rem; display: none;">
+                    <div class="card" style="padding: 2rem;">
+                        <h3>⏳ กำลังดำเนินการ...</h3>
+                        <div style="background: #f0f0f0; border-radius: 8px; height: 24px; margin: 1rem 0; overflow: hidden;">
+                            <div id="test-progress-bar" style="background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); height: 100%; width: 0%; transition: width 0.3s;"></div>
+                        </div>
+                        <p id="test-progress-text">0 / 200 records (0%)</p>
+                        <div id="test-results" style="margin-top: 1rem; font-family: monospace; font-size: 0.9rem; max-height: 300px; overflow-y: auto; background: #f8f8f8; padding: 1rem; border-radius: 4px;"></div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.getElementById('main-content').innerHTML = html;
+        document.getElementById('nav-buttons').style.display = 'none';
+        document.getElementById('progress-container').style.display = 'none';
+    },
+
+    // Start test mode with custom count
+    async startTestMode() {
+        const countInput = document.getElementById('test-record-count');
+        const count = parseInt(countInput?.value) || 200;
+        
+        // Update TEST_MODE config
+        TEST_MODE.totalRecords = count;
+        
+        // Show progress UI
+        document.getElementById('test-progress').style.display = 'block';
+        const progressBar = document.getElementById('test-progress-bar');
+        const progressText = document.getElementById('test-progress-text');
+        const resultsDiv = document.getElementById('test-results');
+        
+        // Run the test mode
+        let successCount = 0;
+        let failCount = 0;
+        
+        TEST_MODE.enabled = true;
+        TEST_MODE.orgDistribution = calculateOrgDistribution();
+        TEST_MODE.currentRecord = 0;
+        
+        console.log('🚀 Starting Test Mode');
+        console.log('📊 Organization distribution:', TEST_MODE.orgDistribution);
+        
+        resultsDiv.innerHTML = '<p>🚀 เริ่มสร้างข้อมูล...</p>';
+        
+        for (const org of TEST_MODE.organizations) {
+            const orgCount = TEST_MODE.orgDistribution[org.code];
+            resultsDiv.innerHTML += `<p>🏢 ${org.name}: ${orgCount} records</p>`;
+            
+            for (let i = 0; i < orgCount; i++) {
+                TEST_MODE.currentRecord++;
+                
+                // Generate random data
+                const responses = generateRandomTestData(org.code, i + 1);
+                
+                // Calculate derived values
+                const height = parseFloat(responses.height);
+                const weight = parseFloat(responses.weight);
+                let bmi = null, bmiCategory = '';
+                if (height && weight) {
+                    bmi = parseFloat(calculateBMI(height, weight));
+                    const bmiInfo = getBMICategory(bmi);
+                    bmiCategory = bmiInfo ? bmiInfo.category : '';
+                }
+                
+                const tmhiScore = calculateTMHIScore(responses);
+                const tmhiInfo = getTMHILevel(tmhiScore);
+                
+                // Prepare data for Supabase
+                const dataToSave = {
+                    email: responses.email,
+                    name: responses.name,
+                    title: responses.title,
+                    gender: responses.gender,
+                    age: responses.age,
+                    organization: responses.organization,
+                    org_type: responses.org_type,
+                    height: height || null,
+                    weight: weight || null,
+                    waist: responses.waist || null,
+                    bmi: bmi,
+                    bmi_category: bmiCategory,
+                    tmhi_score: tmhiScore || null,
+                    tmhi_level: tmhiInfo ? tmhiInfo.level : null,
+                    raw_responses: responses,
+                    is_draft: false,
+                    submitted_at: new Date().toISOString()
+                };
+                
+                try {
+                    // Save to Supabase
+                    const { data, error } = await supabaseClient
+                        .from('survey_responses')
+                        .upsert(dataToSave, {
+                            onConflict: 'email',
+                            ignoreDuplicates: false
+                        });
+                    
+                    if (error) {
+                        console.error(`❌ ${org.code} #${i+1}:`, error.message);
+                        resultsDiv.innerHTML += `<p style="color: red;">❌ ${org.code} #${i+1}: ${error.message.substring(0, 50)}</p>`;
+                        failCount++;
+                    } else {
+                        console.log(`✅ ${org.code} #${i+1}: ${responses.email}`);
+                        successCount++;
+                    }
+                    
+                    await new Promise(resolve => setTimeout(resolve, 50));
+                    
+                } catch (e) {
+                    console.error(`❌ ${org.code} #${i+1}:`, e.message);
+                    resultsDiv.innerHTML += `<p style="color: red;">❌ ${org.code} #${i+1}: ${e.message.substring(0, 50)}</p>`;
+                    failCount++;
+                }
+                
+                // Update progress
+                const progress = (TEST_MODE.currentRecord / TEST_MODE.totalRecords) * 100;
+                progressBar.style.width = `${progress}%`;
+                progressText.textContent = `${TEST_MODE.currentRecord} / ${TEST_MODE.totalRecords} records (${Math.round(progress)}%)`;
+            }
+            
+            // Update org count display
+            const orgCountEl = document.getElementById(`count-${org.code}`);
+            if (orgCountEl) orgCountEl.textContent = orgCount;
+        }
+        
+        // Final summary
+        progressBar.style.width = '100%';
+        progressText.textContent = `เสร็จสิ้น! ${successCount} สำเร็จ, ${failCount} ล้มเหลว`;
+        
+        resultsDiv.innerHTML += `<div style="margin-top: 1rem; padding: 1rem; background: ${failCount === 0 ? '#d4edda' : '#fff3cd'}; border-radius: 4px;">`;
+        resultsDiv.innerHTML += `<h3>${failCount === 0 ? '🎉 สำเร็จทั้งหมด!' : '⚠️ มีบางรายการล้มเหลว'}</h3>`;
+        resultsDiv.innerHTML += `<p>✅ สำเร็จ: ${successCount} records</p>`;
+        resultsDiv.innerHTML += `<p>❌ ล้มเหลว: ${failCount} records</p>`;
+        resultsDiv.innerHTML += `<p style="margin-top: 1rem;"><strong>📧 ตัวอย่าง emails:</strong></p>`;
+        
+        // Show sample emails
+        const sampleOrgs = TEST_MODE.organizations.slice(0, 3);
+        sampleOrgs.forEach(org => {
+            const sampleEmail = `test.${org.code}.${Date.now()}.1@wellbeing.test`;
+            resultsDiv.innerHTML += `<p style="font-size: 0.85rem; margin: 0.25rem 0;">${org.code}: ${sampleEmail}</p>`;
+        });
+        
+        resultsDiv.innerHTML += `<p style="margin-top: 1rem; color: #666;">ตรวจสอบข้อมูลใน Admin Panel</p>`;
+        resultsDiv.innerHTML += `</div>`;
+        
+        showToast(`บันทึกเสร็จสิ้น! ${successCount} รายการ`, failCount === 0 ? 'success' : 'warning');
+        
+        TEST_MODE.enabled = false;
+        TEST_MODE.currentRecord = 0;
     },
 
     // Start Survey
