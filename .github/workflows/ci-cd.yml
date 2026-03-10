@@ -137,7 +137,7 @@ jobs:
           urls: |
             https://nidawellbeing.vercel.app/
             https://nidawellbeing.vercel.app/ch1.html
-          uploadArtifacts: true
+          uploadArtifacts: false
           temporaryPublicStorage: true
 
   # ============================================
