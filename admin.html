@@ -2372,7 +2372,12 @@ CREATE INDEX IF NOT EXISTS idx_ch1_sub ON hrd_ch1_responses(submitted_at);</pre>
       viewers.push({ email, org, createdAt: new Date().toISOString() });
       localStorage.setItem('viewers', JSON.stringify(viewers));
 
-      // Update USER_ROLES
+      // Update USER_ROLES (but don't accidentally downgrade privileged accounts)
+      const existing = USER_ROLES[email];
+      if (existing && existing.role && existing.role !== ROLES.VIEWER) {
+        showToast(`ไม่สามารถเพิ่ม ${esc(email)} เป็น Viewer ได้ (บัญชีนี้เป็น ${esc(existing.role)})`, 'error');
+        return false;
+      }
       USER_ROLES[email] = { role: ROLES.VIEWER, org };
 
       showToast(`เพิ่ม Viewer ${esc(email)} สำหรับ ${esc(org)} สำเร็จ`, 'success');
@@ -2390,7 +2395,8 @@ CREATE INDEX IF NOT EXISTS idx_ch1_sub ON hrd_ch1_responses(submitted_at);</pre>
       const filtered = viewers.filter(m => m.email !== email);
       localStorage.setItem('viewers', JSON.stringify(filtered));
 
-      delete USER_ROLES[email];
+      // Only remove viewer role mapping; never delete predefined/admin mappings.
+      if (USER_ROLES[email]?.role === ROLES.VIEWER) delete USER_ROLES[email];
 
       showToast(`ลบ Viewer ${esc(email)} สำเร็จ`, 'success');
       return true;
@@ -2400,6 +2406,9 @@ CREATE INDEX IF NOT EXISTS idx_ch1_sub ON hrd_ch1_responses(submitted_at);</pre>
     function loadViewers() {
       const viewers = JSON.parse(localStorage.getItem('viewers') || '[]');
       viewers.forEach(m => {
+        // Do not overwrite privileged roles that are hardcoded (or already assigned).
+        const existing = USER_ROLES[m.email];
+        if (existing && existing.role && existing.role !== ROLES.VIEWER) return;
         USER_ROLES[m.email] = { role: ROLES.VIEWER, org: m.org };
       });
     }

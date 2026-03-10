@@ -5,7 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>แบบสำรวจข้อมูลเพื่อจัดทำแผนการพัฒนาองค์กร<br>สุขภาวะข้าราชการพลเรือน | NIDA Well-being</title>
-    <meta name="description" content="แบบสำรวจข้อมูลเพื่อจัดทำแผนการพัฒนาองค์กรสุขภาวะข้าราชการพลเรือนสำหรับหน่วยงานภาครัฐ">
+    <meta name="description"
+        content="แบบสำรวจข้อมูลเพื่อจัดทำแผนการพัฒนาองค์กรสุขภาวะข้าราชการพลเรือนสำหรับหน่วยงานภาครัฐ">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -147,7 +148,8 @@
     <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
         <div class="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <div class="font-bold text-primary text-base">แบบสำรวจข้อมูลเพื่อจัดทำแผนการพัฒนาองค์กร<br>สุขภาวะข้าราชการพลเรือน</div>
+                <div class="font-bold text-primary text-base">
+                    แบบสำรวจข้อมูลเพื่อจัดทำแผนการพัฒนาองค์กร<br>สุขภาวะข้าราชการพลเรือน</div>
             </div>
             <div class="flex gap-2">
                 <button onclick="saveDraft()"
@@ -186,15 +188,18 @@
                     <p style="color:#6B7280; font-size:0.95rem; line-height:1.7; max-width:520px; margin:0 auto 2rem">
                         แบบสำรวจนี้จัดทำขึ้นเพื่อรวบรวมข้อมูลจากหน่วยงานนำร่อง<br>สำหรับใช้ประกอบการจัดทำแผนปฏิบัติการสร้างเสริมสุขภาวะองค์กรข้าราชการพลเรือน
                     </p>
-                    
+
                     <!-- Organization Badge -->
-                    <div id="org-badge-container" class="hidden" style="margin-bottom: 2rem; transition: all 0.3s ease;">
-                        <span style="background-color: #E0F2FE; color: #0369A1; padding: 0.5rem 1rem; border-radius: 9999px; font-size: 0.95rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.5rem; border: 1px solid #BAE6FD; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                    <div id="org-badge-container" class="hidden"
+                        style="margin-bottom: 2rem; transition: all 0.3s ease;">
+                        <span
+                            style="background-color: #E0F2FE; color: #0369A1; padding: 0.5rem 1rem; border-radius: 9999px; font-size: 0.95rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.5rem; border: 1px solid #BAE6FD; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
                             🏢 สำหรับบุคลากร: <span id="org-badge-name"></span>
                         </span>
                     </div>
                     <div id="test-mode-banner" class="hidden" style="margin-bottom: 1rem;">
-                        <span id="test-mode-badge" class="hidden" style="background-color: #FEF3C7; color: #92400E; padding: 0.5rem 1rem; border-radius: 9999px; font-size: 0.95rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.5rem; border: 1px solid #FCD34D; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                        <span id="test-mode-badge" class="hidden"
+                            style="background-color: #FEF3C7; color: #92400E; padding: 0.5rem 1rem; border-radius: 9999px; font-size: 0.95rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.5rem; border: 1px solid #FCD34D; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
                             TEST MODE | Run ID: <span id="test-run-id"></span>
                         </span>
                     </div>
@@ -203,9 +208,10 @@
                         style="background:#F3F4F6; border-radius:8px; padding:0.75rem 1.5rem; display:inline-block; color:#4B5563; font-size:0.9rem; margin-bottom:2rem">
                         ⏱ ใช้เวลาประมาณ 30–45 นาที</div>
                     <div style="max-width:400px; margin:0 auto 1.5rem">
-                        
+
                         <!-- Organization Welcome Alert -->
-                        <div id="org-welcome-alert" class="hidden" style="background-color: #10B981; color: white; padding: 0.875rem 1rem; border-radius: 10px; font-weight: 600; font-size: 0.95rem; margin-bottom: 1rem; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2), 0 2px 4px -1px rgba(16, 185, 129, 0.1); text-align: center; transition: all 0.3s ease;">
+                        <div id="org-welcome-alert" class="hidden"
+                            style="background-color: #10B981; color: white; padding: 0.875rem 1rem; border-radius: 10px; font-weight: 600; font-size: 0.95rem; margin-bottom: 1rem; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2), 0 2px 4px -1px rgba(16, 185, 129, 0.1); text-align: center; transition: all 0.3s ease;">
                             ยินดีต้อนรับบุคลากรจาก <span id="org-welcome-name"></span>
                         </div>
 
@@ -219,7 +225,15 @@
                             style="width:100%; padding:0.875rem; background:linear-gradient(135deg,#3B82F6,#06B6D4); color:#fff; border:none; border-radius:10px; font-size:1rem; font-weight:600; cursor:pointer">ยืนยันอีเมล
                             →</button>
                     </div>
-                    <p style="color:#9CA3AF; font-size:0.78rem">แบบฟอร์มนี้จัดทำโดยสถาบันบัณฑิตพัฒนบริหารศาสตร์</p>
+                    <p style="color:#9CA3AF; font-size:0.78rem; margin-bottom:1.5rem;">แบบฟอร์มนี้จัดทำโดยสถาบันบัณฑิตพัฒนบริหารศาสตร์</p>
+
+                    <div>
+                        <a href="assets/CH1_Form.pdf" target="_blank"
+                            style="display:inline-flex; align-items:center; gap:0.5rem; padding:0.6rem 1.2rem; background:white; color:#4B5563; border:1px solid #D1D5DB; border-radius:8px; font-size:0.9rem; font-weight:500; text-decoration:none; transition:all 0.2s; box-shadow:0 1px 2px rgba(0,0,0,0.05);"
+                            onmouseover="this.style.background='#F3F4F6'; this.style.color='#1F2937'" onmouseout="this.style.background='white'; this.style.color='#4B5563'">
+                            📄 ดาวน์โหลดแบบฟอร์มนี้ (PDF)
+                        </a>
+                    </div>
                 </div>
             </div>
 
@@ -1060,27 +1074,32 @@
                                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
                                     <div>
                                         <label class="block text-xs text-slate-500 mb-1">2568</label>
-                                        <input type="number" id="engagement_score_2568" min="0" max="100" step="0.01" placeholder="0.00"
+                                        <input type="number" id="engagement_score_2568" min="0" max="100" step="0.01"
+                                            placeholder="0.00"
                                             class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm" />
                                     </div>
                                     <div>
                                         <label class="block text-xs text-slate-500 mb-1">2567</label>
-                                        <input type="number" id="engagement_score_2567" min="0" max="100" step="0.01" placeholder="0.00"
+                                        <input type="number" id="engagement_score_2567" min="0" max="100" step="0.01"
+                                            placeholder="0.00"
                                             class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm" />
                                     </div>
                                     <div>
                                         <label class="block text-xs text-slate-500 mb-1">2566</label>
-                                        <input type="number" id="engagement_score_2566" min="0" max="100" step="0.01" placeholder="0.00"
+                                        <input type="number" id="engagement_score_2566" min="0" max="100" step="0.01"
+                                            placeholder="0.00"
                                             class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm" />
                                     </div>
                                     <div>
                                         <label class="block text-xs text-slate-500 mb-1">2565</label>
-                                        <input type="number" id="engagement_score_2565" min="0" max="100" step="0.01" placeholder="0.00"
+                                        <input type="number" id="engagement_score_2565" min="0" max="100" step="0.01"
+                                            placeholder="0.00"
                                             class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm" />
                                     </div>
                                     <div>
                                         <label class="block text-xs text-slate-500 mb-1">2564</label>
-                                        <input type="number" id="engagement_score_2564" min="0" max="100" step="0.01" placeholder="0.00"
+                                        <input type="number" id="engagement_score_2564" min="0" max="100" step="0.01"
+                                            placeholder="0.00"
                                             class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm" />
                                     </div>
                                 </div>
@@ -1764,4 +1783,4 @@
 
 </body>
 
-</html>
+</html>
