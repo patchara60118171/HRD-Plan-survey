@@ -1,0 +1,53 @@
+version: "3.8"
+
+# NocoDB Smart Spreadsheet — Well-being Survey Admin
+# เชื่อมต่อ NocoDB กับ PostgreSQL (Supabase) เพื่อสร้างหน้าจัดการข้อมูลแบบ Spreadsheet
+#
+# วิธีใช้งาน:
+#   1. คัดลอกไฟล์ .env.example เป็น .env แล้วแก้ไขค่า DATABASE_URL
+#   2. รัน: docker compose up -d
+#   3. เปิด: http://localhost:8080
+#   4. สร้าง project ใหม่ → เลือก "Connect to External DB" → วาง DATABASE_URL
+#
+# เชื่อมต่อกับ Supabase PostgreSQL โดยตรง (ไม่แก้ไขโครงสร้าง DB เดิม)
+
+services:
+  nocodb:
+    image: nocodb/nocodb:latest
+    container_name: wellbeing-nocodb
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      # NocoDB metadata database (SQLite สำหรับ local; ใช้ PostgreSQL สำหรับ production)
+      NC_DB: "sqlite3:///usr/app/data/noco.db"
+
+      # Secret key สำหรับ JWT — ควรเปลี่ยนค่านี้ใน production
+      NC_AUTH_JWT_SECRET: "${NC_AUTH_JWT_SECRET:-wellbeing-nocodb-secret-change-in-production}"
+
+      # Supabase PostgreSQL connection (ตั้งค่าใน .env)
+      DATABASE_URL: "${DATABASE_URL}"
+
+      # ปิด telemetry (optional)
+      NC_DISABLE_TELE: "true"
+
+      # ชื่อ app ที่แสดงใน UI
+      NC_APP_NAME: "NIDA Well-being Survey — Smart Spreadsheet"
+
+      # Admin credentials สำหรับการเข้าสู่ระบบครั้งแรก
+      # ⚠️ ต้องตั้งค่าใน .env — ไม่มีค่า default เพื่อความปลอดภัย
+      NC_ADMIN_EMAIL: "${NC_ADMIN_EMAIL}"
+      NC_ADMIN_PASSWORD: "${NC_ADMIN_PASSWORD}"
+
+    volumes:
+      - nocodb_data:/usr/app/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+volumes:
+  nocodb_data:
+    driver: local

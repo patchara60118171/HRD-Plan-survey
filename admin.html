@@ -1205,6 +1205,44 @@
         grid-template-columns: repeat(2, 1fr)
       }
     }
+
+    /* ── SMART SPREADSHEET ── */
+    .ssheet-wrap { display: flex; flex-direction: column; height: calc(100vh - var(--sc) - 2rem); gap: 1rem }
+    .ssheet-toolbar { display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; background: var(--card); border: 1px solid var(--bdr); border-radius: var(--R); padding: .75rem 1rem }
+    .ssheet-toolbar .stlabel { font-size: .8rem; font-weight: 600; color: var(--tx2); white-space: nowrap }
+    .ssheet-url-inp { flex: 1; min-width: 240px; padding: .5rem .75rem; border: 1.5px solid var(--bdr); border-radius: 8px; font-family: inherit; font-size: .85rem; outline: none; transition: border-color .2s }
+    .ssheet-url-inp:focus { border-color: var(--A) }
+    .ssheet-tabs { display: flex; gap: .25rem; background: var(--card); border: 1px solid var(--bdr); border-radius: var(--R); padding: .5rem .75rem; flex-wrap: wrap }
+    .ssheet-tab { padding: .4rem 1rem; border-radius: 6px; border: none; background: transparent; font-family: inherit; font-size: .875rem; cursor: pointer; color: var(--tx2); transition: background .15s, color .15s }
+    .ssheet-tab.active { background: var(--A); color: #fff; font-weight: 600 }
+    .ssheet-tab:hover:not(.active) { background: var(--PL) }
+    .ssheet-body { flex: 1; overflow: hidden; border-radius: var(--R); border: 1px solid var(--bdr); background: var(--card) }
+    .ssheet-iframe { width: 100%; height: 100%; border: none; border-radius: var(--R) }
+    .ssheet-nocfg { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 1rem; color: var(--tx2); text-align: center; padding: 2rem }
+    .ssheet-nocfg .nocfg-icon { font-size: 3.5rem }
+    .ssheet-nocfg h3 { font-size: 1.1rem; color: var(--tx); font-weight: 700 }
+    .ssheet-nocfg p { font-size: .875rem; max-width: 420px; line-height: 1.7 }
+    .ssheet-nocfg code { background: var(--PL); color: var(--P); padding: .15rem .4rem; border-radius: 4px; font-size: .8rem }
+    /* inline grid sheet */
+    .isheet { overflow: auto; height: 100% }
+    .isheet table { border-collapse: collapse; min-width: 100%; font-size: .82rem }
+    .isheet thead { position: sticky; top: 0; z-index: 5 }
+    .isheet thead tr th { background: #f8fafc; border: 1px solid #e2e8f0; padding: .5rem .75rem; text-align: left; font-size: .78rem; font-weight: 700; color: var(--tx2); white-space: nowrap; user-select: none }
+    .isheet thead tr th:first-child { background: #f1f5f9; width: 42px; text-align: center }
+    .isheet tbody tr:hover td { background: #f0f7ff }
+    .isheet tbody td { border: 1px solid #e2e8f0; padding: 0 }
+    .isheet tbody td:first-child { background: #f8fafc; text-align: center; color: var(--tx3); font-size: .75rem; padding: .4rem }
+    .isheet-cell { display: block; padding: .45rem .65rem; min-height: 34px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; cursor: text; outline: none }
+    .isheet-cell:focus { background: #eff6ff; outline: 2px solid var(--A); border-radius: 2px; white-space: normal; overflow: visible; z-index: 10; position: relative; min-width: 180px }
+    .isheet-cell.changed { background: #fefce8 }
+    .isheet-new-row { position: sticky; bottom: 0; background: var(--card); border-top: 2px solid var(--bdr) }
+    .isheet-new-row td { padding: .4rem .65rem }
+    .isheet-add-btn { display: flex; align-items: center; gap: .4rem; background: none; border: 1.5px dashed var(--bdr); border-radius: 6px; padding: .35rem .75rem; font-family: inherit; font-size: .8rem; color: var(--tx3); cursor: pointer; transition: all .15s }
+    .isheet-add-btn:hover { border-color: var(--A); color: var(--A); background: var(--PL) }
+    .isheet-status { display: flex; align-items: center; gap: .5rem; padding: .4rem .75rem; font-size: .78rem; color: var(--tx2) }
+    .isheet-saving { color: var(--W); font-weight: 600 }
+    .isheet-saved { color: var(--G); font-weight: 600 }
+    .isheet-err { color: var(--D); font-weight: 600 }
   </style>
 </head>
 
@@ -1254,6 +1292,9 @@
         <div class="nsc">ANALYSIS</div>
         <div class="ni" data-pg="analytics" onclick="nav('analytics')"><span class="nic">📈</span><span
             class="nil">สถิติ & Analytics</span></div>
+        <div class="nsc">TOOLS</div>
+        <div class="ni" data-pg="spreadsheet" onclick="nav('spreadsheet')"><span class="nic">🗃️</span><span
+            class="nil">Smart Spreadsheet</span></div>
         <div class="nsc">SYSTEM</div>
         <div class="ni" data-pg="settings" onclick="nav('settings')"><span class="nic">⚙️</span><span
             class="nil">ตั้งค่า</span></div>
@@ -1749,6 +1790,36 @@ CREATE INDEX IF NOT EXISTS idx_ch1_sub ON hrd_ch1_responses(submitted_at);</pre>
           </div>
         </div>
       </div>
+
+      <!-- PAGE: SMART SPREADSHEET -->
+      <div class="pg" id="pg-spreadsheet">
+        <div class="ssheet-wrap">
+          <!-- Toolbar -->
+          <div class="ssheet-toolbar">
+            <span class="stlabel">🔗 NocoDB URL:</span>
+            <input class="ssheet-url-inp" id="noco-url" type="url"
+              placeholder="http://localhost:8080 หรือ https://your-nocodb.domain.com"
+              oninput="onNocoUrlChange()" />
+            <button class="btn bp bsm" onclick="saveNocoUrl()">💾 บันทึก</button>
+            <button class="btn bo bsm" onclick="testNocoConn()">🔄 ทดสอบ</button>
+            <span id="noco-status"></span>
+            <div style="margin-left:auto;display:flex;gap:.5rem">
+              <button class="btn bo bsm" onclick="exportSheetCSV()">📥 Export CSV</button>
+              <button class="btn bo bsm" onclick="refreshSpreadsheet()">🔄 Refresh</button>
+            </div>
+          </div>
+          <!-- Tab selector -->
+          <div class="ssheet-tabs">
+            <button class="ssheet-tab active" id="stab-inline" onclick="switchSheetTab('inline')">📊 Spreadsheet View</button>
+            <button class="ssheet-tab" id="stab-noco" onclick="switchSheetTab('noco')">🗃️ NocoDB Embed</button>
+          </div>
+          <!-- Body -->
+          <div class="ssheet-body" id="ssheet-body">
+            <!-- content rendered by JS -->
+          </div>
+        </div>
+      </div>
+
     </div><!-- /mw -->
   </div><!-- /app -->
 
@@ -2010,6 +2081,7 @@ CREATE INDEX IF NOT EXISTS idx_ch1_sub ON hrd_ch1_responses(submitted_at);</pre>
       'resp-wellbeing': ['Wellbeing Survey — ข้อมูลตอบกลับ', 'ข้อมูลจาก wellbeing_responses'],
       'resp-ch1': ['HRD บทที่ 1 — ข้อมูลตอบกลับ', 'ข้อมูลจาก hrd_ch1_responses'],
       analytics: ['สถิติ & Analytics', 'วิเคราะห์ข้อมูลเชิงลึก'],
+      spreadsheet: ['Smart Spreadsheet', 'จัดการข้อมูลแบบ Spreadsheet ด้วย NocoDB'],
       settings: ['ตั้งค่าระบบ', 'Supabase และการตั้งค่าอื่นๆ']
     };
     function nav(page) {
@@ -2030,6 +2102,7 @@ CREATE INDEX IF NOT EXISTS idx_ch1_sub ON hrd_ch1_responses(submitted_at);</pre>
       else if (p === 'resp-wellbeing') renderWbPage();
       else if (p === 'resp-ch1') renderCh1Page();
       else if (p === 'analytics') renderAnalyticsPage();
+      else if (p === 'spreadsheet') renderSpreadsheetPage();
       else if (p === 'settings') renderSettingsPage();
     }
     function toggleSB() {
@@ -2985,6 +3058,244 @@ CREATE INDEX IF NOT EXISTS idx_ch1_sub ON hrd_ch1_responses(submitted_at);</pre>
           ]
         }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' } }, scales: { x: { stacked: false }, y: { beginAtZero: true, ticks: { precision: 0 } } } }
       });
+    }
+
+    // ═══════════════════════════════════════════════
+    // SETTINGS
+    // ═══════════════════════════════════════════════
+    // ═══════════════════════════════════════════════
+    // SMART SPREADSHEET (NocoDB integration)
+    // ═══════════════════════════════════════════════
+    let sheetTab = 'inline';
+    let sheetData = [];
+    let sheetCols = [];
+    let sheetChanges = {};
+    let sheetSaving = false;
+
+    // Columns shown in inline spreadsheet (ordered, display-friendly)
+    const SHEET_COLS = [
+      { key: 'id', label: 'ID', ro: true, w: 80 },
+      { key: 'created_at', label: 'วันที่ส่ง', ro: true, w: 130 },
+      { key: 'organization', label: 'องค์กร', w: 180 },
+      { key: 'email', label: 'อีเมล', w: 180 },
+      { key: 'total_staff', label: 'จำนวนบุคลากร', w: 110 },
+      { key: 'strategic_overview', label: 'Strategic Overview', w: 200 },
+      { key: 'related_policies', label: 'นโยบายที่เกี่ยวข้อง', w: 200 },
+      { key: 'context_challenges', label: 'Context & Challenges', w: 200 },
+      { key: 'sick_leave_days', label: 'วันลาป่วยรวม', w: 110 },
+      { key: 'sick_leave_avg', label: 'วันลาป่วยเฉลี่ย', w: 110 },
+      { key: 'training_hours', label: 'ชั่วโมงอบรม', w: 100 },
+      { key: 'strategic_priority_rank1', label: 'Priority 1', w: 160 },
+      { key: 'strategic_priority_rank2', label: 'Priority 2', w: 160 },
+      { key: 'strategic_priority_rank3', label: 'Priority 3', w: 160 },
+      { key: 'form_version', label: 'Form Version', ro: true, w: 90 },
+    ];
+
+    function renderSpreadsheetPage() {
+      // Restore saved NocoDB URL
+      const savedUrl = localStorage.getItem('noco_url') || '';
+      const inp = el('noco-url');
+      if (inp && !inp.value) inp.value = savedUrl;
+      switchSheetTab(sheetTab, true);
+    }
+
+    function switchSheetTab(tab, force) {
+      if (tab === sheetTab && !force && el('ssheet-body').innerHTML) return;
+      sheetTab = tab;
+      document.querySelectorAll('.ssheet-tab').forEach(t => t.classList.remove('active'));
+      const activeTab = el('stab-' + tab);
+      if (activeTab) activeTab.classList.add('active');
+      if (tab === 'noco') renderNocoEmbed();
+      else renderInlineSheet();
+    }
+
+    function onNocoUrlChange() { /* live validation placeholder */ }
+
+    function saveNocoUrl() {
+      const url = (el('noco-url').value || '').trim().replace(/\/$/, '');
+      if (!url) { showToast('กรุณากรอก NocoDB URL', 'error'); return; }
+      try { new URL(url); } catch { showToast('URL ไม่ถูกต้อง', 'error'); return; }
+      localStorage.setItem('noco_url', url);
+      showToast('บันทึก NocoDB URL ✓', 'success');
+      if (sheetTab === 'noco') renderNocoEmbed();
+    }
+
+    async function testNocoConn() {
+      const url = (el('noco-url').value || localStorage.getItem('noco_url') || '').trim().replace(/\/$/, '');
+      const badge = el('noco-status');
+      if (!url) { badge.innerHTML = '<span style="color:var(--W);font-size:.8rem">⚠️ ยังไม่ได้กรอก URL</span>'; return; }
+      badge.innerHTML = '<span style="font-size:.8rem;color:var(--tx2)">กำลังตรวจสอบ...</span>';
+      try {
+        const r = await fetch(url + '/api/v1/health', { signal: AbortSignal.timeout(5000) });
+        if (r.ok) badge.innerHTML = '<span style="color:var(--G);font-size:.8rem;font-weight:600">✓ เชื่อมต่อ NocoDB สำเร็จ</span>';
+        else throw new Error('HTTP ' + r.status);
+      } catch (e) {
+        badge.innerHTML = `<span style="color:var(--D);font-size:.8rem;font-weight:600">✕ ${esc(e.message)}</span>`;
+      }
+    }
+
+    function renderNocoEmbed() {
+      const url = (el('noco-url').value || localStorage.getItem('noco_url') || '').trim().replace(/\/$/, '');
+      const body = el('ssheet-body');
+      if (!url) {
+        body.innerHTML = `
+          <div class="ssheet-nocfg">
+            <div class="nocfg-icon">🗃️</div>
+            <h3>ยังไม่ได้เชื่อมต่อ NocoDB</h3>
+            <p>กรอก NocoDB URL ด้านบน แล้วกด <strong>บันทึก</strong> เพื่อฝัง NocoDB Spreadsheet ในหน้านี้</p>
+            <p>ยังไม่มี NocoDB? ดู <code>docker-compose.yml</code> และ <code>NOCODB_SETUP.md</code> เพื่อเริ่มต้น</p>
+            <div style="display:flex;gap:.75rem;margin-top:.5rem;flex-wrap:wrap;justify-content:center">
+              <a class="btn bp" href="NOCODB_SETUP.md" target="_blank">📖 คู่มือติดตั้ง</a>
+              <button class="btn bo" onclick="switchSheetTab('inline')">📊 ไปที่ Spreadsheet View</button>
+            </div>
+          </div>`;
+      } else {
+        body.innerHTML = `<iframe class="ssheet-iframe" src="${esc(url)}" title="NocoDB Smart Spreadsheet" allow="fullscreen" sandbox="allow-same-origin allow-scripts allow-forms allow-popups"></iframe>`;
+      }
+    }
+
+    async function renderInlineSheet() {
+      const body = el('ssheet-body');
+      body.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;gap:.75rem;color:var(--tx2)"><span style="font-size:1.5rem">⏳</span> กำลังโหลดข้อมูล...</div>`;
+      try {
+        const cols = SHEET_COLS.map(c => c.key).join(',');
+        const { data, error } = await sb.from('hrd_ch1_responses').select(cols).order('created_at', { ascending: false }).limit(500);
+        if (error) throw error;
+        sheetData = data || [];
+        sheetChanges = {};
+        buildInlineSheet(body);
+      } catch (e) {
+        body.innerHTML = `<div class="ssheet-nocfg"><div class="nocfg-icon">⚠️</div><h3>โหลดข้อมูลไม่สำเร็จ</h3><p>${esc(e.message)}</p><button class="btn bp" onclick="renderInlineSheet()">ลองใหม่</button></div>`;
+      }
+    }
+
+    function buildInlineSheet(body) {
+      const cols = SHEET_COLS;
+      const rows = sheetData;
+      let html = `
+        <div class="isheet" id="isheet-container">
+          <div class="isheet-status" id="isheet-status">
+            <span style="color:var(--tx3)">แสดง ${rows.length} แถว</span>
+          </div>
+          <table id="isheet-table">
+            <thead><tr>
+              <th>#</th>
+              ${cols.map(c => `<th style="min-width:${c.w || 120}px">${esc(c.label)}</th>`).join('')}
+            </tr></thead>
+            <tbody>
+              ${rows.map((row, ri) => `
+                <tr id="irow-${ri}">
+                  <td>${ri + 1}</td>
+                  ${cols.map(c => {
+                    const val = row[c.key] != null ? String(row[c.key]) : '';
+                    const ro = c.ro;
+                    return `<td><span class="isheet-cell${ro ? '' : ''}"
+                      contenteditable="${ro ? 'false' : 'true'}"
+                      data-row="${ri}" data-col="${c.key}"
+                      ${ro ? 'style="color:var(--tx3);cursor:default"' : ''}
+                      onblur="onCellBlur(event,${ri},'${c.key}')"
+                      onfocus="onCellFocus(event)"
+                      title="${esc(val)}">${esc(val)}</span></td>`;
+                  }).join('')}
+                </tr>`).join('')}
+            </tbody>
+          </table>
+          <div style="padding:.75rem 1rem;border-top:1px solid var(--bdr);display:flex;align-items:center;gap:.75rem">
+            <button class="isheet-add-btn" onclick="addSheetRow()">＋ เพิ่มแถวใหม่</button>
+            <button class="btn bp bsm" id="isheet-save-btn" onclick="saveSheetChanges()" style="display:none">💾 บันทึก (<span id="isheet-change-count">0</span> รายการ)</button>
+          </div>
+        </div>`;
+      body.innerHTML = html;
+    }
+
+    function onCellFocus(e) {
+      // highlight row
+    }
+
+    function onCellBlur(e, ri, col) {
+      const cell = e.target;
+      const newVal = cell.textContent.trim();
+      const origVal = sheetData[ri] ? (sheetData[ri][col] != null ? String(sheetData[ri][col]) : '') : '';
+      if (newVal === origVal) {
+        cell.classList.remove('changed');
+        delete (sheetChanges[ri] || {})[col];
+        if (sheetChanges[ri] && !Object.keys(sheetChanges[ri]).length) delete sheetChanges[ri];
+      } else {
+        cell.classList.add('changed');
+        if (!sheetChanges[ri]) sheetChanges[ri] = {};
+        sheetChanges[ri][col] = newVal;
+      }
+      updateSheetSaveBtn();
+    }
+
+    function updateSheetSaveBtn() {
+      const count = Object.keys(sheetChanges).length;
+      const btn = el('isheet-save-btn');
+      const cnt = el('isheet-change-count');
+      if (btn) btn.style.display = count > 0 ? '' : 'none';
+      if (cnt) cnt.textContent = count;
+    }
+
+    async function saveSheetChanges() {
+      if (sheetSaving) return;
+      const entries = Object.entries(sheetChanges);
+      if (!entries.length) return;
+      sheetSaving = true;
+      const status = el('isheet-status');
+      if (status) status.innerHTML = '<span class="isheet-saving">⏳ กำลังบันทึก...</span>';
+      let ok = 0, fail = 0;
+      const saveOps = entries
+        .filter(([ri]) => sheetData[ri] && sheetData[ri].id)
+        .map(([ri, changes]) => {
+          const row = sheetData[ri];
+          return sb.from('hrd_ch1_responses').update(changes).eq('id', row.id)
+            .then(({ error }) => {
+              if (error) { fail++; console.error('save row error', row.id, error); }
+              else {
+                ok++;
+                Object.assign(sheetData[ri], changes);
+                delete sheetChanges[ri];
+                document.querySelectorAll(`#irow-${ri} .isheet-cell.changed`).forEach(c => c.classList.remove('changed'));
+              }
+            });
+        });
+      await Promise.all(saveOps);
+      sheetSaving = false;
+      sheetChanges = {};
+      updateSheetSaveBtn();
+      if (status) status.innerHTML = fail > 0
+        ? `<span class="isheet-err">✕ บันทึกสำเร็จ ${ok} แถว, ล้มเหลว ${fail} แถว</span>`
+        : `<span class="isheet-saved">✓ บันทึกสำเร็จ ${ok} แถว</span>`;
+      setTimeout(() => { if (status) status.innerHTML = `<span style="color:var(--tx3)">แสดง ${sheetData.length} แถว</span>`; }, 3000);
+    }
+
+    function addSheetRow() {
+      showToast('ใช้แบบฟอร์มสำรวจ ch1.html เพื่อเพิ่มข้อมูลใหม่', 'info');
+    }
+
+    function refreshSpreadsheet() {
+      sheetChanges = {};
+      renderInlineSheet();
+    }
+
+    function exportSheetCSV() {
+      if (!sheetData.length) { showToast('ไม่มีข้อมูลสำหรับ Export', 'error'); return; }
+      const cols = SHEET_COLS;
+      const header = cols.map(c => '"' + c.label.replace(/"/g, '""') + '"').join(',');
+      const rows = sheetData.map(row =>
+        cols.map(c => {
+          const v = row[c.key] != null ? String(row[c.key]) : '';
+          return '"' + v.replace(/"/g, '""') + '"';
+        }).join(',')
+      );
+      const csv = '\uFEFF' + [header, ...rows].join('\r\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `wellbeing_ch1_${new Date().toISOString().slice(0, 10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+      showToast('Export CSV สำเร็จ ✓', 'success');
     }
 
     // ═══════════════════════════════════════════════
