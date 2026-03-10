@@ -112,7 +112,22 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Check Vercel secrets
+        id: check-secrets
+        run: |
+          if [ -n "$VERCEL_TOKEN_VALUE" ] && [ -n "$VERCEL_ORG_ID_VALUE" ] && [ -n "$VERCEL_PROJECT_ID_VALUE" ]; then
+            echo "secrets_available=true" >> $GITHUB_OUTPUT
+          else
+            echo "secrets_available=false" >> $GITHUB_OUTPUT
+            echo "⚠️ Vercel secrets (VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID) are not configured — skipping deployment"
+          fi
+        env:
+          VERCEL_TOKEN_VALUE: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID_VALUE: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID_VALUE: ${{ secrets.VERCEL_PROJECT_ID }}
+
       - name: Deploy to Vercel (Preview)
+        if: steps.check-secrets.outputs.secrets_available == 'true'
         uses: amondnet/vercel-action@v25
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
