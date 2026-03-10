@@ -1881,6 +1881,7 @@ CREATE INDEX IF NOT EXISTS idx_ch1_sub ON hrd_ch1_responses(submitted_at);</pre>
     let surveyForms = [], chartInst = {};
     let wbQuestionMeta = [];
     let sarabunFontBase64 = typeof window.SARABUN_FONT_BASE64 !== 'undefined' ? window.SARABUN_FONT_BASE64 : '';
+    let sarabunBoldFontBase64 = typeof window.SARABUN_BOLD_FONT_BASE64 !== 'undefined' ? window.SARABUN_BOLD_FONT_BASE64 : '';
     const TYPE_LABELS = { government: 'ราชการ', private: 'เอกชน', ngo: 'NGO', other: 'อื่นๆ' };
     const SUP_LABELS = { full: 'ครบ', partial: 'บางส่วน', none: 'ไม่มี' };
     const DIG_LABELS = { e_doc: 'เอกสารอิเล็กทรอนิกส์', e_sign: 'E-Signature', cloud: 'Cloud', hr_digital: 'HR Digital', health_db: 'ฐานข้อมูลสุขภาพ', none: 'ไม่มี', other: 'อื่นๆ' };
@@ -2592,20 +2593,31 @@ CREATE INDEX IF NOT EXISTS idx_ch1_sub ON hrd_ch1_responses(submitted_at);</pre>
     async function ensureSarabunFont(doc) {
       try {
         if (!sarabunFontBase64 && typeof window.SARABUN_FONT_BASE64 !== 'undefined') sarabunFontBase64 = window.SARABUN_FONT_BASE64;
-        if (!sarabunFontBase64) {
-          const res = await fetch('https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/sarabun/Sarabun-Regular.ttf');
-          if (!res.ok) throw new Error('font download failed');
-          const buffer = await res.arrayBuffer();
-          const bytes = new Uint8Array(buffer);
+        if (!sarabunBoldFontBase64 && typeof window.SARABUN_BOLD_FONT_BASE64 !== 'undefined') sarabunBoldFontBase64 = window.SARABUN_BOLD_FONT_BASE64;
+
+        const ttfToBase64 = async (url) => {
+          const res = await fetch(url);
+          if (!res.ok) throw new Error('font download failed: ' + url);
+          const bytes = new Uint8Array(await res.arrayBuffer());
           let binary = '';
           const chunkSize = 0x8000;
           for (let i = 0; i < bytes.length; i += chunkSize) {
             binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunkSize));
           }
-          sarabunFontBase64 = btoa(binary);
+          return btoa(binary);
+        };
+
+        if (!sarabunFontBase64) {
+          sarabunFontBase64 = await ttfToBase64('https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/sarabun/Sarabun-Regular.ttf');
         }
+        if (!sarabunBoldFontBase64) {
+          sarabunBoldFontBase64 = await ttfToBase64('https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/sarabun/Sarabun-Bold.ttf');
+        }
+
         doc.addFileToVFS('Sarabun-Regular.ttf', sarabunFontBase64);
         doc.addFont('Sarabun-Regular.ttf', 'Sarabun', 'normal');
+        doc.addFileToVFS('Sarabun-Bold.ttf', sarabunBoldFontBase64);
+        doc.addFont('Sarabun-Bold.ttf', 'Sarabun', 'bold');
         doc.setFont('Sarabun', 'normal');
         return true;
       } catch (error) {
