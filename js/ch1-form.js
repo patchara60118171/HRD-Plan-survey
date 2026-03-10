@@ -512,8 +512,21 @@ function collectAllData() {
     const mental_burnout = document.getElementById('mental_burnout')?.value.trim() || null;
     const mental_depression = document.getElementById('mental_depression')?.value.trim() || null;
 
-    // Engagement
-    const engagement_score = document.getElementById('engagement_score')?.value.trim() || null;
+    // Disease report type
+    const disease_report_type = document.querySelector('input[name="disease_report_type"]:checked')?.value || null;
+
+    // Sick leave report type
+    const sick_leave_report_type = document.querySelector('input[name="sick_leave_report_type"]:checked')?.value || null;
+
+    // Mental health report type
+    const mental_health_report_type = document.querySelector('input[name="mental_health_report_type"]:checked')?.value || null;
+
+    // Engagement scores by year
+    const engagement_score_2568 = parseFloat(document.getElementById('engagement_score_2568')?.value) || null;
+    const engagement_score_2567 = parseFloat(document.getElementById('engagement_score_2567')?.value) || null;
+    const engagement_score_2566 = parseFloat(document.getElementById('engagement_score_2566')?.value) || null;
+    const engagement_score_2565 = parseFloat(document.getElementById('engagement_score_2565')?.value) || null;
+    const engagement_score_2564 = parseFloat(document.getElementById('engagement_score_2564')?.value) || null;
     const engagement_low_areas = document.getElementById('engagement_low_areas')?.value.trim() || null;
 
     // Other wellbeing surveys
@@ -607,12 +620,16 @@ function collectAllData() {
         disease_diabetes, disease_hypertension, disease_cardiovascular,
         disease_kidney, disease_liver, disease_cancer, disease_obesity,
         disease_other_count, disease_other_detail,
+        disease_report_type,
         ncd_count,
         ncd_ratio_pct: (total_staff && ncd_count) ? +((ncd_count / total_staff) * 100).toFixed(2) : null,
         sick_leave_days, sick_leave_avg,
+        sick_leave_report_type,
         clinic_report_type, clinic_users_per_year, clinic_top_symptoms, clinic_top_medications,
         mental_stress, mental_anxiety, mental_sleep, mental_burnout, mental_depression,
-        engagement_score, engagement_low_areas,
+        mental_health_report_type,
+        engagement_score_2568, engagement_score_2567, engagement_score_2566, engagement_score_2565, engagement_score_2564,
+        engagement_low_areas,
         other_wellbeing_surveys,
 
         // Step 4: ระบบและสภาพแวดล้อม
@@ -748,7 +765,7 @@ function restoreFormData(data) {
     });
 
     // Restore radio buttons by name
-    ['mentoring_system', 'job_rotation', 'idp_system', 'career_path_system', 'ergonomics_status', 'clinic_report_type'].forEach(name => {
+    ['mentoring_system', 'job_rotation', 'idp_system', 'career_path_system', 'ergonomics_status', 'clinic_report_type', 'disease_report_type', 'sick_leave_report_type', 'mental_health_report_type'].forEach(name => {
         if (data[name]) {
             const radio = document.querySelector(`input[name="${name}"][value="${data[name]}"]`);
             if (radio) radio.checked = true;
