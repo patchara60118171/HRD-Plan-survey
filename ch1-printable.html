@@ -616,9 +616,23 @@
     </div><!-- end #pdf-content -->
 
     <script>
+        function clearNumberFields() {
+            const numberInputs = document.querySelectorAll('input[type="number"]');
+            numberInputs.forEach((input) => {
+                input.value = '';
+                input.defaultValue = '';
+                input.removeAttribute('value');
+                if (input.placeholder === '0' || input.placeholder === '0.0' || input.placeholder === '0.00') {
+                    input.placeholder = '';
+                }
+                input.setAttribute('autocomplete', 'off');
+            });
+        }
+
         function downloadPDF() {
             // Show a brief hint toast before opening the print dialog
             const toast = document.getElementById('pdf-toast');
+            clearNumberFields();
             toast.style.display = 'block';
             setTimeout(function () {
                 window.print();
@@ -629,6 +643,10 @@
                 });
             }, 800);
         }
+
+        window.addEventListener('DOMContentLoaded', clearNumberFields);
+        window.addEventListener('beforeprint', clearNumberFields);
+        window.addEventListener('pageshow', clearNumberFields);
     </script>
 </body>
 </html>
