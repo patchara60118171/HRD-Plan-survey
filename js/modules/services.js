@@ -34,7 +34,7 @@ class PDFUploadHandler {
         
         // Check MIME type — must be PDF only
         if (file.type !== 'application/pdf') {
-            errors.push('กรุณาอัปโหลดไฟล์ PDF เท่านั้น');
+            errors.push('กรุณาอัปโหลดไฟล PDF เท่านั้น');
         }
         
         // Check file size — max 512 KB

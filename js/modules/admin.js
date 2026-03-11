@@ -8,458 +8,673 @@
 
 class AdminDashboard {
     constructor() {
-        this.isAuthenticated = false;
         this.currentUser = null;
-        this.dataCache = new Map();
-        this.charts = new Map();
+        this.surveyData = [];
+        this.ch1Data = [];
+        this.orgsData = [];
+        this.surveyForms = [];
+        this.isLoading = false;
+        
+        this.init();
     }
 
-    // Authentication
-    async authenticate(email, password) {
+    init() {
+        this.setupEventListeners();
+        this.checkAuthState();
+        this.loadInitialData();
+    }
+
+    setupEventListeners() {
+        // Login form
+        const loginForm = document.getElementById('login-form');
+        if (loginForm) {
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.handleLogin(e.target);
+            });
+        }
+
+        // Logout button
+        const logoutBtn = document.querySelector('button[onclick*="doLogout"]');
+        if (logoutBtn) {
+            logoutBtn.removeAttribute('onclick');
+            logoutBtn.addEventListener('click', () => this.handleLogout());
+        }
+
+        // Navigation
+        document.querySelectorAll('.ni').forEach(navItem => {
+            navItem.addEventListener('click', () => {
+                const section = navItem.dataset.section;
+                const page = navItem.dataset.pg;
+                if (page) this.navigateToPage(page);
+            });
+        });
+
+        // Refresh button
+        const refreshBtn = document.querySelector('button[onclick*="refreshPg"]');
+        if (refreshBtn) {
+            refreshBtn.removeAttribute('onclick');
+            refreshBtn.addEventListener('click', () => this.refreshCurrentPage());
+        }
+    }
+
+    async checkAuthState() {
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                this.currentUser = user;
+                this.showDashboard();
+            } else {
+                this.showLogin();
+            }
+        } catch (error) {
+            console.error('Auth check failed:', error);
+            this.showLogin();
+        }
+    }
+
+    async handleLogin(form) {
+        const email = form.email.value;
+        const password = form.password.value;
+        const errorElement = document.getElementById('l-err');
+
         try {
             const { data, error } = await supabase.auth.signInWithPassword({
-                email: email,
-                password: password
+                email,
+                password
             });
 
             if (error) throw error;
-            
-            this.isAuthenticated = true;
+
             this.currentUser = data.user;
-            return true;
+            this.showDashboard();
+
         } catch (error) {
-            console.error('Authentication failed:', error);
-            return false;
+            console.error('Login failed:', error);
+            if (errorElement) {
+                errorElement.textContent = 'อีเมลหรือรหัสผ่านไม่ถูกต้อง';
+            }
         }
     }
 
-    // Data Management
-    async loadSurveyData() {
+    async handleLogout() {
         try {
-            const { data, error } = await supabase
-                .from('hrd_ch1_responses')
-                .select('*')
-                .order('created_at', { ascending: false });
-
-            if (error) throw error;
-            
-            this.dataCache.set('surveyData', data);
-            return data;
+            await supabase.auth.signOut();
+            this.showLogin();
         } catch (error) {
-            console.error('Failed to load survey data:', error);
-            return [];
+            console.error('Logout failed:', error);
         }
     }
 
-    // User Management
-    async loadUsers() {
-        try {
-            const { data, error } = await supabase
-                .from('users')
-                .select('*')
-                .order('created_at', { ascending: false });
-
-            if (error) throw error;
-            
-            this.dataCache.set('users', data);
-            return data;
-        } catch (error) {
-            console.error('Failed to load users:', error);
-            return [];
-        }
-    }
-
-    // Organization Management
-    async loadOrganizations() {
-        try {
-            const { data, error } = await supabase
-                .from('organizations')
-                .select('*')
-                .order('name');
-
-            if (error) throw error;
-            
-            this.dataCache.set('organizations', data);
-            return data;
-        } catch (error) {
-            console.error('Failed to load organizations:', error);
-            return [];
-        }
-    }
-
-    // Statistics
-    async getStatistics() {
-        try {
-            const surveyData = this.dataCache.get('surveyData') || await this.loadSurveyData();
-            
-            const stats = {
-                totalResponses: surveyData.length,
-                todayResponses: surveyData.filter(r => 
-                    new Date(r.created_at).toDateString() === new Date().toDateString()
-                ).length,
-                completionRate: this.calculateCompletionRate(surveyData),
-                topOrganizations: this.getTopOrganizations(surveyData)
-            };
-
-            return stats;
-        } catch (error) {
-            console.error('Failed to get statistics:', error);
-            return {};
-        }
-    }
-
-    calculateCompletionRate(data) {
-        if (!data.length) return 0;
+    showLogin() {
+        const loginScreen = document.getElementById('lo');
+        const appScreen = document.getElementById('app');
         
-        const completed = data.filter(r => r.submitted_at).length;
-        return Math.round((completed / data.length) * 100);
+        if (loginScreen) loginScreen.style.display = 'flex';
+        if (appScreen) appScreen.style.display = 'none';
     }
 
-    getTopOrganizations(data) {
+    showDashboard() {
+        const loginScreen = document.getElementById('lo');
+        const appScreen = document.getElementById('app');
+        
+        if (loginScreen) loginScreen.style.display = 'none';
+        if (appScreen) appScreen.style.display = 'block';
+
+        // Update user info
+        this.updateUserInfo();
+        
+        // Load dashboard data
+        this.loadDashboardData();
+    }
+
+    updateUserInfo() {
+        const avatar = document.getElementById('sbav');
+        const name = document.getElementById('sbnm');
+        
+        if (avatar && this.currentUser) {
+            const email = this.currentUser.email || 'A';
+            avatar.textContent = email.charAt(0).toUpperCase();
+        }
+        
+        if (name) {
+            name.textContent = this.currentUser?.user_metadata?.name || 'Admin';
+        }
+    }
+
+    async loadInitialData() {
+        if (!this.currentUser) return;
+
+        try {
+            this.showLoading(true);
+            
+            // Load data in parallel
+            const [surveyData, ch1Data, orgsData, surveyForms] = await Promise.all([
+                this.loadSurveyData(),
+                this.loadCH1Data(),
+                this.loadOrganizationsData(),
+                this.loadSurveyForms()
+            ]);
+
+            this.surveyData = surveyData || [];
+            this.ch1Data = ch1Data || [];
+            this.orgsData = orgsData || [];
+            this.surveyForms = surveyForms || [];
+
+            // Update dashboard stats
+            this.updateDashboardStats();
+
+        } catch (error) {
+            console.error('Failed to load initial data:', error);
+            this.showToast('โหลดข้อมูลล้มเหลว', 'error');
+        } finally {
+            this.showLoading(false);
+        }
+    }
+
+    async loadSurveyData() {
+        const { data, error } = await supabase
+            .from('survey_responses')
+            .select('*')
+            .order('submitted_at', { ascending: false });
+
+        if (error) throw error;
+        return data;
+    }
+
+    async loadCH1Data() {
+        const { data, error } = await supabase
+            .from('hrd_ch1_responses')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        return data;
+    }
+
+    async loadOrganizationsData() {
+        const { data, error } = await supabase
+            .from('organizations')
+            .select('*')
+            .order('org_name_th', { ascending: true });
+
+        if (error) throw error;
+        return data;
+    }
+
+    async loadSurveyForms() {
+        const { data, error } = await supabase
+            .from('survey_forms')
+            .select('*')
+            .order('form_name', { ascending: true });
+
+        if (error) throw error;
+        return data;
+    }
+
+    updateDashboardStats() {
+        // Update organization count
+        const orgCount = document.getElementById('ds-o');
+        if (orgCount) orgCount.textContent = this.orgsData.length.toLocaleString();
+
+        // Update total responses
+        const totalCount = document.getElementById('ds-t');
+        if (totalCount) totalCount.textContent = (this.surveyData.length + this.ch1Data.length).toLocaleString();
+
+        // Update wellbeing responses
+        const wellbeingCount = document.getElementById('ds-w');
+        if (wellbeingCount) wellbeingCount.textContent = this.surveyData.length.toLocaleString();
+
+        // Update CH1 responses
+        const ch1Count = document.getElementById('ds-c');
+        if (ch1Count) ch1Count.textContent = this.ch1Data.length.toLocaleString();
+
+        // Update today's responses
+        const todayCount = document.getElementById('ds-td');
+        if (todayCount) {
+            const today = new Date().toISOString().split('T')[0];
+            const todayResponses = [
+                ...this.surveyData.filter(r => r.submitted_at?.startsWith(today)),
+                ...this.ch1Data.filter(r => r.created_at?.startsWith(today))
+            ].length;
+            todayCount.textContent = todayResponses.toLocaleString();
+        }
+
+        // Update month's responses
+        const monthCount = document.getElementById('ds-mo');
+        if (monthCount) {
+            const currentMonth = new Date().toISOString().slice(0, 7);
+            const monthResponses = [
+                ...this.surveyData.filter(r => r.submitted_at?.startsWith(currentMonth)),
+                ...this.ch1Data.filter(r => r.created_at?.startsWith(currentMonth))
+            ].length;
+            monthCount.textContent = monthResponses.toLocaleString();
+        }
+
+        // Update status
+        const orgStatus = document.getElementById('ds-os');
+        if (orgStatus) orgStatus.textContent = 'ข้อมูลล่าสุด';
+    }
+
+    navigateToPage(page) {
+        // Hide all pages
+        document.querySelectorAll('.pg').forEach(pg => {
+            pg.classList.remove('active');
+        });
+
+        // Show target page
+        const targetPage = document.getElementById(`pg-${page}`);
+        if (targetPage) {
+            targetPage.classList.add('active');
+        }
+
+        // Update navigation
+        this.updateNavigation(page);
+        this.updateTopBar(page);
+
+        // Load page-specific data
+        this.loadPageData(page);
+    }
+
+    updateNavigation(page) {
+        // Update active navigation item
+        document.querySelectorAll('.ni').forEach(item => {
+            item.classList.remove('active');
+            if (item.dataset.pg === page) {
+                item.classList.add('active');
+            }
+        });
+    }
+
+    updateTopBar(page) {
+        const title = document.getElementById('tbt');
+        const subtitle = document.getElementById('tbsub');
+
+        const pageTitles = {
+            dashboard: { title: 'แดชบอร์ด', subtitle: 'ภาพรวมระบบ' },
+            organizations: { title: 'จัดการองค์กร', subtitle: 'ข้อมูลหน่วยงาน' },
+            urls: { title: 'URL Manager', subtitle: 'จัดการลิงก์' },
+            'resp-wellbeing': { title: 'Wellbeing Survey', subtitle: 'ข้อมูลการตอบกลับ' },
+            'resp-ch1': { title: 'HRD บทที่ 1', subtitle: 'ข้อมูลการตอบกลับ' },
+            analytics: { title: 'สถิติ & Analytics', subtitle: 'วิเคราะห์ข้อมูล' },
+            users: { title: 'จัดการผู้ใช้', subtitle: 'บัญชีผู้ใช้งาน' },
+            settings: { title: 'ตั้งค่า', subtitle: 'การตั้งค่าระบบ' }
+        };
+
+        const pageInfo = pageTitles[page] || { title: page, subtitle: '' };
+        
+        if (title) title.textContent = pageInfo.title;
+        if (subtitle) subtitle.textContent = pageInfo.subtitle;
+    }
+
+    async loadPageData(page) {
+        switch (page) {
+            case 'dashboard':
+                await this.loadDashboardData();
+                break;
+            case 'resp-wellbeing':
+                await this.loadWellbeingResponses();
+                break;
+            case 'resp-ch1':
+                await this.loadCH1Responses();
+                break;
+            case 'analytics':
+                await this.loadAnalytics();
+                break;
+            // Add other pages as needed
+        }
+    }
+
+    async loadDashboardData() {
+        try {
+            this.showLoading(true);
+
+            // Load charts
+            await this.loadDashboardCharts();
+
+        } catch (error) {
+            console.error('Failed to load dashboard data:', error);
+            this.showToast('โหลดข้อมูลแดชบอร์ดล้มเหลว', 'error');
+        } finally {
+            this.showLoading(false);
+        }
+    }
+
+    async loadDashboardCharts() {
+        // 30-day responses chart
+        await this.load30DayChart();
+
+        // Form distribution pie chart
+        await this.loadFormDistributionChart();
+
+        // Top organizations chart
+        await this.loadTopOrganizationsChart();
+    }
+
+    async load30DayChart() {
+        const ctx = document.getElementById('ch-tr');
+        if (!ctx) return;
+
+        // Generate last 30 days data
+        const last30Days = [];
+        for (let i = 29; i >= 0; i--) {
+            const date = new Date();
+            date.setDate(date.getDate() - i);
+            last30Days.push(date.toISOString().split('T')[0]);
+        }
+
+        const wellbeingData = last30Days.map(date => 
+            this.surveyData.filter(r => r.submitted_at?.startsWith(date)).length
+        );
+
+        const ch1Data = last30Days.map(date => 
+            this.ch1Data.filter(r => r.created_at?.startsWith(date)).length
+        );
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: last30Days.map(d => d.slice(5)),
+                datasets: [
+                    {
+                        label: 'Wellbeing',
+                        data: wellbeingData,
+                        borderColor: '#16a34a',
+                        backgroundColor: 'rgba(22, 163, 74, 0.1)',
+                        tension: 0.4
+                    },
+                    {
+                        label: 'HRD CH1',
+                        data: ch1Data,
+                        borderColor: '#d97706',
+                        backgroundColor: 'rgba(217, 119, 6, 0.1)',
+                        tension: 0.4
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    async loadFormDistributionChart() {
+        const ctx = document.getElementById('ch-pi');
+        if (!ctx) return;
+
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Wellbeing Survey', 'HRD บทที่ 1'],
+                datasets: [{
+                    data: [this.surveyData.length, this.ch1Data.length],
+                    backgroundColor: ['#16a34a', '#d97706'],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    }
+
+    async loadTopOrganizationsChart() {
+        const ctx = document.getElementById('ch-ob');
+        if (!ctx) return;
+
+        // Count responses by organization
         const orgCounts = {};
         
-        data.forEach(response => {
-            const org = response.organization || 'Unknown';
+        [...this.surveyData, ...this.ch1Data].forEach(response => {
+            const org = response.organization || response.org_code || 'Unknown';
             orgCounts[org] = (orgCounts[org] || 0) + 1;
         });
 
-        return Object.entries(orgCounts)
+        // Sort and get top 10
+        const topOrgs = Object.entries(orgCounts)
             .sort(([,a], [,b]) => b - a)
-            .slice(0, 5)
-            .map(([name, count]) => ({ name, count }));
+            .slice(0, 10);
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: topOrgs.map(([org]) => org),
+                datasets: [{
+                    label: 'การตอบกลับ',
+                    data: topOrgs.map(([, count]) => count),
+                    backgroundColor: '#2563eb',
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0
+                        }
+                    }
+                }
+            }
+        });
     }
 
-    // Export Functions
-    async exportToCSV(data, filename) {
-        try {
-            const csv = this.convertToCSV(data);
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            a.click();
-            
-            window.URL.revokeObjectURL(url);
-        } catch (error) {
-            console.error('Export failed:', error);
+    async loadWellbeingResponses() {
+        // Implementation for loading wellbeing responses
+        console.log('Loading wellbeing responses...');
+    }
+
+    async loadCH1Responses() {
+        // Implementation for loading CH1 responses
+        console.log('Loading CH1 responses...');
+    }
+
+    async loadAnalytics() {
+        // Implementation for loading analytics
+        console.log('Loading analytics...');
+    }
+
+    refreshCurrentPage() {
+        const activePage = document.querySelector('.pg.active');
+        if (activePage) {
+            const pageId = activePage.id.replace('pg-', '');
+            this.loadPageData(pageId);
         }
     }
 
-    convertToCSV(data) {
-        if (!data.length) return '';
-        
-        const headers = Object.keys(data[0]);
-        const csvHeaders = headers.join(',');
-        
-        const csvRows = data.map(row => 
-            headers.map(header => {
-                const value = row[header] || '';
-                return `"${String(value).replace(/"/g, '""')}"`;
-            }).join(',')
-        );
-        
-        return [csvHeaders, ...csvRows].join('\n');
-    }
-
-    // Chart Functions
-    createChart(canvasId, type, data, options) {
-        try {
-            const canvas = document.getElementById(canvasId);
-            if (!canvas) return null;
-
-            const ctx = canvas.getContext('2d');
-            const chart = new Chart(ctx, {
-                type: type,
-                data: data,
-                options: options
-            });
-
-            this.charts.set(canvasId, chart);
-            return chart;
-        } catch (error) {
-            console.error('Chart creation failed:', error);
-            return null;
+    showLoading(show) {
+        this.isLoading = show;
+        const loadingOverlay = document.getElementById('lov');
+        if (loadingOverlay) {
+            loadingOverlay.style.display = show ? 'flex' : 'none';
         }
     }
 
-    destroyChart(canvasId) {
-        const chart = this.charts.get(canvasId);
-        if (chart) {
-            chart.destroy();
-            this.charts.delete(canvasId);
-        }
-    }
+    showToast(message, type = 'info') {
+        const toastContainer = document.getElementById('tc');
+        if (!toastContainer) return;
 
-    // Refresh Data
-    async refreshData() {
-        try {
-            await Promise.all([
-                this.loadSurveyData(),
-                this.loadUsers(),
-                this.loadOrganizations()
-            ]);
+        const toast = document.createElement('div');
+        toast.className = `tst ${type}`;
+        toast.innerHTML = `
+            ${message}
+            <button class="tcl" onclick="this.parentElement.remove()">×</button>
+        `;
 
-            this.updateUI();
-        } catch (error) {
-            console.error('Data refresh failed:', error);
-        }
-    }
+        toastContainer.appendChild(toast);
 
-    updateUI() {
-        // Update statistics display
-        this.updateStatistics();
-        
-        // Update charts
-        this.updateCharts();
-        
-        // Update tables
-        this.updateTables();
-    }
-
-    updateStatistics() {
-        const stats = this.getStatistics();
-        
-        // Update DOM elements
-        const totalEl = document.getElementById('stat-total');
-        const todayEl = document.getElementById('stat-today');
-        const completionEl = document.getElementById('stat-completion');
-        
-        if (totalEl) totalEl.textContent = stats.totalResponses || 0;
-        if (todayEl) todayEl.textContent = stats.todayResponses || 0;
-        if (completionEl) completionEl.textContent = `${stats.completionRate || 0}%`;
-    }
-
-    updateCharts() {
-        // Implementation for updating charts
-        console.log('Updating charts...');
-    }
-
-    updateTables() {
-        // Implementation for updating tables
-        console.log('Updating tables...');
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.remove();
+            }
+        }, 5000);
     }
 }
 
 // ========================================
-// Google Analytics (from analytics.js)
+// Google Analytics Integration (from analytics.js)
 // ========================================
 
 class GoogleAnalytics {
     constructor() {
-        this.MEASUREMENT_ID = window.GA_MEASUREMENT_ID || 'G-XXXXXXXXXX';
         this.isInitialized = false;
-        this.userProperties = {};
-        this.currentPage = null;
+        this.measurementId = window.GA_MEASUREMENT_ID || 'G-XXXXXXXXXX';
         
         this.init();
     }
 
     init() {
         if (this.isInitialized) return;
-        
-        this.loadGtagScript();
-        this.setupDefaultConfig();
-        this.setupPageTracking();
-        this.setupEventTracking();
-        
-        this.isInitialized = true;
-        console.log('[GoogleAnalytics] Initialized with ID:', this.MEASUREMENT_ID);
-    }
 
-    loadGtagScript() {
-        window.dataLayer = window.dataLayer || [];
-        
-        window.gtag = function() {
-            window.dataLayer.push(arguments);
-        };
-        
-        window.gtag('js', new Date());
-        window.gtag('config', this.MEASUREMENT_ID, {
-            'send_page_view': false,
-            'debug_mode': window.location.hostname === 'localhost'
-        });
-    }
-
-    setupDefaultConfig() {
-        // Set default user properties
-        this.setUserProperty('app_version', '3.1.0');
-        this.setUserProperty('platform', 'web');
-    }
-
-    setupPageTracking() {
-        // Track initial page view
-        this.trackPageView(window.location.pathname);
-        
-        // Track page changes for SPA
-        let lastPath = window.location.pathname;
-        
-        const observer = new MutationObserver(() => {
-            const currentPath = window.location.pathname;
-            if (currentPath !== lastPath) {
-                this.trackPageView(currentPath);
-                lastPath = currentPath;
-            }
-        });
-        
-        observer.observe(document, { subtree: true, childList: true });
-    }
-
-    setupEventTracking() {
-        // Track form submissions
-        document.addEventListener('submit', (e) => {
-            const form = e.target;
-            if (form.id) {
-                this.trackEvent('form_submit', {
-                    form_id: form.id,
-                    form_name: form.name || 'unnamed'
-                });
-            }
-        });
-
-        // Track button clicks
-        document.addEventListener('click', (e) => {
-            const button = e.target.closest('button');
-            if (button && button.id) {
-                this.trackEvent('button_click', {
-                    button_id: button.id,
-                    button_text: button.textContent?.trim()
-                });
-            }
-        });
-
-        // Track file downloads
-        document.addEventListener('click', (e) => {
-            const link = e.target.closest('a[href$=".pdf"], a[href$=".csv"], a[href$=".xlsx"]');
-            if (link) {
-                this.trackEvent('file_download', {
-                    file_url: link.href,
-                    file_name: link.download || link.textContent?.trim()
-                });
-            }
-        });
-    }
-
-    trackPageView(path) {
-        if (!this.isInitialized) return;
-        
-        this.currentPage = path;
-        
-        window.gtag('config', this.MEASUREMENT_ID, {
-            page_path: path,
-            page_location: window.location.href,
-            page_title: document.title
-        });
-
-        console.log('[GA] Page view:', path);
-    }
-
-    trackEvent(eventName, parameters = {}) {
-        if (!this.isInitialized) return;
-        
-        const eventParams = {
-            ...parameters,
-            ...this.userProperties
-        };
-
-        window.gtag('event', eventName, eventParams);
-
-        console.log('[GA] Event:', eventName, eventParams);
-    }
-
-    setUserProperty(property, value) {
-        this.userProperties[property] = value;
-        
-        if (this.isInitialized) {
-            window.gtag('config', this.MEASUREMENT_ID, {
-                [property]: value
-            });
+        try {
+            // Load gtag script
+            this.loadGtagScript();
+            
+            // Initialize GA
+            this.initializeGA();
+            
+            this.isInitialized = true;
+            console.log('[GoogleAnalytics] Initialized');
+            
+        } catch (error) {
+            console.error('[GoogleAnalytics] Failed to initialize:', error);
         }
     }
 
-    // Custom Events
-    trackFormStart(formName) {
-        this.trackEvent('form_start', {
-            form_name: formName,
-            timestamp: new Date().toISOString()
+    loadGtagScript() {
+        // Create gtag script
+        const script = document.createElement('script');
+        script.async = true;
+        script.src = `https://www.googletagmanager.com/gtag/js?id=${this.measurementId}`;
+        
+        document.head.appendChild(script);
+    }
+
+    initializeGA() {
+        // Initialize dataLayer
+        window.dataLayer = window.dataLayer || [];
+        
+        // gtag function
+        window.gtag = function() {
+            dataLayer.push(arguments);
+        };
+
+        // Default configuration
+        gtag('js', new Date());
+        gtag('config', this.measurementId, {
+            // Custom configuration
+            anonymize_ip: true,
+            cookie_flags: 'SameSite=Lax;Secure'
+        });
+
+        // Track page view
+        this.trackPageView();
+    }
+
+    trackPageView(pageTitle, pageLocation) {
+        if (!this.isInitialized) return;
+
+        gtag('event', 'page_view', {
+            page_title: pageTitle || document.title,
+            page_location: pageLocation || window.location.href
         });
     }
 
-    trackFormComplete(formName, duration) {
-        this.trackEvent('form_complete', {
+    trackEvent(eventName, eventParameters) {
+        if (!this.isInitialized) return;
+
+        gtag('event', eventName, eventParameters);
+    }
+
+    trackFormSubmission(formName, formData = {}) {
+        this.trackEvent('form_submit', {
             form_name: formName,
-            completion_time: duration,
-            timestamp: new Date().toISOString()
+            form_data: JSON.stringify(formData)
         });
     }
 
-    trackFormError(formName, error) {
-        this.trackEvent('form_error', {
-            form_name: formName,
-            error_message: error,
-            timestamp: new Date().toISOString()
-        });
-    }
-
-    trackLogin(method = 'email') {
+    trackUserLogin(userId, method = 'email') {
         this.trackEvent('login', {
             method: method,
-            timestamp: new Date().toISOString()
+            user_id: userId
         });
     }
 
-    trackLogout() {
-        this.trackEvent('logout', {
-            timestamp: new Date().toISOString()
+    trackUserLogout() {
+        this.trackEvent('logout');
+    }
+
+    trackDownload(fileName, fileType) {
+        this.trackEvent('download', {
+            file_name: fileName,
+            file_type: fileType
         });
     }
 
-    trackDataExport(format, recordCount) {
-        this.trackEvent('data_export', {
-            format: format,
-            record_count: recordCount,
-            timestamp: new Date().toISOString()
+    trackError(error, context = {}) {
+        this.trackEvent('error', {
+            error_message: error.message || error,
+            error_stack: error.stack,
+            context: JSON.stringify(context)
         });
     }
 
-    // E-commerce Events (for future use)
-    trackViewItem(itemId, itemName, category) {
-        this.trackEvent('view_item', {
-            item_id: itemId,
-            item_name: itemName,
-            item_category: category
+    trackPerformance(metricName, value, unit = 'ms') {
+        this.trackEvent('performance_metric', {
+            metric_name: metricName,
+            value: value,
+            unit: unit
         });
     }
 
-    trackSearch(searchTerm) {
-        this.trackEvent('search', {
-            search_term: searchTerm,
-            timestamp: new Date().toISOString()
+    // Custom event for survey interactions
+    trackSurveyStep(stepNumber, stepName) {
+        this.trackEvent('survey_step', {
+            step_number: stepNumber,
+            step_name: stepName
         });
     }
 
-    // Performance Tracking
-    trackPageLoadTime(loadTime) {
-        this.trackEvent('page_load_time', {
-            value: loadTime,
-            custom_parameter_1: 'milliseconds'
+    trackSurveyCompletion(surveyType, completionTime) {
+        this.trackEvent('survey_complete', {
+            survey_type: surveyType,
+            completion_time: completionTime
         });
     }
 
-    // Debug Mode
-    enableDebugMode() {
-        window.gtag('config', this.MEASUREMENT_ID, {
-            debug_mode: true
-        });
-        
-        console.log('[GA] Debug mode enabled');
-    }
-
-    // Consent Management
-    updateConsent(consentGranted) {
-        window.gtag('consent', 'update', {
-            'analytics_storage': consentGranted ? 'granted' : 'denied'
+    trackFileUpload(fileName, fileSize, fileType) {
+        this.trackEvent('file_upload', {
+            file_name: fileName,
+            file_size: fileSize,
+            file_type: fileType
         });
     }
 }
@@ -473,6 +688,8 @@ window.AdminModule = {
     GoogleAnalytics
 };
 
-// Initialize instances
-window.adminDashboard = new AdminDashboard();
-window.googleAnalytics = new GoogleAnalytics();
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    window.adminDashboard = new AdminDashboard();
+    window.googleAnalytics = new GoogleAnalytics();
+});
