@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai+Looped:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Removed html2pdf.js - using browser print engine for consistent layout -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -69,7 +69,11 @@
     <!-- PDF Action Bar (not printed) -->
     <div class="no-print sticky top-0 z-50 bg-white border-b border-slate-200 shadow-sm px-4 py-3 flex items-center justify-between">
         <div class="text-sm font-semibold text-primary">แบบฟอร์มสำหรับดาวน์โหลด PDF</div>
-        <div class="flex gap-2">
+        <div class="flex gap-2 flex-wrap justify-end">
+            <a href="/ch1-printable-simple" target="_blank"
+                class="px-4 py-2 border border-slate-300 text-slate-600 rounded-lg text-sm font-semibold hover:bg-slate-50 transition flex items-center gap-2">
+                👁️ ดูเวอร์ชั่นเรียบง่าย
+            </a>
             <button onclick="downloadPDF()" id="pdf-btn"
                 class="px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary-dark transition flex items-center gap-2 shadow-sm">
                 📥 ดาวน์โหลด PDF
@@ -88,6 +92,29 @@
         font-size:0.85rem; z-index:9999; box-shadow:0 4px 16px rgba(0,0,0,0.18);
         text-align:center; white-space:nowrap;
     ">💡 ในหน้าจอพิมพ์ เลือก <strong>Destination → Save as PDF</strong> เพื่อบันทึกไฟล์</div>
+
+    <!-- PDF Preview Modal (not printed) -->
+    <div id="pdf-preview-modal" class="no-print" style="
+        display:none; position:fixed; inset:0; background:rgba(15,23,42,0.72);
+        z-index:10000; padding:20px;
+    ">
+        <div style="
+            background:#fff; width:min(1100px, 100%); height:min(92vh, 920px);
+            margin:0 auto; border-radius:14px; overflow:hidden;
+            box-shadow:0 20px 50px rgba(0,0,0,0.35); display:flex; flex-direction:column;
+        ">
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 14px; border-bottom:1px solid #E2E8F0;">
+                <div style="font-weight:700; color:#0F4C81;">พรีวิว PDF</div>
+                <div style="display:flex; gap:8px;">
+                    <button id="pdf-download-btn" type="button" style="padding:8px 12px; border:none; background:#0F4C81; color:#fff; border-radius:8px; font-weight:600; cursor:pointer;">ดาวน์โหลด PDF</button>
+                    <button id="pdf-preview-close" type="button" style="padding:8px 12px; border:1px solid #CBD5E1; background:#fff; color:#334155; border-radius:8px; font-weight:600; cursor:pointer;">ปิด</button>
+                </div>
+            </div>
+            <div style="flex:1; background:#F8FAFC;">
+                <iframe id="pdf-preview-frame" title="PDF Preview" style="width:100%; height:100%; border:0;"></iframe>
+            </div>
+        </div>
+    </div>
 
     <!-- ======== CONTENT TO EXPORT ======== -->
     <div id="pdf-content" class="max-w-[210mm] mx-auto space-y-2">
@@ -616,6 +643,9 @@
     </div><!-- end #pdf-content -->
 
     <script>
+        let currentPdfBlob = null;
+        let currentPdfUrl = null;
+
         function clearNumberFields() {
             const numberInputs = document.querySelectorAll('input[type="number"]');
             numberInputs.forEach((input) => {
@@ -629,24 +659,91 @@
             });
         }
 
-        function downloadPDF() {
-            // Show a brief hint toast before opening the print dialog
+        function closePdfPreview() {
+            const modal = document.getElementById('pdf-preview-modal');
+            const frame = document.getElementById('pdf-preview-frame');
+            modal.style.display = 'none';
+            frame.src = 'about:blank';
+            if (currentPdfUrl) {
+                URL.revokeObjectURL(currentPdfUrl);
+                currentPdfUrl = null;
+            }
+            currentPdfBlob = null;
+        }
+
+        function saveCurrentPdf() {
+            if (!currentPdfBlob) return;
+            const today = new Date();
+            const dateStr = today.getDate().toString().padStart(2, '0') +
+                            (today.getMonth() + 1).toString().padStart(2, '0') +
+                            today.getFullYear();
+            const filename = 'แบบฟอร์ม_CH1_' + dateStr + '.pdf';
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(currentPdfBlob);
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(link.href);
+        }
+
+        async function downloadPDF() {
             const toast = document.getElementById('pdf-toast');
+            const btn = document.getElementById('pdf-btn');
             clearNumberFields();
             toast.style.display = 'block';
-            setTimeout(function () {
-                window.print();
-                // Hide toast after dialog closes (afterprint event)
-                window.addEventListener('afterprint', function onAfterPrint() {
-                    toast.style.display = 'none';
-                    window.removeEventListener('afterprint', onAfterPrint);
-                });
-            }, 800);
+
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '⏳ กำลังสร้างพรีวิว...';
+
+            try {
+                const element = document.getElementById('pdf-content');
+                const worker = html2pdf().set({
+                    margin: [8, 6, 8, 6],
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: {
+                        scale: 2,
+                        useCORS: true,
+                        logging: false,
+                        letterRendering: true
+                    },
+                    jsPDF: {
+                        unit: 'mm',
+                        format: 'a4',
+                        orientation: 'portrait'
+                    },
+                    pagebreak: { mode: ['css'] }
+                }).from(element);
+
+                currentPdfBlob = await worker.outputPdf('blob');
+                if (currentPdfUrl) URL.revokeObjectURL(currentPdfUrl);
+                currentPdfUrl = URL.createObjectURL(currentPdfBlob);
+
+                const frame = document.getElementById('pdf-preview-frame');
+                frame.src = currentPdfUrl;
+                document.getElementById('pdf-preview-modal').style.display = 'block';
+            } catch (err) {
+                alert('ไม่สามารถสร้าง PDF ได้ กรุณาลองใหม่อีกครั้ง');
+                console.error(err);
+            } finally {
+                toast.style.display = 'none';
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
         }
 
         window.addEventListener('DOMContentLoaded', clearNumberFields);
         window.addEventListener('beforeprint', clearNumberFields);
         window.addEventListener('pageshow', clearNumberFields);
+
+        document.getElementById('pdf-preview-close').addEventListener('click', closePdfPreview);
+        document.getElementById('pdf-download-btn').addEventListener('click', saveCurrentPdf);
+        document.getElementById('pdf-preview-modal').addEventListener('click', function (event) {
+            if (event.target.id === 'pdf-preview-modal') {
+                closePdfPreview();
+            }
+        });
     </script>
 </body>
 </html>

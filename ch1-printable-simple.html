@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แบบสำรวจข้อมูลเพื่อจัดทำแผนการพัฒนาองค์กรสุขภาวะข้าราชการพลเรือน (แบบเรียบ)</title>
+    <style>
+        /* ─── Base ─── */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'TH Sarabun New', 'Sarabun', 'Tahoma', sans-serif;
+            font-size: 14pt;
+            line-height: 1.6;
+            color: #000;
+            background: #fff;
+        }
+
+        /* ─── Print action bar ─── */
+        .action-bar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: #f8f8f8;
+            border-bottom: 1px solid #ccc;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+        .action-bar span { font-size: 12pt; color: #555; }
+        .action-bar .btns { display: flex; gap: 8px; flex-wrap: wrap; }
+        .btn {
+            padding: 6px 16px;
+            border: 1px solid #666;
+            border-radius: 4px;
+            background: #fff;
+            font-size: 11pt;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .btn-primary { background: #1a3a6b; color: #fff; border-color: #1a3a6b; }
+
+        /* ─── Page ─── */
+        .page {
+            width: 210mm;
+            min-height: 297mm;
+            margin: 20px auto;
+            padding: 25mm 20mm 20mm;
+            background: #fff;
+            position: relative;
+        }
+
+        /* ─── Title ─── */
+        .doc-title {
+            text-align: center;
+            font-size: 16pt;
+            font-weight: bold;
+            margin-bottom: 4pt;
+        }
+        .doc-subtitle {
+            text-align: center;
+            font-size: 14pt;
+            font-weight: bold;
+            margin-bottom: 12pt;
+        }
+        .doc-note {
+            font-size: 12pt;
+            margin-bottom: 14pt;
+            padding: 6pt 0;
+            border-top: 1px solid #000;
+            border-bottom: 1px solid #000;
+        }
+        .doc-note strong { font-size: 12pt; }
+
+        /* ─── Section headings ─── */
+        h2 {
+            font-size: 14pt;
+            font-weight: bold;
+            margin-top: 16pt;
+            margin-bottom: 6pt;
+            border-bottom: 1px solid #000;
+            padding-bottom: 2pt;
+        }
+        h3 {
+            font-size: 13pt;
+            font-weight: bold;
+            margin-top: 10pt;
+            margin-bottom: 4pt;
+        }
+
+        /* ─── Line field  (label + dashed fill line) ─── */
+        .field {
+            display: flex;
+            align-items: baseline;
+            gap: 6pt;
+            margin-bottom: 8pt;
+        }
+        .field-label {
+            white-space: nowrap;
+            font-weight: bold;
+            flex-shrink: 0;
+            min-width: 0;
+        }
+        .field-line {
+            flex: 1;
+            border-bottom: 1px solid #000;
+            min-width: 30mm;
+        }
+        /* Multi-line answer area */
+        .answer-area {
+            margin-bottom: 10pt;
+        }
+        .answer-area .field-label { display: block; font-weight: bold; margin-bottom: 3pt; }
+        .answer-lines { margin-top: 4pt; }
+        .answer-lines .line {
+            border-bottom: 1px solid #000;
+            margin-bottom: 7pt;
+            height: 14pt;
+        }
+
+        /* ─── Checkbox list ─── */
+        .check-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10pt 24pt;
+            margin-bottom: 6pt;
+            align-items: center;
+        }
+        .check-item {
+            display: flex;
+            align-items: center;
+            gap: 5pt;
+            font-size: 13pt;
+        }
+        .checkbox {
+            display: inline-block;
+            width: 12pt;
+            height: 12pt;
+            border: 1.5px solid #000;
+            flex-shrink: 0;
+            vertical-align: middle;
+        }
+
+        /* ─── Sub-field grid (compact, 2-col label+line) ─── */
+        .field-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4pt 20pt;
+            margin-bottom: 8pt;
+        }
+        .field-grid-1 {
+            grid-template-columns: 1fr;
+        }
+
+        /* ─── Table ─── */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12pt;
+            margin-bottom: 10pt;
+        }
+        th, td {
+            border: 1px solid #000;
+            padding: 4pt 6pt;
+            text-align: center;
+        }
+        th { font-weight: bold; background: #f0f0f0; }
+        td:first-child { text-align: left; }
+        .cell-blank { height: 18pt; }
+
+        /* ─── Page footer ─── */
+        .page-footer {
+            position: absolute;
+            bottom: 12mm;
+            left: 20mm;
+            right: 20mm;
+            display: flex;
+            justify-content: space-between;
+            font-size: 10pt;
+            color: #444;
+            border-top: 1px solid #ccc;
+            padding-top: 4pt;
+        }
+
+        /* ─── Print media ─── */
+        @media print {
+            .action-bar { display: none !important; }
+            body { background: #fff; }
+            .page {
+                margin: 0;
+                padding: 20mm 20mm 18mm;
+                width: 100%;
+                page-break-after: always;
+                box-shadow: none;
+            }
+            .page:last-child { page-break-after: avoid; }
+            h2 { page-break-after: avoid; }
+            h3 { page-break-after: avoid; }
+            .answer-area, .field, .check-row, table { page-break-inside: avoid; }
+            @page { size: A4 portrait; margin: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Action Bar -->
+    <div class="action-bar">
+        <span>แบบฟอร์มเรียบ (พิมพ์/บันทึก PDF)</span>
+        <div class="btns">
+            <button class="btn btn-primary" onclick="window.print()">📥 บันทึก PDF / พิมพ์</button>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         PAGE 1 — ปก + ส่วนที่ 1
+    ═══════════════════════════════════════════════════ -->
+    <div class="page">
+
+        <div class="doc-title">แบบสำรวจข้อมูล</div>
+        <div class="doc-subtitle">เพื่อจัดทำแผนการพัฒนาองค์กรสุขภาวะข้าราชการพลเรือน</div>
+
+        <div class="doc-note">
+            <strong>คำชี้แจง:</strong> แบบฟอร์มนี้จัดทำขึ้นเพื่อรวบรวมข้อมูลจากหน่วยงานนำร่อง
+            สำหรับใช้ประกอบการจัดทำแผนปฏิบัติการสร้างเสริมสุขภาวะองค์กรข้าราชการพลเรือน
+        </div>
+
+        <div class="field">
+            <span class="field-label">อีเมลผู้ตอบ</span>
+            <span class="field-line"></span>
+        </div>
+        <div class="field">
+            <span class="field-label">ชื่อหน่วยงาน</span>
+            <span class="field-line"></span>
+        </div>
+
+        <!-- ── ส่วนที่ 1 ── -->
+        <h2>ส่วนที่ 1: ข้อมูลเบื้องต้นของส่วนราชการ</h2>
+
+        <div class="answer-area">
+            <span class="field-label">1. ภาพรวมยุทธศาสตร์และทิศทางของส่วนราชการ</span>
+            <div class="answer-lines">
+                <div class="line"></div>
+                <div class="line"></div>
+                <div class="line"></div>
+            </div>
+        </div>
+
+        <div class="answer-area">
+            <span class="field-label">2. โครงสร้างองค์กรและบทบาทหน้าที่หลัก</span>
+            <div class="answer-lines">
+                <div class="line"></div>
+                <div class="line"></div>
+                <div class="line"></div>
+            </div>
+        </div>
+
+        <div class="field" style="margin-bottom:12pt;">
+            <span class="field-label">3. จำนวนข้าราชการรวม (คน)</span>
+            <span class="field-line"></span>
+        </div>
+
+        <h3>3.1 จำแนกตามประเภท</h3>
+        <div class="field-grid">
+            <div class="field"><span class="field-label">ข้าราชการ</span><span class="field-line"></span></div>
+            <div class="field"><span class="field-label">พนักงานราชการ</span><span class="field-line"></span></div>
+            <div class="field"><span class="field-label">ลูกจ้าง</span><span class="field-line"></span></div>
+            <div class="field"><span class="field-label">อื่น ๆ</span><span class="field-line"></span></div>
+        </div>
+
+        <h3>3.2 จำแนกตามช่วงอายุ (เฉพาะข้าราชการ)</h3>
+        <div class="field-grid">
+            <div class="field"><span class="field-label">ไม่เกิน 30 ปี</span><span class="field-line"></span></div>
+            <div class="field"><span class="field-label">31–40 ปี</span><span class="field-line"></span></div>
+            <div class="field"><span class="field-label">41–50 ปี</span><span class="field-line"></span></div>
+            <div class="field"><span class="field-label">51–60 ปี</span><span class="field-line"></span></div>
+        </div>
+
+        <h3>3.3 จำแนกตามอายุราชการ</h3>
+        <div class="field-grid">
+            <div class="field"><span class="field-label">ไม่เกิน 1 ปี</span><span class="field-line"></span></div>
+            <div class="field"><span class="field-label">1–5 ปี</span><span class="field-line"></span></div>
+            <div class="field"><span class="field-label">6–10 ปี</span><span class="field-line"></span></div>
+            <div class="field"><span class="field-label">11–15 ปี</span><span class="field-line"></span></div>
+            <div class="field"><span class="field-label">16–20 ปี</span><span class="field-line"></span></div>
+            <div class="field"><span class="field-label">21–25 ปี</span><span class="field-line"></span></div>
+            <div class="field"><span class="field-label">26–30 ปี</span><span class="field-line"></span></div>
+            <div class="field"><span class="field-label">31 ปีขึ้นไป</span><span class="field-line"></span></div>
+        </div>
+
+        <h3>3.4 จำแนกตามประเภทและระดับตำแหน่ง</h3>
+        <div class="field-grid-1 field-grid">
+            <div class="field"><span class="field-label">ประเภททั่วไป: O1</span><span class="field-line"></span><span class="field-label" style="padding: 0 6pt;">O2</span><span class="field-line"></span><span class="field-label" style="padding: 0 6pt;">O3</span><span class="field-line"></span><span class="field-label" style="padding: 0 6pt;">O4</span><span class="field-line"></span></div>
+            <div class="field"><span class="field-label">ประเภทวิชาการ: K1</span><span class="field-line"></span><span class="field-label" style="padding: 0 6pt;">K2</span><span class="field-line"></span><span class="field-label" style="padding: 0 6pt;">K3</span><span class="field-line"></span><span class="field-label" style="padding: 0 6pt;">K4</span><span class="field-line"></span><span class="field-label" style="padding: 0 6pt;">K5</span><span class="field-line"></span></div>
+            <div class="field"><span class="field-label">ประเภทอำนวยการ: M1</span><span class="field-line"></span><span class="field-label" style="padding: 0 6pt;">M2</span><span class="field-line"></span></div>
+            <div class="field"><span class="field-label">ประเภทบริหาร: S1</span><span class="field-line"></span><span class="field-label" style="padding: 0 6pt;">S2</span><span class="field-line"></span></div>
+        </div>
+
+        <h3>4. การลาออกและโอนย้าย (ย้อนหลัง 5 ปี)</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width:28%">รายการ</th>
+                    <th>2564</th>
+                    <th>2565</th>
+                    <th>2566</th>
+                    <th>2567</th>
+                    <th>2568</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>จำนวนข้าราชการต้นปี (1 ต.ค.)</td><td class="cell-blank"></td><td class="cell-blank"></td><td class="cell-blank"></td><td class="cell-blank"></td><td class="cell-blank"></td></tr>
+                <tr><td>จำนวนข้าราชการปลายปี (30 ก.ย.)</td><td class="cell-blank"></td><td class="cell-blank"></td><td class="cell-blank"></td><td class="cell-blank"></td><td class="cell-blank"></td></tr>
+                <tr><td>ลาออก / โอนย้าย</td><td class="cell-blank"></td><td class="cell-blank"></td><td class="cell-blank"></td><td class="cell-blank"></td><td class="cell-blank"></td></tr>
+                <tr><td>ร้อยละ</td><td class="cell-blank"></td><td class="cell-blank"></td><td class="cell-blank"></td><td class="cell-blank"></td><td class="cell-blank"></td></tr>
+            </tbody>
+        </table>
+
+        <div class="page-footer">
+            <span>หน่วยงาน: ___________________________</span>
+            <span>หน้า 1/5</span>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         PAGE 2 — ส่วนที่ 2
+    ═══════════════════════════════════════════════════ -->
+    <div class="page">
+
+        <h2>ส่วนที่ 2: นโยบายและบริบทภายนอกองค์กร</h2>
+        <p style="font-size:12pt; color:#333; margin-bottom:8pt;">นโยบายที่เกี่ยวข้องและบริบทที่ส่วนราชการต้องเผชิญ</p>
+
+        <div class="answer-area">
+            <span class="field-label">5. นโยบายและยุทธศาสตร์ที่เกี่ยวข้อง</span>
+            <div class="answer-lines">
+                <div class="line"></div>
+                <div class="line"></div>
+                <div class="line"></div>
+                <div class="line"></div>
+                <div class="line"></div>
+            </div>
+        </div>
+
+        <div class="answer-area">
+            <span class="field-label">6. ข้อมูลบริบทและความท้าทาย (Context &amp; Challenges)</span>
+            <div class="answer-lines">
+                <div class="line"></div>
+                <div class="line"></div>
+                <div class="line"></div>
+                <div class="line"></div>
+                <div class="line"></div>
+            </div>
+        </div>
+
+        <h2>ส่วนที่ 3: ข้อมูลสุขภาวะของข้าราชการในปีที่ผ่านมา</h2>
+        <p style="font-size:12pt; color:#333; margin-bottom:8pt;">หากไม่สามารถแยกเฉพาะข้าราชการได้ ให้ระบุข้อมูลรวมของบุคลากรทั้งหมดแทน</p>
+
+        <h3>7. สุขภาวะทางกาย</h3>
+        <p style="font-size:12pt; margin-bottom:4pt;">ข้อมูลที่รายงานเป็น:</p>
+        <div class="check-row" style="margin-bottom:8pt;">
+            <div class="check-item"><span class="checkbox"></span> เฉพาะข้าราชการ</div>
+            <div class="check-item"><span class="checkbox"></span> บุคลากรทั้งหมด (ไม่สามารถแยกตามประเภทบุคลากรได้)</div>
+        </div>
+
+        <div class="field-grid">
+            <div class="field"><span class="field-label">เบาหวาน</span><span class="field-line"></span></div>
+            <div class="field"><span class="field-label">ความดันโลหิตสูง</span><span class="field-line"></span></div>
+            <div class="field"><span class="field-label">โรคหัวใจและหลอดเลือด</span><span class="field-line"></span></div>
+            <div class="field"><span class="field-label">โรคไต</span><span class="field-line"></span></div>
+            <div class="field"><span class="field-label">โรคตับ</span><span class="field-line"></span></div>
+            <div class="field"><span class="field-label">โรคมะเร็ง</span><span class="field-line"></span></div>
+            <div class="field"><span class="field-label">ภาวะอ้วน/น้ำหนักเกิน</span><span class="field-line"></span></div>
+            <div class="field"><span class="field-label">อื่น ๆ (จำนวน)</span><span class="field-line"></span></div>
+        </div>
+        <div class="field"><span class="field-label">อื่น ๆ (ระบุ)</span><span class="field-line"></span></div>
+
+        <h3>8. ข้อมูลการลาป่วย</h3>
+        <p style="font-size:12pt; margin-bottom:4pt;">ข้อมูลที่รายงานเป็น:</p>
+        <div class="check-row" style="margin-bottom:8pt;">
+            <div class="check-item"><span class="checkbox"></span> เฉพาะข้าราชการ</div>
+            <div class="check-item"><span class="checkbox"></span> บุคลากรทั้งหมด (ไม่สามารถแยกตามประเภทบุคลากรได้)</div>
+        </div>
+
+        <div class="field-grid">
+            <div class="field"><span class="field-label">จำนวนวันลาป่วยรวมต่อปี</span><span class="field-line"></span></div>
+            <div class="field"><span class="field-label">จำนวนวันลาป่วยเฉลี่ยต่อคนต่อปี</span><span class="field-line"></span></div>
+        </div>
+
+        <div class="page-footer">
+            <span>หน่วยงาน: ___________________________</span>
+            <span>หน้า 2/5</span>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         PAGE 3 — ส่วนที่ 3 (ต่อ)
+    ═══════════════════════════════════════════════════ -->
+    <div class="page">
+
+        <h2>ส่วนที่ 3: ข้อมูลสุขภาวะ (ต่อ)</h2>
+
+        <h3>10. ผลสำรวจสุขภาพจิต (ถ้ามี)</h3>
+        <p style="font-size:12pt; margin-bottom:4pt;">ข้อมูลที่รายงานเป็น:</p>
+        <div class="check-row" style="margin-bottom:8pt;">
+            <div class="check-item"><span class="checkbox"></span> เฉพาะข้าราชการ</div>
+            <div class="check-item"><span class="checkbox"></span> บุคลากรทั้งหมด (ไม่สามารถแยกตามประเภทบุคลากรได้)</div>
+        </div>
+
+        <div class="field-grid-1 field-grid">
+            <div class="field"><span class="field-label">ภาวะเครียดเรื้อรัง (จำนวน/รายละเอียด)</span><span class="field-line"></span></div>
+            <div class="field"><span class="field-label">ภาวะวิตกกังวล</span><span class="field-line"></span></div>
+            <div class="field"><span class="field-label">ปัญหาการนอนหลับ</span><span class="field-line"></span></div>
+            <div class="field"><span class="field-label">ภาวะหมดไฟ (Burnout)</span><span class="field-line"></span></div>
+            <div class="field"><span class="field-label">ภาวะซึมเศร้า</span><span class="field-line"></span></div>
+        </div>
+
+        <h3>11. ผลสำรวจความผูกพันองค์กร (Employee Engagement) — ย้อนหลัง 5 ปี</h3>
+        <div class="field-grid">
+            <div class="field"><span class="field-label">คะแนนปี 2568</span><span class="field-line"></span></div>
+            <div class="field"><span class="field-label">คะแนนปี 2567</span><span class="field-line"></span></div>
+            <div class="field"><span class="field-label">คะแนนปี 2566</span><span class="field-line"></span></div>
+            <div class="field"><span class="field-label">คะแนนปี 2565</span><span class="field-line"></span></div>
+            <div class="field"><span class="field-label">คะแนนปี 2564</span><span class="field-line"></span></div>
+        </div>
+        <div class="field"><span class="field-label">ประเด็นที่ได้คะแนนต่ำ</span><span class="field-line"></span></div>
+
+        <h3>12. ผลสำรวจสุขภาวะด้วยเครื่องมืออื่น ๆ (ถ้ามี)</h3>
+        <div class="answer-area">
+            <div class="answer-lines">
+                <div class="line"></div>
+                <div class="line"></div>
+                <div class="line"></div>
+            </div>
+        </div>
+
+        <div class="page-footer">
+            <span>หน่วยงาน: ___________________________</span>
+            <span>หน้า 3/5</span>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         PAGE 4 — ส่วนที่ 4
+    ═══════════════════════════════════════════════════ -->
+    <div class="page">
+
+        <h2>ส่วนที่ 4: ระบบการบริหารและสภาพแวดล้อมที่เอื้อต่อสุขภาวะ</h2>
+
+        <h3>13. สถานะระบบการบริหารบุคลากร (เฉพาะข้าราชการ)</h3>
+        <p style="font-size:12pt; margin-bottom:8pt;">สำหรับแต่ละหัวข้อ โปรดทำเครื่องหมาย ✓ ในช่องที่ตรงกับสถานะ</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th style="width:40%; text-align:left;">ระบบ</th>
+                    <th>มีตามแผน</th>
+                    <th>มีไม่ครบตามแผน</th>
+                    <th>ไม่มี</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>ระบบพี่เลี้ยง (Mentoring)</td>
+                    <td class="cell-blank"></td>
+                    <td class="cell-blank"></td>
+                    <td class="cell-blank"></td>
+                </tr>
+                <tr>
+                    <td>ระบบหมุนเวียนงาน (Job Rotation)</td>
+                    <td class="cell-blank"></td>
+                    <td class="cell-blank"></td>
+                    <td class="cell-blank"></td>
+                </tr>
+                <tr>
+                    <td>แผนพัฒนารายบุคคล (IDP)</td>
+                    <td class="cell-blank"></td>
+                    <td class="cell-blank"></td>
+                    <td class="cell-blank"></td>
+                </tr>
+                <tr>
+                    <td>เส้นทางความก้าวหน้า (Career Path)</td>
+                    <td class="cell-blank"></td>
+                    <td class="cell-blank"></td>
+                    <td class="cell-blank"></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>14. ชั่วโมงการอบรมเฉลี่ยต่อคนต่อปี</h3>
+        <div class="field-grid">
+            <div class="field"><span class="field-label">ปี 2568</span><span class="field-line"></span><span style="margin-left:4pt; white-space:nowrap; font-size:12pt;">ชั่วโมง</span></div>
+            <div class="field"><span class="field-label">ปี 2567</span><span class="field-line"></span><span style="margin-left:4pt; white-space:nowrap; font-size:12pt;">ชั่วโมง</span></div>
+            <div class="field"><span class="field-label">ปี 2566</span><span class="field-line"></span><span style="margin-left:4pt; white-space:nowrap; font-size:12pt;">ชั่วโมง</span></div>
+            <div class="field"><span class="field-label">ปี 2565</span><span class="field-line"></span><span style="margin-left:4pt; white-space:nowrap; font-size:12pt;">ชั่วโมง</span></div>
+            <div class="field"><span class="field-label">ปี 2564</span><span class="field-line"></span><span style="margin-left:4pt; white-space:nowrap; font-size:12pt;">ชั่วโมง</span></div>
+        </div>
+
+        <h3>16. การจัดสภาพแวดล้อมตามหลักการยศาสตร์ (Ergonomics)</h3>
+        <div class="check-row" style="margin-bottom:8pt;">
+            <div class="check-item"><span class="checkbox"></span> ยังไม่มี</div>
+            <div class="check-item"><span class="checkbox"></span> มีแผนแต่ยังไม่ดำเนินการ</div>
+            <div class="check-item"><span class="checkbox"></span> อยู่ระหว่างดำเนินการ</div>
+            <div class="check-item"><span class="checkbox"></span> ดำเนินการแล้ว</div>
+        </div>
+        <div class="answer-area">
+            <span class="field-label" style="font-weight:normal; font-size:12pt;">รายละเอียด/ผลลัพธ์:</span>
+            <div class="answer-lines">
+                <div class="line"></div>
+                <div class="line"></div>
+            </div>
+        </div>
+
+        <div class="page-footer">
+            <span>หน่วยงาน: ___________________________</span>
+            <span>หน้า 4/5</span>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         PAGE 5 — ส่วนที่ 5
+    ═══════════════════════════════════════════════════ -->
+    <div class="page">
+
+        <h2>ส่วนที่ 5: ทิศทาง เป้าหมาย และข้อเสนอแนะ</h2>
+
+        <h3>17. จุดเน้นการพัฒนา (โปรดเลือกไม่เกิน 3 ประเด็น และจัดอันดับ 1–3)</h3>
+        <p style="font-size:12pt; margin-bottom:6pt;">ประเด็นที่เลือกได้: การเพิ่มประสิทธิภาพบริการ / การพัฒนาด้านดิจิทัล / การพัฒนาผู้นำ / ลดอัตราลาป่วย / ลดอัตราลาออก / อื่น ๆ</p>
+        <div class="field-grid-1 field-grid">
+            <div class="field"><span class="field-label">อันดับ 1</span><span class="field-line"></span></div>
+            <div class="field"><span class="field-label">อันดับ 2</span><span class="field-line"></span></div>
+            <div class="field"><span class="field-label">อันดับ 3</span><span class="field-line"></span></div>
+        </div>
+
+        <h3>18. ข้อเสนอแนะเกี่ยวกับ Intervention Packages เพิ่มเติม (ถ้ามี)</h3>
+        <div class="answer-area">
+            <div class="answer-lines">
+                <div class="line"></div>
+                <div class="line"></div>
+                <div class="line"></div>
+                <div class="line"></div>
+                <div class="line"></div>
+            </div>
+        </div>
+
+        <h3>19. ไฟล์ HRD PLAN ปี 2567–2570 พร้อมผลการปฏิบัติงานตามแผนในปีล่าสุด (ถ้ามี)</h3>
+        <div class="answer-area">
+            <span class="field-label" style="font-weight:normal; font-size:12pt;">สรุปผลการปฏิบัติงาน:</span>
+            <div class="answer-lines">
+                <div class="line"></div>
+                <div class="line"></div>
+                <div class="line"></div>
+            </div>
+        </div>
+        <div class="field"><span class="field-label">หมายเหตุ / รายการเอกสารแนบ</span><span class="field-line"></span></div>
+
+        <div style="margin-top: 40pt; text-align:center; font-size:12pt; color:#555; border-top:1px solid #ccc; padding-top:8pt;">
+            จัดทำโดยสถาบันบัณฑิตพัฒนบริหารศาสตร์
+        </div>
+
+        <div class="page-footer">
+            <span>หน่วยงาน: ___________________________</span>
+            <span>หน้า 5/5</span>
+        </div>
+    </div>
+
+</body>
+</html>
