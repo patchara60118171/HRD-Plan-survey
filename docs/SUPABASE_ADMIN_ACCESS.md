@@ -412,3 +412,4 @@ supabase logs api --filter "service_role"
 **สร้างเมื่อ**: March 2026  
 **อัปเดตล่าสุด**: March 2026  
 **เวอร์ชัน**: 1.0
+![1772725554036](image/SUPABASE_ADMIN_ACCESS/1772725554036.png)
