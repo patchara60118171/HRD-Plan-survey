@@ -14,6 +14,8 @@
     "supabase:test": "node scripts/supabase-admin.js",
     "supabase:stats": "node -e \"require('./scripts/supabase-admin').getDatabaseStats()\"",
     "supabase:export": "node -e \"require('./scripts/supabase-admin').exportData()\"",
+    "sync:google:pending": "node scripts/sync-ch1-google.js pending",
+    "sync:google:all": "node scripts/sync-ch1-google.js all",
     "db:status": "node scripts/supabase-admin.js",
     "db:clear-test": "node scripts/clear-ch1-test-data.js"
   },
