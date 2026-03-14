@@ -17,7 +17,8 @@
     "sync:google:pending": "node scripts/sync-ch1-google.js pending",
     "sync:google:all": "node scripts/sync-ch1-google.js all",
     "db:status": "node scripts/supabase-admin.js",
-    "db:clear-test": "node scripts/clear-ch1-test-data.js"
+    "db:clear-test": "node scripts/clear-ch1-test-data.js",
+    "supabase:deploy": "npx supabase functions deploy google-sync --no-verify-jwt"
   },
   "main": "index.js",
   "directories": {
