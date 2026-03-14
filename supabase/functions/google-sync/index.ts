@@ -6,6 +6,7 @@ const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
 const GOOGLE_SYNC_WEBHOOK_URL = Deno.env.get('GOOGLE_SYNC_WEBHOOK_URL') ?? '';
 const GOOGLE_SYNC_SHARED_SECRET = Deno.env.get('GOOGLE_SYNC_SHARED_SECRET') ?? '';
+const GOOGLE_SYNC_FUNCTION_TOKEN = Deno.env.get('GOOGLE_SYNC_FUNCTION_TOKEN') ?? '';
 const SYNC_BATCH_SIZE = Number(Deno.env.get('GOOGLE_SYNC_BATCH_SIZE') ?? '10');
 
 const corsHeaders = {
@@ -69,9 +70,14 @@ async function markRowStatus(id: string, payload: Record<string, unknown>) {
 }
 
 async function syncRow(row: Record<string, unknown>) {
+  const issuedAt = new Date().toISOString();
+  const nonce = crypto.randomUUID();
+
   const requestBody = {
     source: 'supabase-edge-function',
     secret: GOOGLE_SYNC_SHARED_SECRET,
+    issuedAt,
+    nonce,
     record: sanitizeRowForWebhook(row),
     attachments: buildAttachmentPayload(row),
   };
@@ -114,9 +120,26 @@ async function fetchPendingRows(limit: number) {
   return data ?? [];
 }
 
+function isAuthorizedCaller(req: Request): boolean {
+  if (!GOOGLE_SYNC_FUNCTION_TOKEN) return true;
+
+  const authHeader = req.headers.get('authorization') || '';
+  if (!authHeader.startsWith('Bearer ')) return false;
+
+  const token = authHeader.slice(7).trim();
+  return token === GOOGLE_SYNC_FUNCTION_TOKEN;
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
+  }
+
+  if (!isAuthorizedCaller(req)) {
+    return new Response(JSON.stringify({ error: 'Unauthorized caller' }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: 401,
+    });
   }
 
   if (!GOOGLE_SYNC_WEBHOOK_URL || !GOOGLE_SYNC_SHARED_SECRET) {

@@ -40,14 +40,15 @@ ADD COLUMN IF NOT EXISTS support_systems TEXT; -- JSON array of support systems 
 -- Note: digital_systems already exists as TEXT[], but ensure it's properly configured
 DO $$
 BEGIN
-    -- Check if column exists and is not already TEXT[]
+    -- Check if column exists and is NOT already TEXT[] (ARRAY of text)
+    -- PostgreSQL reports TEXT[] as data_type='ARRAY', udt_name='_text' in information_schema
     IF EXISTS (
         SELECT 1 FROM information_schema.columns 
         WHERE table_name = 'hrd_ch1_responses' 
         AND column_name = 'digital_systems'
-        AND data_type != 'text[]'
+        AND NOT (data_type = 'ARRAY' AND udt_name = '_text')
     ) THEN
-        ALTER TABLE hrd_ch1_responses DROP COLUMN IF EXISTS digital_systems;
+        ALTER TABLE hrd_ch1_responses DROP COLUMN IF EXISTS digital_systems CASCADE;
         ALTER TABLE hrd_ch1_responses ADD COLUMN digital_systems TEXT[];
     END IF;
 END $$;

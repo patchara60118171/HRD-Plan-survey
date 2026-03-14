@@ -4374,17 +4374,14 @@ CREATE INDEX IF NOT EXISTS idx_ch1_sub ON hrd_ch1_responses(submitted_at);</pre>
 
 
 
-    // Predefined users with their roles
+    const ROLE_TABLE = 'admin_user_roles';
 
-    // Format: email -> { role, org (for viewer only) }
-
+    // Bootstrap users prevent lock-out before role table is configured.
     const USER_ROLES = {
 
       'admin@gmail.com': { role: ROLES.SUPER_ADMIN },
 
       'hrdplan.wellbeing@gmail.com': { role: ROLES.ADMIN }
-
-      // Viewers will be added dynamically as needed
 
     };
 
@@ -4396,7 +4393,59 @@ CREATE INDEX IF NOT EXISTS idx_ch1_sub ON hrd_ch1_responses(submitted_at);</pre>
 
 
 
-    // Get user role from predefined list or Supabase user metadata
+    function normalizeRole(role) {
+
+      if (!role) return null;
+
+      const value = String(role).toLowerCase();
+
+      if (value === ROLES.SUPER_ADMIN || value === ROLES.ADMIN || value === ROLES.VIEWER) return value;
+
+      return null;
+
+    }
+
+    async function loadRoleMappings() {
+
+      if (!sb) return;
+
+      try {
+
+        const { data, error } = await sb.from(ROLE_TABLE)
+
+          .select('email, role, org_name, is_active')
+
+          .eq('is_active', true);
+
+        if (error) {
+
+          console.warn('loadRoleMappings:', error.message);
+
+          return;
+
+        }
+
+        (data || []).forEach(row => {
+
+          const email = String(row.email || '').toLowerCase();
+
+          const role = normalizeRole(row.role);
+
+          if (!email || !role) return;
+
+          USER_ROLES[email] = { role, org: row.org_name || null };
+
+        });
+
+      } catch (e) {
+
+        console.warn('loadRoleMappings error:', e);
+
+      }
+
+    }
+
+    // Get user role from role table, bootstrap mapping, or Supabase metadata
 
     async function getUserRole(user) {
 
@@ -4404,11 +4453,43 @@ CREATE INDEX IF NOT EXISTS idx_ch1_sub ON hrd_ch1_responses(submitted_at);</pre>
 
 
 
-      // Check predefined users first
+      const email = String(user.email || '').toLowerCase();
 
-      if (USER_ROLES[user.email]) {
+      // Check local role mappings first (bootstrap + loaded table roles)
+      if (USER_ROLES[email]) return USER_ROLES[email];
 
-        return USER_ROLES[user.email];
+      // Query role table directly as fallback
+      try {
+
+        const { data, error } = await sb.from(ROLE_TABLE)
+
+          .select('role, org_name, is_active')
+
+          .eq('email', email)
+
+          .eq('is_active', true)
+
+          .maybeSingle();
+
+        if (!error && data) {
+
+          const role = normalizeRole(data.role);
+
+          if (role) {
+
+            const mapped = { role, org: data.org_name || null };
+
+            USER_ROLES[email] = mapped;
+
+            return mapped;
+
+          }
+
+        }
+
+      } catch (e) {
+
+        console.warn('getUserRole table fallback:', e);
 
       }
 
@@ -4736,23 +4817,42 @@ CREATE INDEX IF NOT EXISTS idx_ch1_sub ON hrd_ch1_responses(submitted_at);</pre>
 
 
 
-      // Store in localStorage for now (in production, use Supabase DB)
-
-      const viewers = JSON.parse(localStorage.getItem('viewers') || '[]');
-
-      viewers.push({ email, org, createdAt: new Date().toISOString() });
-
-      localStorage.setItem('viewers', JSON.stringify(viewers));
-
-
+      const normalizedEmail = String(email || '').toLowerCase();
 
       // Update USER_ROLES (but don't accidentally downgrade privileged accounts)
-      const existing = USER_ROLES[email];
+      const existing = USER_ROLES[normalizedEmail];
       if (existing && existing.role && existing.role !== ROLES.VIEWER) {
         showToast(`ไม่สามารถเพิ่ม ${esc(email)} เป็น Viewer ได้ (บัญชีนี้เป็น ${esc(existing.role)})`, 'error');
         return false;
       }
-      USER_ROLES[email] = { role: ROLES.VIEWER, org };
+
+      try {
+
+        const { error } = await sb.from(ROLE_TABLE).upsert({
+
+          email: normalizedEmail,
+
+          role: ROLES.VIEWER,
+
+          org_name: org,
+
+          is_active: true,
+
+          updated_at: new Date().toISOString()
+
+        }, { onConflict: 'email' });
+
+        if (error) throw error;
+
+      } catch (e) {
+
+        showToast('บันทึกสิทธิ์ผู้ใช้ไม่สำเร็จ: ' + (e.message || e), 'error');
+
+        return false;
+
+      }
+
+      USER_ROLES[normalizedEmail] = { role: ROLES.VIEWER, org };
 
 
       showToast(`เพิ่ม Viewer ${esc(email)} สำหรับ ${esc(org)} สำเร็จ`, 'success');
@@ -4777,16 +4877,32 @@ CREATE INDEX IF NOT EXISTS idx_ch1_sub ON hrd_ch1_responses(submitted_at);</pre>
 
 
 
-      const viewers = JSON.parse(localStorage.getItem('viewers') || '[]');
+      const normalizedEmail = String(email || '').toLowerCase();
 
-      const filtered = viewers.filter(m => m.email !== email);
+      try {
 
-      localStorage.setItem('viewers', JSON.stringify(filtered));
+        const { error } = await sb.from(ROLE_TABLE)
+
+          .delete()
+
+          .eq('email', normalizedEmail)
+
+          .eq('role', ROLES.VIEWER);
+
+        if (error) throw error;
+
+      } catch (e) {
+
+        showToast('ลบผู้ใช้ไม่สำเร็จ: ' + (e.message || e), 'error');
+
+        return false;
+
+      }
 
 
 
       // Only remove viewer role mapping; never delete predefined/admin mappings.
-      if (USER_ROLES[email]?.role === ROLES.VIEWER) delete USER_ROLES[email];
+      if (USER_ROLES[normalizedEmail]?.role === ROLES.VIEWER) delete USER_ROLES[normalizedEmail];
 
 
       showToast(`ลบ Viewer ${esc(email)} สำเร็จ`, 'success');
@@ -4797,19 +4913,12 @@ CREATE INDEX IF NOT EXISTS idx_ch1_sub ON hrd_ch1_responses(submitted_at);</pre>
 
 
 
-    // Load viewers from storage
+    // Load role mappings from database.
 
-    function loadViewers() {
+    async function loadViewers() {
 
-      const viewers = JSON.parse(localStorage.getItem('viewers') || '[]');
+      await loadRoleMappings();
 
-      viewers.forEach(m => {
-
-        // Do not overwrite privileged roles that are hardcoded (or already assigned).
-        const existing = USER_ROLES[m.email];
-        if (existing && existing.role && existing.role !== ROLES.VIEWER) return;
-        USER_ROLES[m.email] = { role: ROLES.VIEWER, org: m.org };
-      });
     }
 
 
@@ -4887,17 +4996,19 @@ CREATE INDEX IF NOT EXISTS idx_ch1_sub ON hrd_ch1_responses(submitted_at);</pre>
 
 
 
-      // Load viewers and user role
+      // Load role mappings before resolving current user role.
 
-      loadViewers();
+      loadViewers().finally(() => {
 
-      getUserRole(currentUser).then(role => {
+        getUserRole(currentUser).then(role => {
 
-        currentUserRole = role;
+          currentUserRole = role;
 
-        applyRoleBasedUI();
+          applyRoleBasedUI();
 
-        loadAll();
+          loadAll();
+
+        });
 
       });
 
@@ -5191,7 +5302,7 @@ CREATE INDEX IF NOT EXISTS idx_ch1_sub ON hrd_ch1_responses(submitted_at);</pre>
 
       if (error) { console.warn('wb:', error.message); wbData = []; return; }
 
-      wbData = data || []; wbFilt = [...wbData];
+      wbData = filterDataByRole(data || [], 'org_code'); wbFilt = [...wbData];
 
     }
 
@@ -5203,7 +5314,7 @@ CREATE INDEX IF NOT EXISTS idx_ch1_sub ON hrd_ch1_responses(submitted_at);</pre>
 
       if (error) { console.warn('ch1:', error.message); ch1Data = []; return; }
 
-      ch1Data = data || []; ch1Filt = [...ch1Data];
+      ch1Data = filterDataByRole(data || [], 'organization'); ch1Filt = [...ch1Data];
 
     }
 
@@ -5257,7 +5368,7 @@ CREATE INDEX IF NOT EXISTS idx_ch1_sub ON hrd_ch1_responses(submitted_at);</pre>
 
     // ═══════════════════════════════════════════════
 
-    function renderUsersPage() {
+    async function renderUsersPage() {
 
       // Update current user info
 
@@ -5311,7 +5422,7 @@ CREATE INDEX IF NOT EXISTS idx_ch1_sub ON hrd_ch1_responses(submitted_at);</pre>
 
       // Render viewers table
 
-      renderViewersTable();
+      await renderViewersTable();
 
 
 
@@ -5329,7 +5440,7 @@ CREATE INDEX IF NOT EXISTS idx_ch1_sub ON hrd_ch1_responses(submitted_at);</pre>
 
 
 
-    function renderViewersTable() {
+    async function renderViewersTable() {
 
       const tb = el('viewer-tb');
 
@@ -5339,7 +5450,29 @@ CREATE INDEX IF NOT EXISTS idx_ch1_sub ON hrd_ch1_responses(submitted_at);</pre>
 
 
 
-      const viewers = JSON.parse(localStorage.getItem('viewers') || '[]');
+      let viewers = [];
+
+      try {
+
+        const { data, error } = await sb.from(ROLE_TABLE)
+
+          .select('email, org_name, created_at')
+
+          .eq('role', ROLES.VIEWER)
+
+          .eq('is_active', true)
+
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        viewers = data || [];
+
+      } catch (e) {
+
+        console.warn('renderViewersTable:', e);
+
+      }
 
 
 
@@ -5367,9 +5500,9 @@ CREATE INDEX IF NOT EXISTS idx_ch1_sub ON hrd_ch1_responses(submitted_at);</pre>
 
           <td><code>${esc(m.email)}</code></td>
 
-          <td>${esc(m.org)}</td>
+          <td>${esc(m.org_name || '—')}</td>
 
-          <td>${new Date(m.createdAt).toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' })}</td>
+          <td>${m.created_at ? new Date(m.created_at).toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' }) : '—'}</td>
 
           <td>
 
@@ -5425,7 +5558,7 @@ CREATE INDEX IF NOT EXISTS idx_ch1_sub ON hrd_ch1_responses(submitted_at);</pre>
 
         orgSelect.value = '';
 
-        renderViewersTable();
+        await renderViewersTable();
 
       }
 
@@ -5443,7 +5576,7 @@ CREATE INDEX IF NOT EXISTS idx_ch1_sub ON hrd_ch1_responses(submitted_at);</pre>
 
       if (success) {
 
-        renderViewersTable();
+        await renderViewersTable();
 
       }
 

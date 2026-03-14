@@ -1,4 +1,6 @@
 const SYNC_SECRET = 'CHANGE_ME';
+const REQUEST_MAX_AGE_MS = 5 * 60 * 1000;
+const NONCE_CACHE_SECONDS = 10 * 60;
 const SHEET_NAME = 'CH1 Responses';
 const FILES_SHEET_NAME = 'CH1 Files';
 const ROOT_DRIVE_FOLDER_ID = '1ZzsIupFp8m4UlTdzJk4X8vSdl6dUDhKG';
@@ -42,7 +44,27 @@ function getScriptSecret_() {
 
 function isAuthorized_(payload, scriptSecret) {
   if (!scriptSecret) return false;
-  return Boolean(payload && payload.secret && payload.secret === scriptSecret);
+  if (!payload || !payload.secret || payload.secret !== scriptSecret) return false;
+
+  const issuedAt = Date.parse(payload.issuedAt || '');
+  if (!issuedAt || Math.abs(Date.now() - issuedAt) > REQUEST_MAX_AGE_MS) return false;
+
+  const nonce = String(payload.nonce || '').trim();
+  if (!nonce) return false;
+  if (isReplayNonce_(nonce)) return false;
+
+  rememberNonce_(nonce);
+  return true;
+}
+
+function isReplayNonce_(nonce) {
+  const cache = CacheService.getScriptCache();
+  return Boolean(cache.get('nonce:' + nonce));
+}
+
+function rememberNonce_(nonce) {
+  const cache = CacheService.getScriptCache();
+  cache.put('nonce:' + nonce, '1', NONCE_CACHE_SECONDS);
 }
 
 function getOrCreateSheet_(name) {
