@@ -4,6 +4,16 @@
     "outputDirectory": ".",
     "cleanUrls": true,
     "trailingSlash": false,
+    "rewrites": [
+        {
+            "source": "/admin-login",
+            "destination": "/แบบสอบถามบท 1/admin-login.html"
+        },
+        {
+            "source": "/admin",
+            "destination": "/แบบสอบถามบท 1/admin-login.html"
+        }
+    ],
     "headers": [
         {
             "source": "/(.*)",
