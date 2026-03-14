@@ -1071,18 +1071,42 @@ const ORG_META = [
   { name:'กรมกิจการเด็กและเยาวชน', ministry:'พม.', code:'DCY', letter:'อธิบดีกรมกิจการเด็กและเยาวชน', email:'saraban@dcy.go.th', contact:'นายภาณุวัฒน์ ดีเลิศ', contactRole:'เจ้าพนักงานธุรการปฏิบัติงาน', contactPhone:'—', contactLine:'bombayfc606', contactEmail:'pattanahrd@gmail.com' },
 ];
 
-const ORG_NAMES = ORG_META.map((org) => org.name);
-const ORG_LOOKUP = new Map(ORG_META.map((org) => [org.name, org]));
+let ORG_NAMES = ORG_META.map((org) => org.name);
+let ORG_LOOKUP = new Map(ORG_META.map((org) => [org.name, org]));
 const state = {
   session: null,
   surveyRows: [],
   ch1Rows: [],
   linkRows: [],
   userRows: [],
+  orgProfiles: [],
+  orgSelectedName: '',
   rawFiltered: [],
   rawPage: 1,
   rawPageSize: 50,
 };
+
+function getOrgCatalog() {
+  if (!state.orgProfiles.length) return ORG_META;
+  return state.orgProfiles.map((row) => ({
+    name: row.organization_name,
+    ministry: row.ministry || 'ไม่ระบุ',
+    code: row.org_code || row.organization_code || 'ORG',
+    letter: row.salutation || 'ไม่ระบุ',
+    email: row.saraban_email || '',
+    contact: row.coordinator_name || '',
+    contactRole: row.coordinator_position || '',
+    contactPhone: row.coordinator_contact_line || '',
+    contactLine: row.coordinator_contact_line || '',
+    contactEmail: row.coordinator_email || '',
+  }));
+}
+
+function refreshOrgDerivedState() {
+  const catalog = getOrgCatalog();
+  ORG_NAMES = catalog.map((org) => org.name);
+  ORG_LOOKUP = new Map(catalog.map((org) => [org.name, org]));
+}
 
 function esc(value) {
   return String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[char]));
@@ -1279,11 +1303,12 @@ async function requireSession() {
 }
 
 async function loadBackend() {
-  const [surveyRes, ch1Res, linksRes, usersRes] = await Promise.all([
+  const [surveyRes, ch1Res, linksRes, usersRes, orgRes] = await Promise.all([
     sb.from('survey_responses').select('id,email,name,title,organization,gender,age,org_type,job,job_duration,bmi,bmi_category,is_draft,submitted_at,timestamp,tmhi_score,raw_responses'),
     sb.from('hrd_ch1_responses').select('*'),
     sb.from('org_form_links').select('*'),
     sb.from('admin_user_roles').select('*').order('email', { ascending: true }),
+    sb.from('organization_profiles').select('*').order('organization_name', { ascending: true }),
   ]);
 
   if (surveyRes.error) throw surveyRes.error;
@@ -1296,10 +1321,12 @@ async function loadBackend() {
     .sort((a, b) => new Date(getRowDate(b) || 0) - new Date(getRowDate(a) || 0));
   state.linkRows = linksRes.error ? [] : (linksRes.data || []);
   state.userRows = usersRes.error ? [] : (usersRes.data || []);
+  state.orgProfiles = orgRes.error ? [] : (orgRes.data || []);
+  refreshOrgDerivedState();
 }
 
 function summarizeOrgs() {
-  const map = new Map(ORG_META.map((org) => [org.name, {
+  const map = new Map(getOrgCatalog().map((org) => [org.name, {
     ...org,
     wellbeingTotal: 0,
     wellbeingSubmitted: 0,
@@ -1357,20 +1384,21 @@ function renderChrome() {
 
 function renderDashboard(summary) {
   const dashboard = document.getElementById('page-dashboard');
+  const orgCount = ORG_NAMES.length;
   const submittedWb = state.surveyRows.filter((row) => !row.is_draft);
   const respondedCh1 = summary.filter((org) => org.ch1Count > 0).length;
   const welcome = dashboard.querySelector('.welcome');
   welcome.querySelector('.w-title').textContent = `สวัสดีครับ, ${state.session?.user?.email || 'ผู้ดูแลระบบ'}`;
   welcome.querySelector('.w-sub').textContent = `เชื่อมต่อข้อมูลจริงจาก Supabase · อัปเดต ${fmtDate(new Date(), true)}`;
   const wVals = welcome.querySelectorAll('.w-val');
-  wVals[0].textContent = ORG_META.length;
+  wVals[0].textContent = orgCount;
   wVals[1].textContent = respondedCh1;
   wVals[2].textContent = fmtNum(submittedWb.length);
 
   const kpis = dashboard.querySelectorAll('.kpi');
-  kpis[0].querySelector('.kpi-val').textContent = ORG_META.length;
+  kpis[0].querySelector('.kpi-val').textContent = orgCount;
   kpis[1].querySelector('.kpi-val').textContent = respondedCh1;
-  kpis[1].querySelector('.kpi-sub').textContent = `${fmtNum((respondedCh1 / ORG_META.length) * 100, 1)}% · ยังไม่ส่ง ${ORG_META.length - respondedCh1} องค์กร`;
+  kpis[1].querySelector('.kpi-sub').textContent = `${fmtNum((respondedCh1 / Math.max(orgCount, 1)) * 100, 1)}% · ยังไม่ส่ง ${orgCount - respondedCh1} องค์กร`;
   kpis[2].querySelector('.kpi-val').textContent = fmtNum(submittedWb.length);
   kpis[2].querySelector('.kpi-sub').textContent = `Draft ${fmtNum(state.surveyRows.filter((row) => row.is_draft).length)} รายการ`;
   kpis[3].querySelector('.kpi-val').textContent = fmtNum(state.userRows.filter((row) => row.is_active !== false).length);
@@ -1389,7 +1417,7 @@ function renderDashboard(summary) {
     : '<div class="cph-icon">📈</div><div>ยังไม่มีข้อมูล Wellbeing ที่ submit แล้ว</div>';
 
   const donutCard = dashboard.querySelectorAll('.card')[1];
-  const ministryCounts = ORG_META.reduce((acc, org) => {
+  const ministryCounts = getOrgCatalog().reduce((acc, org) => {
     acc[org.ministry] = (acc[org.ministry] || 0) + 1;
     return acc;
   }, {});
@@ -1410,9 +1438,10 @@ function renderDashboard(summary) {
 
 function renderProgress(summary) {
   const page = document.getElementById('page-progress');
+  const orgCount = ORG_NAMES.length;
   const respondedCh1 = summary.filter((org) => org.ch1Count > 0).length;
-  page.querySelector('.page-sub').textContent = `ติดตามความคืบหน้าทุกองค์กร · ส่งครบ ${respondedCh1}/${ORG_META.length} (${fmtNum((respondedCh1 / ORG_META.length) * 100, 1)}%)`;
-  page.querySelector('.info.yellow').textContent = `⚠️ มี ${ORG_META.length - respondedCh1} องค์กรที่ยังไม่ส่ง Ch1 ครบ — หน้านี้ผูกกับข้อมูลจริงจาก hrd_ch1_responses แล้ว`;
+  page.querySelector('.page-sub').textContent = `ติดตามความคืบหน้าทุกองค์กร · ส่งครบ ${respondedCh1}/${orgCount} (${fmtNum((respondedCh1 / Math.max(orgCount, 1)) * 100, 1)}%)`;
+  page.querySelector('.info.yellow').textContent = `⚠️ มี ${orgCount - respondedCh1} องค์กรที่ยังไม่ส่ง Ch1 ครบ — หน้านี้ผูกกับข้อมูลจริงจาก hrd_ch1_responses แล้ว`;
   const tbody = page.querySelector('tbody');
   tbody.innerHTML = summary.map((org) => {
     const statusCls = org.ch1Count > 0 ? 'bg' : 'br';
@@ -1434,26 +1463,72 @@ function renderOrganizations(summary) {
   const table = page.querySelector('tbody');
   table.innerHTML = summary.map((org, index) => `<tr>
     <td>${index + 1}</td>
-    <td><b>${esc(org.name)}</b><div style="font-size:11px;color:var(--tx3);margin-top:2px">${esc(org.letter)}</div></td>
+    <td><b>${esc(org.name)}</b><div style="font-size:11px;color:var(--tx3);margin-top:2px">${esc(org.letter || '—')}</div></td>
     <td>${esc(org.ministry)}</td>
-    <td><span class="badge bb">15 เป้าหมาย</span></td>
+    <td><span class="badge bb">นำร่อง</span></td>
     <td>${fmtNum(org.wellbeingSubmitted)}</td>
     <td><span class="badge ${org.ch1Count > 0 ? 'bg' : 'br'}">${org.ch1Count > 0 ? '✓' : '—'}</span></td>
-    <td class="td-act"><button class="btn b-blue" onclick="showOrgDetail('${esc(org.name)}')">ดูข้อมูล</button></td>
+    <td class="td-act"><button class="btn b-blue" onclick="showOrgDetail('${esc(org.name)}')">ดู/แก้ไข</button></td>
   </tr>`).join('');
 
   const panel = page.querySelector('.panel');
-  panel.innerHTML = `<h3>📋 ข้อมูลติดต่อหน่วยงาน</h3>
-    <div id="org-detail-box" style="display:flex;flex-direction:column;gap:12px"></div>`;
-  showOrgDetail(summary[0]?.name || ORG_META[0].name);
+  panel.innerHTML = `
+    <h3>📋 ข้อมูลติดต่อหน่วยงาน (ดู/แก้ไข/เพิ่ม)</h3>
+    <form id="org-profile-form" style="display:flex;flex-direction:column;gap:10px">
+      <div class="fg"><label>ชื่อองค์กร *</label><input id="org-name" required></div>
+      <div class="fg"><label>กระทรวง</label><input id="org-ministry"></div>
+      <div class="fg"><label>เรียน *</label><input id="org-salutation" required></div>
+      <div class="fg"><label>Mail Sarabun *</label><input id="org-saraban-email" type="email" required></div>
+      <div class="fg"><label>ชื่อผู้ประสานงานหลัก *</label><input id="org-coordinator-name" required></div>
+      <div class="fg"><label>ตำแหน่ง *</label><input id="org-coordinator-position" required></div>
+      <div class="fg"><label>เบอร์ติดต่อ/ID Line *</label><input id="org-coordinator-contact" required></div>
+      <div class="fg"><label>อีเมลล์ผู้ประสาน *</label><input id="org-coordinator-email" type="email" required></div>
+      <div class="form-row">
+        <button type="button" class="btn b-blue" id="org-btn-new">+ เพิ่มใหม่</button>
+        <button type="submit" class="btn b-solid" id="org-btn-save">💾 บันทึก</button>
+      </div>
+      <div id="org-form-msg" style="font-size:12px;color:var(--tx2)"></div>
+    </form>
+    <div id="org-detail-box" style="display:flex;flex-direction:column;gap:10px;margin-top:12px"></div>`;
+
+  const form = document.getElementById('org-profile-form');
+  const newBtn = document.getElementById('org-btn-new');
+  form.onsubmit = saveOrgProfile;
+  newBtn.onclick = () => {
+    state.orgSelectedName = '';
+    form.reset();
+    document.getElementById('org-form-msg').textContent = 'กำลังเพิ่มหน่วยงานใหม่';
+    showOrgDetail('');
+  };
+
+  showOrgDetail(summary[0]?.name || ORG_NAMES[0] || '');
 }
 
 function showOrgDetail(orgName) {
-  const org = ORG_LOOKUP.get(orgName);
-  if (!org) return;
-  const summary = summarizeOrgs().find((item) => item.name === orgName);
+  state.orgSelectedName = orgName || '';
+  const org = ORG_LOOKUP.get(orgName) || null;
+  const summary = summarizeOrgs().find((item) => item.name === orgName) || null;
   const box = document.getElementById('org-detail-box');
   if (!box) return;
+
+  const setValue = (id, value) => {
+    const node = document.getElementById(id);
+    if (node) node.value = value || '';
+  };
+  setValue('org-name', org?.name || '');
+  setValue('org-ministry', org?.ministry || '');
+  setValue('org-salutation', org?.letter || '');
+  setValue('org-saraban-email', org?.email || '');
+  setValue('org-coordinator-name', org?.contact || '');
+  setValue('org-coordinator-position', org?.contactRole || '');
+  setValue('org-coordinator-contact', org?.contactPhone || '');
+  setValue('org-coordinator-email', org?.contactEmail || '');
+
+  if (!org) {
+    box.innerHTML = '<div class="info blue">เพิ่มข้อมูลหน่วยงานใหม่ แล้วกดบันทึกเพื่อสร้างในฐานข้อมูล Supabase</div>';
+    return;
+  }
+
   box.innerHTML = `
     <div style="padding:12px;border:1px solid var(--bdr);border-radius:10px;background:#fff">
       <div style="font-size:12px;color:var(--tx3);margin-bottom:4px">หน่วยงาน</div>
@@ -1469,7 +1544,7 @@ function showOrgDetail(orgName) {
       <div style="font-size:12px;color:var(--tx3);margin-bottom:6px">ผู้ประสานงานหลัก</div>
       <div style="font-weight:600">${esc(org.contact)}</div>
       <div style="font-size:12px;color:var(--tx2);margin-top:4px">${esc(org.contactRole)}</div>
-      <div style="font-size:12px;color:var(--tx2);margin-top:6px">โทร: ${esc(org.contactPhone)} · Line: ${esc(org.contactLine)}</div>
+      <div style="font-size:12px;color:var(--tx2);margin-top:6px">ติดต่อ/Line: ${esc(org.contactPhone)}</div>
       <div style="font-size:12px;color:var(--tx2);margin-top:4px"><a href="mailto:${esc(org.contactEmail)}" style="color:var(--A)">${esc(org.contactEmail)}</a></div>
     </div>
     <div style="padding:12px;border:1px solid var(--bdr);border-radius:10px;background:#fff">
@@ -1480,17 +1555,76 @@ function showOrgDetail(orgName) {
     </div>`;
 }
 
+async function saveOrgProfile(event) {
+  event.preventDefault();
+  const get = (id) => document.getElementById(id)?.value?.trim() || '';
+  const organizationName = get('org-name');
+  const payload = {
+    organization_name: organizationName,
+    ministry: get('org-ministry') || null,
+    salutation: get('org-salutation'),
+    saraban_email: get('org-saraban-email'),
+    coordinator_name: get('org-coordinator-name'),
+    coordinator_position: get('org-coordinator-position'),
+    coordinator_contact_line: get('org-coordinator-contact'),
+    coordinator_email: get('org-coordinator-email'),
+  };
+
+  const msg = document.getElementById('org-form-msg');
+  if (!organizationName || !payload.salutation || !payload.saraban_email || !payload.coordinator_name || !payload.coordinator_position || !payload.coordinator_contact_line || !payload.coordinator_email) {
+    msg.textContent = 'กรุณากรอกข้อมูลให้ครบทุกช่องที่มี *';
+    msg.style.color = 'var(--D)';
+    return;
+  }
+
+  msg.textContent = 'กำลังบันทึกข้อมูล...';
+  msg.style.color = 'var(--tx2)';
+
+  const { error } = await sb
+    .from('organization_profiles')
+    .upsert(payload, { onConflict: 'organization_name' });
+
+  if (error) {
+    msg.textContent = 'บันทึกไม่สำเร็จ: ' + error.message;
+    msg.style.color = 'var(--D)';
+    return;
+  }
+
+  const { data, error: reloadError } = await sb
+    .from('organization_profiles')
+    .select('*')
+    .order('organization_name', { ascending: true });
+
+  if (reloadError) {
+    msg.textContent = 'บันทึกแล้ว แต่รีโหลดข้อมูลไม่สำเร็จ: ' + reloadError.message;
+    msg.style.color = 'var(--W)';
+    return;
+  }
+
+  state.orgProfiles = data || [];
+  refreshOrgDerivedState();
+  const summary = summarizeOrgs();
+  renderOrganizations(summary);
+  showOrgDetail(organizationName);
+  const newMsg = document.getElementById('org-form-msg');
+  if (newMsg) {
+    newMsg.textContent = 'บันทึกข้อมูลเรียบร้อย';
+    newMsg.style.color = 'var(--A)';
+  }
+}
+
 function renderCh1(summary) {
   const responded = summary.filter((org) => org.ch1Count > 0);
+  const orgCount = ORG_NAMES.length;
   const ctrl = document.getElementById('c1-ctrl');
   const stats = ctrl.querySelectorAll('.st-val');
   stats[0].textContent = fmtNum(responded.length);
-  stats[1].textContent = fmtNum(ORG_META.length - responded.length);
+  stats[1].textContent = fmtNum(orgCount - responded.length);
   stats[2].textContent = '5';
   ctrl.querySelector('.fc-head .badge').textContent = responded.length ? 'เชื่อมต่อแล้ว' : 'ยังไม่มีข้อมูล';
 
   const linkSelect = ctrl.querySelector('select');
-  linkSelect.innerHTML = `<option value="">-- เลือกองค์กร --</option>${ORG_META.map((org) => `<option value="${esc(org.name)}">${esc(org.name)}</option>`).join('')}`;
+  linkSelect.innerHTML = `<option value="">-- เลือกองค์กร --</option>${getOrgCatalog().map((org) => `<option value="${esc(org.name)}">${esc(org.name)}</option>`).join('')}`;
   linkSelect.onchange = () => {
     const selected = ORG_LOOKUP.get(linkSelect.value);
     const code = selected?.code || 'ORG';
@@ -1779,7 +1913,7 @@ function buildLinkUrl(org) {
 function renderLinks(summary) {
   const page = document.getElementById('page-links');
   const tbody = page.querySelector('tbody');
-  const links = state.linkRows.length ? state.linkRows : ORG_META.map((org) => ({ organization: org.name, form_url: buildLinkUrl(org), is_active: true }));
+  const links = state.linkRows.length ? state.linkRows : getOrgCatalog().map((org) => ({ organization: org.name, form_url: buildLinkUrl(org), is_active: true }));
   tbody.innerHTML = links.map((row) => {
     const organization = row.organization || row.org_name || row.org_name_th || row.org || '—';
     const summaryRow = summary.find((item) => item.name === organization);
@@ -1825,7 +1959,7 @@ function exportCurrentPage() {
     return;
   }
   if (pageId === 'page-links') {
-    downloadWorkbook('org_form_links.xlsx', 'Links', state.linkRows.length ? state.linkRows : ORG_META.map((org) => ({ organization: org.name, url: buildLinkUrl(org) })));
+    downloadWorkbook('org_form_links.xlsx', 'Links', state.linkRows.length ? state.linkRows : getOrgCatalog().map((org) => ({ organization: org.name, url: buildLinkUrl(org) })));
     return;
   }
   const summary = summarizeOrgs();
