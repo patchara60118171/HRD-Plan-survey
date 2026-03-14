@@ -7,11 +7,11 @@
     "rewrites": [
         {
             "source": "/admin-login",
-            "destination": "/แบบสอบถามบท 1/admin-login.html"
+            "destination": "/admin-login.html"
         },
         {
             "source": "/admin",
-            "destination": "/แบบสอบถามบท 1/admin-login.html"
+            "destination": "/admin-login.html"
         }
     ],
     "headers": [
