@@ -1089,16 +1089,16 @@ const state = {
 function getOrgCatalog() {
   if (!state.orgProfiles.length) return ORG_META;
   return state.orgProfiles.map((row) => ({
-    name: row.organization_name,
-    ministry: row.ministry || 'ไม่ระบุ',
-    code: row.org_code || row.organization_code || 'ORG',
-    letter: row.salutation || 'ไม่ระบุ',
-    email: row.saraban_email || '',
-    contact: row.coordinator_name || '',
-    contactRole: row.coordinator_position || '',
-    contactPhone: row.coordinator_contact_line || '',
-    contactLine: row.coordinator_contact_line || '',
-    contactEmail: row.coordinator_email || '',
+    name: row.org_name_th,
+    ministry: row.settings?.ministry || 'ไม่ระบุ',
+    code: row.org_code || 'ORG',
+    letter: row.settings?.salutation || 'ไม่ระบุ',
+    email: row.settings?.saraban_email || row.contact_email || '',
+    contact: row.settings?.coordinator_name || '',
+    contactRole: row.settings?.coordinator_position || '',
+    contactPhone: row.settings?.coordinator_contact_line || '',
+    contactLine: row.settings?.coordinator_contact_line || '',
+    contactEmail: row.settings?.coordinator_email || row.contact_email || '',
   }));
 }
 
@@ -1308,7 +1308,7 @@ async function loadBackend() {
     sb.from('hrd_ch1_responses').select('*'),
     sb.from('org_form_links').select('*'),
     sb.from('admin_user_roles').select('*').order('email', { ascending: true }),
-    sb.from('organization_profiles').select('*').order('organization_name', { ascending: true }),
+    sb.from('organizations').select('*').eq('is_active', true).order('org_name_th', { ascending: true }),
   ]);
 
   if (surveyRes.error) throw surveyRes.error;
@@ -1560,14 +1560,19 @@ async function saveOrgProfile(event) {
   const get = (id) => document.getElementById(id)?.value?.trim() || '';
   const organizationName = get('org-name');
   const payload = {
-    organization_name: organizationName,
-    ministry: get('org-ministry') || null,
-    salutation: get('org-salutation'),
-    saraban_email: get('org-saraban-email'),
-    coordinator_name: get('org-coordinator-name'),
-    coordinator_position: get('org-coordinator-position'),
-    coordinator_contact_line: get('org-coordinator-contact'),
-    coordinator_email: get('org-coordinator-email'),
+    org_name_th: organizationName,
+    org_type: 'government',
+    contact_email: get('org-coordinator-email'),
+    is_active: true,
+    settings: {
+      ministry: get('org-ministry') || null,
+      salutation: get('org-salutation'),
+      saraban_email: get('org-saraban-email'),
+      coordinator_name: get('org-coordinator-name'),
+      coordinator_position: get('org-coordinator-position'),
+      coordinator_contact_line: get('org-coordinator-contact'),
+      coordinator_email: get('org-coordinator-email'),
+    },
   };
 
   const msg = document.getElementById('org-form-msg');
@@ -1580,9 +1585,19 @@ async function saveOrgProfile(event) {
   msg.textContent = 'กำลังบันทึกข้อมูล...';
   msg.style.color = 'var(--tx2)';
 
-  const { error } = await sb
-    .from('organization_profiles')
-    .upsert(payload, { onConflict: 'organization_name' });
+  const existing = state.orgProfiles.find((row) => row.org_name_th === organizationName);
+  let error = null;
+  if (existing?.id) {
+    ({ error } = await sb
+      .from('organizations')
+      .update(payload)
+      .eq('id', existing.id));
+  } else {
+    payload.org_code = organizationName.replace(/[^A-Za-zก-๙0-9]/g, '').slice(0, 12).toUpperCase() || `ORG${Date.now().toString().slice(-4)}`;
+    ({ error } = await sb
+      .from('organizations')
+      .insert(payload));
+  }
 
   if (error) {
     msg.textContent = 'บันทึกไม่สำเร็จ: ' + error.message;
@@ -1591,9 +1606,10 @@ async function saveOrgProfile(event) {
   }
 
   const { data, error: reloadError } = await sb
-    .from('organization_profiles')
+    .from('organizations')
     .select('*')
-    .order('organization_name', { ascending: true });
+    .eq('is_active', true)
+    .order('org_name_th', { ascending: true });
 
   if (reloadError) {
     msg.textContent = 'บันทึกแล้ว แต่รีโหลดข้อมูลไม่สำเร็จ: ' + reloadError.message;
