@@ -11,7 +11,7 @@
         },
         {
             "source": "/admin",
-            "destination": "/admin-login.html"
+            "destination": "/admin.html"
         }
     ],
     "headers": [
