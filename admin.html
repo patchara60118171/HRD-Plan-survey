@@ -1271,7 +1271,7 @@ function swb(el, targetId) {
 async function requireSession() {
   const { data: { session } } = await sb.auth.getSession();
   if (!session) {
-    window.location.href = 'แบบสอบถามบท 1/admin-login.html';
+    window.location.href = '/admin-login';
     return null;
   }
   state.session = session;
@@ -1341,7 +1341,7 @@ function renderChrome() {
   const logoutItem = document.querySelector('.sidebar-foot .nav-item');
   logoutItem.onclick = async () => {
     await sb.auth.signOut();
-    window.location.href = 'แบบสอบถามบท 1/admin-login.html';
+    window.location.href = '/admin-login';
   };
 
   const buttons = document.querySelectorAll('.topbar-btn');
