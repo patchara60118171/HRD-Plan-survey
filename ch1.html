@@ -3487,6 +3487,32 @@
     })();
     </script>
 
+    <!-- ข้อ 15: mutual exclusion — "ไม่มีระบบดังกล่าว" vs ตัวเลือกอื่น -->
+    <script>
+    (function () {
+        const allBoxes = () => document.querySelectorAll('input[name="digital_systems"]');
+        const noneVal = 'none';
+
+        document.addEventListener('change', function (e) {
+            if (!e.target.matches('input[name="digital_systems"]')) return;
+
+            const boxes = allBoxes();
+
+            if (e.target.value === noneVal && e.target.checked) {
+                // เลือก "ไม่มีระบบดังกล่าว" → uncheck ตัวอื่นทั้งหมด
+                boxes.forEach(function (cb) {
+                    if (cb.value !== noneVal) cb.checked = false;
+                });
+            } else if (e.target.value !== noneVal && e.target.checked) {
+                // เลือกระบบใดก็ตาม → uncheck "ไม่มีระบบดังกล่าว"
+                boxes.forEach(function (cb) {
+                    if (cb.value === noneVal) cb.checked = false;
+                });
+            }
+        });
+    })();
+    </script>
+
 </body>
 
 
