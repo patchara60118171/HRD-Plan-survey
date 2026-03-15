@@ -3400,32 +3400,179 @@ function previewReminderEmail() {
 function showCh1RowDetail(index) {
   const row = state.ch1Rows[index];
   if (!row) return;
-  const org = getCh1Org(row);
   const fd = row.form_data || row;
-  const fields = [
-    ['องค์กร', org],
-    ['วันที่ส่ง', fmtDate(getRowDate(row), true)],
-    ['บุคลากรรวม', fmtNum(row.total_personnel || row.total_staff || fd.total_personnel)],
-    ['ส่วนที่กรอก', row.form_completion || '5/5 ส่วน'],
-    ['ชาย', fmtNum(fd.gender_male)],
-    ['หญิง', fmtNum(fd.gender_female)],
-    ['อายุ ≤30 ปี', fmtNum(fd.age_under30)],
-    ['อายุ 31–40 ปี', fmtNum(fd.age_31_40)],
-    ['อายุ 41–50 ปี', fmtNum(fd.age_41_50)],
-    ['อายุ 51+ ปี', fmtNum(fd.age_over51)],
-    ['สัดส่วน NCD', fmtNum(row.ncd_ratio_pct ?? fd.ncd_ratio_pct, 1) + '%'],
-    ['Burnout', fmtNum(row.mental_burnout ?? fd.mental_burnout, 1) + '%'],
-    ['Engagement Score', fmtNum(row.engagement_score ?? fd.engagement_score, 1)],
-  ];
+  const org = getCh1Org(row);
+  const dateStr = fmtDate(getRowDate(row), true);
+
+  const v = (k) => { const val = fd[k] ?? row[k]; return (val !== undefined && val !== null) ? val : ''; };
+  const n = (k, d) => fmtNum(parseFloat(v(k)) || 0, d !== undefined ? d : 0);
+  const s = (k) => esc(v(k) || '—');
+  const yn = (k) => { const val = v(k); if (val === true || val === 1 || val === 'true' || val === '1' || val === 'yes') return '✓ มี'; if (val === false || val === 0 || val === 'false' || val === '0' || val === 'no') return '✗ ไม่มี'; return val ? esc(String(val)) : '—'; };
+
+  const histRows = ['2564','2565','2566','2567','2568'].map((yr) => {
+    const bg = v(`begin_count_${yr}`); const end = v(`end_count_${yr}`); const lv = v(`leave_count_${yr}`); const rt = v(`turnover_rate_${yr}`);
+    if (!bg && !end && !lv && !rt) return '';
+    return `<tr><td>${yr}</td><td>${fmtNum(parseFloat(bg)||0)}</td><td>${fmtNum(parseFloat(end)||0)}</td><td>${fmtNum(parseFloat(lv)||0)}</td><td>${fmtNum(parseFloat(rt)||0,1)}%</td></tr>`;
+  }).filter(Boolean).join('') || '<tr><td colspan="5" style="color:#9CA3AF;text-align:center">—</td></tr>';
+
+  const reportContent = `
+<div style="font-family:'Sarabun',sans-serif;color:#1A2433;font-size:13px;line-height:1.75">
+<style>#ch1-detail-inner h1{font-size:19px;color:#0F4C81;margin-bottom:4px}#ch1-detail-inner h2{font-size:13.5px;color:#0F4C81;margin:20px 0 6px;border-bottom:2px solid #E8F1FB;padding-bottom:5px;font-weight:700}#ch1-detail-inner h3{font-size:12px;color:#374151;margin:12px 0 4px;font-weight:600}#ch1-detail-inner .meta{font-size:11.5px;color:#6B7280;margin-bottom:18px}#ch1-detail-inner table{width:100%;border-collapse:collapse;margin-bottom:10px;font-size:12px}#ch1-detail-inner th,#ch1-detail-inner td{padding:6px 10px;border:1px solid #D8DCE3;text-align:left}#ch1-detail-inner th{background:#F4F6F9;font-weight:600;color:#374151;width:44%}#ch1-detail-inner td.c{text-align:center;width:auto}#ch1-detail-inner .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}#ch1-detail-inner .kpi{background:#F4F6F9;border:1px solid #D8DCE3;border-radius:8px;padding:9px 12px;text-align:center}#ch1-detail-inner .kpi-val{font-size:20px;font-weight:700;color:#0F4C81}#ch1-detail-inner .kpi-label{font-size:10.5px;color:#6B7280;margin-top:2px}#ch1-detail-inner .two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px}</style>
+<h1>📋 รายงาน Ch1 — ข้อมูลสุขภาวะองค์กร</h1>
+<div class="meta">องค์กร: <b>${org}</b> &nbsp;|&nbsp; วันที่ส่ง: <b>${dateStr}</b> &nbsp;|&nbsp; ระบบ Admin Portal Well-being Survey</div>
+<div class="kpi-grid">
+  <div class="kpi"><div class="kpi-val">${n('total_personnel')}</div><div class="kpi-label">บุคลากรทั้งหมด (คน)</div></div>
+  <div class="kpi"><div class="kpi-val">${fmtNum(parseFloat(v('mental_burnout'))||0,1)}%</div><div class="kpi-label">Burnout Rate</div></div>
+  <div class="kpi"><div class="kpi-val">${fmtNum(parseFloat(v('engagement_score'))||0,1)}</div><div class="kpi-label">Engagement Score</div></div>
+  <div class="kpi"><div class="kpi-val">${fmtNum(parseFloat(v('sick_leave_days'))||0,1)}</div><div class="kpi-label">วันลาป่วยเฉลี่ย/คน/ปี</div></div>
+</div>
+<h2>ส่วนที่ 1: โครงสร้างบุคลากร</h2>
+<div class="two-col">
+  <div>
+    <h3>จำนวนและช่วงอายุ</h3>
+    <table>
+      <tr><th>จำนวนบุคลากรทั้งหมด</th><td>${n('total_personnel')} คน</td></tr>
+      <tr><th>อายุ ≤ 30 ปี</th><td>${n('age_under30')} คน</td></tr>
+      <tr><th>อายุ 31–40 ปี</th><td>${n('age_31_40')} คน</td></tr>
+      <tr><th>อายุ 41–50 ปี</th><td>${n('age_41_50')} คน</td></tr>
+      <tr><th>อายุ 51–60 ปี</th><td>${n('age_51_60')} คน</td></tr>
+    </table>
+    <h3>เพศ</h3>
+    <table>
+      <tr><th>เพศชาย</th><td>${n('gender_male')} คน</td></tr>
+      <tr><th>เพศหญิง</th><td>${n('gender_female')} คน</td></tr>
+    </table>
+  </div>
+  <div>
+    <h3>อายุราชการ (ปี)</h3>
+    <table>
+      <tr><th>น้อยกว่า 1 ปี</th><td>${n('service_u1')} คน</td></tr>
+      <tr><th>1–5 ปี</th><td>${n('service_1_5')} คน</td></tr>
+      <tr><th>6–10 ปี</th><td>${n('service_6_10')} คน</td></tr>
+      <tr><th>11–15 ปี</th><td>${n('service_11_15')} คน</td></tr>
+      <tr><th>16–20 ปี</th><td>${n('service_16_20')} คน</td></tr>
+      <tr><th>21–25 ปี</th><td>${n('service_21_25')} คน</td></tr>
+      <tr><th>26–30 ปี</th><td>${n('service_26_30')} คน</td></tr>
+      <tr><th>มากกว่า 30 ปี</th><td>${n('service_over30')} คน</td></tr>
+    </table>
+  </div>
+</div>
+<div class="two-col">
+  <div>
+    <h3>ประเภทตำแหน่ง (อำนวยการ)</h3>
+    <table>
+      <tr><th>ระดับ C-Suite/อธิบดี</th><td>${n('pos_o1')} คน</td></tr>
+      <tr><th>รองอธิบดี/ผู้ช่วยฯ</th><td>${n('pos_o2')} คน</td></tr>
+      <tr><th>ผู้อำนวยการกอง/สำนัก</th><td>${n('pos_o3')} คน</td></tr>
+      <tr><th>หัวหน้าฝ่าย/กลุ่ม</th><td>${n('pos_o4')} คน</td></tr>
+    </table>
+  </div>
+  <div>
+    <h3>ประเภทบุคลากร</h3>
+    <table>
+      <tr><th>ข้าราชการ</th><td>${n('type_official')} คน</td></tr>
+      <tr><th>พนักงานราชการ</th><td>${n('type_employee')} คน</td></tr>
+      <tr><th>ลูกจ้าง/จ้างเหมา</th><td>${n('type_contract')} คน</td></tr>
+      <tr><th>อื่นๆ</th><td>${n('type_other')} คน</td></tr>
+    </table>
+  </div>
+</div>
+<h3>อัตราการลาออก/โอนย้าย</h3>
+<table>
+  <tr><th>จำนวนลาออก</th><td>${n('turnover_count')} คน</td></tr>
+  <tr><th>อัตราการลาออก</th><td>${fmtNum(parseFloat(v('turnover_rate'))||0,2)}%</td></tr>
+  <tr><th>จำนวนโอนย้าย</th><td>${n('transfer_count')} คน</td></tr>
+</table>
+${histRows !== '<tr><td colspan="5" style="color:#9CA3AF;text-align:center">—</td></tr>' ? `
+<h3>ประวัติอัตราการลาออกรายปี</h3>
+<table>
+  <thead><tr><th style="width:auto">ปี</th><th class="c">ต้นปี</th><th class="c">ปลายปี</th><th class="c">ลาออก</th><th class="c">อัตรา %</th></tr></thead>
+  <tbody>${histRows}</tbody>
+</table>` : ''}
+<h2>ส่วนที่ 2: บริบทและนโยบาย</h2>
+<table>
+  <tr><th>นโยบายที่เกี่ยวข้อง</th><td>${s('related_policies')}</td></tr>
+  <tr><th>บริบทและความท้าทาย</th><td>${s('context_challenges')}</td></tr>
+</table>
+<h2>ส่วนที่ 3: สุขภาวะบุคลากร</h2>
+<div class="two-col">
+  <div>
+    <h3>โรค NCD</h3>
+    <table>
+      <tr><th>โรคเบาหวาน</th><td>${n('ncd_diabetes')} คน</td></tr>
+      <tr><th>โรคความดันโลหิตสูง</th><td>${n('ncd_hypertension')} คน</td></tr>
+      <tr><th>โรคหัวใจและหลอดเลือด</th><td>${n('disease_cardiovascular')} คน</td></tr>
+      <tr><th>โรคไต</th><td>${n('disease_kidney')} คน</td></tr>
+      <tr><th>โรคตับ</th><td>${n('disease_liver')} คน</td></tr>
+      <tr><th>มะเร็ง</th><td>${n('disease_cancer')} คน</td></tr>
+      <tr><th>โรคอ้วน</th><td>${n('disease_obesity')} คน</td></tr>
+      <tr><th>โรคอื่นๆ (จำนวน)</th><td>${n('disease_other_count')} คน</td></tr>
+      ${v('disease_other_detail') ? `<tr><th>โรคอื่นๆ (รายละเอียด)</th><td>${s('disease_other_detail')}</td></tr>` : ''}
+    </table>
+  </div>
+  <div>
+    <h3>สุขภาพจิตและการลา</h3>
+    <table>
+      <tr><th>วันลาป่วยเฉลี่ย/คน/ปี</th><td>${fmtNum(parseFloat(v('sick_leave_days'))||0,1)} วัน</td></tr>
+      <tr><th>วันลาป่วยเฉลี่ย (รายละเอียด)</th><td>${fmtNum(parseFloat(v('sick_leave_avg'))||0,1)} วัน</td></tr>
+      <tr><th>ภาวะเครียด</th><td>${fmtNum(parseFloat(v('mental_stress'))||0,1)}%</td></tr>
+      <tr><th>ภาวะวิตกกังวล</th><td>${fmtNum(parseFloat(v('mental_anxiety'))||0,1)}%</td></tr>
+      <tr><th>ปัญหาการนอนหลับ</th><td>${fmtNum(parseFloat(v('mental_sleep'))||0,1)}%</td></tr>
+      <tr><th>ภาวะซึมเศร้า</th><td>${fmtNum(parseFloat(v('mental_depression'))||0,1)}%</td></tr>
+      <tr><th>ภาวะหมดไฟ (Burnout)</th><td>${fmtNum(parseFloat(v('mental_burnout'))||0,1)}%</td></tr>
+    </table>
+    <h3>ข้อมูลคลินิก</h3>
+    <table>
+      <tr><th>ผู้ใช้บริการคลินิก/ปี</th><td>${n('clinic_users_per_year')} คน</td></tr>
+      <tr><th>อาการที่พบบ่อย</th><td>${s('clinic_top_symptoms')}</td></tr>
+      <tr><th>ยาที่สั่งจ่ายบ่อย</th><td>${s('clinic_top_medications')}</td></tr>
+    </table>
+  </div>
+</div>
+<h2>ส่วนที่ 4: ระบบการบริหารและพัฒนาบุคลากร</h2>
+<div class="two-col">
+  <div>
+    <h3>ระบบ Engagement</h3>
+    <table>
+      <tr><th>Engagement Score (ปัจจุบัน)</th><td>${fmtNum(parseFloat(v('engagement_score'))||0,1)} / 100</td></tr>
+      ${['2568','2567','2566','2565','2564'].map((yr) => { const sc = v(`engagement_score_${yr}`); return sc ? `<tr><th>Engagement ปี ${yr}</th><td>${fmtNum(parseFloat(sc)||0,1)}</td></tr>` : ''; }).filter(Boolean).join('')}
+      ${v('engagement_low_areas') ? `<tr><th>ด้านที่คะแนนต่ำ</th><td>${s('engagement_low_areas')}</td></tr>` : ''}
+    </table>
+  </div>
+  <div>
+    <h3>ระบบพัฒนาบุคลากร</h3>
+    <table>
+      <tr><th>Mentoring System</th><td>${yn('mentoring_system')}</td></tr>
+      <tr><th>Job Rotation</th><td>${yn('job_rotation')}</td></tr>
+      <tr><th>IDP System</th><td>${yn('idp_system')}</td></tr>
+      <tr><th>Career Path System</th><td>${yn('career_path_system')}</td></tr>
+      <tr><th>ชั่วโมงฝึกอบรมเฉลี่ย/คน/ปี</th><td>${fmtNum(parseFloat(v('training_hours'))||0,1)} ชั่วโมง</td></tr>
+      <tr><th>สภาพแวดล้อมการทำงาน (Ergonomics)</th><td>${s('ergonomics_status')}</td></tr>
+    </table>
+  </div>
+</div>
+<h2>ส่วนที่ 5: ทิศทางและเป้าหมายสุขภาวะ</h2>
+<table>
+  <tr><th>ประเด็นสุขภาวะสำคัญ</th><td>${s('strategic_priorities')}</td></tr>
+  <tr><th>อันดับ 1</th><td>${s('strategic_priority_rank1')}</td></tr>
+  <tr><th>อันดับ 2</th><td>${s('strategic_priority_rank2')}</td></tr>
+  <tr><th>อันดับ 3</th><td>${s('strategic_priority_rank3')}</td></tr>
+  <tr><th>Feedback ชุดมาตรการ</th><td>${s('intervention_packages_feedback')}</td></tr>
+  <tr><th>ผลลัพธ์แผน HRD ที่คาดหวัง</th><td>${s('hrd_plan_results')}</td></tr>
+</table>
+</div>`;
+
   const existing = document.getElementById('ch1-detail-modal');
   if (existing) existing.remove();
   const overlay = document.createElement('div');
   overlay.id = 'ch1-detail-modal';
-  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px';
-  overlay.innerHTML = `<div style="background:#fff;border-radius:16px;padding:24px;min-width:320px;max-width:480px;width:100%;max-height:80vh;overflow-y:auto;box-shadow:0 20px 40px rgba(0,0,0,.2)">
-    <div style="font-weight:700;font-size:16px;margin-bottom:16px">📋 รายละเอียด Ch1 — ${esc(org)}</div>
-    <table style="width:100%;font-size:13px;border-collapse:collapse">${fields.map(([k,v]) => `<tr><td style="padding:5px 0;color:#64748b;width:55%">${k}</td><td style="font-weight:600">${v||'—'}</td></tr>`).join('')}</table>
-    <div style="margin-top:16px;text-align:right"><button class="btn b-gray" onclick="document.getElementById('ch1-detail-modal').remove()">✕ ปิด</button></div>
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:flex-start;justify-content:center;z-index:9999;padding:20px;overflow-y:auto';
+  overlay.innerHTML = `<div id="ch1-detail-inner" style="background:#fff;border-radius:16px;padding:28px 32px;max-width:920px;width:100%;margin:auto;box-shadow:0 24px 60px rgba(0,0,0,.25)">
+    ${reportContent}
+    <div style="margin-top:20px;display:flex;gap:8px;justify-content:flex-end;border-top:1px solid #E5E7EB;padding-top:14px">
+      <button class="btn b-blue" onclick="showCh1PDF(${index})">📄 พิมพ์/ดู PDF</button>
+      <button class="btn b-gray" onclick="document.getElementById('ch1-detail-modal').remove()">✕ ปิด</button>
+    </div>
   </div>`;
   document.body.appendChild(overlay);
   overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
@@ -3589,50 +3736,144 @@ const FORM_CONFIG_SCHEMAS = {
   wellbeing: {
     label: 'Wellbeing Survey (รายบุคคล)',
     sections: [
-      { key: 'personal', label: '👤 ข้อมูลส่วนตัว', fields: [
-        { key: 'personal.title', label: 'ชื่อหัวข้อ', default: '👤 ข้อมูลส่วนตัว' },
-        { key: 'personal.q.gender', label: 'คำถามเพศ', default: 'เพศ', options: ['ชาย','หญิง','ไม่ระบุ / อื่นๆ'] },
-        { key: 'personal.q.age', label: 'คำถามอายุ (ปี)', default: 'อายุ (ปี)' },
-        { key: 'personal.q.education', label: 'คำถามระดับการศึกษา', default: 'ระดับการศึกษาสูงสุด', options: ['ต่ำกว่าปริญญาตรี','ปริญญาตรี','ปริญญาโท','ปริญญาเอก'] },
-        { key: 'personal.q.job_duration', label: 'คำถามอายุราชการ', default: 'อายุราชการ / อายุการทำงาน', options: ['น้อยกว่า 1 ปี','1–5 ปี','6–10 ปี','11–20 ปี','มากกว่า 20 ปี'] },
+      { key: 'personal', label: '👤 ส่วนที่ 1: ข้อมูลส่วนบุคคล + ร่างกาย', fields: [
+        { key: 'personal.title', label: 'ชื่อหัวข้อหลัก', default: 'ส่วนที่ 1 ข้อมูลส่วนบุคคล และการตรวจวัดร่างกาย' },
+        { key: 'personal.sub.0.title', label: 'หัวข้อย่อย: ข้อมูลส่วนบุคคล', default: 'ข้อมูลส่วนบุคคล' },
+        { key: 'personal.q.title', label: 'คำถามคำนำหน้า', default: 'คำนำหน้า' },
+        { key: 'personal.q.name', label: 'คำถามชื่อ-สกุล', default: 'ชื่อ-สกุล' },
+        { key: 'personal.q.gender', label: 'คำถามเพศ', default: 'เพศ' },
+        { key: 'personal.q.age', label: 'คำถามอายุ', default: 'อายุ (ปี)' },
+        { key: 'personal.q.org_type', label: 'คำถามประเภทตำแหน่ง', default: 'ประเภทตำแหน่ง' },
+        { key: 'personal.q.job', label: 'คำถามตำแหน่ง/ระดับ', default: 'ตำแหน่ง / ระดับ' },
+        { key: 'personal.q.job_duration', label: 'คำถามอายุราชการ', default: 'ระยะเวลาที่ทำงานในตำแหน่งปัจจุบัน (ปี)' },
+        { key: 'personal.q.activity_org', label: 'คำถามร่วมกิจกรรมส่งเสริมสุขภาพขององค์กร', default: 'ท่านเคยเข้าร่วมกิจกรรมส่งเสริมสุขภาพขององค์กรหรือไม่' },
+        { key: 'personal.q.activity_thaihealth', label: 'คำถามร่วมกิจกรรม สสส.', default: 'ท่านเคยเข้าร่วมกิจกรรมส่งเสริมสุขภาพของ สสส. หรือไม่' },
+        { key: 'personal.q.diseases', label: 'คำถามโรคประจำตัว', default: 'โรคประจำตัวที่ได้รับการวินิจฉัย (เลือกได้มากกว่า 1 ข้อ)' },
+        { key: 'personal.sub.1.title', label: 'หัวข้อย่อย: ข้อมูลร่างกายเบื้องต้น', default: 'ข้อมูลร่างกายเบื้องต้น' },
+        { key: 'personal.q.height', label: 'คำถามส่วนสูง', default: 'ส่วนสูง (เซนติเมตร)' },
+        { key: 'personal.q.weight', label: 'คำถามน้ำหนัก', default: 'น้ำหนัก (กิโลกรัม)' },
+        { key: 'personal.q.waist', label: 'คำถามเส้นรอบเอว', default: 'เส้นรอบเอว (เซนติเมตร)' },
       ]},
-      { key: 'consumption', label: '🍎 พฤติกรรมสุขภาพ (การบริโภค)', fields: [
-        { key: 'consumption.title', label: 'ชื่อหัวข้อ', default: '🍎 พฤติกรรมสุขภาพ: การบริโภค' },
-        { key: 'consumption.q.alcohol', label: 'คำถามดื่มแอลกอฮอล์', default: 'ท่านดื่มเครื่องดื่มแอลกอฮอล์หรือไม่', options: ['ไม่ดื่มเลย','นานๆ ครั้ง (ไม่เกิน 1 ครั้ง/เดือน)','บางครั้ง (1–3 ครั้ง/เดือน)','สม่ำเสมอ (1+ ครั้ง/สัปดาห์)'] },
-        { key: 'consumption.q.smoking', label: 'คำถามสูบบุหรี่', default: 'ท่านสูบบุหรี่หรือผลิตภัณฑ์ยาสูบหรือไม่', options: ['ไม่สูบ','เคยสูบแต่เลิกแล้ว','สูบเป็นบางครั้ง','สูบเป็นประจำ'] },
+      { key: 'consumption', label: '🚬 ส่วนที่ 2: การบริโภคยาสูบและแอลกอฮอล์', fields: [
+        { key: 'consumption.title', label: 'ชื่อหัวข้อหลัก', default: 'การบริโภคยาสูบและแอลกอฮอล์' },
+        { key: 'consumption.sub.0.title', label: 'หัวข้อย่อย: ในระยะเวลา 2 เดือนที่ผ่านมา', default: 'ในระยะเวลา 2 เดือนที่ผ่านมา' },
+        { key: 'consumption.q.q2001', label: 'คำถามสูบบุหรี่', default: 'ท่านสูบบุหรี่หรือไม่' },
+        { key: 'consumption.q.q2002', label: 'คำถามบุหรี่ไฟฟ้า', default: 'ท่านสูบบุหรี่ไฟฟ้าหรือไม่' },
+        { key: 'consumption.q.q2003', label: 'คำถามดื่มแอลกอฮอล์', default: 'ท่านดื่มเครื่องดื่มแอลกอฮอล์หรือไม่' },
+        { key: 'consumption.q.q2004', label: 'คำถามดื่มเครื่องดื่มกัญชา', default: 'ท่านเคยดื่มเครื่องดื่มที่มีส่วนผสมของกัญชาหรือไม่' },
+        { key: 'consumption.q.q2005_drug', label: 'คำถามใช้สารเสพติดอื่น', default: 'ท่านเคยใช้สารเสพติดประเภทอื่นหรือไม่' },
       ]},
-      { key: 'nutrition', label: '🥗 โภชนาการ', fields: [
-        { key: 'nutrition.title', label: 'ชื่อหัวข้อ', default: '🥗 โภชนาการ' },
-        { key: 'nutrition.q.breakfast', label: 'คำถามอาหารเช้า', default: 'ท่านรับประทานอาหารเช้าเป็นประจำหรือไม่' },
-        { key: 'nutrition.q.fruit_veg', label: 'คำถามผักและผลไม้', default: 'ท่านรับประทานผักและผลไม้อย่างเพียงพอหรือไม่' },
+      { key: 'nutrition', label: '🥗 ส่วนที่ 3: พฤติกรรมการบริโภค (โภชนาการ)', fields: [
+        { key: 'nutrition.title', label: 'ชื่อหัวข้อหลัก', default: 'พฤติกรรมการบริโภค' },
+        { key: 'nutrition.sub.0.title', label: 'หัวข้อย่อย: รสหวาน', default: 'รสหวาน' },
+        { key: 'nutrition.q.sweet_1', label: 'น้ำหวาน ข้อ 1', default: 'ดื่มน้ำเปล่า / กาแฟดำ / ชาไม่ใส่น้ำตาล / โซดา' },
+        { key: 'nutrition.q.sweet_2', label: 'น้ำหวาน ข้อ 2', default: 'ดื่มน้ำอัดลม / กาแฟ 3 in 1 / เครื่องดื่มชง / น้ำหวาน' },
+        { key: 'nutrition.q.sweet_3', label: 'น้ำหวาน ข้อ 3', default: 'ดื่มน้ำผัก / ผลไม้สำเร็จรูป' },
+        { key: 'nutrition.q.sweet_4', label: 'น้ำหวาน ข้อ 4', default: 'กินไอศกรีม / เบเกอรี่ หรือขนมหวานไทย' },
+        { key: 'nutrition.q.sweet_5', label: 'น้ำหวาน ข้อ 5', default: 'เติมน้ำตาล / น้ำผึ้ง / น้ำเชื่อมลงในอาหาร' },
+        { key: 'nutrition.sub.1.title', label: 'หัวข้อย่อย: ไขมัน', default: 'ไขมัน' },
+        { key: 'nutrition.q.fat_1', label: 'ไขมัน ข้อ 1', default: 'เลือกกินเนื้อสัตว์ติดมัน ติดหนัง มีไขมันแทรก' },
+        { key: 'nutrition.q.fat_2', label: 'ไขมัน ข้อ 2', default: 'กินอาหารทอด อาหารฟาสต์ฟู้ด อาหารผัดน้ำมัน' },
+        { key: 'nutrition.q.fat_3', label: 'ไขมัน ข้อ 3', default: 'กินอาหารจานเดียว ไขมันสูง หรืออาหารประเภทแกงกะทิ' },
+        { key: 'nutrition.q.fat_4', label: 'ไขมัน ข้อ 4', default: 'ดื่มเครื่องดื่มชงผสมนมข้นหวาน ครีมเทียม วิปปิ้งครีม' },
+        { key: 'nutrition.q.fat_5', label: 'ไขมัน ข้อ 5', default: 'ซดน้ำผัด น้ำแกง หรือราดน้ำผัดน้ำแกงลงในข้าว' },
+        { key: 'nutrition.sub.2.title', label: 'หัวข้อย่อย: โซเดียม (เค็ม)', default: 'โซเดียม (เค็ม)' },
+        { key: 'nutrition.q.salt_1', label: 'เค็ม ข้อ 1', default: 'ชิมอาหารก่อนปรุง / ปรุงน้ำปลา ซีอิ๊ว ซอส น้อย หรือไม่ปรุงเพิ่ม', long: true },
+        { key: 'nutrition.q.salt_2', label: 'เค็ม ข้อ 2', default: 'ใช้สมุนไพร หรือเครื่องเทศเป็นส่วนประกอบอาหารแทนเครื่องปรุง' },
+        { key: 'nutrition.q.salt_3', label: 'เค็ม ข้อ 3', default: 'กินเนื้อสัตว์แปรรูป ไส้กรอก หมูยอ แฮม ปลาเค็ม กุ้งแห้ง ปลาร้า', long: true },
+        { key: 'nutrition.q.salt_4', label: 'เค็ม ข้อ 4', default: 'กินบะหมี่ โจ๊กกึ่งสำเร็จรูป หรืออาหารกล่องแช่แข็ง' },
+        { key: 'nutrition.q.salt_5', label: 'เค็ม ข้อ 5', default: 'กินผักผลไม้ดอง หรือผลไม้แช่อิ่ม จิ้มพริกเกลือ น้ำปลาหวาน' },
       ]},
-      { key: 'activity', label: '🏃 กิจกรรมทางกาย', fields: [
-        { key: 'activity.title', label: 'ชื่อหัวข้อ', default: '🏃 กิจกรรมทางกาย' },
-        { key: 'activity.q.exercise_freq', label: 'คำถามความถี่ออกกำลังกาย', default: 'ท่านออกกำลังกายสม่ำเสมอหรือไม่' },
-        { key: 'activity.q.exercise_min', label: 'คำถามระยะเวลาออกกำลัง', default: 'โดยเฉลี่ยท่านออกกำลังกายครั้งละกี่นาที' },
+      { key: 'activity', label: '🏃 ส่วนที่ 4: กิจกรรมทางกาย (TPAX)', fields: [
+        { key: 'activity.title', label: 'ชื่อหัวข้อหลัก', default: 'กิจกรรมทางกาย (TPAX)' },
+        { key: 'activity.sub.0.title', label: 'หัวข้อย่อย: การทำงาน', default: 'การทำงาน' },
+        { key: 'activity.q.act_work_days', label: 'กิจกรรมทางกายขณะทำงาน (วัน/สัปดาห์)', default: 'กิจกรรมทางกายขณะทำงาน (วัน/สัปดาห์)' },
+        { key: 'activity.q.act_work_dur', label: 'ระยะเวลาทำงานเฉลี่ยต่อวัน', default: 'ระยะเวลาเฉลี่ยต่อวัน' },
+        { key: 'activity.sub.1.title', label: 'หัวข้อย่อย: การเดินทาง', default: 'การเดินทาง' },
+        { key: 'activity.q.act_commute_days', label: 'เดินทางด้วยเท้า/จักรยาน (วัน/สัปดาห์)', default: 'เดินทางด้วยเท้า/จักรยาน (วัน/สัปดาห์)' },
+        { key: 'activity.q.act_commute_dur', label: 'ระยะเวลาเดินทางเฉลี่ยต่อวัน', default: 'ระยะเวลาเฉลี่ยต่อวัน' },
+        { key: 'activity.sub.2.title', label: 'หัวข้อย่อย: นันทนาการ/ออกกำลังกาย', default: 'นันทนาการ/ออกกำลังกาย' },
+        { key: 'activity.q.act_rec_days', label: 'ออกกำลังกาย/นันทนาการ (วัน/สัปดาห์)', default: 'ออกกำลังกาย/นันทนาการ (วัน/สัปดาห์)' },
+        { key: 'activity.q.act_rec_dur', label: 'ระยะเวลาออกกำลังกายเฉลี่ยต่อวัน', default: 'ระยะเวลาเฉลี่ยต่อวัน' },
+        { key: 'activity.sub.3.title', label: 'หัวข้อย่อย: พฤติกรรมเนือยนิ่ง/หน้าจอ', default: 'พฤติกรรมเนือยนิ่ง/หน้าจอ' },
+        { key: 'activity.q.sedentary_dur', label: 'เวลานั่ง/เอนกาย (ไม่รวมนอนหลับ) ต่อวัน', default: 'เวลานั่ง/เอนกาย (ไม่รวมนอนหลับ) ต่อวัน' },
+        { key: 'activity.q.screen_entertain', label: 'เวลาหน้าจอเพื่อความบันเทิงต่อวัน', default: 'เวลาหน้าจอเพื่อความบันเทิงต่อวัน' },
+        { key: 'activity.q.screen_work', label: 'เวลาหน้าจอเพื่อการทำงานต่อวัน', default: 'เวลาหน้าจอเพื่อการทำงานต่อวัน' },
       ]},
-      { key: 'mental', label: '🧠 สุขภาพจิต (PHQ-9 / GAD-7)', fields: [
-        { key: 'mental.title', label: 'ชื่อหัวข้อ', default: '🧠 สุขภาพจิต' },
-        { key: 'mental.q.phq_intro', label: 'คำนำ PHQ-9', default: 'ในช่วง 2 สัปดาห์ที่ผ่านมา ท่านมีปัญหาต่อไปนี้บ่อยเพียงใด?', long: true },
-        { key: 'mental.q.tmhi_1', label: 'PHQ-9 ข้อ 1', default: 'ขาดความสนใจหรือความเพลิดเพลินในการทำสิ่งต่างๆ' },
-        { key: 'mental.q.tmhi_2', label: 'PHQ-9 ข้อ 2', default: 'รู้สึกหดหู่ ซึมเศร้า หรือสิ้นหวัง' },
-        { key: 'mental.q.tmhi_3', label: 'PHQ-9 ข้อ 3', default: 'นอนหลับยาก หรือหลับมากกว่าปกติ' },
-        { key: 'mental.q.tmhi_4', label: 'PHQ-9 ข้อ 4', default: 'รู้สึกอ่อนเพลียหรือไม่มีแรง' },
+      { key: 'mental', label: '🧠 ส่วนที่ 5: สุขภาพจิต (TMHI-15)', fields: [
+        { key: 'mental.title', label: 'ชื่อหัวข้อหลัก', default: 'สุขภาพจิต (TMHI-15)' },
+        { key: 'mental.sub.0.title', label: 'หัวข้อย่อย: ความรู้สึกในช่วง 1 เดือนที่ผ่านมา', default: 'ความรู้สึกในช่วง 1 เดือนที่ผ่านมา' },
+        { key: 'mental.q.tmhi_1', label: 'TMHI ข้อ 1', default: 'ท่านรู้สึกพึงพอใจในชีวิต' },
+        { key: 'mental.q.tmhi_2', label: 'TMHI ข้อ 2', default: 'ท่านรู้สึกสบายใจ' },
+        { key: 'mental.q.tmhi_3', label: 'TMHI ข้อ 3', default: 'ท่านรู้สึกภูมิใจในตนเอง' },
+        { key: 'mental.q.tmhi_4', label: 'TMHI ข้อ 4', default: 'ท่านรู้สึกเบื่อหน่ายท้อแท้กับการดำเนินชีวิตประจำวัน' },
+        { key: 'mental.q.tmhi_5', label: 'TMHI ข้อ 5', default: 'ท่านรู้สึกผิดหวังในตนเอง' },
+        { key: 'mental.q.tmhi_6', label: 'TMHI ข้อ 6', default: 'ท่านรู้สึกว่าชีวิตมีแต่ความทุกข์' },
+        { key: 'mental.q.tmhi_7', label: 'TMHI ข้อ 7', default: 'ท่านสามารถทำใจยอมรับได้สำหรับปัญหาที่ยากจะแก้ไข' },
+        { key: 'mental.q.tmhi_8', label: 'TMHI ข้อ 8', default: 'ท่านมั่นใจว่าจะสามารถควบคุมอารมณ์ได้เมื่อมีเหตุการณ์คับขัน' },
+        { key: 'mental.q.tmhi_9', label: 'TMHI ข้อ 9', default: 'ท่านมั่นใจที่จะเผชิญกับเหตุการณ์ร้ายแรงที่เกิดขึ้นในชีวิต' },
+        { key: 'mental.q.tmhi_10', label: 'TMHI ข้อ 10', default: 'ท่านรู้สึกเห็นอกเห็นใจเมื่อผู้อื่นมีความทุกข์' },
+        { key: 'mental.q.tmhi_11', label: 'TMHI ข้อ 11', default: 'ท่านรู้สึกเป็นสุขในการช่วยเหลือผู้อื่นที่มีปัญหา' },
+        { key: 'mental.q.tmhi_12', label: 'TMHI ข้อ 12', default: 'ท่านให้ความช่วยเหลือแก่ผู้อื่นเมื่อมีโอกาส' },
+        { key: 'mental.q.tmhi_13', label: 'TMHI ข้อ 13', default: 'ท่านรู้สึกมั่นคงปลอดภัยเมื่ออยู่ในครอบครัว' },
+        { key: 'mental.q.tmhi_14', label: 'TMHI ข้อ 14', default: 'หากท่านป่วยหนัก ท่านเชื่อว่าคนในครอบครัวจะดูแลท่านเป็นอย่างดี', long: true },
+        { key: 'mental.q.tmhi_15', label: 'TMHI ข้อ 15', default: 'สมาชิกในครอบครัวมีความรักและผูกพันต่อกัน' },
       ]},
-      { key: 'loneliness', label: '🤝 ความโดดเดี่ยว / สัมพันธภาพ', fields: [
-        { key: 'loneliness.title', label: 'ชื่อหัวข้อ', default: '🤝 ความโดดเดี่ยวและสัมพันธภาพ' },
-        { key: 'loneliness.q.lonely_1', label: 'คำถามความโดดเดี่ยว 1', default: 'ท่านรู้สึกว่าขาดเพื่อนฝูงบ่อยครั้งหรือไม่' },
-        { key: 'loneliness.q.lonely_2', label: 'คำถามความโดดเดี่ยว 2', default: 'ท่านรู้สึกว่าถูกตัดขาดจากผู้อื่นหรือไม่' },
+      { key: 'loneliness', label: '🤝 ส่วนที่ 6: ความเหงา (UCLA Loneliness Scale)', fields: [
+        { key: 'loneliness.title', label: 'ชื่อหัวข้อหลัก', default: 'แบบสำรวจความเหงา (UCLA Loneliness Scale)' },
+        { key: 'loneliness.sub.0.title', label: 'หัวข้อย่อย: ความรู้สึกโดดเดี่ยว', default: 'ความรู้สึกโดดเดี่ยว' },
+        { key: 'loneliness.q.lonely_1', label: 'UCLA ข้อ 1', default: 'ฉันไม่มีความสุขที่ต้องทำหลายสิ่งหลายอย่างคนเดียว' },
+        { key: 'loneliness.q.lonely_2', label: 'UCLA ข้อ 2', default: 'ฉันไม่มีใครคุยด้วย' },
+        { key: 'loneliness.q.lonely_3', label: 'UCLA ข้อ 3', default: 'ฉันทนไม่ได้ที่จะอยู่คนเดียวอย่างนี้' },
+        { key: 'loneliness.q.lonely_4', label: 'UCLA ข้อ 4', default: 'ฉันขาดมิตรภาพ' },
+        { key: 'loneliness.q.lonely_5', label: 'UCLA ข้อ 5', default: 'ฉันรู้สึกราวกับว่าไม่มีใครเข้าใจฉันจริงๆ' },
+        { key: 'loneliness.sub.1.title', label: 'หัวข้อย่อย: ความสัมพันธ์ทางสังคม', default: 'ความสัมพันธ์ทางสังคม' },
+        { key: 'loneliness.q.lonely_6', label: 'UCLA ข้อ 6', default: 'ฉันพบว่าตัวเองรอคนโทรหา' },
+        { key: 'loneliness.q.lonely_7', label: 'UCLA ข้อ 7', default: 'ฉันไม่มีใครให้พึ่ง' },
+        { key: 'loneliness.q.lonely_8', label: 'UCLA ข้อ 8', default: 'ฉันไม่สนิทกับใคร' },
+        { key: 'loneliness.q.lonely_9', label: 'UCLA ข้อ 9', default: 'ความเห็นจากคนอื่นไม่มีผลต่อความสนใจหรือแนวคิดของฉัน' },
+        { key: 'loneliness.q.lonely_10', label: 'UCLA ข้อ 10', default: 'ฉันรู้สึกถูกทอดทิ้ง' },
+        { key: 'loneliness.sub.2.title', label: 'หัวข้อย่อย: ความรู้สึกเกี่ยวกับตนเอง', default: 'ความรู้สึกเกี่ยวกับตนเอง' },
+        { key: 'loneliness.q.lonely_11', label: 'UCLA ข้อ 11', default: 'ฉันรู้สึกโดดเดี่ยว' },
+        { key: 'loneliness.q.lonely_12', label: 'UCLA ข้อ 12', default: 'ฉันไม่สามารถติดต่อสื่อสารกับคนรอบข้างได้' },
+        { key: 'loneliness.q.lonely_13', label: 'UCLA ข้อ 13', default: 'ความสัมพันธ์ทางสังคมของฉันเป็นเพียงผิวเผิน' },
+        { key: 'loneliness.q.lonely_14', label: 'UCLA ข้อ 14', default: 'ฉันโหยหาการมีเพื่อนพ้อง' },
+        { key: 'loneliness.q.lonely_15', label: 'UCLA ข้อ 15', default: 'ไม่มีใครรู้จักฉันดีพอ' },
+        { key: 'loneliness.sub.3.title', label: 'หัวข้อย่อย: พฤติกรรมทางสังคม', default: 'พฤติกรรมทางสังคม' },
+        { key: 'loneliness.q.lonely_16', label: 'UCLA ข้อ 16', default: 'ฉันรู้สึกถูกแยกออกจากคนอื่นๆ' },
+        { key: 'loneliness.q.lonely_17', label: 'UCLA ข้อ 17', default: 'ฉันรู้สึกไม่มีความสุขเมื่อต้องเริ่มออกห่างจากบางสิ่งบางอย่าง' },
+        { key: 'loneliness.q.lonely_18', label: 'UCLA ข้อ 18', default: 'เป็นการยากสำหรับฉันที่จะหาเพื่อน' },
+        { key: 'loneliness.q.lonely_19', label: 'UCLA ข้อ 19', default: 'ฉันรู้สึกถูกกีดกัน และถูกตัดขาดออกจากผู้อื่น' },
+        { key: 'loneliness.q.lonely_20', label: 'UCLA ข้อ 20', default: 'แม้มีคนมากมายอยู่รอบตัวแต่ฉันก็ยังรู้สึกโดดเดี่ยว' },
       ]},
-      { key: 'safety', label: '🛡️ ความปลอดภัย / Engagement', fields: [
-        { key: 'safety.title', label: 'ชื่อหัวข้อ', default: '🛡️ ความปลอดภัยและ Engagement' },
-        { key: 'safety.q.safety_1', label: 'คำถามความปลอดภัย 1', default: 'ท่านรู้สึกปลอดภัยในสภาพแวดล้อมการทำงาน' },
-        { key: 'safety.q.engage_1', label: 'คำถาม Engagement 1', default: 'ท่านรู้สึกมีส่วนร่วมและทุ่มเทกับงานของท่าน' },
+      { key: 'safety', label: '🦺 ส่วนที่ 7: อุบัติเหตุและความปลอดภัย', fields: [
+        { key: 'safety.title', label: 'ชื่อหัวข้อหลัก', default: 'อุบัติเหตุและความปลอดภัย' },
+        { key: 'safety.sub.0.title', label: 'หัวข้อย่อย: การขับขี่และการเดินทาง', default: 'การขับขี่และการเดินทาง' },
+        { key: 'safety.q.helmet_driver', label: 'สวมหมวกนิรภัยขณะขับขี่', default: 'ในช่วง 30 วันที่ผ่านมา ท่านสวมหมวกนิรภัยขณะขับขี่รถจักรยานยนต์หรือไม่', long: true },
+        { key: 'safety.q.helmet_passenger', label: 'สวมหมวกนิรภัยขณะโดยสาร', default: 'ในช่วง 30 วันที่ผ่านมา ท่านสวมหมวกนิรภัยขณะโดยสารรถจักรยานยนต์หรือไม่', long: true },
+        { key: 'safety.q.seatbelt_driver', label: 'ใช้เข็มขัดนิรภัยขณะขับ', default: 'ในช่วง 30 วันที่ผ่านมา ท่านใช้เข็มขัดนิรภัยขณะขับรถยนต์หรือไม่', long: true },
+        { key: 'safety.q.seatbelt_passenger', label: 'ใช้เข็มขัดนิรภัยขณะโดยสาร', default: 'ในช่วง 30 วันที่ผ่านมา ท่านใช้เข็มขัดนิรภัยขณะเป็นผู้โดยสารข้างคนขับหรือไม่', long: true },
+        { key: 'safety.q.accident_hist', label: 'ประวัติอุบัติเหตุจราจร', default: 'ในช่วง 12 เดือนที่ผ่านมา ท่านเคยประสบอุบัติเหตุจราจรในลักษณะใดบ้าง', long: true },
+        { key: 'safety.q.drunk_drive', label: 'ขับขี่หลังดื่มแอลกอฮอล์', default: 'ในช่วง 12 เดือนที่ผ่านมา เคยขับขี่หลังดื่มแอลกอฮอล์หรือไม่' },
       ]},
-      { key: 'environment', label: '🏢 สภาพแวดล้อมองค์กร', fields: [
-        { key: 'environment.title', label: 'ชื่อหัวข้อ', default: '🏢 สภาพแวดล้อมองค์กร' },
-        { key: 'environment.q.wlb_1', label: 'คำถาม Work-Life Balance', default: 'งานของท่านส่งผลกระทบต่อเวลาส่วนตัวและครอบครัวมากน้อยเพียงใด' },
-        { key: 'environment.q.workload', label: 'คำถามภาระงาน', default: 'ปริมาณงานของท่านเหมาะสมหรือไม่' },
+      { key: 'environment', label: '🌿 ส่วนที่ 8: สิ่งแวดล้อมและโรคอุบัติใหม่', fields: [
+        { key: 'environment.title', label: 'ชื่อหัวข้อหลัก', default: 'สิ่งแวดล้อมและโรคอุบัติใหม่' },
+        { key: 'environment.sub.0.title', label: 'หัวข้อย่อย: สภาพแวดล้อมในที่ทำงาน', default: 'สภาพแวดล้อมในที่ทำงาน' },
+        { key: 'environment.q.env_satisfaction', label: 'ความพึงพอใจสิ่งแวดล้อมที่ทำงาน', default: 'ความพึงพอใจในสิ่งแวดล้อมที่ทำงาน' },
+        { key: 'environment.q.env_glare', label: 'แสงจ้า/ทำงานกลางแดด', default: 'แสงจ้า/ทำงานกลางแดด' },
+        { key: 'environment.q.env_noise', label: 'เสียงดัง/แรงสั่นสะเทือน', default: 'เสียงดัง/แรงสั่นสะเทือน' },
+        { key: 'environment.q.env_smell', label: 'กลิ่นเหม็น/สารเคมี', default: 'กลิ่นเหม็น/สารเคมี' },
+        { key: 'environment.q.env_smoke', label: 'ควัน/ไอระเหย', default: 'ควัน/ไอระเหย' },
+        { key: 'environment.q.env_posture', label: 'ท่าทางเดิมนานๆ/ก้มเงย', default: 'ท่าทางเดิมนานๆ/ก้มเงย' },
+        { key: 'environment.q.env_awkward', label: 'ท่าทางฝืนธรรมชาติ', default: 'ท่าทางฝืนธรรมชาติ (ยกของ/เขย่ง)' },
+        { key: 'environment.sub.1.title', label: 'หัวข้อย่อย: มลพิษและโรคอุบัติใหม่', default: 'มลพิษและโรคอุบัติใหม่' },
+        { key: 'environment.q.pm25_impact', label: 'ปัญหา PM 2.5 ในพื้นที่', default: 'ปัญหา PM 2.5 ในพื้นที่ (1 ปีที่ผ่านมา)' },
+        { key: 'environment.q.pm25_symptom', label: 'อาการเจ็บป่วยจาก PM 2.5', default: 'อาการเจ็บป่วยจาก PM 2.5' },
+        { key: 'environment.q.life_quality', label: 'คุณภาพชีวิตโดยรวม', default: 'คุณภาพชีวิตโดยรวม' },
+        { key: 'environment.q.emerging_known', label: 'รู้จักโรคอุบัติใหม่', default: 'รู้จัก "โรคอุบัติใหม่" หรือไม่' },
+        { key: 'environment.q.emerging_list', label: 'โรคอุบัติใหม่ที่รู้จัก', default: 'โรคอุบัติใหม่ที่รู้จัก' },
+        { key: 'environment.q.climate_impact', label: 'ผลกระทบจากโลกร้อนต่อสุขภาพ', default: 'ผลกระทบจากโลกร้อนต่อสุขภาพ' },
+        { key: 'environment.q.covid_history', label: 'ติด COVID-19 ใน 6 เดือนที่ผ่านมา', default: 'ติด COVID-19 ใน 6 เดือนที่ผ่านมา' },
       ]},
     ]
   }
@@ -3679,45 +3920,29 @@ function renderFeFields(formId) {
       ${editedInSec > 0 ? `<span style="font-size:11px;font-weight:400;background:var(--AL);color:var(--A);padding:2px 10px;border-radius:99px">แก้ไขแล้ว ${editedInSec} ช่อง</span>` : ''}
     </div>`;
 
-    const fieldsHtml = sec.fields.map((field) => {
-      const currentVal = cfg[field.key] || '';
-      const isChanged = !!currentVal;
-      const safeKey = field.key.replace(/\./g, '-');
-      const fieldId = `fe-field-${formId}-${safeKey}`;
-      const cardId = `fe-card-${formId}-${safeKey}`;
-      const previewId = `fe-preview-${formId}-${safeKey}`;
-      const editboxId = `fe-editbox-${formId}-${safeKey}`;
-      const displayText = currentVal || field.default;
+    const fieldsHtml = `<div style="display:flex;flex-direction:column;gap:2px;margin-bottom:6px">` +
+      sec.fields.map((field) => {
+        const currentVal = cfg[field.key] || '';
+        const isChanged = !!currentVal;
+        const safeKey = field.key.replace(/\./g, '-');
+        const fieldId = `fe-field-${formId}-${safeKey}`;
+        const inputEl = field.long
+          ? `<textarea class="fe-q-input" id="${fieldId}" rows="2" placeholder="${esc(field.default)}">${esc(currentVal)}</textarea>`
+          : `<input class="fe-q-input" id="${fieldId}" value="${esc(currentVal)}" placeholder="${esc(field.default)}">`;
 
-      // Build the input/textarea for edit mode
-      const inputHtml = field.long
-        ? `<textarea class="fe-q-input" id="${fieldId}" rows="3" placeholder="${esc(field.default)}" data-original="${esc(currentVal)}">${esc(currentVal)}</textarea>`
-        : `<input class="fe-q-input" id="${fieldId}" value="${esc(currentVal)}" placeholder="${esc(field.default)}" data-original="${esc(currentVal)}">`;
-
-      return `<div class="fe-gf-card${isChanged ? ' modified' : ''}" id="${cardId}">
-        <div class="fe-gf-band">
-          <span>${esc(field.label)}</span>
-          ${isChanged ? '<span class="fe-edited-badge">✓ แก้ไขแล้ว</span>' : '<span style="font-size:10px;color:var(--tx3);margin-left:2px">default</span>'}
-          <div style="margin-left:auto;display:flex;gap:6px;align-items:center">
-            ${isChanged ? `<button class="btn b-gray" style="padding:3px 8px;font-size:10.5px" onclick="resetFeField('${esc(formId)}','${esc(field.key)}')">↩ รีเซ็ต</button>` : ''}
-            <button class="btn b-blue" style="padding:3px 9px;font-size:11px" onclick="toggleFeFieldEdit('${esc(formId)}','${esc(field.key)}')">✏️ แก้ไข</button>
-          </div>
-        </div>
-        <!-- Preview mode (shown by default) -->
-        <div class="fe-gf-preview" id="${previewId}" onclick="toggleFeFieldEdit('${esc(formId)}','${esc(field.key)}')" title="คลิกเพื่อแก้ไข">
-          ${esc(displayText)}
-        </div>
-        <!-- Edit mode (hidden by default) -->
-        <div class="fe-gf-editbox" id="${editboxId}" style="display:none">
-          ${inputHtml}
-          <div class="fe-default-hint" style="margin-top:5px">Default: ${esc(field.default)}</div>
-          <div style="display:flex;gap:8px;margin-top:10px">
-            <button class="btn b-gray" style="padding:4px 11px;font-size:12px" onclick="cancelFeFieldInline('${esc(formId)}','${esc(field.key)}')">✕ ยกเลิก</button>
-            <span style="font-size:11px;color:var(--tx3);align-self:center">แก้ไขแล้วกด 💾 บันทึก ด้านล่าง</span>
-          </div>
-        </div>
-      </div>`;
-    }).join('');
+        return `<div class="fg" style="margin-bottom:0;padding:10px 12px;border-radius:8px;background:${isChanged ? 'var(--AL)' : 'var(--bg)'};border:1px solid ${isChanged ? 'var(--A)' : 'transparent'}">
+          <label style="display:flex;align-items:center;gap:6px;margin-bottom:5px">
+            <span style="flex:1;font-size:12px;font-weight:600;color:${isChanged ? 'var(--A)' : 'var(--tx2)'}">${esc(field.label)}</span>
+            ${isChanged
+              ? `<span style="font-size:10px;background:var(--A);color:#fff;padding:1px 8px;border-radius:99px;font-weight:700;flex-shrink:0">✓ แก้ไขแล้ว</span>
+                 <button type="button" class="btn b-gray" style="padding:1px 7px;font-size:10px;flex-shrink:0" onclick="resetFeField('${esc(formId)}','${esc(field.key)}')">↩ รีเซ็ต</button>`
+              : `<span style="font-size:10px;color:var(--tx3);flex-shrink:0">default</span>`
+            }
+          </label>
+          ${inputEl}
+          ${!isChanged ? `<div style="font-size:10px;color:var(--tx3);margin-top:3px;line-height:1.4">📌 ${esc(field.default)}</div>` : ''}
+        </div>`;
+      }).join('') + `</div>`;
 
     return sectionHdr + fieldsHtml;
   }).join('');
@@ -4006,7 +4231,6 @@ function showCh1PDF(index) {
   <tr><th>จำนวนลาออก</th><td>${n('turnover_count')} คน</td></tr>
   <tr><th>อัตราการลาออก</th><td>${fmtNum(parseFloat(v('turnover_rate'))||0,2)}%</td></tr>
   <tr><th>จำนวนโอนย้าย</th><td>${n('transfer_count')} คน</td></tr>
-  <tr><th>อัตราการโอนย้าย</th><td>${fmtNum(parseFloat(v('transfer_rate'))||0,2)}%</td></tr>
 </table>
 
 ${histRows !== '<tr><td colspan="5" style="color:#9CA3AF;text-align:center">—</td></tr>' ? `
