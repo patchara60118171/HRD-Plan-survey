@@ -160,7 +160,13 @@ function getFieldId(fieldType) {
 // SUPABASE STORAGE UPLOAD
 // =============================================
 async function uploadPDFToSupabase(file, fieldType) {
-    const agencyId = document.getElementById('organization')?.value || 'unknown';
+    const rawAgencyId = document.getElementById('organization')?.value || 'unknown';
+    // Sanitize: replace non-ASCII / non-safe chars with underscore (Supabase Storage requires ASCII keys)
+    const agencyId = rawAgencyId
+        .replace(/[^a-zA-Z0-9\-]/g, '_')
+        .replace(/_+/g, '_')
+        .replace(/^_|_$/g, '')
+        .substring(0, 50) || 'agency';
     const timestamp = Date.now();
     const safeFileName = `${agencyId}_${timestamp}.pdf`;
     

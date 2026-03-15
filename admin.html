@@ -677,7 +677,7 @@ tbody tr:hover td{background:#FAFBFD}
     <!-- ==================== FORM WELLBEING ==================== -->
     <div class="page" id="page-form-wb">
       <div class="page-title">Wellbeing Survey</div>
-      <div class="page-sub">ฟอร์มรายบุคคล · เป้าหมาย 1,500–2,000 คน จากทุกองค์กร</div>
+      <div class="page-sub">ฟอร์มรายบุคคล · จากทุกองค์กร</div>
       <div class="tabs">
         <div class="tab active" onclick="swb(this,'wb-ctrl')">⚙️ ควบคุมฟอร์ม</div>
         <div class="tab" onclick="swb(this,'wb-org')">👥 สถิติรายองค์กร</div>
@@ -694,8 +694,8 @@ tbody tr:hover td{background:#FAFBFD}
             <div class="toggle-row"><div class="tr-left"><label>จำกัด 1 ครั้ง/อุปกรณ์</label></div><label class="tgl"><input type="checkbox"><div class="tgl-s"></div></label></div>
             <div class="stats-row">
               <div class="st"><div class="st-val">1,247</div><div class="st-label">ตอบแล้ว</div></div>
-              <div class="st"><div class="st-val">83%</div><div class="st-label">Complete Rate</div></div>
-              <div class="st"><div class="st-val">8.3 นาที</div><div class="st-label">เวลาเฉลี่ย</div></div>
+              <div class="st"><div class="st-val">—</div><div class="st-label">PHQ-9 สูง (≥10)</div></div>
+              <div class="st"><div class="st-val">—</div><div class="st-label">Burnout เฉลี่ย</div></div>
             </div>
             <div class="fc-actions">
               <button class="btn b-blue" onclick="go('form-editor',document.querySelector('.nav-item[onclick*=\'form-editor\']'));setTimeout(()=>feTab('wellbeing',document.getElementById('fe-tab-wb')),200)">✏️ แก้ไขคำถาม</button>
@@ -862,37 +862,51 @@ tbody tr:hover td{background:#FAFBFD}
     <!-- ==================== ANALYTICS WELLBEING ==================== -->
     <div class="page" id="page-an-wb">
       <div class="page-title">วิเคราะห์ Wellbeing Survey</div>
-      <div class="page-sub">ผลการสำรวจรายบุคคล 1,247 คน จาก 15 องค์กร</div>
-      <div class="filter-bar" style="margin-bottom:16px">
-        <select class="sel" style="width:200px"><option>ทุกองค์กร</option><option>กรมสุขภาพจิต</option></select>
-        <select class="sel"><option>ทุกเพศ</option><option>ชาย</option><option>หญิง</option></select>
-        <select class="sel"><option>ทุกกลุ่มอายุ</option><option>≤30 ปี</option><option>31–40 ปี</option></select>
-        <button class="btn b-gray" onclick="showToast('Export PDF: กำลังพัฒนา — ใช้ print (Ctrl+P) หรือ Export Excel แทนได้','info')">📤 Export PDF</button>
+      <div class="page-sub" id="an-wb-sub">ผลการสำรวจรายบุคคล</div>
+
+      <!-- KPI Summary Row -->
+      <div class="stats-row" style="margin-bottom:16px;flex-wrap:wrap;gap:10px">
+        <div class="st"><div class="st-val" id="wba-total">—</div><div class="st-label">ตอบทั้งหมด</div></div>
+        <div class="st"><div class="st-val" id="wba-phq-high">—</div><div class="st-label">PHQ-9 สูง (≥10)</div></div>
+        <div class="st"><div class="st-val" id="wba-gad-high">—</div><div class="st-label">GAD-7 สูง (≥10)</div></div>
+        <div class="st"><div class="st-val" id="wba-burnout-avg">—</div><div class="st-label">Burnout เฉลี่ย</div></div>
+        <div class="st"><div class="st-val" id="wba-eng-avg">—</div><div class="st-label">Engagement เฉลี่ย</div></div>
+        <div class="st"><div class="st-val" id="wba-wlb-avg">—</div><div class="st-label">WLB เฉลี่ย</div></div>
       </div>
+
+      <!-- Filter Bar -->
+      <div class="filter-bar" style="margin-bottom:16px">
+        <select class="sel" id="wba-org-filter" style="width:200px" onchange="renderWbAnalytics()"><option value="">ทุกองค์กร</option></select>
+        <select class="sel" id="wba-gender-filter" onchange="renderWbAnalytics()"><option value="">ทุกเพศ</option><option value="ชาย">ชาย</option><option value="หญิง">หญิง</option></select>
+        <button class="btn b-gray" onclick="showToast('ใช้ print (Ctrl+P) เพื่อ Export PDF หน้านี้','info')">📤 Export PDF</button>
+      </div>
+
+      <!-- Two-column: PHQ-9 distribution + Score summary -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+        <div class="card">
+          <div class="card-head"><h3>📊 การกระจาย PHQ-9 (ภาวะซึมเศร้า)</h3></div>
+          <div class="card-body" id="wba-phq-dist" style="padding:14px 16px">— รอโหลดข้อมูล —</div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>📋 สรุปตัวชี้วัดสุขภาวะ</h3></div>
+          <div class="card-body" id="wba-scores" style="padding:14px 16px">— รอโหลดข้อมูล —</div>
+        </div>
+      </div>
+
+      <!-- Dynamic Heatmap -->
       <div class="card card-mb">
         <div class="card-head"><h3>🌡️ Wellbeing Heatmap — ตัวชี้วัดรายด้าน × องค์กร</h3></div>
-        <div class="card-body" style="overflow-x:auto">
-          <div style="min-width:520px">
-            <div style="display:flex;gap:3px;margin-bottom:5px;padding-left:150px">
-              <div style="width:36px;text-align:center;font-size:10px;color:var(--tx3)">DMH</div>
-              <div style="width:36px;text-align:center;font-size:10px;color:var(--tx3)">OCSC</div>
-              <div style="width:36px;text-align:center;font-size:10px;color:var(--tx3)">DDC</div>
-              <div style="width:36px;text-align:center;font-size:10px;color:var(--tx3)">DOL</div>
-              <div style="width:36px;text-align:center;font-size:10px;color:var(--tx3)">DLA</div>
-            </div>
-            <div class="hm-row"><div class="hm-label">สุขภาพกาย (PHQ)</div><div class="hm-cells"><div class="hm hm2">3.2</div><div class="hm hm1">2.8</div><div class="hm hm3">4.1</div><div class="hm hm3">3.6</div><div class="hm hm5">5.2</div></div></div>
-            <div class="hm-row"><div class="hm-label">ความเครียด</div><div class="hm-cells"><div class="hm hm3">3.8</div><div class="hm hm2">2.5</div><div class="hm hm5">4.9</div><div class="hm hm3">3.3</div><div class="hm hm4">4.2</div></div></div>
-            <div class="hm-row"><div class="hm-label">Engagement</div><div class="hm-cells"><div class="hm hm1">72</div><div class="hm hm2">68</div><div class="hm hm2">65</div><div class="hm hm1">75</div><div class="hm hm4">58</div></div></div>
-            <div class="hm-row"><div class="hm-label">Burnout</div><div class="hm-cells"><div class="hm hm3">23%</div><div class="hm hm2">18%</div><div class="hm hm5">31%</div><div class="hm hm4">26%</div><div class="hm hm5">35%</div></div></div>
-            <div class="hm-row"><div class="hm-label">Work-Life Balance</div><div class="hm-cells"><div class="hm hm2">3.4</div><div class="hm hm1">3.8</div><div class="hm hm3">3.1</div><div class="hm hm2">3.5</div><div class="hm hm5">2.6</div></div></div>
-          </div>
-          <div style="margin-top:10px;display:flex;gap:8px;align-items:center;font-size:11px;color:var(--tx3);flex-wrap:wrap">
-            <div class="hm hm1" style="width:14px;height:14px;font-size:0"></div>ดีมาก
-            <div class="hm hm2" style="width:14px;height:14px;font-size:0"></div>ดี
-            <div class="hm hm3" style="width:14px;height:14px;font-size:0"></div>ปานกลาง
-            <div class="hm hm4" style="width:14px;height:14px;font-size:0"></div>ต้องปรับปรุง
-            <div class="hm hm5" style="width:14px;height:14px;font-size:0"></div>วิกฤต
-          </div>
+        <div class="card-body" id="wba-heatmap" style="overflow-x:auto;padding:14px 16px">— รอโหลดข้อมูล —</div>
+      </div>
+
+      <!-- Org Ranking Table -->
+      <div class="card">
+        <div class="card-head"><h3>🏆 จัดอันดับองค์กร — PHQ-9 สูง (เรียงจากมากไปน้อย)</h3></div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>#</th><th>องค์กร</th><th>ตอบแล้ว</th><th>PHQ-9 เฉลี่ย</th><th>PHQ-9 สูง (%)</th><th>Burnout เฉลี่ย</th><th>Engagement เฉลี่ย</th></tr></thead>
+            <tbody id="wba-org-table"><tr><td colspan="7" style="text-align:center;color:var(--tx3);padding:24px">รอโหลดข้อมูล...</td></tr></tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -1649,9 +1663,18 @@ function renderProgress(summary) {
       <td>${org.ch1Count > 0 ? '100%' : '0%'}</td>
       <td>${fmtNum(org.wellbeingSubmitted)}</td>
       <td>${fmtDate(org.latestCh1 || org.latestWb)}</td>
-      <td class="td-act"><button class="btn b-blue" onclick="go('form-wb', document.querySelector('.nav-item[onclick*=\'form-wb\']'))">ดูข้อมูล</button></td>
+      <td class="td-act"><button class="btn b-blue" onclick="openOrgData('${esc(org.name)}')">ดูข้อมูล</button></td>
     </tr>`;
   }).join('');
+}
+
+function openOrgData(orgName) {
+  const idx = state.ch1Rows.findIndex((row) => getCh1Org(row) === orgName);
+  if (idx < 0) {
+    showToast('ยังไม่มีข้อมูล Ch1 สำหรับ ' + orgName, 'warn');
+    return;
+  }
+  showCh1RowDetail(idx);
 }
 
 function renderOrgs(summary) {
@@ -2124,8 +2147,9 @@ function renderWellbeingControl(summary) {
   const drafts = state.surveyRows.filter((row) => row.is_draft);
   const values = ctrl.querySelectorAll('.st-val');
   values[0].textContent = fmtNum(submitted.length);
-  values[1].textContent = submitted.length ? fmtNum((submitted.length / Math.max(state.surveyRows.length, 1)) * 100, 1) + '%' : '0%';
-  values[2].textContent = 'สด';
+  const phqHighCount = submitted.filter((r) => (getPhq9(r) || 0) >= 10).length;
+  values[1].textContent = fmtNum(phqHighCount) + ' คน (' + (submitted.length ? fmtNum((phqHighCount / submitted.length) * 100, 1) : '0') + '%)';
+  values[2].textContent = fmtNum(submitted.length ? submitted.reduce((s, r) => s + (getBurnout(r) || 0), 0) / submitted.length : 0, 1);
 
   const summaryLines = ctrl.querySelectorAll('.set-row b');
   summaryLines[0].textContent = `${fmtNum(submitted.length)} คน`;
@@ -2457,8 +2481,178 @@ function renderAnalytics(summary) {
     ch1Kpis[3].textContent = fmtNum(state.ch1Rows.length ? (state.ch1Rows.reduce((sum, row) => sum + (parseFloat(row.engagement_score ?? row.form_data?.engagement_score) || 0), 0) / state.ch1Rows.length) : 0, 1);
   }
 
-  const wbPage = document.getElementById('page-an-wb');
-  wbPage.querySelector('.page-sub').textContent = `ผลการสำรวจรายบุคคล ${fmtNum(state.surveyRows.filter((row) => !row.is_draft).length)} คน จาก ${fmtNum(summary.filter((org) => org.wellbeingSubmitted > 0).length)} องค์กร`;
+  const submitted = state.surveyRows.filter((row) => !row.is_draft);
+  const activeOrgs = summary.filter((org) => org.wellbeingSubmitted > 0).length;
+  const subEl = document.getElementById('an-wb-sub');
+  if (subEl) subEl.textContent = `ผลการสำรวจรายบุคคล ${fmtNum(submitted.length)} คน จาก ${fmtNum(activeOrgs)} องค์กร`;
+
+  // Populate org filter dropdown
+  const orgFilter = document.getElementById('wba-org-filter');
+  if (orgFilter && orgFilter.options.length <= 1) {
+    const orgs = [...new Set(submitted.map((r) => r.organization || r.org).filter(Boolean))].sort();
+    orgs.forEach((o) => {
+      const opt = document.createElement('option');
+      opt.value = o; opt.textContent = o;
+      orgFilter.appendChild(opt);
+    });
+  }
+
+  renderWbAnalytics();
+}
+
+function renderWbAnalytics() {
+  const submitted = state.surveyRows.filter((r) => !r.is_draft);
+  const orgSel = (document.getElementById('wba-org-filter') || {}).value || '';
+  const genderSel = (document.getElementById('wba-gender-filter') || {}).value || '';
+
+  const rows = submitted.filter((r) => {
+    if (orgSel && (r.organization || r.org) !== orgSel) return false;
+    if (genderSel && r.gender !== genderSel) return false;
+    return true;
+  });
+
+  const n = rows.length;
+  const setEl = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+
+  if (n === 0) {
+    setEl('wba-total', '0 คน'); setEl('wba-phq-high', '—'); setEl('wba-gad-high', '—');
+    setEl('wba-burnout-avg', '—'); setEl('wba-eng-avg', '—'); setEl('wba-wlb-avg', '—');
+    ['wba-phq-dist', 'wba-scores', 'wba-heatmap'].forEach((id) => { const el = document.getElementById(id); if (el) el.innerHTML = '<span style="color:var(--tx3)">ยังไม่มีข้อมูล</span>'; });
+    const tb = document.getElementById('wba-org-table');
+    if (tb) tb.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--tx3);padding:24px">ยังไม่มีข้อมูล</td></tr>';
+    return;
+  }
+
+  const phqHighCount = rows.filter((r) => (getPhq9(r) || 0) >= 10).length;
+  const gadHighCount = rows.filter((r) => (getGad7(r) || 0) >= 10).length;
+  const avgBurnout = rows.reduce((s, r) => s + (getBurnout(r) || 0), 0) / n;
+  const avgEng = rows.reduce((s, r) => s + (getEngagement(r) || 0), 0) / n;
+  const avgWlb = rows.reduce((s, r) => s + (getWlb(r) || 0), 0) / n;
+  const avgPhq = rows.reduce((s, r) => s + (getPhq9(r) || 0), 0) / n;
+  const avgGad = rows.reduce((s, r) => s + (getGad7(r) || 0), 0) / n;
+
+  setEl('wba-total', fmtNum(n) + ' คน');
+  setEl('wba-phq-high', fmtNum(phqHighCount) + ' คน (' + fmtNum((phqHighCount / n) * 100, 1) + '%)');
+  setEl('wba-gad-high', fmtNum(gadHighCount) + ' คน (' + fmtNum((gadHighCount / n) * 100, 1) + '%)');
+  setEl('wba-burnout-avg', fmtNum(avgBurnout, 1));
+  setEl('wba-eng-avg', fmtNum(avgEng, 1));
+  setEl('wba-wlb-avg', fmtNum(avgWlb, 1));
+
+  // PHQ-9 distribution bars
+  const phqDist = document.getElementById('wba-phq-dist');
+  if (phqDist) {
+    const lvls = [
+      { label: 'ปกติ (0–4)', cls: 'hm1', count: rows.filter((r) => (getPhq9(r) || 0) < 5).length },
+      { label: 'เล็กน้อย (5–9)', cls: 'hm2', count: rows.filter((r) => { const p = getPhq9(r) || 0; return p >= 5 && p < 10; }).length },
+      { label: 'ปานกลาง (10–14)', cls: 'hm3', count: rows.filter((r) => { const p = getPhq9(r) || 0; return p >= 10 && p < 15; }).length },
+      { label: 'รุนแรง (≥15)', cls: 'hm5', count: rows.filter((r) => (getPhq9(r) || 0) >= 15).length },
+    ];
+    phqDist.innerHTML = lvls.map((l) => {
+      const pct = fmtNum((l.count / n) * 100, 1);
+      return `<div style="margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">
+          <span>${l.label}</span><span style="font-weight:600">${fmtNum(l.count)} คน (${pct}%)</span>
+        </div>
+        <div style="background:#F0F2F5;border-radius:4px;height:10px;overflow:hidden">
+          <div class="${l.cls}" style="width:${pct}%;height:10px;border-radius:4px;transition:width .4s"></div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // Score summary table
+  const scoresEl = document.getElementById('wba-scores');
+  if (scoresEl) {
+    scoresEl.innerHTML = `<table style="width:100%;font-size:12px;border-collapse:collapse">
+      <thead><tr style="border-bottom:1px solid var(--brd)">
+        <th style="text-align:left;padding:6px 4px">ตัวชี้วัด</th>
+        <th style="text-align:right;padding:6px 4px">เฉลี่ย</th>
+        <th style="text-align:right;padding:6px 4px">มีความเสี่ยง (≥10)</th>
+      </tr></thead>
+      <tbody>
+        <tr><td style="padding:6px 4px">PHQ-9 (ซึมเศร้า)</td><td style="text-align:right;padding:6px 4px">${fmtNum(avgPhq, 1)}</td><td style="text-align:right;padding:6px 4px;${phqHighCount / n >= 0.2 ? 'color:#991B1B;font-weight:600' : ''}">${fmtNum(phqHighCount)} คน (${fmtNum((phqHighCount / n) * 100, 1)}%)</td></tr>
+        <tr><td style="padding:6px 4px">GAD-7 (วิตกกังวล)</td><td style="text-align:right;padding:6px 4px">${fmtNum(avgGad, 1)}</td><td style="text-align:right;padding:6px 4px;${gadHighCount / n >= 0.2 ? 'color:#991B1B;font-weight:600' : ''}">${fmtNum(gadHighCount)} คน (${fmtNum((gadHighCount / n) * 100, 1)}%)</td></tr>
+        <tr><td style="padding:6px 4px">Burnout Score</td><td style="text-align:right;padding:6px 4px">${fmtNum(avgBurnout, 1)}</td><td style="text-align:right;padding:6px 4px;color:var(--tx3)">—</td></tr>
+        <tr><td style="padding:6px 4px">Engagement Score</td><td style="text-align:right;padding:6px 4px">${fmtNum(avgEng, 1)}</td><td style="text-align:right;padding:6px 4px;color:var(--tx3)">—</td></tr>
+        <tr><td style="padding:6px 4px">Work-Life Balance</td><td style="text-align:right;padding:6px 4px">${fmtNum(avgWlb, 1)}</td><td style="text-align:right;padding:6px 4px;color:var(--tx3)">—</td></tr>
+      </tbody>
+    </table>`;
+  }
+
+  // Dynamic heatmap
+  const heatmapEl = document.getElementById('wba-heatmap');
+  if (heatmapEl) {
+    const orgList = [...new Set(rows.map((r) => r.organization || r.org).filter(Boolean))].sort();
+    if (orgList.length === 0) {
+      heatmapEl.innerHTML = '<span style="color:var(--tx3)">ไม่มีข้อมูลองค์กร</span>';
+    } else {
+      const hmCls = (val, metric) => {
+        if (metric === 'phq') { if (val < 5) return 'hm1'; if (val < 10) return 'hm2'; if (val < 15) return 'hm3'; if (val < 20) return 'hm4'; return 'hm5'; }
+        if (metric === 'gad') { if (val < 5) return 'hm1'; if (val < 10) return 'hm2'; if (val < 15) return 'hm3'; return 'hm4'; }
+        if (metric === 'burnout') { if (val < 2) return 'hm1'; if (val < 4) return 'hm2'; if (val < 6) return 'hm3'; if (val < 8) return 'hm4'; return 'hm5'; }
+        if (metric === 'eng') { if (val >= 75) return 'hm1'; if (val >= 60) return 'hm2'; if (val >= 45) return 'hm3'; if (val >= 30) return 'hm4'; return 'hm5'; }
+        if (metric === 'wlb') { if (val >= 7) return 'hm1'; if (val >= 5) return 'hm2'; if (val >= 3) return 'hm3'; if (val >= 1.5) return 'hm4'; return 'hm5'; }
+        return 'hm3';
+      };
+      const abbr = (s) => s && s.length > 6 ? s.substring(0, 6) + '…' : (s || '?');
+      const orgData = orgList.map((o) => {
+        const orgRows = rows.filter((r) => (r.organization || r.org) === o);
+        const m = orgRows.length;
+        return {
+          name: o,
+          phq: m ? orgRows.reduce((s, r) => s + (getPhq9(r) || 0), 0) / m : 0,
+          gad: m ? orgRows.reduce((s, r) => s + (getGad7(r) || 0), 0) / m : 0,
+          burnout: m ? orgRows.reduce((s, r) => s + (getBurnout(r) || 0), 0) / m : 0,
+          eng: m ? orgRows.reduce((s, r) => s + (getEngagement(r) || 0), 0) / m : 0,
+          wlb: m ? orgRows.reduce((s, r) => s + (getWlb(r) || 0), 0) / m : 0,
+        };
+      });
+      const metrics = [
+        { key: 'phq', label: 'PHQ-9 (ซึมเศร้า)' },
+        { key: 'gad', label: 'GAD-7 (วิตกกังวล)' },
+        { key: 'burnout', label: 'Burnout' },
+        { key: 'eng', label: 'Engagement' },
+        { key: 'wlb', label: 'Work-Life Balance' },
+      ];
+      heatmapEl.innerHTML = `<div style="min-width:${Math.max(520, orgList.length * 42 + 160)}px">
+        <div style="display:flex;gap:3px;margin-bottom:8px;padding-left:150px">
+          ${orgData.map((o) => `<div style="width:36px;text-align:center;font-size:9px;color:var(--tx3);overflow:hidden;word-break:break-all">${abbr(o.name)}</div>`).join('')}
+        </div>
+        ${metrics.map((m) => `<div class="hm-row"><div class="hm-label">${m.label}</div><div class="hm-cells">${orgData.map((o) => `<div class="hm ${hmCls(o[m.key], m.key)}">${fmtNum(o[m.key], 1)}</div>`).join('')}</div></div>`).join('')}
+        <div style="margin-top:10px;display:flex;gap:8px;align-items:center;font-size:11px;color:var(--tx3);flex-wrap:wrap">
+          <div class="hm hm1" style="width:14px;height:14px;font-size:0"></div>ดีมาก
+          <div class="hm hm2" style="width:14px;height:14px;font-size:0"></div>ดี
+          <div class="hm hm3" style="width:14px;height:14px;font-size:0"></div>ปานกลาง
+          <div class="hm hm4" style="width:14px;height:14px;font-size:0"></div>ต้องปรับปรุง
+          <div class="hm hm5" style="width:14px;height:14px;font-size:0"></div>วิกฤต
+        </div>
+      </div>`;
+    }
+  }
+
+  // Org ranking table
+  const tbody = document.getElementById('wba-org-table');
+  if (tbody) {
+    const orgStats = [...new Set(rows.map((r) => r.organization || r.org).filter(Boolean))].sort().map((o) => {
+      const orgRows = rows.filter((r) => (r.organization || r.org) === o);
+      const m = orgRows.length;
+      const phqAvg = m ? orgRows.reduce((s, r) => s + (getPhq9(r) || 0), 0) / m : 0;
+      const phqH = m ? orgRows.filter((r) => (getPhq9(r) || 0) >= 10).length : 0;
+      const burnoutAvg = m ? orgRows.reduce((s, r) => s + (getBurnout(r) || 0), 0) / m : 0;
+      const engAvg = m ? orgRows.reduce((s, r) => s + (getEngagement(r) || 0), 0) / m : 0;
+      return { name: o, count: m, phqAvg, phqHighPct: m ? (phqH / m) * 100 : 0, burnoutAvg, engAvg };
+    }).sort((a, b) => b.phqHighPct - a.phqHighPct);
+
+    tbody.innerHTML = orgStats.map((o, i) => `<tr>
+      <td>${i + 1}</td>
+      <td>${esc(o.name)}</td>
+      <td>${fmtNum(o.count)}</td>
+      <td class="${o.phqAvg >= 10 ? 'bad' : ''}">${fmtNum(o.phqAvg, 1)}</td>
+      <td class="${o.phqHighPct >= 20 ? 'bad' : ''}">${fmtNum(o.phqHighPct, 1)}%</td>
+      <td>${fmtNum(o.burnoutAvg, 1)}</td>
+      <td>${fmtNum(o.engAvg, 1)}</td>
+    </tr>`).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--tx3)">ยังไม่มีข้อมูล</td></tr>';
+  }
 }
 
 function exportCurrentPage() {
@@ -3701,58 +3895,206 @@ function showCh1PDF(index) {
   const fd = row.form_data || row;
   const org = getCh1Org(row);
   const dateStr = fmtDate(getRowDate(row), true);
+
+  // helper shortcuts
+  const v = (k) => { const val = fd[k] ?? row[k]; return (val !== undefined && val !== null) ? val : ''; };
+  const n = (k, d) => fmtNum(parseFloat(v(k)) || 0, d !== undefined ? d : 0);
+  const s = (k) => esc(v(k) || '—');
+  const yn = (k) => { const val = v(k); if (val === true || val === 1 || val === 'true' || val === '1' || val === 'yes') return '✓ มี'; if (val === false || val === 0 || val === 'false' || val === '0' || val === 'no') return '✗ ไม่มี'; return val ? esc(String(val)) : '—'; };
+
+  // historical turnover rows
+  const histRows = ['2564','2565','2566','2567','2568'].map((yr) => {
+    const bg = v(`begin_count_${yr}`); const end = v(`end_count_${yr}`); const lv = v(`leave_count_${yr}`); const rt = v(`turnover_rate_${yr}`);
+    if (!bg && !end && !lv && !rt) return '';
+    return `<tr><td>${yr}</td><td>${fmtNum(parseFloat(bg)||0)}</td><td>${fmtNum(parseFloat(end)||0)}</td><td>${fmtNum(parseFloat(lv)||0)}</td><td>${fmtNum(parseFloat(rt)||0,1)}%</td></tr>`;
+  }).filter(Boolean).join('') || '<tr><td colspan="5" style="color:#9CA3AF;text-align:center">—</td></tr>';
+
+  // engagement history
+  const engHistRows = ['2568','2567','2566','2565','2564'].map((yr) => {
+    const sc = v(`engagement_score_${yr}`);
+    if (!sc) return '';
+    return `<tr><td>ปี ${yr}</td><td>${fmtNum(parseFloat(sc)||0,1)}</td></tr>`;
+  }).filter(Boolean).join('');
+
   const pdfHtml = `<!DOCTYPE html><html lang="th"><head><meta charset="UTF-8">
 <title>Ch1 Report — ${org}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-  body{font-family:'Sarabun',sans-serif;margin:32px;color:#1A2433;font-size:13px;line-height:1.7}
-  h1{font-size:18px;color:#0F4C81;margin-bottom:4px}
-  h2{font-size:14px;color:#0F4C81;margin:18px 0 6px;border-bottom:2px solid #E8F1FB;padding-bottom:4px}
-  .meta{font-size:12px;color:#6B7280;margin-bottom:20px}
-  table{width:100%;border-collapse:collapse;margin-bottom:12px}
-  th,td{padding:7px 10px;border:1px solid #D8DCE3;text-align:left;font-size:12.5px}
-  th{background:#F4F6F9;font-weight:600;color:#374151;width:45%}
-  .kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
-  .kpi{background:#F4F6F9;border:1px solid #D8DCE3;border-radius:8px;padding:10px 14px;text-align:center}
-  .kpi-val{font-size:22px;font-weight:700;color:#0F4C81}
-  .kpi-label{font-size:11px;color:#6B7280;margin-top:3px}
-  .footer{margin-top:30px;font-size:11px;color:#9CA3AF;border-top:1px solid #E5E7EB;padding-top:10px}
-  @media print{body{margin:16px}}
+  body{font-family:'Sarabun',sans-serif;margin:28px 36px;color:#1A2433;font-size:13px;line-height:1.75}
+  h1{font-size:19px;color:#0F4C81;margin-bottom:4px}
+  h2{font-size:13.5px;color:#0F4C81;margin:20px 0 6px;border-bottom:2px solid #E8F1FB;padding-bottom:5px;font-weight:700}
+  h3{font-size:12px;color:#374151;margin:12px 0 4px;font-weight:600}
+  .meta{font-size:11.5px;color:#6B7280;margin-bottom:18px}
+  table{width:100%;border-collapse:collapse;margin-bottom:10px;font-size:12px}
+  th,td{padding:6px 10px;border:1px solid #D8DCE3;text-align:left}
+  th{background:#F4F6F9;font-weight:600;color:#374151;width:44%}
+  td.c{text-align:center;width:auto}
+  .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
+  .kpi{background:#F4F6F9;border:1px solid #D8DCE3;border-radius:8px;padding:9px 12px;text-align:center}
+  .kpi-val{font-size:20px;font-weight:700;color:#0F4C81}
+  .kpi-label{font-size:10.5px;color:#6B7280;margin-top:2px}
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .footer{margin-top:28px;font-size:10.5px;color:#9CA3AF;border-top:1px solid #E5E7EB;padding-top:8px}
+  @media print{body{margin:14px 20px}h2{page-break-after:avoid}}
 </style>
 </head><body>
 <h1>📋 รายงาน Ch1 — ข้อมูลสุขภาวะองค์กร</h1>
-<div class="meta">องค์กร: <b>${org}</b> &nbsp;|&nbsp; วันที่ส่ง: <b>${dateStr}</b></div>
+<div class="meta">องค์กร: <b>${org}</b> &nbsp;|&nbsp; วันที่ส่ง: <b>${dateStr}</b> &nbsp;|&nbsp; ระบบ Admin Portal Well-being Survey</div>
+
 <div class="kpi-grid">
-  <div class="kpi"><div class="kpi-val">${fmtNum(row.total_personnel || fd.total_personnel)}</div><div class="kpi-label">บุคลากรทั้งหมด (คน)</div></div>
-  <div class="kpi"><div class="kpi-val">${fmtNum(parseFloat(row.mental_burnout ?? fd.mental_burnout) || 0, 1)}%</div><div class="kpi-label">Burnout Rate</div></div>
-  <div class="kpi"><div class="kpi-val">${fmtNum(parseFloat(row.engagement_score ?? fd.engagement_score) || 0, 1)}</div><div class="kpi-label">Engagement Score</div></div>
+  <div class="kpi"><div class="kpi-val">${n('total_personnel')}</div><div class="kpi-label">บุคลากรทั้งหมด (คน)</div></div>
+  <div class="kpi"><div class="kpi-val">${fmtNum(parseFloat(v('mental_burnout'))||0,1)}%</div><div class="kpi-label">Burnout Rate</div></div>
+  <div class="kpi"><div class="kpi-val">${fmtNum(parseFloat(v('engagement_score'))||0,1)}</div><div class="kpi-label">Engagement Score</div></div>
+  <div class="kpi"><div class="kpi-val">${fmtNum(parseFloat(v('sick_leave_days'))||0,1)}</div><div class="kpi-label">วันลาป่วยเฉลี่ย/คน/ปี</div></div>
 </div>
+
 <h2>ส่วนที่ 1: โครงสร้างบุคลากร</h2>
+<div class="two-col">
+  <div>
+    <h3>จำนวนและช่วงอายุ</h3>
+    <table>
+      <tr><th>จำนวนบุคลากรทั้งหมด</th><td>${n('total_personnel')} คน</td></tr>
+      <tr><th>อายุ ≤ 30 ปี</th><td>${n('age_under30')} คน</td></tr>
+      <tr><th>อายุ 31–40 ปี</th><td>${n('age_31_40')} คน</td></tr>
+      <tr><th>อายุ 41–50 ปี</th><td>${n('age_41_50')} คน</td></tr>
+      <tr><th>อายุ 51–60 ปี</th><td>${n('age_51_60')} คน</td></tr>
+    </table>
+    <h3>เพศ</h3>
+    <table>
+      <tr><th>เพศชาย</th><td>${n('gender_male')} คน</td></tr>
+      <tr><th>เพศหญิง</th><td>${n('gender_female')} คน</td></tr>
+    </table>
+  </div>
+  <div>
+    <h3>อายุราชการ (ปี)</h3>
+    <table>
+      <tr><th>น้อยกว่า 1 ปี</th><td>${n('service_u1')} คน</td></tr>
+      <tr><th>1–5 ปี</th><td>${n('service_1_5')} คน</td></tr>
+      <tr><th>6–10 ปี</th><td>${n('service_6_10')} คน</td></tr>
+      <tr><th>11–15 ปี</th><td>${n('service_11_15')} คน</td></tr>
+      <tr><th>16–20 ปี</th><td>${n('service_16_20')} คน</td></tr>
+      <tr><th>21–25 ปี</th><td>${n('service_21_25')} คน</td></tr>
+      <tr><th>26–30 ปี</th><td>${n('service_26_30')} คน</td></tr>
+      <tr><th>มากกว่า 30 ปี</th><td>${n('service_over30')} คน</td></tr>
+    </table>
+  </div>
+</div>
+<div class="two-col">
+  <div>
+    <h3>ประเภทตำแหน่ง (อำนวยการ)</h3>
+    <table>
+      <tr><th>ระดับ C-Suite/อธิบดี</th><td>${n('pos_o1')} คน</td></tr>
+      <tr><th>รองอธิบดี/ผู้ช่วยฯ</th><td>${n('pos_o2')} คน</td></tr>
+      <tr><th>ผู้อำนวยการกอง/สำนัก</th><td>${n('pos_o3')} คน</td></tr>
+      <tr><th>หัวหน้าฝ่าย/กลุ่ม</th><td>${n('pos_o4')} คน</td></tr>
+    </table>
+  </div>
+  <div>
+    <h3>ประเภทบุคลากร</h3>
+    <table>
+      <tr><th>ข้าราชการ</th><td>${n('type_official')} คน</td></tr>
+      <tr><th>พนักงานราชการ</th><td>${n('type_employee')} คน</td></tr>
+      <tr><th>ลูกจ้าง/จ้างเหมา</th><td>${n('type_contract')} คน</td></tr>
+      <tr><th>อื่นๆ</th><td>${n('type_other')} คน</td></tr>
+    </table>
+  </div>
+</div>
+
+<h3>อัตราการลาออก/โอนย้าย</h3>
 <table>
-  <tr><th>จำนวนบุคลากรทั้งหมด</th><td>${fmtNum(row.total_personnel || fd.total_personnel)} คน</td></tr>
-  <tr><th>อายุ ≤ 30 ปี</th><td>${fmtNum(row.age_under30 || fd.age_under30)} คน</td></tr>
-  <tr><th>อายุ 31–40 ปี</th><td>${fmtNum(row.age_31_40 || fd.age_31_40)} คน</td></tr>
-  <tr><th>อายุ 41–50 ปี</th><td>${fmtNum(row.age_41_50 || fd.age_41_50)} คน</td></tr>
-  <tr><th>อายุ 51–60 ปี</th><td>${fmtNum(row.age_51_60 || fd.age_51_60)} คน</td></tr>
+  <tr><th>จำนวนลาออก</th><td>${n('turnover_count')} คน</td></tr>
+  <tr><th>อัตราการลาออก</th><td>${fmtNum(parseFloat(v('turnover_rate'))||0,2)}%</td></tr>
+  <tr><th>จำนวนโอนย้าย</th><td>${n('transfer_count')} คน</td></tr>
+  <tr><th>อัตราการโอนย้าย</th><td>${fmtNum(parseFloat(v('transfer_rate'))||0,2)}%</td></tr>
 </table>
+
+${histRows !== '<tr><td colspan="5" style="color:#9CA3AF;text-align:center">—</td></tr>' ? `
+<h3>ประวัติอัตราการลาออกรายปี</h3>
+<table>
+  <thead><tr><th style="width:auto">ปี</th><th class="c">ต้นปี</th><th class="c">ปลายปี</th><th class="c">ลาออก</th><th class="c">อัตรา %</th></tr></thead>
+  <tbody>${histRows}</tbody>
+</table>` : ''}
+
+<h2>ส่วนที่ 2: บริบทและนโยบาย</h2>
+<table>
+  <tr><th>นโยบายที่เกี่ยวข้อง</th><td>${s('related_policies')}</td></tr>
+  <tr><th>บริบทและความท้าทาย</th><td>${s('context_challenges')}</td></tr>
+</table>
+
 <h2>ส่วนที่ 3: สุขภาวะบุคลากร</h2>
+<div class="two-col">
+  <div>
+    <h3>โรค NCD</h3>
+    <table>
+      <tr><th>โรคเบาหวาน</th><td>${n('ncd_diabetes')} คน</td></tr>
+      <tr><th>โรคความดันโลหิตสูง</th><td>${n('ncd_hypertension')} คน</td></tr>
+      <tr><th>โรคหัวใจและหลอดเลือด</th><td>${n('disease_cardiovascular')} คน</td></tr>
+      <tr><th>โรคไต</th><td>${n('disease_kidney')} คน</td></tr>
+      <tr><th>โรคตับ</th><td>${n('disease_liver')} คน</td></tr>
+      <tr><th>มะเร็ง</th><td>${n('disease_cancer')} คน</td></tr>
+      <tr><th>โรคอ้วน</th><td>${n('disease_obesity')} คน</td></tr>
+      <tr><th>โรคอื่นๆ (จำนวน)</th><td>${n('disease_other_count')} คน</td></tr>
+      ${v('disease_other_detail') ? `<tr><th>โรคอื่นๆ (รายละเอียด)</th><td>${s('disease_other_detail')}</td></tr>` : ''}
+    </table>
+  </div>
+  <div>
+    <h3>สุขภาพจิตและการลา</h3>
+    <table>
+      <tr><th>วันลาป่วยเฉลี่ย/คน/ปี</th><td>${fmtNum(parseFloat(v('sick_leave_days'))||0,1)} วัน</td></tr>
+      <tr><th>วันลาป่วยเฉลี่ย (รายละเอียด)</th><td>${fmtNum(parseFloat(v('sick_leave_avg'))||0,1)} วัน</td></tr>
+      <tr><th>ภาวะเครียด</th><td>${fmtNum(parseFloat(v('mental_stress'))||0,1)}%</td></tr>
+      <tr><th>ภาวะวิตกกังวล</th><td>${fmtNum(parseFloat(v('mental_anxiety'))||0,1)}%</td></tr>
+      <tr><th>ปัญหาการนอนหลับ</th><td>${fmtNum(parseFloat(v('mental_sleep'))||0,1)}%</td></tr>
+      <tr><th>ภาวะซึมเศร้า</th><td>${fmtNum(parseFloat(v('mental_depression'))||0,1)}%</td></tr>
+      <tr><th>ภาวะหมดไฟ (Burnout)</th><td>${fmtNum(parseFloat(v('mental_burnout'))||0,1)}%</td></tr>
+    </table>
+    <h3>ข้อมูลคลินิก</h3>
+    <table>
+      <tr><th>ผู้ใช้บริการคลินิก/ปี</th><td>${n('clinic_users_per_year')} คน</td></tr>
+      <tr><th>อาการที่พบบ่อย</th><td>${s('clinic_top_symptoms')}</td></tr>
+      <tr><th>ยาที่สั่งจ่ายบ่อย</th><td>${s('clinic_top_medications')}</td></tr>
+    </table>
+  </div>
+</div>
+
+<h2>ส่วนที่ 4: ระบบการบริหารและพัฒนาบุคลากร</h2>
+<div class="two-col">
+  <div>
+    <h3>ระบบ Engagement</h3>
+    <table>
+      <tr><th>Engagement Score (ปัจจุบัน)</th><td>${fmtNum(parseFloat(v('engagement_score'))||0,1)} / 100</td></tr>
+      ${['2568','2567','2566','2565','2564'].map((yr) => { const sc = v(`engagement_score_${yr}`); return sc ? `<tr><th>Engagement ปี ${yr}</th><td>${fmtNum(parseFloat(sc)||0,1)}</td></tr>` : ''; }).filter(Boolean).join('')}
+      ${v('engagement_low_areas') ? `<tr><th>ด้านที่คะแนนต่ำ</th><td>${s('engagement_low_areas')}</td></tr>` : ''}
+    </table>
+  </div>
+  <div>
+    <h3>ระบบพัฒนาบุคลากร</h3>
+    <table>
+      <tr><th>Mentoring System</th><td>${yn('mentoring_system')}</td></tr>
+      <tr><th>Job Rotation</th><td>${yn('job_rotation')}</td></tr>
+      <tr><th>IDP System</th><td>${yn('idp_system')}</td></tr>
+      <tr><th>Career Path System</th><td>${yn('career_path_system')}</td></tr>
+      <tr><th>ชั่วโมงฝึกอบรมเฉลี่ย/คน/ปี</th><td>${fmtNum(parseFloat(v('training_hours'))||0,1)} ชั่วโมง</td></tr>
+      <tr><th>สภาพแวดล้อมการทำงาน (Ergonomics)</th><td>${s('ergonomics_status')}</td></tr>
+    </table>
+  </div>
+</div>
+
+<h2>ส่วนที่ 5: ทิศทางและเป้าหมายสุขภาวะ</h2>
 <table>
-  <tr><th>โรคเบาหวาน</th><td>${fmtNum(row.ncd_diabetes || fd.ncd_diabetes)} คน</td></tr>
-  <tr><th>โรคความดันโลหิตสูง</th><td>${fmtNum(row.ncd_hypertension || fd.ncd_hypertension)} คน</td></tr>
-  <tr><th>วันลาป่วยเฉลี่ย/คน/ปี</th><td>${fmtNum(row.sick_leave_days || fd.sick_leave_days, 1)} วัน</td></tr>
-  <tr><th>ภาวะหมดไฟ (Burnout)</th><td>${fmtNum(parseFloat(row.mental_burnout ?? fd.mental_burnout) || 0, 1)}%</td></tr>
+  <tr><th>ประเด็นสุขภาวะสำคัญ</th><td>${s('strategic_priorities')}</td></tr>
+  <tr><th>อันดับ 1</th><td>${s('strategic_priority_rank1')}</td></tr>
+  <tr><th>อันดับ 2</th><td>${s('strategic_priority_rank2')}</td></tr>
+  <tr><th>อันดับ 3</th><td>${s('strategic_priority_rank3')}</td></tr>
+  <tr><th>Feedback ชุดมาตรการ</th><td>${s('intervention_packages_feedback')}</td></tr>
+  <tr><th>ผลลัพธ์แผน HRD ที่คาดหวัง</th><td>${s('hrd_plan_results')}</td></tr>
 </table>
-<h2>ส่วนที่ 4: ระบบการบริหาร</h2>
-<table>
-  <tr><th>Engagement Score</th><td>${fmtNum(parseFloat(row.engagement_score ?? fd.engagement_score) || 0, 1)} / 100</td></tr>
-</table>
-<h2>ส่วนที่ 5: ทิศทางและเป้าหมาย</h2>
-<table>
-  <tr><th>ประเด็นสุขภาวะสำคัญ</th><td>${esc(row.strategic_priorities || fd.strategic_priorities || '—')}</td></tr>
-</table>
+
 <div class="footer">พิมพ์เมื่อ: ${new Date().toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'})} &nbsp;|&nbsp; ระบบ Admin Portal Well-being Survey</div>
 <script>window.onload=function(){window.print()}<\/script>
 </body></html>`;
-  const w = window.open('', '_blank', 'width=900,height=700');
+  const w = window.open('', '_blank', 'width=960,height=780');
   if (w) { w.document.write(pdfHtml); w.document.close(); }
   else showToast('กรุณาอนุญาต Popup เพื่อดู PDF', 'warn');
 }

@@ -672,14 +672,16 @@ async function submitForm() {
     document.getElementById('overlay-loading').classList.remove('hidden');
 
     try {
-        const { data, error } = await ch1Sb.from(TARGET_TABLE).insert([payload]).select();
+        const { error } = await ch1Sb.from(TARGET_TABLE).insert([payload]);
 
         if (error) throw error;
 
         // Success
         document.getElementById('overlay-loading').classList.add('hidden');
         document.getElementById('overlay-success').classList.remove('hidden');
-        document.getElementById('success-ref').textContent = `Ref: ${data[0]?.id || 'N/A'}`;
+        // Generate a short reference from timestamp (anon role has no SELECT policy)
+        const refId = Date.now().toString(36).toUpperCase();
+        document.getElementById('success-ref').textContent = `Ref: ${refId}`;
         document.getElementById('success-mode').textContent = IS_TEST_MODE
             ? `Test mode | Run ID: ${TEST_RUN_ID}`
             : 'Live mode';
