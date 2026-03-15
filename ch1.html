@@ -368,11 +368,11 @@
 
                     <div style="font-size:3.5rem; margin-bottom:1rem">🌿</div>
 
-                    <h1 style="font-size:1.75rem; font-weight:700; color:#2563EB; margin-bottom:0.75rem">
+                    <h1 data-cfg="main_title" style="font-size:1.75rem; font-weight:700; color:#2563EB; margin-bottom:0.75rem">
 
                         แบบสำรวจข้อมูลเพื่อจัดทำแผนการพัฒนาองค์กร<br>สุขภาวะข้าราชการพลเรือน</h1>
 
-                    <p style="color:#6B7280; font-size:0.95rem; line-height:1.7; max-width:520px; margin:0 auto 2rem">
+                    <p data-cfg="main_desc" style="color:#6B7280; font-size:0.95rem; line-height:1.7; max-width:520px; margin:0 auto 2rem">
 
                         แบบสำรวจนี้จัดทำขึ้นเพื่อรวบรวมข้อมูลจากหน่วยงานนำร่อง<br>สำหรับใช้ประกอบการจัดทำแผนปฏิบัติการสร้างเสริมสุขภาวะองค์กรข้าราชการพลเรือน
 
@@ -480,7 +480,7 @@
 
             <div class="form-step" data-step="1">
 
-                <h2 class="text-xl font-bold text-primary mb-1">🏛️ ส่วนที่ 1: ข้อมูลเบื้องต้นของส่วนราชการ</h2>
+                <h2 data-cfg="step1_title" class="text-xl font-bold text-primary mb-1">🏛️ ส่วนที่ 1: ข้อมูลเบื้องต้นของส่วนราชการ</h2>
 
                 <p class="text-slate-500 text-sm mb-6">ข้อมูลพื้นฐาน โครงสร้างองค์กร และอัตรากำลัง</p>
 
@@ -1646,7 +1646,7 @@
 
             <div class="form-step" data-step="2">
 
-                <h2 class="text-xl font-bold text-primary mb-1">📋 ส่วนที่ 2: นโยบายและบริบทภายนอกองค์กร</h2>
+                <h2 data-cfg="step2_title" class="text-xl font-bold text-primary mb-1">📋 ส่วนที่ 2: นโยบายและบริบทภายนอกองค์กร</h2>
 
                 <p class="text-slate-500 text-sm mb-6">นโยบายที่เกี่ยวข้องและบริบทที่ส่วนราชการต้องเผชิญ</p>
 
@@ -1700,7 +1700,7 @@
 
             <div class="form-step" data-step="3">
 
-                <h2 class="text-xl font-bold text-primary mb-1">🩺 ส่วนที่ 3: ข้อมูลสุขภาวะของข้าราชการในปีที่ผ่านมา
+                <h2 data-cfg="step3_title" class="text-xl font-bold text-primary mb-1">🩺 ส่วนที่ 3: ข้อมูลสุขภาวะของข้าราชการในปีที่ผ่านมา
 
                 </h2>
 
@@ -2160,7 +2160,7 @@
 
             <div class="form-step" data-step="4">
 
-                <h2 class="text-xl font-bold text-primary mb-1">⚙️ ส่วนที่ 4:
+                <h2 data-cfg="step4_title" class="text-xl font-bold text-primary mb-1">⚙️ ส่วนที่ 4:
 
                     ระบบการบริหารและสภาพแวดล้อมที่เอื้อต่อสุขภาวะ</h2>
 
@@ -2432,7 +2432,7 @@
 
             <div class="form-step" data-step="5">
 
-                <h2 class="text-xl font-bold text-primary mb-1">🎯 ส่วนที่ 5: ทิศทาง เป้าหมาย และข้อเสนอแนะ</h2>
+                <h2 data-cfg="step5_title" class="text-xl font-bold text-primary mb-1">🎯 ส่วนที่ 5: ทิศทาง เป้าหมาย และข้อเสนอแนะ</h2>
 
                 <p class="text-slate-500 text-sm mb-6">จุดเน้นการพัฒนาและข้อเสนอแนะ</p>
 
@@ -3458,6 +3458,27 @@
 
         })();
 
+    </script>
+
+    <!-- Form Config Loader: applies admin-configured text overrides from Supabase -->
+    <script>
+    (function applyCh1FormConfig() {
+      try {
+        const url = 'https://fgdommhiqhzvsedfzyrr.supabase.co/rest/v1/form_configs?form_id=eq.ch1&select=config_json&limit=1';
+        const key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZnZG9tbWhpcWh6dnNlZGZ6eXJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkzMzY2MzUsImV4cCI6MjA4NDkxMjYzNX0.GFMOeDArhq-9lPt39OizkBOFFgK4TDpVDJrk_HRQ6Xc';
+        fetch(url, { headers: { apikey: key, Authorization: 'Bearer ' + key } })
+          .then(r => r.json())
+          .then(data => {
+            if (!data || !data[0] || !data[0].config_json) return;
+            const cfg = data[0].config_json;
+            document.querySelectorAll('[data-cfg]').forEach(el => {
+              const val = cfg[el.getAttribute('data-cfg')];
+              if (val && val.trim()) el.textContent = val.trim();
+            });
+          })
+          .catch(() => {}); // Silent fail — show default text if config unavailable
+      } catch (e) {}
+    })();
     </script>
 
 </body>

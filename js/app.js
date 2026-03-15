@@ -381,12 +381,23 @@ const app = {
     },
 
     // Initialize app
-    init() {
+    async init() {
         // Parse URL Parameters for organization
         this.parseUrlParameters();
 
         // Initialize Supabase
         initSupabase();
+
+        // Fetch form config overrides (silent — falls back to defaults on error)
+        try {
+            const cfgUrl = 'https://fgdommhiqhzvsedfzyrr.supabase.co/rest/v1/form_configs?form_id=eq.wellbeing&select=config_json&limit=1';
+            const cfgKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZnZG9tbWhpcWh6dnNlZGZ6eXJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkzMzY2MzUsImV4cCI6MjA4NDkxMjYzNX0.GFMOeDArhq-9lPt39OizkBOFFgK4TDpVDJrk_HRQ6Xc';
+            const cfgResp = await fetch(cfgUrl, { headers: { apikey: cfgKey, Authorization: 'Bearer ' + cfgKey } });
+            const cfgData = await cfgResp.json();
+            if (cfgData && cfgData[0] && cfgData[0].config_json && Object.keys(cfgData[0].config_json).length > 0) {
+                applyWellbeingFormConfig(cfgData[0].config_json);
+            }
+        } catch (e) { /* silent — show default text */ }
 
         // Load saved responses
         this.responses = loadResponses();
@@ -402,7 +413,7 @@ const app = {
         // Hide loading screen
         setTimeout(() => {
             document.getElementById('loading-screen').classList.add('hidden');
-            
+
             // Show welcome toast for organization after loading screen is hidden
             if (this.organization) {
                 setTimeout(() => {

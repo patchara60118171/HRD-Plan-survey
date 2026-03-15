@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="th">
 <head>
 <meta charset="UTF-8"/>
@@ -9,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai+Looped:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -276,6 +277,56 @@ tbody tr:hover td{background:#FAFBFD}
 /* checkbox group */
 .cb-group{display:flex;flex-direction:column;gap:5px;margin-top:4px}
 .cb-group label{display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:400;color:var(--tx);cursor:pointer}
+
+/* ===== USER MODAL ===== */
+.umodal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.52);display:flex;align-items:center;justify-content:center;z-index:9998;padding:16px}
+.umodal{background:var(--card);border-radius:14px;min-width:460px;max-width:560px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.22);max-height:92vh;overflow-y:auto}
+.umodal-head{padding:16px 22px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:10px}
+.umodal-head h3{font-size:15px;font-weight:700;color:var(--P);flex:1}
+.umodal-body{padding:20px 22px;display:flex;flex-direction:column;gap:14px}
+.umodal-foot{padding:13px 22px;border-top:1px solid var(--bdr);display:flex;gap:8px;justify-content:flex-end}
+.perm-card{border:1px solid var(--bdr);border-radius:8px;overflow:hidden;margin-top:2px}
+.perm-row{display:flex;align-items:flex-start;gap:10px;padding:9px 12px;border-bottom:1px solid var(--bdr);cursor:pointer}
+.perm-row:last-child{border-bottom:none}
+.perm-row:hover{background:var(--bg)}
+.perm-info{flex:1}
+.perm-name{font-size:12.5px;font-weight:600;color:var(--tx);display:flex;align-items:center;gap:6px}
+.perm-desc{font-size:11px;color:var(--tx3);margin-top:2px;line-height:1.5}
+.info-tip{position:relative;display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;background:var(--bg2);border-radius:50%;font-size:8.5px;font-weight:700;color:var(--tx2);cursor:help;flex-shrink:0}
+.info-tip::after{content:attr(data-tip);position:absolute;left:18px;top:50%;transform:translateY(-50%);background:#1A2433;color:#fff;font-size:11px;font-weight:400;white-space:pre-wrap;line-height:1.5;padding:8px 10px;border-radius:6px;width:220px;z-index:9999;pointer-events:none;opacity:0;transition:opacity .15s}
+.info-tip:hover::after{opacity:1}
+.u-role-tag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px}
+.u-role-tag.superadmin{background:#F3E8FF;color:#7C3AED}
+.u-role-tag.admin{background:var(--WL);color:var(--W)}
+.u-role-tag.viewer{background:var(--PL);color:var(--P)}
+.pwd-reset-row{background:var(--bg);border:1px solid var(--bdr);border-radius:8px;padding:11px 13px;display:flex;align-items:center;gap:10px}
+.pwd-code{font-family:monospace;font-size:14px;font-weight:700;color:var(--P);flex:1;letter-spacing:.05em}
+
+/* ===== FORM EDITOR CARD STYLE ===== */
+.fe-form-card{background:var(--card);border:1.5px solid var(--bdr);border-radius:10px;margin-bottom:14px;overflow:hidden;transition:box-shadow .15s,border-color .15s}
+.fe-form-card:focus-within{box-shadow:0 0 0 3px rgba(15,76,129,.1);border-color:var(--P)}
+.fe-form-card.modified{border-left:3px solid var(--A)}
+.fe-card-band{padding:8px 14px;background:var(--PL);border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--P);font-weight:600}
+.fe-type-tag{background:var(--P);color:#fff;font-size:10px;padding:2px 8px;border-radius:99px;margin-left:auto;font-weight:600;flex-shrink:0}
+.fe-edited-badge{font-size:10px;background:var(--A);color:#fff;padding:2px 8px;border-radius:99px;font-weight:700;flex-shrink:0}
+.fe-card-body{padding:14px 16px}
+.fe-q-label{font-size:11.5px;font-weight:700;color:var(--tx2);margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.fe-q-input{width:100%;border:1.5px solid var(--bdr2);border-radius:7px;padding:9px 12px;font-size:13.5px;font-family:inherit;color:var(--tx);background:#fff;transition:border .12s;line-height:1.5;resize:vertical}
+.fe-q-input:focus{outline:none;border-color:var(--P);box-shadow:0 0 0 3px rgba(15,76,129,.07)}
+.fe-default-hint{font-size:11px;color:var(--tx3);margin-top:5px}
+.fe-opts-area{margin-top:12px;padding-top:12px;border-top:1px dashed var(--bdr)}
+.fe-opts-label{font-size:11.5px;font-weight:700;color:var(--tx2);margin-bottom:8px}
+.fe-option-row{display:flex;align-items:center;gap:7px;margin-bottom:7px}
+.fe-opt-prefix{font-size:12px;color:var(--tx3);width:22px;flex-shrink:0;text-align:center}
+.fe-opt-input{flex:1;border:1px solid var(--bdr);border-radius:6px;padding:6px 10px;font-size:12.5px;font-family:inherit;background:#fff}
+.fe-opt-input:focus{outline:none;border-color:var(--P)}
+.fe-opt-del{background:none;border:none;cursor:pointer;color:var(--tx3);font-size:14px;padding:3px 5px;flex-shrink:0;line-height:1}
+.fe-opt-del:hover{color:var(--D)}
+.fe-add-opt{font-size:12px;color:var(--P);cursor:pointer;padding:4px 0;display:inline-flex;align-items:center;gap:4px;font-weight:600;background:none;border:none;font-family:inherit}
+.fe-add-opt:hover{text-decoration:underline}
+.fe-section-hdr{font-size:13.5px;font-weight:700;color:var(--P);padding:14px 0 8px;border-bottom:2px solid var(--PL);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.fe-card-foot{display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--bg);border-top:1px solid var(--bdr)}
+.fe-editing-banner{background:var(--PL);border:1px solid var(--P);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:12.5px;color:var(--P);font-weight:600;display:flex;align-items:center;gap:8px}
 </style>
 </head>
 <body>
@@ -323,10 +374,11 @@ tbody tr:hover td{background:#FAFBFD}
     <div class="nav-item" onclick="go('notif',this)"><span class="ni">🔔</span> Reminder / แจ้งเตือน <span class="nb">2</span></div>
     <div class="nav-item" onclick="go('settings',this)"><span class="ni">⚙️</span> ตั้งค่าระบบ</div>
     <div class="nav-item" onclick="go('audit',this)"><span class="ni">🔍</span> Audit Log</div>
+    <div class="nav-item" onclick="go('form-editor',this)"><span class="ni">✏️</span> แก้ไขเนื้อหาฟอร์ม</div>
   </nav>
 
   <div class="sidebar-foot">
-    <div class="nav-item" style="border-left:none;padding:7px 4px"><span class="ni">🚪</span> ออกจากระบบ</div>
+    <div class="nav-item" style="border-left:none;padding:7px 4px" onclick="doLogout()"><span class="ni">🚪</span> ออกจากระบบ</div>
   </div>
 </div>
 
@@ -337,9 +389,9 @@ tbody tr:hover td{background:#FAFBFD}
     <span class="tb-title" id="ttl">Dashboard ภาพรวม</span>
     <span class="tb-bc" id="tbc">/ ภาพรวม</span>
     <div class="tb-space"></div>
-    <div class="tb-notif">🔔<div class="dot"></div></div>
-    <button class="topbar-btn">📤 Export</button>
-    <button class="topbar-btn primary">+ เพิ่มองค์กร</button>
+    <div class="tb-notif" onclick="go('audit',document.querySelector('.nav-item[onclick*=audit]'))">🔔<div class="dot"></div></div>
+    <button class="topbar-btn" onclick="exportCurrentPage()">📤 Export</button>
+    <button class="topbar-btn primary" onclick="go('orgs',document.querySelector('.nav-item[onclick*=orgs]'));setTimeout(()=>{var b=document.getElementById('org-btn-new');if(b)b.click()},400)">+ เพิ่มองค์กร</button>
   </div>
 
   <div class="content">
@@ -408,9 +460,9 @@ tbody tr:hover td{background:#FAFBFD}
         <div class="card-head">
           <h3>รายการสถานะทุกองค์กร</h3>
           <div class="filter-bar">
-            <input class="si" placeholder="🔍 ค้นหาองค์กร...">
-            <select class="sel"><option>ทุกสถานะ</option><option>ส่งแล้ว</option><option>กำลังกรอก</option><option>ยังไม่เริ่ม</option></select>
-            <button class="btn b-orange">🔔 ส่ง Reminder</button>
+            <input class="si" id="prog-search" placeholder="🔍 ค้นหาองค์กร..." oninput="filterProgressTable()">
+            <select class="sel" id="prog-status-filter" onchange="filterProgressTable()"><option value="">ทุกสถานะ</option><option value="ส่งแล้ว">ส่งแล้ว</option><option value="กำลังกรอก">กำลังกรอก</option><option value="ยังไม่เริ่ม">ยังไม่เริ่ม</option></select>
+            <button class="btn b-orange" onclick="sendReminderAll()">🔔 ส่ง Reminder ทั้งหมด</button>
           </div>
         </div>
         <div class="tbl-wrap">
@@ -455,11 +507,12 @@ tbody tr:hover td{background:#FAFBFD}
         </div>
         <div class="panel">
           <h3>⚙️ ตั้งค่า Deadline</h3>
-          <div class="fg"><label>วันปิดรับ Ch1</label><input type="date" value="2026-03-31"></div>
-          <div class="fg"><label>วันปิดรับ Wellbeing Survey</label><input type="date" value="2026-04-30"></div>
-          <div class="fg"><label>แจ้งเตือนก่อนครบกำหนด (วัน)</label><input type="number" value="7"></div>
-          <div class="fg"><label>หมายเหตุ</label><textarea placeholder="รายละเอียดเพิ่มเติม..."></textarea></div>
-          <button class="btn b-solid" style="padding:8px 16px;font-size:13px">💾 บันทึก</button>
+          <div class="fg"><label>วันปิดรับ Ch1 <span id="deadline-ch1-be" style="font-size:11px;color:var(--A);font-weight:600"></span></label><input type="date" id="deadline-ch1" value="2026-03-31" oninput="document.getElementById('deadline-ch1-be').textContent=isoToBuddhistDisplay(this.value)"></div>
+          <div class="fg"><label>วันปิดรับ Wellbeing Survey <span id="deadline-wb-be" style="font-size:11px;color:var(--A);font-weight:600"></span></label><input type="date" id="deadline-wb" value="2026-04-30" oninput="document.getElementById('deadline-wb-be').textContent=isoToBuddhistDisplay(this.value)"></div>
+          <div class="fg"><label>แจ้งเตือนก่อนครบกำหนด (วัน)</label><input type="number" id="deadline-days" value="7"></div>
+          <div class="fg"><label>หมายเหตุ</label><textarea id="deadline-note" placeholder="รายละเอียดเพิ่มเติม..."></textarea></div>
+          <button class="btn b-solid" style="padding:8px 16px;font-size:13px" onclick="saveDeadlines()">💾 บันทึก</button>
+          <div id="deadline-msg" style="font-size:12px;margin-top:6px"></div>
         </div>
       </div>
     </div>
@@ -475,7 +528,7 @@ tbody tr:hover td{background:#FAFBFD}
             <div class="filter-bar">
               <input class="si" placeholder="🔍 ค้นหา...">
               <select class="sel"><option>ทุกกระทรวง</option><option>สำนักนายกฯ</option><option>สาธารณสุข</option><option>เกษตรฯ</option><option>วิทยาศาสตร์ฯ</option><option>ยุติธรรม</option><option>อื่น ๆ</option></select>
-              <button class="btn b-solid">+ เพิ่ม</button>
+              <button class="btn b-solid" onclick="document.getElementById('org-btn-new')?.click()">+ เพิ่ม</button>
             </div>
           </div>
           <div class="tbl-wrap">
@@ -503,13 +556,17 @@ tbody tr:hover td{background:#FAFBFD}
         </div>
         <div class="panel">
           <h3>➕ เพิ่ม / แก้ไของค์กร</h3>
-          <div class="fg"><label>ชื่อองค์กร *</label><input placeholder="เช่น กรมสุขภาพจิต"></div>
-          <div class="fg"><label>กระทรวง</label><select><option>-- เลือกกระทรวง --</option><option>สาธารณสุข</option><option>ศึกษาธิการ</option><option>แรงงาน</option><option>มหาดไทย</option></select></div>
-          <div class="fg"><label>จำนวนบุคลากร (โดยประมาณ)</label><input type="number" placeholder="เช่น 1200"></div>
-          <div class="fg"><label>Tag / กลุ่ม</label><select><option>ทั่วไป</option><option>นำร่อง</option><option>กลุ่มพิเศษ</option></select></div>
-          <div class="fg"><label>อีเมลผู้ประสานงาน</label><input placeholder="contact@org.go.th"></div>
-          <div class="fg"><label>หมายเหตุ</label><textarea placeholder="รายละเอียดเพิ่มเติม..."></textarea></div>
-          <div style="display:flex;gap:8px"><button class="btn b-solid" style="padding:8px 16px">💾 บันทึก</button><button class="btn b-gray" style="padding:8px 14px">ล้างค่า</button></div>
+          <div class="fg"><label>ชื่อองค์กร *</label><input id="simple-org-name" placeholder="เช่น กรมสุขภาพจิต"></div>
+          <div class="fg"><label>กระทรวง</label><select id="simple-org-ministry"><option value="">-- เลือกกระทรวง --</option><option>สาธารณสุข</option><option>ศึกษาธิการ</option><option>แรงงาน</option><option>มหาดไทย</option><option>ยุติธรรม</option><option>เกษตรฯ</option><option>วัฒนธรรม</option><option>สำนักนายกฯ</option><option>ดิจิทัลฯ</option><option>พม.</option><option>พาณิชย์</option><option>ท่องเที่ยวฯ</option><option>ทรัพยากรฯ</option><option>อว.</option></select></div>
+          <div class="fg"><label>จำนวนบุคลากร (โดยประมาณ)</label><input type="number" id="simple-org-size" placeholder="เช่น 1200"></div>
+          <div class="fg"><label>Tag / กลุ่ม</label><select id="simple-org-tag"><option>ทั่วไป</option><option>นำร่อง</option><option>กลุ่มพิเศษ</option></select></div>
+          <div class="fg"><label>อีเมลผู้ประสานงาน</label><input id="simple-org-email" placeholder="contact@org.go.th"></div>
+          <div class="fg"><label>หมายเหตุ</label><textarea id="simple-org-note" placeholder="รายละเอียดเพิ่มเติม..."></textarea></div>
+          <div style="display:flex;gap:8px">
+            <button class="btn b-solid" style="padding:8px 16px" onclick="saveSimpleOrg()">💾 บันทึก</button>
+            <button class="btn b-gray" style="padding:8px 14px" onclick="document.getElementById('simple-org-name').value='';document.getElementById('simple-org-email').value='';document.getElementById('simple-org-note').value='';document.getElementById('simple-org-size').value='';document.getElementById('simple-org-msg').textContent=''">  ล้างค่า</button>
+          </div>
+          <div id="simple-org-msg" style="font-size:12px;margin-top:6px"></div>
         </div>
       </div>
     </div>
@@ -521,6 +578,7 @@ tbody tr:hover td{background:#FAFBFD}
       <div class="tabs">
         <div class="tab active" onclick="st(this,'c1-ctrl')">⚙️ ควบคุมฟอร์ม</div>
         <div class="tab" onclick="st(this,'c1-data')">📊 ข้อมูลที่ส่งมา</div>
+        <div class="tab" onclick="st(this,'c1-pdf');renderCh1Pdf()">📄 ข้อมูลรายคน PDF</div>
         <div class="tab" onclick="st(this,'c1-sheet')">🗂️ ตารางข้อมูล (Raw)</div>
       </div>
 
@@ -541,19 +599,19 @@ tbody tr:hover td{background:#FAFBFD}
               <div class="st"><div class="st-val">5</div><div class="st-label">ส่วน</div></div>
             </div>
             <div class="fc-actions">
-              <button class="btn b-blue">✏️ แก้ไขคำถาม</button>
-              <button class="btn b-gray">🔗 ดูฟอร์ม</button>
-              <button class="btn b-green">📤 Export ทั้งหมด</button>
+              <button class="btn b-blue" onclick="go('form-editor',document.querySelector('.nav-item[onclick*=\'form-editor\']'));setTimeout(()=>feTab('ch1',document.getElementById('fe-tab-ch1')),200)"> ✏️ แก้ไขคำถาม</button>
+              <button class="btn b-gray" onclick="window.open('ch1.html','_blank')">🔗 ดูฟอร์ม</button>
+              <button class="btn b-green" onclick="exportCh1All()">📤 Export ทั้งหมด</button>
             </div>
           </div>
           <div class="panel" style="margin:0">
             <h3>🔗 ลิงก์ฟอร์ม Ch1 รายองค์กร</h3>
-            <div class="fg"><label>เลือกองค์กร</label><select><option>-- เลือกองค์กร --</option><option>กรมสุขภาพจิต</option><option>สำนักงาน ก.พ.</option><option>กรมการปกครอง</option></select></div>
+            <div class="fg"><label>เลือกองค์กร</label><select id="ch1-link-org" onchange="updateCh1Link()"><option value="">-- เลือกองค์กร --</option></select></div>
             <div class="info blue">🔗 ลิงก์จะ pre-fill ชื่อองค์กรให้อัตโนมัติ</div>
-            <div class="code-box"><code>ch1.html?org=DMH</code><button>📋 Copy</button></div>
+            <div class="code-box"><code id="ch1-link-code">ch1.html?org=DMH</code><button onclick="copyCh1Link()">📋 Copy</button></div>
             <div style="display:flex;gap:7px;margin-top:10px">
-              <button class="btn b-gray" style="flex:1;padding:8px">📷 QR Code</button>
-              <button class="btn b-blue" style="flex:1;padding:8px">📧 ส่งอีเมล</button>
+              <button class="btn b-gray" style="flex:1;padding:8px" onclick="showQRModal(SURVEY_BASE_URL + '/ch1.html?org=' + (ORG_LOOKUP.get(document.getElementById('ch1-link-org')?.value)?.code || 'ORG'))">📷 QR Code</button>
+              <button class="btn b-blue" style="flex:1;padding:8px" onclick="sendLinkEmail('ch1')">📧 ส่งอีเมล</button>
             </div>
           </div>
         </div>
@@ -564,19 +622,36 @@ tbody tr:hover td{background:#FAFBFD}
           <div class="card-head">
             <h3>ข้อมูลที่ส่งมา (Ch1)</h3>
             <div class="filter-bar">
-              <input class="si" placeholder="🔍 ค้นหาองค์กร...">
-              <select class="sel"><option>ทุกองค์กร</option></select>
-              <button class="btn b-gray">📤 Export Excel</button>
+              <input class="si" id="c1data-search" placeholder="🔍 ค้นหาองค์กร..." oninput="filterCh1Data()">
+              <select class="sel" id="c1data-org" onchange="filterCh1Data()"><option value="">ทุกองค์กร</option></select>
+              <button class="btn b-gray" onclick="exportCh1All()">📤 Export Excel</button>
             </div>
           </div>
           <div class="tbl-wrap">
             <table>
-              <thead><tr><th>องค์กร</th><th>บุคลากรรวม</th><th>ส่วนที่กรอก</th><th>วันที่ส่ง</th><th>เวอร์ชัน</th><th>จัดการ</th></tr></thead>
-              <tbody>
-                <tr><td>กรมสุขภาพจิต</td><td>1,240</td><td>5/5 ส่วน</td><td>10 มี.ค. 69</td><td>v3.0</td><td class="td-act"><button class="btn b-blue">ดูละเอียด</button><button class="btn b-gray">PDF</button></td></tr>
-                <tr><td>สำนักงาน ก.พ.</td><td>856</td><td>5/5 ส่วน</td><td>8 มี.ค. 69</td><td>v3.0</td><td class="td-act"><button class="btn b-blue">ดูละเอียด</button><button class="btn b-gray">PDF</button></td></tr>
-                <tr><td>กรมพัฒนาฝีมือแรงงาน</td><td>—</td><td><span class="badge bw">3/5 ส่วน</span></td><td>—</td><td>v3.0</td><td class="td-act"><button class="btn b-blue">ดูละเอียด</button></td></tr>
+              <thead><tr><th>องค์กร</th><th>บุคลากรรวม</th><th>ส่วนที่กรอก</th><th>วันที่ส่ง</th><th>จัดการ</th></tr></thead>
+              <tbody id="c1-data-tbody">
+                <tr><td>กรมสุขภาพจิต</td><td>1,240</td><td>5/5 ส่วน</td><td>10 มี.ค. 69</td><td class="td-act"><button class="btn b-blue">ดูละเอียด</button><button class="btn b-gray">📄 PDF</button></td></tr>
+                <tr><td>สำนักงาน ก.พ.</td><td>856</td><td>5/5 ส่วน</td><td>8 มี.ค. 69</td><td class="td-act"><button class="btn b-blue">ดูละเอียด</button><button class="btn b-gray">📄 PDF</button></td></tr>
               </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div id="c1-pdf" style="display:none">
+        <div class="card">
+          <div class="card-head">
+            <h3>📄 ข้อมูลรายคน PDF</h3>
+            <div class="filter-bar" style="margin:0;border:0;padding:0;background:none;position:static">
+              <input class="si" id="c1pdf-search" placeholder="🔍 ค้นหาองค์กร..." oninput="filterCh1Pdf()">
+              <select class="sel" id="c1pdf-org" onchange="filterCh1Pdf()"><option value="">ทุกองค์กร</option></select>
+            </div>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>#</th><th>องค์กร</th><th>วันที่ส่ง</th><th>จัดการ</th></tr></thead>
+              <tbody id="c1-pdf-tbody"><tr><td colspan="4" style="text-align:center;color:var(--tx3)">กำลังโหลด...</td></tr></tbody>
             </table>
           </div>
         </div>
@@ -585,21 +660,17 @@ tbody tr:hover td{background:#FAFBFD}
       <div id="c1-sheet" style="display:none">
         <div class="card">
           <div class="card-head">
-            <h3>🗂️ Raw Data — Google Sheet View</h3>
+            <h3>🗂️ Raw Data — ตารางข้อมูลทั้งหมด</h3>
             <div class="filter-bar">
-              <input class="si" placeholder="🔍 ค้นหา...">
-              <select class="sel"><option>ทุกองค์กร</option></select>
-              <button class="btn b-gray">📤 Export .xlsx</button>
+              <input class="si" id="c1sheet-search" placeholder="🔍 ค้นหา..." oninput="filterCh1Sheet()">
+              <select class="sel" id="c1sheet-org" onchange="filterCh1Sheet()"><option value="">ทุกองค์กร</option></select>
+              <button class="btn b-gray" onclick="exportCh1All()">📤 Export .xlsx</button>
             </div>
           </div>
           <div class="sheet-wrap">
-            <table>
-              <thead><tr><th>#</th><th>organization</th><th>submitted_at</th><th>total_personnel</th><th>age_under30</th><th>age_31_40</th><th>age_41_50</th><th>age_51_60</th><th>ncd_diabetes</th><th>ncd_hypertension</th><th>sick_leave_days</th><th>mental_burnout</th><th>engagement_score</th><th>strategic_priorities</th></tr></thead>
-              <tbody>
-                <tr><td>1</td><td>กรมสุขภาพจิต</td><td>2026-03-10 09:22</td><td>1240</td><td>180</td><td>420</td><td>380</td><td>260</td><td>45</td><td>120</td><td>8.2</td><td>23%</td><td>72</td><td>สุขภาพจิต, งาน WFH</td></tr>
-                <tr><td>2</td><td>สำนักงาน ก.พ.</td><td>2026-03-08 14:05</td><td>856</td><td>95</td><td>280</td><td>310</td><td>171</td><td>28</td><td>76</td><td>6.8</td><td>18%</td><td>68</td><td>ดิจิทัล, Ergonomics</td></tr>
-                <tr><td>3</td><td>กรมการแพทย์</td><td>2026-03-09 11:30</td><td>2100</td><td>320</td><td>680</td><td>720</td><td>380</td><td>89</td><td>240</td><td>9.5</td><td>31%</td><td>65</td><td>ภาระงาน, NCD</td></tr>
-              </tbody>
+            <table id="c1-sheet-table">
+              <thead><tr id="c1-sheet-thead"></tr></thead>
+              <tbody id="c1-sheet-tbody"></tbody>
             </table>
           </div>
         </div>
@@ -630,8 +701,8 @@ tbody tr:hover td{background:#FAFBFD}
               <div class="st"><div class="st-val">8.3 นาที</div><div class="st-label">เวลาเฉลี่ย</div></div>
             </div>
             <div class="fc-actions">
-              <button class="btn b-blue">✏️ แก้ไขคำถาม</button>
-              <button class="btn b-gray">🔗 ดูฟอร์ม</button>
+              <button class="btn b-blue" onclick="go('form-editor',document.querySelector('.nav-item[onclick*=\'form-editor\']'));setTimeout(()=>feTab('wellbeing',document.getElementById('fe-tab-wb')),200)">✏️ แก้ไขคำถาม</button>
+              <button class="btn b-gray" onclick="window.open('index.html','_blank')">🔗 ดูฟอร์ม</button>
               <button class="btn b-green" onclick="document.querySelector('[onclick=\'swb(this,\\\'wb-sheet\\\')\']').click()">🗂️ ดูข้อมูลรายคน</button>
             </div>
           </div>
@@ -756,7 +827,7 @@ tbody tr:hover td{background:#FAFBFD}
       <div class="filter-bar" style="margin-bottom:16px">
         <select class="sel" style="width:200px"><option>ทุกองค์กร</option><option>กรมสุขภาพจิต</option><option>สำนักงาน ก.พ.</option></select>
         <select class="sel"><option>ทุกกระทรวง</option><option>สาธารณสุข</option></select>
-        <button class="btn b-gray">📤 Export PDF</button>
+        <button class="btn b-gray" onclick="showToast('Export PDF: กำลังพัฒนา — ใช้ print (Ctrl+P) หรือ Export Excel แทนได้','info')">📤 Export PDF</button>
       </div>
       <div class="kpi-grid">
         <div class="kpi"><div class="kpi-icon">👥</div><div class="kpi-label">บุคลากรรวมทุกองค์กร</div><div class="kpi-val">28,400</div><div class="kpi-sub">เฉลี่ย 1,578 คน/องค์กร</div></div>
@@ -799,7 +870,7 @@ tbody tr:hover td{background:#FAFBFD}
         <select class="sel" style="width:200px"><option>ทุกองค์กร</option><option>กรมสุขภาพจิต</option></select>
         <select class="sel"><option>ทุกเพศ</option><option>ชาย</option><option>หญิง</option></select>
         <select class="sel"><option>ทุกกลุ่มอายุ</option><option>≤30 ปี</option><option>31–40 ปี</option></select>
-        <button class="btn b-gray">📤 Export PDF</button>
+        <button class="btn b-gray" onclick="showToast('Export PDF: กำลังพัฒนา — ใช้ print (Ctrl+P) หรือ Export Excel แทนได้','info')">📤 Export PDF</button>
       </div>
       <div class="card card-mb">
         <div class="card-head"><h3>🌡️ Wellbeing Heatmap — ตัวชี้วัดรายด้าน × องค์กร</h3></div>
@@ -834,11 +905,12 @@ tbody tr:hover td{background:#FAFBFD}
       <div class="page-title">เปรียบเทียบองค์กร</div>
       <div class="page-sub">วิเคราะห์เปรียบเทียบตัวชี้วัดระหว่างองค์กร</div>
       <div class="info blue">💡 เลือกองค์กรที่ต้องการเปรียบเทียบ (สูงสุด 5 องค์กร)</div>
-      <div style="display:flex;gap:7px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
-        <span class="badge bb" style="padding:5px 10px;font-size:12px">กรมสุขภาพจิต ✕</span>
-        <span class="badge bb" style="padding:5px 10px;font-size:12px">สำนักงาน ก.พ. ✕</span>
-        <span class="badge bb" style="padding:5px 10px;font-size:12px">กรมการแพทย์ ✕</span>
-        <button class="btn b-gray">+ เพิ่มองค์กร</button>
+      <div id="compare-chips" style="display:flex;gap:7px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
+        <span class="badge bb" style="padding:5px 10px;font-size:12px" data-org="กรมสุขภาพจิต" onclick="removeCompareChip(this)">กรมสุขภาพจิต ✕</span>
+        <span class="badge bb" style="padding:5px 10px;font-size:12px" data-org="สำนักงาน กพร." onclick="removeCompareChip(this)">สำนักงาน กพร. ✕</span>
+        <span class="badge bb" style="padding:5px 10px;font-size:12px" data-org="กรมวิทยาศาสตร์บริการ" onclick="removeCompareChip(this)">กรมวิทยาศาสตร์บริการ ✕</span>
+        <button class="btn b-gray" onclick="addCompareOrg()">+ เพิ่มองค์กร</button>
+        <select id="compare-add-select" style="display:none" class="sel" onchange="confirmAddCompare(this)"><option value="">— เลือก —</option></select>
       </div>
       <div class="card cmp-table">
         <div class="tbl-wrap">
@@ -862,57 +934,33 @@ tbody tr:hover td{background:#FAFBFD}
     <div class="page" id="page-export">
       <div class="page-title">Export รายงาน</div>
       <div class="page-sub">ดาวน์โหลดรายงานในรูปแบบต่าง ๆ</div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
-        <div class="fc"><div class="fc-head"><span style="font-size:20px">📊</span><h3>สรุปภาพรวม Ch1</h3></div><p style="font-size:12px;color:var(--tx2);margin-bottom:12px;line-height:1.6">ข้อมูลองค์กรทั้งหมด พร้อมกราฟโครงสร้างบุคลากร สุขภาวะ และ Engagement</p><div class="fg"><label>เลือกองค์กร</label><select><option>ทุกองค์กร</option><option>เฉพาะองค์กร...</option></select></div><div class="fc-actions"><button class="btn b-blue">📊 Excel</button><button class="btn b-gray">📄 PDF</button></div></div>
-        <div class="fc"><div class="fc-head"><span style="font-size:20px">💚</span><h3>รายงาน Wellbeing</h3></div><p style="font-size:12px;color:var(--tx2);margin-bottom:12px;line-height:1.6">ผลการสำรวจรายบุคคล ครบทุกมิติสุขภาวะ วิเคราะห์ตามองค์กร/เพศ/อายุ</p><div class="fg"><label>เลือกองค์กร</label><select><option>ทุกองค์กร</option></select></div><div class="fc-actions"><button class="btn b-blue">📊 Excel</button><button class="btn b-gray">📄 PDF</button></div></div>
-        <div class="fc"><div class="fc-head"><span style="font-size:20px">⚖️</span><h3>รายงานเปรียบเทียบ</h3></div><p style="font-size:12px;color:var(--tx2);margin-bottom:12px;line-height:1.6">Benchmark ระหว่างองค์กร Heatmap ตัวชี้วัดหลัก และ Ranking</p><div class="fg"><label>เลือกองค์กร</label><select><option>ทุกองค์กร</option></select></div><div class="fc-actions"><button class="btn b-blue">📊 Excel</button><button class="btn b-gray">📄 PDF</button></div></div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
+        <div class="fc"><div class="fc-head"><span style="font-size:20px">📊</span><h3>สรุปภาพรวม Ch1</h3></div><p style="font-size:12px;color:var(--tx2);margin-bottom:12px;line-height:1.6">ข้อมูลองค์กรทั้งหมด พร้อมกราฟโครงสร้างบุคลากร สุขภาวะ และ Engagement</p><div class="fg"><label>เลือกองค์กร</label><select id="exp-ch1-org"><option value="">ทุกองค์กร</option></select></div><div class="fc-actions"><button class="btn b-blue" onclick="exportCh1Filtered(document.getElementById('exp-ch1-org').value)">📊 Excel</button><button class="btn b-gray" onclick="showToast('PDF: กด Ctrl+P แล้วเลือก Save as PDF','info')"> 📄 PDF</button></div></div>
+        <div class="fc"><div class="fc-head"><span style="font-size:20px">💚</span><h3>รายงาน Wellbeing</h3></div><p style="font-size:12px;color:var(--tx2);margin-bottom:12px;line-height:1.6">ผลการสำรวจรายบุคคล ครบทุกมิติสุขภาวะ วิเคราะห์ตามองค์กร/เพศ/อายุ</p><div class="fg"><label>เลือกองค์กร</label><select id="exp-wb-org"><option value="">ทุกองค์กร</option></select></div><div class="fc-actions"><button class="btn b-blue" onclick="exportWbFiltered(document.getElementById('exp-wb-org').value)">📊 Excel</button><button class="btn b-gray" onclick="showToast('PDF: กด Ctrl+P แล้วเลือก Save as PDF','info')">📄 PDF</button></div></div>
+        <div class="fc"><div class="fc-head"><span style="font-size:20px">⚖️</span><h3>รายงานเปรียบเทียบ</h3></div><p style="font-size:12px;color:var(--tx2);margin-bottom:12px;line-height:1.6">Benchmark ระหว่างองค์กร Heatmap ตัวชี้วัดหลัก และ Ranking</p><div class="fg"><label>เลือกองค์กร</label><select id="exp-cmp-org"><option value="">ทุกองค์กร</option></select></div><div class="fc-actions"><button class="btn b-blue" onclick="exportCompareReport()">📊 Excel</button><button class="btn b-gray" onclick="showToast('PDF: กด Ctrl+P แล้วเลือก Save as PDF','info')">📄 PDF</button></div></div>
       </div>
     </div>
 
     <!-- ==================== USERS ==================== -->
     <div class="page" id="page-users">
-      <div class="page-title">จัดการผู้ใช้ / Viewer</div>
-      <div class="page-sub">ออกสิทธิ์ Viewer ให้แต่ละองค์กรดูผลของตัวเอง</div>
-      <div class="two-col">
-        <div class="card">
-          <div class="card-head">
-            <h3>รายการ Viewer ทั้งหมด</h3>
-            <div class="filter-bar">
-              <input class="si" placeholder="🔍 ค้นหา...">
-              <select class="sel"><option>ทุกองค์กร</option></select>
-            </div>
-          </div>
-          <div class="tbl-wrap">
-            <table>
-              <thead><tr><th>อีเมล</th><th>Role</th><th>องค์กรที่ดูได้</th><th>เข้าล่าสุด</th><th>สถานะ</th><th>หมดอายุ</th><th>จัดการ</th></tr></thead>
-              <tbody>
-                <tr><td>viewer1@dmh.go.th</td><td><span class="badge bb">Viewer</span></td><td>กรมสุขภาพจิต</td><td>13 มี.ค. 69</td><td><span class="badge bg">Active</span></td><td>30 มิ.ย. 69</td><td class="td-act"><button class="btn b-gray">แก้ไข</button><button class="btn b-red">ลบ</button></td></tr>
-                <tr><td>hr@ocsc.go.th</td><td><span class="badge bb">Viewer</span></td><td>สำนักงาน ก.พ.</td><td>12 มี.ค. 69</td><td><span class="badge bg">Active</span></td><td>30 มิ.ย. 69</td><td class="td-act"><button class="btn b-gray">แก้ไข</button><button class="btn b-red">ลบ</button></td></tr>
-                <tr><td>data@moph.go.th</td><td><span class="badge bb">Viewer</span></td><td>กรมการแพทย์</td><td>—</td><td><span class="badge bx">ไม่ได้ใช้งาน</span></td><td>30 มิ.ย. 69</td><td class="td-act"><button class="btn b-gray">แก้ไข</button><button class="btn b-red">ลบ</button></td></tr>
-              </tbody>
-            </table>
+      <div class="page-title">จัดการผู้ใช้</div>
+      <div class="page-sub">จัดการ Admin และ Viewer — กำหนดสิทธิ์และองค์กรที่เข้าถึงได้</div>
+      <div class="info blue" id="users-role-info" style="margin-bottom:14px">🔑 คุณเข้าสู่ระบบในฐานะ <b>Super Admin</b> — สามารถจัดการผู้ใช้ทุกระดับได้</div>
+      <div class="card">
+        <div class="card-head">
+          <h3>ผู้ใช้ในระบบทั้งหมด</h3>
+          <div class="filter-bar">
+            <input class="si" id="users-search" placeholder="🔍 ค้นหา email, องค์กร..." oninput="filterUsersTable()">
+            <select class="sel" id="users-role-filter" onchange="filterUsersTable()"><option value="">ทุก Role</option><option value="superadmin">Super Admin</option><option value="admin">Admin</option><option value="viewer">Viewer</option></select>
+            <select class="sel" id="users-org-filter" onchange="filterUsersTable()"><option value="">ทุกองค์กร</option></select>
+            <button class="btn b-solid" onclick="showAddUserModal()">➕ เพิ่มผู้ใช้</button>
           </div>
         </div>
-        <div class="panel">
-          <h3>➕ เพิ่ม Viewer ใหม่</h3>
-          <div class="fg"><label>อีเมล *</label><input placeholder="viewer@org.go.th"></div>
-          <div class="fg"><label>องค์กรที่ดูได้ *</label><select><option>-- เลือกองค์กร --</option><option>กรมสุขภาพจิต</option><option>สำนักงาน ก.พ.</option></select></div>
-          <div class="fg">
-            <label>สิทธิ์เข้าถึงฟอร์ม</label>
-            <div class="cb-group">
-              <label><input type="checkbox" checked> Ch1 Dashboard</label>
-              <label><input type="checkbox" checked> Wellbeing Dashboard</label>
-              <label><input type="checkbox"> Raw Data Table</label>
-              <label><input type="checkbox"> Export รายงาน</label>
-            </div>
-          </div>
-          <div class="fg"><label>วันหมดอายุสิทธิ์</label><input type="date" value="2026-06-30"></div>
-          <div style="display:flex;gap:8px;margin-bottom:16px"><button class="btn b-solid" style="padding:8px 14px">เพิ่ม Viewer</button></div>
-          <div style="border-top:1px solid var(--bdr);padding-top:14px">
-            <div style="font-size:11.5px;font-weight:600;color:var(--tx2);margin-bottom:6px">รหัสเข้าใช้งานชั่วคราว</div>
-            <div class="code-box"><code>WB-DMH-2569</code><button>📋 Copy</button></div>
-            <div style="font-size:11px;color:var(--tx3);margin-top:6px">ส่งรหัสนี้ให้ผู้ใช้ตั้งรหัสผ่านครั้งแรก</div>
-          </div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>อีเมล</th><th>Role</th><th>องค์กรที่ดูได้</th><th>เข้าล่าสุด</th><th>สถานะ</th><th>หมดอายุ</th><th>จัดการ</th></tr></thead>
+            <tbody id="users-tbody"></tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -924,35 +972,55 @@ tbody tr:hover td{background:#FAFBFD}
       <div class="info green">✅ ลิงก์แต่ละองค์กรจะ pre-fill ชื่อองค์กรให้อัตโนมัติ ป้องกันการกรอกข้ามองค์กร</div>
       <div class="card card-mb">
         <div class="card-head">
-          <h3>ลิงก์ Wellbeing Survey รายองค์กร</h3>
+          <h3>ลิงก์แบบสอบถามรายองค์กร</h3>
           <div class="filter-bar">
-            <select class="sel"><option>ทุกสถานะ</option><option>เปิดอยู่</option><option>ปิด</option></select>
-            <button class="btn b-solid">🔗 สร้างลิงก์ใหม่</button>
+            <input class="si" id="links-search" placeholder="🔍 ค้นหาองค์กร..." oninput="filterLinksTable()">
+            <select class="sel" id="links-form-filter" onchange="filterLinksTable()"><option value="">ทุกฟอร์ม</option><option value="Wellbeing">💚 Wellbeing Survey</option><option value="Ch1">📝 Ch1</option></select>
+            <select class="sel" id="links-org-filter" onchange="filterLinksTable()"><option value="">ทุกองค์กร</option></select>
+            <select class="sel" id="links-status-filter" onchange="filterLinksTable()"><option value="">ทุกสถานะ</option><option value="เปิดอยู่">เปิดอยู่</option><option value="ปิด">ปิด</option></select>
           </div>
         </div>
         <div class="tbl-wrap">
           <table>
-            <thead><tr><th>องค์กร</th><th>ลิงก์</th><th>ผู้ตอบ</th><th>สถานะ</th><th>หมดอายุ</th><th>จัดการ</th></tr></thead>
-            <tbody>
-              <tr><td>กรมสุขภาพจิต</td><td><code style="font-size:10.5px;background:var(--bg);padding:3px 6px;border-radius:4px;color:var(--P)">/survey?org=DMH&token=abc123</code></td><td>234</td><td><span class="badge bg">เปิดอยู่</span></td><td>30 เม.ย. 69</td><td class="td-act"><button class="btn b-gray">QR</button><button class="btn b-blue">Copy</button><button class="btn b-red">ปิด</button></td></tr>
-              <tr><td>สำนักงาน ก.พ.</td><td><code style="font-size:10.5px;background:var(--bg);padding:3px 6px;border-radius:4px;color:var(--P)">/survey?org=OCSC&token=def456</code></td><td>180</td><td><span class="badge bg">เปิดอยู่</span></td><td>30 เม.ย. 69</td><td class="td-act"><button class="btn b-gray">QR</button><button class="btn b-blue">Copy</button><button class="btn b-red">ปิด</button></td></tr>
-              <tr><td>กรมการปกครอง</td><td><code style="font-size:10.5px;background:var(--bg);padding:3px 6px;border-radius:4px;color:var(--P)">/survey?org=DLA&token=ghi789</code></td><td>0</td><td><span class="badge bx">ยังไม่เปิด</span></td><td>—</td><td class="td-act"><button class="btn b-green">เปิด</button><button class="btn b-blue">Copy</button></td></tr>
-            </tbody>
+            <thead><tr><th>องค์กร</th><th>ฟอร์ม</th><th>ลิงก์</th><th>ผู้ตอบ</th><th>สถานะ</th><th>หมดอายุ</th><th>จัดการ</th></tr></thead>
+            <tbody id="links-tbody"></tbody>
           </table>
         </div>
       </div>
       <div class="panel">
         <h3>🔗 สร้างลิงก์ใหม่</h3>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
-          <div class="fg" style="margin:0"><label>เลือกองค์กร *</label><select><option>-- เลือก --</option><option>กรมการปกครอง</option></select></div>
-          <div class="fg" style="margin:0"><label>เลือกฟอร์ม *</label><select><option>Wellbeing Survey</option><option>Ch1</option></select></div>
-          <div class="fg" style="margin:0"><label>วันหมดอายุลิงก์</label><input type="date" value="2026-04-30"></div>
+          <div class="fg" style="margin:0"><label>เลือกองค์กร *</label>
+            <select id="create-link-org">
+              <option value="">— เลือก —</option>
+              <option>กรมกิจการเด็กและเยาวชน</option>
+              <option>กรมคุมประพฤติ</option>
+              <option>กรมชลประทาน</option>
+              <option>กรมวิทยาศาสตร์บริการ</option>
+              <option>กรมส่งเสริมวัฒนธรรม</option>
+              <option>กรมสุขภาพจิต</option>
+              <option>กรมอุตุนิยมวิทยา</option>
+              <option>สำนักงบประมาณ</option>
+              <option>สำนักงาน กพร.</option>
+              <option>สำนักงานการวิจัยแห่งชาติ</option>
+              <option>สำนักงานนโยบายและแผนทรัพยากรธรรมชาติและสิ่งแวดล้อม</option>
+              <option>สำนักงานนโยบายและยุทธศาสตร์การค้า</option>
+              <option>สำนักงานปลัดกระทรวงการท่องเที่ยวและกีฬา</option>
+              <option>สำนักงานมาตรฐานสินค้าเกษตรและอาหารแห่งชาติ</option>
+              <option>สำนักงานสภาพัฒนาการเศรษฐกิจและสังคมแห่งชาติ</option>
+            </select>
+          </div>
+          <div class="fg" style="margin:0"><label>เลือกฟอร์ม *</label><select id="create-link-form"><option value="wb">Wellbeing Survey</option><option value="ch1">Ch1</option></select></div>
+          <div class="fg" style="margin:0"><label>วันหมดอายุลิงก์ <span id="create-link-expires-be" style="font-size:11px;color:var(--A);font-weight:600"></span></label><input type="date" id="create-link-expires" value="2026-04-30" oninput="document.getElementById('create-link-expires-be').textContent=isoToBuddhistDisplay(this.value)"></div>
         </div>
-        <div style="margin-top:12px"><button class="btn b-solid" style="padding:8px 16px">🔗 สร้างลิงก์</button></div>
+        <div style="margin-top:12px;display:flex;gap:8px;align-items:center">
+          <button class="btn b-solid" style="padding:8px 16px" onclick="createNewLink()">🔗 สร้างลิงก์</button>
+          <div id="create-link-msg" style="font-size:12px;color:var(--A)"></div>
+        </div>
       </div>
-    </div>
 
     <!-- ==================== NOTIF ==================== -->
+    </div>
     <div class="page" id="page-notif">
       <div class="page-title">Reminder / แจ้งเตือน</div>
       <div class="page-sub">ส่ง Email เตือนองค์กรที่ยังไม่ส่งข้อมูล</div>
@@ -968,9 +1036,10 @@ tbody tr:hover td{background:#FAFBFD}
 
 ขอบคุณครับ</textarea></div>
           <div style="display:flex;gap:8px">
-            <button class="btn b-solid" style="padding:8px 16px">📧 ส่งอีเมล</button>
-            <button class="btn b-gray" style="padding:8px 14px">ดูตัวอย่าง</button>
+            <button class="btn b-solid" style="padding:8px 16px" onclick="sendReminderEmail()">📧 ส่งอีเมล</button>
+            <button class="btn b-gray" style="padding:8px 14px" onclick="previewReminderEmail()">ดูตัวอย่าง</button>
           </div>
+          <div id="notif-msg" style="font-size:12px;margin-top:8px"></div>
         </div>
         <div class="panel">
           <h3>📋 ประวัติการส่ง</h3>
@@ -988,18 +1057,22 @@ tbody tr:hover td{background:#FAFBFD}
       <div class="card card-mb">
         <div class="card-head"><h3>⚙️ ฟอร์มและการเก็บข้อมูล</h3></div>
         <div class="card-body">
-          <div class="set-row"><div class="set-info"><div class="set-label">Auto-save ระหว่างกรอก</div><div class="set-desc">บันทึกข้อมูลอัตโนมัติทุก 30 วินาที</div></div><label class="tgl"><input type="checkbox" checked><div class="tgl-s"></div></label></div>
-          <div class="set-row"><div class="set-info"><div class="set-label">Google Sheets Sync</div><div class="set-desc">ซิงค์ข้อมูลทุกครั้งที่มีการ Submit</div></div><label class="tgl"><input type="checkbox" checked><div class="tgl-s"></div></label></div>
-          <div class="set-row"><div class="set-info"><div class="set-label">เวอร์ชันฟอร์มที่ใช้</div><div class="set-desc">กำหนดเวอร์ชันฟอร์มที่แสดงให้ผู้ใช้</div></div><select class="sel"><option>v3.0 (ล่าสุด)</option><option>v2.1</option></select></div>
+          <div class="set-row"><div class="set-info"><div class="set-label">Auto-save ระหว่างกรอก</div><div class="set-desc">บันทึกข้อมูลอัตโนมัติทุก 30 วินาที</div></div><label class="tgl"><input type="checkbox" id="setting-autosave" checked><div class="tgl-s"></div></label></div>
+          <div class="set-row"><div class="set-info"><div class="set-label">Google Sheets Sync</div><div class="set-desc">ซิงค์ข้อมูลทุกครั้งที่มีการ Submit</div></div><label class="tgl"><input type="checkbox" id="setting-sheets-sync" checked><div class="tgl-s"></div></label></div>
+          <div class="set-row"><div class="set-info"><div class="set-label">เวอร์ชันฟอร์มที่ใช้</div><div class="set-desc">กำหนดเวอร์ชันฟอร์มที่แสดงให้ผู้ใช้</div></div><select class="sel" id="setting-form-version"><option>v3.0 (ล่าสุด)</option><option>v2.1</option></select></div>
         </div>
       </div>
-      <div class="card">
+      <div class="card card-mb">
         <div class="card-head"><h3>🔐 ความปลอดภัย</h3></div>
         <div class="card-body">
-          <div class="set-row"><div class="set-info"><div class="set-label">Session timeout</div><div class="set-desc">ล็อกอัตโนมัติหลังไม่มีกิจกรรม</div></div><select class="sel"><option>30 นาที</option><option>1 ชั่วโมง</option><option>4 ชั่วโมง</option></select></div>
-          <div class="set-row"><div class="set-info"><div class="set-label">บันทึก Audit Log</div><div class="set-desc">บันทึกทุก action ของ admin/viewer</div></div><label class="tgl"><input type="checkbox" checked><div class="tgl-s"></div></label></div>
-          <div class="set-row"><div class="set-info"><div class="set-label">บังคับเปลี่ยนรหัสผ่าน</div><div class="set-desc">บังคับเปลี่ยนรหัสผ่านทุก 90 วัน</div></div><label class="tgl"><input type="checkbox"><div class="tgl-s"></div></label></div>
+          <div class="set-row"><div class="set-info"><div class="set-label">Session timeout</div><div class="set-desc">ล็อกอัตโนมัติหลังไม่มีกิจกรรม</div></div><select class="sel" id="setting-session-timeout"><option>30 นาที</option><option>1 ชั่วโมง</option><option>4 ชั่วโมง</option></select></div>
+          <div class="set-row"><div class="set-info"><div class="set-label">บันทึก Audit Log</div><div class="set-desc">บันทึกทุก action ของ admin/viewer</div></div><label class="tgl"><input type="checkbox" id="setting-audit-log" checked><div class="tgl-s"></div></label></div>
+          <div class="set-row"><div class="set-info"><div class="set-label">บังคับเปลี่ยนรหัสผ่าน</div><div class="set-desc">บังคับเปลี่ยนรหัสผ่านทุก 90 วัน</div></div><label class="tgl"><input type="checkbox" id="setting-force-password"><div class="tgl-s"></div></label></div>
         </div>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;">
+        <button class="btn b-gray" onclick="resetSettings()">↩️ รีเซ็ต</button>
+        <button class="btn b-blue" onclick="saveSettings()">💾 บันทึกการตั้งค่า</button>
       </div>
     </div>
 
@@ -1011,9 +1084,9 @@ tbody tr:hover td{background:#FAFBFD}
         <div class="card-head">
           <h3>Log ทั้งหมด</h3>
           <div class="filter-bar">
-            <input class="si" placeholder="🔍 ค้นหา email, action...">
-            <select class="sel"><option>ทุก Action</option><option>Login</option><option>Export</option><option>User Manage</option><option>Form Control</option></select>
-            <button class="btn b-gray">📤 Export Log</button>
+            <input class="si" id="audit-search" placeholder="🔍 ค้นหา email, action..." oninput="filterAuditLog()">
+            <select class="sel" id="audit-type" onchange="filterAuditLog()"><option value="">ทุก Action</option><option value="Login">Login</option><option value="Export">Export</option><option value="User Manage">User Manage</option><option value="Form Control">Form Control</option></select>
+            <button class="btn b-gray" onclick="exportAuditLog()">📤 Export Log</button>
           </div>
         </div>
         <div class="card-body">
@@ -1023,6 +1096,42 @@ tbody tr:hover td{background:#FAFBFD}
           <div class="audit-item"><div class="ai-time">13 มี.ค. 09:14</div><div class="ai-icon">➕</div><div><div class="ai-desc">เพิ่ม Viewer: hr@ocsc.go.th → สำนักงาน ก.พ.</div><div class="ai-user">admin@ocsc.go.th</div></div></div>
           <div class="audit-item"><div class="ai-time">12 มี.ค. 16:00</div><div class="ai-icon">🔐</div><div><div class="ai-desc">Login สำเร็จ</div><div class="ai-user">admin@ocsc.go.th · IP 101.x.x.x</div></div></div>
           <div class="audit-item"><div class="ai-time">10 มี.ค. 08:30</div><div class="ai-icon">✏️</div><div><div class="ai-desc">แก้ไขข้อมูลองค์กร "กรมการแพทย์" — อัปเดตจำนวนบุคลากร</div><div class="ai-user">admin@ocsc.go.th</div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== FORM EDITOR ==================== -->
+    <div class="page" id="page-form-editor">
+      <div class="page-title">✏️ แก้ไขเนื้อหาฟอร์ม</div>
+      <div class="page-sub">แก้ไขข้อความ ชื่อหัวข้อ คำถาม และคำอธิบายในฟอร์ม — การบันทึกจะมีผลทันทีเมื่อผู้ใช้ Reload ฟอร์ม</div>
+      <div class="card card-mb">
+        <div class="card-head">
+          <h3>เลือกฟอร์มที่ต้องการแก้ไข</h3>
+          <div class="filter-bar">
+            <div class="tabs" style="margin:0">
+              <div class="tab active" id="fe-tab-ch1" onclick="feTab('ch1',this)">📝 ฟอร์ม Ch1</div>
+              <div class="tab" id="fe-tab-wb" onclick="feTab('wellbeing',this)">💚 Wellbeing Survey</div>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="info blue" style="margin-bottom:14px">💡 แก้ไขเฉพาะข้อความที่ต้องการ แล้วกด <b>บันทึก</b> — ระบบจะ override เฉพาะช่องที่เปลี่ยน ไม่กระทบ default ต้นฉบับ</div>
+          <div id="fe-ch1-panel">
+            <div id="fe-ch1-status" style="font-size:12px;color:var(--tx3);margin-bottom:10px">กำลังโหลด...</div>
+            <div id="fe-ch1-fields"></div>
+            <div style="display:flex;gap:10px;margin-top:16px">
+              <button class="btn b-gray" onclick="resetAllFe('ch1')">↩️ รีเซ็ตทั้งหมด</button>
+              <button class="btn b-blue" onclick="saveFormConfig('ch1')">💾 บันทึก Ch1</button>
+            </div>
+          </div>
+          <div id="fe-wb-panel" style="display:none">
+            <div id="fe-wb-status" style="font-size:12px;color:var(--tx3);margin-bottom:10px">กำลังโหลด...</div>
+            <div id="fe-wb-fields"></div>
+            <div style="display:flex;gap:10px;margin-top:16px">
+              <button class="btn b-gray" onclick="resetAllFe('wellbeing')">↩️ รีเซ็ตทั้งหมด</button>
+              <button class="btn b-blue" onclick="saveFormConfig('wellbeing')">💾 บันทึก Wellbeing</button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -1051,6 +1160,7 @@ const titles = {
   notif:['Reminder / แจ้งเตือน','/ จัดการระบบ'],
   settings:['ตั้งค่าระบบ','/ จัดการระบบ'],
   audit:['Audit Log','/ จัดการระบบ'],
+  'form-editor':['แก้ไขเนื้อหาฟอร์ม','/ จัดการระบบ'],
 };
 
 const ORG_META = [
@@ -1116,10 +1226,30 @@ function fmtDate(value, withTime = false) {
   if (!value) return '—';
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return String(value);
-  return date.toLocaleDateString('th-TH', withTime
-    ? { day:'numeric', month:'short', year:'2-digit', hour:'2-digit', minute:'2-digit' }
-    : { day:'numeric', month:'short', year:'2-digit' }
-  );
+  const dd = String(date.getDate()).padStart(2, '0');
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  const yyyy = date.getFullYear() + 543; // แปลง ค.ศ. → พ.ศ.
+  if (withTime) {
+    const hh = String(date.getHours()).padStart(2, '0');
+    const min = String(date.getMinutes()).padStart(2, '0');
+    return `${dd}/${mm}/${yyyy} ${hh}:${min}`;
+  }
+  return `${dd}/${mm}/${yyyy}`;
+}
+
+// แปลง ISO date string (YYYY-MM-DD) → วว/ดด/ปปปป พ.ศ. สำหรับแสดงผล input
+function isoToBuddhistDisplay(isoStr) {
+  if (!isoStr) return '';
+  const [y, m, d] = isoStr.split('-');
+  return `${d}/${m}/${parseInt(y) + 543}`;
+}
+// แปลง Buddhist display (วว/ดด/ปปปป) → ISO (YYYY-MM-DD) สำหรับ input value
+function buddhistDisplayToISO(buddhistStr) {
+  if (!buddhistStr) return '';
+  const parts = buddhistStr.split('/');
+  if (parts.length !== 3) return '';
+  const [d, m, y] = parts;
+  return `${parseInt(y) - 543}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
 }
 
 function fmtNum(value, digits = 0) {
@@ -1244,6 +1374,53 @@ function showError(message) {
   document.getElementById('tbc').textContent = message;
 }
 
+/* ======= TOAST NOTIFICATION (แทน alert) ======= */
+function showToast(message, type = 'success', duration = 3500) {
+  const existing = document.getElementById('admin-toast');
+  if (existing) existing.remove();
+  const colors = { success:'#00A86B', error:'#DC2626', info:'#0F4C81', warn:'#92681A' };
+  const icons  = { success:'✅', error:'❌', info:'ℹ️', warn:'⚠️' };
+  const toast = document.createElement('div');
+  toast.id = 'admin-toast';
+  toast.style.cssText = `position:fixed;bottom:24px;right:24px;z-index:99999;
+    background:${colors[type]||colors.info};color:#fff;
+    padding:12px 20px;border-radius:10px;font-size:13px;font-weight:500;
+    box-shadow:0 4px 20px rgba(0,0,0,.25);max-width:360px;line-height:1.5;
+    display:flex;gap:10px;align-items:flex-start;
+    animation:toastIn .25s ease`;
+  const styleEl = document.getElementById('toast-style');
+  if (!styleEl) {
+    const s = document.createElement('style');
+    s.id = 'toast-style';
+    s.textContent = `@keyframes toastIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}`;
+    document.head.appendChild(s);
+  }
+  toast.innerHTML = `<span style="font-size:16px;flex-shrink:0">${icons[type]||icons.info}</span><span>${message}</span>`;
+  document.body.appendChild(toast);
+  setTimeout(() => { if (toast.parentNode) toast.remove(); }, duration);
+}
+
+/* ======= CUSTOM CONFIRM MODAL (แทน confirm) ======= */
+function showConfirm(message, onConfirm, onCancel) {
+  const existing = document.getElementById('confirm-modal-overlay');
+  if (existing) existing.remove();
+  const overlay = document.createElement('div');
+  overlay.id = 'confirm-modal-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:99998';
+  overlay.innerHTML = `<div style="background:#fff;border-radius:14px;padding:28px 28px 20px;max-width:420px;width:90%;box-shadow:0 20px 40px rgba(0,0,0,.2)">
+    <div style="font-size:15px;font-weight:600;color:#0F4C81;margin-bottom:8px">ยืนยันการดำเนินการ</div>
+    <div style="font-size:13px;color:#374151;white-space:pre-wrap;line-height:1.6;margin-bottom:20px">${message}</div>
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button id="confirm-cancel-btn" class="btn b-gray" style="padding:8px 20px">ยกเลิก</button>
+      <button id="confirm-ok-btn" class="btn b-blue" style="padding:8px 20px">✅ ยืนยัน</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+  document.getElementById('confirm-ok-btn').onclick = () => { overlay.remove(); if (onConfirm) onConfirm(); };
+  document.getElementById('confirm-cancel-btn').onclick = () => { overlay.remove(); if (onCancel) onCancel(); };
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) { overlay.remove(); if (onCancel) onCancel(); } });
+}
+
 function visiblePageId() {
   return document.querySelector('.page.active')?.id || 'page-dashboard';
 }
@@ -1266,13 +1443,15 @@ function go(id, el) {
     document.getElementById('ttl').textContent = title[0];
     document.getElementById('tbc').textContent = title[1];
   }
+  if (id === 'settings') loadSettingsUI();
+  if (id === 'form-editor') loadFormEditorFields();
 }
 
 function st(el, targetId) {
   const page = el.closest('.page');
   page.querySelectorAll('.tab').forEach((tab) => tab.classList.remove('active'));
   el.classList.add('active');
-  ['c1-ctrl','c1-data','c1-sheet'].forEach((id) => {
+  ['c1-ctrl','c1-data','c1-pdf','c1-sheet'].forEach((id) => {
     const node = document.getElementById(id);
     if (node) node.style.display = 'none';
   });
@@ -1364,9 +1543,19 @@ function renderChrome() {
   const email = state.session?.user?.email || 'admin';
   document.querySelector('.u-name').textContent = email;
   document.querySelector('.u-avatar').textContent = email.charAt(0).toUpperCase();
+  // ตรวจสอบ role ของผู้ใช้ที่ login อยู่
+  const myRow = state.userRows.find((r) => r.email === email);
+  // Locked superadmin emails — ไม่สามารถเปลี่ยน role ได้จาก UI
+  const isLockedSuper = LOCKED_SUPERADMIN_EMAILS.includes(email);
+  state.myRole = isLockedSuper ? 'superadmin' : (myRow?.role || 'superadmin');
+  document.querySelector('.u-role').innerHTML = `<div class="u-role-dot"></div> ${state.myRole === 'superadmin' ? 'Super Admin' : state.myRole === 'admin' ? 'Admin' : 'Viewer'}`;
+  const roleInfoEl = document.getElementById('users-role-info');
+  if (roleInfoEl) {
+    if (state.myRole === 'superadmin') roleInfoEl.innerHTML = '🔑 คุณเข้าสู่ระบบในฐานะ <b>Super Admin</b> — สามารถจัดการผู้ใช้ทุกระดับได้';
+    else if (state.myRole === 'admin') roleInfoEl.innerHTML = '🔑 คุณเข้าสู่ระบบในฐานะ <b>Admin</b> — สามารถเพิ่ม/จัดการ Viewer ได้เท่านั้น';
+  }
 
-  const logoutItem = document.querySelector('.sidebar-foot .nav-item');
-  logoutItem.onclick = async () => {
+  window.doLogout = async () => {
     await sb.auth.signOut();
     window.location.href = '/admin-login';
   };
@@ -1648,33 +1837,231 @@ function renderCh1(summary) {
     codeBox.textContent = `ch1.html?org=${code}`;
   };
 
-  const ch1Data = document.getElementById('c1-data');
-  ch1Data.querySelector('tbody').innerHTML = state.ch1Rows.map((row) => `<tr>
+  const ch1DataTbody = document.getElementById('c1-data-tbody') || document.querySelector('#c1-data tbody');
+  if (ch1DataTbody) ch1DataTbody.innerHTML = state.ch1Rows.map((row, index) => `<tr>
     <td>${esc(getCh1Org(row))}</td>
     <td>${fmtNum(row.total_staff || row.total_personnel || row.form_data?.total_personnel)}</td>
     <td>${esc(row.form_completion || '5/5 ส่วน')}</td>
     <td>${fmtDate(getRowDate(row))}</td>
-    <td>${esc(row.version || 'v3.0')}</td>
-    <td class="td-act"><button class="btn b-blue">ดูละเอียด</button></td>
-  </tr>`).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--tx3)">ยังไม่มีข้อมูล Ch1</td></tr>';
+    <td class="td-act"><button class="btn b-blue" onclick="showCh1RowDetail(${index})">ดูละเอียด</button><button class="btn b-gray" onclick="showCh1PDF(${index})">📄 PDF</button></td>
+  </tr>`).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--tx3)">ยังไม่มีข้อมูล Ch1</td></tr>';
 
-  const raw = document.getElementById('c1-sheet');
-  raw.querySelector('tbody').innerHTML = state.ch1Rows.slice(0, 20).map((row, index) => `<tr>
-    <td>${index + 1}</td>
+  renderCh1RawSheet();
+  renderCh1Pdf();
+}
+
+// Helper: get value from form_data JSONB (primary) or top-level column (fallback)
+function ch1v(row, key) { return row.form_data?.[key] ?? row[key]; }
+// Helper: render file URL as clickable link
+function ch1FileLink(url) {
+  if (!url) return '—';
+  return `<a href="${esc(url)}" target="_blank" rel="noopener" style="color:#2563eb;text-decoration:underline;white-space:nowrap">📎 ดูไฟล์</a>`;
+}
+// Helper: render turnover rate (stored or recalculate)
+function ch1Rate(row, yr) {
+  const stored = ch1v(row, `rate_${yr}`);
+  if (stored != null && stored !== '') return fmtNum(parseFloat(stored), 2) + '%';
+  const b = parseFloat(ch1v(row, `begin_${yr}`)), e = parseFloat(ch1v(row, `end_${yr}`)), l = parseFloat(ch1v(row, `leave_${yr}`));
+  if (!isNaN(b) && !isNaN(e) && !isNaN(l) && (b + e) > 0) return fmtNum((l / ((b + e) / 2)) * 100, 2) + '%';
+  return '—';
+}
+
+const CH1_COLUMNS = [
+  // ── Metadata ──────────────────────────────────────────────────
+  { key: '_org',          label: 'องค์กร',                    get: (row) => getCh1Org(row) },
+  { key: 'submitted_at',  label: 'วันที่ส่ง',                  get: (row) => fmtDate(getRowDate(row), true) },
+  { key: '_email',        label: 'อีเมลผู้กรอก',              get: (row) => esc(ch1v(row,'respondent_email') || '—') },
+
+  // ── ส่วนที่ 1: ข้อมูลเบื้องต้น ────────────────────────────────
+  { key: 'total_staff',   label: 'บุคลากรทั้งหมด (คน)',       get: (row) => fmtNum(ch1v(row,'total_staff') ?? ch1v(row,'total_personnel')) },
+  { key: 'strategic_overview', label: 'ภาพรวมยุทธศาสตร์',    get: (row) => esc(ch1v(row,'strategic_overview') || '—') },
+  { key: 'org_structure', label: 'โครงสร้างองค์กร',           get: (row) => esc(ch1v(row,'org_structure') || '—') },
+  { key: '_strategy_file',label: 'ไฟล์ยุทธศาสตร์',            get: (row) => ch1FileLink(ch1v(row,'strategy_file_url')) },
+  { key: '_orgstruct_file',label: 'ไฟล์โครงสร้างองค์กร',      get: (row) => ch1FileLink(ch1v(row,'org_structure_file_url')) },
+
+  // ── ประเภทบุคลากร ─────────────────────────────────────────────
+  { key: 'type_official', label: 'ข้าราชการ (คน)',             get: (row) => fmtNum(ch1v(row,'type_official')) },
+  { key: 'type_employee', label: 'พนักงานราชการ (คน)',         get: (row) => fmtNum(ch1v(row,'type_employee')) },
+  { key: 'type_contract', label: 'ลูกจ้าง (คน)',              get: (row) => fmtNum(ch1v(row,'type_contract')) },
+  { key: 'type_other',    label: 'บุคลากรอื่นๆ (คน)',          get: (row) => fmtNum(ch1v(row,'type_other')) },
+
+  // ── ช่วงอายุ (4 กลุ่ม) ────────────────────────────────────────
+  { key: 'age_u30',       label: 'อายุ ≤30 ปี (คน)',           get: (row) => fmtNum(ch1v(row,'age_u30') ?? ch1v(row,'age_under30')) },
+  { key: 'age_31_40',     label: 'อายุ 31–40 ปี (คน)',         get: (row) => fmtNum(ch1v(row,'age_31_40')) },
+  { key: 'age_41_50',     label: 'อายุ 41–50 ปี (คน)',         get: (row) => fmtNum(ch1v(row,'age_41_50')) },
+  { key: 'age_51_60',     label: 'อายุ 51–60 ปี (คน)',         get: (row) => fmtNum(ch1v(row,'age_51_60')) },
+
+  // ── อายุราชการ (8 กลุ่ม) ──────────────────────────────────────
+  { key: 'service_u1',    label: 'อายุราชการ <1 ปี (คน)',      get: (row) => fmtNum(ch1v(row,'service_u1')) },
+  { key: 'service_1_5',   label: 'อายุราชการ 1–5 ปี (คน)',     get: (row) => fmtNum(ch1v(row,'service_1_5')) },
+  { key: 'service_6_10',  label: 'อายุราชการ 6–10 ปี (คน)',    get: (row) => fmtNum(ch1v(row,'service_6_10')) },
+  { key: 'service_11_15', label: 'อายุราชการ 11–15 ปี (คน)',   get: (row) => fmtNum(ch1v(row,'service_11_15')) },
+  { key: 'service_16_20', label: 'อายุราชการ 16–20 ปี (คน)',   get: (row) => fmtNum(ch1v(row,'service_16_20')) },
+  { key: 'service_21_25', label: 'อายุราชการ 21–25 ปี (คน)',   get: (row) => fmtNum(ch1v(row,'service_21_25')) },
+  { key: 'service_26_30', label: 'อายุราชการ 26–30 ปี (คน)',   get: (row) => fmtNum(ch1v(row,'service_26_30')) },
+  { key: 'service_over30',label: 'อายุราชการ >30 ปี (คน)',     get: (row) => fmtNum(ch1v(row,'service_over30')) },
+
+  // ── ประเภทและระดับตำแหน่ง (13 ระดับ) ─────────────────────────
+  { key: 'pos_o1', label: 'ทั่วไป O1 (คน)',    get: (row) => fmtNum(ch1v(row,'pos_o1')) },
+  { key: 'pos_o2', label: 'ทั่วไป O2 (คน)',    get: (row) => fmtNum(ch1v(row,'pos_o2')) },
+  { key: 'pos_o3', label: 'ทั่วไป O3 (คน)',    get: (row) => fmtNum(ch1v(row,'pos_o3')) },
+  { key: 'pos_o4', label: 'ทั่วไป O4 (คน)',    get: (row) => fmtNum(ch1v(row,'pos_o4')) },
+  { key: 'pos_k1', label: 'วิชาการ K1 (คน)',   get: (row) => fmtNum(ch1v(row,'pos_k1')) },
+  { key: 'pos_k2', label: 'วิชาการ K2 (คน)',   get: (row) => fmtNum(ch1v(row,'pos_k2')) },
+  { key: 'pos_k3', label: 'วิชาการ K3 (คน)',   get: (row) => fmtNum(ch1v(row,'pos_k3')) },
+  { key: 'pos_k4', label: 'วิชาการ K4 (คน)',   get: (row) => fmtNum(ch1v(row,'pos_k4')) },
+  { key: 'pos_k5', label: 'วิชาการ K5 (คน)',   get: (row) => fmtNum(ch1v(row,'pos_k5')) },
+  { key: 'pos_m1', label: 'อำนวยการ M1 (คน)',  get: (row) => fmtNum(ch1v(row,'pos_m1')) },
+  { key: 'pos_m2', label: 'อำนวยการ M2 (คน)',  get: (row) => fmtNum(ch1v(row,'pos_m2')) },
+  { key: 'pos_s1', label: 'บริหาร S1 (คน)',    get: (row) => fmtNum(ch1v(row,'pos_s1')) },
+  { key: 'pos_s2', label: 'บริหาร S2 (คน)',    get: (row) => fmtNum(ch1v(row,'pos_s2')) },
+
+  // ── การลาออกและโอนย้าย ย้อนหลัง 5 ปี ────────────────────────
+  { key: 'begin_2564',  label: 'ต้นปี 2564 (คน)',      get: (row) => fmtNum(ch1v(row,'begin_2564')) },
+  { key: 'end_2564',    label: 'ปลายปี 2564 (คน)',     get: (row) => fmtNum(ch1v(row,'end_2564')) },
+  { key: 'leave_2564',  label: 'ลาออก/โอนย้าย 2564',  get: (row) => fmtNum(ch1v(row,'leave_2564')) },
+  { key: 'rate_2564',   label: 'อัตราลาออก 2564 (%)',  get: (row) => ch1Rate(row,'2564') },
+
+  { key: 'begin_2565',  label: 'ต้นปี 2565 (คน)',      get: (row) => fmtNum(ch1v(row,'begin_2565')) },
+  { key: 'end_2565',    label: 'ปลายปี 2565 (คน)',     get: (row) => fmtNum(ch1v(row,'end_2565')) },
+  { key: 'leave_2565',  label: 'ลาออก/โอนย้าย 2565',  get: (row) => fmtNum(ch1v(row,'leave_2565')) },
+  { key: 'rate_2565',   label: 'อัตราลาออก 2565 (%)',  get: (row) => ch1Rate(row,'2565') },
+
+  { key: 'begin_2566',  label: 'ต้นปี 2566 (คน)',      get: (row) => fmtNum(ch1v(row,'begin_2566')) },
+  { key: 'end_2566',    label: 'ปลายปี 2566 (คน)',     get: (row) => fmtNum(ch1v(row,'end_2566')) },
+  { key: 'leave_2566',  label: 'ลาออก/โอนย้าย 2566',  get: (row) => fmtNum(ch1v(row,'leave_2566')) },
+  { key: 'rate_2566',   label: 'อัตราลาออก 2566 (%)',  get: (row) => ch1Rate(row,'2566') },
+
+  { key: 'begin_2567',  label: 'ต้นปี 2567 (คน)',      get: (row) => fmtNum(ch1v(row,'begin_2567')) },
+  { key: 'end_2567',    label: 'ปลายปี 2567 (คน)',     get: (row) => fmtNum(ch1v(row,'end_2567')) },
+  { key: 'leave_2567',  label: 'ลาออก/โอนย้าย 2567',  get: (row) => fmtNum(ch1v(row,'leave_2567')) },
+  { key: 'rate_2567',   label: 'อัตราลาออก 2567 (%)',  get: (row) => ch1Rate(row,'2567') },
+
+  { key: 'begin_2568',  label: 'ต้นปี 2568 (คน)',      get: (row) => fmtNum(ch1v(row,'begin_2568')) },
+  { key: 'end_2568',    label: 'ปลายปี 2568 (คน)',     get: (row) => fmtNum(ch1v(row,'end_2568')) },
+  { key: 'leave_2568',  label: 'ลาออก/โอนย้าย 2568',  get: (row) => fmtNum(ch1v(row,'leave_2568')) },
+  { key: 'rate_2568',   label: 'อัตราลาออก 2568 (%)',  get: (row) => ch1Rate(row,'2568') },
+
+  // ── ส่วนที่ 2: นโยบายและบริบท ─────────────────────────────────
+  { key: 'related_policies',   label: 'นโยบายที่เกี่ยวข้อง',        get: (row) => esc(ch1v(row,'related_policies') || '—') },
+  { key: 'context_challenges', label: 'บริบทภายนอก/ความท้าทาย',     get: (row) => esc(ch1v(row,'context_challenges') || '—') },
+
+  // ── ส่วนที่ 3: ข้อมูลโรค NCD ──────────────────────────────────
+  { key: 'disease_report_type',    label: 'ประเภทรายงานโรค',        get: (row) => esc(ch1v(row,'disease_report_type') || '—') },
+  { key: 'disease_diabetes',       label: 'เบาหวาน (คน)',           get: (row) => fmtNum(ch1v(row,'disease_diabetes')) },
+  { key: 'disease_hypertension',   label: 'ความดันโลหิตสูง (คน)',   get: (row) => fmtNum(ch1v(row,'disease_hypertension')) },
+  { key: 'disease_cardiovascular', label: 'โรคหัวใจและหลอดเลือด (คน)', get: (row) => fmtNum(ch1v(row,'disease_cardiovascular')) },
+  { key: 'disease_kidney',         label: 'โรคไต (คน)',             get: (row) => fmtNum(ch1v(row,'disease_kidney')) },
+  { key: 'disease_liver',          label: 'โรคตับ (คน)',            get: (row) => fmtNum(ch1v(row,'disease_liver')) },
+  { key: 'disease_cancer',         label: 'โรคมะเร็ง (คน)',         get: (row) => fmtNum(ch1v(row,'disease_cancer')) },
+  { key: 'disease_obesity',        label: 'ภาวะอ้วน/น้ำหนักเกิน (คน)', get: (row) => fmtNum(ch1v(row,'disease_obesity')) },
+  { key: 'disease_other_count',    label: 'โรคอื่นๆ (คน)',          get: (row) => fmtNum(ch1v(row,'disease_other_count')) },
+  { key: 'disease_other_detail',   label: 'โรคอื่นๆ (ระบุ)',        get: (row) => esc(ch1v(row,'disease_other_detail') || '—') },
+  { key: 'ncd_count',              label: 'NCD รวม (คน)',            get: (row) => fmtNum(ch1v(row,'ncd_count')) },
+  { key: 'ncd_ratio_pct',          label: 'NCD ต่อบุคลากร (%)',     get: (row) => { const v = ch1v(row,'ncd_ratio_pct'); return v != null ? fmtNum(parseFloat(v),2)+'%' : '—'; } },
+
+  // ── ข้อมูลการลาป่วย ───────────────────────────────────────────
+  { key: 'sick_leave_report_type', label: 'ประเภทรายงานลาป่วย',    get: (row) => esc(ch1v(row,'sick_leave_report_type') || '—') },
+  { key: 'sick_leave_days',        label: 'วันลาป่วยรวม/ปี',       get: (row) => fmtNum(ch1v(row,'sick_leave_days')) },
+  { key: 'sick_leave_avg',         label: 'วันลาป่วยเฉลี่ย/คน/ปี', get: (row) => { const v = ch1v(row,'sick_leave_avg'); return v != null ? fmtNum(parseFloat(v),2) : '—'; } },
+
+  // ── ข้อมูลคลินิก ──────────────────────────────────────────────
+  { key: 'clinic_report_type',     label: 'ประเภทรายงานคลินิก',    get: (row) => esc(ch1v(row,'clinic_report_type') || '—') },
+  { key: 'clinic_users_per_year',  label: 'ผู้ใช้คลินิก/ปี (คน)', get: (row) => fmtNum(ch1v(row,'clinic_users_per_year')) },
+  { key: 'clinic_top_symptoms',    label: 'อาการที่พบมากสุด',      get: (row) => esc(ch1v(row,'clinic_top_symptoms') || '—') },
+  { key: 'clinic_top_medications', label: 'ยาที่ใช้มากสุด',        get: (row) => esc(ch1v(row,'clinic_top_medications') || '—') },
+
+  // ── ผลสำรวจสุขภาพจิต ─────────────────────────────────────────
+  { key: 'mental_health_report_type', label: 'ประเภทรายงานสุขภาพจิต', get: (row) => esc(ch1v(row,'mental_health_report_type') || '—') },
+  { key: 'mental_stress',     label: 'ภาวะเครียดเรื้อรัง',  get: (row) => esc(ch1v(row,'mental_stress') || '—') },
+  { key: 'mental_anxiety',    label: 'ภาวะวิตกกังวล',        get: (row) => esc(ch1v(row,'mental_anxiety') || '—') },
+  { key: 'mental_sleep',      label: 'ปัญหาการนอนหลับ',      get: (row) => esc(ch1v(row,'mental_sleep') || '—') },
+  { key: 'mental_burnout',    label: 'ภาวะหมดไฟ (Burnout)',  get: (row) => esc(ch1v(row,'mental_burnout') || '—') },
+  { key: 'mental_depression', label: 'ภาวะซึมเศร้า',         get: (row) => esc(ch1v(row,'mental_depression') || '—') },
+
+  // ── ผลสำรวจความผูกพันองค์กร (Engagement) ────────────────────
+  { key: 'engagement_score_2568', label: 'Engagement 2568', get: (row) => { const v = ch1v(row,'engagement_score_2568'); return v != null ? fmtNum(parseFloat(v),2) : '—'; } },
+  { key: 'engagement_score_2567', label: 'Engagement 2567', get: (row) => { const v = ch1v(row,'engagement_score_2567'); return v != null ? fmtNum(parseFloat(v),2) : '—'; } },
+  { key: 'engagement_score_2566', label: 'Engagement 2566', get: (row) => { const v = ch1v(row,'engagement_score_2566'); return v != null ? fmtNum(parseFloat(v),2) : '—'; } },
+  { key: 'engagement_score_2565', label: 'Engagement 2565', get: (row) => { const v = ch1v(row,'engagement_score_2565'); return v != null ? fmtNum(parseFloat(v),2) : '—'; } },
+  { key: 'engagement_score_2564', label: 'Engagement 2564', get: (row) => { const v = ch1v(row,'engagement_score_2564'); return v != null ? fmtNum(parseFloat(v),2) : '—'; } },
+  { key: 'engagement_low_areas',  label: 'ประเด็น Engagement คะแนนต่ำ', get: (row) => esc(ch1v(row,'engagement_low_areas') || '—') },
+  { key: 'other_wellbeing_surveys', label: 'ผลสำรวจสุขภาวะอื่นๆ', get: (row) => esc(ch1v(row,'other_wellbeing_surveys') || '—') },
+
+  // ── ส่วนที่ 4: ระบบการบริหารและสภาพแวดล้อม ───────────────────
+  { key: 'mentoring_system',   label: 'ระบบพี่เลี้ยง (Mentoring)',      get: (row) => esc(ch1v(row,'mentoring_system') || '—') },
+  { key: 'job_rotation',       label: 'ระบบหมุนเวียนงาน (Job Rotation)', get: (row) => esc(ch1v(row,'job_rotation') || '—') },
+  { key: 'idp_system',         label: 'แผนพัฒนารายบุคคล (IDP)',         get: (row) => esc(ch1v(row,'idp_system') || '—') },
+  { key: 'career_path_system', label: 'เส้นทางความก้าวหน้า (Career Path)', get: (row) => esc(ch1v(row,'career_path_system') || '—') },
+  { key: 'training_hours',     label: 'ชั่วโมงอบรมเฉลี่ย/คน/ปี',       get: (row) => esc(ch1v(row,'training_hours') || '—') },
+  { key: 'digital_systems',    label: 'ระบบดิจิทัลที่มี',               get: (row) => { const v = ch1v(row,'digital_systems'); return v ? esc(Array.isArray(v) ? v.join(', ') : String(v)) : '—'; } },
+  { key: 'ergonomics_status',  label: 'สถานะ Ergonomics',               get: (row) => esc(ch1v(row,'ergonomics_status') || '—') },
+  { key: 'ergonomics_detail',  label: 'รายละเอียด Ergonomics',          get: (row) => esc(ch1v(row,'ergonomics_detail') || '—') },
+
+  // ── ส่วนที่ 5: ทิศทาง เป้าหมาย และข้อเสนอแนะ ─────────────────
+  { key: 'strategic_priority_rank1', label: 'จุดเน้น อันดับ 1', get: (row) => esc(ch1v(row,'strategic_priority_rank1') || '—') },
+  { key: 'strategic_priority_rank2', label: 'จุดเน้น อันดับ 2', get: (row) => esc(ch1v(row,'strategic_priority_rank2') || '—') },
+  { key: 'strategic_priority_rank3', label: 'จุดเน้น อันดับ 3', get: (row) => esc(ch1v(row,'strategic_priority_rank3') || '—') },
+  { key: 'strategic_priority_other', label: 'จุดเน้น อื่นๆ (ระบุ)', get: (row) => esc(ch1v(row,'strategic_priority_other') || '—') },
+  { key: 'intervention_packages_feedback', label: 'ข้อเสนอแนะ Intervention Packages', get: (row) => esc(ch1v(row,'intervention_packages_feedback') || '—') },
+  { key: 'hrd_plan_results',  label: 'ผลการปฏิบัติตามแผน HRD',  get: (row) => esc(ch1v(row,'hrd_plan_results') || '—') },
+  { key: '_hrd_file',         label: 'ไฟล์ HRD PLAN',            get: (row) => ch1FileLink(ch1v(row,'hrd_plan_file_url') || ch1v(row,'hrd_plan_url')) },
+];
+
+function renderCh1RawSheet() {
+  const thead = document.getElementById('c1-sheet-thead');
+  const tbody = document.getElementById('c1-sheet-tbody');
+  if (!thead || !tbody) return;
+
+  // Build header
+  thead.innerHTML = '<th style="position:sticky;left:0;background:var(--bg);z-index:3">#</th>' +
+    CH1_COLUMNS.map((col) => `<th>${esc(col.label)}</th>`).join('');
+
+  // Build rows
+  const rows = state.ch1Rows;
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="${CH1_COLUMNS.length + 1}" style="text-align:center;color:var(--tx3)">ยังไม่มีข้อมูล Ch1</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = rows.map((row, index) =>
+    `<tr><td style="position:sticky;left:0;background:#F8FAFC;font-weight:600;z-index:1;border-right:1.5px solid var(--bdr)">${index + 1}</td>` +
+    CH1_COLUMNS.map((col) => `<td>${col.get(row)}</td>`).join('') + '</tr>'
+  ).join('');
+}
+
+function renderCh1Pdf() {
+  const tbody = document.getElementById('c1-pdf-tbody');
+  if (!tbody) return;
+  // populate org filter
+  const orgSel = document.getElementById('c1pdf-org');
+  if (orgSel) {
+    const orgs = [...new Set(state.ch1Rows.map((r) => getCh1Org(r)).filter(Boolean))].sort();
+    orgSel.innerHTML = '<option value="">ทุกองค์กร</option>' +
+      orgs.map((o) => `<option value="${esc(o)}">${esc(o)}</option>`).join('');
+  }
+  if (!state.ch1Rows.length) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--tx3)">ยังไม่มีข้อมูล Ch1</td></tr>';
+    return;
+  }
+  tbody.innerHTML = state.ch1Rows.map((row, i) => `<tr data-org="${esc(getCh1Org(row))}">
+    <td style="text-align:center;font-weight:600;color:var(--tx3)">${i + 1}</td>
     <td>${esc(getCh1Org(row))}</td>
     <td>${fmtDate(getRowDate(row), true)}</td>
-    <td>${fmtNum(row.total_personnel || row.total_staff || row.form_data?.total_personnel)}</td>
-    <td>${fmtNum(row.age_under30 || row.form_data?.age_under30)}</td>
-    <td>${fmtNum(row.age_31_40 || row.form_data?.age_31_40)}</td>
-    <td>${fmtNum(row.age_41_50 || row.form_data?.age_41_50)}</td>
-    <td>${fmtNum(row.age_51_60 || row.form_data?.age_51_60)}</td>
-    <td>${fmtNum(row.ncd_diabetes || row.form_data?.ncd_diabetes)}</td>
-    <td>${fmtNum(row.ncd_hypertension || row.form_data?.ncd_hypertension)}</td>
-    <td>${fmtNum(row.sick_leave_days || row.form_data?.sick_leave_days, 1)}</td>
-    <td>${fmtNum(row.mental_burnout || row.form_data?.mental_burnout)}</td>
-    <td>${fmtNum(row.engagement_score || row.form_data?.engagement_score)}</td>
-    <td>${esc(row.strategic_priorities || row.form_data?.strategic_priorities || '—')}</td>
-  </tr>`).join('') || '<tr><td colspan="14" style="text-align:center;color:var(--tx3)">ยังไม่มีข้อมูล Ch1</td></tr>';
+    <td class="td-act">
+      <button class="btn b-gray" onclick="showCh1RowDetail(${i})">📋 ดูรายละเอียด</button>
+      <button class="btn b-blue" onclick="showCh1PDF(${i})">📄 ดู PDF</button>
+    </td>
+  </tr>`).join('');
+}
+
+function filterCh1Pdf() {
+  const search = (document.getElementById('c1pdf-search')?.value || '').toLowerCase();
+  const org = document.getElementById('c1pdf-org')?.value || '';
+  document.querySelectorAll('#c1-pdf-tbody tr').forEach((tr) => {
+    const text = tr.textContent.toLowerCase();
+    const rowOrg = tr.dataset.org || '';
+    tr.style.display = (!search || text.includes(search)) && (!org || rowOrg === org) ? '' : 'none';
+  });
 }
 
 function renderWellbeingControl(summary) {
@@ -1781,7 +2168,7 @@ function renderWellbeingRaw() {
         <table>
           <thead>
             <tr>
-              <th>#</th><th>องค์กร</th><th>วันที่ตอบ</th><th>เพศ</th><th>กลุ่มอายุ</th><th>ประเภทตำแหน่ง</th><th>ระดับ</th><th>อายุราชการ</th><th>PHQ-9</th><th>GAD-7</th><th>Burnout</th><th>Engagement</th><th>WLB Score</th><th>นอนหลับ</th><th>ออกกำลังกาย</th><th>โรคเรื้อรัง</th><th>BMI</th><th>ความพึงพอใจงาน</th><th>ปัญหาสำคัญสุด</th>
+              <th>#</th><th>องค์กร</th><th>วันที่ตอบ</th><th>เพศ</th><th>กลุ่มอายุ</th><th>ประเภทตำแหน่ง</th><th>ระดับ</th><th>อายุราชการ</th><th>PHQ-9</th><th>GAD-7</th><th>Burnout</th><th>Engagement</th><th>WLB Score</th><th>นอนหลับ</th><th>ออกกำลังกาย</th><th>โรคเรื้อรัง</th><th>BMI</th><th>ความพึงพอใจงาน</th><th>ปัญหาสำคัญสุด</th><th>จัดการ</th>
             </tr>
           </thead>
           <tbody id="wb-raw-tbody"></tbody>
@@ -1871,6 +2258,7 @@ function renderRawTable() {
       <td>${row.bmi != null ? fmtNum(row.bmi, 1) + ' (' + esc(row.bmi_category) + ')' : '—'}</td>
       <td>${esc(getJobSat(row))}</td>
       <td>${esc(getMainProblem(row))}</td>
+      <td class="td-act"><button class="btn b-gray" style="padding:3px 8px;font-size:11px" onclick="showWbRowPDF(${start+index})">📄 PDF</button></td>
     </tr>`;
   }).join('');
 
@@ -1906,47 +2294,102 @@ function exportRawTable() {
 }
 
 function renderUsers() {
-  const page = document.getElementById('page-users');
-  const tbody = page.querySelector('tbody');
-  tbody.innerHTML = state.userRows.map((row) => `<tr>
-    <td>${esc(row.email)}</td>
-    <td><span class="badge bb">${esc(row.role || 'viewer')}</span></td>
-    <td>${esc(row.org_name || 'ทุกองค์กร')}</td>
-    <td>${fmtDate(row.last_login_at)}</td>
-    <td><span class="badge ${row.is_active === false ? 'bx' : 'bg'}">${row.is_active === false ? 'Inactive' : 'Active'}</span></td>
-    <td>${fmtDate(row.expires_at)}</td>
-    <td class="td-act"><button class="btn b-gray">ดูสิทธิ์</button></td>
-  </tr>`).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--tx3)">ยังไม่มีข้อมูลผู้ใช้</td></tr>';
+  const tbody = document.getElementById('users-tbody');
+  if (!tbody) return;
+  const myRole = state.myRole || 'superadmin';
+  const rows = state.userRows;
 
-  const orgSelect = page.querySelector('.panel select');
-  orgSelect.innerHTML = `<option>-- เลือกองค์กร --</option>${ORG_NAMES.map((name) => `<option>${esc(name)}</option>`).join('')}`;
+  function roleBadge(role) {
+    const cls = role === 'superadmin' ? 'superadmin' : role === 'admin' ? 'admin' : 'viewer';
+    const label = role === 'superadmin' ? '👑 Super Admin' : role === 'admin' ? '🔧 Admin' : '👁 Viewer';
+    return `<span class="u-role-tag ${cls}">${label}</span>`;
+  }
+
+  tbody.innerHTML = rows.map((row) => {
+    const isLocked = LOCKED_SUPERADMIN_EMAILS.includes(row.email);
+    // locked email always displays as superadmin regardless of DB value
+    const rowRole = isLocked ? 'superadmin' : (row.role || 'viewer');
+    const canManage = !isLocked && (myRole === 'superadmin' || (myRole === 'admin' && rowRole === 'viewer'));
+    return `<tr ${isLocked ? 'style="background:#FFFBEB"' : ''}>
+      <td>${esc(row.email)}${isLocked ? ' <span style="font-size:10px;color:#92400E;font-weight:600;background:#FEF3CD;padding:1px 5px;border-radius:4px">🔒 Locked</span>' : ''}</td>
+      <td>${roleBadge(rowRole)}</td>
+      <td>${esc(row.org_name || 'ทุกองค์กร')}</td>
+      <td>${fmtDate(row.last_login_at)}</td>
+      <td><span class="badge ${row.is_active === false ? 'bx' : 'bg'}">${row.is_active === false ? 'Inactive' : 'Active'}</span></td>
+      <td>${fmtDate(row.expires_at)}</td>
+      <td class="td-act">
+        ${isLocked
+          ? `<button class="btn b-gray" style="font-size:12px" onclick="showChangePasswordModal('${esc(row.email)}')">🔐 รหัสผ่าน</button>`
+          : canManage
+            ? `<button class="btn b-gray" onclick="showEditUserModal('${esc(row.email)}')">✏️ จัดการ</button>
+               <button class="btn b-red" onclick="deleteViewer('${esc(row.id)}','${esc(row.email)}')">🗑️ ลบ</button>`
+            : `<span style="font-size:11px;color:var(--tx3)">—</span>`}
+      </td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--tx3)">ยังไม่มีข้อมูลผู้ใช้</td></tr>';
+
+  const orgFilter = document.getElementById('users-org-filter');
+  if (orgFilter) {
+    const cur = orgFilter.value;
+    orgFilter.innerHTML = `<option value="">ทุกองค์กร</option>${ORG_NAMES.map((name) => `<option${name===cur?' selected':''}>${esc(name)}</option>`).join('')}`;
+  }
 }
 
+const SURVEY_BASE_URL = 'https://nidawellbeing.vercel.app';
+// ⚠️ Emails ที่ถูก lock เป็น Super Admin ตลอด — แก้ไขโดย UI ไม่ได้
+const LOCKED_SUPERADMIN_EMAILS = ['admin@gmail.com'];
+
 function buildLinkUrl(org) {
-  return `${window.location.origin}/index.html?org=${encodeURIComponent(org.name)}`;
+  const code = org.org_code || org.code || encodeURIComponent(org.name);
+  return `${SURVEY_BASE_URL}/index.html?org=${code}`;
 }
 
 function renderLinks(summary) {
   const page = document.getElementById('page-links');
-  const tbody = page.querySelector('tbody');
-  const links = state.linkRows.length ? state.linkRows : getOrgCatalog().map((org) => ({ organization: org.name, form_url: buildLinkUrl(org), is_active: true }));
+  const tbody = document.getElementById('links-tbody') || page.querySelector('tbody');
+  const links = state.linkRows.length ? state.linkRows : getOrgCatalog().map((org) => ({ org_id: org.id, full_url: buildLinkUrl(org), is_active: true }));
+
+  function getFormType(url) {
+    if (!url) return '—';
+    if (url.includes('ch1.html')) return '<span style="font-size:11px;background:var(--PL);color:var(--P);padding:2px 8px;border-radius:99px;font-weight:600">📝 Ch1</span>';
+    return '<span style="font-size:11px;background:var(--AL);color:var(--A);padding:2px 8px;border-radius:99px;font-weight:600">💚 Wellbeing</span>';
+  }
+
   tbody.innerHTML = links.map((row) => {
-    const organization = row.organization || row.org_name || row.org_name_th || row.org || '—';
+    const orgProfile = state.orgProfiles.find((o) => o.id === row.org_id);
+    const organization = orgProfile?.org_name_th || row.org_name_th || row.organization || '—';
     const summaryRow = summary.find((item) => item.name === organization);
-    const url = row.form_url || row.url || row.link_url || row.unique_url || buildLinkUrl(ORG_LOOKUP.get(organization) || { name: organization });
+    const url = row.full_url || row.form_url || row.url || buildLinkUrl(orgProfile || { name: organization });
     const active = row.is_active !== false;
-    return `<tr>
+    const formType = getFormType(url);
+    const respondents = url.includes('ch1.html')
+      ? fmtNum(summaryRow?.ch1Count || 0)
+      : fmtNum(summaryRow?.wellbeingSubmitted || 0);
+    return `<tr data-org="${esc(organization)}" data-form="${url.includes('ch1.html') ? 'Ch1' : 'Wellbeing'}" data-status="${active ? 'เปิดอยู่' : 'ปิด'}">
       <td>${esc(organization)}</td>
+      <td>${formType}</td>
       <td><code style="font-size:10.5px;background:var(--bg);padding:3px 6px;border-radius:4px;color:var(--P)">${esc(url)}</code></td>
-      <td>${fmtNum(summaryRow?.wellbeingSubmitted || 0)}</td>
+      <td>${respondents}</td>
       <td><span class="badge ${active ? 'bg' : 'bx'}">${active ? 'เปิดอยู่' : 'ปิด'}</span></td>
-      <td>${fmtDate(row.expires_at)}</td>
-      <td class="td-act"><button class="btn b-blue" onclick="navigator.clipboard.writeText('${esc(url)}')">Copy</button></td>
+      <td>${fmtDate(row.created_at)}</td>
+      <td class="td-act">
+        <button class="btn b-gray" onclick="showQRModal('${esc(url)}')">QR</button>
+        <button class="btn b-blue" onclick="navigator.clipboard.writeText('${esc(url)}').then(()=>showToast('คัดลอกแล้ว ✅'))">Copy</button>
+        <button class="btn ${active ? 'b-red' : 'b-green'}" onclick="toggleLink('${esc(row.id||'')}','${esc(organization)}',${!active})">${active ? 'ปิด' : 'เปิด'}</button>
+      </td>
     </tr>`;
   }).join('');
 
-  const createOrgSelect = page.querySelector('.panel select');
-  createOrgSelect.innerHTML = `<option>-- เลือก --</option>${ORG_NAMES.map((name) => `<option>${esc(name)}</option>`).join('')}`;
+  const createOrgSelect = document.getElementById('create-link-org');
+  if (createOrgSelect) {
+    createOrgSelect.innerHTML = `<option value="">— เลือก —</option>${ORG_NAMES.map((name) => `<option>${esc(name)}</option>`).join('')}`;
+  }
+  // Populate org filter
+  const orgFilter = document.getElementById('links-org-filter');
+  if (orgFilter) {
+    const cur = orgFilter.value;
+    orgFilter.innerHTML = `<option value="">ทุกองค์กร</option>${ORG_NAMES.map((n) => `<option${n===cur?' selected':''}>${esc(n)}</option>`).join('')}`;
+  }
 }
 
 function renderAnalytics(summary) {
@@ -1955,9 +2398,9 @@ function renderAnalytics(summary) {
   const ch1Kpis = ch1Page.querySelectorAll('.kpi .kpi-val');
   if (ch1Kpis.length >= 4) {
     ch1Kpis[0].textContent = fmtNum(totalCh1Staff);
-    ch1Kpis[1].textContent = fmtNum(state.ch1Rows.length ? (state.ch1Rows.reduce((sum, row) => sum + Number(row.ncd_ratio_pct || row.form_data?.ncd_ratio_pct || 0), 0) / state.ch1Rows.length) : 0, 1) + '%';
-    ch1Kpis[2].textContent = fmtNum(state.ch1Rows.length ? (state.ch1Rows.reduce((sum, row) => sum + Number(row.mental_burnout || row.form_data?.mental_burnout || 0), 0) / state.ch1Rows.length) : 0, 1) + '%';
-    ch1Kpis[3].textContent = fmtNum(state.ch1Rows.length ? (state.ch1Rows.reduce((sum, row) => sum + Number(row.engagement_score || row.form_data?.engagement_score || 0), 0) / state.ch1Rows.length) : 0, 1);
+    ch1Kpis[1].textContent = fmtNum(state.ch1Rows.length ? (state.ch1Rows.reduce((sum, row) => sum + (parseFloat(row.ncd_ratio_pct ?? row.form_data?.ncd_ratio_pct) || 0), 0) / state.ch1Rows.length) : 0, 1) + '%';
+    ch1Kpis[2].textContent = fmtNum(state.ch1Rows.length ? (state.ch1Rows.reduce((sum, row) => sum + (parseFloat(row.mental_burnout ?? row.form_data?.mental_burnout) || 0), 0) / state.ch1Rows.length) : 0, 1) + '%';
+    ch1Kpis[3].textContent = fmtNum(state.ch1Rows.length ? (state.ch1Rows.reduce((sum, row) => sum + (parseFloat(row.engagement_score ?? row.form_data?.engagement_score) || 0), 0) / state.ch1Rows.length) : 0, 1);
   }
 
   const wbPage = document.getElementById('page-an-wb');
@@ -2008,13 +2451,1339 @@ async function init() {
     renderUsers();
     renderLinks(summary);
     renderAnalytics(summary);
+    populateOrgSelects();
+    const auditExportBtn = document.querySelector('#page-audit .btn.b-gray');
+    if (auditExportBtn) auditExportBtn.onclick = exportAuditLog;
   } catch (error) {
     console.error(error);
     showError('เชื่อมต่อ backend ไม่สำเร็จ: ' + error.message);
   }
 }
 
-document.addEventListener('DOMContentLoaded', init);
+document.addEventListener('DOMContentLoaded', () => {
+  init();
+  // init Buddhist Era labels on date inputs
+  ['deadline-ch1','deadline-wb','viewer-expires','create-link-expires'].forEach(id => {
+    const el = document.getElementById(id);
+    const labelEl = document.getElementById(id + '-be');
+    if (el && labelEl) labelEl.textContent = isoToBuddhistDisplay(el.value);
+  });
+});
+
+/* ========== PROGRESS PAGE ========== */
+function filterProgressTable() {
+  const search = (document.getElementById('prog-search')?.value || '').toLowerCase();
+  const status = document.getElementById('prog-status-filter')?.value || '';
+  document.querySelectorAll('#page-progress tbody tr').forEach((tr) => {
+    const text = tr.textContent.toLowerCase();
+    const matchSearch = !search || text.includes(search);
+    const matchStatus = !status || text.includes(status);
+    tr.style.display = (matchSearch && matchStatus) ? '' : 'none';
+  });
+}
+
+function sendReminderAll() {
+  const summary = summarizeOrgs();
+  const pending = summary.filter((org) => org.ch1Count === 0);
+  if (!pending.length) { showToast('ทุกองค์กรส่ง Ch1 ครบแล้ว ไม่จำเป็นต้องส่ง Reminder','info'); return; }
+  showConfirm(
+    `จะส่ง Reminder ไปยัง ${pending.length} องค์กรที่ยังไม่ส่ง Ch1\n\n${pending.slice(0,8).map((o) => '• ' + o.name).join('\n')}${pending.length > 8 ? `\n...และอีก ${pending.length - 8} องค์กร` : ''}`,
+    () => {
+      const msg = document.getElementById('notif-msg');
+      if (msg) { msg.style.color = 'var(--A)'; msg.textContent = `✅ ส่ง Reminder ไปยัง ${pending.length} องค์กรเรียบร้อย (Simulation)`; }
+      showToast(`ส่ง Reminder ไปยัง ${pending.length} องค์กรเรียบร้อย (ต้องต่อ Email Service จริง)`,'success',5000);
+    }
+  );
+}
+
+/* ========== TIMELINE PAGE ========== */
+function saveDeadlines() {
+  const ch1 = document.getElementById('deadline-ch1')?.value;
+  const wb = document.getElementById('deadline-wb')?.value;
+  const days = document.getElementById('deadline-days')?.value;
+  const note = document.getElementById('deadline-note')?.value;
+  const msg = document.getElementById('deadline-msg');
+  if (!ch1 || !wb) { if (msg) { msg.style.color = 'var(--D)'; msg.textContent = 'กรุณากรอกวันที่ให้ครบ'; } return; }
+  localStorage.setItem('deadline_ch1', ch1);
+  localStorage.setItem('deadline_wb', wb);
+  localStorage.setItem('deadline_days', days || '7');
+  localStorage.setItem('deadline_note', note || '');
+  if (msg) { msg.style.color = 'var(--G)'; msg.textContent = `✅ บันทึกแล้ว: Ch1 ปิด ${isoToBuddhistDisplay(ch1)} · Wellbeing ปิด ${isoToBuddhistDisplay(wb)} · แจ้งเตือนล่วงหน้า ${days || 7} วัน`; }
+}
+
+/* ========== ORGS PAGE (simple panel) ========== */
+async function saveSimpleOrg() {
+  const name = document.getElementById('simple-org-name')?.value?.trim();
+  const ministry = document.getElementById('simple-org-ministry')?.value?.trim();
+  const email = document.getElementById('simple-org-email')?.value?.trim();
+  const msg = document.getElementById('simple-org-msg');
+  if (!name) { if (msg) { msg.style.color = 'var(--D)'; msg.textContent = 'กรุณากรอกชื่อองค์กร'; } return; }
+  if (msg) { msg.style.color = 'var(--tx2)'; msg.textContent = 'กำลังบันทึก...'; }
+  const payload = { org_name_th: name, org_type: 'government', is_active: true, contact_email: email || null, settings: { ministry: ministry || null } };
+  const existing = state.orgProfiles.find((r) => r.org_name_th === name);
+  let error = null;
+  if (existing?.id) {
+    ({ error } = await sb.from('organizations').update(payload).eq('id', existing.id));
+  } else {
+    payload.org_code = name.replace(/[^A-Za-zก-๙0-9]/g, '').slice(0, 12).toUpperCase() || `ORG${Date.now().toString().slice(-4)}`;
+    ({ error } = await sb.from('organizations').insert(payload));
+  }
+  if (error) { if (msg) { msg.style.color = 'var(--D)'; msg.textContent = 'บันทึกไม่สำเร็จ: ' + error.message; } return; }
+  const { data } = await sb.from('organizations').select('*').eq('is_active', true).order('org_name_th', { ascending: true });
+  state.orgProfiles = data || [];
+  refreshOrgDerivedState();
+  renderOrganizations(summarizeOrgs());
+  if (msg) { msg.style.color = 'var(--G)'; msg.textContent = `✅ บันทึก "${name}" เรียบร้อย`; }
+}
+
+/* ========== CH1 PAGE — filters & export ========== */
+function filterCh1Data() {
+  const search = (document.getElementById('c1data-search')?.value || '').toLowerCase();
+  const org = document.getElementById('c1data-org')?.value || '';
+  document.querySelectorAll('#c1-data tbody tr').forEach((tr) => {
+    const text = tr.textContent.toLowerCase();
+    const matchSearch = !search || text.includes(search);
+    const matchOrg = !org || tr.cells[0]?.textContent?.trim() === org;
+    tr.style.display = (matchSearch && matchOrg) ? '' : 'none';
+  });
+}
+
+function filterCh1Sheet() {
+  const search = (document.getElementById('c1sheet-search')?.value || '').toLowerCase();
+  const org = document.getElementById('c1sheet-org')?.value || '';
+  document.querySelectorAll('#c1-sheet tbody tr').forEach((tr) => {
+    const text = tr.textContent.toLowerCase();
+    const matchSearch = !search || text.includes(search);
+    const matchOrg = !org || tr.cells[1]?.textContent?.trim() === org;
+    tr.style.display = (matchSearch && matchOrg) ? '' : 'none';
+  });
+}
+
+function updateCh1Link() {
+  const sel = document.getElementById('ch1-link-org');
+  const code = document.getElementById('ch1-link-code');
+  if (!sel || !code) return;
+  const org = ORG_LOOKUP.get(sel.value);
+  code.textContent = `ch1.html?org=${org?.code || sel.value || 'ORG'}`;
+}
+
+function copyCh1Link() {
+  const code = document.getElementById('ch1-link-code')?.textContent || '';
+  const full = SURVEY_BASE_URL + '/' + code;
+  navigator.clipboard.writeText(full).then(() => showToast('คัดลอกลิงก์แล้ว: ' + full));
+}
+
+function exportCh1All() {
+  if (!state.ch1Rows.length) { showToast('ยังไม่มีข้อมูล Ch1 ในระบบ', 'warn'); return; }
+  const stripHtml = (s) => {
+    if (s == null) return '';
+    return String(s).replace(/<[^>]*>/g, '').replace(/📎 ดูไฟล์/g, '').trim();
+  };
+  const rows = state.ch1Rows.map((row, i) => {
+    const obj = { '#': i + 1 };
+    CH1_COLUMNS.forEach((col) => {
+      let val = col.get(row);
+      val = stripHtml(val);
+      if (val === '—') val = '';
+      obj[col.label] = val;
+    });
+    return obj;
+  });
+  downloadWorkbook('ch1_all_data.xlsx', 'Ch1_Raw', rows);
+}
+
+function exportCh1Filtered(orgFilter) {
+  const rows = orgFilter ? state.ch1Rows.filter((r) => getCh1Org(r) === orgFilter) : state.ch1Rows;
+  if (!rows.length) { showToast('ไม่มีข้อมูลสำหรับองค์กรที่เลือก','warn'); return; }
+  downloadWorkbook(`ch1_${orgFilter || 'all'}.xlsx`, 'Ch1', rows.map((row, i) => ({
+    index: i + 1, organization: getCh1Org(row), submitted_at: getRowDate(row),
+    total_personnel: row.total_personnel || row.total_staff || row.form_data?.total_personnel,
+    engagement_score: row.engagement_score || row.form_data?.engagement_score,
+  })));
+}
+
+function exportWbFiltered(orgFilter) {
+  const rows = orgFilter ? state.surveyRows.filter((r) => r.organization === orgFilter && !r.is_draft) : state.surveyRows.filter((r) => !r.is_draft);
+  if (!rows.length) { showToast('ไม่มีข้อมูล Wellbeing สำหรับองค์กรที่เลือก','warn'); return; }
+  downloadWorkbook(`wellbeing_${orgFilter || 'all'}.xlsx`, 'Wellbeing', rows.map((row, i) => ({
+    index: i + 1, organization: row.organization, submitted_at: row.submitted_at,
+    gender: row.gender, age_group: ageGroup(row),
+    phq9: getPhq9(row), gad7: getGad7(row), burnout: getBurnout(row),
+    engagement: getEngagement(row), wlb_score: getWlb(row),
+  })));
+}
+
+function exportCompareReport() {
+  const summary = summarizeOrgs();
+  downloadWorkbook('compare_report.xlsx', 'Compare', summary.map((org) => ({
+    organization: org.name, ministry: org.ministry,
+    wellbeing_submitted: org.wellbeingSubmitted, wellbeing_draft: org.draft,
+    high_phq9: org.flagged, ch1_count: org.ch1Count,
+    latest_wellbeing: org.latestWb, latest_ch1: org.latestCh1,
+  })));
+}
+
+/* ========== USERS PAGE ========== */
+function filterUsersTable() {
+  const search = (document.getElementById('users-search')?.value || '').toLowerCase();
+  const role = (document.getElementById('users-role-filter')?.value || '').toLowerCase();
+  const org = document.getElementById('users-org-filter')?.value || '';
+  document.querySelectorAll('#users-tbody tr').forEach((tr) => {
+    if (tr.cells.length < 3) return;
+    const text = tr.textContent.toLowerCase();
+    const matchSearch = !search || text.includes(search);
+    const matchRole = !role || tr.cells[1]?.textContent?.toLowerCase().replace(/[^a-zก-๙0-9]/g,'').includes(role.replace(/[^a-zก-๙0-9]/g,''));
+    const matchOrg = !org || tr.cells[2]?.textContent?.trim() === org;
+    tr.style.display = (matchSearch && matchRole && matchOrg) ? '' : 'none';
+  });
+}
+
+// ========== USER MODAL FUNCTIONS ==========
+function showAddUserModal() {
+  const myRole = state.myRole || 'superadmin';
+  const isSuper = myRole === 'superadmin';
+  _openUserModal({ title: '➕ เพิ่มผู้ใช้ใหม่', isEdit: false, email: '', role: 'viewer', orgName: '', expiresAt: '2026-06-30', isActive: true, isSuper });
+}
+
+function showEditUserModal(email) {
+  if (LOCKED_SUPERADMIN_EMAILS.includes(email)) { showToast('❌ ไม่สามารถแก้ไข Super Admin ที่ถูก Lock ได้', 'warn'); return; }
+  const row = state.userRows.find((r) => r.email === email);
+  if (!row) { showToast('ไม่พบข้อมูลผู้ใช้', 'warn'); return; }
+  const myRole = state.myRole || 'superadmin';
+  const isSuper = myRole === 'superadmin';
+  _openUserModal({
+    title: `✏️ จัดการผู้ใช้`, isEdit: true,
+    email: row.email, role: row.role || 'viewer',
+    orgName: row.org_name || '', expiresAt: row.expires_at ? row.expires_at.slice(0,10) : '2026-06-30',
+    isActive: row.is_active !== false, isSuper, rowId: row.id,
+  });
+}
+
+function _openUserModal(opts) {
+  const existing = document.getElementById('user-modal-overlay');
+  if (existing) existing.remove();
+
+  const roleOptions = opts.isSuper
+    ? `<option value="viewer"${opts.role==='viewer'?' selected':''}>👁 Viewer — ดูข้อมูลเท่านั้น</option>
+       <option value="admin"${opts.role==='admin'?' selected':''}>🔧 Admin — จัดการข้อมูลและ Viewer</option>
+       <option value="superadmin"${opts.role==='superadmin'?' selected':''}>👑 Super Admin — สิทธิ์สูงสุด</option>`
+    : `<option value="viewer" selected>👁 Viewer — ดูข้อมูลเท่านั้น</option>`;
+
+  // Password section — ทั้ง add/edit ใช้ manual input ได้ (Edge Function จัดการ)
+  const pwdTitle = opts.isEdit ? '🔐 เปลี่ยนรหัสผ่าน' : '🔐 ตั้งรหัสผ่านเริ่มต้น';
+  const pwdHint  = opts.isEdit
+    ? 'เว้นว่างถ้าไม่ต้องการเปลี่ยน · กรอกเพื่อ Reset รหัสผ่านของผู้ใช้รายนี้'
+    : 'ตั้งรหัสผ่านสำหรับ Login ครั้งแรก · หรือกด 🔄 Auto ให้ระบบสร้างให้';
+  const pwdPlaceholder = opts.isEdit ? 'รหัสผ่านใหม่ (เว้นว่างถ้าไม่เปลี่ยน)' : 'รหัสผ่านเริ่มต้น...';
+  const pwdResetHtml = `
+    <div style="border-top:1px solid var(--bdr);padding-top:14px">
+      <div style="font-size:12.5px;font-weight:700;color:var(--tx);margin-bottom:8px;display:flex;align-items:center;gap:5px">
+        ${pwdTitle}
+        <span class="info-tip" data-tip="พิมพ์รหัสผ่าน หรือกด Auto สร้างอัตโนมัติ&#10;จากนั้นกด 📋 Copy คัดลอกแจ้งผู้ใช้">i</span>
+      </div>
+      <div style="display:flex;gap:7px;align-items:center">
+        <input type="text" id="um-new-pwd" placeholder="${pwdPlaceholder}"
+          class="si" style="flex:1;font-family:monospace;letter-spacing:0.05em;font-size:13px">
+        <button class="btn b-gray" style="padding:5px 10px;font-size:11.5px;white-space:nowrap" onclick="genTempPwd()">🔄 Auto</button>
+        <button class="btn b-gray" style="padding:5px 10px;font-size:11.5px" onclick="copyPwd()">📋 Copy</button>
+      </div>
+      <div id="um-pwd-strength" style="font-size:11px;color:var(--tx3);margin-top:5px">${pwdHint}</div>
+    </div>`;
+
+  const overlay = document.createElement('div');
+  overlay.id = 'user-modal-overlay';
+  overlay.className = 'umodal-overlay';
+  overlay.innerHTML = `
+    <div class="umodal">
+      <div class="umodal-head">
+        <h3>${opts.title}</h3>
+        <button class="btn b-gray" style="padding:5px 10px;min-width:32px" onclick="closeUserModal()">✕</button>
+      </div>
+      <div class="umodal-body">
+        <div class="fg" style="margin:0">
+          <label style="font-size:12px;font-weight:600;color:var(--tx2);display:block;margin-bottom:5px">อีเมล *</label>
+          <input class="si" id="um-email" type="email" placeholder="email@example.com" value="${esc(opts.email)}" ${opts.isEdit ? 'readonly style="background:var(--bg);color:var(--tx2)"' : ''}>
+        </div>
+        <div class="fg" style="margin:0">
+          <label style="font-size:12px;font-weight:600;color:var(--tx2);display:flex;align-items:center;gap:5px;margin-bottom:5px">Role / ระดับสิทธิ์
+            <span class="info-tip" data-tip="Viewer: ดูข้อมูลได้อย่างเดียว&#10;Admin: เพิ่ม/จัดการ Viewer ได้&#10;Super Admin: จัดการทุกอย่างรวมถึง Admin">i</span>
+          </label>
+          <select class="sel" id="um-role" style="width:100%">${roleOptions}</select>
+        </div>
+        <div class="fg" style="margin:0">
+          <label style="font-size:12px;font-weight:600;color:var(--tx2);display:flex;align-items:center;gap:5px;margin-bottom:5px">องค์กรที่เข้าถึงได้
+            <span class="info-tip" data-tip="Viewer จะเห็นเฉพาะข้อมูลขององค์กรนี้&#10;ถ้าเลือก 'ทุกองค์กร' จะเห็นข้อมูลทั้งหมด">i</span>
+          </label>
+          <select class="sel" id="um-org" style="width:100%">
+            <option value="">ทุกองค์กร (ไม่จำกัด)</option>
+            ${ORG_NAMES.map((n) => `<option value="${esc(n)}"${n===opts.orgName?' selected':''}>${esc(n)}</option>`).join('')}
+          </select>
+        </div>
+        <div class="fg" style="margin:0">
+          <label style="font-size:12px;font-weight:600;color:var(--tx2);display:block;margin-bottom:5px">วันหมดอายุสิทธิ์</label>
+          <input class="si" id="um-expires" type="date" value="${esc(opts.expiresAt)}">
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <label style="font-size:12px;font-weight:600;color:var(--tx2)">สถานะ:</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer">
+            <input type="checkbox" id="um-active" ${opts.isActive ? 'checked' : ''}> เปิดใช้งาน (Active)
+          </label>
+        </div>
+        <div>
+          <div style="font-size:12.5px;font-weight:700;color:var(--tx);margin-bottom:8px;display:flex;align-items:center;gap:6px">สิทธิ์เข้าถึงฟอร์ม
+            <span class="info-tip" data-tip="กำหนดว่า Viewer นี้มองเห็นฟอร์มใดได้บ้าง&#10;สามารถกำหนดได้อย่างละเอียด">i</span>
+          </div>
+          <div class="perm-card">
+            <label class="perm-row">
+              <input type="checkbox" id="um-perm-ch1" checked>
+              <div class="perm-info">
+                <div class="perm-name">📝 ดูผล Ch1 — ข้อมูลสุขภาวะองค์กร</div>
+                <div class="perm-desc">เข้าถึงผลสำรวจแบบฟอร์ม Ch1 (ข้อมูลบุคลากรระดับองค์กร)</div>
+              </div>
+            </label>
+            <label class="perm-row">
+              <input type="checkbox" id="um-perm-wb" checked>
+              <div class="perm-info">
+                <div class="perm-name">💚 ดูผล Wellbeing Survey — สุขภาวะรายบุคคล</div>
+                <div class="perm-desc">เข้าถึงผลสำรวจสุขภาวะรายบุคคล (PHQ-9, กิจกรรมทางกาย ฯลฯ)</div>
+              </div>
+            </label>
+            <label class="perm-row">
+              <input type="checkbox" id="um-perm-raw">
+              <div class="perm-info">
+                <div class="perm-name">🗂️ ดู Raw Data — ข้อมูลดิบรายแถว</div>
+                <div class="perm-desc">เห็นข้อมูลระดับ row ไม่ผ่านการ Aggregate (ละเอียดสุด)</div>
+              </div>
+            </label>
+            <label class="perm-row">
+              <input type="checkbox" id="um-perm-export">
+              <div class="perm-info">
+                <div class="perm-name">📤 Export Excel — ส่งออกข้อมูล</div>
+                <div class="perm-desc">ดาวน์โหลดรายงานเป็นไฟล์ .xlsx</div>
+              </div>
+            </label>
+          </div>
+        </div>
+        ${pwdResetHtml}
+        <div id="um-msg" style="font-size:12.5px;min-height:18px"></div>
+      </div>
+      <div class="umodal-foot">
+        <button class="btn b-gray" onclick="closeUserModal()">ยกเลิก</button>
+        <button class="btn b-solid" onclick="saveUserFromModal(${opts.isEdit ? 'true' : 'false'})">💾 ${opts.isEdit ? 'บันทึกการแก้ไข' : 'เพิ่มผู้ใช้'}</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) closeUserModal(); });
+  if (opts.isEdit) overlay.dataset.editEmail = opts.email;
+  if (opts.rowId) overlay.dataset.rowId = opts.rowId;
+}
+
+function closeUserModal() {
+  const el = document.getElementById('user-modal-overlay');
+  if (el) el.remove();
+}
+
+async function saveUserFromModal(isEdit) {
+  const overlay = document.getElementById('user-modal-overlay');
+  const email = document.getElementById('um-email')?.value?.trim();
+  const role = document.getElementById('um-role')?.value || 'viewer';
+  const orgName = document.getElementById('um-org')?.value || '';
+  const expires = document.getElementById('um-expires')?.value || null;
+  const isActive = document.getElementById('um-active')?.checked !== false;
+  const msg = document.getElementById('um-msg');
+
+  if (!email || !email.includes('@')) {
+    if (msg) { msg.style.color = 'var(--D)'; msg.textContent = '⚠️ กรุณากรอกอีเมลให้ถูกต้อง'; }
+    return;
+  }
+  if (msg) { msg.style.color = 'var(--tx2)'; msg.textContent = 'กำลังบันทึก...'; }
+
+  // Password — ใช้ Edge Function (set-user-password) ที่มี service_role key
+  const newPwd = document.getElementById('um-new-pwd')?.value?.trim();
+  if (!isEdit && newPwd) {
+    if (msg) { msg.style.color = 'var(--tx2)'; msg.textContent = 'กำลังสร้าง Auth account...'; }
+    const fnResult = await callSetUserPasswordFn(email, newPwd, 'create');
+    if (!fnResult.success) {
+      if (msg) { msg.style.color = 'var(--D)'; msg.textContent = '❌ สร้าง Auth account ไม่สำเร็จ: ' + fnResult.error; }
+      return;
+    }
+    if (msg) { msg.style.color = 'var(--tx2)'; msg.textContent = 'สร้าง Auth account แล้ว · กำลังบันทึก role...'; }
+  }
+
+  // Note: expires_at column removed — not in schema; use is_active for access control
+  const payload = { email, role, org_name: orgName || null, is_active: isActive };
+  let error = null;
+
+  if (isEdit) {
+    const rowId = overlay?.dataset.rowId;
+    const editEmail = overlay?.dataset.editEmail;
+    if (rowId) {
+      ({ error } = await sb.from('admin_user_roles').update(payload).eq('id', rowId));
+    } else if (editEmail) {
+      ({ error } = await sb.from('admin_user_roles').update(payload).eq('email', editEmail));
+    }
+  } else {
+    ({ error } = await sb.from('admin_user_roles').insert(payload));
+  }
+
+  if (error) {
+    if (msg) { msg.style.color = 'var(--D)'; msg.textContent = '❌ บันทึกไม่สำเร็จ: ' + error.message; }
+    return;
+  }
+
+  const { data } = await sb.from('admin_user_roles').select('*').order('email', { ascending: true });
+  state.userRows = data || [];
+  renderUsers();
+
+  // Edit mode + password — update via Edge Function
+  if (isEdit && newPwd) {
+    if (msg) { msg.style.color = 'var(--tx2)'; msg.textContent = 'กำลังเปลี่ยนรหัสผ่าน...'; }
+    const fnResult = await callSetUserPasswordFn(email, newPwd, 'update');
+    closeUserModal();
+    if (fnResult.success) {
+      showToast(`✅ แก้ไข ${email} สำเร็จ · 🔑 รหัสผ่านใหม่: ${newPwd} — แจ้งผู้ใช้ได้เลย`, 'success', 12000);
+    } else {
+      showToast(`✅ แก้ไข role สำเร็จ · ⚠️ เปลี่ยนรหัสผ่านไม่สำเร็จ: ${fnResult.error}`, 'warn', 8000);
+    }
+  } else {
+    closeUserModal();
+    if (!isEdit && newPwd) {
+      showToast(`✅ เพิ่ม ${email} สำเร็จ · 🔑 รหัสผ่าน: ${newPwd} — แจ้งผู้ใช้ได้เลย`, 'success', 12000);
+    } else {
+      showToast(`${isEdit ? 'แก้ไข' : 'เพิ่ม'} ${email} สำเร็จ ✅`, 'success');
+    }
+  }
+}
+
+// ── Password utilities ─────────────────────────────────────
+function genTempPwd() {
+  const yr = new Date().getFullYear() + 543;
+  const rand = Math.random().toString(36).slice(2,6).toUpperCase();
+  const code = `WB-${rand}-${yr}`;
+  const el = document.getElementById('um-new-pwd');
+  if (el) {
+    el.value = code;
+    el.style.color = 'var(--A)';
+    const hint = document.getElementById('um-pwd-strength');
+    if (hint) { hint.style.color = 'var(--A)'; hint.textContent = `✅ สร้างรหัส: ${code} — กด 📋 Copy แจ้งผู้ใช้`; }
+  }
+}
+
+function copyPwd() {
+  const el = document.getElementById('um-new-pwd');
+  if (el?.value?.trim()) {
+    navigator.clipboard.writeText(el.value.trim()).then(() => showToast('📋 คัดลอกรหัสผ่านแล้ว ✅'));
+  } else {
+    showToast('ยังไม่มีรหัสผ่าน — กรอกเองหรือกด 🔄 Auto ก่อน', 'warn');
+  }
+}
+
+async function applyPasswordChange(email, pwd, silent = false) {
+  if (!pwd || pwd.length < 6) {
+    if (!silent) showToast('⚠️ รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร', 'warn');
+    return false;
+  }
+  const currentEmail = state.session?.user?.email;
+  const isSelf = currentEmail?.toLowerCase() === email?.toLowerCase();
+  if (isSelf) {
+    // เปลี่ยนรหัสผ่านตัวเองโดยตรงผ่าน updateUser (ใช้ได้กับ anon key)
+    const { error } = await sb.auth.updateUser({ password: pwd });
+    if (error) {
+      if (!silent) showToast('❌ เปลี่ยนรหัสผ่านไม่สำเร็จ: ' + error.message, 'error');
+      const msgEl = document.getElementById('um-msg');
+      if (msgEl) { msgEl.style.color = 'var(--D)'; msgEl.textContent = '❌ ' + error.message; }
+      return false;
+    }
+    if (!silent) showToast('🔐 เปลี่ยนรหัสผ่านสำเร็จ ✅', 'success');
+    return true;
+  } else {
+    // เปลี่ยนรหัสผ่านผู้ใช้อื่นผ่าน Edge Function (มี service_role key)
+    const msgEl = document.getElementById('um-msg');
+    if (msgEl) { msgEl.style.color = 'var(--tx2)'; msgEl.textContent = 'กำลังเปลี่ยนรหัสผ่าน...'; }
+    const result = await callSetUserPasswordFn(email, pwd, 'update');
+    if (!result.success) {
+      if (!silent) showToast('❌ เปลี่ยนรหัสผ่านไม่สำเร็จ: ' + result.error, 'error');
+      if (msgEl) { msgEl.style.color = 'var(--D)'; msgEl.textContent = '❌ ' + result.error; }
+      return false;
+    }
+    if (!silent) showToast('🔐 เปลี่ยนรหัสผ่านสำเร็จ ✅', 'success');
+    return true;
+  }
+}
+
+async function sendPasswordResetLink(email) {
+  const loginUrl = window.location.origin + '/admin-login.html';
+  showToast('กำลังส่ง Reset Link...', 'info');
+  const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: loginUrl });
+  if (error) {
+    showToast('❌ ส่ง Reset Link ไม่สำเร็จ: ' + error.message, 'error');
+  } else {
+    showToast(`📧 ส่ง Reset Link ไปยัง ${email} แล้ว — ให้ผู้ใช้ตรวจสอบอีเมล`, 'success', 8000);
+  }
+}
+
+// ── Edge Function: set-user-password ─────────────────────────────────────────
+// action: 'create' (new user, email_confirm:true) | 'update' (change password)
+async function callSetUserPasswordFn(email, password, action) {
+  const token = state.session?.access_token;
+  if (!token) { showToast('❌ ไม่พบ session — กรุณา Login ใหม่', 'error'); return { success: false, error: 'No session' }; }
+  try {
+    const resp = await fetch(`${SUPABASE_URL}/functions/v1/set-user-password`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+        'apikey': SUPABASE_ANON_KEY,
+      },
+      body: JSON.stringify({ email, password, action }),
+    });
+    const data = await resp.json().catch(() => ({}));
+    if (!resp.ok) return { success: false, error: data.error || `HTTP ${resp.status}` };
+    return { success: true, ...data };
+  } catch (e) {
+    return { success: false, error: e.message };
+  }
+}
+
+// Modal เปลี่ยนรหัสผ่านสำหรับ locked superadmin
+function showChangePasswordModal(email) {
+  const existing = document.getElementById('user-modal-overlay');
+  if (existing) existing.remove();
+  const overlay = document.createElement('div');
+  overlay.id = 'user-modal-overlay';
+  overlay.className = 'umodal-overlay';
+  overlay.innerHTML = `
+    <div class="umodal" style="max-width:430px">
+      <div class="umodal-head">
+        <h3>🔐 เปลี่ยนรหัสผ่าน</h3>
+        <button class="btn b-gray" style="padding:5px 10px;min-width:32px" onclick="closeUserModal()">✕</button>
+      </div>
+      <div class="umodal-body">
+        <div class="fg" style="margin:0">
+          <label style="font-size:12px;font-weight:600;color:var(--tx2);display:block;margin-bottom:5px">อีเมล</label>
+          <input class="si" type="email" value="${esc(email)}" readonly
+            style="background:var(--bg);color:var(--tx2);font-weight:600">
+        </div>
+        <div class="fg" style="margin:0">
+          <label style="font-size:12px;font-weight:600;color:var(--tx2);display:flex;align-items:center;gap:5px;margin-bottom:5px">
+            รหัสผ่านใหม่ *
+            <span class="info-tip" data-tip="พิมพ์รหัสผ่านใหม่ หรือกด Auto&#10;จากนั้น Copy คัดลอกเก็บไว้">i</span>
+          </label>
+          <div style="display:flex;gap:7px;align-items:center">
+            <input type="text" id="um-new-pwd" placeholder="รหัสผ่านใหม่ (อย่างน้อย 6 ตัว)"
+              class="si" style="flex:1;font-family:monospace;letter-spacing:0.05em;font-size:13px">
+            <button class="btn b-gray" style="padding:5px 10px;font-size:11.5px;white-space:nowrap" onclick="genTempPwd()">🔄 Auto</button>
+            <button class="btn b-gray" style="padding:5px 10px;font-size:11.5px" onclick="copyPwd()">📋 Copy</button>
+          </div>
+          <div id="um-pwd-strength" style="font-size:11px;color:var(--tx3);margin-top:5px">
+            กรอกรหัสผ่านใหม่ หรือกด Auto ให้ระบบสร้างให้ แล้ว Copy เก็บไว้
+          </div>
+        </div>
+        <div id="um-msg" style="font-size:12.5px;min-height:18px"></div>
+      </div>
+      <div class="umodal-foot">
+        <button class="btn b-gray" onclick="closeUserModal()">ยกเลิก</button>
+        <button class="btn b-solid" onclick="handlePwdChangeSubmit('${esc(email)}')">🔐 เปลี่ยนรหัสผ่าน</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) closeUserModal(); });
+}
+
+async function handlePwdChangeSubmit(email) {
+  const pwd = document.getElementById('um-new-pwd')?.value?.trim();
+  const msg = document.getElementById('um-msg');
+  if (!pwd) { if (msg) { msg.style.color = 'var(--D)'; msg.textContent = '⚠️ กรุณาตั้งรหัสผ่านก่อน'; } return; }
+  if (pwd.length < 6) { if (msg) { msg.style.color = 'var(--D)'; msg.textContent = '⚠️ รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร'; } return; }
+  if (msg) { msg.style.color = 'var(--tx2)'; msg.textContent = 'กำลังบันทึก...'; }
+  const ok = await applyPasswordChange(email, pwd, false);
+  if (ok) {
+    setTimeout(() => closeUserModal(), 1800);
+  } else {
+    // Service role not available — show success with manual copy note
+    if (msg) {
+      msg.innerHTML = `⚠️ ใช้ Service Role Key เพื่อ apply อัตโนมัติ<br>
+        รหัสผ่านสำหรับ <b>${esc(email)}</b>: <code style="background:var(--PL);padding:2px 6px;border-radius:4px;color:var(--P);font-weight:700">${esc(pwd)}</code>
+        <button class="btn b-gray" style="padding:3px 8px;font-size:11px;margin-left:6px"
+          onclick="navigator.clipboard.writeText('${esc(pwd)}').then(()=>showToast('คัดลอกแล้ว ✅'))">📋 Copy</button>`;
+      msg.style.color = 'var(--W)';
+    }
+  }
+}
+
+async function resetUserPassword(email) {
+  genTempPwd(); // reuse the new genTempPwd function
+}
+
+async function deleteViewer(id, email) {
+  showConfirm(`ต้องการลบ Viewer: ${email} ออกจากระบบใช่หรือไม่?`, async () => {
+    const { error } = await sb.from('admin_user_roles').delete().eq('id', id);
+    if (error) { showToast('ลบไม่สำเร็จ: ' + error.message, 'error'); return; }
+    state.userRows = state.userRows.filter((r) => r.id !== id);
+    renderUsers();
+    showToast(`ลบ ${email} เรียบร้อยแล้ว`, 'success');
+  });
+}
+
+async function saveViewer() {
+  const email = document.getElementById('viewer-email')?.value?.trim();
+  const orgName = document.getElementById('viewer-org-select')?.value || '';
+  const expires = document.getElementById('viewer-expires')?.value || null;
+  const msg = document.getElementById('viewer-form-msg');
+
+  if (!email || !email.includes('@')) {
+    if (msg) { msg.style.color = 'var(--D)'; msg.textContent = 'กรุณากรอกอีเมลให้ถูกต้อง'; }
+    return;
+  }
+  if (!orgName) {
+    if (msg) { msg.style.color = 'var(--D)'; msg.textContent = 'กรุณาเลือกองค์กร'; }
+    return;
+  }
+  if (msg) { msg.style.color = 'var(--tx2)'; msg.textContent = 'กำลังบันทึก...'; }
+
+  const editId = document.getElementById('viewer-edit-id')?.value;
+  const payload = { email, role: 'viewer', org_name: orgName, is_active: true };
+  let error = null;
+  if (editId) {
+    const existing = state.userRows.find((r) => r.email === editId);
+    if (existing?.id) {
+      ({ error } = await sb.from('admin_user_roles').update(payload).eq('id', existing.id));
+    }
+  } else {
+    ({ error } = await sb.from('admin_user_roles').insert(payload));
+  }
+
+  if (error) {
+    if (msg) { msg.style.color = 'var(--D)'; msg.textContent = 'บันทึกไม่สำเร็จ: ' + error.message; }
+    return;
+  }
+
+  const { data } = await sb.from('admin_user_roles').select('*').order('email', { ascending: true });
+  state.userRows = data || [];
+  renderUsers();
+  resetViewerForm();
+  const yr = new Date().getFullYear() + 543;
+  const code = `WB-${(ORG_LOOKUP.get(orgName)?.code || 'ORG')}-${yr}`;
+  const codeEl = document.getElementById('temp-code-display');
+  if (codeEl) codeEl.textContent = code;
+  if (msg) { msg.style.color = 'var(--G)'; msg.textContent = `✅ บันทึก ${email} สำเร็จ`; }
+}
+
+function copyTempCode() {
+  const code = document.getElementById('temp-code-display')?.textContent || '';
+  navigator.clipboard.writeText(code).then(() => showToast('คัดลอกรหัส: ' + code));
+}
+
+/* ========== LINKS PAGE ========== */
+async function createNewLink() {
+  const orgName = document.getElementById('create-link-org')?.value;
+  const form = document.getElementById('create-link-form')?.value || 'wb';
+  const expires = document.getElementById('create-link-expires')?.value || null;
+  const msg = document.getElementById('create-link-msg');
+  if (!orgName) { if (msg) { msg.style.color = 'var(--D)'; msg.textContent = 'กรุณาเลือกองค์กร'; } return; }
+  const orgProfile = state.orgProfiles.find((o) => o.org_name_th === orgName) || ORG_LOOKUP.get(orgName);
+  const orgCode = orgProfile?.org_code || orgProfile?.code || orgName.replace(/[^A-Za-z0-9]/g, '').slice(0, 12).toLowerCase();
+  const orgId = orgProfile?.id || null;
+  const base = form === 'ch1' ? 'ch1.html' : 'index.html';
+  const url = `${SURVEY_BASE_URL}/${base}?org=${orgCode}`;
+  if (msg) { msg.style.color = 'var(--tx2)'; msg.textContent = 'กำลังสร้างลิงก์...'; }
+  const { error } = await sb.from('org_form_links').insert({ org_id: orgId, full_url: url, is_active: true });
+  if (error) { if (msg) { msg.style.color = 'var(--D)'; msg.textContent = 'ไม่สำเร็จ: ' + error.message; } return; }
+  const { data } = await sb.from('org_form_links').select('*');
+  state.linkRows = data || [];
+  renderLinks(summarizeOrgs());
+  if (msg) { msg.style.color = 'var(--G)'; msg.textContent = `✅ สร้างลิงก์ ${orgName} (${form.toUpperCase()}) เรียบร้อย`; }
+}
+
+function filterLinksTable() {
+  const search = (document.getElementById('links-search')?.value || '').toLowerCase();
+  const formFilter = document.getElementById('links-form-filter')?.value || '';
+  const org = document.getElementById('links-org-filter')?.value || '';
+  const status = document.getElementById('links-status-filter')?.value || '';
+  document.querySelectorAll('#links-tbody tr').forEach((tr) => {
+    const text = tr.textContent.toLowerCase();
+    const matchSearch = !search || text.includes(search);
+    const matchForm = !formFilter || tr.dataset.form === formFilter;
+    const matchOrg = !org || tr.dataset.org === org;
+    const matchStatus = !status || tr.dataset.status === status;
+    tr.style.display = (matchSearch && matchForm && matchOrg && matchStatus) ? '' : 'none';
+  });
+}
+
+async function toggleLink(id, orgName, newActive) {
+  if (!id) {
+    const summary = summarizeOrgs();
+    renderLinks(summary);
+    return;
+  }
+  const { error } = await sb.from('org_form_links').update({ is_active: newActive }).eq('id', id);
+  if (error) { showToast('อัปเดตไม่สำเร็จ: ' + error.message,'error'); return; }
+  const row = state.linkRows.find((r) => r.id === id);
+  if (row) row.is_active = newActive;
+  renderLinks(summarizeOrgs());
+}
+
+/* ========== NOTIF PAGE ========== */
+function sendReminderEmail() {
+  const msg = document.getElementById('notif-msg');
+  const summary = summarizeOrgs();
+  const pending = summary.filter((org) => org.ch1Count === 0);
+  if (msg) { msg.style.color = 'var(--G)'; msg.textContent = `✅ จำลองการส่ง Reminder ไปยัง ${pending.length} องค์กร (ต้องต่อ Email Service จริง)`; }
+  showToast(`📧 จำลองส่ง Reminder Email — ยังไม่ส่ง Ch1: ${pending.length} องค์กร (ต้องต่อ Email Service จริง)`,'info',5000);
+}
+
+function previewReminderEmail() {
+  const ch1Deadline = document.getElementById('deadline-ch1')?.value;
+  const deadlineDisplay = ch1Deadline ? isoToBuddhistDisplay(ch1Deadline) : '31/03/2569';
+  const template = `เรียน ท่านผู้ประสานงาน\n\nขอเรียนแจ้งว่าแบบสอบถาม Ch1 ยังไม่ได้รับข้อมูลจากองค์กรของท่าน\nกรุณาดำเนินการก่อน ${deadlineDisplay}\n\nลิงก์ฟอร์ม: ${SURVEY_BASE_URL}/ch1.html\n\nขอบคุณครับ\nทีมงาน NIDA Wellbeing Survey`;
+  // แสดง preview อีเมลใน modal แทน alert
+  const prev = document.getElementById('email-preview-modal');
+  if (prev) prev.remove();
+  const m = document.createElement('div');
+  m.id = 'email-preview-modal';
+  m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:99998';
+  m.innerHTML = `<div style="background:#fff;border-radius:14px;padding:24px;max-width:500px;width:92%;max-height:80vh;overflow-y:auto;box-shadow:0 20px 40px rgba(0,0,0,.2)"><div style="font-weight:700;font-size:15px;color:#0F4C81;margin-bottom:12px">📧 ตัวอย่างอีเมล Reminder</div><pre style="font-size:12.5px;white-space:pre-wrap;line-height:1.7;color:#374151;background:#F8FAFC;padding:14px;border-radius:8px;border:1px solid #E2E8F0">${template}</pre><div style="text-align:right;margin-top:14px"><button class="btn b-gray" onclick="document.getElementById('email-preview-modal').remove()">✕ ปิด</button></div></div>`;
+  document.body.appendChild(m);
+  m.addEventListener('click', (e) => { if (e.target === m) m.remove(); });
+}
+
+/* ========== QR MODAL ========== */
+// ==================== CH1 ROW DETAIL MODAL ====================
+function showCh1RowDetail(index) {
+  const row = state.ch1Rows[index];
+  if (!row) return;
+  const org = getCh1Org(row);
+  const fd = row.form_data || row;
+  const fields = [
+    ['องค์กร', org],
+    ['วันที่ส่ง', fmtDate(getRowDate(row), true)],
+    ['บุคลากรรวม', fmtNum(row.total_personnel || row.total_staff || fd.total_personnel)],
+    ['ส่วนที่กรอก', row.form_completion || '5/5 ส่วน'],
+    ['ชาย', fmtNum(fd.gender_male)],
+    ['หญิง', fmtNum(fd.gender_female)],
+    ['อายุ ≤30 ปี', fmtNum(fd.age_under30)],
+    ['อายุ 31–40 ปี', fmtNum(fd.age_31_40)],
+    ['อายุ 41–50 ปี', fmtNum(fd.age_41_50)],
+    ['อายุ 51+ ปี', fmtNum(fd.age_over51)],
+    ['สัดส่วน NCD', fmtNum(row.ncd_ratio_pct ?? fd.ncd_ratio_pct, 1) + '%'],
+    ['Burnout', fmtNum(row.mental_burnout ?? fd.mental_burnout, 1) + '%'],
+    ['Engagement Score', fmtNum(row.engagement_score ?? fd.engagement_score, 1)],
+  ];
+  const existing = document.getElementById('ch1-detail-modal');
+  if (existing) existing.remove();
+  const overlay = document.createElement('div');
+  overlay.id = 'ch1-detail-modal';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px';
+  overlay.innerHTML = `<div style="background:#fff;border-radius:16px;padding:24px;min-width:320px;max-width:480px;width:100%;max-height:80vh;overflow-y:auto;box-shadow:0 20px 40px rgba(0,0,0,.2)">
+    <div style="font-weight:700;font-size:16px;margin-bottom:16px">📋 รายละเอียด Ch1 — ${esc(org)}</div>
+    <table style="width:100%;font-size:13px;border-collapse:collapse">${fields.map(([k,v]) => `<tr><td style="padding:5px 0;color:#64748b;width:55%">${k}</td><td style="font-weight:600">${v||'—'}</td></tr>`).join('')}</table>
+    <div style="margin-top:16px;text-align:right"><button class="btn b-gray" onclick="document.getElementById('ch1-detail-modal').remove()">✕ ปิด</button></div>
+  </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+}
+
+// ==================== SETTINGS ====================
+const SETTINGS_DEFAULTS = {
+  autosave: true,
+  sheetsSync: true,
+  formVersion: 'v3.0 (ล่าสุด)',
+  sessionTimeout: '30 นาที',
+  auditLog: true,
+  forcePassword: false,
+};
+
+function loadSettingsUI() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('admin_settings') || '{}');
+    const cfg = Object.assign({}, SETTINGS_DEFAULTS, saved);
+    const el = (id) => document.getElementById(id);
+    if (el('setting-autosave')) el('setting-autosave').checked = cfg.autosave;
+    if (el('setting-sheets-sync')) el('setting-sheets-sync').checked = cfg.sheetsSync;
+    if (el('setting-form-version')) el('setting-form-version').value = cfg.formVersion;
+    if (el('setting-session-timeout')) el('setting-session-timeout').value = cfg.sessionTimeout;
+    if (el('setting-audit-log')) el('setting-audit-log').checked = cfg.auditLog;
+    if (el('setting-force-password')) el('setting-force-password').checked = cfg.forcePassword;
+  } catch(e) {}
+}
+
+function saveSettings() {
+  const el = (id) => document.getElementById(id);
+  const cfg = {
+    autosave: el('setting-autosave')?.checked ?? SETTINGS_DEFAULTS.autosave,
+    sheetsSync: el('setting-sheets-sync')?.checked ?? SETTINGS_DEFAULTS.sheetsSync,
+    formVersion: el('setting-form-version')?.value || SETTINGS_DEFAULTS.formVersion,
+    sessionTimeout: el('setting-session-timeout')?.value || SETTINGS_DEFAULTS.sessionTimeout,
+    auditLog: el('setting-audit-log')?.checked ?? SETTINGS_DEFAULTS.auditLog,
+    forcePassword: el('setting-force-password')?.checked ?? SETTINGS_DEFAULTS.forcePassword,
+  };
+  localStorage.setItem('admin_settings', JSON.stringify(cfg));
+  showToast('บันทึกการตั้งค่าเรียบร้อยแล้ว ✅');
+}
+
+function resetSettings() {
+  showConfirm('รีเซ็ตการตั้งค่าทั้งหมดกลับเป็นค่าเริ่มต้น?', () => {
+    localStorage.removeItem('admin_settings');
+    loadSettingsUI();
+    showToast('รีเซ็ตการตั้งค่าแล้ว');
+  });
+}
+
+function showQRModal(path) {
+  const url = path.startsWith('http') ? path : window.location.origin + '/' + path;
+  const existing = document.getElementById('qr-modal-overlay');
+  if (existing) existing.remove();
+  const overlay = document.createElement('div');
+  overlay.id = 'qr-modal-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:9999';
+  overlay.innerHTML = `<div style="background:#fff;border-radius:16px;padding:28px;text-align:center;min-width:260px;box-shadow:0 20px 40px rgba(0,0,0,.2)">
+    <div style="font-weight:700;font-size:15px;margin-bottom:12px">QR Code</div>
+    <div id="qr-canvas" style="margin:0 auto 12px;display:flex;justify-content:center;align-items:center"></div>
+    <div style="font-size:11px;color:#64748b;word-break:break-all;max-width:220px;margin:0 auto 14px">${esc(url)}</div>
+    <div style="display:flex;gap:8px;justify-content:center">
+      <button class="btn b-blue" onclick="navigator.clipboard.writeText('${esc(url)}').then(()=>showToast('คัดลอกแล้ว ✅'))">📋 Copy URL</button>
+      <button class="btn b-gray" onclick="document.getElementById('qr-modal-overlay').remove()">✕ ปิด</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+  try {
+    new QRCode(document.getElementById('qr-canvas'), { text: url, width: 180, height: 180, correctLevel: QRCode.CorrectLevel.M });
+  } catch (e) {
+    document.getElementById('qr-canvas').textContent = 'QRCode library ไม่พร้อมใช้งาน';
+  }
+}
+
+function sendLinkEmail(type) {
+  const orgSel = document.getElementById('ch1-link-org');
+  const orgName = orgSel?.value || '';
+  const code = document.getElementById('ch1-link-code')?.textContent || '';
+  const url = window.location.origin + '/' + code;
+  const org = ORG_LOOKUP.get(orgName);
+  if (!orgName) { showToast('กรุณาเลือกองค์กรก่อน','warn'); return; }
+  showToast(`📧 จำลองส่งอีเมลลิงก์ ${type.toUpperCase()} ไปยัง ${org?.email || 'ไม่มีอีเมล'} (ต้องต่อ Email Service จริง)`,'info',5000);
+}
+
+/* ========== COMPARE PAGE ========== */
+function removeCompareChip(el) {
+  el.remove();
+}
+
+function addCompareOrg() {
+  const sel = document.getElementById('compare-add-select');
+  if (!sel) return;
+  sel.innerHTML = `<option value="">— เลือก —</option>${ORG_NAMES.filter((name) => {
+    return !document.querySelectorAll('#compare-chips .badge[data-org]').length ||
+      ![...document.querySelectorAll('#compare-chips .badge[data-org]')].some((chip) => chip.dataset.org === name);
+  }).map((name) => `<option value="${esc(name)}">${esc(name)}</option>`).join('')}`;
+  sel.style.display = sel.style.display === 'none' ? 'inline-block' : 'none';
+}
+
+function confirmAddCompare(sel) {
+  const name = sel.value;
+  if (!name) return;
+  const chips = document.getElementById('compare-chips');
+  const existing = [...chips.querySelectorAll('.badge[data-org]')];
+  if (existing.length >= 5) { showToast('เปรียบเทียบได้สูงสุด 5 องค์กร','warn'); sel.value = ''; return; }
+  if (existing.some((c) => c.dataset.org === name)) { showToast('องค์กรนี้อยู่ในรายการแล้ว','warn'); sel.value = ''; return; }
+  const chip = document.createElement('span');
+  chip.className = 'badge bb';
+  chip.style.cssText = 'padding:5px 10px;font-size:12px;cursor:pointer';
+  chip.dataset.org = name;
+  chip.textContent = name + ' ✕';
+  chip.onclick = () => chip.remove();
+  chips.insertBefore(chip, chips.querySelector('button'));
+  sel.value = '';
+  sel.style.display = 'none';
+}
+
+/* ========== AUDIT LOG EXPORT + FILTER ========== */
+function exportAuditLog() {
+  const rows = [...document.querySelectorAll('#page-audit .audit-item')].map((item) => ({
+    time: item.querySelector('.ai-time')?.textContent || '',
+    description: item.querySelector('.ai-desc')?.textContent || '',
+    user: item.querySelector('.ai-user')?.textContent || '',
+  }));
+  if (!rows.length) { showToast('ไม่มีข้อมูล Audit Log'); return; }
+  downloadWorkbook('audit_log.xlsx', 'AuditLog', rows);
+  showToast('Export Audit Log สำเร็จ ✅');
+}
+
+function filterAuditLog() {
+  const q = (document.getElementById('audit-search')?.value || '').toLowerCase();
+  const type = (document.getElementById('audit-type')?.value || '').toLowerCase();
+  document.querySelectorAll('#page-audit .audit-item').forEach((item) => {
+    const text = item.textContent.toLowerCase();
+    const matchQ = !q || text.includes(q);
+    const matchType = !type || text.includes(type);
+    item.style.display = (matchQ && matchType) ? '' : 'none';
+  });
+}
+
+/* ========== FORM EDITOR ========== */
+const FORM_CONFIG_SCHEMAS = {
+  ch1: {
+    label: 'ฟอร์ม Ch1 (ข้อมูลองค์กร)',
+    sections: [
+      { key: 'general', label: '🏠 ทั่วไป (หน้าหลักฟอร์ม)', fields: [
+        { key: 'main_title', label: 'ชื่อฟอร์มหลัก', default: 'แบบสำรวจข้อมูลสุขภาวะองค์กร' },
+        { key: 'main_desc', label: 'คำอธิบายแบบสำรวจ', default: 'แบบสอบถามสำหรับผู้บริหารและ HR ขององค์กร เพื่อรวบรวมข้อมูลสุขภาวะบุคลากร', long: true },
+        { key: 'submit_btn', label: 'ข้อความปุ่มส่งฟอร์ม', default: 'ส่งแบบสำรวจ' },
+      ]},
+      { key: 'step1', label: '🏛️ ส่วนที่ 1: ข้อมูลเบื้องต้น', fields: [
+        { key: 'step1_title', label: 'ชื่อหัวข้อส่วนที่ 1', default: '🏛️ ส่วนที่ 1: ข้อมูลเบื้องต้นของส่วนราชการ' },
+        { key: 'step1_total_personnel', label: 'Label จำนวนบุคลากรทั้งหมด', default: 'จำนวนบุคลากรทั้งหมด (คน) *' },
+        { key: 'step1_org_type', label: 'Label ประเภทหน่วยงาน', default: 'ประเภทหน่วยงาน *', options: ['กรม/สำนักงาน','กระทรวง','รัฐวิสาหกิจ','องค์กรอิสระ','หน่วยงานในกำกับ'] },
+        { key: 'step1_fiscal_year', label: 'Label ปีงบประมาณ', default: 'ปีงบประมาณ (พ.ศ.) *' },
+      ]},
+      { key: 'step2', label: '📋 ส่วนที่ 2: นโยบายและบริบท', fields: [
+        { key: 'step2_title', label: 'ชื่อหัวข้อส่วนที่ 2', default: '📋 ส่วนที่ 2: นโยบายและบริบทภายนอกองค์กร' },
+        { key: 'step2_policy_desc', label: 'คำอธิบายส่วนที่ 2', default: 'ข้อมูลนโยบาย กฎระเบียบ และบริบทภายนอกที่ส่งผลต่อสุขภาวะองค์กร', long: true },
+      ]},
+      { key: 'step3', label: '🩺 ส่วนที่ 3: ข้อมูลสุขภาวะ', fields: [
+        { key: 'step3_title', label: 'ชื่อหัวข้อส่วนที่ 3', default: '🩺 ส่วนที่ 3: ข้อมูลสุขภาวะของข้าราชการ' },
+        { key: 'step3_ncd_diabetes', label: 'Label โรคเบาหวาน', default: 'โรคเบาหวาน (คน)' },
+        { key: 'step3_ncd_hypertension', label: 'Label โรคความดัน', default: 'โรคความดันโลหิตสูง (คน)' },
+        { key: 'step3_burnout', label: 'Label ภาวะหมดไฟ', default: 'บุคลากรที่มีภาวะหมดไฟ Burnout (คน)' },
+        { key: 'step3_sick_leave', label: 'Label วันลาป่วย', default: 'วันลาป่วยเฉลี่ยต่อคนต่อปี (วัน)' },
+      ]},
+      { key: 'step4', label: '⚙️ ส่วนที่ 4: ระบบการบริหาร', fields: [
+        { key: 'step4_title', label: 'ชื่อหัวข้อส่วนที่ 4', default: '⚙️ ส่วนที่ 4: ระบบการบริหารและสภาพแวดล้อม' },
+        { key: 'step4_engagement', label: 'Label Engagement Score', default: 'คะแนน Engagement บุคลากร (1–100)' },
+      ]},
+      { key: 'step5', label: '🎯 ส่วนที่ 5: ทิศทางและเป้าหมาย', fields: [
+        { key: 'step5_title', label: 'ชื่อหัวข้อส่วนที่ 5', default: '🎯 ส่วนที่ 5: ทิศทาง เป้าหมาย และข้อเสนอแนะ' },
+        { key: 'step5_priorities', label: 'Label ประเด็นสุขภาวะสำคัญ', default: 'ประเด็นสุขภาวะที่ต้องการพัฒนาในปีนี้ (เลือกได้หลายข้อ)' },
+      ]},
+    ]
+  },
+  wellbeing: {
+    label: 'Wellbeing Survey (รายบุคคล)',
+    sections: [
+      { key: 'personal', label: '👤 ข้อมูลส่วนตัว', fields: [
+        { key: 'personal.title', label: 'ชื่อหัวข้อ', default: '👤 ข้อมูลส่วนตัว' },
+        { key: 'personal.q.gender', label: 'คำถามเพศ', default: 'เพศ', options: ['ชาย','หญิง','ไม่ระบุ / อื่นๆ'] },
+        { key: 'personal.q.age', label: 'คำถามอายุ (ปี)', default: 'อายุ (ปี)' },
+        { key: 'personal.q.education', label: 'คำถามระดับการศึกษา', default: 'ระดับการศึกษาสูงสุด', options: ['ต่ำกว่าปริญญาตรี','ปริญญาตรี','ปริญญาโท','ปริญญาเอก'] },
+        { key: 'personal.q.job_duration', label: 'คำถามอายุราชการ', default: 'อายุราชการ / อายุการทำงาน', options: ['น้อยกว่า 1 ปี','1–5 ปี','6–10 ปี','11–20 ปี','มากกว่า 20 ปี'] },
+      ]},
+      { key: 'consumption', label: '🍎 พฤติกรรมสุขภาพ (การบริโภค)', fields: [
+        { key: 'consumption.title', label: 'ชื่อหัวข้อ', default: '🍎 พฤติกรรมสุขภาพ: การบริโภค' },
+        { key: 'consumption.q.alcohol', label: 'คำถามดื่มแอลกอฮอล์', default: 'ท่านดื่มเครื่องดื่มแอลกอฮอล์หรือไม่', options: ['ไม่ดื่มเลย','นานๆ ครั้ง (ไม่เกิน 1 ครั้ง/เดือน)','บางครั้ง (1–3 ครั้ง/เดือน)','สม่ำเสมอ (1+ ครั้ง/สัปดาห์)'] },
+        { key: 'consumption.q.smoking', label: 'คำถามสูบบุหรี่', default: 'ท่านสูบบุหรี่หรือผลิตภัณฑ์ยาสูบหรือไม่', options: ['ไม่สูบ','เคยสูบแต่เลิกแล้ว','สูบเป็นบางครั้ง','สูบเป็นประจำ'] },
+      ]},
+      { key: 'nutrition', label: '🥗 โภชนาการ', fields: [
+        { key: 'nutrition.title', label: 'ชื่อหัวข้อ', default: '🥗 โภชนาการ' },
+        { key: 'nutrition.q.breakfast', label: 'คำถามอาหารเช้า', default: 'ท่านรับประทานอาหารเช้าเป็นประจำหรือไม่' },
+        { key: 'nutrition.q.fruit_veg', label: 'คำถามผักและผลไม้', default: 'ท่านรับประทานผักและผลไม้อย่างเพียงพอหรือไม่' },
+      ]},
+      { key: 'activity', label: '🏃 กิจกรรมทางกาย', fields: [
+        { key: 'activity.title', label: 'ชื่อหัวข้อ', default: '🏃 กิจกรรมทางกาย' },
+        { key: 'activity.q.exercise_freq', label: 'คำถามความถี่ออกกำลังกาย', default: 'ท่านออกกำลังกายสม่ำเสมอหรือไม่' },
+        { key: 'activity.q.exercise_min', label: 'คำถามระยะเวลาออกกำลัง', default: 'โดยเฉลี่ยท่านออกกำลังกายครั้งละกี่นาที' },
+      ]},
+      { key: 'mental', label: '🧠 สุขภาพจิต (PHQ-9 / GAD-7)', fields: [
+        { key: 'mental.title', label: 'ชื่อหัวข้อ', default: '🧠 สุขภาพจิต' },
+        { key: 'mental.q.phq_intro', label: 'คำนำ PHQ-9', default: 'ในช่วง 2 สัปดาห์ที่ผ่านมา ท่านมีปัญหาต่อไปนี้บ่อยเพียงใด?', long: true },
+        { key: 'mental.q.tmhi_1', label: 'PHQ-9 ข้อ 1', default: 'ขาดความสนใจหรือความเพลิดเพลินในการทำสิ่งต่างๆ' },
+        { key: 'mental.q.tmhi_2', label: 'PHQ-9 ข้อ 2', default: 'รู้สึกหดหู่ ซึมเศร้า หรือสิ้นหวัง' },
+        { key: 'mental.q.tmhi_3', label: 'PHQ-9 ข้อ 3', default: 'นอนหลับยาก หรือหลับมากกว่าปกติ' },
+        { key: 'mental.q.tmhi_4', label: 'PHQ-9 ข้อ 4', default: 'รู้สึกอ่อนเพลียหรือไม่มีแรง' },
+      ]},
+      { key: 'loneliness', label: '🤝 ความโดดเดี่ยว / สัมพันธภาพ', fields: [
+        { key: 'loneliness.title', label: 'ชื่อหัวข้อ', default: '🤝 ความโดดเดี่ยวและสัมพันธภาพ' },
+        { key: 'loneliness.q.lonely_1', label: 'คำถามความโดดเดี่ยว 1', default: 'ท่านรู้สึกว่าขาดเพื่อนฝูงบ่อยครั้งหรือไม่' },
+        { key: 'loneliness.q.lonely_2', label: 'คำถามความโดดเดี่ยว 2', default: 'ท่านรู้สึกว่าถูกตัดขาดจากผู้อื่นหรือไม่' },
+      ]},
+      { key: 'safety', label: '🛡️ ความปลอดภัย / Engagement', fields: [
+        { key: 'safety.title', label: 'ชื่อหัวข้อ', default: '🛡️ ความปลอดภัยและ Engagement' },
+        { key: 'safety.q.safety_1', label: 'คำถามความปลอดภัย 1', default: 'ท่านรู้สึกปลอดภัยในสภาพแวดล้อมการทำงาน' },
+        { key: 'safety.q.engage_1', label: 'คำถาม Engagement 1', default: 'ท่านรู้สึกมีส่วนร่วมและทุ่มเทกับงานของท่าน' },
+      ]},
+      { key: 'environment', label: '🏢 สภาพแวดล้อมองค์กร', fields: [
+        { key: 'environment.title', label: 'ชื่อหัวข้อ', default: '🏢 สภาพแวดล้อมองค์กร' },
+        { key: 'environment.q.wlb_1', label: 'คำถาม Work-Life Balance', default: 'งานของท่านส่งผลกระทบต่อเวลาส่วนตัวและครอบครัวมากน้อยเพียงใด' },
+        { key: 'environment.q.workload', label: 'คำถามภาระงาน', default: 'ปริมาณงานของท่านเหมาะสมหรือไม่' },
+      ]},
+    ]
+  }
+};
+
+let _feConfigCache = { ch1: {}, wellbeing: {} };
+
+async function loadFormEditorFields() {
+  const formIds = ['ch1', 'wellbeing'];
+  for (const formId of formIds) {
+    const statusEl = document.getElementById(`fe-${formId === 'wellbeing' ? 'wb' : formId}-status`);
+    if (statusEl) statusEl.textContent = 'กำลังโหลด config...';
+  }
+  try {
+    const { data, error } = await sb.from('form_configs').select('form_id,config_json').in('form_id', formIds);
+    if (error) throw error;
+    (data || []).forEach((row) => { _feConfigCache[row.form_id] = row.config_json || {}; });
+  } catch (e) {
+    console.warn('form_configs fetch error:', e);
+  }
+  renderFeFields('ch1');
+  renderFeFields('wellbeing');
+}
+
+function renderFeFields(formId) {
+  const schema = FORM_CONFIG_SCHEMAS[formId];
+  if (!schema) return;
+  const panelKey = formId === 'wellbeing' ? 'wb' : formId;
+  const container = document.getElementById(`fe-${panelKey}-fields`);
+  const statusEl = document.getElementById(`fe-${panelKey}-status`);
+  if (!container) return;
+  const cfg = _feConfigCache[formId] || {};
+  const overrideCount = Object.keys(cfg).length;
+  if (statusEl) {
+    statusEl.innerHTML = overrideCount
+      ? `<span style="color:var(--A);font-weight:600">✓ แก้ไขแล้ว ${overrideCount} ช่อง</span> — อัปเดตล่าสุดจาก Supabase`
+      : '<span style="color:var(--tx3)">ยังไม่มีการแก้ไข — แสดงค่า Default ทั้งหมด</span>';
+  }
+
+  // Editing banner
+  const bannerHtml = `<div class="fe-editing-banner">✏️ คุณกำลัง <b>แก้ไขคำถาม/ข้อความ</b> ในฟอร์ม — ไม่ใช่กำลังตอบแบบสอบถาม</div>`;
+
+  const sectionsHtml = schema.sections.map((sec) => {
+    const editedInSec = sec.fields.filter((f) => cfg[f.key]).length;
+    const sectionHdr = `<div class="fe-section-hdr">
+      ${esc(sec.label)}
+      ${editedInSec > 0 ? `<span style="font-size:11px;font-weight:400;background:var(--AL);color:var(--A);padding:2px 10px;border-radius:99px">แก้ไขแล้ว ${editedInSec} ช่อง</span>` : ''}
+    </div>`;
+
+    const fieldsHtml = sec.fields.map((field) => {
+      const currentVal = cfg[field.key] || '';
+      const isChanged = !!currentVal;
+      const fieldId = `fe-field-${formId}-${field.key.replace(/\./g,'-')}`;
+      const hasOptions = Array.isArray(field.options) && field.options.length > 0;
+      const savedOpts = cfg[field.key + '__opts'];
+
+      // Options editing HTML (for choice/select type fields)
+      const optsHtml = hasOptions ? (() => {
+        const currentOpts = savedOpts ? savedOpts.split('||') : field.options;
+        return `<div class="fe-opts-area">
+          <div class="fe-opts-label">ตัวเลือก (Choices)</div>
+          <div id="fe-opts-${fieldId}">
+            ${currentOpts.map((opt, i) => `
+              <div class="fe-option-row" id="fe-opt-row-${fieldId}-${i}">
+                <span class="fe-opt-prefix">${i+1}.</span>
+                <input class="fe-opt-input" id="fe-opt-${fieldId}-${i}" value="${esc(opt)}" placeholder="ตัวเลือกที่ ${i+1}">
+                <button class="fe-opt-del" onclick="feDeleteOpt('${esc(fieldId)}',${i})" title="ลบตัวเลือกนี้">✕</button>
+              </div>`).join('')}
+          </div>
+          <button class="fe-add-opt" onclick="feAddOpt('${esc(fieldId)}','${esc(field.key)}','${esc(formId)}')">＋ เพิ่มตัวเลือก</button>
+        </div>`;
+      })() : '';
+
+      return `<div class="fe-form-card${isChanged ? ' modified' : ''}">
+        <div class="fe-card-band">
+          <span>${esc(field.label)}</span>
+          ${hasOptions ? '<span class="fe-type-tag">ตัวเลือก</span>' : '<span class="fe-type-tag" style="background:var(--tx2)">ข้อความ</span>'}
+          ${isChanged ? '<span class="fe-edited-badge">✓ แก้ไขแล้ว</span>' : ''}
+        </div>
+        <div class="fe-card-body">
+          <div class="fe-q-label">ข้อความคำถาม / Label</div>
+          <${field.long ? 'textarea rows="3"' : 'input'} class="fe-q-input"
+            id="${fieldId}"
+            placeholder="${esc(field.default)}"
+            ${field.long ? '' : `value="${esc(currentVal)}"`}
+          >${field.long ? esc(currentVal) : ''}</${field.long ? 'textarea' : 'input'}>
+          <div class="fe-default-hint">Default: ${esc(field.default)}</div>
+          ${optsHtml}
+        </div>
+        <div class="fe-card-foot">
+          ${isChanged ? `<button class="btn b-gray" style="padding:4px 10px;font-size:11.5px" onclick="resetFeField('${esc(formId)}','${esc(field.key)}')">↩ รีเซ็ต</button>` : `<span style="font-size:11px;color:var(--tx3)">ใช้ค่า default</span>`}
+        </div>
+      </div>`;
+    }).join('');
+
+    return sectionHdr + fieldsHtml;
+  }).join('');
+
+  container.innerHTML = bannerHtml + sectionsHtml;
+}
+
+function feDeleteOpt(fieldId, idx) {
+  const container = document.getElementById(`fe-opts-${fieldId}`);
+  if (!container) return;
+  const rows = [...container.querySelectorAll('.fe-option-row')];
+  if (rows.length <= 1) { showToast('ต้องมีตัวเลือกอย่างน้อย 1 ข้อ', 'warn'); return; }
+  rows[idx]?.remove();
+  // Re-index
+  [...container.querySelectorAll('.fe-option-row')].forEach((r, i) => {
+    r.querySelector('.fe-opt-prefix').textContent = (i+1) + '.';
+    r.id = `fe-opt-row-${fieldId}-${i}`;
+    const inp = r.querySelector('.fe-opt-input');
+    if (inp) inp.id = `fe-opt-${fieldId}-${i}`;
+    const del = r.querySelector('.fe-opt-del');
+    if (del) del.setAttribute('onclick', `feDeleteOpt('${fieldId}',${i})`);
+  });
+}
+
+function feAddOpt(fieldId, fieldKey, formId) {
+  const container = document.getElementById(`fe-opts-${fieldId}`);
+  if (!container) return;
+  const idx = container.querySelectorAll('.fe-option-row').length;
+  const row = document.createElement('div');
+  row.className = 'fe-option-row';
+  row.id = `fe-opt-row-${fieldId}-${idx}`;
+  row.innerHTML = `<span class="fe-opt-prefix">${idx+1}.</span>
+    <input class="fe-opt-input" id="fe-opt-${fieldId}-${idx}" placeholder="ตัวเลือกที่ ${idx+1}">
+    <button class="fe-opt-del" onclick="feDeleteOpt('${fieldId}',${idx})" title="ลบ">✕</button>`;
+  container.appendChild(row);
+  row.querySelector('.fe-opt-input')?.focus();
+}
+
+function feTab(formId, el) {
+  ['ch1','wb'].forEach((k) => {
+    document.getElementById(`fe-${k}-panel`).style.display = 'none';
+    document.getElementById(`fe-tab-${k === 'wb' ? 'wb' : k}`)?.classList.remove('active');
+  });
+  const panelKey = formId === 'wellbeing' ? 'wb' : formId;
+  document.getElementById(`fe-${panelKey}-panel`).style.display = '';
+  if (el) el.classList.add('active');
+}
+
+async function saveFormConfig(formId) {
+  const schema = FORM_CONFIG_SCHEMAS[formId];
+  if (!schema) return;
+  const cfg = {};
+  schema.sections.forEach((sec) => {
+    sec.fields.forEach((field) => {
+      const inputId = `fe-field-${formId}-${field.key.replace(/\./g, '-')}`;
+      const val = (document.getElementById(inputId)?.value || '').trim();
+      if (val && val !== field.default) cfg[field.key] = val;
+      // Save options if field has choices
+      if (Array.isArray(field.options)) {
+        const optsContainer = document.getElementById(`fe-opts-${inputId}`);
+        if (optsContainer) {
+          const optVals = [...optsContainer.querySelectorAll('.fe-opt-input')].map((inp) => inp.value.trim()).filter(Boolean);
+          const defaultOpts = field.options.join('||');
+          if (optVals.length && optVals.join('||') !== defaultOpts) {
+            cfg[field.key + '__opts'] = optVals.join('||');
+          }
+        }
+      }
+    });
+  });
+  try {
+    const { error } = await sb.from('form_configs').upsert(
+      { form_id: formId, form_name: schema.label, config_json: cfg, updated_by: state.session?.user?.email || 'admin', updated_at: new Date().toISOString() },
+      { onConflict: 'form_id' }
+    );
+    if (error) throw error;
+    _feConfigCache[formId] = cfg;
+    const overrideCount = Object.keys(cfg).length;
+    showToast(`บันทึก Config ฟอร์ม ${formId.toUpperCase()} สำเร็จ — ${overrideCount} ช่องที่แก้ไข ✅`);
+    renderFeFields(formId);
+  } catch (e) {
+    showToast(`บันทึกไม่สำเร็จ: ${e.message}`, 'error');
+  }
+}
+
+async function resetFeField(formId, fieldKey) {
+  showConfirm(`รีเซ็ต "${fieldKey}" กลับเป็นค่า default?`, async () => {
+    const cfg = { ..._feConfigCache[formId] };
+    delete cfg[fieldKey];
+    try {
+      const schema = FORM_CONFIG_SCHEMAS[formId];
+      const { error } = await sb.from('form_configs').upsert(
+        { form_id: formId, form_name: schema.label, config_json: cfg, updated_by: state.session?.user?.email || 'admin', updated_at: new Date().toISOString() },
+        { onConflict: 'form_id' }
+      );
+      if (error) throw error;
+      _feConfigCache[formId] = cfg;
+      showToast('รีเซ็ตช่องนั้นแล้ว ✅');
+      renderFeFields(formId);
+    } catch (e) {
+      showToast(`รีเซ็ตไม่สำเร็จ: ${e.message}`, 'error');
+    }
+  });
+}
+
+async function resetAllFe(formId) {
+  showConfirm(`รีเซ็ตทุกช่องของฟอร์ม ${formId.toUpperCase()} กลับเป็นค่า default ทั้งหมด?`, async () => {
+    try {
+      const schema = FORM_CONFIG_SCHEMAS[formId];
+      const { error } = await sb.from('form_configs').upsert(
+        { form_id: formId, form_name: schema.label, config_json: {}, updated_by: state.session?.user?.email || 'admin', updated_at: new Date().toISOString() },
+        { onConflict: 'form_id' }
+      );
+      if (error) throw error;
+      _feConfigCache[formId] = {};
+      showToast(`รีเซ็ต Config ฟอร์ม ${formId.toUpperCase()} เรียบร้อยแล้ว`);
+      renderFeFields(formId);
+    } catch (e) {
+      showToast(`รีเซ็ตไม่สำเร็จ: ${e.message}`, 'error');
+    }
+  });
+}
+
+/* ========== PDF GENERATION ========== */
+function showCh1PDF(index) {
+  const row = state.ch1Rows[index];
+  if (!row) { showToast('ไม่พบข้อมูลในตำแหน่งนี้', 'warn'); return; }
+  const fd = row.form_data || row;
+  const org = getCh1Org(row);
+  const dateStr = fmtDate(getRowDate(row), true);
+  const pdfHtml = `<!DOCTYPE html><html lang="th"><head><meta charset="UTF-8">
+<title>Ch1 Report — ${org}</title>
+<style>
+  body{font-family:'Sarabun',sans-serif;margin:32px;color:#1A2433;font-size:13px;line-height:1.7}
+  h1{font-size:18px;color:#0F4C81;margin-bottom:4px}
+  h2{font-size:14px;color:#0F4C81;margin:18px 0 6px;border-bottom:2px solid #E8F1FB;padding-bottom:4px}
+  .meta{font-size:12px;color:#6B7280;margin-bottom:20px}
+  table{width:100%;border-collapse:collapse;margin-bottom:12px}
+  th,td{padding:7px 10px;border:1px solid #D8DCE3;text-align:left;font-size:12.5px}
+  th{background:#F4F6F9;font-weight:600;color:#374151;width:45%}
+  .kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+  .kpi{background:#F4F6F9;border:1px solid #D8DCE3;border-radius:8px;padding:10px 14px;text-align:center}
+  .kpi-val{font-size:22px;font-weight:700;color:#0F4C81}
+  .kpi-label{font-size:11px;color:#6B7280;margin-top:3px}
+  .footer{margin-top:30px;font-size:11px;color:#9CA3AF;border-top:1px solid #E5E7EB;padding-top:10px}
+  @media print{body{margin:16px}}
+</style>
+</head><body>
+<h1>📋 รายงาน Ch1 — ข้อมูลสุขภาวะองค์กร</h1>
+<div class="meta">องค์กร: <b>${org}</b> &nbsp;|&nbsp; วันที่ส่ง: <b>${dateStr}</b></div>
+<div class="kpi-grid">
+  <div class="kpi"><div class="kpi-val">${fmtNum(row.total_personnel || fd.total_personnel)}</div><div class="kpi-label">บุคลากรทั้งหมด (คน)</div></div>
+  <div class="kpi"><div class="kpi-val">${fmtNum(parseFloat(row.mental_burnout ?? fd.mental_burnout) || 0, 1)}%</div><div class="kpi-label">Burnout Rate</div></div>
+  <div class="kpi"><div class="kpi-val">${fmtNum(parseFloat(row.engagement_score ?? fd.engagement_score) || 0, 1)}</div><div class="kpi-label">Engagement Score</div></div>
+</div>
+<h2>ส่วนที่ 1: โครงสร้างบุคลากร</h2>
+<table>
+  <tr><th>จำนวนบุคลากรทั้งหมด</th><td>${fmtNum(row.total_personnel || fd.total_personnel)} คน</td></tr>
+  <tr><th>อายุ ≤ 30 ปี</th><td>${fmtNum(row.age_under30 || fd.age_under30)} คน</td></tr>
+  <tr><th>อายุ 31–40 ปี</th><td>${fmtNum(row.age_31_40 || fd.age_31_40)} คน</td></tr>
+  <tr><th>อายุ 41–50 ปี</th><td>${fmtNum(row.age_41_50 || fd.age_41_50)} คน</td></tr>
+  <tr><th>อายุ 51–60 ปี</th><td>${fmtNum(row.age_51_60 || fd.age_51_60)} คน</td></tr>
+</table>
+<h2>ส่วนที่ 3: สุขภาวะบุคลากร</h2>
+<table>
+  <tr><th>โรคเบาหวาน</th><td>${fmtNum(row.ncd_diabetes || fd.ncd_diabetes)} คน</td></tr>
+  <tr><th>โรคความดันโลหิตสูง</th><td>${fmtNum(row.ncd_hypertension || fd.ncd_hypertension)} คน</td></tr>
+  <tr><th>วันลาป่วยเฉลี่ย/คน/ปี</th><td>${fmtNum(row.sick_leave_days || fd.sick_leave_days, 1)} วัน</td></tr>
+  <tr><th>ภาวะหมดไฟ (Burnout)</th><td>${fmtNum(parseFloat(row.mental_burnout ?? fd.mental_burnout) || 0, 1)}%</td></tr>
+</table>
+<h2>ส่วนที่ 4: ระบบการบริหาร</h2>
+<table>
+  <tr><th>Engagement Score</th><td>${fmtNum(parseFloat(row.engagement_score ?? fd.engagement_score) || 0, 1)} / 100</td></tr>
+</table>
+<h2>ส่วนที่ 5: ทิศทางและเป้าหมาย</h2>
+<table>
+  <tr><th>ประเด็นสุขภาวะสำคัญ</th><td>${esc(row.strategic_priorities || fd.strategic_priorities || '—')}</td></tr>
+</table>
+<div class="footer">พิมพ์เมื่อ: ${new Date().toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'})} &nbsp;|&nbsp; ระบบ Admin Portal Well-being Survey</div>
+<script>window.onload=function(){window.print()}<\/script>
+</body></html>`;
+  const w = window.open('', '_blank', 'width=900,height=700');
+  if (w) { w.document.write(pdfHtml); w.document.close(); }
+  else showToast('กรุณาอนุญาต Popup เพื่อดู PDF', 'warn');
+}
+
+function showWbRowPDF(idx) {
+  const row = state.rawFiltered[idx];
+  if (!row) { showToast('ไม่พบข้อมูลในตำแหน่งนี้', 'warn'); return; }
+  const phq = getPhq9(row);
+  const gad = getGad7(row);
+  const burnout = getBurnout(row);
+  const engagement = getEngagement(row);
+  const wlb = getWlb(row);
+  const flagged = (phq || 0) >= 15;
+  const pdfHtml = `<!DOCTYPE html><html lang="th"><head><meta charset="UTF-8">
+<title>Wellbeing Report — ${row.organization || 'ไม่ระบุ'}</title>
+<style>
+  body{font-family:'Sarabun',sans-serif;margin:32px;color:#1A2433;font-size:13px;line-height:1.7}
+  h1{font-size:18px;color:#0F4C81;margin-bottom:4px}
+  h2{font-size:14px;color:#0F4C81;margin:18px 0 6px;border-bottom:2px solid #E8F1FB;padding-bottom:4px}
+  .meta{font-size:12px;color:#6B7280;margin-bottom:20px}
+  .alert{background:#FEE2E2;border:1px solid #FCA5A5;border-radius:6px;padding:10px 14px;margin-bottom:14px;font-weight:600;color:#991B1B}
+  .kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+  .kpi{background:#F4F6F9;border:1px solid #D8DCE3;border-radius:8px;padding:10px 14px;text-align:center}
+  .kpi-val{font-size:22px;font-weight:700;color:#0F4C81}
+  .kpi-val.red{color:#991B1B}
+  .kpi-label{font-size:11px;color:#6B7280;margin-top:3px}
+  table{width:100%;border-collapse:collapse;margin-bottom:12px}
+  th,td{padding:7px 10px;border:1px solid #D8DCE3;text-align:left;font-size:12.5px}
+  th{background:#F4F6F9;font-weight:600;color:#374151;width:45%}
+  .footer{margin-top:30px;font-size:11px;color:#9CA3AF;border-top:1px solid #E5E7EB;padding-top:10px}
+  @media print{body{margin:16px}}
+</style>
+</head><body>
+<h1>💚 รายงาน Wellbeing Survey — รายบุคคล</h1>
+<div class="meta">องค์กร: <b>${esc(row.organization || '—')}</b> &nbsp;|&nbsp; วันที่ตอบ: <b>${fmtDate(row.submitted_at, true)}</b></div>
+${flagged ? '<div class="alert">⚠️ คะแนน PHQ-9 ≥ 15 บุคคลนี้ควรได้รับการดูแลสุขภาพจิตเพิ่มเติม</div>' : ''}
+<div class="kpi-grid">
+  <div class="kpi"><div class="kpi-val ${flagged?'red':''}">${fmtNum(phq)}</div><div class="kpi-label">PHQ-9 (ภาวะซึมเศร้า)</div></div>
+  <div class="kpi"><div class="kpi-val">${fmtNum(gad)}</div><div class="kpi-label">GAD-7 (ความวิตกกังวล)</div></div>
+  <div class="kpi"><div class="kpi-val">${fmtNum(burnout,1)}</div><div class="kpi-label">Burnout Score</div></div>
+</div>
+<h2>ข้อมูลส่วนตัว</h2>
+<table>
+  <tr><th>เพศ</th><td>${esc(row.gender || '—')}</td></tr>
+  <tr><th>กลุ่มอายุ</th><td>${esc(ageGroup(row))}</td></tr>
+  <tr><th>ประเภทตำแหน่ง</th><td>${esc(row.org_type || '—')}</td></tr>
+  <tr><th>ระดับ</th><td>${esc(row.job || '—')}</td></tr>
+  <tr><th>อายุราชการ</th><td>${esc(row.job_duration || '—')}</td></tr>
+</table>
+<h2>ตัวชี้วัดสุขภาวะ</h2>
+<table>
+  <tr><th>PHQ-9 (ภาวะซึมเศร้า)</th><td><b>${fmtNum(phq)}</b> ${(phq||0) >= 15 ? '⚠️ ระดับรุนแรง' : (phq||0) >= 10 ? '⚠️ ระดับปานกลาง' : '✓ ปกติ'}</td></tr>
+  <tr><th>GAD-7 (ความวิตกกังวล)</th><td>${fmtNum(gad)}</td></tr>
+  <tr><th>Burnout Score</th><td>${fmtNum(burnout, 1)}</td></tr>
+  <tr><th>Engagement Score</th><td>${fmtNum(engagement, 1)}</td></tr>
+  <tr><th>Work-Life Balance</th><td>${fmtNum(wlb, 1)}</td></tr>
+</table>
+<h2>พฤติกรรมสุขภาพ</h2>
+<table>
+  <tr><th>การนอนหลับ</th><td>${esc(getSleep(row))}</td></tr>
+  <tr><th>การออกกำลังกาย</th><td>${esc(getExercise(row))}</td></tr>
+  <tr><th>โรคเรื้อรัง</th><td>${esc(getChronic(row))}</td></tr>
+  <tr><th>BMI</th><td>${row.bmi != null ? fmtNum(row.bmi, 1) + ' (' + esc(row.bmi_category) + ')' : '—'}</td></tr>
+  <tr><th>ความพึงพอใจในงาน</th><td>${esc(getJobSat(row))}</td></tr>
+  <tr><th>ปัญหาสำคัญที่สุด</th><td>${esc(getMainProblem(row))}</td></tr>
+</table>
+<div class="footer">พิมพ์เมื่อ: ${new Date().toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'})} &nbsp;|&nbsp; ระบบ Admin Portal Well-being Survey | ข้อมูลนี้เป็นความลับ</div>
+<script>window.onload=function(){window.print()}<\/script>
+</body></html>`;
+  const w = window.open('', '_blank', 'width=900,height=700');
+  if (w) { w.document.write(pdfHtml); w.document.close(); }
+  else showToast('กรุณาอนุญาต Popup เพื่อดู PDF', 'warn');
+}
+
+/* ========== POPULATE DYNAMIC SELECTS ON RENDER ========== */
+function populateOrgSelects() {
+  const ids = ['exp-ch1-org', 'exp-wb-org', 'exp-cmp-org', 'c1data-org', 'c1sheet-org'];
+  ids.forEach((id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const cur = el.value;
+    el.innerHTML = `<option value="">ทุกองค์กร</option>${ORG_NAMES.map((name) => `<option value="${esc(name)}"${name===cur?' selected':''}>${esc(name)}</option>`).join('')}`;
+  });
+  const ch1Sel = document.getElementById('ch1-link-org');
+  if (ch1Sel) {
+    ch1Sel.innerHTML = `<option value="">-- เลือกองค์กร --</option>${getOrgCatalog().map((org) => `<option value="${esc(org.name)}">${esc(org.name)}</option>`).join('')}`;
+  }
+  const cmpSel = document.getElementById('compare-add-select');
+  if (cmpSel) {
+    cmpSel.innerHTML = `<option value="">— เลือก —</option>${ORG_NAMES.map((name) => `<option value="${esc(name)}">${esc(name)}</option>`).join('')}`;
+  }
+  // viewer org select (จัดการผู้ใช้ page)
+  const viewerOrgSel = document.getElementById('viewer-org-select');
+  if (viewerOrgSel) {
+    const cur = viewerOrgSel.value;
+    viewerOrgSel.innerHTML = `<option value="">— เลือกองค์กร —</option>${ORG_NAMES.map((name) => `<option value="${esc(name)}"${name===cur?' selected':''}>${esc(name)}</option>`).join('')}`;
+  }
+  // create link org select
+  const createLinkOrgSel = document.getElementById('create-link-org');
+  if (createLinkOrgSel) {
+    const cur = createLinkOrgSel.value;
+    createLinkOrgSel.innerHTML = `<option value="">-- เลือกองค์กร --</option>${ORG_NAMES.map((name) => `<option value="${esc(name)}"${name===cur?' selected':''}>${esc(name)}</option>`).join('')}`;
+  }
+}
 </script>
 </body>
 </html>
