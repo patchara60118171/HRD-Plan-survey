@@ -327,6 +327,25 @@ tbody tr:hover td{background:#FAFBFD}
 .fe-section-hdr{font-size:13.5px;font-weight:700;color:var(--P);padding:14px 0 8px;border-bottom:2px solid var(--PL);margin-bottom:14px;display:flex;align-items:center;gap:8px}
 .fe-card-foot{display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--bg);border-top:1px solid var(--bdr)}
 .fe-editing-banner{background:var(--PL);border:1px solid var(--P);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:12.5px;color:var(--P);font-weight:600;display:flex;align-items:center;gap:8px}
+
+/* ===== FORM EDITOR SIDEBAR LAYOUT ===== */
+.fe-layout{display:flex;min-height:420px;border-radius:10px;overflow:hidden}
+.fe-sidebar{width:176px;background:var(--bg);border-right:1px solid var(--bdr);padding:14px 0;flex-shrink:0}
+.fe-sidebar-title{padding:0 14px 8px;font-size:9.5px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.08em}
+.fe-tab-item{padding:9px 14px;cursor:pointer;font-size:12.5px;font-weight:600;color:var(--tx2);transition:background .12s,color .12s;border-left:2px solid transparent;display:flex;align-items:center;gap:7px;user-select:none}
+.fe-tab-item:hover{background:rgba(0,0,0,.04);color:var(--P)}
+.fe-tab-item.active{background:var(--PL);color:var(--P);border-left-color:var(--P)}
+.fe-content{flex:1;padding:18px;overflow:hidden;min-width:0}
+
+/* ===== GOOGLE FORMS INLINE EDIT STYLE ===== */
+.fe-gf-card{background:var(--card);border:1.5px solid var(--bdr);border-radius:10px;margin-bottom:12px;overflow:hidden;transition:border-color .15s,box-shadow .15s}
+.fe-gf-card:hover{border-color:var(--bdr2);box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.fe-gf-card.modified{border-left:3px solid var(--A)}
+.fe-gf-card.fe-gf-editing{border-color:var(--P);box-shadow:0 0 0 3px rgba(15,76,129,.1)}
+.fe-gf-band{padding:8px 12px;background:var(--PL);border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--P);font-weight:600;flex-wrap:wrap}
+.fe-gf-preview{padding:13px 16px;font-size:14px;color:var(--tx);line-height:1.6;cursor:pointer;min-height:46px;transition:background .12s}
+.fe-gf-preview:hover{background:var(--bg)}
+.fe-gf-editbox{padding:12px 16px 14px}
 </style>
 </head>
 <body>
@@ -372,9 +391,9 @@ tbody tr:hover td{background:#FAFBFD}
     <div class="nav-item" onclick="go('users',this)"><span class="ni">👥</span> จัดการผู้ใช้ / Viewer</div>
     <div class="nav-item" onclick="go('links',this)"><span class="ni">🔗</span> ลิงก์แบบสอบถาม</div>
     <div class="nav-item" onclick="go('notif',this)"><span class="ni">🔔</span> Reminder / แจ้งเตือน <span class="nb">2</span></div>
-    <div class="nav-item" onclick="go('settings',this)"><span class="ni">⚙️</span> ตั้งค่าระบบ</div>
-    <div class="nav-item" onclick="go('audit',this)"><span class="ni">🔍</span> Audit Log</div>
-    <div class="nav-item" onclick="go('form-editor',this)"><span class="ni">✏️</span> แก้ไขเนื้อหาฟอร์ม</div>
+    <div class="nav-item" data-min-role="superadmin" onclick="go('settings',this)"><span class="ni">⚙️</span> ตั้งค่าระบบ</div>
+    <div class="nav-item" data-min-role="admin" onclick="go('audit',this)"><span class="ni">🔍</span> Audit Log</div>
+    <div class="nav-item" data-min-role="admin" onclick="go('form-editor',this)"><span class="ni">✏️</span> แก้ไขเนื้อหาฟอร์ม</div>
   </nav>
 
   <div class="sidebar-foot">
@@ -520,53 +539,31 @@ tbody tr:hover td{background:#FAFBFD}
     <!-- ==================== ORGS ==================== -->
     <div class="page" id="page-orgs">
       <div class="page-title">องค์กรที่เข้าร่วม</div>
-      <div class="page-sub">จัดการรายชื่อและข้อมูลองค์กร · รวม 15 องค์กร</div>
-      <div class="two-col">
-        <div class="card">
-          <div class="card-head">
-            <h3>รายการองค์กร</h3>
-            <div class="filter-bar">
-              <input class="si" placeholder="🔍 ค้นหา...">
-              <select class="sel"><option>ทุกกระทรวง</option><option>สำนักนายกฯ</option><option>สาธารณสุข</option><option>เกษตรฯ</option><option>วิทยาศาสตร์ฯ</option><option>ยุติธรรม</option><option>อื่น ๆ</option></select>
-              <button class="btn b-solid" onclick="document.getElementById('org-btn-new')?.click()">+ เพิ่ม</button>
-            </div>
-          </div>
-          <div class="tbl-wrap">
-            <table>
-              <thead><tr><th>#</th><th>ชื่อองค์กร</th><th>กระทรวง</th><th>Tag</th><th>บุคลากร</th><th>Ch1</th><th>จัดการ</th></tr></thead>
-              <tbody>
-                <tr><td>1</td><td><b>สำนักงานสภาพัฒนาการเศรษฐกิจและสังคมแห่งชาติ</b></td><td>สำนักนายกฯ</td><td><span class="badge bb">นำร่อง</span></td><td>~900</td><td><span class="badge bg">✓</span></td><td class="td-act"><button class="btn b-blue">แก้ไข</button><button class="btn b-red">ลบ</button></td></tr>
-                <tr><td>2</td><td><b>สำนักงานนโยบายและยุทธศาสตร์การค้า</b></td><td>พาณิชย์</td><td><span class="badge bb">นำร่อง</span></td><td>~280</td><td><span class="badge bg">✓</span></td><td class="td-act"><button class="btn b-blue">แก้ไข</button><button class="btn b-red">ลบ</button></td></tr>
-                <tr><td>3</td><td><b>กรมวิทยาศาสตร์บริการ</b></td><td>วิทยาศาสตร์ฯ</td><td><span class="badge bb">นำร่อง</span></td><td>~1,100</td><td><span class="badge bg">✓</span></td><td class="td-act"><button class="btn b-blue">แก้ไข</button><button class="btn b-red">ลบ</button></td></tr>
-                <tr><td>4</td><td><b>สำนักงบประมาณ</b></td><td>สำนักนายกฯ</td><td><span class="badge bb">นำร่อง</span></td><td>~600</td><td><span class="badge bg">✓</span></td><td class="td-act"><button class="btn b-blue">แก้ไข</button><button class="btn b-red">ลบ</button></td></tr>
-                <tr><td>5</td><td><b>กรมอุตุนิยมวิทยา</b></td><td>ดิจิทัลฯ</td><td><span class="badge bb">นำร่อง</span></td><td>~1,400</td><td><span class="badge bg">✓</span></td><td class="td-act"><button class="btn b-blue">แก้ไข</button><button class="btn b-red">ลบ</button></td></tr>
-                <tr><td>6</td><td><b>กรมส่งเสริมวัฒนธรรม</b></td><td>วัฒนธรรม</td><td><span class="badge bb">นำร่อง</span></td><td>~700</td><td><span class="badge bg">✓</span></td><td class="td-act"><button class="btn b-blue">แก้ไข</button><button class="btn b-red">ลบ</button></td></tr>
-                <tr><td>7</td><td><b>กรมคุมประพฤติ</b></td><td>ยุติธรรม</td><td><span class="badge bb">นำร่อง</span></td><td>~2,800</td><td><span class="badge bg">✓</span></td><td class="td-act"><button class="btn b-blue">แก้ไข</button><button class="btn b-red">ลบ</button></td></tr>
-                <tr><td>8</td><td><b>สำนักงานปลัดกระทรวงการท่องเที่ยวและกีฬา</b></td><td>ท่องเที่ยวฯ</td><td><span class="badge bb">นำร่อง</span></td><td>~500</td><td><span class="badge bg">✓</span></td><td class="td-act"><button class="btn b-blue">แก้ไข</button><button class="btn b-red">ลบ</button></td></tr>
-                <tr><td>9</td><td><b>กรมสุขภาพจิต</b></td><td>สาธารณสุข</td><td><span class="badge bb">นำร่อง</span></td><td>~1,240</td><td><span class="badge bg">✓</span></td><td class="td-act"><button class="btn b-blue">แก้ไข</button><button class="btn b-red">ลบ</button></td></tr>
-                <tr><td>10</td><td><b>สำนักงานนโยบายและแผนทรัพยากรธรรมชาติและสิ่งแวดล้อม</b></td><td>ทรัพยากรฯ</td><td><span class="badge bb">นำร่อง</span></td><td>~340</td><td><span class="badge bg">✓</span></td><td class="td-act"><button class="btn b-blue">แก้ไข</button><button class="btn b-red">ลบ</button></td></tr>
-                <tr><td>11</td><td><b>สำนักงานการวิจัยแห่งชาติ</b></td><td>อว.</td><td><span class="badge bb">นำร่อง</span></td><td>~450</td><td><span class="badge bw">กำลังกรอก</span></td><td class="td-act"><button class="btn b-blue">แก้ไข</button><button class="btn b-red">ลบ</button></td></tr>
-                <tr><td>12</td><td><b>สำนักงานมาตรฐานสินค้าเกษตรและอาหารแห่งชาติ</b></td><td>เกษตรฯ</td><td><span class="badge bb">นำร่อง</span></td><td>~580</td><td><span class="badge bw">กำลังกรอก</span></td><td class="td-act"><button class="btn b-blue">แก้ไข</button><button class="btn b-red">ลบ</button></td></tr>
-                <tr><td>13</td><td><b>สำนักงาน กพร.</b></td><td>สำนักนายกฯ</td><td><span class="badge bb">นำร่อง</span></td><td>~320</td><td><span class="badge bw">กำลังกรอก</span></td><td class="td-act"><button class="btn b-blue">แก้ไข</button><button class="btn b-red">ลบ</button></td></tr>
-                <tr><td>14</td><td><b>กรมชลประทาน</b></td><td>เกษตรฯ</td><td><span class="badge bb">นำร่อง</span></td><td>~3,600</td><td><span class="badge br">ยังไม่เริ่ม</span></td><td class="td-act"><button class="btn b-blue">แก้ไข</button><button class="btn b-red">ลบ</button></td></tr>
-                <tr><td>15</td><td><b>กรมกิจการเด็กและเยาวชน</b></td><td>พม.</td><td><span class="badge bb">นำร่อง</span></td><td>~920</td><td><span class="badge br">ยังไม่เริ่ม</span></td><td class="td-act"><button class="btn b-blue">แก้ไข</button><button class="btn b-red">ลบ</button></td></tr>
-              </tbody>
-            </table>
+      <div class="page-sub">จัดการรายชื่อและข้อมูลองค์กร — คลิก ดู/แก้ไข เพื่อเปิดรายละเอียด</div>
+      <div class="card">
+        <div class="card-head">
+          <h3>รายการองค์กร</h3>
+          <div class="filter-bar">
+            <input class="si" id="org-search" placeholder="🔍 ค้นหาองค์กร..." oninput="filterOrgTable()">
+            <select class="sel" id="org-filter-ministry" onchange="filterOrgTable()">
+              <option value="">ทุกกระทรวง</option>
+              <option>สำนักนายกฯ</option><option>สาธารณสุข</option><option>เกษตรฯ</option>
+              <option>วิทยาศาสตร์ฯ</option><option>ยุติธรรม</option><option>อว.</option>
+              <option>ดิจิทัลฯ</option><option>วัฒนธรรม</option><option>ท่องเที่ยวฯ</option>
+              <option>ทรัพยากรฯ</option><option>พาณิชย์</option><option>พม.</option>
+            </select>
+            <button class="btn b-solid" id="org-btn-new" onclick="openOrgModal('')">+ เพิ่มองค์กร</button>
           </div>
         </div>
-        <div class="panel">
-          <h3>➕ เพิ่ม / แก้ไของค์กร</h3>
-          <div class="fg"><label>ชื่อองค์กร *</label><input id="simple-org-name" placeholder="เช่น กรมสุขภาพจิต"></div>
-          <div class="fg"><label>กระทรวง</label><select id="simple-org-ministry"><option value="">-- เลือกกระทรวง --</option><option>สาธารณสุข</option><option>ศึกษาธิการ</option><option>แรงงาน</option><option>มหาดไทย</option><option>ยุติธรรม</option><option>เกษตรฯ</option><option>วัฒนธรรม</option><option>สำนักนายกฯ</option><option>ดิจิทัลฯ</option><option>พม.</option><option>พาณิชย์</option><option>ท่องเที่ยวฯ</option><option>ทรัพยากรฯ</option><option>อว.</option></select></div>
-          <div class="fg"><label>จำนวนบุคลากร (โดยประมาณ)</label><input type="number" id="simple-org-size" placeholder="เช่น 1200"></div>
-          <div class="fg"><label>Tag / กลุ่ม</label><select id="simple-org-tag"><option>ทั่วไป</option><option>นำร่อง</option><option>กลุ่มพิเศษ</option></select></div>
-          <div class="fg"><label>อีเมลผู้ประสานงาน</label><input id="simple-org-email" placeholder="contact@org.go.th"></div>
-          <div class="fg"><label>หมายเหตุ</label><textarea id="simple-org-note" placeholder="รายละเอียดเพิ่มเติม..."></textarea></div>
-          <div style="display:flex;gap:8px">
-            <button class="btn b-solid" style="padding:8px 16px" onclick="saveSimpleOrg()">💾 บันทึก</button>
-            <button class="btn b-gray" style="padding:8px 14px" onclick="document.getElementById('simple-org-name').value='';document.getElementById('simple-org-email').value='';document.getElementById('simple-org-note').value='';document.getElementById('simple-org-size').value='';document.getElementById('simple-org-msg').textContent=''">  ล้างค่า</button>
-          </div>
-          <div id="simple-org-msg" style="font-size:12px;margin-top:6px"></div>
+        <div class="tbl-wrap">
+          <table id="org-table">
+            <thead>
+              <tr><th>#</th><th>ชื่อองค์กร</th><th>กระทรวง</th><th>Tag</th><th>Wellbeing</th><th>Ch1</th><th>จัดการ</th></tr>
+            </thead>
+            <tbody>
+              <tr><td colspan="7" style="text-align:center;color:var(--tx3);padding:24px">กำลังโหลดข้อมูล...</td></tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -1103,19 +1100,17 @@ tbody tr:hover td{background:#FAFBFD}
     <!-- ==================== FORM EDITOR ==================== -->
     <div class="page" id="page-form-editor">
       <div class="page-title">✏️ แก้ไขเนื้อหาฟอร์ม</div>
-      <div class="page-sub">แก้ไขข้อความ ชื่อหัวข้อ คำถาม และคำอธิบายในฟอร์ม — การบันทึกจะมีผลทันทีเมื่อผู้ใช้ Reload ฟอร์ม</div>
-      <div class="card card-mb">
-        <div class="card-head">
-          <h3>เลือกฟอร์มที่ต้องการแก้ไข</h3>
-          <div class="filter-bar">
-            <div class="tabs" style="margin:0">
-              <div class="tab active" id="fe-tab-ch1" onclick="feTab('ch1',this)">📝 ฟอร์ม Ch1</div>
-              <div class="tab" id="fe-tab-wb" onclick="feTab('wellbeing',this)">💚 Wellbeing Survey</div>
-            </div>
-          </div>
+      <div class="page-sub">คลิกที่ข้อความใด ๆ เพื่อแก้ไขได้ทันที — กด 💾 บันทึก เพื่อบันทึกทั้งหมด</div>
+      <div class="card card-mb fe-layout">
+        <!-- Left: Tab sidebar -->
+        <div class="fe-sidebar">
+          <div class="fe-sidebar-title">เลือกฟอร์ม</div>
+          <div class="fe-tab-item active" id="fe-tab-ch1" onclick="feTab('ch1',this)">📝 ฟอร์ม Ch1</div>
+          <div class="fe-tab-item" id="fe-tab-wb" onclick="feTab('wellbeing',this)">💚 Wellbeing</div>
         </div>
-        <div class="card-body">
-          <div class="info blue" style="margin-bottom:14px">💡 แก้ไขเฉพาะข้อความที่ต้องการ แล้วกด <b>บันทึก</b> — ระบบจะ override เฉพาะช่องที่เปลี่ยน ไม่กระทบ default ต้นฉบับ</div>
+        <!-- Right: Content area -->
+        <div class="fe-content">
+          <div class="info blue" style="margin-bottom:14px">💡 คลิกที่ข้อความเพื่อแก้ไข — ระบบ override เฉพาะช่องที่เปลี่ยน ไม่กระทบ default ต้นฉบับ</div>
           <div id="fe-ch1-panel">
             <div id="fe-ch1-status" style="font-size:12px;color:var(--tx3);margin-bottom:10px">กำลังโหลด...</div>
             <div id="fe-ch1-fields"></div>
@@ -1433,6 +1428,12 @@ function downloadWorkbook(fileName, sheetName, rows) {
 }
 
 function go(id, el) {
+  const roleLvl = { viewer: 0, admin: 1, superadmin: 2 };
+  const myLvl = roleLvl[state.myRole] ?? 0;
+  const adminOnlyPages = { users: 1, links: 1, notif: 1, audit: 1, 'form-editor': 1 };
+  const superOnlyPages = { settings: 2 };
+  const reqLvl = superOnlyPages[id] ?? adminOnlyPages[id] ?? 0;
+  if (myLvl < reqLvl) { showToast('⛔ ไม่มีสิทธิ์เข้าถึงหน้านี้', 'warn'); return; }
   document.querySelectorAll('.page').forEach((page) => page.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach((item) => item.classList.remove('active'));
   const page = document.getElementById('page-' + id);
@@ -1547,7 +1548,13 @@ function renderChrome() {
   const myRow = state.userRows.find((r) => r.email === email);
   // Locked superadmin emails — ไม่สามารถเปลี่ยน role ได้จาก UI
   const isLockedSuper = LOCKED_SUPERADMIN_EMAILS.includes(email);
-  state.myRole = isLockedSuper ? 'superadmin' : (myRow?.role || 'superadmin');
+  state.myRole = isLockedSuper ? 'superadmin' : (myRow?.role || 'viewer');
+  const roleLvl = { viewer: 0, admin: 1, superadmin: 2 };
+  const myLvl = roleLvl[state.myRole] ?? 0;
+  document.querySelectorAll('[data-min-role]').forEach((el) => {
+    const minLvl = roleLvl[el.dataset.minRole] ?? 99;
+    el.style.display = myLvl >= minLvl ? '' : 'none';
+  });
   document.querySelector('.u-role').innerHTML = `<div class="u-role-dot"></div> ${state.myRole === 'superadmin' ? 'Super Admin' : state.myRole === 'admin' ? 'Admin' : 'Viewer'}`;
   const roleInfoEl = document.getElementById('users-role-info');
   if (roleInfoEl) {
@@ -1578,7 +1585,7 @@ function renderDashboard(summary) {
   const respondedCh1 = summary.filter((org) => org.ch1Count > 0).length;
   const welcome = dashboard.querySelector('.welcome');
   welcome.querySelector('.w-title').textContent = `สวัสดีครับ, ${state.session?.user?.email || 'ผู้ดูแลระบบ'}`;
-  welcome.querySelector('.w-sub').textContent = `เชื่อมต่อข้อมูลจริงจาก Supabase · อัปเดต ${fmtDate(new Date(), true)}`;
+  welcome.querySelector('.w-sub').textContent = `อัปเดต ${fmtDate(new Date(), true)}`;
   const wVals = welcome.querySelectorAll('.w-val');
   wVals[0].textContent = orgCount;
   wVals[1].textContent = respondedCh1;
@@ -1647,9 +1654,13 @@ function renderProgress(summary) {
   }).join('');
 }
 
-function renderOrganizations(summary) {
-  const page = document.getElementById('page-orgs');
-  const table = page.querySelector('tbody');
+function renderOrgs(summary) {
+  const table = document.querySelector('#org-table tbody');
+  if (!table) return;
+  if (summary.length === 0) {
+    table.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--tx3);padding:24px">ยังไม่มีข้อมูลองค์กร</td></tr>';
+    return;
+  }
   table.innerHTML = summary.map((org, index) => `<tr>
     <td>${index + 1}</td>
     <td><b>${esc(org.name)}</b><div style="font-size:11px;color:var(--tx3);margin-top:2px">${esc(org.letter || '—')}</div></td>
@@ -1657,41 +1668,87 @@ function renderOrganizations(summary) {
     <td><span class="badge bb">นำร่อง</span></td>
     <td>${fmtNum(org.wellbeingSubmitted)}</td>
     <td><span class="badge ${org.ch1Count > 0 ? 'bg' : 'br'}">${org.ch1Count > 0 ? '✓' : '—'}</span></td>
-    <td class="td-act"><button class="btn b-blue" onclick="showOrgDetail('${esc(org.name)}')">ดู/แก้ไข</button></td>
+    <td class="td-act"><button class="btn b-blue" onclick="openOrgModal('${esc(org.name)}')">ดู/แก้ไข</button></td>
   </tr>`).join('');
-
-  const panel = page.querySelector('.panel');
-  panel.innerHTML = `
-    <h3>📋 ข้อมูลติดต่อหน่วยงาน (ดู/แก้ไข/เพิ่ม)</h3>
-    <form id="org-profile-form" style="display:flex;flex-direction:column;gap:10px">
-      <div class="fg"><label>ชื่อองค์กร *</label><input id="org-name" required></div>
-      <div class="fg"><label>กระทรวง</label><input id="org-ministry"></div>
-      <div class="fg"><label>เรียน *</label><input id="org-salutation" required></div>
-      <div class="fg"><label>Mail Sarabun *</label><input id="org-saraban-email" type="email" required></div>
-      <div class="fg"><label>ชื่อผู้ประสานงานหลัก *</label><input id="org-coordinator-name" required></div>
-      <div class="fg"><label>ตำแหน่ง *</label><input id="org-coordinator-position" required></div>
-      <div class="fg"><label>เบอร์ติดต่อ/ID Line *</label><input id="org-coordinator-contact" required></div>
-      <div class="fg"><label>อีเมลล์ผู้ประสาน *</label><input id="org-coordinator-email" type="email" required></div>
-      <div class="form-row">
-        <button type="button" class="btn b-blue" id="org-btn-new">+ เพิ่มใหม่</button>
-        <button type="submit" class="btn b-solid" id="org-btn-save">💾 บันทึก</button>
-      </div>
-      <div id="org-form-msg" style="font-size:12px;color:var(--tx2)"></div>
-    </form>
-    <div id="org-detail-box" style="display:flex;flex-direction:column;gap:10px;margin-top:12px"></div>`;
-
-  const form = document.getElementById('org-profile-form');
-  const newBtn = document.getElementById('org-btn-new');
-  form.onsubmit = saveOrgProfile;
-  newBtn.onclick = () => {
-    state.orgSelectedName = '';
-    form.reset();
-    document.getElementById('org-form-msg').textContent = 'กำลังเพิ่มหน่วยงานใหม่';
-    showOrgDetail('');
-  };
-
-  showOrgDetail(summary[0]?.name || ORG_NAMES[0] || '');
 }
+
+
+function filterOrgTable() {
+  const search = document.getElementById('org-search')?.value.toLowerCase() || '';
+  const ministry = document.getElementById('org-filter-ministry')?.value || '';
+  const table = document.getElementById('org-table');
+  if (!table) return;
+  const rows = table.querySelectorAll('tbody tr');
+  rows.forEach(row => {
+    const nameEl = row.querySelector('td:nth-child(2)');
+    const ministryEl = row.querySelector('td:nth-child(3)');
+    const name = nameEl?.textContent.toLowerCase() || '';
+    const min = ministryEl?.textContent.toLowerCase() || '';
+    const matchName = search === '' || name.includes(search);
+    const matchMin = ministry === '' || min.includes(ministry);
+    row.style.display = (matchName && matchMin) ? '' : 'none';
+  });
+}
+
+function openOrgModal(orgName) {
+  if (!document.getElementById('org-modal')) createOrgModal();
+  const modal = document.getElementById('org-modal');
+  const titleEl = modal.querySelector('.umodal-head h3');
+  if (titleEl) titleEl.textContent = orgName ? '✏️ แก้ไขหน่วยงาน' : '➕ เพิ่มหน่วยงานใหม่';
+  const msg = document.getElementById('org-form-msg');
+  if (msg) msg.textContent = '';
+  if (!orgName) {
+    document.getElementById('org-profile-form')?.reset();
+    const box = document.getElementById('org-detail-box');
+    if (box) box.innerHTML = '<div class="info blue">กรอกข้อมูลให้ครบแล้วกดบันทึกเพื่อสร้างหน่วยงานใหม่</div>';
+  } else {
+    showOrgDetail(orgName);
+  }
+  modal.style.display = 'flex';
+}
+
+function createOrgModal() {
+  const overlay = document.createElement('div');
+  overlay.id = 'org-modal';
+  overlay.className = 'umodal-overlay';
+  overlay.style.display = 'none';
+  overlay.innerHTML = `
+    <div class="umodal" style="max-width:620px">
+      <div class="umodal-head">
+        <h3>แก้ไขหน่วยงาน</h3>
+        <button class="btn b-gray" style="margin-left:auto;padding:4px 10px;font-size:13px" onclick="document.getElementById('org-modal').style.display='none'">✕</button>
+      </div>
+      <div class="umodal-body">
+        <form id="org-profile-form" onsubmit="saveOrgProfile(event)" style="display:flex;flex-direction:column;gap:10px">
+          <div class="fg"><label>ชื่อองค์กร *</label><input id="org-name" required placeholder="เช่น กรมสุขภาพจิต"></div>
+          <div class="fg"><label>กระทรวง</label><input id="org-ministry" placeholder="เช่น สาธารณสุข"></div>
+          <div class="two-col-eq">
+            <div class="fg"><label>หนังสือเรียน *</label><input id="org-salutation" required placeholder="เช่น อธิบดีกรมสุขภาพจิต"></div>
+            <div class="fg"><label>Mail Sarabun *</label><input id="org-saraban-email" type="email" required placeholder="saraban@org.go.th"></div>
+          </div>
+          <div style="background:var(--bg);border:1px solid var(--bdr);border-radius:8px;padding:12px 14px">
+            <div style="font-size:11.5px;font-weight:700;color:var(--tx2);margin-bottom:10px">👤 ผู้ประสานงานหลัก</div>
+            <div class="fg"><label>ชื่อผู้ประสานงาน *</label><input id="org-coordinator-name" required></div>
+            <div class="two-col-eq">
+              <div class="fg"><label>ตำแหน่ง *</label><input id="org-coordinator-position" required></div>
+              <div class="fg"><label>เบอร์/ID Line *</label><input id="org-coordinator-contact" required></div>
+            </div>
+            <div class="fg" style="margin-bottom:0"><label>อีเมลผู้ประสาน *</label><input id="org-coordinator-email" type="email" required></div>
+          </div>
+          <div id="org-form-msg" style="font-size:12px;color:var(--tx2);min-height:16px"></div>
+          <div id="org-detail-box" style="display:flex;flex-direction:column;gap:8px"></div>
+        </form>
+      </div>
+      <div class="umodal-foot">
+        <button class="btn b-gray" onclick="document.getElementById('org-modal').style.display='none'">ยกเลิก</button>
+        <button class="btn b-solid" onclick="document.getElementById('org-profile-form').requestSubmit()">💾 บันทึก</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.style.display = 'none'; });
+  return overlay;
+}
+
 
 function showOrgDetail(orgName) {
   state.orgSelectedName = orgName || '';
@@ -1809,13 +1866,10 @@ async function saveOrgProfile(event) {
   state.orgProfiles = data || [];
   refreshOrgDerivedState();
   const summary = summarizeOrgs();
-  renderOrganizations(summary);
-  showOrgDetail(organizationName);
-  const newMsg = document.getElementById('org-form-msg');
-  if (newMsg) {
-    newMsg.textContent = 'บันทึกข้อมูลเรียบร้อย';
-    newMsg.style.color = 'var(--A)';
-  }
+  renderOrgs(summary);
+  const orgModal = document.getElementById('org-modal');
+  if (orgModal) orgModal.style.display = 'none';
+  showToast('บันทึกข้อมูลองค์กรเรียบร้อย ✅', 'success');
 }
 
 function renderCh1(summary) {
@@ -2443,7 +2497,7 @@ async function init() {
     const summary = summarizeOrgs();
     renderDashboard(summary);
     renderProgress(summary);
-    renderOrganizations(summary);
+    renderOrgs(summary);
     renderCh1(summary);
     renderWellbeingControl(summary);
     renderWellbeingOrg(summary);
@@ -2532,7 +2586,7 @@ async function saveSimpleOrg() {
   const { data } = await sb.from('organizations').select('*').eq('is_active', true).order('org_name_th', { ascending: true });
   state.orgProfiles = data || [];
   refreshOrgDerivedState();
-  renderOrganizations(summarizeOrgs());
+  renderOrgs(summarizeOrgs());
   if (msg) { msg.style.color = 'var(--G)'; msg.textContent = `✅ บันทึก "${name}" เรียบร้อย`; }
 }
 
@@ -3325,35 +3379,16 @@ const FORM_CONFIG_SCHEMAS = {
   ch1: {
     label: 'ฟอร์ม Ch1 (ข้อมูลองค์กร)',
     sections: [
-      { key: 'general', label: '🏠 ทั่วไป (หน้าหลักฟอร์ม)', fields: [
-        { key: 'main_title', label: 'ชื่อฟอร์มหลัก', default: 'แบบสำรวจข้อมูลสุขภาวะองค์กร' },
-        { key: 'main_desc', label: 'คำอธิบายแบบสำรวจ', default: 'แบบสอบถามสำหรับผู้บริหารและ HR ขององค์กร เพื่อรวบรวมข้อมูลสุขภาวะบุคลากร', long: true },
-        { key: 'submit_btn', label: 'ข้อความปุ่มส่งฟอร์ม', default: 'ส่งแบบสำรวจ' },
+      { key: 'general', label: '🏠 ทั่วไป', fields: [
+        { key: 'main_title', label: 'ชื่อฟอร์มหลัก', default: 'แบบสำรวจข้อมูลเพื่อจัดทำแผนการพัฒนาองค์กร สุขภาวะข้าราชการพลเรือน' },
+        { key: 'main_desc', label: 'คำอธิบายฟอร์ม', default: 'แบบสำรวจนี้จัดทำขึ้นเพื่อรวบรวมข้อมูลจากหน่วยงานนำร่อง สำหรับใช้ประกอบการจัดทำแผนปฏิบัติการสร้างเสริมสุขภาวะองค์กรข้าราชการพลเรือน', long: true },
       ]},
-      { key: 'step1', label: '🏛️ ส่วนที่ 1: ข้อมูลเบื้องต้น', fields: [
-        { key: 'step1_title', label: 'ชื่อหัวข้อส่วนที่ 1', default: '🏛️ ส่วนที่ 1: ข้อมูลเบื้องต้นของส่วนราชการ' },
-        { key: 'step1_total_personnel', label: 'Label จำนวนบุคลากรทั้งหมด', default: 'จำนวนบุคลากรทั้งหมด (คน) *' },
-        { key: 'step1_org_type', label: 'Label ประเภทหน่วยงาน', default: 'ประเภทหน่วยงาน *', options: ['กรม/สำนักงาน','กระทรวง','รัฐวิสาหกิจ','องค์กรอิสระ','หน่วยงานในกำกับ'] },
-        { key: 'step1_fiscal_year', label: 'Label ปีงบประมาณ', default: 'ปีงบประมาณ (พ.ศ.) *' },
-      ]},
-      { key: 'step2', label: '📋 ส่วนที่ 2: นโยบายและบริบท', fields: [
-        { key: 'step2_title', label: 'ชื่อหัวข้อส่วนที่ 2', default: '📋 ส่วนที่ 2: นโยบายและบริบทภายนอกองค์กร' },
-        { key: 'step2_policy_desc', label: 'คำอธิบายส่วนที่ 2', default: 'ข้อมูลนโยบาย กฎระเบียบ และบริบทภายนอกที่ส่งผลต่อสุขภาวะองค์กร', long: true },
-      ]},
-      { key: 'step3', label: '🩺 ส่วนที่ 3: ข้อมูลสุขภาวะ', fields: [
-        { key: 'step3_title', label: 'ชื่อหัวข้อส่วนที่ 3', default: '🩺 ส่วนที่ 3: ข้อมูลสุขภาวะของข้าราชการ' },
-        { key: 'step3_ncd_diabetes', label: 'Label โรคเบาหวาน', default: 'โรคเบาหวาน (คน)' },
-        { key: 'step3_ncd_hypertension', label: 'Label โรคความดัน', default: 'โรคความดันโลหิตสูง (คน)' },
-        { key: 'step3_burnout', label: 'Label ภาวะหมดไฟ', default: 'บุคลากรที่มีภาวะหมดไฟ Burnout (คน)' },
-        { key: 'step3_sick_leave', label: 'Label วันลาป่วย', default: 'วันลาป่วยเฉลี่ยต่อคนต่อปี (วัน)' },
-      ]},
-      { key: 'step4', label: '⚙️ ส่วนที่ 4: ระบบการบริหาร', fields: [
-        { key: 'step4_title', label: 'ชื่อหัวข้อส่วนที่ 4', default: '⚙️ ส่วนที่ 4: ระบบการบริหารและสภาพแวดล้อม' },
-        { key: 'step4_engagement', label: 'Label Engagement Score', default: 'คะแนน Engagement บุคลากร (1–100)' },
-      ]},
-      { key: 'step5', label: '🎯 ส่วนที่ 5: ทิศทางและเป้าหมาย', fields: [
-        { key: 'step5_title', label: 'ชื่อหัวข้อส่วนที่ 5', default: '🎯 ส่วนที่ 5: ทิศทาง เป้าหมาย และข้อเสนอแนะ' },
-        { key: 'step5_priorities', label: 'Label ประเด็นสุขภาวะสำคัญ', default: 'ประเด็นสุขภาวะที่ต้องการพัฒนาในปีนี้ (เลือกได้หลายข้อ)' },
+      { key: 'steps', label: '📋 ชื่อหัวข้อแต่ละส่วน', fields: [
+        { key: 'step1_title', label: 'ส่วนที่ 1 — ข้อมูลเบื้องต้น', default: '🏛️ ส่วนที่ 1: ข้อมูลเบื้องต้นของส่วนราชการ' },
+        { key: 'step2_title', label: 'ส่วนที่ 2 — นโยบายและบริบท', default: '📋 ส่วนที่ 2: นโยบายและบริบทภายนอกองค์กร' },
+        { key: 'step3_title', label: 'ส่วนที่ 3 — ข้อมูลสุขภาวะ', default: '🩺 ส่วนที่ 3: ข้อมูลสุขภาวะของข้าราชการในปีที่ผ่านมา' },
+        { key: 'step4_title', label: 'ส่วนที่ 4 — ระบบการบริหาร', default: '⚙️ ส่วนที่ 4: ระบบการบริหารและสภาพแวดล้อมที่เอื้อต่อสุขภาวะ' },
+        { key: 'step5_title', label: 'ส่วนที่ 5 — ทิศทางและเป้าหมาย', default: '🎯 ส่วนที่ 5: ทิศทาง เป้าหมาย และข้อเสนอแนะ' },
       ]},
     ]
   },
@@ -3436,15 +3471,12 @@ function renderFeFields(formId) {
   const statusEl = document.getElementById(`fe-${panelKey}-status`);
   if (!container) return;
   const cfg = _feConfigCache[formId] || {};
-  const overrideCount = Object.keys(cfg).length;
+  const overrideCount = Object.keys(cfg).filter(k => !k.endsWith('__opts')).length;
   if (statusEl) {
     statusEl.innerHTML = overrideCount
       ? `<span style="color:var(--A);font-weight:600">✓ แก้ไขแล้ว ${overrideCount} ช่อง</span> — อัปเดตล่าสุดจาก Supabase`
       : '<span style="color:var(--tx3)">ยังไม่มีการแก้ไข — แสดงค่า Default ทั้งหมด</span>';
   }
-
-  // Editing banner
-  const bannerHtml = `<div class="fe-editing-banner">✏️ คุณกำลัง <b>แก้ไขคำถาม/ข้อความ</b> ในฟอร์ม — ไม่ใช่กำลังตอบแบบสอบถาม</div>`;
 
   const sectionsHtml = schema.sections.map((sec) => {
     const editedInSec = sec.fields.filter((f) => cfg[f.key]).length;
@@ -3456,45 +3488,39 @@ function renderFeFields(formId) {
     const fieldsHtml = sec.fields.map((field) => {
       const currentVal = cfg[field.key] || '';
       const isChanged = !!currentVal;
-      const fieldId = `fe-field-${formId}-${field.key.replace(/\./g,'-')}`;
-      const hasOptions = Array.isArray(field.options) && field.options.length > 0;
-      const savedOpts = cfg[field.key + '__opts'];
+      const safeKey = field.key.replace(/\./g, '-');
+      const fieldId = `fe-field-${formId}-${safeKey}`;
+      const cardId = `fe-card-${formId}-${safeKey}`;
+      const previewId = `fe-preview-${formId}-${safeKey}`;
+      const editboxId = `fe-editbox-${formId}-${safeKey}`;
+      const displayText = currentVal || field.default;
 
-      // Options editing HTML (for choice/select type fields)
-      const optsHtml = hasOptions ? (() => {
-        const currentOpts = savedOpts ? savedOpts.split('||') : field.options;
-        return `<div class="fe-opts-area">
-          <div class="fe-opts-label">ตัวเลือก (Choices)</div>
-          <div id="fe-opts-${fieldId}">
-            ${currentOpts.map((opt, i) => `
-              <div class="fe-option-row" id="fe-opt-row-${fieldId}-${i}">
-                <span class="fe-opt-prefix">${i+1}.</span>
-                <input class="fe-opt-input" id="fe-opt-${fieldId}-${i}" value="${esc(opt)}" placeholder="ตัวเลือกที่ ${i+1}">
-                <button class="fe-opt-del" onclick="feDeleteOpt('${esc(fieldId)}',${i})" title="ลบตัวเลือกนี้">✕</button>
-              </div>`).join('')}
-          </div>
-          <button class="fe-add-opt" onclick="feAddOpt('${esc(fieldId)}','${esc(field.key)}','${esc(formId)}')">＋ เพิ่มตัวเลือก</button>
-        </div>`;
-      })() : '';
+      // Build the input/textarea for edit mode
+      const inputHtml = field.long
+        ? `<textarea class="fe-q-input" id="${fieldId}" rows="3" placeholder="${esc(field.default)}" data-original="${esc(currentVal)}">${esc(currentVal)}</textarea>`
+        : `<input class="fe-q-input" id="${fieldId}" value="${esc(currentVal)}" placeholder="${esc(field.default)}" data-original="${esc(currentVal)}">`;
 
-      return `<div class="fe-form-card${isChanged ? ' modified' : ''}">
-        <div class="fe-card-band">
+      return `<div class="fe-gf-card${isChanged ? ' modified' : ''}" id="${cardId}">
+        <div class="fe-gf-band">
           <span>${esc(field.label)}</span>
-          ${hasOptions ? '<span class="fe-type-tag">ตัวเลือก</span>' : '<span class="fe-type-tag" style="background:var(--tx2)">ข้อความ</span>'}
-          ${isChanged ? '<span class="fe-edited-badge">✓ แก้ไขแล้ว</span>' : ''}
+          ${isChanged ? '<span class="fe-edited-badge">✓ แก้ไขแล้ว</span>' : '<span style="font-size:10px;color:var(--tx3);margin-left:2px">default</span>'}
+          <div style="margin-left:auto;display:flex;gap:6px;align-items:center">
+            ${isChanged ? `<button class="btn b-gray" style="padding:3px 8px;font-size:10.5px" onclick="resetFeField('${esc(formId)}','${esc(field.key)}')">↩ รีเซ็ต</button>` : ''}
+            <button class="btn b-blue" style="padding:3px 9px;font-size:11px" onclick="toggleFeFieldEdit('${esc(formId)}','${esc(field.key)}')">✏️ แก้ไข</button>
+          </div>
         </div>
-        <div class="fe-card-body">
-          <div class="fe-q-label">ข้อความคำถาม / Label</div>
-          <${field.long ? 'textarea rows="3"' : 'input'} class="fe-q-input"
-            id="${fieldId}"
-            placeholder="${esc(field.default)}"
-            ${field.long ? '' : `value="${esc(currentVal)}"`}
-          >${field.long ? esc(currentVal) : ''}</${field.long ? 'textarea' : 'input'}>
-          <div class="fe-default-hint">Default: ${esc(field.default)}</div>
-          ${optsHtml}
+        <!-- Preview mode (shown by default) -->
+        <div class="fe-gf-preview" id="${previewId}" onclick="toggleFeFieldEdit('${esc(formId)}','${esc(field.key)}')" title="คลิกเพื่อแก้ไข">
+          ${esc(displayText)}
         </div>
-        <div class="fe-card-foot">
-          ${isChanged ? `<button class="btn b-gray" style="padding:4px 10px;font-size:11.5px" onclick="resetFeField('${esc(formId)}','${esc(field.key)}')">↩ รีเซ็ต</button>` : `<span style="font-size:11px;color:var(--tx3)">ใช้ค่า default</span>`}
+        <!-- Edit mode (hidden by default) -->
+        <div class="fe-gf-editbox" id="${editboxId}" style="display:none">
+          ${inputHtml}
+          <div class="fe-default-hint" style="margin-top:5px">Default: ${esc(field.default)}</div>
+          <div style="display:flex;gap:8px;margin-top:10px">
+            <button class="btn b-gray" style="padding:4px 11px;font-size:12px" onclick="cancelFeFieldInline('${esc(formId)}','${esc(field.key)}')">✕ ยกเลิก</button>
+            <span style="font-size:11px;color:var(--tx3);align-self:center">แก้ไขแล้วกด 💾 บันทึก ด้านล่าง</span>
+          </div>
         </div>
       </div>`;
     }).join('');
@@ -3502,7 +3528,54 @@ function renderFeFields(formId) {
     return sectionHdr + fieldsHtml;
   }).join('');
 
-  container.innerHTML = bannerHtml + sectionsHtml;
+  container.innerHTML = sectionsHtml;
+}
+
+function toggleFeFieldEdit(formId, fieldKey) {
+  const safeKey = fieldKey.replace(/\./g, '-');
+  const editbox = document.getElementById(`fe-editbox-${formId}-${safeKey}`);
+  const preview = document.getElementById(`fe-preview-${formId}-${safeKey}`);
+  const card = document.getElementById(`fe-card-${formId}-${safeKey}`);
+  if (!editbox || !preview) return;
+  // Close any other open editboxes in this form panel
+  const panelKey = formId === 'wellbeing' ? 'wb' : formId;
+  document.getElementById(`fe-${panelKey}-fields`)?.querySelectorAll('.fe-gf-editbox').forEach((box) => {
+    if (box !== editbox && box.style.display !== 'none') {
+      const otherId = box.id; // fe-editbox-{formId}-{safeKey}
+      const otherSafeKey = otherId.replace(`fe-editbox-${formId}-`, '');
+      const otherPreview = document.getElementById(`fe-preview-${formId}-${otherSafeKey}`);
+      const otherCard = document.getElementById(`fe-card-${formId}-${otherSafeKey}`);
+      box.style.display = 'none';
+      if (otherPreview) otherPreview.style.display = '';
+      if (otherCard) otherCard.classList.remove('fe-gf-editing');
+    }
+  });
+  // Open this editbox
+  editbox.style.display = '';
+  preview.style.display = 'none';
+  card.classList.add('fe-gf-editing');
+  const input = editbox.querySelector('input, textarea');
+  if (input) {
+    if (input.dataset.original === undefined) input.dataset.original = input.value;
+    input.focus();
+    if (input.tagName === 'INPUT') { const len = input.value.length; input.setSelectionRange(len, len); }
+  }
+}
+
+function cancelFeFieldInline(formId, fieldKey) {
+  const safeKey = fieldKey.replace(/\./g, '-');
+  const editbox = document.getElementById(`fe-editbox-${formId}-${safeKey}`);
+  const preview = document.getElementById(`fe-preview-${formId}-${safeKey}`);
+  const card = document.getElementById(`fe-card-${formId}-${safeKey}`);
+  if (!editbox || !preview) return;
+  // Revert value
+  const input = editbox.querySelector('input, textarea');
+  if (input && input.dataset.original !== undefined) {
+    input.value = input.dataset.original;
+  }
+  editbox.style.display = 'none';
+  preview.style.display = '';
+  card.classList.remove('fe-gf-editing');
 }
 
 function feDeleteOpt(fieldId, idx) {

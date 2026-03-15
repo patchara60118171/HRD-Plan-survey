@@ -127,7 +127,23 @@ async function processFile(file, fieldType) {
         
     } catch (error) {
         console.error('Upload error:', error);
-        showUploadError(fieldType, 'เกิดข้อผิดพลาดในการอัปโหลด กรุณาลองใหม่อีกครั้ง');
+        // แสดง error ที่ชัดเจนตามสาเหตุ
+        const msg = error?.message || '';
+        let friendlyMsg;
+        if (msg.includes('Bucket not found') || msg.includes('bucket')) {
+            friendlyMsg = '❌ ไม่พบพื้นที่จัดเก็บไฟล์ — กรุณาติดต่อผู้ดูแลระบบ';
+        } else if (msg.includes('size') || msg.includes('too large') || msg.includes('413')) {
+            friendlyMsg = '❌ ไฟล์มีขนาดใหญ่เกิน 512 KB กรุณาบีบอัดหรือเลือกไฟล์ใหม่';
+        } else if (msg.includes('mime') || msg.includes('content') || msg.includes('type')) {
+            friendlyMsg = '❌ ไฟล์ PDF เท่านั้น — กรุณาเลือกไฟล์ .pdf ใหม่';
+        } else if (msg.includes('network') || msg.includes('fetch') || msg.includes('Failed')) {
+            friendlyMsg = '❌ เครือข่ายขัดข้อง กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองใหม่';
+        } else if (msg.includes('policy') || msg.includes('not allowed') || msg.includes('403')) {
+            friendlyMsg = '❌ ไม่มีสิทธิ์อัปโหลด — กรุณาติดต่อผู้ดูแลระบบ';
+        } else {
+            friendlyMsg = '❌ อัปโหลดไม่สำเร็จ กรุณาลองใหม่อีกครั้ง';
+        }
+        showUploadError(fieldType, friendlyMsg);
     } finally {
         setUploadingState(fieldType, false);
     }
