@@ -538,8 +538,13 @@ function collectAllData() {
     const idp_system = document.querySelector('input[name="idp_system"]:checked')?.value || null;
     const career_path_system = document.querySelector('input[name="career_path_system"]:checked')?.value || null;
 
-    // Training hours (now text field)
-    const training_hours = document.getElementById('training_hours')?.value.trim() || null;
+    // Training hours — แยกรายปี ข้อ 14 (2564-2568)
+    const training_hours = document.getElementById('training_hours')?.value?.trim() || null;
+    const training_hours_2568 = parseFloat(document.getElementById('training_hours_2568')?.value) || null;
+    const training_hours_2567 = parseFloat(document.getElementById('training_hours_2567')?.value) || null;
+    const training_hours_2566 = parseFloat(document.getElementById('training_hours_2566')?.value) || null;
+    const training_hours_2565 = parseFloat(document.getElementById('training_hours_2565')?.value) || null;
+    const training_hours_2564 = parseFloat(document.getElementById('training_hours_2564')?.value) || null;
 
     // Digital systems
     const digitalSystems = [...document.querySelectorAll('input[name="digital_systems"]:checked')].map(cb => cb.value);
@@ -635,6 +640,7 @@ function collectAllData() {
         // Step 4: ระบบและสภาพแวดล้อม
         mentoring_system, job_rotation, idp_system, career_path_system,
         training_hours,
+        training_hours_2568, training_hours_2567, training_hours_2566, training_hours_2565, training_hours_2564,
         digital_systems: digitalSystems.length ? digitalSystems : null,
         ergonomics_status, ergonomics_detail,
 
@@ -684,7 +690,7 @@ async function submitForm() {
         document.getElementById('success-ref').textContent = `Ref: ${refId}`;
         document.getElementById('success-mode').textContent = IS_TEST_MODE
             ? `Test mode | Run ID: ${TEST_RUN_ID}`
-            : 'Live mode';
+            : '';
 
         // Mark files as saved to prevent cleanup
         window.formSubmitted = true;
