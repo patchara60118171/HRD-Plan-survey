@@ -754,6 +754,11 @@ function loadDraft() {
 }
 
 function restoreFormData(data) {
+    // Bug fix: restore respondentEmail variable (not just DOM) to prevent null on submit
+    if (data.respondent_email) {
+        respondentEmail = data.respondent_email;
+    }
+
     // Restore all fields
     Object.keys(data).forEach(key => {
         if (key.startsWith('_')) return;
