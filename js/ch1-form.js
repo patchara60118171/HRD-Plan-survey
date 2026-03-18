@@ -57,7 +57,9 @@ const ORG_MAP = {
     'mots': 'สำนักงานปลัดกระทรวงการท่องเที่ยวและกีฬา',
     'tpso': 'สำนักงานนโยบายและยุทธศาสตร์การค้า',
     'dcp': 'กรมส่งเสริมวัฒนธรรม',
-    'acfs': 'สำนักงานมาตรฐานสินค้าเกษตรและอาหารแห่งชาติ'
+    'acfs': 'สำนักงานมาตรฐานสินค้าเกษตรและอาหารแห่งชาติ',
+    // ---- TEST ONLY ----
+    'testorg': '[TEST] หน่วยงานทดสอบระบบ'
 };
 
 function parseUrlParameters() {
@@ -103,15 +105,22 @@ function parseUrlParameters() {
             orgSelect.appendChild(newOption);
         }
         orgSelect.value = orgName;
-        orgSelect.disabled = true;
+        // testorg: ไม่ lock dropdown เผื่อต้องการเปลี่ยนระหว่างเทส
+        if (orgCode !== 'testorg') {
+            orgSelect.disabled = true;
+        }
     }
-    
+
     console.log(`Organization auto-selected: ${orgName} (${orgCode})`);
-    
+
     // 3. Toast after a short delay
     setTimeout(() => {
         if (typeof showToast === 'function') {
-            showToast(`ยินดีต้อนรับบุคลากรจาก ${orgName}`, 'success');
+            if (orgCode === 'testorg') {
+                showToast('🧪 TEST MODE — ข้อมูลนี้จะถูกแยกออกจากข้อมูลจริง', 'info');
+            } else {
+                showToast(`ยินดีต้อนรับบุคลากรจาก ${orgName}`, 'success');
+            }
         }
     }, 500);
 }

@@ -3,7 +3,7 @@
 // Handles file validation, upload to Supabase Storage, and preview
 // =============================================
 
-const MAX_FILE_SIZE = 512 * 1024; // 512 KB in bytes
+const MAX_FILE_SIZE = 1024 * 1024; // 1 MB in bytes
 const BUCKET_NAME = 'hrd-documents';
 
 // Store uploaded file paths for cleanup (if user leaves without saving)
@@ -23,7 +23,7 @@ function validateFile(file) {
     // Check file size — max 512 KB
     if (file.size > MAX_FILE_SIZE) {
         const fileSizeKB = (file.size / 1024).toFixed(1);
-        errors.push(`ขนาดไฟล์ (${fileSizeKB} KB) เกินกำหนด กรุณาใช้ไฟล์ขนาดไม่เกิน 512 KB`);
+        errors.push(`ขนาดไฟล์ (${fileSizeKB} KB) เกินกำหนด กรุณาใช้ไฟล์ขนาดไม่เกิน 1 MB`);
     }
     
     return errors; // Return [] means valid
@@ -133,7 +133,7 @@ async function processFile(file, fieldType) {
         if (msg.includes('Bucket not found') || msg.includes('bucket')) {
             friendlyMsg = '❌ ไม่พบพื้นที่จัดเก็บไฟล์ — กรุณาติดต่อผู้ดูแลระบบ';
         } else if (msg.includes('size') || msg.includes('too large') || msg.includes('413')) {
-            friendlyMsg = '❌ ไฟล์มีขนาดใหญ่เกิน 512 KB กรุณาบีบอัดหรือเลือกไฟล์ใหม่';
+            friendlyMsg = '❌ ไฟล์มีขนาดใหญ่เกิน 1 MB กรุณาบีบอัดหรือเลือกไฟล์ใหม่';
         } else if (msg.includes('mime') || msg.includes('content') || msg.includes('type')) {
             friendlyMsg = '❌ ไฟล์ PDF เท่านั้น — กรุณาเลือกไฟล์ .pdf ใหม่';
         } else if (msg.includes('network') || msg.includes('fetch') || msg.includes('Failed')) {
@@ -252,7 +252,8 @@ function setUploadingState(fieldType, isUploading) {
             content.innerHTML = `
                 <div class="text-3xl mb-2">📄</div>
                 <p class="text-sm text-slate-600 font-medium">คลิกหรือลากไฟล์ PDF มาวางที่นี่</p>
-                <p class="text-xs text-slate-400 mt-1">ไฟล์ PDF เท่านั้น | ขนาดไม่เกิน 512 KB</p>
+                <p class="text-xs text-slate-400 mt-1">ไฟล์ PDF เท่านั้น | ขนาดไม่เกิน 1 MB</p>
+                <p class="text-xs text-slate-400 mt-1">หากไม่สามารถอัพโหลดได้ให้ส่งเมลมาที่ <a href="mailto:hrdplan.wellbeing@gmail.com" class="text-blue-400 underline">hrdplan.wellbeing@gmail.com</a></p>
             `;
         }
     }
