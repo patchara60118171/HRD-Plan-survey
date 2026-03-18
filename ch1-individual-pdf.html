@@ -3,401 +3,324 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ดูรายละเอียดการตอบ - ระบบประเมินสภาพความเป็นอยู่ที่ดี</title>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai+Looped:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>ดูรายละเอียดการตอบ CH1</title>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai+Looped:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    colors: {
-                        primary: '#0F4C81',
-                        accent: '#00A86B'
-                    },
-                    fontFamily: {
-                        sans: ['IBM Plex Sans Thai Looped', 'sans-serif']
-                    }
+                    colors: { primary: '#0F4C81', accent: '#00A86B' },
+                    fontFamily: { sans: ['IBM Plex Sans Thai Looped', 'sans-serif'] }
                 }
             }
         }
     </script>
-</head>
-<body class="bg-slate-50 font-sans">
-    <div class="min-h-screen">
-        <!-- Header -->
-        <header class="bg-gradient-to-r from-primary to-blue-700 text-white shadow-lg sticky top-0 z-40">
-            <div class="max-w-7xl mx-auto px-4 py-6">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h1 class="text-3xl font-bold mb-2">ดูรายละเอียดการตอบแบบประเมิน</h1>
-                        <p class="text-blue-100">View Individual Response Details</p>
-                    </div>
-                    <a href="/ch1-all-responses.html" class="px-4 py-2 bg-white text-primary rounded-lg font-semibold hover:bg-opacity-90 transition">
-                        ← กลับไปยังรายการทั้งหมด
-                    </a>
-                </div>
-            </div>
-        </header>
-
-        <!-- Navigation and Action Buttons -->
-        <nav class="bg-white border-b border-slate-200 sticky top-20 z-40 shadow-sm">
-            <div class="max-w-7xl mx-auto px-4 py-4">
-                <div class="flex items-center justify-between gap-4">
-                    <div class="flex items-center gap-2">
-                        <button id="prev-response-btn" class="px-4 py-2 bg-slate-300 text-slate-700 rounded-lg text-sm font-semibold hover:bg-slate-400 transition disabled:opacity-50 disabled:cursor-not-allowed">
-                            ← ก่อนหน้า
-                        </button>
-                        <span id="response-counter" class="text-sm text-slate-700 font-semibold px-4 py-2 bg-slate-100 rounded-lg">
-                            Response 1 of 1
-                        </span>
-                        <button id="next-response-btn" class="px-4 py-2 bg-slate-300 text-slate-700 rounded-lg text-sm font-semibold hover:bg-slate-400 transition disabled:opacity-50 disabled:cursor-not-allowed">
-                            ถัดไป →
-                        </button>
-                    </div>
-
-                    <div class="flex items-center gap-2">
-                        <button id="print-btn" class="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm font-semibold hover:bg-opacity-90 transition">
-                            🖨️ พิมพ์
-                        </button>
-                        <button id="export-pdf-btn" class="px-4 py-2 bg-red-500 text-white rounded-lg text-sm font-semibold hover:bg-opacity-90 transition">
-                            📄 ส่งออก PDF
-                        </button>
-                        <button id="edit-btn" class="px-4 py-2 bg-accent text-white rounded-lg text-sm font-semibold hover:bg-opacity-90 transition">
-                            ✏️ แก้ไข
-                        </button>
-                        <button id="delete-btn" class="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-semibold hover:bg-opacity-90 transition">
-                            🗑️ ลบ
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </nav>
-
-        <!-- Main Content -->
-        <main class="max-w-7xl mx-auto px-4 py-8">
-            <!-- Response Summary Card -->
-            <div class="bg-white rounded-lg shadow p-6 mb-6" id="response-summary">
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div>
-                        <p class="text-xs font-semibold text-slate-500 uppercase mb-1">ID</p>
-                        <p class="text-lg font-bold text-slate-800" id="summary-id">-</p>
-                    </div>
-                    <div>
-                        <p class="text-xs font-semibold text-slate-500 uppercase mb-1">หน่วยงาน</p>
-                        <p class="text-lg font-bold text-slate-800" id="summary-org">-</p>
-                    </div>
-                    <div>
-                        <p class="text-xs font-semibold text-slate-500 uppercase mb-1">วันที่ส่ง</p>
-                        <p class="text-lg font-bold text-slate-800" id="summary-date">-</p>
-                    </div>
-                    <div>
-                        <p class="text-xs font-semibold text-slate-500 uppercase mb-1">สถานะ</p>
-                        <p class="text-lg font-bold" id="summary-status">-</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Tabs -->
-            <div class="bg-white border-b border-slate-200 mb-6 rounded-t-lg">
-                <div class="flex space-x-6 overflow-x-auto px-6">
-                    <button class="response-tab active px-4 py-3 font-semibold border-b-2 border-primary text-primary whitespace-nowrap transition" data-tab="overview">
-                        概览
-                    </button>
-                    <button class="response-tab px-4 py-3 font-semibold border-b-2 border-transparent text-slate-600 hover:text-slate-900 whitespace-nowrap transition" data-tab="step1">
-                        ข้อมูลหน่วยงาน
-                    </button>
-                    <button class="response-tab px-4 py-3 font-semibold border-b-2 border-transparent text-slate-600 hover:text-slate-900 whitespace-nowrap transition" data-tab="step2">
-                        นโยบาย
-                    </button>
-                    <button class="response-tab px-4 py-3 font-semibold border-b-2 border-transparent text-slate-600 hover:text-slate-900 whitespace-nowrap transition" data-tab="step3">
-                        สุขภาพ
-                    </button>
-                    <button class="response-tab px-4 py-3 font-semibold border-b-2 border-transparent text-slate-600 hover:text-slate-900 whitespace-nowrap transition" data-tab="step4">
-                        ระบบสนับสนุน
-                    </button>
-                    <button class="response-tab px-4 py-3 font-semibold border-b-2 border-transparent text-slate-600 hover:text-slate-900 whitespace-nowrap transition" data-tab="step5">
-                        แผน
-                    </button>
-                </div>
-            </div>
-
-            <!-- Tab Contents -->
-            <div id="response-container" class="bg-white rounded-b-lg shadow p-6">
-                <!-- Will be populated dynamically -->
-                <div class="text-center py-8">
-                    <p class="text-slate-600">กำลังโหลดข้อมูลการตอบแบบประเมิน...</p>
-                </div>
-            </div>
-        </main>
-
-        <!-- Footer -->
-        <footer class="bg-slate-800 text-white mt-12 py-6 border-t border-slate-700">
-            <div class="max-w-7xl mx-auto px-4 text-center text-sm">
-                <p>© 2026 Thai Government Well-being Assessment System</p>
-                <p class="text-slate-400 mt-2">Individual Response Viewer</p>
-            </div>
-        </footer>
-    </div>
-
-    <!-- Print CSS -->
-    <style media="print">
-        body {
-            background-color: white;
-        }
-        header, nav, footer, .no-print {
-            display: none !important;
-        }
-        .response-container {
-            box-shadow: none !important;
+    <style>
+        .section-card { background: white; border: 1px solid #e2e8f0; border-radius: 0.75rem; padding: 1.5rem; margin-bottom: 1.5rem; }
+        .section-title { font-size: 1rem; font-weight: 700; color: #0F4C81; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; margin-bottom: 1rem; }
+        .field-row { display: flex; gap: 0.5rem; padding: 0.5rem 0; border-bottom: 1px solid #f1f5f9; align-items: flex-start; }
+        .field-row:last-child { border-bottom: none; }
+        .field-label { font-size: 0.8rem; color: #64748b; font-weight: 500; min-width: 220px; flex-shrink: 0; }
+        .field-value { font-size: 0.875rem; color: #1e293b; font-weight: 500; flex: 1; }
+        .field-value.empty { color: #cbd5e1; font-style: italic; }
+        .badge-full    { background: #d1fae5; color: #059669; }
+        .badge-partial { background: #fef3c7; color: #d97706; }
+        .badge-none    { background: #fee2e2; color: #dc2626; }
+        .badge-actual    { background: #dbeafe; color: #2563eb; }
+        .badge-estimated { background: #fef3c7; color: #d97706; }
+        .badge { display: inline-block; padding: 0.125rem 0.625rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
+        .table-turnover { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+        .table-turnover th { background: #f1f5f9; color: #475569; font-weight: 600; padding: 0.5rem; text-align: center; border: 1px solid #e2e8f0; }
+        .table-turnover td { padding: 0.4rem 0.5rem; border: 1px solid #e2e8f0; text-align: center; }
+        .table-turnover td.label-col { text-align: left; color: #374151; font-weight: 500; background: #f8fafc; }
+        .computed-cell { background: #f0fdf4; color: #059669; font-weight: 700; }
+        .grid-stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 0.75rem; }
+        .stat-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 0.75rem; text-align: center; }
+        .stat-num { font-size: 1.25rem; font-weight: 700; color: #0F4C81; }
+        .stat-lbl { font-size: 0.7rem; color: #64748b; margin-top: 0.125rem; }
+        .file-link { display: inline-flex; align-items: center; gap: 0.375rem; color: #2563eb; font-size: 0.8rem; text-decoration: underline; }
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white; }
         }
     </style>
+</head>
+<body class="bg-slate-50 font-sans">
 
-    <!-- Scripts -->
-    <script src="/js/data-loader.js"></script>
-    <script src="/js/response-viewer.js"></script>
+<!-- Header -->
+<header class="bg-gradient-to-r from-primary to-blue-700 text-white shadow-lg no-print">
+    <div class="max-w-4xl mx-auto px-4 py-4 flex items-center gap-4">
+        <div class="flex-1">
+            <div class="text-xs text-blue-200 uppercase tracking-wider mb-1">CH1 — รายละเอียดการตอบแบบสอบถาม</div>
+            <h1 class="text-xl font-bold" id="page-title">กำลังโหลด...</h1>
+        </div>
+        <div class="flex gap-2">
+            <button onclick="window.print()"
+                class="flex items-center gap-1.5 bg-white/20 hover:bg-white/30 text-white border border-white/30 px-3 py-2 rounded-lg text-sm font-semibold transition">
+                🖨️ พิมพ์
+            </button>
+            <button id="btn-pdf" onclick="exportPDF()"
+                class="flex items-center gap-1.5 bg-accent hover:bg-green-600 text-white px-3 py-2 rounded-lg text-sm font-semibold transition">
+                📄 Export PDF
+            </button>
+            <a href="ch1-all-responses.html"
+                class="flex items-center gap-1.5 bg-white/20 hover:bg-white/30 text-white border border-white/30 px-3 py-2 rounded-lg text-sm font-semibold transition">
+                ← กลับรายการ
+            </a>
+        </div>
+    </div>
+</header>
 
-    <script>
-        const dataLoader = new DataLoader('/data/');
-        let responseViewer = null;
-        let responses = [];
-        let currentIndex = 0;
+<!-- Loading -->
+<div id="loading" class="text-center py-20 text-slate-400">
+    <div class="text-4xl mb-3">⏳</div>
+    <div>กำลังโหลดข้อมูล...</div>
+</div>
 
-        // Get response ID from URL
-        function getResponseIdFromUrl() {
-            const params = new URLSearchParams(window.location.search);
-            return params.get('id');
-        }
+<!-- Error -->
+<div id="error-msg" class="hidden max-w-xl mx-auto mt-10 bg-red-50 border border-red-200 text-red-700 rounded-xl p-6 text-center"></div>
 
-        // Initialize
-        async function init() {
-            try {
-                const config = await dataLoader.loadConfig();
-                responseViewer = new ResponseViewer(dataLoader, config.responseViewerConfiguration || {});
+<!-- Report Content -->
+<div id="report" class="hidden max-w-4xl mx-auto px-4 py-6">
 
-                // Load mock data (in production, would load from Supabase)
-                loadMockData();
+    <!-- Meta Card -->
+    <div class="section-card mb-6">
+        <div class="flex items-start justify-between gap-4">
+            <div>
+                <div class="text-xl font-bold text-slate-800" id="meta-org">—</div>
+                <div class="text-sm text-slate-500 mt-1" id="meta-submitted">ส่งเมื่อ —</div>
+                <div class="flex gap-2 mt-2 flex-wrap" id="meta-badges"></div>
+            </div>
+            <div class="text-right text-xs text-slate-400" id="meta-version"></div>
+        </div>
+    </div>
 
-                // Find response by ID
-                const responseId = getResponseIdFromUrl();
-                if (responseId) {
-                    const response = responseViewer.getResponseById(responseId);
-                    if (response) {
-                        currentIndex = responses.indexOf(response);
-                    }
-                }
+    <div id="report-body"><!-- sections injected here --></div>
 
-                setupEventListeners();
-                renderCurrentResponse();
-            } catch (error) {
-                console.error('Initialization error:', error);
-                document.getElementById('response-container').innerHTML = `
-                    <div class="p-6 bg-red-50 border-2 border-red-200 rounded-lg">
-                        <h3 class="text-red-800 font-bold mb-2">เกิดข้อผิดพลาด</h3>
-                        <p class="text-red-700">${error.message}</p>
-                    </div>
-                `;
-            }
-        }
+</div>
 
-        // Load mock data
-        function loadMockData() {
-            responses = [
-                {
-                    id: 'resp_001',
-                    org_name: 'สำนักงานสภาพัฒนาการเศรษฐกิจและสังคมแห่งชาติ',
-                    submitted_date: new Date('2026-03-15'),
-                    created_at: '2026-03-15T10:30:00Z',
-                    status: 'completed',
-                    step1: { orgName: 'สำนักงานสภาพัฒนาการเศรษฐกิจและสังคมแห่งชาติ' },
-                    step2: { policy: 'มีนโยบายสนับสนุนสุขภาพพนักงาน' },
-                    step3: { diseases: 'ข้อมูลโรค' },
-                    step4: { support: 'ระบบสนับสนุนสมบูรณ์' },
-                    step5: { priority: 'แผนปฏิบัติการเรียบร้อย' }
-                }
-            ];
+<script src="js/supabase-config.js"></script>
+<script>
+// ── Supabase init (reuse ch1Sb from supabase-config.js) ──────────────────
+// ch1Sb is available globally from supabase-config.js
 
-            responseViewer.responses = responses;
-        }
+// ── Helpers ────────────────────────────────────────────────────────────────
+const TABLE = 'wellbeing_ch1_submissions';
 
-        // Setup event listeners
-        function setupEventListeners() {
-            // Tab switching
-            document.querySelectorAll('.response-tab').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    switchTab(e.target.dataset.tab);
-                });
-            });
+function getParam(key) {
+    return new URLSearchParams(window.location.search).get(key);
+}
 
-            // Navigation buttons
-            document.getElementById('prev-response-btn').addEventListener('click', () => {
-                if (currentIndex > 0) {
-                    currentIndex--;
-                    renderCurrentResponse();
-                }
-            });
+function fmt(val) {
+    if (val === null || val === undefined || val === '') return '<span class="empty">—</span>';
+    return String(val);
+}
 
-            document.getElementById('next-response-btn').addEventListener('click', () => {
-                if (currentIndex < responses.length - 1) {
-                    currentIndex++;
-                    renderCurrentResponse();
-                }
-            });
+function fmtNum(val) {
+    if (val === null || val === undefined || val === '') return '<span class="empty">—</span>';
+    return Number(val).toLocaleString('th-TH');
+}
 
-            // Action buttons
-            document.getElementById('print-btn').addEventListener('click', () => {
-                window.print();
-            });
+function fmtBool(val) {
+    if (val === true)  return '<span class="badge badge-none">ทดสอบ</span>';
+    if (val === false) return '<span class="badge badge-full">จริง</span>';
+    return '—';
+}
 
-            document.getElementById('export-pdf-btn').addEventListener('click', exportToPDF);
+function statusBadge(val) {
+    const map = {
+        full:        ['badge-full',    'ครบถ้วน'],
+        partial:     ['badge-partial', 'บางส่วน'],
+        none:        ['badge-none',    'ยังไม่มี'],
+        actual:      ['badge-actual',  'ข้อมูลจริง'],
+        estimated:   ['badge-estimated','ประมาณการ'],
+        planned:     ['badge-partial', 'มีแผน'],
+        in_progress: ['badge-partial', 'กำลังดำเนิน'],
+        done:        ['badge-full',    'เสร็จแล้ว'],
+    };
+    if (!val || !map[val]) return fmt(val);
+    const [cls, lbl] = map[val];
+    return `<span class="badge ${cls}">${lbl}</span>`;
+}
 
-            document.getElementById('edit-btn').addEventListener('click', () => {
-                const response = responses[currentIndex];
-                // In production, would navigate to edit page
-                alert(`Edit response: ${response.id}`);
-            });
+function row(label, html) {
+    return `<div class="field-row"><div class="field-label">${label}</div><div class="field-value">${html}</div></div>`;
+}
 
-            document.getElementById('delete-btn').addEventListener('click', () => {
-                if (confirm(`ยืนยันการลบการตอบแบบประเมินของ ${responses[currentIndex].org_name}?`)) {
-                    responses.splice(currentIndex, 1);
-                    if (currentIndex >= responses.length) {
-                        currentIndex = Math.max(0, responses.length - 1);
-                    }
-                    renderCurrentResponse();
-                    alert('ลบการตอบแบบประเมินเรียบร้อย');
-                }
-            });
-        }
+// ── Main ────────────────────────────────────────────────────────────────────
+async function main() {
+    const id = getParam('id');
+    if (!id) { showError('ไม่พบ ?id= ใน URL'); return; }
 
-        // Render current response
-        function renderCurrentResponse() {
-            if (responses.length === 0) {
-                document.getElementById('response-container').innerHTML = `
-                    <div class="p-6 bg-yellow-50 border-2 border-yellow-200 rounded-lg">
-                        <p class="text-yellow-800">ไม่มีการตอบแบบประเมินที่ต้องการดู</p>
-                    </div>
-                `;
-                return;
-            }
+    let schema, record;
 
-            const response = responses[currentIndex];
+    try {
+        const [schemaRes, dbRes] = await Promise.all([
+            fetch('data/questions-ch1.json?v=' + Date.now()),
+            ch1Sb.from(TABLE).select('*').eq('id', id).single()
+        ]);
+        schema = await schemaRes.json();
+        if (dbRes.error) throw dbRes.error;
+        record = dbRes.data;
+    } catch(e) {
+        showError('โหลดข้อมูลไม่สำเร็จ: ' + e.message);
+        return;
+    }
 
-            // Update summary
-            document.getElementById('summary-id').textContent = response.id;
-            document.getElementById('summary-org').textContent = response.org_name;
-            document.getElementById('summary-date').textContent = new Date(response.submitted_date).toLocaleDateString('th-TH');
+    document.getElementById('loading').classList.add('hidden');
+    document.getElementById('report').classList.remove('hidden');
 
-            const statusBadge = document.getElementById('summary-status');
-            statusBadge.textContent = response.status === 'completed' ? 'เสร็จสิ้น' : 'รอดำเนินการ';
-            statusBadge.className = response.status === 'completed'
-                ? 'text-lg font-bold bg-green-100 text-green-800 px-3 py-1 rounded inline-block'
-                : 'text-lg font-bold bg-yellow-100 text-yellow-800 px-3 py-1 rounded inline-block';
+    // Meta
+    document.getElementById('page-title').textContent = record.organization || 'ไม่ระบุหน่วยงาน';
+    document.getElementById('meta-org').textContent = record.organization || 'ไม่ระบุหน่วยงาน';
+    document.getElementById('meta-submitted').textContent = 'ส่งเมื่อ ' + new Date(record.submitted_at || record.created_at).toLocaleString('th-TH');
+    document.getElementById('meta-version').textContent = record.form_version || '';
 
-            // Update counter
-            document.getElementById('response-counter').textContent = `Response ${currentIndex + 1} of ${responses.length}`;
+    const badges = document.getElementById('meta-badges');
+    if (record.is_test) badges.innerHTML += `<span class="badge badge-none">🧪 TEST</span>`;
+    if (record.submission_mode) badges.innerHTML += `<span class="badge badge-actual">${record.submission_mode}</span>`;
 
-            // Update navigation buttons
-            document.getElementById('prev-response-btn').disabled = currentIndex === 0;
-            document.getElementById('next-response-btn').disabled = currentIndex === responses.length - 1;
+    // Build body from schema
+    const body = document.getElementById('report-body');
+    body.innerHTML = schema.steps.map(step => renderStep(step, record)).join('');
+}
 
-            // Render overview tab content
-            renderOverviewTab(response);
-        }
+function renderStep(step, d) {
+    const sections = step.sections.map(sec => renderSection(sec, d)).join('');
+    return `
+        <div class="mb-2 mt-6">
+            <div class="text-xs text-slate-400 uppercase tracking-wider">ขั้นตอนที่ ${step.step}</div>
+            <h2 class="text-lg font-bold text-slate-700">${step.title}</h2>
+        </div>
+        ${sections}`;
+}
 
-        // Render overview tab
-        function renderOverviewTab(response) {
-            const container = document.getElementById('response-container');
-            container.innerHTML = `
-                <div class="space-y-4">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <h3 class="font-semibold text-slate-700 mb-2">ข้อมูลพื้นฐาน</h3>
-                            <div class="space-y-2 text-sm text-slate-600">
-                                <p><span class="font-semibold">ID:</span> ${response.id}</p>
-                                <p><span class="font-semibold">หน่วยงาน:</span> ${response.org_name}</p>
-                                <p><span class="font-semibold">วันที่ส่ง:</span> ${new Date(response.submitted_date).toLocaleDateString('th-TH')}</p>
-                                <p><span class="font-semibold">สถานะ:</span> ${response.status === 'completed' ? 'เสร็จสิ้น' : 'รอดำเนินการ'}</p>
-                            </div>
-                        </div>
-                        <div>
-                            <h3 class="font-semibold text-slate-700 mb-2">ความคืบหน้า</h3>
-                            <div class="space-y-2">
-                                <div class="flex items-center justify-between text-sm">
-                                    <span>ขั้นตอนที่ 1</span>
-                                    <span class="text-green-600 font-semibold">✓ เสร็จ</span>
-                                </div>
-                                <div class="flex items-center justify-between text-sm">
-                                    <span>ขั้นตอนที่ 2</span>
-                                    <span class="text-green-600 font-semibold">✓ เสร็จ</span>
-                                </div>
-                                <div class="flex items-center justify-between text-sm">
-                                    <span>ขั้นตอนที่ 3</span>
-                                    <span class="text-green-600 font-semibold">✓ เสร็จ</span>
-                                </div>
-                                <div class="flex items-center justify-between text-sm">
-                                    <span>ขั้นตอนที่ 4</span>
-                                    <span class="text-green-600 font-semibold">✓ เสร็จ</span>
-                                </div>
-                                <div class="flex items-center justify-between text-sm">
-                                    <span>ขั้นตอนที่ 5</span>
-                                    <span class="text-green-600 font-semibold">✓ เสร็จ</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+function renderSection(sec, d) {
+    let inner = '';
 
-                    <div class="mt-6 pt-6 border-t border-slate-200">
-                        <h3 class="font-semibold text-slate-700 mb-3">สรุปข้อมูล</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-slate-600">
-                            <div class="p-3 bg-slate-50 rounded">
-                                <p class="font-semibold mb-1">ข้อมูลหน่วยงาน</p>
-                                <p>${response.step1?.orgName || 'ยังไม่บันทึก'}</p>
-                            </div>
-                            <div class="p-3 bg-slate-50 rounded">
-                                <p class="font-semibold mb-1">นโยบายสนับสนุน</p>
-                                <p>${response.step2?.policy || 'ยังไม่บันทึก'}</p>
-                            </div>
-                        </div>
-                    </div>
+    if (sec.type === 'turnover_table') {
+        inner = renderTurnoverTable(d);
+    } else if (sec.subsections) {
+        inner = sec.subsections.map(sub =>
+            `<div class="mb-3">
+                <div class="text-xs font-semibold text-slate-500 bg-slate-50 px-2 py-1 rounded mb-2">${sub.subsection_label}</div>
+                <div class="grid grid-cols-4 gap-2">
+                    ${sub.fields.map(f =>
+                        `<div class="stat-box">
+                            <div class="stat-num">${d[f.id] !== null && d[f.id] !== undefined ? fmtNum(d[f.id]) : '—'}</div>
+                            <div class="stat-lbl">${f.label}</div>
+                        </div>`
+                    ).join('')}
                 </div>
-            `;
+            </div>`
+        ).join('');
+    } else {
+        inner = sec.fields.map(f => renderField(f, d)).join('');
+    }
+
+    return `<div class="section-card">
+        <div class="section-title">${sec.title}</div>
+        ${sec.description ? `<p class="text-xs text-slate-500 mb-3">${sec.description}</p>` : ''}
+        ${inner}
+    </div>`;
+}
+
+function renderField(f, d) {
+    const val = d[f.id];
+
+    switch (f.type) {
+        case 'radio':
+            return row(f.label, statusBadge(val));
+
+        case 'checkbox_group': {
+            const arr = Array.isArray(val) ? val : [];
+            if (!arr.length) return row(f.label, '<span class="empty">—</span>');
+            const optMap = Object.fromEntries((f.options||[]).map(o => [o.value, o.label]));
+            return row(f.label, arr.map(v => `<span class="badge badge-actual mr-1">${optMap[v]||v}</span>`).join(' '));
         }
 
-        // Switch tabs
-        function switchTab(tabName) {
-            document.querySelectorAll('.response-tab').forEach(btn => {
-                if (btn.dataset.tab === tabName) {
-                    btn.classList.add('border-primary', 'text-primary');
-                    btn.classList.remove('border-transparent', 'text-slate-600');
-                } else {
-                    btn.classList.remove('border-primary', 'text-primary');
-                    btn.classList.add('border-transparent', 'text-slate-600');
+        case 'textarea':
+        case 'text': {
+            let html = val ? `<div style="white-space:pre-wrap">${fmt(val)}</div>` : '<span class="empty">—</span>';
+            // File attachment
+            if (f.has_file_upload && f.file_field_prefix) {
+                const urlKey = f.file_field_prefix + '_file_url';
+                const nameKey = f.file_field_prefix + '_file_name';
+                if (d[urlKey]) {
+                    html += `<div class="mt-1"><a href="${d[urlKey]}" target="_blank" class="file-link">📎 ${d[nameKey]||'ดูไฟล์แนบ'}</a></div>`;
                 }
-            });
-
-            // In production, would render different content based on tab
-            if (tabName === 'overview') {
-                renderOverviewTab(responses[currentIndex]);
             }
+            return row(f.label, html);
         }
 
-        // Export to PDF
-        function exportToPDF() {
-            const response = responses[currentIndex];
-            const element = document.getElementById('response-container');
-            const opt = {
-                margin: 10,
-                filename: `response-${response.id}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2 },
-                jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
-            };
+        case 'number':
+            return row(f.label, val !== null && val !== undefined ? fmtNum(val) : '<span class="empty">—</span>');
 
-            html2pdf().set(opt).from(element).save();
+        case 'ranking': {
+            // rank_priority_1 / 2 / 3
+            const pos = f.rank_position;
+            const stored = d[`strategic_priority_rank${pos}`] || d[f.id];
+            return row(f.label, stored ? `<span class="badge badge-actual">${stored}</span>` : '<span class="empty">—</span>');
         }
 
-        // Initialize app
-        init();
-    </script>
+        case 'select':
+            return row(f.label, fmt(val));
+
+        default:
+            return row(f.label, fmt(val));
+    }
+}
+
+function renderTurnoverTable(d) {
+    const years = [2564, 2565, 2566, 2567, 2568];
+    const rowDefs = [
+        { key: 'begin', label: 'จำนวนต้นปี (คน)' },
+        { key: 'end',   label: 'จำนวนปลายปี (คน)' },
+        { key: 'leave', label: 'ลาออก/โอนย้าย (คน)' },
+        { key: 'rate',  label: 'อัตรา (%)', computed: true }
+    ];
+
+    const thead = `<tr><th class="text-left">รายการ</th>${years.map(y => `<th>ปี ${y}</th>`).join('')}</tr>`;
+    const tbody = rowDefs.map(r => {
+        const cells = years.map(y => {
+            const v = d[`${r.key}_${y}`];
+            if (r.computed) return `<td class="computed-cell">${v !== null && v !== undefined ? v + '%' : '—'}</td>`;
+            return `<td>${v !== null && v !== undefined ? fmtNum(v) : '—'}</td>`;
+        }).join('');
+        return `<tr><td class="label-col">${r.label}</td>${cells}</tr>`;
+    }).join('');
+
+    return `<div class="overflow-x-auto">
+        <table class="table-turnover"><thead>${thead}</thead><tbody>${tbody}</tbody></table>
+    </div>`;
+}
+
+// ── Staff distribution summary ──────────────────────────────────────────────
+// (rendered inline via section subsections logic above)
+
+// ── Export PDF ─────────────────────────────────────────────────────────────
+function exportPDF() {
+    const el = document.getElementById('report');
+    const org = document.getElementById('meta-org').textContent.replace(/\s/g, '_').substring(0, 30);
+    html2pdf().set({
+        margin: [10, 10, 10, 10],
+        filename: `CH1_${org}.pdf`,
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    }).from(el).save();
+}
+
+function showError(msg) {
+    document.getElementById('loading').classList.add('hidden');
+    const e = document.getElementById('error-msg');
+    e.innerHTML = `<div class="text-4xl mb-3">❌</div><div>${msg}</div>`;
+    e.classList.remove('hidden');
+}
+
+main();
+</script>
 </body>
 </html>

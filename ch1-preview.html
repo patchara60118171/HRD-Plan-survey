@@ -3,250 +3,275 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>แบบประเมินสภาพความเป็นอยู่ที่ดีของพนักงานภาครัฐ - ตัวอย่าง</title>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai+Looped:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>ตัวอย่างฟอร์ม CH1 — แบบสอบถามข้อมูลองค์กร</title>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai+Looped:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    colors: {
-                        primary: '#0F4C81',
-                        accent: '#00A86B'
-                    },
-                    fontFamily: {
-                        sans: ['IBM Plex Sans Thai Looped', 'sans-serif']
-                    }
+                    colors: { primary: '#0F4C81', accent: '#00A86B' },
+                    fontFamily: { sans: ['IBM Plex Sans Thai Looped', 'sans-serif'] }
                 }
             }
         }
     </script>
+    <style>
+        .step-btn.active { border-bottom-color: #0F4C81; color: #0F4C81; }
+        .field-block { margin-bottom: 1.25rem; }
+        .field-label { font-weight: 600; color: #1e293b; margin-bottom: 0.25rem; font-size: 0.875rem; }
+        .field-note  { font-size: 0.75rem; color: #64748b; margin-top: 0.125rem; }
+        .mock-input  { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 0.625rem 0.875rem; color: #94a3b8; font-size: 0.875rem; width: 100%; }
+        .mock-radio  { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0; color: #64748b; font-size: 0.875rem; }
+        .mock-radio .dot { width: 1rem; height: 1rem; border: 2px solid #cbd5e1; border-radius: 50%; flex-shrink: 0; }
+        .mock-check  { display: flex; align-items: center; gap: 0.5rem; padding: 0.375rem 0; color: #64748b; font-size: 0.875rem; }
+        .mock-check .box { width: 1rem; height: 1rem; border: 2px solid #cbd5e1; border-radius: 0.25rem; flex-shrink: 0; }
+        .section-card { background: white; border: 1px solid #e2e8f0; border-radius: 0.75rem; padding: 1.5rem; margin-bottom: 1.5rem; }
+        .section-title { font-size: 1rem; font-weight: 700; color: #0F4C81; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; margin-bottom: 1rem; }
+        .section-desc  { font-size: 0.8rem; color: #64748b; margin-bottom: 1rem; }
+        .subsection-title { font-size: 0.8rem; font-weight: 600; color: #475569; background: #f1f5f9; padding: 0.375rem 0.75rem; border-radius: 0.375rem; margin-bottom: 0.75rem; }
+        .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; }
+        .grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.75rem; }
+        .upload-zone { border: 2px dashed #cbd5e1; border-radius: 0.5rem; padding: 1rem; text-align: center; color: #94a3b8; font-size: 0.8rem; background: #f8fafc; }
+        .table-turnover { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+        .table-turnover th { background: #f1f5f9; color: #475569; font-weight: 600; padding: 0.5rem 0.75rem; text-align: center; border: 1px solid #e2e8f0; }
+        .table-turnover td { padding: 0.5rem 0.75rem; border: 1px solid #e2e8f0; text-align: center; }
+        .table-turnover td.label-col { text-align: left; color: #374151; font-weight: 500; background: #f8fafc; }
+        .computed-cell { background: #f0fdf4; color: #059669; font-weight: 600; }
+        @media (max-width: 640px) {
+            .grid-2, .grid-4, .grid-5 { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
 </head>
 <body class="bg-slate-50 font-sans">
-    <div class="min-h-screen">
-        <!-- Header -->
-        <header class="bg-gradient-to-r from-primary to-blue-700 text-white shadow-lg">
-            <div class="max-w-6xl mx-auto px-4 py-6">
-                <h1 class="text-3xl font-bold mb-2">แบบประเมินสภาพความเป็นอยู่ที่ดี</h1>
-                <p class="text-blue-100">Government Employee Well-being Assessment Form</p>
-            </div>
-        </header>
 
-        <!-- Navigation -->
-        <nav class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
-            <div class="max-w-6xl mx-auto px-4">
-                <div class="flex items-center space-x-4 overflow-x-auto">
-                    <button id="step-nav-1" class="step-nav-btn active px-4 py-3 font-semibold border-b-2 border-primary text-primary whitespace-nowrap transition" data-step="1">
-                        ขั้นตอนที่ 1: ข้อมูลหน่วยงาน
-                    </button>
-                    <button id="step-nav-2" class="step-nav-btn px-4 py-3 font-semibold border-b-2 border-transparent text-slate-600 hover:text-slate-900 whitespace-nowrap transition" data-step="2">
-                        ขั้นตอนที่ 2: นโยบาย
-                    </button>
-                    <button id="step-nav-3" class="step-nav-btn px-4 py-3 font-semibold border-b-2 border-transparent text-slate-600 hover:text-slate-900 whitespace-nowrap transition" data-step="3">
-                        ขั้นตอนที่ 3: สุขภาพ
-                    </button>
-                    <button id="step-nav-4" class="step-nav-btn px-4 py-3 font-semibold border-b-2 border-transparent text-slate-600 hover:text-slate-900 whitespace-nowrap transition" data-step="4">
-                        ขั้นตอนที่ 4: ระบบสนับสนุน
-                    </button>
-                    <button id="step-nav-5" class="step-nav-btn px-4 py-3 font-semibold border-b-2 border-transparent text-slate-600 hover:text-slate-900 whitespace-nowrap transition" data-step="5">
-                        ขั้นตอนที่ 5: แผน
-                    </button>
-                </div>
-            </div>
-        </nav>
-
-        <!-- Progress Bar -->
-        <div class="bg-white border-b border-slate-200">
-            <div class="max-w-6xl mx-auto px-4 py-4">
-                <div class="flex items-center justify-between mb-2">
-                    <p class="text-sm font-semibold text-slate-700">ความคืบหน้า</p>
-                    <p class="text-sm font-semibold text-primary" id="progress-text">0%</p>
-                </div>
-                <div class="w-full bg-slate-200 rounded-full h-2">
-                    <div id="progress-bar" class="bg-primary h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
-                </div>
-            </div>
+<!-- Header -->
+<header class="bg-gradient-to-r from-primary to-blue-700 text-white shadow-lg">
+    <div class="max-w-5xl mx-auto px-4 py-5 flex items-start gap-4">
+        <div class="flex-1">
+            <div class="text-xs uppercase tracking-widest text-blue-200 mb-1">PREVIEW — Read Only</div>
+            <h1 class="text-2xl font-bold" id="form-title">กำลังโหลด...</h1>
+            <p class="text-blue-200 text-sm mt-1" id="form-subtitle"></p>
         </div>
-
-        <!-- Main Content -->
-        <main class="max-w-6xl mx-auto px-4 py-8">
-            <!-- Test Mode Banner -->
-            <div id="test-mode-banner" class="mb-6 p-4 bg-red-100 border-2 border-red-400 rounded-lg hidden">
-                <p class="text-red-800 font-semibold text-center">⚠️ TEST MODE - Data will not be submitted</p>
-            </div>
-
-            <!-- Form Container -->
-            <div id="form-container" class="bg-white rounded-lg shadow-md p-6">
-                <div class="text-center py-8">
-                    <p class="text-slate-600">กำลังโหลดแบบประเมิน...</p>
-                </div>
-            </div>
-
-            <!-- Navigation Buttons -->
-            <div class="mt-6 flex justify-between">
-                <button id="prev-btn" class="px-6 py-2 bg-slate-300 text-slate-700 rounded-lg font-semibold hover:bg-slate-400 transition disabled:opacity-50 disabled:cursor-not-allowed">
-                    ← ก่อนหน้า
-                </button>
-                <div class="space-x-2">
-                    <button id="save-draft-btn" class="px-6 py-2 bg-accent text-white rounded-lg font-semibold hover:bg-opacity-90 transition">
-                        💾 บันทึกฉบับร่าง
-                    </button>
-                    <button id="next-btn" class="px-6 py-2 bg-primary text-white rounded-lg font-semibold hover:bg-opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed">
-                        ถัดไป →
-                    </button>
-                </div>
-            </div>
-        </main>
-
-        <!-- Footer -->
-        <footer class="bg-slate-800 text-white mt-12 py-6 border-t border-slate-700">
-            <div class="max-w-6xl mx-auto px-4 text-center text-sm">
-                <p>© 2026 Thai Government Well-being Assessment System</p>
-                <p class="text-slate-400 mt-2">This is a read-only preview. No data will be submitted.</p>
-            </div>
-        </footer>
+        <div class="bg-white/20 rounded-lg px-3 py-2 text-xs text-center">
+            <div class="font-bold text-white" id="version-badge">v4.0</div>
+            <div class="text-blue-200">Version</div>
+        </div>
     </div>
+</header>
 
-    <!-- Scripts -->
-    <script src="/js/data-loader.js"></script>
-    <script src="/js/form-validator.js"></script>
-    <script src="/js/form-renderer.js"></script>
+<!-- Step Nav -->
+<nav class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
+    <div class="max-w-5xl mx-auto px-4">
+        <div class="flex items-center overflow-x-auto" id="step-nav">
+            <!-- dynamically inserted -->
+        </div>
+    </div>
+</nav>
 
-    <script>
-        // Initialize application
-        const dataLoader = new DataLoader('/data/');
-        let formRenderer = null;
-        let currentStep = 1;
-        const totalSteps = 5;
+<!-- Content -->
+<main class="max-w-5xl mx-auto px-4 py-6" id="step-content">
+    <div class="text-center py-20 text-slate-400">
+        <div class="text-4xl mb-3">⏳</div>
+        <div>กำลังโหลดโครงสร้างฟอร์ม...</div>
+    </div>
+</main>
 
-        // Check for test mode
-        function isTestMode() {
-            const params = new URLSearchParams(window.location.search);
-            return params.get('test') === 'true';
-        }
+<!-- Step footer -->
+<div class="max-w-5xl mx-auto px-4 pb-10 flex justify-between" id="step-footer">
+    <button id="btn-prev" onclick="changeStep(-1)"
+        class="px-5 py-2.5 rounded-lg border border-slate-300 text-slate-600 font-semibold text-sm hover:bg-slate-100 transition hidden">
+        ← ก่อนหน้า
+    </button>
+    <div class="flex-1"></div>
+    <button id="btn-next" onclick="changeStep(1)"
+        class="px-5 py-2.5 rounded-lg bg-primary text-white font-semibold text-sm hover:bg-blue-800 transition hidden">
+        ถัดไป →
+    </button>
+</div>
 
-        // Show test mode banner
-        if (isTestMode()) {
-            document.getElementById('test-mode-banner').classList.remove('hidden');
-        }
+<script>
+// ── State ──────────────────────────────────────────────────────────────────
+let schema = null;
+let currentStep = 1;
 
-        // Initialize application
-        async function init() {
-            try {
-                const config = await dataLoader.loadConfig();
-                formRenderer = new FormRenderer('form-container', dataLoader, config);
+// ── Boot ───────────────────────────────────────────────────────────────────
+async function init() {
+    try {
+        const res = await fetch('data/questions-ch1.json?v=' + Date.now());
+        schema = await res.json();
+        document.getElementById('form-title').textContent = schema.form_title || 'แบบสอบถามข้อมูลองค์กร (CH1)';
+        document.getElementById('form-subtitle').textContent = schema.form_title_en || '';
+        document.getElementById('version-badge').textContent = 'v' + (schema.form_version || '').replace('ch1-v','');
+        buildNav();
+        renderStep(1);
+    } catch(e) {
+        document.getElementById('step-content').innerHTML =
+            `<div class="text-center py-20 text-red-500"><div class="text-4xl mb-3">❌</div><div>โหลด JSON ไม่สำเร็จ: ${e.message}</div></div>`;
+    }
+}
 
-                // Load and render first step
-                await renderStep(1);
-                updateNavigationButtons();
+// ── Nav ────────────────────────────────────────────────────────────────────
+function buildNav() {
+    const nav = document.getElementById('step-nav');
+    nav.innerHTML = schema.steps.map(s =>
+        `<button class="step-btn px-4 py-3 font-semibold border-b-2 border-transparent text-slate-500 whitespace-nowrap text-sm transition hover:text-primary"
+                 data-step="${s.step}" onclick="renderStep(${s.step})">
+            ขั้นที่ ${s.step}: ${s.title}
+         </button>`
+    ).join('');
+}
 
-                // Set up event listeners
-                setupEventListeners();
-            } catch (error) {
-                console.error('Initialization error:', error);
-                document.getElementById('form-container').innerHTML = `
-                    <div class="p-6 bg-red-50 border-2 border-red-200 rounded-lg">
-                        <h3 class="text-red-800 font-bold mb-2">เกิดข้อผิดพลาด</h3>
-                        <p class="text-red-700">${error.message}</p>
-                    </div>
-                `;
+function changeStep(delta) {
+    const next = currentStep + delta;
+    if (next >= 1 && next <= schema.steps.length) renderStep(next);
+}
+
+// ── Render Step ────────────────────────────────────────────────────────────
+function renderStep(n) {
+    currentStep = n;
+
+    // update nav highlight
+    document.querySelectorAll('.step-btn').forEach(b => {
+        b.classList.toggle('active', parseInt(b.dataset.step) === n);
+        b.classList.toggle('border-primary', parseInt(b.dataset.step) === n);
+        b.classList.toggle('text-primary', parseInt(b.dataset.step) === n);
+        b.classList.toggle('border-transparent', parseInt(b.dataset.step) !== n);
+        b.classList.toggle('text-slate-500', parseInt(b.dataset.step) !== n);
+    });
+
+    const stepData = schema.steps.find(s => s.step === n);
+    let html = `<div class="mb-5">
+        <div class="text-xs text-slate-400 uppercase tracking-wider mb-1">ขั้นตอนที่ ${n} / ${schema.steps.length}</div>
+        <h2 class="text-xl font-bold text-slate-800">${stepData.title}</h2>
+        ${stepData.title_en ? `<p class="text-sm text-slate-500">${stepData.title_en}</p>` : ''}
+    </div>`;
+
+    for (const sec of stepData.sections) {
+        html += renderSection(sec);
+    }
+
+    document.getElementById('step-content').innerHTML = html;
+
+    // footer buttons
+    document.getElementById('btn-prev').classList.toggle('hidden', n === 1);
+    document.getElementById('btn-next').classList.toggle('hidden', n === schema.steps.length);
+}
+
+// ── Render Section ─────────────────────────────────────────────────────────
+function renderSection(sec) {
+    let inner = '';
+
+    if (sec.type === 'turnover_table') {
+        inner = renderTurnoverTable(sec);
+    } else if (sec.subsections) {
+        inner = sec.subsections.map(sub => `
+            <div class="mb-4">
+                <div class="subsection-title">${sub.subsection_label}</div>
+                <div class="grid-4">
+                    ${sub.fields.map(f => renderField(f)).join('')}
+                </div>
+            </div>`).join('');
+    } else {
+        inner = sec.fields.map(f => renderField(f)).join('');
+    }
+
+    return `<div class="section-card">
+        <div class="section-title">${sec.title}</div>
+        ${sec.description ? `<div class="section-desc">${sec.description}</div>` : ''}
+        ${inner}
+    </div>`;
+}
+
+// ── Render Field ───────────────────────────────────────────────────────────
+function renderField(f) {
+    let input = '';
+
+    switch (f.type) {
+        case 'select':
+            input = `<select class="mock-input" disabled>
+                <option>— เลือกหน่วยงาน —</option>
+                ${(f.options||[]).map(o => `<option>${o.label}</option>`).join('')}
+            </select>`;
+            break;
+
+        case 'textarea':
+            input = `<textarea class="mock-input" rows="3" disabled placeholder="${f.placeholder||''}"></textarea>`;
+            if (f.has_file_upload) {
+                input += `<div class="upload-zone mt-2">
+                    📎 ${f.file_label || 'แนบไฟล์ PDF'} (ไม่เกิน 1 MB)
+                </div>`;
             }
-        }
+            break;
 
-        // Render a specific step
-        async function renderStep(stepNumber) {
-            try {
-                currentStep = stepNumber;
-                await formRenderer.render(stepNumber);
-                updateProgressBar();
-                updateNavigationButtons();
-                window.scrollTo(0, 0);
-            } catch (error) {
-                console.error(`Error rendering step ${stepNumber}:`, error);
+        case 'text':
+            input = `<input type="text" class="mock-input" disabled placeholder="${f.placeholder||''}">`;
+            break;
+
+        case 'number':
+            input = `<input type="number" class="mock-input" disabled placeholder="0">`;
+            break;
+
+        case 'radio':
+            input = (f.options||[]).map(o =>
+                `<div class="mock-radio"><div class="dot"></div><span>${o.label}</span></div>`
+            ).join('');
+            break;
+
+        case 'checkbox_group':
+            input = `<div class="grid-2">
+                ${(f.options||[]).map(o =>
+                    `<div class="mock-check"><div class="box"></div><span>${o.label}</span></div>`
+                ).join('')}
+            </div>`;
+            break;
+
+        case 'ranking':
+            input = `<input type="text" class="mock-input" disabled placeholder="ลากเพื่อจัดลำดับ">`;
+            break;
+
+        default:
+            input = `<input type="text" class="mock-input" disabled>`;
+    }
+
+    const required = f.required ? '<span class="text-red-500 ml-1">*</span>' : '';
+    const condition = f.condition ? `<span class="text-amber-500 text-xs ml-2">(แสดงเมื่อ ${f.condition.field} = ${f.condition.value})</span>` : '';
+
+    return `<div class="field-block">
+        <div class="field-label">${f.label}${required}${condition}</div>
+        ${input}
+        ${f.placeholder && f.type !== 'textarea' && f.type !== 'text' ? `<div class="field-note">${f.placeholder}</div>` : ''}
+    </div>`;
+}
+
+// ── Turnover Table ─────────────────────────────────────────────────────────
+function renderTurnoverTable(sec) {
+    const years = sec.years || [];
+    const rows  = sec.row_fields || [];
+
+    let thead = `<tr><th class="text-left">รายการ</th>${years.map(y => `<th>ปี ${y}</th>`).join('')}</tr>`;
+    let tbody = rows.map(row => {
+        const cells = years.map(y => {
+            if (row.type === 'computed') {
+                return `<td class="computed-cell">คำนวณอัตโนมัติ</td>`;
             }
-        }
+            return `<td><input type="number" class="mock-input text-center" style="min-width:70px" disabled placeholder="0"></td>`;
+        }).join('');
+        return `<tr><td class="label-col">${row.label}</td>${cells}</tr>`;
+    }).join('');
 
-        // Update progress bar
-        function updateProgressBar() {
-            const progress = (currentStep / totalSteps) * 100;
-            const progressBar = document.getElementById('progress-bar');
-            const progressText = document.getElementById('progress-text');
+    return `<div class="overflow-x-auto">
+        <table class="table-turnover">
+            <thead>${thead}</thead>
+            <tbody>${tbody}</tbody>
+        </table>
+        <p class="text-xs text-slate-400 mt-2">* อัตราการลาออก/โอนย้าย = จำนวนที่ลาออก ÷ ((ต้นปี + ปลายปี) / 2) × 100</p>
+    </div>`;
+}
 
-            progressBar.style.width = `${progress}%`;
-            progressText.textContent = `${Math.round(progress)}%`;
-        }
-
-        // Update navigation buttons
-        function updateNavigationButtons() {
-            const prevBtn = document.getElementById('prev-btn');
-            const nextBtn = document.getElementById('next-btn');
-
-            prevBtn.disabled = currentStep === 1;
-            nextBtn.disabled = currentStep === totalSteps;
-
-            // Change next button text for last step
-            if (currentStep === totalSteps) {
-                nextBtn.textContent = '✓ เสร็จสิ้น';
-                nextBtn.disabled = false;
-            } else {
-                nextBtn.textContent = 'ถัดไป →';
-            }
-        }
-
-        // Set up event listeners
-        function setupEventListeners() {
-            // Step navigation buttons
-            document.querySelectorAll('.step-nav-btn').forEach(btn => {
-                btn.addEventListener('click', async (e) => {
-                    const step = parseInt(e.target.dataset.step);
-                    await renderStep(step);
-                    updateStepNavigation();
-                });
-            });
-
-            // Previous button
-            document.getElementById('prev-btn').addEventListener('click', async () => {
-                if (currentStep > 1) {
-                    await renderStep(currentStep - 1);
-                    updateStepNavigation();
-                }
-            });
-
-            // Next button
-            document.getElementById('next-btn').addEventListener('click', async () => {
-                if (currentStep < totalSteps) {
-                    await renderStep(currentStep + 1);
-                    updateStepNavigation();
-                } else {
-                    // Show completion message
-                    alert('แบบประเมินสมบูรณ์! (ตัวอย่าง - ไม่ส่ง)');
-                }
-            });
-
-            // Save draft button
-            document.getElementById('save-draft-btn').addEventListener('click', () => {
-                const formData = formRenderer.collectFormData();
-                localStorage.setItem(`ch1_draft_step${currentStep}`, JSON.stringify(formData));
-                alert('บันทึกฉบับร่างสำเร็จ!');
-            });
-        }
-
-        // Update step navigation styling
-        function updateStepNavigation() {
-            document.querySelectorAll('.step-nav-btn').forEach(btn => {
-                const step = parseInt(btn.dataset.step);
-                if (step === currentStep) {
-                    btn.classList.add('active', 'border-primary', 'text-primary');
-                    btn.classList.remove('border-transparent', 'text-slate-600');
-                } else {
-                    btn.classList.remove('active', 'border-primary', 'text-primary');
-                    btn.classList.add('border-transparent', 'text-slate-600');
-                }
-            });
-        }
-
-        // Start application
-        init();
-    </script>
+// ── Start ──────────────────────────────────────────────────────────────────
+init();
+</script>
 </body>
 </html>
