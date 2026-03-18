@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แก้ไขการกำหนดค่าแบบประเมิน - ระบบประเมินสภาพความเป็นอยู่ที่ดี</title>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai+Looped:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0F4C81',
+                        accent: '#00A86B'
+                    },
+                    fontFamily: {
+                        sans: ['IBM Plex Sans Thai Looped', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 font-sans">
+    <div class="min-h-screen">
+        <!-- Header -->
+        <header class="bg-gradient-to-r from-primary to-blue-700 text-white shadow-lg">
+            <div class="max-w-7xl mx-auto px-4 py-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-3xl font-bold mb-2">แก้ไขการกำหนดค่าแบบประเมิน</h1>
+                        <p class="text-blue-100">Edit Assessment Form Configuration</p>
+                    </div>
+                    <a href="/ch1.html" class="px-4 py-2 bg-white text-primary rounded-lg font-semibold hover:bg-opacity-90 transition">
+                        ← กลับไปยังแบบประเมิน
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="max-w-7xl mx-auto px-4 py-8">
+            <!-- Tabs -->
+            <div class="bg-white border-b border-slate-200 mb-6">
+                <div class="flex space-x-6 overflow-x-auto">
+                    <button class="config-tab active px-6 py-3 font-semibold border-b-2 border-primary text-primary whitespace-nowrap transition" data-tab="general">
+                        ทั่วไป
+                    </button>
+                    <button class="config-tab px-6 py-3 font-semibold border-b-2 border-transparent text-slate-600 hover:text-slate-900 whitespace-nowrap transition" data-tab="validation">
+                        การตรวจสอบ
+                    </button>
+                    <button class="config-tab px-6 py-3 font-semibold border-b-2 border-transparent text-slate-600 hover:text-slate-900 whitespace-nowrap transition" data-tab="submission">
+                        การส่ง
+                    </button>
+                    <button class="config-tab px-6 py-3 font-semibold border-b-2 border-transparent text-slate-600 hover:text-slate-900 whitespace-nowrap transition" data-tab="ui">
+                        UI/ธีม
+                    </button>
+                    <button class="config-tab px-6 py-3 font-semibold border-b-2 border-transparent text-slate-600 hover:text-slate-900 whitespace-nowrap transition" data-tab="test">
+                        Test Mode
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tab Contents -->
+            <div class="space-y-6">
+                <!-- General Settings -->
+                <div id="general-tab" class="config-panel bg-white rounded-lg shadow p-6">
+                    <h2 class="text-xl font-bold text-slate-800 mb-4">การตั้งค่าทั่วไป</h2>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">ชื่อแบบประเมิน</label>
+                            <input type="text" id="form-name" placeholder="ชื่อแบบประเมิน"
+                                class="w-full border-2 border-slate-200 rounded-lg px-4 py-2 text-sm focus:border-primary focus:outline-none transition">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">เวอร์ชัน</label>
+                            <input type="text" id="form-version" placeholder="เช่น 1.0.0"
+                                class="w-full border-2 border-slate-200 rounded-lg px-4 py-2 text-sm focus:border-primary focus:outline-none transition">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">เวลาประมาณในการเสร็จ (นาที)</label>
+                            <input type="number" id="completion-time" min="1" placeholder="25"
+                                class="w-full border-2 border-slate-200 rounded-lg px-4 py-2 text-sm focus:border-primary focus:outline-none transition">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Validation Settings -->
+                <div id="validation-tab" class="config-panel hidden bg-white rounded-lg shadow p-6">
+                    <h2 class="text-xl font-bold text-slate-800 mb-4">การตั้งค่าการตรวจสอบ</h2>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="flex items-center space-x-2 cursor-pointer">
+                                <input type="checkbox" id="validate-on-blur" class="w-4 h-4 text-primary rounded">
+                                <span class="text-sm font-semibold text-slate-700">ตรวจสอบเมื่อเลือกออกจากฟิลด์</span>
+                            </label>
+                        </div>
+                        <div>
+                            <label class="flex items-center space-x-2 cursor-pointer">
+                                <input type="checkbox" id="validate-on-change" class="w-4 h-4 text-primary rounded">
+                                <span class="text-sm font-semibold text-slate-700">ตรวจสอบเมื่อเปลี่ยนค่า</span>
+                            </label>
+                        </div>
+                        <div>
+                            <label class="flex items-center space-x-2 cursor-pointer">
+                                <input type="checkbox" id="validate-on-submit" checked class="w-4 h-4 text-primary rounded">
+                                <span class="text-sm font-semibold text-slate-700">ตรวจสอบเมื่อส่ง</span>
+                            </label>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">ขนาดไฟล์สูงสุด (MB)</label>
+                            <input type="number" id="max-file-size" min="1" value="1"
+                                class="w-full border-2 border-slate-200 rounded-lg px-4 py-2 text-sm focus:border-primary focus:outline-none transition">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submission Settings -->
+                <div id="submission-tab" class="config-panel hidden bg-white rounded-lg shadow p-6">
+                    <h2 class="text-xl font-bold text-slate-800 mb-4">การตั้งค่าการส่ง</h2>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="flex items-center space-x-2 cursor-pointer">
+                                <input type="checkbox" id="submission-enabled" checked class="w-4 h-4 text-primary rounded">
+                                <span class="text-sm font-semibold text-slate-700">เปิดใช้งานการส่ง</span>
+                            </label>
+                        </div>
+                        <div>
+                            <label class="flex items-center space-x-2 cursor-pointer">
+                                <input type="checkbox" id="confirm-before-submit" checked class="w-4 h-4 text-primary rounded">
+                                <span class="text-sm font-semibold text-slate-700">ยืนยันก่อนส่ง</span>
+                            </label>
+                        </div>
+                        <div>
+                            <label class="flex items-center space-x-2 cursor-pointer">
+                                <input type="checkbox" id="auto-save-enabled" checked class="w-4 h-4 text-primary rounded">
+                                <span class="text-sm font-semibold text-slate-700">บันทึกอัตโนมัติ</span>
+                            </label>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">ช่วงเวลาบันทึกอัตโนมัติ (วินาที)</label>
+                            <input type="number" id="auto-save-interval" min="10" value="30"
+                                class="w-full border-2 border-slate-200 rounded-lg px-4 py-2 text-sm focus:border-primary focus:outline-none transition">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">Supabase Table Name</label>
+                            <input type="text" id="supabase-table" value="ch1_responses"
+                                class="w-full border-2 border-slate-200 rounded-lg px-4 py-2 text-sm focus:border-primary focus:outline-none transition">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- UI/Theme Settings -->
+                <div id="ui-tab" class="config-panel hidden bg-white rounded-lg shadow p-6">
+                    <h2 class="text-xl font-bold text-slate-800 mb-4">การตั้งค่า UI/ธีม</h2>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">สี Primary (Hex)</label>
+                            <div class="flex gap-2">
+                                <input type="color" id="primary-color" value="#0F4C81"
+                                    class="h-10 rounded border-2 border-slate-200 cursor-pointer">
+                                <input type="text" id="primary-color-text" value="#0F4C81"
+                                    class="flex-1 border-2 border-slate-200 rounded-lg px-4 py-2 text-sm focus:border-primary focus:outline-none transition">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">สี Accent (Hex)</label>
+                            <div class="flex gap-2">
+                                <input type="color" id="accent-color" value="#00A86B"
+                                    class="h-10 rounded border-2 border-slate-200 cursor-pointer">
+                                <input type="text" id="accent-color-text" value="#00A86B"
+                                    class="flex-1 border-2 border-slate-200 rounded-lg px-4 py-2 text-sm focus:border-primary focus:outline-none transition">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="flex items-center space-x-2 cursor-pointer">
+                                <input type="checkbox" id="animations-enabled" checked class="w-4 h-4 text-primary rounded">
+                                <span class="text-sm font-semibold text-slate-700">เปิดใช้งานแอนิเมชัน</span>
+                            </label>
+                        </div>
+                        <div>
+                            <label class="flex items-center space-x-2 cursor-pointer">
+                                <input type="checkbox" id="progress-bar-enabled" checked class="w-4 h-4 text-primary rounded">
+                                <span class="text-sm font-semibold text-slate-700">แสดงแถบความคืบหน้า</span>
+                            </label>
+                        </div>
+                        <div>
+                            <label class="flex items-center space-x-2 cursor-pointer">
+                                <input type="checkbox" id="field-hints-enabled" checked class="w-4 h-4 text-primary rounded">
+                                <span class="text-sm font-semibold text-slate-700">แสดงคำแนะนำฟิลด์</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Test Mode Settings -->
+                <div id="test-tab" class="config-panel hidden bg-white rounded-lg shadow p-6">
+                    <h2 class="text-xl font-bold text-slate-800 mb-4">การตั้งค่า Test Mode</h2>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="flex items-center space-x-2 cursor-pointer">
+                                <input type="checkbox" id="test-mode-enabled" checked class="w-4 h-4 text-primary rounded">
+                                <span class="text-sm font-semibold text-slate-700">เปิดใช้งาน Test Mode</span>
+                            </label>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">URL Parameter Name</label>
+                            <input type="text" id="test-url-param" value="test"
+                                class="w-full border-2 border-slate-200 rounded-lg px-4 py-2 text-sm focus:border-primary focus:outline-none transition">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">URL Parameter Value</label>
+                            <input type="text" id="test-url-value" value="true"
+                                class="w-full border-2 border-slate-200 rounded-lg px-4 py-2 text-sm focus:border-primary focus:outline-none transition">
+                        </div>
+                        <div>
+                            <label class="flex items-center space-x-2 cursor-pointer">
+                                <input type="checkbox" id="test-banner-enabled" checked class="w-4 h-4 text-primary rounded">
+                                <span class="text-sm font-semibold text-slate-700">แสดงแบนเนอร์ Test Mode</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="mt-6 flex justify-between gap-4">
+                <button id="reset-btn" class="px-6 py-3 bg-slate-300 text-slate-700 rounded-lg font-semibold hover:bg-slate-400 transition">
+                    รีเซ็ต
+                </button>
+                <div class="space-x-2">
+                    <button id="cancel-btn" class="px-6 py-3 bg-slate-300 text-slate-700 rounded-lg font-semibold hover:bg-slate-400 transition">
+                        ยกเลิก
+                    </button>
+                    <button id="save-btn" class="px-6 py-3 bg-primary text-white rounded-lg font-semibold hover:bg-opacity-90 transition">
+                        💾 บันทึก
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-slate-800 text-white mt-12 py-6 border-t border-slate-700">
+            <div class="max-w-7xl mx-auto px-4 text-center text-sm">
+                <p>© 2026 Thai Government Well-being Assessment System</p>
+                <p class="text-slate-400 mt-2">Admin Panel - Configuration Editor</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/js/data-loader.js"></script>
+
+    <script>
+        const dataLoader = new DataLoader('/data/');
+        let currentConfig = {};
+
+        // Initialize
+        async function init() {
+            try {
+                currentConfig = await dataLoader.loadConfig();
+                loadConfigToUI(currentConfig);
+                setupEventListeners();
+            } catch (error) {
+                console.error('Initialization error:', error);
+                alert(`เกิดข้อผิดพลาด: ${error.message}`);
+            }
+        }
+
+        // Load config to UI
+        function loadConfigToUI(config) {
+            // General
+            document.getElementById('form-name').value = config.formMetadata?.formName || '';
+            document.getElementById('form-version').value = config.formMetadata?.version || '1.0.0';
+            document.getElementById('completion-time').value = config.formMetadata?.estimatedCompletionTime?.split('-')[0] || '25';
+
+            // Validation
+            const validationRules = config.validationRules?.global || {};
+            document.getElementById('validate-on-blur').checked = validationRules.validateOnBlur !== false;
+            document.getElementById('validate-on-change').checked = validationRules.validateOnChange === true;
+            document.getElementById('validate-on-submit').checked = validationRules.validateOnSubmit !== false;
+            document.getElementById('max-file-size').value = config.validationRules?.fileUpload?.maxFileSizeMB || 1;
+
+            // Submission
+            const submissionConfig = config.submissionConfiguration || {};
+            document.getElementById('submission-enabled').checked = submissionConfig.enabled !== false;
+            document.getElementById('confirm-before-submit').checked = submissionConfig.confirmBeforeSubmit !== false;
+            document.getElementById('auto-save-enabled').checked = submissionConfig.autoSaveEnabled !== false;
+            document.getElementById('auto-save-interval').value = (submissionConfig.autoSaveInterval || 30000) / 1000;
+            document.getElementById('supabase-table').value = submissionConfig.supabaseTable || 'ch1_responses';
+
+            // UI/Theme
+            const uiSettings = config.uiSettings || {};
+            const theme = uiSettings.theme || {};
+            document.getElementById('primary-color').value = theme.primaryColor || '#0F4C81';
+            document.getElementById('primary-color-text').value = theme.primaryColor || '#0F4C81';
+            document.getElementById('accent-color').value = theme.accentColor || '#00A86B';
+            document.getElementById('accent-color-text').value = theme.accentColor || '#00A86B';
+            document.getElementById('animations-enabled').checked = uiSettings.layout?.animationsEnabled !== false;
+            document.getElementById('progress-bar-enabled').checked = uiSettings.stepProgressBar?.enabled !== false;
+            document.getElementById('field-hints-enabled').checked = uiSettings.fieldHints?.enabled !== false;
+
+            // Test Mode
+            const testConfig = config.testModeConfiguration || {};
+            document.getElementById('test-mode-enabled').checked = testConfig.enabled !== false;
+            document.getElementById('test-url-param').value = testConfig.urlParameterName || 'test';
+            document.getElementById('test-url-value').value = testConfig.urlParameterValue || 'true';
+            document.getElementById('test-banner-enabled').checked = testConfig.testModeBanner?.enabled !== false;
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Tab switching
+            document.querySelectorAll('.config-tab').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    switchTab(e.target.dataset.tab);
+                });
+            });
+
+            // Color pickers
+            document.getElementById('primary-color').addEventListener('change', (e) => {
+                document.getElementById('primary-color-text').value = e.target.value;
+            });
+            document.getElementById('primary-color-text').addEventListener('change', (e) => {
+                document.getElementById('primary-color').value = e.target.value;
+            });
+
+            document.getElementById('accent-color').addEventListener('change', (e) => {
+                document.getElementById('accent-color-text').value = e.target.value;
+            });
+            document.getElementById('accent-color-text').addEventListener('change', (e) => {
+                document.getElementById('accent-color').value = e.target.value;
+            });
+
+            // Action buttons
+            document.getElementById('reset-btn').addEventListener('click', () => {
+                loadConfigToUI(currentConfig);
+            });
+
+            document.getElementById('cancel-btn').addEventListener('click', () => {
+                window.history.back();
+            });
+
+            document.getElementById('save-btn').addEventListener('click', saveConfig);
+        }
+
+        // Switch tabs
+        function switchTab(tabName) {
+            // Hide all panels
+            document.querySelectorAll('.config-panel').forEach(panel => {
+                panel.classList.add('hidden');
+            });
+
+            // Remove active state from buttons
+            document.querySelectorAll('.config-tab').forEach(btn => {
+                btn.classList.remove('active', 'border-primary', 'text-primary');
+                btn.classList.add('border-transparent', 'text-slate-600');
+            });
+
+            // Show selected panel
+            document.getElementById(`${tabName}-tab`).classList.remove('hidden');
+
+            // Add active state to button
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active', 'border-primary', 'text-primary');
+            document.querySelector(`[data-tab="${tabName}"]`).classList.remove('border-transparent', 'text-slate-600');
+        }
+
+        // Save config
+        function saveConfig() {
+            // Update config object with form values
+            currentConfig.formMetadata.formName = document.getElementById('form-name').value;
+            currentConfig.formMetadata.version = document.getElementById('form-version').value;
+            currentConfig.formMetadata.estimatedCompletionTime = document.getElementById('completion-time').value + '-35 minutes';
+
+            currentConfig.validationRules.global.validateOnBlur = document.getElementById('validate-on-blur').checked;
+            currentConfig.validationRules.global.validateOnChange = document.getElementById('validate-on-change').checked;
+            currentConfig.validationRules.global.validateOnSubmit = document.getElementById('validate-on-submit').checked;
+            currentConfig.validationRules.fileUpload.maxFileSizeMB = parseInt(document.getElementById('max-file-size').value);
+
+            currentConfig.submissionConfiguration.enabled = document.getElementById('submission-enabled').checked;
+            currentConfig.submissionConfiguration.confirmBeforeSubmit = document.getElementById('confirm-before-submit').checked;
+            currentConfig.submissionConfiguration.autoSaveEnabled = document.getElementById('auto-save-enabled').checked;
+            currentConfig.submissionConfiguration.autoSaveInterval = parseInt(document.getElementById('auto-save-interval').value) * 1000;
+            currentConfig.submissionConfiguration.supabaseTable = document.getElementById('supabase-table').value;
+
+            currentConfig.uiSettings.theme.primaryColor = document.getElementById('primary-color').value;
+            currentConfig.uiSettings.theme.accentColor = document.getElementById('accent-color').value;
+            currentConfig.uiSettings.layout.animationsEnabled = document.getElementById('animations-enabled').checked;
+            currentConfig.uiSettings.stepProgressBar.enabled = document.getElementById('progress-bar-enabled').checked;
+            currentConfig.uiSettings.fieldHints.enabled = document.getElementById('field-hints-enabled').checked;
+
+            currentConfig.testModeConfiguration.enabled = document.getElementById('test-mode-enabled').checked;
+            currentConfig.testModeConfiguration.urlParameterName = document.getElementById('test-url-param').value;
+            currentConfig.testModeConfiguration.urlParameterValue = document.getElementById('test-url-value').value;
+            currentConfig.testModeConfiguration.testModeBanner.enabled = document.getElementById('test-banner-enabled').checked;
+
+            // Save to localStorage (in production, would save to database)
+            localStorage.setItem('ch1_form_config', JSON.stringify(currentConfig));
+
+            alert('บันทึกการกำหนดค่าเรียบร้อย!');
+        }
+
+        // Initialize app
+        init();
+    </script>
+</body>
+</html>

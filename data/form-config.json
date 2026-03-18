@@ -1,0 +1,251 @@
+{
+  "formMetadata": {
+    "formId": "ch1-wellbeing-survey",
+    "formName": "แบบประเมินสภาพความเป็นอยู่ที่ดีของพนักงานภาครัฐ",
+    "formNameEN": "Government Employee Well-being Assessment Form",
+    "version": "1.0.0",
+    "createdDate": "2026-01-15",
+    "totalSteps": 5,
+    "estimatedCompletionTime": "25-35 minutes"
+  },
+
+  "uiSettings": {
+    "theme": {
+      "primaryColor": "#0F4C81",
+      "accentColor": "#00A86B",
+      "dangerColor": "#EF4444",
+      "warningColor": "#F59E0B",
+      "successColor": "#10B981",
+      "fontFamily": "IBM Plex Sans Thai Looped, sans-serif"
+    },
+    "layout": {
+      "responsive": true,
+      "containerMaxWidth": "1200px",
+      "stepLayout": "vertical-tabs",
+      "fieldSpacing": "md",
+      "borderRadius": "xl",
+      "animationsEnabled": true
+    },
+    "stepProgressBar": {
+      "enabled": true,
+      "showStepNumbers": true,
+      "showStepTitles": true,
+      "showCompletionPercentage": true
+    },
+    "fieldHints": {
+      "enabled": true,
+      "tooltipPosition": "right",
+      "hintIconColor": "#6B7280"
+    }
+  },
+
+  "validationRules": {
+    "global": {
+      "requiredFieldIndicator": "*",
+      "showErrorsInline": true,
+      "showFieldSuccessStatus": true,
+      "validateOnChange": false,
+      "validateOnBlur": true,
+      "validateOnSubmit": true,
+      "highlightInvalidFields": true
+    },
+    "textFields": {
+      "minLength": 3,
+      "maxLength": 500,
+      "pattern": "^[ก-๙a-zA-Z0-9\\s\\-.,()]*$"
+    },
+    "textareaFields": {
+      "minLength": 10,
+      "maxLength": 2000,
+      "pattern": "^[ก-๙a-zA-Z0-9\\s\\-.,()\\n]*$"
+    },
+    "numberFields": {
+      "min": 0,
+      "max": 999999,
+      "allowDecimals": true,
+      "decimalPlaces": 2
+    },
+    "emailFields": {
+      "pattern": "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$"
+    },
+    "phoneFields": {
+      "pattern": "^[0-9\\-\\+\\s]{10,20}$"
+    },
+    "fileUpload": {
+      "allowedMimeTypes": ["application/pdf"],
+      "maxFileSize": 1048576,
+      "maxFileCount": 1,
+      "maxFileSizeMB": 1
+    },
+    "selectFields": {
+      "allowMultiple": false,
+      "showSearchIcon": true
+    },
+    "checkboxFields": {
+      "minSelections": 1,
+      "maxSelections": null
+    },
+    "radioFields": {
+      "required": true
+    },
+    "rankingFields": {
+      "maxSelections": 3,
+      "minSelections": 1
+    }
+  },
+
+  "stepConfiguration": {
+    "step1": {
+      "title": "ข้อมูลหน่วยงาน",
+      "titleEN": "Organization Information",
+      "description": "โปรดใส่ข้อมูลพื้นฐานของหน่วยงานของท่าน",
+      "descriptionEN": "Please provide basic information about your organization",
+      "requiredFields": ["org-name", "strategic-overview", "staff-count"],
+      "completionChecklist": [
+        "ข้อมูลหน่วยงานครบถ้วน",
+        "ข้อมูลโครงสร้างองค์กร",
+        "ข้อมูลบุคลากรกรอก"
+      ]
+    },
+    "step2": {
+      "title": "นโยบายและบริบท",
+      "titleEN": "Policy and Context",
+      "description": "โปรดอธิบายนโยบายที่เกี่ยวข้องกับสุขภาพและความเป็นอยู่ที่ดีของพนักงาน",
+      "descriptionEN": "Please describe policies related to employee health and well-being",
+      "requiredFields": ["policy-health", "policy-context"],
+      "completionChecklist": [
+        "นโยบายสุขภาพ",
+        "บริบทองค์กร"
+      ]
+    },
+    "step3": {
+      "title": "ข้อมูลสุขภาพและความเป็นอยู่",
+      "titleEN": "Health and Well-being Data",
+      "description": "โปรดให้ข้อมูลเกี่ยวกับสุขภาพและความเป็นอยู่ที่ดี",
+      "descriptionEN": "Please provide health and well-being information",
+      "requiredFields": [],
+      "completionChecklist": [
+        "ข้อมูลโรค",
+        "ข้อมูลการจากงาน",
+        "ข้อมูลสุขภาพจิต"
+      ]
+    },
+    "step4": {
+      "title": "ระบบสนับสนุนและอุปกรณ์",
+      "titleEN": "Support Systems and Equipment",
+      "description": "โปรดระบุระบบสนับสนุนและอุปกรณ์ที่มีในหน่วยงาน",
+      "descriptionEN": "Please specify support systems and equipment in your organization",
+      "requiredFields": [],
+      "completionChecklist": [
+        "ระบบสนับสนุน",
+        "อุปกรณ์ดิจิทัล",
+        "สภาพแวดล้อมการทำงาน"
+      ]
+    },
+    "step5": {
+      "title": "แผนและสรุป",
+      "titleEN": "Plans and Summary",
+      "description": "โปรดให้ข้อมูลแผนปฏิบัติการและสรุปผลการประเมิน",
+      "descriptionEN": "Please provide action plans and assessment summary",
+      "requiredFields": ["priority-ranking"],
+      "completionChecklist": [
+        "การจัดลำดับความสำคัญ",
+        "ผลการประเมินแบบรวม"
+      ]
+    }
+  },
+
+  "submissionConfiguration": {
+    "enabled": true,
+    "submitButtonText": "ส่งแบบประเมิน",
+    "submitButtonTextEN": "Submit Assessment",
+    "cancelButtonText": "ยกเลิก",
+    "cancelButtonTextEN": "Cancel",
+    "confirmBeforeSubmit": true,
+    "confirmMessage": "ยืนยันการส่งแบบประเมิน?",
+    "confirmMessageEN": "Confirm submission of assessment?",
+    "autoSaveEnabled": true,
+    "autoSaveInterval": 30000,
+    "autoSaveDraft": true,
+    "draftStorageType": "localStorage",
+    "supabaseTable": "ch1_responses",
+    "supabaseProjectId": "your_project_id",
+    "supabaseServiceRole": "service_role",
+    "successMessage": "แบบประเมินถูกส่งเรียบร้อย",
+    "successMessageEN": "Assessment submitted successfully",
+    "errorMessage": "เกิดข้อผิดพลาดในการส่งแบบประเมิน",
+    "errorMessageEN": "Error submitting assessment"
+  },
+
+  "testModeConfiguration": {
+    "enabled": true,
+    "enabledByDefault": false,
+    "urlParameterName": "test",
+    "urlParameterValue": "true",
+    "testModeIndicator": "TEST MODE",
+    "testModeColor": "#FF6B6B",
+    "testDataStorage": "localStorage",
+    "testDataPrefix": "test_ch1_",
+    "allowTestSubmissions": false,
+    "preventProductionSubmissions": true,
+    "testModeBanner": {
+      "enabled": true,
+      "position": "top",
+      "backgroundColor": "#FEE2E2",
+      "textColor": "#991B1B",
+      "borderColor": "#FCA5A5"
+    }
+  },
+
+  "responseViewerConfiguration": {
+    "enabled": true,
+    "defaultView": "table",
+    "supportedViews": ["table", "detailed", "pdf"],
+    "columnVisibility": {
+      "id": true,
+      "organization": true,
+      "submittedDate": true,
+      "step1Complete": true,
+      "step2Complete": true,
+      "step3Complete": true,
+      "step4Complete": true,
+      "step5Complete": true,
+      "formStatus": true
+    },
+    "sortableColumns": ["organization", "submittedDate", "formStatus"],
+    "filterableColumns": ["organization", "formStatus"],
+    "pageSize": 25,
+    "allowExportCSV": true,
+    "allowExportJSON": true,
+    "allowPdfGeneration": true
+  },
+
+  "errorHandling": {
+    "displayMode": "inline-and-alert",
+    "logErrors": true,
+    "showErrorCodes": false,
+    "errorRetryAttempts": 3,
+    "errorRetryDelay": 2000,
+    "fallbackMessage": "เกิดข้อผิดพลาด โปรดลองใหม่"
+  },
+
+  "accessibility": {
+    "enableScreenReaderSupport": true,
+    "enableKeyboardNavigation": true,
+    "enableContrastMode": false,
+    "enableFontSizeAdjustment": true,
+    "minFontSize": 12,
+    "maxFontSize": 20,
+    "enableColorBlindMode": false
+  },
+
+  "localization": {
+    "defaultLanguage": "th",
+    "supportedLanguages": ["th", "en"],
+    "dateFormat": "DD/MM/YYYY",
+    "timeFormat": "HH:mm:ss",
+    "currencySymbol": "฿",
+    "decimalSeparator": ".",
+    "thousandsSeparator": ","
+  }
+}

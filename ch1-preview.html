@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แบบประเมินสภาพความเป็นอยู่ที่ดีของพนักงานภาครัฐ - ตัวอย่าง</title>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai+Looped:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0F4C81',
+                        accent: '#00A86B'
+                    },
+                    fontFamily: {
+                        sans: ['IBM Plex Sans Thai Looped', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 font-sans">
+    <div class="min-h-screen">
+        <!-- Header -->
+        <header class="bg-gradient-to-r from-primary to-blue-700 text-white shadow-lg">
+            <div class="max-w-6xl mx-auto px-4 py-6">
+                <h1 class="text-3xl font-bold mb-2">แบบประเมินสภาพความเป็นอยู่ที่ดี</h1>
+                <p class="text-blue-100">Government Employee Well-being Assessment Form</p>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
+            <div class="max-w-6xl mx-auto px-4">
+                <div class="flex items-center space-x-4 overflow-x-auto">
+                    <button id="step-nav-1" class="step-nav-btn active px-4 py-3 font-semibold border-b-2 border-primary text-primary whitespace-nowrap transition" data-step="1">
+                        ขั้นตอนที่ 1: ข้อมูลหน่วยงาน
+                    </button>
+                    <button id="step-nav-2" class="step-nav-btn px-4 py-3 font-semibold border-b-2 border-transparent text-slate-600 hover:text-slate-900 whitespace-nowrap transition" data-step="2">
+                        ขั้นตอนที่ 2: นโยบาย
+                    </button>
+                    <button id="step-nav-3" class="step-nav-btn px-4 py-3 font-semibold border-b-2 border-transparent text-slate-600 hover:text-slate-900 whitespace-nowrap transition" data-step="3">
+                        ขั้นตอนที่ 3: สุขภาพ
+                    </button>
+                    <button id="step-nav-4" class="step-nav-btn px-4 py-3 font-semibold border-b-2 border-transparent text-slate-600 hover:text-slate-900 whitespace-nowrap transition" data-step="4">
+                        ขั้นตอนที่ 4: ระบบสนับสนุน
+                    </button>
+                    <button id="step-nav-5" class="step-nav-btn px-4 py-3 font-semibold border-b-2 border-transparent text-slate-600 hover:text-slate-900 whitespace-nowrap transition" data-step="5">
+                        ขั้นตอนที่ 5: แผน
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Progress Bar -->
+        <div class="bg-white border-b border-slate-200">
+            <div class="max-w-6xl mx-auto px-4 py-4">
+                <div class="flex items-center justify-between mb-2">
+                    <p class="text-sm font-semibold text-slate-700">ความคืบหน้า</p>
+                    <p class="text-sm font-semibold text-primary" id="progress-text">0%</p>
+                </div>
+                <div class="w-full bg-slate-200 rounded-full h-2">
+                    <div id="progress-bar" class="bg-primary h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <main class="max-w-6xl mx-auto px-4 py-8">
+            <!-- Test Mode Banner -->
+            <div id="test-mode-banner" class="mb-6 p-4 bg-red-100 border-2 border-red-400 rounded-lg hidden">
+                <p class="text-red-800 font-semibold text-center">⚠️ TEST MODE - Data will not be submitted</p>
+            </div>
+
+            <!-- Form Container -->
+            <div id="form-container" class="bg-white rounded-lg shadow-md p-6">
+                <div class="text-center py-8">
+                    <p class="text-slate-600">กำลังโหลดแบบประเมิน...</p>
+                </div>
+            </div>
+
+            <!-- Navigation Buttons -->
+            <div class="mt-6 flex justify-between">
+                <button id="prev-btn" class="px-6 py-2 bg-slate-300 text-slate-700 rounded-lg font-semibold hover:bg-slate-400 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                    ← ก่อนหน้า
+                </button>
+                <div class="space-x-2">
+                    <button id="save-draft-btn" class="px-6 py-2 bg-accent text-white rounded-lg font-semibold hover:bg-opacity-90 transition">
+                        💾 บันทึกฉบับร่าง
+                    </button>
+                    <button id="next-btn" class="px-6 py-2 bg-primary text-white rounded-lg font-semibold hover:bg-opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                        ถัดไป →
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-slate-800 text-white mt-12 py-6 border-t border-slate-700">
+            <div class="max-w-6xl mx-auto px-4 text-center text-sm">
+                <p>© 2026 Thai Government Well-being Assessment System</p>
+                <p class="text-slate-400 mt-2">This is a read-only preview. No data will be submitted.</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/js/data-loader.js"></script>
+    <script src="/js/form-validator.js"></script>
+    <script src="/js/form-renderer.js"></script>
+
+    <script>
+        // Initialize application
+        const dataLoader = new DataLoader('/data/');
+        let formRenderer = null;
+        let currentStep = 1;
+        const totalSteps = 5;
+
+        // Check for test mode
+        function isTestMode() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('test') === 'true';
+        }
+
+        // Show test mode banner
+        if (isTestMode()) {
+            document.getElementById('test-mode-banner').classList.remove('hidden');
+        }
+
+        // Initialize application
+        async function init() {
+            try {
+                const config = await dataLoader.loadConfig();
+                formRenderer = new FormRenderer('form-container', dataLoader, config);
+
+                // Load and render first step
+                await renderStep(1);
+                updateNavigationButtons();
+
+                // Set up event listeners
+                setupEventListeners();
+            } catch (error) {
+                console.error('Initialization error:', error);
+                document.getElementById('form-container').innerHTML = `
+                    <div class="p-6 bg-red-50 border-2 border-red-200 rounded-lg">
+                        <h3 class="text-red-800 font-bold mb-2">เกิดข้อผิดพลาด</h3>
+                        <p class="text-red-700">${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Render a specific step
+        async function renderStep(stepNumber) {
+            try {
+                currentStep = stepNumber;
+                await formRenderer.render(stepNumber);
+                updateProgressBar();
+                updateNavigationButtons();
+                window.scrollTo(0, 0);
+            } catch (error) {
+                console.error(`Error rendering step ${stepNumber}:`, error);
+            }
+        }
+
+        // Update progress bar
+        function updateProgressBar() {
+            const progress = (currentStep / totalSteps) * 100;
+            const progressBar = document.getElementById('progress-bar');
+            const progressText = document.getElementById('progress-text');
+
+            progressBar.style.width = `${progress}%`;
+            progressText.textContent = `${Math.round(progress)}%`;
+        }
+
+        // Update navigation buttons
+        function updateNavigationButtons() {
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+
+            prevBtn.disabled = currentStep === 1;
+            nextBtn.disabled = currentStep === totalSteps;
+
+            // Change next button text for last step
+            if (currentStep === totalSteps) {
+                nextBtn.textContent = '✓ เสร็จสิ้น';
+                nextBtn.disabled = false;
+            } else {
+                nextBtn.textContent = 'ถัดไป →';
+            }
+        }
+
+        // Set up event listeners
+        function setupEventListeners() {
+            // Step navigation buttons
+            document.querySelectorAll('.step-nav-btn').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    const step = parseInt(e.target.dataset.step);
+                    await renderStep(step);
+                    updateStepNavigation();
+                });
+            });
+
+            // Previous button
+            document.getElementById('prev-btn').addEventListener('click', async () => {
+                if (currentStep > 1) {
+                    await renderStep(currentStep - 1);
+                    updateStepNavigation();
+                }
+            });
+
+            // Next button
+            document.getElementById('next-btn').addEventListener('click', async () => {
+                if (currentStep < totalSteps) {
+                    await renderStep(currentStep + 1);
+                    updateStepNavigation();
+                } else {
+                    // Show completion message
+                    alert('แบบประเมินสมบูรณ์! (ตัวอย่าง - ไม่ส่ง)');
+                }
+            });
+
+            // Save draft button
+            document.getElementById('save-draft-btn').addEventListener('click', () => {
+                const formData = formRenderer.collectFormData();
+                localStorage.setItem(`ch1_draft_step${currentStep}`, JSON.stringify(formData));
+                alert('บันทึกฉบับร่างสำเร็จ!');
+            });
+        }
+
+        // Update step navigation styling
+        function updateStepNavigation() {
+            document.querySelectorAll('.step-nav-btn').forEach(btn => {
+                const step = parseInt(btn.dataset.step);
+                if (step === currentStep) {
+                    btn.classList.add('active', 'border-primary', 'text-primary');
+                    btn.classList.remove('border-transparent', 'text-slate-600');
+                } else {
+                    btn.classList.remove('active', 'border-primary', 'text-primary');
+                    btn.classList.add('border-transparent', 'text-slate-600');
+                }
+            });
+        }
+
+        // Start application
+        init();
+    </script>
+</body>
+</html>

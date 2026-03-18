@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ดูรายละเอียดการตอบ - ระบบประเมินสภาพความเป็นอยู่ที่ดี</title>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai+Looped:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0F4C81',
+                        accent: '#00A86B'
+                    },
+                    fontFamily: {
+                        sans: ['IBM Plex Sans Thai Looped', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 font-sans">
+    <div class="min-h-screen">
+        <!-- Header -->
+        <header class="bg-gradient-to-r from-primary to-blue-700 text-white shadow-lg sticky top-0 z-40">
+            <div class="max-w-7xl mx-auto px-4 py-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-3xl font-bold mb-2">ดูรายละเอียดการตอบแบบประเมิน</h1>
+                        <p class="text-blue-100">View Individual Response Details</p>
+                    </div>
+                    <a href="/ch1-all-responses.html" class="px-4 py-2 bg-white text-primary rounded-lg font-semibold hover:bg-opacity-90 transition">
+                        ← กลับไปยังรายการทั้งหมด
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation and Action Buttons -->
+        <nav class="bg-white border-b border-slate-200 sticky top-20 z-40 shadow-sm">
+            <div class="max-w-7xl mx-auto px-4 py-4">
+                <div class="flex items-center justify-between gap-4">
+                    <div class="flex items-center gap-2">
+                        <button id="prev-response-btn" class="px-4 py-2 bg-slate-300 text-slate-700 rounded-lg text-sm font-semibold hover:bg-slate-400 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                            ← ก่อนหน้า
+                        </button>
+                        <span id="response-counter" class="text-sm text-slate-700 font-semibold px-4 py-2 bg-slate-100 rounded-lg">
+                            Response 1 of 1
+                        </span>
+                        <button id="next-response-btn" class="px-4 py-2 bg-slate-300 text-slate-700 rounded-lg text-sm font-semibold hover:bg-slate-400 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                            ถัดไป →
+                        </button>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <button id="print-btn" class="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm font-semibold hover:bg-opacity-90 transition">
+                            🖨️ พิมพ์
+                        </button>
+                        <button id="export-pdf-btn" class="px-4 py-2 bg-red-500 text-white rounded-lg text-sm font-semibold hover:bg-opacity-90 transition">
+                            📄 ส่งออก PDF
+                        </button>
+                        <button id="edit-btn" class="px-4 py-2 bg-accent text-white rounded-lg text-sm font-semibold hover:bg-opacity-90 transition">
+                            ✏️ แก้ไข
+                        </button>
+                        <button id="delete-btn" class="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-semibold hover:bg-opacity-90 transition">
+                            🗑️ ลบ
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="max-w-7xl mx-auto px-4 py-8">
+            <!-- Response Summary Card -->
+            <div class="bg-white rounded-lg shadow p-6 mb-6" id="response-summary">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div>
+                        <p class="text-xs font-semibold text-slate-500 uppercase mb-1">ID</p>
+                        <p class="text-lg font-bold text-slate-800" id="summary-id">-</p>
+                    </div>
+                    <div>
+                        <p class="text-xs font-semibold text-slate-500 uppercase mb-1">หน่วยงาน</p>
+                        <p class="text-lg font-bold text-slate-800" id="summary-org">-</p>
+                    </div>
+                    <div>
+                        <p class="text-xs font-semibold text-slate-500 uppercase mb-1">วันที่ส่ง</p>
+                        <p class="text-lg font-bold text-slate-800" id="summary-date">-</p>
+                    </div>
+                    <div>
+                        <p class="text-xs font-semibold text-slate-500 uppercase mb-1">สถานะ</p>
+                        <p class="text-lg font-bold" id="summary-status">-</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="bg-white border-b border-slate-200 mb-6 rounded-t-lg">
+                <div class="flex space-x-6 overflow-x-auto px-6">
+                    <button class="response-tab active px-4 py-3 font-semibold border-b-2 border-primary text-primary whitespace-nowrap transition" data-tab="overview">
+                        概览
+                    </button>
+                    <button class="response-tab px-4 py-3 font-semibold border-b-2 border-transparent text-slate-600 hover:text-slate-900 whitespace-nowrap transition" data-tab="step1">
+                        ข้อมูลหน่วยงาน
+                    </button>
+                    <button class="response-tab px-4 py-3 font-semibold border-b-2 border-transparent text-slate-600 hover:text-slate-900 whitespace-nowrap transition" data-tab="step2">
+                        นโยบาย
+                    </button>
+                    <button class="response-tab px-4 py-3 font-semibold border-b-2 border-transparent text-slate-600 hover:text-slate-900 whitespace-nowrap transition" data-tab="step3">
+                        สุขภาพ
+                    </button>
+                    <button class="response-tab px-4 py-3 font-semibold border-b-2 border-transparent text-slate-600 hover:text-slate-900 whitespace-nowrap transition" data-tab="step4">
+                        ระบบสนับสนุน
+                    </button>
+                    <button class="response-tab px-4 py-3 font-semibold border-b-2 border-transparent text-slate-600 hover:text-slate-900 whitespace-nowrap transition" data-tab="step5">
+                        แผน
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tab Contents -->
+            <div id="response-container" class="bg-white rounded-b-lg shadow p-6">
+                <!-- Will be populated dynamically -->
+                <div class="text-center py-8">
+                    <p class="text-slate-600">กำลังโหลดข้อมูลการตอบแบบประเมิน...</p>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-slate-800 text-white mt-12 py-6 border-t border-slate-700">
+            <div class="max-w-7xl mx-auto px-4 text-center text-sm">
+                <p>© 2026 Thai Government Well-being Assessment System</p>
+                <p class="text-slate-400 mt-2">Individual Response Viewer</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Print CSS -->
+    <style media="print">
+        body {
+            background-color: white;
+        }
+        header, nav, footer, .no-print {
+            display: none !important;
+        }
+        .response-container {
+            box-shadow: none !important;
+        }
+    </style>
+
+    <!-- Scripts -->
+    <script src="/js/data-loader.js"></script>
+    <script src="/js/response-viewer.js"></script>
+
+    <script>
+        const dataLoader = new DataLoader('/data/');
+        let responseViewer = null;
+        let responses = [];
+        let currentIndex = 0;
+
+        // Get response ID from URL
+        function getResponseIdFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('id');
+        }
+
+        // Initialize
+        async function init() {
+            try {
+                const config = await dataLoader.loadConfig();
+                responseViewer = new ResponseViewer(dataLoader, config.responseViewerConfiguration || {});
+
+                // Load mock data (in production, would load from Supabase)
+                loadMockData();
+
+                // Find response by ID
+                const responseId = getResponseIdFromUrl();
+                if (responseId) {
+                    const response = responseViewer.getResponseById(responseId);
+                    if (response) {
+                        currentIndex = responses.indexOf(response);
+                    }
+                }
+
+                setupEventListeners();
+                renderCurrentResponse();
+            } catch (error) {
+                console.error('Initialization error:', error);
+                document.getElementById('response-container').innerHTML = `
+                    <div class="p-6 bg-red-50 border-2 border-red-200 rounded-lg">
+                        <h3 class="text-red-800 font-bold mb-2">เกิดข้อผิดพลาด</h3>
+                        <p class="text-red-700">${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Load mock data
+        function loadMockData() {
+            responses = [
+                {
+                    id: 'resp_001',
+                    org_name: 'สำนักงานสภาพัฒนาการเศรษฐกิจและสังคมแห่งชาติ',
+                    submitted_date: new Date('2026-03-15'),
+                    created_at: '2026-03-15T10:30:00Z',
+                    status: 'completed',
+                    step1: { orgName: 'สำนักงานสภาพัฒนาการเศรษฐกิจและสังคมแห่งชาติ' },
+                    step2: { policy: 'มีนโยบายสนับสนุนสุขภาพพนักงาน' },
+                    step3: { diseases: 'ข้อมูลโรค' },
+                    step4: { support: 'ระบบสนับสนุนสมบูรณ์' },
+                    step5: { priority: 'แผนปฏิบัติการเรียบร้อย' }
+                }
+            ];
+
+            responseViewer.responses = responses;
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Tab switching
+            document.querySelectorAll('.response-tab').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    switchTab(e.target.dataset.tab);
+                });
+            });
+
+            // Navigation buttons
+            document.getElementById('prev-response-btn').addEventListener('click', () => {
+                if (currentIndex > 0) {
+                    currentIndex--;
+                    renderCurrentResponse();
+                }
+            });
+
+            document.getElementById('next-response-btn').addEventListener('click', () => {
+                if (currentIndex < responses.length - 1) {
+                    currentIndex++;
+                    renderCurrentResponse();
+                }
+            });
+
+            // Action buttons
+            document.getElementById('print-btn').addEventListener('click', () => {
+                window.print();
+            });
+
+            document.getElementById('export-pdf-btn').addEventListener('click', exportToPDF);
+
+            document.getElementById('edit-btn').addEventListener('click', () => {
+                const response = responses[currentIndex];
+                // In production, would navigate to edit page
+                alert(`Edit response: ${response.id}`);
+            });
+
+            document.getElementById('delete-btn').addEventListener('click', () => {
+                if (confirm(`ยืนยันการลบการตอบแบบประเมินของ ${responses[currentIndex].org_name}?`)) {
+                    responses.splice(currentIndex, 1);
+                    if (currentIndex >= responses.length) {
+                        currentIndex = Math.max(0, responses.length - 1);
+                    }
+                    renderCurrentResponse();
+                    alert('ลบการตอบแบบประเมินเรียบร้อย');
+                }
+            });
+        }
+
+        // Render current response
+        function renderCurrentResponse() {
+            if (responses.length === 0) {
+                document.getElementById('response-container').innerHTML = `
+                    <div class="p-6 bg-yellow-50 border-2 border-yellow-200 rounded-lg">
+                        <p class="text-yellow-800">ไม่มีการตอบแบบประเมินที่ต้องการดู</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const response = responses[currentIndex];
+
+            // Update summary
+            document.getElementById('summary-id').textContent = response.id;
+            document.getElementById('summary-org').textContent = response.org_name;
+            document.getElementById('summary-date').textContent = new Date(response.submitted_date).toLocaleDateString('th-TH');
+
+            const statusBadge = document.getElementById('summary-status');
+            statusBadge.textContent = response.status === 'completed' ? 'เสร็จสิ้น' : 'รอดำเนินการ';
+            statusBadge.className = response.status === 'completed'
+                ? 'text-lg font-bold bg-green-100 text-green-800 px-3 py-1 rounded inline-block'
+                : 'text-lg font-bold bg-yellow-100 text-yellow-800 px-3 py-1 rounded inline-block';
+
+            // Update counter
+            document.getElementById('response-counter').textContent = `Response ${currentIndex + 1} of ${responses.length}`;
+
+            // Update navigation buttons
+            document.getElementById('prev-response-btn').disabled = currentIndex === 0;
+            document.getElementById('next-response-btn').disabled = currentIndex === responses.length - 1;
+
+            // Render overview tab content
+            renderOverviewTab(response);
+        }
+
+        // Render overview tab
+        function renderOverviewTab(response) {
+            const container = document.getElementById('response-container');
+            container.innerHTML = `
+                <div class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <h3 class="font-semibold text-slate-700 mb-2">ข้อมูลพื้นฐาน</h3>
+                            <div class="space-y-2 text-sm text-slate-600">
+                                <p><span class="font-semibold">ID:</span> ${response.id}</p>
+                                <p><span class="font-semibold">หน่วยงาน:</span> ${response.org_name}</p>
+                                <p><span class="font-semibold">วันที่ส่ง:</span> ${new Date(response.submitted_date).toLocaleDateString('th-TH')}</p>
+                                <p><span class="font-semibold">สถานะ:</span> ${response.status === 'completed' ? 'เสร็จสิ้น' : 'รอดำเนินการ'}</p>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-slate-700 mb-2">ความคืบหน้า</h3>
+                            <div class="space-y-2">
+                                <div class="flex items-center justify-between text-sm">
+                                    <span>ขั้นตอนที่ 1</span>
+                                    <span class="text-green-600 font-semibold">✓ เสร็จ</span>
+                                </div>
+                                <div class="flex items-center justify-between text-sm">
+                                    <span>ขั้นตอนที่ 2</span>
+                                    <span class="text-green-600 font-semibold">✓ เสร็จ</span>
+                                </div>
+                                <div class="flex items-center justify-between text-sm">
+                                    <span>ขั้นตอนที่ 3</span>
+                                    <span class="text-green-600 font-semibold">✓ เสร็จ</span>
+                                </div>
+                                <div class="flex items-center justify-between text-sm">
+                                    <span>ขั้นตอนที่ 4</span>
+                                    <span class="text-green-600 font-semibold">✓ เสร็จ</span>
+                                </div>
+                                <div class="flex items-center justify-between text-sm">
+                                    <span>ขั้นตอนที่ 5</span>
+                                    <span class="text-green-600 font-semibold">✓ เสร็จ</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 pt-6 border-t border-slate-200">
+                        <h3 class="font-semibold text-slate-700 mb-3">สรุปข้อมูล</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-slate-600">
+                            <div class="p-3 bg-slate-50 rounded">
+                                <p class="font-semibold mb-1">ข้อมูลหน่วยงาน</p>
+                                <p>${response.step1?.orgName || 'ยังไม่บันทึก'}</p>
+                            </div>
+                            <div class="p-3 bg-slate-50 rounded">
+                                <p class="font-semibold mb-1">นโยบายสนับสนุน</p>
+                                <p>${response.step2?.policy || 'ยังไม่บันทึก'}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Switch tabs
+        function switchTab(tabName) {
+            document.querySelectorAll('.response-tab').forEach(btn => {
+                if (btn.dataset.tab === tabName) {
+                    btn.classList.add('border-primary', 'text-primary');
+                    btn.classList.remove('border-transparent', 'text-slate-600');
+                } else {
+                    btn.classList.remove('border-primary', 'text-primary');
+                    btn.classList.add('border-transparent', 'text-slate-600');
+                }
+            });
+
+            // In production, would render different content based on tab
+            if (tabName === 'overview') {
+                renderOverviewTab(responses[currentIndex]);
+            }
+        }
+
+        // Export to PDF
+        function exportToPDF() {
+            const response = responses[currentIndex];
+            const element = document.getElementById('response-container');
+            const opt = {
+                margin: 10,
+                filename: `response-${response.id}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
+            };
+
+            html2pdf().set(opt).from(element).save();
+        }
+
+        // Initialize app
+        init();
+    </script>
+</body>
+</html>

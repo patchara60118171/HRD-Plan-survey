@@ -1,0 +1,695 @@
+{
+  "meta": {
+    "formId": "ch1-v4.0",
+    "version": "4.0",
+    "title": "แบบสำรวจข้อมูลเพื่อจัดทำแผนการพัฒนาองค์กรสุขภาวะข้าราชการพลเรือน",
+    "description": "แบบสำรวจเพื่อรวบรวมข้อมูลจากหน่วยงานนำร่องสำหรับใช้ประกอบการจัดทำแผนปฏิบัติการสร้างเสริมสุขภาวะองค์กรข้าราชการพลเรือน",
+    "lastUpdated": "2026-03-18T00:00:00Z",
+    "totalSteps": 5,
+    "estimatedTime": "30-45 minutes",
+    "createdBy": "NIDA Well-being Project",
+    "organization": "National Institute of Development Administration"
+  },
+  "steps": [
+    {
+      "id": "step-1",
+      "stepNumber": 1,
+      "title": "ส่วนที่ 1: ข้อมูลเบื้องต้นของส่วนราชการ",
+      "icon": "🏛️",
+      "description": "ข้อมูลพื้นฐาน โครงสร้างองค์กร และอัตรากำลัง",
+      "sections": [
+        {
+          "sectionId": "org-basic-info",
+          "title": "ข้อมูลพื้นฐาน",
+          "fields": [
+            {
+              "id": "organization",
+              "label": "ชื่อหน่วยงาน",
+              "type": "select",
+              "required": true,
+              "options": [
+                "สำนักงานสภาพัฒนาการเศรษฐกิจและสังคมแห่งชาติ",
+                "สำนักงานนโยบายและยุทธศาสตร์การค้า",
+                "กรมวิทยาศาสตร์บริการ",
+                "สำนักงบประมาณ",
+                "กรมอุตุนิยมวิทยา",
+                "กรมส่งเสริมวัฒนธรรม",
+                "กรมคุมประพฤติ",
+                "สำนักงานปลัดกระทรวงการท่องเที่ยวและกีฬา",
+                "กรมสุขภาพจิต",
+                "สำนักงานนโยบายและแผนทรัพยากรธรรมชาติและสิ่งแวดล้อม",
+                "สำนักงานการวิจัยแห่งชาติ",
+                "สำนักงานมาตรฐานสินค้าเกษตรและอาหารแห่งชาติ",
+                "สำนักงาน กพร.",
+                "กรมชลประทาน",
+                "กรมกิจการเด็กและเยาวชน"
+              ],
+              "validation": "required"
+            },
+            {
+              "id": "strategic_overview",
+              "label": "1. ภาพรวมยุทธศาสตร์และทิศทางของส่วนราชการ",
+              "type": "textarea",
+              "required": false,
+              "rows": 3,
+              "placeholder": "อธิบายภาพรวมยุทธศาสตร์และทิศทางของหน่วยงาน",
+              "hint": "โปรดแนบข้อมูลหรืออธิบายโดยสังเขป"
+            },
+            {
+              "id": "strategy_file",
+              "label": "ไฟล์ PDF (ยุทธศาสตร์)",
+              "type": "file",
+              "required": false,
+              "accept": ".pdf",
+              "maxSize": "1MB",
+              "hint": "ไฟล์ PDF เท่านั้น | ขนาดไม่เกิน 1 MB"
+            },
+            {
+              "id": "org_structure",
+              "label": "2. โครงสร้างองค์กรและบทบาทหน้าที่หลัก",
+              "type": "textarea",
+              "required": false,
+              "rows": 3,
+              "placeholder": "อธิบายโครงสร้างองค์กรและบทบาทหน้าที่หลัก",
+              "hint": "โปรดแนบข้อมูล"
+            },
+            {
+              "id": "org_structure_file",
+              "label": "ไฟล์ PDF (โครงสร้าง)",
+              "type": "file",
+              "required": false,
+              "accept": ".pdf",
+              "maxSize": "1MB"
+            }
+          ]
+        },
+        {
+          "sectionId": "staffing-data",
+          "title": "ข้อมูลอัตรากำลัง",
+          "fields": [
+            {
+              "id": "total_staff",
+              "label": "3. จำนวนข้าราชการรวม",
+              "type": "number",
+              "required": true,
+              "min": 1,
+              "placeholder": "จำนวนข้าราชการรวม (เช่น 500)",
+              "validation": "required,min:1"
+            },
+            {
+              "id": "staff-by-type",
+              "label": "จำนวนอัตรากำลังจำแนกตามประเภท",
+              "type": "number-group",
+              "groupFields": [
+                {
+                  "id": "type_official",
+                  "label": "ข้าราชการ",
+                  "type": "number",
+                  "min": 0,
+                  "default": 0
+                },
+                {
+                  "id": "type_employee",
+                  "label": "พนักงานราชการ",
+                  "type": "number",
+                  "min": 0,
+                  "default": 0
+                },
+                {
+                  "id": "type_contract",
+                  "label": "ลูกจ้าง",
+                  "type": "number",
+                  "min": 0,
+                  "default": 0
+                },
+                {
+                  "id": "type_other",
+                  "label": "อื่น ๆ",
+                  "type": "number",
+                  "min": 0,
+                  "default": 0
+                }
+              ]
+            },
+            {
+              "id": "staff-by-age",
+              "label": "จำแนกตามช่วงอายุ (เฉพาะข้าราชการ)",
+              "type": "number-group",
+              "groupFields": [
+                {
+                  "id": "age_u30",
+                  "label": "ไม่เกิน 30 ปี",
+                  "type": "number",
+                  "min": 0,
+                  "default": 0
+                },
+                {
+                  "id": "age_31_40",
+                  "label": "31–40 ปี",
+                  "type": "number",
+                  "min": 0,
+                  "default": 0
+                },
+                {
+                  "id": "age_41_50",
+                  "label": "41–50 ปี",
+                  "type": "number",
+                  "min": 0,
+                  "default": 0
+                },
+                {
+                  "id": "age_51_60",
+                  "label": "51–60 ปี",
+                  "type": "number",
+                  "min": 0,
+                  "default": 0
+                }
+              ]
+            },
+            {
+              "id": "staff-by-service",
+              "label": "จำแนกตามอายุราชการ",
+              "type": "number-group",
+              "groupFields": [
+                {
+                  "id": "service_u1",
+                  "label": "ไม่เกิน 1 ปี",
+                  "type": "number",
+                  "min": 0,
+                  "default": 0
+                },
+                {
+                  "id": "service_1_5",
+                  "label": "1-5 ปี",
+                  "type": "number",
+                  "min": 0,
+                  "default": 0
+                },
+                {
+                  "id": "service_6_10",
+                  "label": "6-10 ปี",
+                  "type": "number",
+                  "min": 0,
+                  "default": 0
+                },
+                {
+                  "id": "service_11_15",
+                  "label": "11-15 ปี",
+                  "type": "number",
+                  "min": 0,
+                  "default": 0
+                },
+                {
+                  "id": "service_16_20",
+                  "label": "16-20 ปี",
+                  "type": "number",
+                  "min": 0,
+                  "default": 0
+                },
+                {
+                  "id": "service_21_25",
+                  "label": "21-25 ปี",
+                  "type": "number",
+                  "min": 0,
+                  "default": 0
+                },
+                {
+                  "id": "service_26_30",
+                  "label": "26-30 ปี",
+                  "type": "number",
+                  "min": 0,
+                  "default": 0
+                },
+                {
+                  "id": "service_over30",
+                  "label": "31 ปีขึ้นไป",
+                  "type": "number",
+                  "min": 0,
+                  "default": 0
+                }
+              ]
+            },
+            {
+              "id": "staff-by-position",
+              "label": "จำแนกตามประเภทและระดับตำแหน่ง",
+              "type": "number-group",
+              "groupCategories": [
+                {
+                  "category": "ประเภททั่วไป",
+                  "groupFields": [
+                    {"id": "pos_o1", "label": "ปฏิบัติงาน (O1)", "type": "number", "min": 0, "default": 0},
+                    {"id": "pos_o2", "label": "ชำนาญงาน (O2)", "type": "number", "min": 0, "default": 0},
+                    {"id": "pos_o3", "label": "อาวุโส (O3)", "type": "number", "min": 0, "default": 0},
+                    {"id": "pos_o4", "label": "ทักษะพิเศษ (O4)", "type": "number", "min": 0, "default": 0}
+                  ]
+                },
+                {
+                  "category": "ประเภทวิชาการ",
+                  "groupFields": [
+                    {"id": "pos_k1", "label": "ปฏิบัติการ (K1)", "type": "number", "min": 0, "default": 0},
+                    {"id": "pos_k2", "label": "ชำนาญการ (K2)", "type": "number", "min": 0, "default": 0},
+                    {"id": "pos_k3", "label": "ชำนาญการพิเศษ (K3)", "type": "number", "min": 0, "default": 0},
+                    {"id": "pos_k4", "label": "เชี่ยวชาญ (K4)", "type": "number", "min": 0, "default": 0},
+                    {"id": "pos_k5", "label": "ทรงคุณวุฒิ (K5)", "type": "number", "min": 0, "default": 0}
+                  ]
+                },
+                {
+                  "category": "ประเภทอำนวยการ",
+                  "groupFields": [
+                    {"id": "pos_m1", "label": "ระดับต้น (M1)", "type": "number", "min": 0, "default": 0},
+                    {"id": "pos_m2", "label": "ระดับสูง (M2)", "type": "number", "min": 0, "default": 0}
+                  ]
+                },
+                {
+                  "category": "ประเภทบริหาร",
+                  "groupFields": [
+                    {"id": "pos_s1", "label": "ระดับต้น (S1)", "type": "number", "min": 0, "default": 0},
+                    {"id": "pos_s2", "label": "ระดับสูง (S2)", "type": "number", "min": 0, "default": 0}
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "turnover-table",
+              "label": "4. การลาออกและโอนย้าย (ย้อนหลัง 5 ปี)",
+              "type": "turnover-table",
+              "years": [2564, 2565, 2566, 2567, 2568],
+              "rows": [
+                {
+                  "id": "begin",
+                  "label": "จำนวนข้าราชการ (ต้นปี 1 ต.ค.)",
+                  "hint": "จำนวนข้าราชการ ณ วันที่ 1 ต.ค. (ต้นปีงบประมาณ)"
+                },
+                {
+                  "id": "end",
+                  "label": "จำนวนข้าราชการ (ปลายปี 30 ก.ย.)",
+                  "hint": "จำนวนข้าราชการ ณ วันที่ 30 ก.ย. ของปีถัดไป (ปลายปีงบประมาณ)"
+                },
+                {
+                  "id": "leave",
+                  "label": "จำนวนข้าราชการลาออกและโอนย้าย",
+                  "hint": "จำนวนข้าราชการลาออกและโอนย้าย ตั้งแต่ 1 ต.ค. ถึง 30 ก.ย. ปีถัดไป"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "step-2",
+      "stepNumber": 2,
+      "title": "ส่วนที่ 2: นโยบายและบริบทภายนอกองค์กร",
+      "icon": "📋",
+      "description": "นโยบายที่เกี่ยวข้องและบริบทที่ส่วนราชการต้องเผชิญ",
+      "sections": [
+        {
+          "sectionId": "policy-context",
+          "title": "นโยบายและบริบท",
+          "fields": [
+            {
+              "id": "related_policies",
+              "label": "5. นโยบายและยุทธศาสตร์ที่เกี่ยวข้อง",
+              "type": "textarea",
+              "required": false,
+              "rows": 4,
+              "placeholder": "ระบุนโยบายที่หน่วยงานเลือกใช้ในการพัฒนาสุขภาวะข้าราชการ",
+              "hint": "โปรดระบุนโยบายที่หน่วยงานเลือกใช้"
+            },
+            {
+              "id": "context_challenges",
+              "label": "6. ข้อมูลบริบทและความท้าทาย (Context & Challenges)",
+              "type": "textarea",
+              "required": false,
+              "rows": 4,
+              "placeholder": "ระบุบริบทและความท้าทาย...",
+              "hint": "โปรดระบุบริบทที่ส่วนราชการต้องเผชิญ เช่น นโยบายระดับชาติ, การเปลี่ยนแปลง, หรือความเสี่ยงสำคัญ"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "step-3",
+      "stepNumber": 3,
+      "title": "ส่วนที่ 3: ข้อมูลสุขภาวะของข้าราชการในปีที่ผ่านมา",
+      "icon": "🩺",
+      "description": "ข้อมูลสุขภาพกาย สุขภาพจิต และการลาป่วย",
+      "sections": [
+        {
+          "sectionId": "physical-health",
+          "title": "7. สุขภาวะทางกาย",
+          "hint": "ข้อมูลปีล่าสุด หรือย้อนหลังไม่เกิน 5 ปี",
+          "fields": [
+            {
+              "id": "disease_report_type",
+              "label": "โปรดระบุว่าข้อมูลที่รายงานเป็น",
+              "type": "radio",
+              "required": false,
+              "options": [
+                {"value": "official_only", "label": "เฉพาะข้าราชการ"},
+                {"value": "all_staff", "label": "บุคลากรทั้งหมด (ไม่สามารถแยกตามประเภทบุคลากรได้)"}
+              ]
+            },
+            {
+              "id": "disease-group",
+              "label": "จำนวนข้าราชการที่มีภาวะดังต่อไปนี้",
+              "type": "number-group",
+              "groupFields": [
+                {"id": "disease_diabetes", "label": "เบาหวาน", "type": "number", "min": 0, "default": 0},
+                {"id": "disease_hypertension", "label": "ความดันโลหิตสูง", "type": "number", "min": 0, "default": 0},
+                {"id": "disease_cardiovascular", "label": "โรคหัวใจและหลอดเลือด", "type": "number", "min": 0, "default": 0},
+                {"id": "disease_kidney", "label": "โรคไต", "type": "number", "min": 0, "default": 0},
+                {"id": "disease_liver", "label": "โรคตับ", "type": "number", "min": 0, "default": 0},
+                {"id": "disease_cancer", "label": "โรคมะเร็ง", "type": "number", "min": 0, "default": 0},
+                {"id": "disease_obesity", "label": "ภาวะอ้วน/น้ำหนักเกิน", "type": "number", "min": 0, "default": 0}
+              ]
+            },
+            {
+              "id": "disease_other_detail",
+              "label": "อื่น ๆ (ระบุ)",
+              "type": "text",
+              "required": false,
+              "placeholder": "ระบุโรคอื่นๆ"
+            },
+            {
+              "id": "disease_other_count",
+              "label": "อื่น ๆ (จำนวน)",
+              "type": "number",
+              "required": false,
+              "min": 0,
+              "default": 0
+            }
+          ]
+        },
+        {
+          "sectionId": "sick-leave",
+          "title": "8. ข้อมูลการลาป่วย",
+          "hint": "ข้อมูลปีล่าสุด หรือย้อนหลังไม่เกิน 5 ปี",
+          "fields": [
+            {
+              "id": "sick_leave_report_type",
+              "label": "โปรดระบุว่าข้อมูลที่รายงานเป็น",
+              "type": "radio",
+              "required": false,
+              "options": [
+                {"value": "official_only", "label": "เฉพาะข้าราชการ"},
+                {"value": "all_staff", "label": "บุคลากรทั้งหมด (ไม่สามารถแยกตามประเภทบุคลากรได้)"}
+              ]
+            },
+            {
+              "id": "sick_leave_days",
+              "label": "จำนวนวันลาป่วยรวมต่อปี",
+              "type": "number",
+              "required": false,
+              "min": 0,
+              "placeholder": "0"
+            },
+            {
+              "id": "sick_leave_avg",
+              "label": "จำนวนวันลาป่วยเฉลี่ยต่อคนต่อปี",
+              "type": "number",
+              "required": false,
+              "min": 0,
+              "step": 0.01,
+              "placeholder": "0.00"
+            }
+          ]
+        },
+        {
+          "sectionId": "mental-health",
+          "title": "10. ผลสำรวจสุขภาพจิต",
+          "hint": "ถ้ามี",
+          "fields": [
+            {
+              "id": "mental_health_report_type",
+              "label": "โปรดระบุว่าข้อมูลที่รายงานเป็น",
+              "type": "radio",
+              "required": false,
+              "options": [
+                {"value": "official_only", "label": "เฉพาะข้าราชการ"},
+                {"value": "all_staff", "label": "บุคลากรทั้งหมด (ไม่สามารถแยกตามประเภทบุคลากรได้)"}
+              ]
+            },
+            {
+              "id": "mental_stress",
+              "label": "ภาวะเครียดเรื้อรัง",
+              "type": "textarea",
+              "required": false,
+              "rows": 2,
+              "placeholder": "ระบุจำนวนหรือรายละเอียด"
+            },
+            {
+              "id": "mental_anxiety",
+              "label": "ภาวะวิตกกังวล",
+              "type": "textarea",
+              "required": false,
+              "rows": 2,
+              "placeholder": "ระบุจำนวนหรือรายละเอียด"
+            },
+            {
+              "id": "mental_sleep",
+              "label": "ปัญหาการนอนหลับ",
+              "type": "textarea",
+              "required": false,
+              "rows": 2,
+              "placeholder": "ระบุจำนวนหรือรายละเอียด"
+            },
+            {
+              "id": "mental_burnout",
+              "label": "ภาวะหมดไฟ (Burnout)",
+              "type": "textarea",
+              "required": false,
+              "rows": 2,
+              "placeholder": "ระบุจำนวนหรือรายละเอียด"
+            },
+            {
+              "id": "mental_depression",
+              "label": "ภาวะซึมเศร้า",
+              "type": "textarea",
+              "required": false,
+              "rows": 2,
+              "placeholder": "ระบุจำนวนหรือรายละเอียด"
+            }
+          ]
+        },
+        {
+          "sectionId": "engagement",
+          "title": "11. ผลสำรวจความผูกพันองค์กร (Employee Engagement)",
+          "hint": "ย้อนหลังไม่เกิน 5 ปี ถ้ามี",
+          "fields": [
+            {
+              "id": "engagement-scores",
+              "label": "คะแนนภาพรวมรายปี",
+              "type": "number-group",
+              "groupFields": [
+                {"id": "engagement_score_2568", "label": "2568", "type": "number", "min": 0, "max": 100, "step": 0.01, "placeholder": "0.00"},
+                {"id": "engagement_score_2567", "label": "2567", "type": "number", "min": 0, "max": 100, "step": 0.01, "placeholder": "0.00"},
+                {"id": "engagement_score_2566", "label": "2566", "type": "number", "min": 0, "max": 100, "step": 0.01, "placeholder": "0.00"},
+                {"id": "engagement_score_2565", "label": "2565", "type": "number", "min": 0, "max": 100, "step": 0.01, "placeholder": "0.00"},
+                {"id": "engagement_score_2564", "label": "2564", "type": "number", "min": 0, "max": 100, "step": 0.01, "placeholder": "0.00"}
+              ],
+              "hint": "ระบุคะแนน 0-100 (เช่น 75.25)"
+            },
+            {
+              "id": "engagement_low_areas",
+              "label": "ประเด็นที่ได้คะแนนต่ำ",
+              "type": "textarea",
+              "required": false,
+              "rows": 2,
+              "placeholder": "ระบุประเด็นที่ได้คะแนนต่ำ"
+            }
+          ]
+        },
+        {
+          "sectionId": "other-surveys",
+          "title": "12. ผลการสำรวจสุขภาวะด้วยเครื่องมืออื่น ๆ",
+          "hint": "ถ้ามี",
+          "fields": [
+            {
+              "id": "other_wellbeing_surveys",
+              "label": "เครื่องมืออื่นๆ",
+              "type": "textarea",
+              "required": false,
+              "rows": 3,
+              "placeholder": "ระบุเครื่องมือและผลสำรวจอื่นๆ..."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "step-4",
+      "stepNumber": 4,
+      "title": "ส่วนที่ 4: ระบบการบริหารและสภาพแวดล้อมที่เอื้อต่อสุขภาวะ",
+      "icon": "⚙️",
+      "description": "สถานะระบบสนับสนุน การอบรม และสภาพแวดล้อม",
+      "sections": [
+        {
+          "sectionId": "support-systems",
+          "title": "13. สถานะระบบการบริหารบุคลากร",
+          "hint": "เฉพาะข้าราชการ - โปรดระบุว่า มีตามแผน / มีไม่ครบตามแผน / ไม่มี",
+          "fields": [
+            {
+              "id": "support_systems_group",
+              "type": "support-systems-radio-group",
+              "items": [
+                "แผนอัตรากำลังและแผนแม่บท",
+                "มาตรฐานตำแหน่งและมาตรฐานงาน",
+                "ระบบประเมินผลงาน",
+                "ระบบสะสมคะแนนบำนาญ",
+                "ระบบการอบรม",
+                "ระบบสวัสดิการและสิทธิประโยชน์",
+                "ระบบความปลอดภัยและอาชีวอนามัย"
+              ]
+            }
+          ]
+        },
+        {
+          "sectionId": "training-hours",
+          "title": "14. ชั่วโมงการอบรมเฉลี่ยต่อคนต่อปี",
+          "hint": "ปีล่าสุดและ 5 ปีย้อนหลัง (ถ้ามี)",
+          "fields": [
+            {
+              "id": "training-hours-group",
+              "label": "ชั่วโมงการอบรม",
+              "type": "number-group",
+              "groupFields": [
+                {"id": "training_hours_2568", "label": "2568 (ชั่วโมง)", "type": "number", "min": 0, "step": 0.5, "placeholder": "0.0"},
+                {"id": "training_hours_2567", "label": "2567 (ชั่วโมง)", "type": "number", "min": 0, "step": 0.5, "placeholder": "0.0"},
+                {"id": "training_hours_2566", "label": "2566 (ชั่วโมง)", "type": "number", "min": 0, "step": 0.5, "placeholder": "0.0"},
+                {"id": "training_hours_2565", "label": "2565 (ชั่วโมง)", "type": "number", "min": 0, "step": 0.5, "placeholder": "0.0"},
+                {"id": "training_hours_2564", "label": "2564 (ชั่วโมง)", "type": "number", "min": 0, "step": 0.5, "placeholder": "0.0"}
+              ],
+              "hint": "ระบุจำนวนชั่วโมงเฉลี่ยต่อคนต่อปี (เช่น 40.5)"
+            }
+          ]
+        },
+        {
+          "sectionId": "digital-systems",
+          "title": "15. ระบบสนับสนุนดิจิทัล",
+          "hint": "เลือกได้มากกว่า 1 ข้อ",
+          "fields": [
+            {
+              "id": "digital_systems",
+              "label": "ระบบดิจิทัลที่มี",
+              "type": "checkbox",
+              "required": false,
+              "options": [
+                {"value": "e_doc", "label": "ระบบเอกสารอิเล็กทรอนิกส์"},
+                {"value": "e_sign", "label": "ระบบลงนามอิเล็กทรอนิกส์ (E-signature)"},
+                {"value": "cloud", "label": "ระบบ Cloud"},
+                {"value": "hr_digital", "label": "ระบบ HR Digital"},
+                {"value": "health_db", "label": "ระบบฐานข้อมูลสุขภาพ"},
+                {"value": "none", "label": "ไม่มีระบบดังกล่าว"}
+              ]
+            }
+          ]
+        },
+        {
+          "sectionId": "ergonomics",
+          "title": "16. การจัดสภาพแวดล้อมตามหลักการยศาสตร์ (Ergonomics)",
+          "fields": [
+            {
+              "id": "ergonomics_status",
+              "label": "สถานะการจัดสภาพแวดล้อม",
+              "type": "radio",
+              "required": false,
+              "options": [
+                {"value": "none", "label": "ยังไม่มี"},
+                {"value": "planned", "label": "มีแผนแต่ยังไม่ดำเนินการ", "hasDetail": true, "detailId": "ergonomics_planned_detail"},
+                {"value": "in_progress", "label": "อยู่ระหว่างดำเนินการ", "hasDetail": true, "detailId": "ergonomics_in_progress_detail"},
+                {"value": "done", "label": "ดำเนินการแล้ว", "hasDetail": true, "detailId": "ergonomics_done_detail"}
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "step-5",
+      "stepNumber": 5,
+      "title": "ส่วนที่ 5: ทิศทาง เป้าหมาย และข้อเสนอแนะ",
+      "icon": "🎯",
+      "description": "จุดเน้นการพัฒนาและข้อเสนอแนะ",
+      "sections": [
+        {
+          "sectionId": "strategic-priority",
+          "title": "17. จุดเน้นการพัฒนา",
+          "hint": "โปรดเลือกไม่เกิน 3 ประเด็นสำคัญและจัดลำดับ 1-3",
+          "fields": [
+            {
+              "id": "strategic_priority_ranking",
+              "label": "เลือกจุดเน้นการพัฒนา",
+              "type": "ranking",
+              "required": false,
+              "maxSelections": 3,
+              "options": [
+                {"value": "service_efficiency", "label": "การเพิ่มประสิทธิภาพการให้บริการประชาชน"},
+                {"value": "digital_capability", "label": "การพัฒนาศักยภาพด้านดิจิทัล"},
+                {"value": "new_leaders", "label": "การพัฒนาผู้นำรุ่นใหม่"},
+                {"value": "reduce_sick_leave", "label": "การลดอัตราการลาป่วย"},
+                {"value": "reduce_turnover", "label": "การลดอัตราการลาออก"},
+                {"value": "other", "label": "อื่น ๆ (โปรดระบุ)", "hasDetail": true, "detailId": "strategic_priority_other"}
+              ]
+            },
+            {
+              "id": "strategic_priority_rank1",
+              "label": "ลำดับที่ 1",
+              "type": "hidden"
+            },
+            {
+              "id": "strategic_priority_rank2",
+              "label": "ลำดับที่ 2",
+              "type": "hidden"
+            },
+            {
+              "id": "strategic_priority_rank3",
+              "label": "ลำดับที่ 3",
+              "type": "hidden"
+            }
+          ]
+        },
+        {
+          "sectionId": "intervention-feedback",
+          "title": "18. ข้อเสนอแนะเกี่ยวกับ Intervention Packages เพิ่มเติม",
+          "hint": "ถ้ามี",
+          "fields": [
+            {
+              "id": "intervention_packages_feedback",
+              "label": "ข้อเสนอแนะ",
+              "type": "textarea",
+              "required": false,
+              "rows": 4,
+              "placeholder": "โปรดระบุข้อเสนอแนะเกี่ยวกับฐานข้อมูล Intervention Packages..."
+            }
+          ]
+        },
+        {
+          "sectionId": "hrd-plan",
+          "title": "19. ไฟล์ HRD PLAN ปี 2567-2570 พร้อมผลการปฏิบัติงาน",
+          "hint": "ถ้ามี",
+          "fields": [
+            {
+              "id": "hrd_plan_results",
+              "label": "ผลการปฏิบัติงานตามแผนปีล่าสุด",
+              "type": "textarea",
+              "required": false,
+              "rows": 3,
+              "placeholder": "สรุปผลการปฏิบัติงาน..."
+            },
+            {
+              "id": "hrd_plan_file",
+              "label": "ไฟล์ PDF (HRD Plan)",
+              "type": "file",
+              "required": false,
+              "accept": ".pdf",
+              "maxSize": "1MB",
+              "hint": "ไฟล์ PDF เท่านั้น | ขนาดไม่เกิน 1 MB"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
