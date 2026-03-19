@@ -392,3 +392,43 @@ const SURVEY_DATA = {
         ]
     }
 };
+
+// ========================================
+// Form Config Overrides
+// Applies admin-configured text overrides from form_configs table.
+// Key format:
+//   "sectionKey.title"           → SURVEY_DATA[sectionKey].title
+//   "sectionKey.sub.N.title"     → SURVEY_DATA[sectionKey].subsections[N].title
+//   "sectionKey.q.questionId"    → question.text for matching id in any subsection
+// ========================================
+function applyWellbeingFormConfig(configJson) {
+    if (!configJson || typeof configJson !== 'object') return;
+    Object.entries(configJson).forEach(([key, value]) => {
+        if (!value || !value.trim()) return;
+        const parts = key.split('.');
+        const sectionKey = parts[0];
+        const section = SURVEY_DATA[sectionKey];
+        if (!section) return;
+
+        if (parts.length === 2 && parts[1] === 'title') {
+            // e.g. "mental.title"
+            section.title = value.trim();
+        } else if (parts.length === 4 && parts[1] === 'sub' && parts[3] === 'title') {
+            // e.g. "mental.sub.0.title"
+            const idx = parseInt(parts[2], 10);
+            if (section.subsections && section.subsections[idx]) {
+                section.subsections[idx].title = value.trim();
+            }
+        } else if (parts.length === 3 && parts[1] === 'q') {
+            // e.g. "mental.q.tmhi_1"
+            const qId = parts[2];
+            if (section.subsections) {
+                for (const sub of section.subsections) {
+                    if (!sub.questions) continue;
+                    const q = sub.questions.find(q => q.id === qId);
+                    if (q) { q.text = value.trim(); break; }
+                }
+            }
+        }
+    });
+}

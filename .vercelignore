@@ -7,6 +7,8 @@ yarn-error.log*
 # Testing
 coverage/
 .nyc_output/
+test-files/
+test-pdfs/
 
 # IDE
 .vscode/
@@ -23,6 +25,7 @@ Thumbs.db
 *.backup
 *.bak
 *.tmp
+backup/
 
 # Python
 __pycache__/
@@ -38,6 +41,8 @@ logs/
 .env
 .env.local
 .env.*.local
+.env.example
+.env.local.example
 
 # Build
 dist/
@@ -45,6 +50,7 @@ build/
 
 # Documentation drafts
 แบบสอบถามบท 1/
+docs/
 
 # Git
 .git/
@@ -53,3 +59,18 @@ build/
 # Misc
 *.csv
 encoding_output.txt
+
+# Server-side scripts and config (not needed for static site)
+scripts/
+supabase/
+apps-script/
+docker-compose.yml
+setup-supabase.ps1
+*.tex
+*.ps1
+/direct-submit-final.png
+/error-complete.png
+form-test.js
+package.json
+package-lock.json
+*.md

@@ -79,17 +79,27 @@ Well-being Survey/
 
 ### 1. เตรียม Supabase
 
-```sql
--- รัน migration ใน Supabase SQL Editor
--- ไฟล์: supabase/migrations/20250303_update_schema_v3.sql
+```bash
+# 1. ติดตั้ง Supabase CLI
+npm install -g supabase
+
+# 2. Login และ Link โปรเจกต์
+npx supabase login
+npx supabase link --project-ref [YOUR_PROJECT_REF]
+
+# 3. Deploy Edge Functions (สำหรับ Google Sheets Sync)
+npm run supabase:deploy
 ```
 
-### 2. ตั้งค่า Supabase
+### 2. ตั้งค่า Environment Variables
 
-แก้ไข `js/supabase-config.js`:
-```javascript
-const SUPABASE_URL = 'https://YOUR_PROJECT.supabase.co';
-const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY';
+สร้างไฟล์ `.env.local` จาก `.env.local.example`:
+```env
+SUPABASE_URL=https://[REF].supabase.co
+SUPABASE_ANON_KEY=[ANON_KEY]
+SUPABASE_SERVICE_ROLE_KEY=[SERVICE_ROLE_KEY]
+GOOGLE_SYNC_WEBHOOK_URL=[GAS_URL]
+GOOGLE_SYNC_SHARED_SECRET=[SECRET]
 ```
 
 ### 3. เติมข้อมูลทดสอบ (ถ้าต้องการ)

@@ -4,13 +4,21 @@
   "description": "Well-being Survey - HRD Chapter 1 Form with enhanced security and performance",
   "scripts": {
     "dev": "npx serve",
-    "build": "echo 'Static site - no build required'",
+    "build": "echo '✅ Static site build completed - no build process required'",
     "deploy": "vercel --prod",
     "deploy:preview": "vercel",
+    "lint": "echo 'ℹ️ No ESLint config - skipping lint'",
+    "lint:fix": "echo 'ℹ️ No ESLint config - skipping lint fix'",
+    "format": "echo 'ℹ️ No Prettier config - skipping format'",
+    "test": "echo 'ℹ️ No tests configured - skipping test'",
     "supabase:test": "node scripts/supabase-admin.js",
     "supabase:stats": "node -e \"require('./scripts/supabase-admin').getDatabaseStats()\"",
     "supabase:export": "node -e \"require('./scripts/supabase-admin').exportData()\"",
-    "db:status": "node scripts/supabase-admin.js"
+    "sync:google:pending": "node scripts/sync-ch1-google.js pending",
+    "sync:google:all": "node scripts/sync-ch1-google.js all",
+    "db:status": "node scripts/supabase-admin.js",
+    "db:clear-test": "node scripts/clear-ch1-test-data.js",
+    "supabase:deploy": "npx supabase functions deploy google-sync --no-verify-jwt"
   },
   "main": "index.js",
   "directories": {

@@ -1,15 +1,17 @@
 {
+    "framework": null,
+    "buildCommand": null,
     "outputDirectory": ".",
     "cleanUrls": true,
     "trailingSlash": false,
     "rewrites": [
         {
-            "destination": "/admin.html",
-            "source": "/admin"
+            "source": "/admin-login",
+            "destination": "/admin-login.html"
         },
         {
-            "source": "/ch1",
-            "destination": "/ch1.html"
+            "source": "/admin",
+            "destination": "/admin.html"
         }
     ],
     "headers": [
@@ -39,7 +41,7 @@
             "headers": [
                 {
                     "key": "Cache-Control",
-                    "value": "public, max-age=31536000, immutable"
+                    "value": "public, max-age=0, must-revalidate"
                 }
             ]
         },
@@ -48,7 +50,7 @@
             "headers": [
                 {
                     "key": "Cache-Control",
-                    "value": "public, max-age=31536000, immutable"
+                    "value": "public, max-age=0, must-revalidate"
                 }
             ]
         },

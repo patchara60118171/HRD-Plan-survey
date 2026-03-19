@@ -43,6 +43,11 @@ playwright.config.*
 screenshots/
 test-results/
 playwright-report/
+docs/screenshots/
+
+# Playwright test files (moved to tests/e2e/)
+playwright-*.js
+submit-200-records.js
 
 # Temp files
 add-email-column.js
@@ -55,3 +60,66 @@ generate-*.js
 # Old database analysis
 database-analysis.js
 database-analysis-report.md
+
+# ===== Claude Worktrees (auto-generated, DO NOT COMMIT) =====
+.claude/worktrees/
+
+# ===== One-time fix/migration scripts (root level) =====
+add-funcs.js
+add-funcs2.js
+apply-all-fixes.js
+apply-change2.js
+apply-changes.js
+check-syntax.js
+fix-admin.js
+fix-calls.js
+fix.js
+form-test.js
+
+# ===== Windows batch/PowerShell scripts =====
+run.bat
+run-check.bat
+setup-supabase.ps1
+
+# ===== Screenshots / debug images =====
+*.png
+*.jpg
+*.jpeg
+!assets/logo.png
+
+# ===== Test PDF folders =====
+test-files/
+test-pdfs/
+
+# ===== Backup folder =====
+backup/
+
+# ===== Duplicate/draft HTML at root (working copies) =====
+admin-wireframe.html
+ch1-plain-form.tex
+ch1-printable.html
+ch1-printable-simple.html
+
+# ===== Analysis/setup docs (working notes, not for repo) =====
+ADMIN_PORTAL_ANALYSIS_THAI.md
+AUDIT_REPORT.md
+CLAUDE_SKILLS_REQUIREMENTS.md
+IMPLEMENTATION_SUMMARY.md
+NOCODB_SETUP.md
+PROJECT_ANALYSIS_PUBLIC.md
+PROJECT_ANALYSIS_PUBLIC_THAI.md
+PROJECT_ANALYSIS_REPORT.md
+PROJECT_OVERVIEW.md
+SETUP_ADMIN_ACCESS.md
+SETUP_COMPLETE.md
+TESTING_GUIDE_COMPLETE.md
+
+# ===== Supabase temp & dangerous scripts =====
+supabase/.temp/
+supabase/clear-ch1-data.sql
+
+# ===== Org links (contains production URLs - use seeds/ instead) =====
+Organization_Links.csv
+
+# ===== Draft/working folder (Thai name folder at root) =====
+แบบสอบถามบท 1/
