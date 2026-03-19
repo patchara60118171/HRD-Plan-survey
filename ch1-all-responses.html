@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ข้อมูล CH1 ทั้งหมด — HRD Plan Survey</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Sarabun',sans-serif;background:#f5f7fb;color:#1e293b;font-size:14px}
+.topbar{background:#1e3a5f;color:#fff;padding:13px 24px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:100}
+.topbar h1{font-size:17px;font-weight:600}
+.topbar-right{margin-left:auto;display:flex;gap:8px;align-items:center}
+.btn{padding:6px 14px;border-radius:6px;border:none;cursor:pointer;font-size:13px;font-weight:500;transition:.15s}
+.btn-primary{background:#2563eb;color:#fff}.btn-primary:hover{background:#1d4ed8}
+.btn-secondary{background:#fff;color:#374151;border:1px solid #d1d5db}.btn-secondary:hover{background:#f9fafb}
+.btn-green{background:#16a34a;color:#fff}.btn-green:hover{background:#15803d}
+.container{padding:20px 24px}
+.toolbar{display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+.toolbar input[type=search]{padding:7px 12px;border:1px solid #d1d5db;border-radius:7px;font-size:14px;width:240px;font-family:inherit}
+.toolbar input:focus{outline:none;border-color:#2563eb}
+.summary-row{display:flex;gap:16px;margin-bottom:18px;flex-wrap:wrap}
+.summary-card{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:12px 18px;min-width:140px}
+.summary-card .num{font-size:24px;font-weight:700;color:#1e3a5f}
+.summary-card .lbl{font-size:12px;color:#64748b;margin-top:2px}
+.table-wrap{background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:auto}
+table{width:100%;border-collapse:collapse;min-width:900px}
+thead th{background:#f8fafc;padding:10px 14px;text-align:left;font-size:12px;color:#64748b;font-weight:600;border-bottom:1px solid #e2e8f0;white-space:nowrap;position:sticky;top:0}
+tbody tr{border-bottom:1px solid #f1f5f9;transition:.1s}
+tbody tr:hover{background:#f8fafc}
+tbody td{padding:10px 14px;font-size:13px;vertical-align:middle}
+.badge{display:inline-block;padding:2px 8px;border-radius:5px;font-size:11px;font-weight:600}
+.badge-draft{background:#fef3c7;color:#92400e}
+.badge-submitted{background:#dcfce7;color:#166534}
+.badge-reopened{background:#fce7f3;color:#9d174d}
+.action-cell{display:flex;gap:6px}
+.spinner{display:inline-block;width:20px;height:20px;border:2px solid #e2e8f0;border-top-color:#2563eb;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:50vh;gap:14px;color:#64748b}
+.alert{border-radius:8px;padding:13px 16px;font-size:14px;margin-bottom:16px}
+.alert-error{background:#fee2e2;border:1px solid #fca5a5;color:#7f1d1d}
+.alert-info{background:#eff6ff;border:1px solid #93c5fd;color:#1e3a8a}
+.empty-state{text-align:center;padding:60px 20px;color:#94a3b8}
+.org-hr-notice{background:#fef9c3;border:1px solid #fde047;border-radius:8px;padding:10px 16px;font-size:13px;color:#713f12;margin-bottom:16px}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>📋 ข้อมูล CH1 ทั้งหมด</h1>
+  <span id="role-badge" style="background:rgba(255,255,255,.15);border-radius:6px;padding:3px 10px;font-size:12px"></span>
+  <div class="topbar-right">
+    <button class="btn btn-secondary" onclick="history.back()">← กลับ</button>
+    <button class="btn btn-green" onclick="exportCSV()" id="btn-export" style="display:none">📥 Export CSV</button>
+  </div>
+</div>
+
+<div class="container">
+  <div class="loading-screen" id="loading-screen">
+    <div class="spinner"></div>
+    <div>กำลังโหลดข้อมูล...</div>
+  </div>
+
+  <div id="content-area" style="display:none">
+    <div class="org-hr-notice" id="org-hr-notice" style="display:none">
+      🔒 คุณเห็นเฉพาะข้อมูลขององค์กรคุณ
+    </div>
+
+    <div class="summary-row" id="summary-row"></div>
+
+    <div class="toolbar">
+      <input type="search" id="search-input" placeholder="🔍 ค้นหาองค์กร..." oninput="filterTable()">
+      <select id="status-filter" onchange="filterTable()" style="padding:7px 12px;border:1px solid #d1d5db;border-radius:7px;font-size:14px;font-family:inherit">
+        <option value="">ทุก Status</option>
+        <option value="draft">Draft</option>
+        <option value="submitted">ส่งแล้ว</option>
+        <option value="reopened">เปิดแก้ไข</option>
+      </select>
+      <span id="row-count" style="color:#64748b;font-size:13px"></span>
+    </div>
+
+    <div class="table-wrap">
+      <table id="main-table">
+        <thead id="table-head"></thead>
+        <tbody id="table-body"></tbody>
+      </table>
+      <div class="empty-state" id="empty-state" style="display:none">ไม่พบข้อมูลที่ตรงกับเงื่อนไข</div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js"></script>
+<script src="js/form-schema.js"></script>
+<script>
+'use strict';
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let allRows = [], schema = null, userRole = null, userOrgCode = null;
+
+// Key columns to show in the table (order matters)
+const TABLE_COLS = [
+  'organization','org_code','total_staff','ncd_count','ncd_ratio_pct',
+  'engagement_score','training_hours','turnover_rate','status','updated_at'
+];
+
+async function init() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) { location.href = 'org-portal.html'; return; }
+
+  const { data: roleRow } = await sb.from('admin_user_roles').select('role,org_code,display_name').eq('email', session.user.email).maybeSingle();
+  if (!roleRow) { showError('ไม่พบสิทธิ์การเข้าใช้งาน'); return; }
+
+  userRole = roleRow.role;
+  userOrgCode = roleRow.org_code || null;
+  document.getElementById('role-badge').textContent = userRole;
+
+  if (userRole === 'org_hr') {
+    document.getElementById('org-hr-notice').style.display = '';
+  } else {
+    document.getElementById('btn-export').style.display = '';
+  }
+
+  try {
+    [schema] = await Promise.all([FormSchema.loadFormSchema('ch1')]);
+
+    // Fetch responses (RLS handles org_hr scoping automatically)
+    let q = sb.from('hrd_ch1_responses').select('*').order('organization', { ascending: true });
+    if (userRole === 'org_hr' && userOrgCode) {
+      q = q.eq('org_code', userOrgCode);
+    }
+    const { data, error } = await q;
+    if (error) throw error;
+    allRows = data || [];
+  } catch(e) { showError('โหลดข้อมูลไม่สำเร็จ: ' + e.message); return; }
+
+  renderSummary();
+  renderTable();
+  document.getElementById('loading-screen').style.display = 'none';
+  document.getElementById('content-area').style.display = '';
+}
+
+function renderSummary() {
+  const total = allRows.length;
+  const submitted = allRows.filter(r => r.status === 'submitted').length;
+  const draft = allRows.filter(r => r.status === 'draft').length;
+  const avgStaff = total > 0 ? Math.round(allRows.reduce((s,r) => s + (Number(r.total_staff)||0), 0) / total) : 0;
+
+  document.getElementById('summary-row').innerHTML = `
+    <div class="summary-card"><div class="num">${total}</div><div class="lbl">องค์กรทั้งหมด</div></div>
+    <div class="summary-card"><div class="num" style="color:#16a34a">${submitted}</div><div class="lbl">ส่งแล้ว</div></div>
+    <div class="summary-card"><div class="num" style="color:#d97706">${draft}</div><div class="lbl">Draft</div></div>
+    <div class="summary-card"><div class="num">${avgStaff}</div><div class="lbl">เฉลี่ยบุคลากร/org</div></div>
+  `;
+}
+
+function getLabel(key) {
+  if (schema?.questionsMap) {
+    const q = schema.questionsMap.get(key);
+    if (q) return q.label_th;
+  }
+  // Fallback labels
+  const fallback = { organization:'หน่วยงาน', org_code:'รหัส', total_staff:'บุคลากรรวม',
+    ncd_count:'NCD รวม', ncd_ratio_pct:'NCD(%)', engagement_score:'Engagement',
+    training_hours:'อบรม(ชม)', turnover_rate:'ลาออก(%)', status:'Status', updated_at:'อัปเดต' };
+  return fallback[key] || key;
+}
+
+function renderTable(rows = allRows) {
+  const thead = document.getElementById('table-head');
+  const tbody = document.getElementById('table-body');
+
+  // Build header
+  thead.innerHTML = '<tr>' + TABLE_COLS.map(k => `<th>${getLabel(k)}</th>`).join('') + '<th>การดำเนินการ</th></tr>';
+
+  if (!rows.length) {
+    tbody.innerHTML = '';
+    document.getElementById('empty-state').style.display = '';
+    document.getElementById('row-count').textContent = '0 รายการ';
+    return;
+  }
+
+  document.getElementById('empty-state').style.display = 'none';
+  document.getElementById('row-count').textContent = rows.length + ' รายการ';
+
+  tbody.innerHTML = rows.map(row => {
+    const cells = TABLE_COLS.map(k => {
+      let v = row[k];
+      if (k === 'status') {
+        const labels = {draft:'Draft', submitted:'ส่งแล้ว', reopened:'เปิดแก้ไข'};
+        return `<td><span class="badge badge-${v||'draft'}">${labels[v]||v||'—'}</span></td>`;
+      }
+      if (k === 'updated_at') {
+        v = v ? new Date(v).toLocaleDateString('th-TH', {day:'2-digit',month:'short',year:'2-digit'}) : '—';
+        return `<td style="color:#64748b">${v}</td>`;
+      }
+      if (v === null || v === undefined || v === '') return `<td style="color:#cbd5e1">—</td>`;
+      return `<td>${v}</td>`;
+    }).join('');
+
+    const canEdit = userRole === 'super_admin' || userRole === 'admin' || ['draft','reopened'].includes(row.status);
+    const orgParam = encodeURIComponent(row.org_code || row.organization || '');
+    const actions = `
+      <td class="action-cell">
+        <button class="btn btn-secondary" onclick="location.href='ch1-preview.html?org=${orgParam}&id=${row.id}'">👁️</button>
+        ${canEdit ? `<button class="btn btn-primary" onclick="location.href='ch1-edit.html?org=${orgParam}&id=${row.id}'">✏️</button>` : ''}
+        <button class="btn" style="background:#fef2f2;color:#dc2626;border:1px solid #fca5a5" onclick="location.href='ch1-individual-pdf.html?org=${orgParam}&id=${row.id}'">📄</button>
+      </td>`;
+    return `<tr>${cells}${actions}</tr>`;
+  }).join('');
+}
+
+function filterTable() {
+  const q = document.getElementById('search-input').value.toLowerCase();
+  const st = document.getElementById('status-filter').value;
+  const filtered = allRows.filter(r => {
+    const matchQ = !q || (r.organization||'').toLowerCase().includes(q) || (r.org_code||'').toLowerCase().includes(q);
+    const matchSt = !st || r.status === st;
+    return matchQ && matchSt;
+  });
+  renderTable(filtered);
+}
+
+function exportCSV() {
+  if (!allRows.length) return;
+  const cols = ['organization','org_code','total_staff','type_official','type_employee','type_contract',
+    'ncd_count','ncd_ratio_pct','disease_diabetes','disease_hypertension',
+    'engagement_score','training_hours','turnover_rate','transfer_rate','status','updated_at'];
+  const header = cols.map(k => getLabel(k));
+  const rows = allRows.map(r => cols.map(k => {
+    const v = r[k];
+    if (Array.isArray(v)) return '"' + v.join(', ') + '"';
+    if (typeof v === 'string' && v.includes(',')) return '"' + v + '"';
+    return v ?? '';
+  }));
+  const csv = [header, ...rows].map(r => r.join(',')).join('\n');
+  const blob = new Blob(['\ufeff' + csv], {type:'text/csv;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `ch1_responses_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+}
+
+function showError(msg) {
+  document.getElementById('loading-screen').innerHTML = `<div class="alert alert-error" style="max-width:480px">⛔ ${msg}</div><br><a href="admin.html" style="color:#2563eb">← กลับ Admin</a>`;
+}
+
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PDF Report CH1 — HRD Plan Survey</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Sarabun',sans-serif;background:#f0f4f8;color:#1e293b;font-size:14px}
+
+/* Screen toolbar */
+.toolbar{background:#1e3a5f;color:#fff;padding:12px 24px;display:flex;align-items:center;gap:14px}
+.toolbar h1{font-size:16px;font-weight:600}
+.toolbar-right{margin-left:auto;display:flex;gap:8px}
+.btn{padding:7px 16px;border-radius:7px;border:none;cursor:pointer;font-size:14px;font-weight:500;transition:.15s}
+.btn-primary{background:#2563eb;color:#fff}.btn-primary:hover{background:#1d4ed8}
+.btn-secondary{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3)}.btn-secondary:hover{background:rgba(255,255,255,.25)}
+.btn-red{background:#dc2626;color:#fff}.btn-red:hover{background:#b91c1c}
+
+/* PDF page container */
+.page-wrap{max-width:794px;margin:24px auto;background:#fff;border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,.12)}
+.pdf-page{padding:40px 48px;min-height:1123px;position:relative}
+
+/* Header */
+.pdf-header{border-bottom:3px solid #1e3a5f;padding-bottom:18px;margin-bottom:28px;display:flex;justify-content:space-between;align-items:flex-start}
+.pdf-header-left .title{font-size:20px;font-weight:700;color:#1e3a5f;margin-bottom:4px}
+.pdf-header-left .subtitle{font-size:13px;color:#64748b}
+.pdf-header-right{text-align:right;font-size:12px;color:#64748b;line-height:1.6}
+.pdf-logo{font-size:28px;margin-bottom:4px}
+
+/* Org info strip */
+.org-strip{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:14px 18px;margin-bottom:24px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.org-strip .item label{font-size:11px;color:#64748b;display:block;margin-bottom:2px}
+.org-strip .item .val{font-size:14px;font-weight:600;color:#1e293b}
+.status-chip{display:inline-block;padding:2px 8px;border-radius:5px;font-size:11px;font-weight:700}
+.chip-draft{background:#fef3c7;color:#92400e}
+.chip-submitted{background:#dcfce7;color:#166534}
+.chip-reopened{background:#fce7f3;color:#9d174d}
+
+/* Section */
+.pdf-section{margin-bottom:22px}
+.pdf-section-title{font-size:13px;font-weight:700;color:#1e3a5f;background:#eff6ff;border-left:3px solid #2563eb;padding:6px 12px;margin-bottom:10px;border-radius:0 4px 4px 0}
+.field-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:0}
+.field-item{padding:7px 10px;border-bottom:1px solid #f1f5f9;border-right:1px solid #f1f5f9}
+.field-item:nth-child(even){border-right:none}
+.field-item .fl{font-size:11px;color:#64748b;margin-bottom:2px}
+.field-item .fv{font-size:13px;font-weight:500;color:#1e293b}
+.field-item .fv.empty{color:#cbd5e1;font-style:italic}
+.field-full{padding:7px 10px;border-bottom:1px solid #f1f5f9;grid-column:1/-1}
+.field-full .fl{font-size:11px;color:#64748b;margin-bottom:3px}
+.field-full .fv{font-size:13px;line-height:1.5}
+
+/* Footer */
+.pdf-footer{border-top:1px solid #e2e8f0;padding-top:14px;margin-top:auto;display:flex;justify-content:space-between;font-size:11px;color:#94a3b8;position:absolute;bottom:32px;left:48px;right:48px}
+
+/* Spinner / Loading */
+.spinner{display:inline-block;width:22px;height:22px;border:2px solid #e2e8f0;border-top-color:#2563eb;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:70vh;gap:16px;color:#64748b}
+.alert{border-radius:8px;padding:13px 16px;font-size:14px;margin:16px 24px}
+.alert-error{background:#fee2e2;border:1px solid #fca5a5;color:#7f1d1d}
+
+/* Print overrides */
+@media print{
+  body{background:#fff}
+  .toolbar,.no-print{display:none!important}
+  .page-wrap{box-shadow:none;border-radius:0;margin:0;max-width:100%}
+  .pdf-page{padding:20mm 18mm;min-height:auto}
+  .pdf-footer{position:fixed;bottom:0}
+  @page{margin:0;size:A4}
+}
+</style>
+</head>
+<body>
+
+<div class="toolbar no-print">
+  <h1>📄 รายงาน CH1</h1>
+  <div class="toolbar-right">
+    <button class="btn btn-secondary" onclick="history.back()">← กลับ</button>
+    <button class="btn btn-primary" onclick="window.print()">🖨️ พิมพ์</button>
+    <button class="btn btn-red" onclick="downloadPDF()">📥 บันทึก PDF</button>
+  </div>
+</div>
+
+<div id="loading-screen" class="loading-screen">
+  <div class="spinner"></div>
+  <div>กำลังสร้างรายงาน...</div>
+</div>
+
+<div id="pdf-container" style="display:none"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js"></script>
+<script src="js/form-schema.js"></script>
+<script>
+'use strict';
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const params = new URLSearchParams(location.search);
+const ORG_PARAM = params.get('org');
+const ID_PARAM  = params.get('id');
+
+let schema = null, responseData = null, userRole = null, userOrgCode = null;
+
+async function init() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) { location.href = 'org-portal.html'; return; }
+
+  const { data: roleRow } = await sb.from('admin_user_roles').select('role,org_code').eq('email', session.user.email).maybeSingle();
+  if (!roleRow) { showError('ไม่พบสิทธิ์การเข้าใช้งาน'); return; }
+
+  userRole = roleRow.role;
+  userOrgCode = roleRow.org_code || null;
+
+  if (userRole === 'org_hr') {
+    if (!userOrgCode || (ORG_PARAM && ORG_PARAM !== userOrgCode)) {
+      showError('คุณไม่มีสิทธิ์เข้าถึงข้อมูลองค์กรนี้'); return;
+    }
+  }
+
+  const targetOrg = ORG_PARAM || userOrgCode;
+  if (!targetOrg) { showError('ไม่พบรหัสองค์กร'); return; }
+
+  try {
+    [schema, responseData] = await Promise.all([
+      FormSchema.loadFormSchema('ch1'),
+      loadResponse(targetOrg)
+    ]);
+  } catch(e) { showError('โหลดข้อมูลไม่สำเร็จ: ' + e.message); return; }
+
+  if (!responseData) { showError('ไม่พบข้อมูล CH1 สำหรับองค์กรนี้'); return; }
+
+  renderPDF();
+}
+
+async function loadResponse(orgCode) {
+  let q = sb.from('hrd_ch1_responses').select('*').order('created_at', {ascending: false});
+  if (ID_PARAM) q = q.eq('id', ID_PARAM);
+  else q = q.eq('org_code', orgCode).limit(1);
+  const { data } = await q.maybeSingle();
+  return data;
+}
+
+function getLabel(key) {
+  if (schema?.questionsMap) {
+    const q = schema.questionsMap.get(key);
+    if (q) return q.label_th;
+  }
+  return key;
+}
+
+function fv(key) {
+  const v = responseData[key];
+  if (v === null || v === undefined || v === '') return '<span class="fv empty">—</span>';
+  if (Array.isArray(v)) return `<span class="fv">${v.join(', ')}</span>`;
+  return `<span class="fv">${v}</span>`;
+}
+
+function fieldItem(key, full = false) {
+  const cls = full ? 'field-full' : 'field-item';
+  return `<div class="${cls}"><div class="fl">${getLabel(key)}</div><div>${fv(key)}</div></div>`;
+}
+
+function renderPDF() {
+  const r = responseData;
+  const orgName = r.organization || ORG_PARAM || '';
+  const status = r.status || 'draft';
+  const chipCls = `status-chip chip-${status}`;
+  const statusLabel = {draft:'Draft', submitted:'ส่งแล้ว', reopened:'เปิดแก้ไข'}[status] || status;
+  const printDate = new Date().toLocaleDateString('th-TH', {day:'numeric',month:'long',year:'numeric'});
+  const updateDate = r.updated_at ? new Date(r.updated_at).toLocaleDateString('th-TH', {day:'numeric',month:'long',year:'numeric'}) : '—';
+
+  const html = `
+  <div class="page-wrap">
+    <div class="pdf-page">
+
+      <!-- Header -->
+      <div class="pdf-header">
+        <div class="pdf-header-left">
+          <div class="pdf-logo">🏛️</div>
+          <div class="title">รายงานสุขภาวะองค์กร — บทที่ 1</div>
+          <div class="subtitle">แบบสรุปข้อมูลองค์กร (HRD CH1) | รอบ 2569</div>
+        </div>
+        <div class="pdf-header-right">
+          <div>วันที่พิมพ์: ${printDate}</div>
+          <div>วันที่อัปเดต: ${updateDate}</div>
+          <div>รหัสเอกสาร: ${r.id ? r.id.slice(0,8).toUpperCase() : '—'}</div>
+        </div>
+      </div>
+
+      <!-- Org strip -->
+      <div class="org-strip">
+        <div class="item"><label>หน่วยงาน</label><div class="val">${orgName}</div></div>
+        <div class="item"><label>รหัสหน่วยงาน</label><div class="val">${r.org_code || '—'}</div></div>
+        <div class="item"><label>สถานะ</label><div class="val"><span class="${chipCls}">${statusLabel}</span></div></div>
+      </div>
+
+      <!-- Section 1: Workforce -->
+      <div class="pdf-section">
+        <div class="pdf-section-title">👥 ข้อมูลบุคลากร</div>
+        <div class="field-grid">
+          ${fieldItem('total_staff')}${fieldItem('type_official')}
+          ${fieldItem('type_employee')}${fieldItem('type_contract')}
+          ${fieldItem('type_other')}${fieldItem('age_u30')}
+          ${fieldItem('age_31_40')}${fieldItem('age_41_50')}
+          ${fieldItem('age_51_60')}${''}
+        </div>
+      </div>
+
+      <!-- Section 2: Turnover -->
+      <div class="pdf-section">
+        <div class="pdf-section-title">🔄 การเปลี่ยนแปลงบุคลากร</div>
+        <div class="field-grid">
+          ${fieldItem('turnover_count')}${fieldItem('turnover_rate')}
+          ${fieldItem('transfer_count')}${fieldItem('transfer_rate')}
+        </div>
+      </div>
+
+      <!-- Section 3: Health NCD -->
+      <div class="pdf-section">
+        <div class="pdf-section-title">💊 สุขภาพและโรคไม่ติดต่อ (NCD)</div>
+        <div class="field-grid">
+          ${fieldItem('ncd_count')}${fieldItem('ncd_ratio_pct')}
+          ${fieldItem('disease_diabetes')}${fieldItem('disease_hypertension')}
+          ${fieldItem('disease_cardiovascular')}${fieldItem('disease_kidney')}
+          ${fieldItem('disease_liver')}${fieldItem('disease_cancer')}
+          ${fieldItem('disease_obesity')}${fieldItem('sick_leave_days')}
+          ${fieldItem('sick_leave_avg')}${fieldItem('clinic_users_per_year')}
+        </div>
+      </div>
+
+      <!-- Section 4: Engagement -->
+      <div class="pdf-section">
+        <div class="pdf-section-title">🎯 Engagement & พัฒนาบุคลากร</div>
+        <div class="field-grid">
+          ${fieldItem('engagement_score')}${fieldItem('training_hours')}
+          ${fieldItem('mentoring_system')}${fieldItem('job_rotation')}
+          ${fieldItem('idp_system')}${fieldItem('career_path_system')}
+        </div>
+      </div>
+
+      <!-- Section 5: Strategy -->
+      <div class="pdf-section">
+        <div class="pdf-section-title">📌 ยุทธศาสตร์และบริบทองค์กร</div>
+        <div class="field-grid">
+          ${fieldItem('strategic_priority_rank1')}${fieldItem('strategic_priority_rank2')}
+          ${fieldItem('strategic_priority_rank3',false)}${''}
+          ${fieldItem('related_policies',true)}
+          ${fieldItem('context_challenges',true)}
+          ${fieldItem('strategic_overview',true)}
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="pdf-footer">
+        <span>จัดทำโดย: ระบบ HRD Plan Survey | สสส.</span>
+        <span>${orgName} | ${printDate}</span>
+      </div>
+
+    </div>
+  </div>`;
+
+  document.getElementById('pdf-container').innerHTML = html;
+  document.getElementById('loading-screen').style.display = 'none';
+  document.getElementById('pdf-container').style.display = '';
+
+  // Auto-print if ?print=1
+  if (new URLSearchParams(location.search).get('print') === '1') {
+    setTimeout(() => window.print(), 600);
+  }
+}
+
+function downloadPDF() {
+  // Trigger print dialog — browser will save as PDF
+  window.print();
+}
+
+function showError(msg) {
+  document.getElementById('loading-screen').innerHTML = `<div class="alert alert-error" style="max-width:480px">⛔ ${msg}</div><br><a href="org-portal.html" style="color:#2563eb">← กลับหน้า Portal</a>`;
+}
+
+init();
+</script>
+</body>
+</html>

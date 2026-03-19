@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Org HR Portal — Well-being Survey</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai+Looped:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js"></script>
+<script src="js/form-schema.js"></script>
+<style>
+:root{--P:#0F4C81;--PL:#E8F0FE;--A:#00A86B;--AL:#E6F7F0;--W:#D97706;--WL:#FEF3C7;--D:#DC2626;--bg:#F7F8FA;--bg2:#EEF0F3;--card:#fff;--bdr:#E2E6EB;--tx:#1A2433;--tx2:#4A5568;--tx3:#8896A5;--shadow:0 1px 3px rgba(0,0,0,.08)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh}
+
+/* ── Header ── */
+.portal-header{background:var(--P);color:#fff;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.portal-logo{display:flex;align-items:center;gap:12px}
+.portal-logo-icon{font-size:28px}
+.portal-title{font-size:18px;font-weight:700;line-height:1.3}
+.portal-title small{font-size:12px;font-weight:400;opacity:.8;display:block}
+.portal-user{display:flex;align-items:center;gap:12px;font-size:13px}
+.portal-org-badge{background:rgba(255,255,255,.18);padding:4px 12px;border-radius:99px;font-weight:600;font-size:12px}
+.btn-logout{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;transition:background .15s}
+.btn-logout:hover{background:rgba(255,255,255,.25)}
+
+/* ── Login Gate ── */
+.login-gate{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+.login-box{background:var(--card);border-radius:12px;padding:40px;max-width:400px;width:100%;box-shadow:var(--shadow);text-align:center}
+.login-box h2{color:var(--P);margin-bottom:8px;font-size:22px}
+.login-box p{color:var(--tx2);font-size:13px;margin-bottom:24px}
+.login-box .fg{margin-bottom:14px;text-align:left}
+.login-box label{font-size:12px;font-weight:600;color:var(--tx2);display:block;margin-bottom:5px}
+.login-box input{width:100%;padding:10px 12px;border:1.5px solid var(--bdr);border-radius:8px;font-size:14px;font-family:inherit;transition:border-color .15s}
+.login-box input:focus{outline:none;border-color:var(--P);box-shadow:0 0 0 3px rgba(15,76,129,.1)}
+.login-btn{width:100%;padding:12px;background:var(--P);color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;transition:background .15s}
+.login-btn:hover{background:#0D3F6B}
+.login-btn:disabled{opacity:.6;cursor:not-allowed}
+.login-msg{font-size:12px;margin-top:12px;min-height:18px}
+.login-msg.err{color:var(--D)}
+
+/* ── Main Content ── */
+.portal-main{max-width:960px;margin:0 auto;padding:24px 20px}
+.welcome-bar{background:var(--card);border-radius:12px;padding:20px 24px;margin-bottom:20px;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:space-between}
+.welcome-bar h2{font-size:18px;color:var(--P)}
+.welcome-bar .sub{font-size:12px;color:var(--tx3);margin-top:4px}
+.status-badge{display:inline-flex;align-items:center;gap:5px;padding:5px 14px;border-radius:99px;font-size:12px;font-weight:700}
+.status-badge.submitted{background:var(--AL);color:var(--A)}
+.status-badge.draft{background:var(--WL);color:var(--W)}
+.status-badge.reopened{background:#FEF3CD;color:#92400E}
+.status-badge.none{background:var(--bg2);color:var(--tx3)}
+
+/* ── Cards ── */
+.section-card{background:var(--card);border-radius:12px;padding:24px;margin-bottom:20px;box-shadow:var(--shadow);border-left:4px solid var(--P)}
+.section-card.wb{border-left-color:var(--A)}
+.section-card h3{font-size:16px;color:var(--tx);margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.section-card .desc{font-size:13px;color:var(--tx2);margin-bottom:16px;line-height:1.6}
+.section-actions{display:flex;gap:10px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;border:none;cursor:pointer;font-family:inherit;transition:all .15s}
+.btn-primary{background:var(--P);color:#fff}.btn-primary:hover{background:#0D3F6B}
+.btn-green{background:var(--A);color:#fff}.btn-green:hover{background:#008F5B}
+.btn-outline{background:transparent;border:1.5px solid var(--bdr);color:var(--tx2)}.btn-outline:hover{border-color:var(--P);color:var(--P)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+
+/* ── Summary Table ── */
+.summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:16px}
+.summary-item{background:var(--bg);border-radius:8px;padding:14px;text-align:center}
+.summary-item .val{font-size:22px;font-weight:700;color:var(--P)}
+.summary-item .lbl{font-size:11px;color:var(--tx3);margin-top:4px}
+
+/* ── Info boxes ── */
+.info-box{padding:12px 16px;border-radius:8px;font-size:13px;margin-bottom:16px;line-height:1.6}
+.info-box.blue{background:var(--PL);color:var(--P)}
+.info-box.yellow{background:var(--WL);color:#92400E}
+.info-box.green{background:var(--AL);color:#047857}
+.info-box.red{background:#FEE2E2;color:var(--D)}
+
+/* ── Loading ── */
+.loading-overlay{position:fixed;inset:0;background:rgba(255,255,255,.85);display:flex;align-items:center;justify-content:center;z-index:9999;flex-direction:column;gap:12px}
+.spinner{width:36px;height:36px;border:3px solid var(--bg2);border-top-color:var(--P);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── Toast ── */
+.toast{position:fixed;bottom:20px;right:20px;padding:12px 20px;border-radius:8px;font-size:13px;font-weight:600;color:#fff;z-index:99999;transform:translateY(100px);opacity:0;transition:all .3s}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.success{background:var(--A)}
+.toast.error{background:var(--D)}
+.toast.warn{background:var(--W)}
+.toast.info{background:var(--P)}
+</style>
+</head>
+<body>
+
+<!-- ===== LOGIN GATE ===== -->
+<div id="login-gate" class="login-gate">
+  <div class="login-box">
+    <div style="font-size:48px;margin-bottom:12px">🏛️</div>
+    <h2>Org HR Portal</h2>
+    <p>เข้าสู่ระบบสำหรับ HR ประจำองค์กร<br>ดูข้อมูล CH1 และผลสำรวจ Well-being ขององค์กร</p>
+    <div class="fg">
+      <label>อีเมล</label>
+      <input type="email" id="login-email" placeholder="hr@example.go.th" autocomplete="email">
+    </div>
+    <div class="fg">
+      <label>รหัสผ่าน</label>
+      <input type="password" id="login-pwd" placeholder="รหัสผ่าน" autocomplete="current-password">
+    </div>
+    <button class="login-btn" id="login-btn" onclick="doLogin()">เข้าสู่ระบบ</button>
+    <div class="login-msg" id="login-msg"></div>
+  </div>
+</div>
+
+<!-- ===== MAIN PORTAL (hidden until login) ===== -->
+<div id="portal-app" style="display:none">
+  <!-- Header -->
+  <div class="portal-header">
+    <div class="portal-logo">
+      <span class="portal-logo-icon">🏛️</span>
+      <div>
+        <div class="portal-title">Org HR Portal<small>ระบบสำรวจสุขภาวะบุคลากรภาครัฐ</small></div>
+      </div>
+    </div>
+    <div class="portal-user">
+      <span id="user-email-display">—</span>
+      <span class="portal-org-badge" id="user-org-badge">—</span>
+      <button class="btn-logout" onclick="doLogout()">ออกจากระบบ</button>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="portal-main">
+    <!-- Welcome -->
+    <div class="welcome-bar">
+      <div>
+        <h2 id="org-name-display">—</h2>
+        <div class="sub" id="org-code-display">—</div>
+      </div>
+      <div id="ch1-status-badge"></div>
+    </div>
+
+    <!-- CH1 Section -->
+    <div class="section-card" id="ch1-section">
+      <h3>📝 แบบสอบถาม บทที่ 1 (CH1) — ข้อมูลสุขภาวะองค์กร</h3>
+      <div class="desc">แบบสอบถามข้อมูลบุคลากร โครงสร้างองค์กร NCD และนโยบาย HRD</div>
+
+      <!-- CH1 Summary (shown when data exists) -->
+      <div id="ch1-summary" style="display:none">
+        <div class="summary-grid" id="ch1-summary-grid"></div>
+      </div>
+
+      <!-- CH1 Actions -->
+      <div id="ch1-window-info"></div>
+      <div class="section-actions" id="ch1-actions"></div>
+    </div>
+
+    <!-- Wellbeing Section -->
+    <div class="section-card wb" id="wb-section">
+      <h3>💚 Well-being Survey — ผลสำรวจสุขภาวะรายบุคคล</h3>
+      <div class="desc">ผลการสำรวจ Well-being ของบุคลากรในองค์กร · PHQ-9, กิจกรรมทางกาย, Engagement และอื่นๆ</div>
+
+      <div id="wb-summary" style="display:none">
+        <div class="summary-grid" id="wb-summary-grid"></div>
+      </div>
+
+      <div class="section-actions" id="wb-actions"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast-el"></div>
+
+<!-- Loading -->
+<div class="loading-overlay" id="loading" style="display:none">
+  <div class="spinner"></div>
+  <div style="font-size:13px;color:var(--tx2)">กำลังโหลด...</div>
+</div>
+
+<script>
+// ── Globals ──
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let portalState = {
+  session: null,
+  userRole: null,
+  orgCode: null,
+  orgName: null,
+  ch1Row: null,
+  wbRows: [],
+};
+
+// ── Toast ──
+function showToast(msg, type = 'info', duration = 4000) {
+  const el = document.getElementById('toast-el');
+  el.textContent = msg;
+  el.className = `toast ${type} show`;
+  clearTimeout(el._tid);
+  el._tid = setTimeout(() => el.classList.remove('show'), duration);
+}
+
+// ── Loading ──
+function showLoading(show = true) {
+  document.getElementById('loading').style.display = show ? 'flex' : 'none';
+}
+
+// ── Escape ──
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+// ── Login ──
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pwd = document.getElementById('login-pwd').value;
+  const msg = document.getElementById('login-msg');
+  const btn = document.getElementById('login-btn');
+
+  if (!email || !pwd) { msg.className = 'login-msg err'; msg.textContent = 'กรุณากรอกอีเมลและรหัสผ่าน'; return; }
+  btn.disabled = true;
+  msg.className = 'login-msg'; msg.textContent = 'กำลังเข้าสู่ระบบ...';
+
+  const { data, error } = await sb.auth.signInWithPassword({ email, password: pwd });
+  if (error) {
+    msg.className = 'login-msg err'; msg.textContent = '❌ ' + error.message;
+    btn.disabled = false;
+    return;
+  }
+
+  portalState.session = data.session;
+  await initPortal();
+}
+
+// Allow Enter key on password field
+document.getElementById('login-pwd')?.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') doLogin();
+});
+
+async function doLogout() {
+  await sb.auth.signOut();
+  portalState = { session: null, userRole: null, orgCode: null, orgName: null, ch1Row: null, wbRows: [] };
+  document.getElementById('portal-app').style.display = 'none';
+  document.getElementById('login-gate').style.display = 'flex';
+}
+
+// ── Init Portal ──
+async function initPortal() {
+  showLoading(true);
+
+  const email = portalState.session?.user?.email;
+  if (!email) { showToast('ไม่พบ session', 'error'); showLoading(false); return; }
+
+  // 1. Get user role
+  const { data: roleRow, error: roleErr } = await sb
+    .from('admin_user_roles')
+    .select('*')
+    .eq('email', email)
+    .maybeSingle();
+
+  if (roleErr || !roleRow) {
+    showToast('❌ ไม่พบข้อมูลผู้ใช้ในระบบ — ติดต่อ Admin', 'error');
+    showLoading(false);
+    return;
+  }
+
+  if (!roleRow.is_active) {
+    showToast('❌ บัญชีถูกระงับ — ติดต่อ Admin', 'error');
+    showLoading(false);
+    return;
+  }
+
+  portalState.userRole = roleRow.role;
+  portalState.orgCode = roleRow.org_code;
+  portalState.orgName = roleRow.org_name;
+
+  // Only org_hr can use this portal
+  if (roleRow.role !== 'org_hr') {
+    showToast('⚠️ Portal นี้สำหรับ Org HR เท่านั้น — Admin ใช้หน้า admin.html', 'warn', 6000);
+    showLoading(false);
+    return;
+  }
+
+  if (!portalState.orgCode) {
+    showToast('❌ ยังไม่ได้ผูกองค์กร — ติดต่อ Admin', 'error');
+    showLoading(false);
+    return;
+  }
+
+  // 2. Update last_login_at
+  sb.from('admin_user_roles').update({ last_login_at: new Date().toISOString() }).eq('email', email).then(() => {});
+
+  // 3. Show portal UI
+  document.getElementById('login-gate').style.display = 'none';
+  document.getElementById('portal-app').style.display = '';
+  document.getElementById('user-email-display').textContent = email;
+  document.getElementById('user-org-badge').textContent = portalState.orgName || portalState.orgCode;
+  document.getElementById('org-name-display').textContent = portalState.orgName || '—';
+  document.getElementById('org-code-display').textContent = `รหัส: ${portalState.orgCode}`;
+
+  // 4. Load data
+  await Promise.all([loadCh1Data(), loadWbData()]);
+
+  showLoading(false);
+}
+
+// ── Load CH1 ──
+async function loadCh1Data() {
+  const orgCode = portalState.orgCode;
+
+  // Try fetching by org_code first, then by organization name
+  let { data: rows } = await sb
+    .from('hrd_ch1_responses')
+    .select('*')
+    .eq('org_code', orgCode)
+    .order('created_at', { ascending: false })
+    .limit(1);
+
+  if ((!rows || rows.length === 0) && portalState.orgName) {
+    ({ data: rows } = await sb
+      .from('hrd_ch1_responses')
+      .select('*')
+      .eq('organization', portalState.orgName)
+      .order('created_at', { ascending: false })
+      .limit(1));
+  }
+
+  const ch1Row = rows?.[0] || null;
+  portalState.ch1Row = ch1Row;
+
+  // Status badge
+  const badgeEl = document.getElementById('ch1-status-badge');
+  if (!ch1Row) {
+    badgeEl.innerHTML = '<span class="status-badge none">⬜ ยังไม่มีข้อมูล</span>';
+  } else {
+    const status = ch1Row.status || 'submitted';
+    const cls = status === 'submitted' ? 'submitted' : status === 'draft' ? 'draft' : status === 'reopened' ? 'reopened' : 'submitted';
+    const label = status === 'submitted' ? '✅ ส่งแล้ว' : status === 'draft' ? '📝 ร่างอยู่' : status === 'reopened' ? '🔄 เปิดแก้ไข' : '✅ ส่งแล้ว';
+    badgeEl.innerHTML = `<span class="status-badge ${cls}">${label}</span>`;
+  }
+
+  // Summary
+  const summaryEl = document.getElementById('ch1-summary');
+  const summaryGrid = document.getElementById('ch1-summary-grid');
+  if (ch1Row) {
+    const fd = ch1Row.form_data || ch1Row;
+    summaryEl.style.display = '';
+    summaryGrid.innerHTML = [
+      { val: fd.total_staff || fd.total_personnel || '—', lbl: 'บุคลากรรวม' },
+      { val: fd.turnover_rate ? fd.turnover_rate + '%' : '—', lbl: 'อัตราลาออก' },
+      { val: fd.ncd_count || '—', lbl: 'NCD รวม' },
+      { val: fd.engagement_score || '—', lbl: 'Engagement' },
+      { val: fd.training_hours || '—', lbl: 'ชม.อบรม/คน/ปี' },
+      { val: fd.sick_leave_avg || '—', lbl: 'ลาป่วยเฉลี่ย/คน' },
+    ].map(i => `<div class="summary-item"><div class="val">${esc(String(i.val))}</div><div class="lbl">${i.lbl}</div></div>`).join('');
+  } else {
+    summaryEl.style.display = 'none';
+  }
+
+  // Check form window
+  const windowStatus = await FormSchema.checkFormWindow('ch1', orgCode);
+
+  // Actions
+  const actionsEl = document.getElementById('ch1-actions');
+  const windowInfo = document.getElementById('ch1-window-info');
+  let actionsHtml = '';
+
+  if (!ch1Row) {
+    // No data — show "Start filling"
+    if (windowStatus.open) {
+      windowInfo.innerHTML = '<div class="info-box green">✅ ฟอร์ม CH1 เปิดรับข้อมูลอยู่ — สามารถเริ่มกรอกได้</div>';
+      actionsHtml = `<button class="btn btn-primary" onclick="navigateCh1('new')">📝 เริ่มกรอก CH1</button>`;
+    } else {
+      windowInfo.innerHTML = `<div class="info-box yellow">⏰ ฟอร์ม CH1 ยังไม่เปิดรับข้อมูล (${windowStatus.reason === 'not_yet_open' ? 'เปิด ' + windowStatus.opensAt : 'ปิดโดย Admin'})</div>`;
+      actionsHtml = `<button class="btn btn-outline" disabled>📝 ยังไม่เปิดรับข้อมูล</button>`;
+    }
+  } else {
+    const status = ch1Row.status || 'submitted';
+    const canEdit = (status === 'draft' || status === 'reopened');
+
+    if (canEdit && windowStatus.open) {
+      windowInfo.innerHTML = '<div class="info-box blue">📝 สามารถแก้ไขข้อมูลได้</div>';
+      actionsHtml = `
+        <button class="btn btn-primary" onclick="navigateCh1('edit')">✏️ แก้ไข CH1</button>
+        <button class="btn btn-outline" onclick="navigateCh1('preview')">👁 ดูข้อมูล</button>
+        <button class="btn btn-outline" onclick="navigateCh1('pdf')">📄 PDF</button>`;
+    } else if (status === 'submitted') {
+      windowInfo.innerHTML = '<div class="info-box green">✅ ส่งข้อมูลแล้ว — หากต้องการแก้ไข กรุณาติดต่อ Admin</div>';
+      actionsHtml = `
+        <button class="btn btn-outline" onclick="navigateCh1('preview')">👁 ดูข้อมูล</button>
+        <button class="btn btn-outline" onclick="navigateCh1('pdf')">📄 ดาวน์โหลด PDF</button>`;
+    } else {
+      windowInfo.innerHTML = '<div class="info-box yellow">⏰ ฟอร์มปิดรับแล้ว — ดูข้อมูลได้อย่างเดียว</div>';
+      actionsHtml = `
+        <button class="btn btn-outline" onclick="navigateCh1('preview')">👁 ดูข้อมูล</button>
+        <button class="btn btn-outline" onclick="navigateCh1('pdf')">📄 PDF</button>`;
+    }
+  }
+  actionsEl.innerHTML = actionsHtml;
+}
+
+// ── Load Wellbeing ──
+async function loadWbData() {
+  const orgCode = portalState.orgCode;
+  const orgName = portalState.orgName;
+
+  // Wellbeing uses organization name
+  let filter = orgName || orgCode;
+  const { data: rows } = await sb
+    .from('wellbeing_responses')
+    .select('id, organization, submitted_at, is_draft, gender, age')
+    .eq('organization', filter)
+    .eq('is_draft', false)
+    .order('submitted_at', { ascending: false });
+
+  portalState.wbRows = rows || [];
+
+  const summaryEl = document.getElementById('wb-summary');
+  const summaryGrid = document.getElementById('wb-summary-grid');
+  const actionsEl = document.getElementById('wb-actions');
+
+  if (rows && rows.length > 0) {
+    summaryEl.style.display = '';
+    const total = rows.length;
+    const male = rows.filter(r => r.gender === 'ชาย').length;
+    const female = rows.filter(r => r.gender === 'หญิง').length;
+    summaryGrid.innerHTML = [
+      { val: total, lbl: 'ผู้ตอบทั้งหมด' },
+      { val: male, lbl: 'ชาย' },
+      { val: female, lbl: 'หญิง' },
+      { val: total - male - female, lbl: 'อื่นๆ' },
+    ].map(i => `<div class="summary-item"><div class="val">${i.val}</div><div class="lbl">${i.lbl}</div></div>`).join('');
+
+    actionsEl.innerHTML = `
+      <button class="btn btn-green" onclick="showToast('📊 ฟีเจอร์ Dashboard กำลังพัฒนา','info')">📊 ดู Dashboard</button>
+      <button class="btn btn-outline" onclick="showToast('📤 ฟีเจอร์ Export กำลังพัฒนา','info')">📤 Export Excel</button>`;
+  } else {
+    summaryEl.style.display = 'none';
+    actionsEl.innerHTML = `
+      <div class="info-box blue" style="margin:0">ℹ️ ยังไม่มีผู้ตอบ Well-being Survey จากองค์กรของท่าน · แชร์ลิงก์แบบสอบถามให้บุคลากรในองค์กร</div>`;
+  }
+}
+
+// ── Navigation ──
+function navigateCh1(action) {
+  const orgCode = portalState.orgCode;
+  const ch1Id = portalState.ch1Row?.id;
+  const baseUrl = window.location.origin;
+
+  switch (action) {
+    case 'new':
+      window.location.href = `${baseUrl}/ch1-edit.html?org=${encodeURIComponent(orgCode)}`;
+      break;
+    case 'edit':
+      if (ch1Id) window.location.href = `${baseUrl}/ch1-edit.html?org=${encodeURIComponent(orgCode)}&id=${ch1Id}`;
+      else showToast('ไม่พบ ID ของข้อมูล', 'warn');
+      break;
+    case 'preview':
+      if (ch1Id) window.location.href = `${baseUrl}/ch1-preview.html?org=${encodeURIComponent(orgCode)}&id=${ch1Id}`;
+      else showToast('ไม่พบข้อมูล', 'warn');
+      break;
+    case 'pdf':
+      if (ch1Id) window.location.href = `${baseUrl}/ch1-individual-pdf.html?org=${encodeURIComponent(orgCode)}&id=${ch1Id}`;
+      else showToast('ไม่พบข้อมูล', 'warn');
+      break;
+  }
+}
+
+// ── Auto-login if session exists ──
+(async () => {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) {
+    portalState.session = session;
+    await initPortal();
+  }
+})();
+</script>
+</body>
+</html>
