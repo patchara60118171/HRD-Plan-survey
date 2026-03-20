@@ -10,7 +10,371 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
-<link rel="stylesheet" href="admin/assets/css/admin.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --P:#0F4C81;
+  --PD:#0A3560;
+  --PL:#E8F1FB;
+  --A:#00A86B;
+  --AL:#E6F7F1;
+  --W:#92681A;
+  --WL:#FEF3CD;
+  --D:#991B1B;
+  --DL:#FEE2E2;
+  --bg:#F4F6F9;
+  --bg2:#EAECF0;
+  --card:#FFFFFF;
+  --bdr:#D8DCE3;
+  --bdr2:#C4CAD4;
+  --tx:#1A2433;
+  --tx2:#4A5568;
+  --tx3:#8896A5;
+  --sidebar-w:248px;
+}
+body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);color:var(--tx);font-size:14px;display:flex;min-height:100vh;line-height:1.6}
+
+/* ===== SIDEBAR ===== */
+.sidebar{width:var(--sidebar-w);background:var(--PD);color:#fff;display:flex;flex-direction:column;flex-shrink:0;position:fixed;top:0;left:0;height:100vh;z-index:100;overflow-y:auto}
+.sidebar-logo{padding:20px 18px 16px;border-bottom:1px solid rgba(255,255,255,.1)}
+.sidebar-logo .logo-main{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.sidebar-logo .logo-icon{width:32px;height:32px;background:var(--A);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.sidebar-logo .logo-title{font-size:14px;font-weight:700;color:#fff;line-height:1.25}
+.sidebar-logo .logo-sub{font-size:10.5px;color:rgba(255,255,255,.5);margin-top:1px;padding-left:42px}
+.sidebar-user{margin:12px 14px;background:rgba(255,255,255,.08);border-radius:8px;padding:9px 11px;display:flex;align-items:center;gap:9px}
+.sidebar-user .u-avatar{width:30px;height:30px;border-radius:50%;background:var(--P);border:2px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;color:#fff}
+.sidebar-user .u-info{flex:1;min-width:0}
+.sidebar-user .u-name{font-size:12px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sidebar-user .u-role{font-size:10px;color:rgba(255,255,255,.55);display:flex;align-items:center;gap:4px}
+.u-role-dot{width:5px;height:5px;border-radius:50%;background:var(--A);flex-shrink:0}
+nav{flex:1;padding:6px 0 12px}
+.nav-group{padding:16px 14px 4px;font-size:9.5px;font-weight:700;letter-spacing:.08em;color:rgba(255,255,255,.35);text-transform:uppercase}
+.nav-item{display:flex;align-items:center;gap:9px;padding:8px 14px;cursor:pointer;color:rgba(255,255,255,.7);transition:background .12s,color .12s;border-left:2px solid transparent;font-size:13px;user-select:none}
+.nav-item:hover{background:rgba(255,255,255,.06);color:rgba(255,255,255,.95)}
+.nav-item.active{background:rgba(255,255,255,.1);color:#fff;border-left-color:var(--A)}
+.nav-item .ni{width:16px;font-size:14px;text-align:center;flex-shrink:0;opacity:.8}
+.nav-item.active .ni{opacity:1}
+.nav-item .nb{margin-left:auto;background:rgba(220,53,69,.8);color:#fff;font-size:9.5px;font-weight:700;padding:1px 6px;border-radius:99px;min-width:18px;text-align:center}
+.nav-item .nb.g{background:rgba(0,168,107,.7)}
+.sidebar-foot{border-top:1px solid rgba(255,255,255,.08);padding:10px 14px}
+.sidebar-foot .nav-item{border-left:none;padding:7px 4px;font-size:12.5px}
+
+/* ===== TOPBAR ===== */
+.main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column}
+.topbar{background:var(--card);border-bottom:1px solid var(--bdr);padding:0 22px;height:54px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:50}
+.tb-title{font-size:15px;font-weight:700;color:var(--P)}
+.tb-bc{font-size:12px;color:var(--tx3)}
+.tb-space{flex:1}
+.topbar-btn{padding:6px 13px;border-radius:7px;font-size:12.5px;font-weight:600;cursor:pointer;border:1px solid var(--bdr);display:flex;align-items:center;gap:5px;font-family:inherit;background:var(--card);color:var(--tx2);transition:background .12s}
+.topbar-btn:hover{background:var(--bg)}
+.topbar-btn.primary{background:var(--P);color:#fff;border-color:var(--P)}
+.topbar-btn.primary:hover{background:var(--PD)}
+.tb-notif{position:relative;width:34px;height:34px;border-radius:7px;border:1px solid var(--bdr);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;color:var(--tx2);background:var(--card)}
+.tb-notif .dot{position:absolute;top:5px;right:5px;width:7px;height:7px;background:#D64045;border-radius:50%;border:1.5px solid #fff}
+.content{padding:22px;flex:1}
+
+/* ===== PAGES ===== */
+.page{display:none}
+.page.active{display:block}
+.page-title{font-size:17px;font-weight:700;color:var(--P);margin-bottom:2px}
+.page-sub{font-size:12.5px;color:var(--tx2);margin-bottom:18px}
+
+/* ===== KPI GRID ===== */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+.kpi{background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:16px 18px}
+.kpi .kpi-label{font-size:11.5px;color:var(--tx2);font-weight:500;margin-bottom:6px}
+.kpi .kpi-val{font-size:26px;font-weight:700;color:var(--P);line-height:1.1}
+.kpi .kpi-sub{font-size:11px;color:var(--tx3);margin-top:5px}
+.kpi .kpi-icon{font-size:18px;margin-bottom:6px;opacity:.7}
+.kpi.g .kpi-val{color:var(--A)}
+.kpi.w .kpi-val{color:var(--W)}
+.kpi.r .kpi-val{color:var(--D)}
+
+/* ===== CARDS ===== */
+.card{background:var(--card);border:1px solid var(--bdr);border-radius:10px}
+.card-head{padding:14px 18px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:10px}
+.card-head h3{font-size:13.5px;font-weight:700;color:var(--P);flex:1}
+.card-body{padding:16px 18px}
+.card-mb{margin-bottom:16px}
+
+/* ===== TABLE ===== */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+thead th{background:var(--bg);padding:9px 14px;text-align:left;font-size:11.5px;font-weight:700;color:var(--tx2);white-space:nowrap;border-bottom:1px solid var(--bdr)}
+tbody td{padding:10px 14px;border-bottom:1px solid var(--bg2);font-size:12.5px;vertical-align:middle}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:#FAFBFD}
+.td-act{display:flex;gap:5px}
+
+/* ===== BADGES ===== */
+.badge{display:inline-block;padding:2px 8px;border-radius:5px;font-size:10.5px;font-weight:600;white-space:nowrap}
+.bg{background:#D1FAE5;color:#065F46}
+.bw{background:var(--WL);color:var(--W)}
+.br{background:var(--DL);color:var(--D)}
+.bb{background:#DBEAFE;color:#1E40AF}
+.bx{background:var(--bg2);color:var(--tx2)}
+
+/* ===== BUTTONS ===== */
+.btn{padding:5px 11px;border-radius:6px;font-size:11.5px;font-weight:600;cursor:pointer;border:none;font-family:inherit;transition:opacity .12s}
+.btn:hover{opacity:.85}
+.b-blue{background:#DBEAFE;color:#1E40AF}
+.b-red{background:var(--DL);color:var(--D)}
+.b-green{background:#D1FAE5;color:#065F46}
+.b-gray{background:var(--bg2);color:var(--tx2)}
+.b-orange{background:#FEE3C8;color:#92400E}
+.b-solid{background:var(--P);color:#fff}
+
+/* ===== FORM ===== */
+.fg{margin-bottom:13px}
+.fg label{display:block;font-size:11.5px;font-weight:600;color:var(--tx2);margin-bottom:4px}
+.fg input,.fg select,.fg textarea{width:100%;padding:8px 10px;border:1px solid var(--bdr);border-radius:7px;font-size:13px;color:var(--tx);background:#fff;font-family:inherit;line-height:1.5}
+.fg textarea{resize:vertical;min-height:68px}
+.fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:var(--P);box-shadow:0 0 0 2px rgba(15,76,129,.12)}
+.form-row{display:flex;gap:8px;flex-wrap:wrap}
+.form-row .fg{flex:1;min-width:120px}
+
+/* ===== TOGGLE ===== */
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bg2)}
+.toggle-row:last-child{border-bottom:none}
+.toggle-row .tr-left label{font-size:13px;font-weight:500;color:var(--tx)}
+.toggle-row .tr-left small{font-size:11px;color:var(--tx3);display:block}
+.tgl{position:relative;width:40px;height:22px;flex-shrink:0}
+.tgl input{display:none}
+.tgl-s{position:absolute;inset:0;background:#CBD5E1;border-radius:99px;cursor:pointer;transition:.18s}
+.tgl-s::after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;background:#fff;border-radius:50%;transition:.18s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.tgl input:checked+.tgl-s{background:var(--A)}
+.tgl input:checked+.tgl-s::after{transform:translateX(18px)}
+
+/* ===== PROGRESS BAR ===== */
+.prog-item{display:flex;align-items:center;gap:12px;padding:9px 10px;border-radius:7px;background:var(--bg)}
+.prog-item+.prog-item{margin-top:6px}
+.prog-org{width:168px;font-size:12.5px;font-weight:500;flex-shrink:0}
+.prog-track{flex:1;height:7px;background:var(--bdr);border-radius:99px;overflow:hidden}
+.prog-fill{height:100%;border-radius:99px;background:var(--A);transition:width .3s}
+.prog-fill.r{background:#C4444A}
+.prog-fill.w{background:#C08F2A}
+.prog-pct{width:38px;text-align:right;font-size:12px;font-weight:700;color:var(--A);flex-shrink:0}
+.prog-pct.r{color:var(--D)}
+.prog-pct.w{color:var(--W)}
+.prog-status{width:80px;text-align:right;flex-shrink:0}
+
+/* ===== CODE DISPLAY ===== */
+.code-box{display:flex;align-items:center;gap:8px;background:var(--bg);border:1px dashed var(--bdr2);border-radius:7px;padding:9px 12px;margin-top:6px}
+.code-box code{flex:1;font-size:14px;font-weight:700;letter-spacing:.12em;color:var(--P);font-family:'Courier New',monospace}
+.code-box button{padding:5px 10px;border:none;background:var(--P);color:#fff;border-radius:5px;font-size:11px;cursor:pointer;font-weight:600;font-family:inherit}
+
+/* ===== STATS ROW ===== */
+.stats-row{display:flex;gap:10px;margin-top:12px}
+.st{flex:1;background:var(--bg);border-radius:7px;padding:9px;text-align:center}
+.st-val{font-size:20px;font-weight:700;color:var(--P)}
+.st-label{font-size:10.5px;color:var(--tx2);margin-top:2px}
+
+/* ===== INFO BOX ===== */
+.info{padding:9px 12px;border-radius:7px;font-size:12px;margin-bottom:12px;display:flex;align-items:flex-start;gap:8px}
+.info.blue{background:#EFF6FF;color:#1E40AF;border:1px solid #BFDBFE}
+.info.yellow{background:var(--WL);color:var(--W);border:1px solid #FBBF24}
+.info.green{background:#F0FDF4;color:#14532D;border:1px solid #BBF7D0}
+
+/* ===== SEARCH / FILTER ===== */
+.filter-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.si{padding:7px 10px;border:1px solid var(--bdr);border-radius:7px;font-size:12.5px;width:200px;color:var(--tx);font-family:inherit;background:#fff}
+.si:focus{outline:none;border-color:var(--P)}
+.sel{padding:7px 10px;border:1px solid var(--bdr);border-radius:7px;font-size:12.5px;color:var(--tx);background:#fff;font-family:inherit;cursor:pointer}
+
+/* ===== CHARTS PLACEHOLDER ===== */
+.chart-ph{background:var(--bg);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--tx3);font-size:12.5px;flex-direction:column;gap:5px}
+.chart-ph .cph-icon{font-size:28px;opacity:.5}
+
+/* ===== TWO-COL ===== */
+.two-col{display:grid;grid-template-columns:3fr 2fr;gap:16px}
+.two-col-eq{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+
+/* ===== PANEL ===== */
+.panel{background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:18px}
+.panel h3{font-size:13.5px;font-weight:700;color:var(--P);margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--bdr)}
+
+/* ===== TABS ===== */
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--bdr);margin-bottom:16px}
+.tab{padding:9px 16px;font-size:13px;font-weight:600;color:var(--tx2);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:.12s}
+.tab:hover{color:var(--P)}
+.tab.active{color:var(--P);border-bottom-color:var(--P)}
+
+/* ===== AUDIT ===== */
+.audit-item{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--bg2)}
+.audit-item:last-child{border-bottom:none}
+.ai-time{font-size:11px;color:var(--tx3);white-space:nowrap;width:95px;flex-shrink:0;padding-top:1px}
+.ai-icon{font-size:13px;flex-shrink:0;padding-top:1px}
+.ai-desc{font-size:12.5px;color:var(--tx)}
+.ai-user{font-size:11px;color:var(--tx3);margin-top:1px}
+
+/* ===== TIMELINE ===== */
+.tl{position:relative;padding-left:18px}
+.tl::before{content:'';position:absolute;left:5px;top:8px;bottom:8px;width:1.5px;background:var(--bdr)}
+.tl-item{position:relative;margin-bottom:16px}
+.tl-item::before{content:'';position:absolute;left:-17px;top:5px;width:9px;height:9px;border-radius:50%;background:var(--P);border:2px solid #fff;box-shadow:0 0 0 1.5px var(--P)}
+.tl-item.done::before{background:var(--A);box-shadow:0 0 0 1.5px var(--A)}
+.tl-item.now::before{background:var(--W);box-shadow:0 0 0 1.5px var(--W)}
+.tl-date{font-size:10.5px;color:var(--tx3);margin-bottom:1px}
+.tl-title{font-size:13px;font-weight:600;color:var(--tx)}
+.tl-desc{font-size:11.5px;color:var(--tx2);margin-top:2px}
+
+/* ===== DONUT MOCK ===== */
+.donut{width:90px;height:90px;border-radius:50%;margin:0 auto 12px;flex-shrink:0}
+.legend-row{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--tx2);margin-bottom:4px}
+.ld{width:9px;height:9px;border-radius:2px;flex-shrink:0}
+
+/* ===== HEATMAP ===== */
+.hm-row{display:flex;align-items:center;gap:6px;margin-bottom:5px}
+.hm-label{width:140px;font-size:11.5px;color:var(--tx2);flex-shrink:0}
+.hm-cells{display:flex;gap:3px}
+.hm{width:36px;height:28px;border-radius:4px;font-size:9.5px;display:flex;align-items:center;justify-content:center;font-weight:600}
+.hm1{background:#D1FAE5;color:#065F46}
+.hm2{background:#A7F3D0;color:#065F46}
+.hm3{background:#FEF3C7;color:#92400E}
+.hm4{background:#FED7AA;color:#7C2D12}
+.hm5{background:#FEE2E2;color:#991B1B}
+
+.summary-sections{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:14px}
+.summary-section-card .card-head{align-items:flex-start}
+.section-badge{background:var(--bg2);color:var(--tx2);padding:2px 8px;border-radius:99px;font-size:10.5px;font-weight:600;white-space:nowrap}
+.summary-table{width:100%;border-collapse:collapse}
+.summary-table td{padding:8px 0;border-bottom:1px solid var(--bg2);vertical-align:top}
+.summary-table tr:last-child td{border-bottom:none}
+.summary-label{width:38%;padding-right:10px;font-size:12px;color:var(--tx2);font-weight:500}
+.summary-value{font-size:12.5px;font-weight:700;color:var(--tx)}
+.summary-note{margin-top:2px;font-size:11px;color:var(--tx3);line-height:1.5}
+.summary-empty{padding:14px 0;font-size:12px;color:var(--tx3)}
+.summary-mini{display:flex;flex-direction:column;gap:8px}
+.summary-mini-row{display:flex;align-items:center;gap:8px}
+.summary-mini-label{width:112px;flex-shrink:0;font-size:11.5px;color:var(--tx2)}
+.summary-mini-bar{flex:1;height:8px;border-radius:99px;background:var(--bg2);overflow:hidden}
+.summary-mini-bar span{display:block;height:100%;border-radius:99px;background:var(--P)}
+.summary-mini-val{width:68px;flex-shrink:0;text-align:right;font-size:11.5px;font-weight:600;color:var(--tx2)}
+.trend-wrap{position:relative}
+.trend-tooltip{position:absolute;z-index:5;pointer-events:none;opacity:0;transform:translate(-50%,-115%);background:#0F1F33;color:#fff;padding:6px 8px;border-radius:8px;font-size:11px;line-height:1.35;white-space:nowrap;box-shadow:0 8px 20px rgba(15,31,51,.25);transition:opacity .12s ease}
+.trend-tooltip.show{opacity:1}
+.trend-dot-hit{cursor:pointer}
+.org-multi-wrap{position:relative;display:inline-block;width:260px}
+.org-multi-btn{width:100%;text-align:left;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.org-dropdown{display:none;position:absolute;top:100%;left:0;width:100%;max-height:260px;overflow-y:auto;background:#fff;border:1px solid var(--bg3);border-radius:8px;box-shadow:0 4px 14px rgba(0,0,0,.12);z-index:20;padding:6px 0;margin-top:4px}
+.org-dropdown.show{display:block}
+.org-check-item{display:flex;align-items:center;gap:8px;padding:6px 12px;cursor:pointer;font-size:12.5px;color:var(--tx)}
+.org-check-item:hover{background:var(--bg2)}
+.org-check-item input[type="checkbox"]{accent-color:var(--P);width:15px;height:15px;cursor:pointer}
+
+/* ===== COMPARE ===== */
+.cmp-table th{text-align:center}
+.cmp-table td{text-align:center}
+.cmp-table td:first-child{text-align:left;font-weight:500}
+.good{color:#065F46;font-weight:600}
+.bad{color:#991B1B;font-weight:600}
+.mid{color:#92400E;font-weight:600}
+
+/* ===== WELCOME STRIP ===== */
+.welcome{background:var(--P);border-radius:10px;padding:18px 22px;color:#fff;margin-bottom:18px;display:flex;align-items:center;gap:18px}
+.w-icon{font-size:32px;opacity:.9;flex-shrink:0}
+.w-title{font-size:16px;font-weight:700;margin-bottom:2px}
+.w-sub{font-size:12px;opacity:.7}
+.w-space{flex:1}
+.w-stats{display:flex;gap:12px}
+.w-stat{text-align:center;background:rgba(255,255,255,.1);border-radius:8px;padding:9px 14px}
+.w-val{font-size:20px;font-weight:700}
+.w-label{font-size:10.5px;opacity:.65;margin-top:1px}
+
+/* ===== SETTING ROW ===== */
+.set-row{display:flex;align-items:center;gap:14px;padding:10px 0;border-bottom:1px solid var(--bg2)}
+.set-row:last-child{border-bottom:none}
+.set-info{flex:1}
+.set-label{font-size:13px;font-weight:500;color:var(--tx)}
+.set-desc{font-size:11px;color:var(--tx3);margin-top:1px}
+
+/* sheet scroll */
+.sheet-wrap{overflow:auto;max-height:420px}
+.sheet-wrap table{font-size:11px}
+.sheet-wrap thead th{position:sticky;top:0;z-index:2;background:var(--bg);border-right:1px solid var(--bdr)}
+.sheet-wrap tbody td{border-right:1px solid var(--bg2);white-space:nowrap;max-width:160px;overflow:hidden;text-overflow:ellipsis}
+.sheet-wrap tbody td:first-child{position:sticky;left:0;background:#F8FAFC;font-weight:600;z-index:1;border-right:1.5px solid var(--bdr)}
+
+/* form ctrl card */
+.fc{background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:18px}
+.fc-head{display:flex;align-items:center;gap:10px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--bdr)}
+.fc-head h3{font-size:14px;font-weight:700;color:var(--P);flex:1}
+.fc-actions{display:flex;gap:7px;margin-top:13px;padding-top:12px;border-top:1px solid var(--bg2)}
+.fc-actions .btn{flex:1;padding:7px;text-align:center}
+
+/* checkbox group */
+.cb-group{display:flex;flex-direction:column;gap:5px;margin-top:4px}
+.cb-group label{display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:400;color:var(--tx);cursor:pointer}
+
+/* ===== USER MODAL ===== */
+.umodal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.52);display:flex;align-items:center;justify-content:center;z-index:9998;padding:16px}
+.umodal{background:var(--card);border-radius:14px;min-width:460px;max-width:560px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.22);max-height:92vh;overflow-y:auto}
+.umodal-head{padding:16px 22px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:10px}
+.umodal-head h3{font-size:15px;font-weight:700;color:var(--P);flex:1}
+.umodal-body{padding:20px 22px;display:flex;flex-direction:column;gap:14px}
+.umodal-foot{padding:13px 22px;border-top:1px solid var(--bdr);display:flex;gap:8px;justify-content:flex-end}
+.perm-card{border:1px solid var(--bdr);border-radius:8px;overflow:hidden;margin-top:2px}
+.perm-row{display:flex;align-items:flex-start;gap:10px;padding:9px 12px;border-bottom:1px solid var(--bdr);cursor:pointer}
+.perm-row:last-child{border-bottom:none}
+.perm-row:hover{background:var(--bg)}
+.perm-info{flex:1}
+.perm-name{font-size:12.5px;font-weight:600;color:var(--tx);display:flex;align-items:center;gap:6px}
+.perm-desc{font-size:11px;color:var(--tx3);margin-top:2px;line-height:1.5}
+.info-tip{position:relative;display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;background:var(--bg2);border-radius:50%;font-size:8.5px;font-weight:700;color:var(--tx2);cursor:help;flex-shrink:0}
+.info-tip::after{content:attr(data-tip);position:absolute;left:18px;top:50%;transform:translateY(-50%);background:#1A2433;color:#fff;font-size:11px;font-weight:400;white-space:pre-wrap;line-height:1.5;padding:8px 10px;border-radius:6px;width:220px;z-index:9999;pointer-events:none;opacity:0;transition:opacity .15s}
+.info-tip:hover::after{opacity:1}
+.u-role-tag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px}
+.u-role-tag.superadmin{background:#F3E8FF;color:#7C3AED}
+.u-role-tag.admin{background:var(--WL);color:var(--W)}
+.u-role-tag.viewer{background:var(--PL);color:var(--P)}
+.pwd-reset-row{background:var(--bg);border:1px solid var(--bdr);border-radius:8px;padding:11px 13px;display:flex;align-items:center;gap:10px}
+.pwd-code{font-family:monospace;font-size:14px;font-weight:700;color:var(--P);flex:1;letter-spacing:.05em}
+
+/* ===== FORM EDITOR CARD STYLE ===== */
+.fe-form-card{background:var(--card);border:1.5px solid var(--bdr);border-radius:10px;margin-bottom:14px;overflow:hidden;transition:box-shadow .15s,border-color .15s}
+.fe-form-card:focus-within{box-shadow:0 0 0 3px rgba(15,76,129,.1);border-color:var(--P)}
+.fe-form-card.modified{border-left:3px solid var(--A)}
+.fe-card-band{padding:8px 14px;background:var(--PL);border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--P);font-weight:600}
+.fe-type-tag{background:var(--P);color:#fff;font-size:10px;padding:2px 8px;border-radius:99px;margin-left:auto;font-weight:600;flex-shrink:0}
+.fe-edited-badge{font-size:10px;background:var(--A);color:#fff;padding:2px 8px;border-radius:99px;font-weight:700;flex-shrink:0}
+.fe-card-body{padding:14px 16px}
+.fe-q-label{font-size:11.5px;font-weight:700;color:var(--tx2);margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.fe-q-input{width:100%;border:1.5px solid var(--bdr2);border-radius:7px;padding:9px 12px;font-size:13.5px;font-family:inherit;color:var(--tx);background:#fff;transition:border .12s;line-height:1.5;resize:vertical}
+.fe-q-input:focus{outline:none;border-color:var(--P);box-shadow:0 0 0 3px rgba(15,76,129,.07)}
+.fe-default-hint{font-size:11px;color:var(--tx3);margin-top:5px}
+.fe-opts-area{margin-top:12px;padding-top:12px;border-top:1px dashed var(--bdr)}
+.fe-opts-label{font-size:11.5px;font-weight:700;color:var(--tx2);margin-bottom:8px}
+.fe-option-row{display:flex;align-items:center;gap:7px;margin-bottom:7px}
+.fe-opt-prefix{font-size:12px;color:var(--tx3);width:22px;flex-shrink:0;text-align:center}
+.fe-opt-input{flex:1;border:1px solid var(--bdr);border-radius:6px;padding:6px 10px;font-size:12.5px;font-family:inherit;background:#fff}
+.fe-opt-input:focus{outline:none;border-color:var(--P)}
+.fe-opt-del{background:none;border:none;cursor:pointer;color:var(--tx3);font-size:14px;padding:3px 5px;flex-shrink:0;line-height:1}
+.fe-opt-del:hover{color:var(--D)}
+.fe-add-opt{font-size:12px;color:var(--P);cursor:pointer;padding:4px 0;display:inline-flex;align-items:center;gap:4px;font-weight:600;background:none;border:none;font-family:inherit}
+.fe-add-opt:hover{text-decoration:underline}
+.fe-section-hdr{font-size:13.5px;font-weight:700;color:var(--P);padding:14px 0 8px;border-bottom:2px solid var(--PL);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.fe-card-foot{display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--bg);border-top:1px solid var(--bdr)}
+.fe-editing-banner{background:var(--PL);border:1px solid var(--P);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:12.5px;color:var(--P);font-weight:600;display:flex;align-items:center;gap:8px}
+
+/* ===== FORM EDITOR SIDEBAR LAYOUT ===== */
+.fe-layout{display:flex;min-height:420px;border-radius:10px;overflow:hidden}
+.fe-sidebar{width:176px;background:var(--bg);border-right:1px solid var(--bdr);padding:14px 0;flex-shrink:0}
+.fe-sidebar-title{padding:0 14px 8px;font-size:9.5px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.08em}
+.fe-tab-item{padding:9px 14px;cursor:pointer;font-size:12.5px;font-weight:600;color:var(--tx2);transition:background .12s,color .12s;border-left:2px solid transparent;display:flex;align-items:center;gap:7px;user-select:none}
+.fe-tab-item:hover{background:rgba(0,0,0,.04);color:var(--P)}
+.fe-tab-item.active{background:var(--PL);color:var(--P);border-left-color:var(--P)}
+.fe-content{flex:1;padding:18px;overflow:hidden;min-width:0}
+
+/* ===== GOOGLE FORMS INLINE EDIT STYLE ===== */
+.fe-gf-card{background:var(--card);border:1.5px solid var(--bdr);border-radius:10px;margin-bottom:12px;overflow:hidden;transition:border-color .15s,box-shadow .15s}
+.fe-gf-card:hover{border-color:var(--bdr2);box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.fe-gf-card.modified{border-left:3px solid var(--A)}
+.fe-gf-card.fe-gf-editing{border-color:var(--P);box-shadow:0 0 0 3px rgba(15,76,129,.1)}
+.fe-gf-band{padding:8px 12px;background:var(--PL);border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--P);font-weight:600;flex-wrap:wrap}
+.fe-gf-preview{padding:13px 16px;font-size:14px;color:var(--tx);line-height:1.6;cursor:pointer;min-height:46px;transition:background .12s}
+.fe-gf-preview:hover{background:var(--bg)}
+.fe-gf-editbox{padding:12px 16px 14px}
+</style>
 </head>
 <body>
 
@@ -46,6 +410,7 @@
     <div class="nav-item" onclick="go('form-wb',this)"><span class="ni">💚</span> Wellbeing Survey</div>
 
     <div class="nav-group">วิเคราะห์ข้อมูล</div>
+    <div class="nav-item" onclick="go('ch1-summary',this)"><span class="ni">📊</span> สรุปภาพรวม Ch1</div>
     <div class="nav-item" onclick="go('an-ch1',this)"><span class="ni">📈</span> วิเคราะห์ผล Ch1</div>
     <div class="nav-item" onclick="go('an-wb',this)"><span class="ni">🧠</span> วิเคราะห์ Wellbeing</div>
     <div class="nav-item" onclick="go('compare',this)"><span class="ni">⚖️</span> เปรียบเทียบองค์กร</div>
@@ -481,6 +846,59 @@
       </div>
     </div>
 
+    <div class="page" id="page-ch1-summary">
+      <div class="page-title">สรุปภาพรวม Ch1</div>
+      <div class="page-sub" id="ch1-summary-sub">สรุปข้อมูลที่กรอกแล้วทั้งหมด · กรองตามองค์กรเพื่อดูรายละเอียดรายหน่วยงาน</div>
+      <div class="info blue">เลือกองค์กรจากตัวกรองด้านล่างเพื่อสลับจากภาพรวมทั้งหมดไปยังรายงานเฉพาะองค์กรได้ทันที</div>
+      <div class="filter-bar" style="margin-bottom:16px">
+        <div class="org-multi-wrap">
+          <button type="button" class="sel org-multi-btn" id="ch1-org-toggle" onclick="ch1ToggleOrgDropdown()">ทุกองค์กร ▾</button>
+          <div id="ch1-org-dropdown" class="org-dropdown">
+            <label class="org-check-item"><input type="checkbox" checked onchange="ch1OrgCheckAll(this)"> <span style="font-weight:600">เลือกทั้งหมด</span></label>
+            <div id="ch1-org-list"></div>
+          </div>
+        </div>
+        <button class="btn b-gray" onclick="resetCh1SummaryFilter()">ล้างตัวกรอง</button>
+        <button class="btn b-blue" onclick="exportCh1SummaryReport()">📤 Export Excel</button>
+        <button class="btn b-gray" onclick="exportCh1SummaryPdf()">📄 Export PDF</button>
+      </div>
+      <div class="kpi-grid">
+        <div class="kpi"><div class="kpi-icon">🏛️</div><div class="kpi-label">องค์กรที่มีข้อมูล</div><div class="kpi-val" id="ch1sum-kpi-orgs">—</div><div class="kpi-sub">นับเฉพาะองค์กรที่ส่ง Ch1 แล้ว</div></div>
+        <div class="kpi g"><div class="kpi-icon">👥</div><div class="kpi-label">บุคลากรรวม</div><div class="kpi-val" id="ch1sum-kpi-staff">—</div><div class="kpi-sub">รวมจากทุกเรคคอร์ดที่เลือก</div></div>
+        <div class="kpi r"><div class="kpi-icon">🏥</div><div class="kpi-label">NCD ต่อบุคลากร</div><div class="kpi-val" id="ch1sum-kpi-ncd">—</div><div class="kpi-sub">คำนวณจากจำนวน NCD / บุคลากรรวม</div></div>
+        <div class="kpi w"><div class="kpi-icon">🩺</div><div class="kpi-label">วันลาป่วยรวม</div><div class="kpi-val" id="ch1sum-kpi-sick">—</div><div class="kpi-sub">สะสมจากองค์กรที่เลือก</div></div>
+        <div class="kpi"><div class="kpi-icon">🧠</div><div class="kpi-label">Burnout เฉลี่ย</div><div class="kpi-val" id="ch1sum-kpi-burnout">—</div><div class="kpi-sub">ค่าเฉลี่ยจากฟอร์ม Ch1</div></div>
+        <div class="kpi g"><div class="kpi-icon">❤️</div><div class="kpi-label">Engagement เฉลี่ย</div><div class="kpi-val" id="ch1sum-kpi-eng">—</div><div class="kpi-sub">ค่าเฉลี่ยจากฟอร์ม Ch1</div></div>
+      </div>
+      <div class="summary-sections" style="margin-bottom:14px">
+        <div class="card summary-section-card"><div class="card-head"><h3>โครงสร้างอายุ</h3><span class="section-badge">4 กลุ่ม</span></div><div class="card-body" id="ch1sum-age-chart"></div></div>
+        <div class="card summary-section-card"><div class="card-head"><h3>อายุราชการ</h3><span class="section-badge">8 กลุ่ม</span></div><div class="card-body" id="ch1sum-service-chart"></div></div>
+        <div class="card summary-section-card"><div class="card-head"><h3>ประเภทและระดับตำแหน่ง</h3><span class="section-badge">13 ระดับ</span></div><div class="card-body" id="ch1sum-position-chart"></div></div>
+        <div class="card summary-section-card"><div class="card-head"><h3>การลาออก / โอนย้ายย้อนหลัง</h3><span class="section-badge">5 ปี</span></div><div class="card-body" id="ch1sum-turnover-chart"></div></div>
+        <div class="card summary-section-card"><div class="card-head"><h3>แนวโน้มกำลังคนต้นปี/ปลายปี/ลาออก</h3><span class="section-badge">5 ปี</span></div><div class="card-body" id="ch1sum-headcount-trend-chart"></div></div>
+        <div class="card summary-section-card"><div class="card-head"><h3>แนวโน้ม Engagement</h3><span class="section-badge">2564–2568</span></div><div class="card-body" id="ch1sum-eng-trend-chart"></div></div>
+        <div class="card summary-section-card"><div class="card-head"><h3>NCD และโรคหลัก</h3><span class="section-badge">สุขภาพกาย</span></div><div class="card-body" id="ch1sum-ncd-chart"></div></div>
+        <div class="card summary-section-card"><div class="card-head"><h3>สุขภาพจิต / Engagement</h3><span class="section-badge">สุขภาวะ</span></div><div class="card-body" id="ch1sum-mental-chart"></div></div>
+      </div>
+      <div id="ch1sum-priority-card" class="card summary-section-card" style="margin-bottom:14px">
+        <div class="card-head"><h3>🎯 จุดเน้น 3 อันดับ (ภาพรวม)</h3><span class="section-badge">Top Priorities</span></div>
+        <div class="card-body" style="overflow:auto;max-height:400px">
+          <table class="summary-table" style="width:100%">
+            <thead><tr style="border-bottom:2px solid var(--bg3)">
+              <th style="width:32px;font-size:10.5px;text-align:center;color:var(--tx3);padding:6px 0">#</th>
+              <th style="text-align:left;font-size:11px;font-weight:600;color:var(--tx2);padding:6px 8px">หัวข้อจุดเน้น</th>
+              <th style="width:56px;text-align:center;font-size:10px;color:#0F4C81;padding:6px 0">อันดับ 1</th>
+              <th style="width:56px;text-align:center;font-size:10px;color:var(--tx2);padding:6px 0">อันดับ 2</th>
+              <th style="width:56px;text-align:center;font-size:10px;color:var(--tx3);padding:6px 0">อันดับ 3</th>
+              <th style="width:50px;text-align:center;font-size:10.5px;font-weight:700;color:var(--tx);padding:6px 0">รวม</th>
+            </tr></thead>
+            <tbody id="ch1sum-priority-ranking"></tbody>
+          </table>
+        </div>
+      </div>
+      <div id="ch1-summary-sections" class="summary-sections"></div>
+    </div>
+
     <!-- ==================== ANALYTICS CH1 ==================== -->
     <div class="page" id="page-an-ch1">
       <div class="page-title">วิเคราะห์ผล Ch1</div>
@@ -824,6 +1242,7 @@ const titles = {
   orgs:['องค์กรที่เข้าร่วม','/ จัดการข้อมูล'],
   'form-ch1':['ฟอร์ม Ch1','/ จัดการข้อมูล'],
   'form-wb':['Wellbeing Survey','/ จัดการข้อมูล'],
+  'ch1-summary':['สรุปภาพรวม Ch1','/ วิเคราะห์ข้อมูล'],
   'an-ch1':['วิเคราะห์ผล Ch1','/ วิเคราะห์'],
   'an-wb':['วิเคราะห์ Wellbeing','/ วิเคราะห์'],
   compare:['เปรียบเทียบองค์กร','/ วิเคราะห์'],
@@ -1122,6 +1541,7 @@ function go(id, el) {
     document.getElementById('ttl').textContent = title[0];
     document.getElementById('tbc').textContent = title[1];
   }
+  if (id === 'ch1-summary') renderCh1Summary();
   if (id === 'settings') loadSettingsUI();
   if (id === 'form-editor') loadFormEditorFields();
 }
@@ -2319,8 +2739,796 @@ function renderWbAnalytics() {
   }
 }
 
+function ch1ToggleOrgDropdown() {
+  const dd = document.getElementById('ch1-org-dropdown');
+  if (dd) dd.classList.toggle('show');
+}
+function ch1OrgCheckAll(allCb) {
+  document.querySelectorAll('#ch1-org-list input[type="checkbox"]').forEach(cb => cb.checked = allCb.checked);
+  ch1UpdateOrgLabel();
+  renderCh1Summary();
+}
+function ch1OrgCheckOne() {
+  const boxes = [...document.querySelectorAll('#ch1-org-list input[type="checkbox"]')];
+  const allCb = document.querySelector('#ch1-org-dropdown > label input[type="checkbox"]');
+  if (allCb) allCb.checked = boxes.length > 0 && boxes.every(cb => cb.checked);
+  ch1UpdateOrgLabel();
+  renderCh1Summary();
+}
+function ch1UpdateOrgLabel() {
+  const btn = document.getElementById('ch1-org-toggle');
+  if (!btn) return;
+  const sel = ch1GetSelectedOrgs();
+  if (!sel) btn.textContent = 'ทุกองค์กร ▾';
+  else if (sel.length === 0) btn.textContent = '(ไม่ได้เลือก) ▾';
+  else if (sel.length === 1) btn.textContent = sel[0] + ' ▾';
+  else btn.textContent = sel.length + ' องค์กร ▾';
+}
+function ch1GetSelectedOrgs() {
+  const allCb = document.querySelector('#ch1-org-dropdown > label input[type="checkbox"]');
+  if (allCb && allCb.checked) return null;
+  return [...document.querySelectorAll('#ch1-org-list input[type="checkbox"]:checked')].map(cb => cb.value);
+}
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.org-multi-wrap')) {
+    const dd = document.getElementById('ch1-org-dropdown');
+    if (dd) dd.classList.remove('show');
+  }
+});
+
+function ch1VisibleRows() {
+  const sel = ch1GetSelectedOrgs();
+  if (!sel) return state.ch1Rows;
+  if (!sel.length) return [];
+  const orgSet = new Set(sel);
+  return state.ch1Rows.filter(row => orgSet.has(getCh1Org(row)));
+}
+
+function ch1ToNumber(row, fields) {
+  const list = Array.isArray(fields) ? fields : [fields];
+  for (const field of list) {
+    const value = ch1v(row, field);
+    if (value === null || value === undefined || value === '') continue;
+    const num = Number(value);
+    if (!Number.isNaN(num)) return num;
+  }
+  return null;
+}
+
+function ch1Sum(rows, fields) {
+  return rows.reduce((sum, row) => sum + (ch1ToNumber(row, fields) || 0), 0);
+}
+
+function ch1Avg(rows, fields) {
+  const values = rows.map((row) => ch1ToNumber(row, fields)).filter((value) => Number.isFinite(value));
+  if (!values.length) return null;
+  return values.reduce((sum, value) => sum + value, 0) / values.length;
+}
+
+function ch1RateNum(row, year) {
+  const raw = ch1Rate(row, year);
+  if (!raw || raw === '—') return null;
+  const num = Number(String(raw).replace('%', ''));
+  return Number.isNaN(num) ? null : num;
+}
+
+function ch1AvgRate(rows, year) {
+  const values = rows.map((row) => ch1RateNum(row, year)).filter((value) => Number.isFinite(value));
+  if (!values.length) return null;
+  return values.reduce((sum, value) => sum + value, 0) / values.length;
+}
+
+function ch1Pct(num, den) {
+  if (!den) return null;
+  return (num / den) * 100;
+}
+
+function ch1ShortText(value, maxLen = 90) {
+  const text = String(value ?? '').replace(/\s+/g, ' ').trim();
+  if (!text) return '—';
+  return text.length > maxLen ? `${text.slice(0, maxLen - 1)}…` : text;
+}
+
+function ch1TextSummary(rows, field) {
+  const values = rows
+    .map((row) => ch1v(row, field))
+    .flatMap((value) => Array.isArray(value) ? value : [value])
+    .map((value) => String(value ?? '').trim())
+    .filter(Boolean);
+
+  if (!values.length) {
+    return { value: 'ยังไม่มีข้อมูล', note: '—' };
+  }
+
+  const counts = new Map();
+  values.forEach((value) => counts.set(value, (counts.get(value) || 0) + 1));
+  const top = [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 3);
+  const summary = top.map(([text, count]) => `${ch1ShortText(text, 34)}${count > 1 ? ` (${count})` : ''}`).join(' · ');
+  return {
+    value: `${fmtNum(values.length)} รายการ / ${fmtNum(rows.length)} องค์กร`,
+    note: `ตัวอย่าง: ${summary}`,
+  };
+}
+
+function ch1FileSummary(rows, field) {
+  const count = rows.filter((row) => !!ch1v(row, field)).length;
+  return {
+    value: `${fmtNum(count)} / ${fmtNum(rows.length)} องค์กร`,
+    note: count ? 'มีไฟล์แนบพร้อมใช้งาน' : 'ยังไม่มีไฟล์แนบ',
+  };
+}
+
+function ch1MetricSummary(rows, item) {
+  const unit = item.unit || '';
+  if (item.type === 'sum') {
+    const total = ch1Sum(rows, item.fields || item.field);
+    return { value: `${fmtNum(total)}${unit ? ` ${unit}` : ''}`, note: `รวมจาก ${fmtNum(rows.length)} องค์กร` };
+  }
+  if (item.type === 'avg') {
+    const avg = ch1Avg(rows, item.fields || item.field);
+    return { value: avg == null ? '—' : `${fmtNum(avg, item.digits ?? 1)}${unit ? ` ${unit}` : ''}`, note: avg == null ? 'ยังไม่มีข้อมูล' : `เฉลี่ยจาก ${fmtNum(rows.length)} องค์กร` };
+  }
+  if (item.type === 'rate') {
+    const avg = ch1AvgRate(rows, item.year);
+    return { value: avg == null ? '—' : `${fmtNum(avg, 1)}%`, note: avg == null ? 'ยังไม่มีข้อมูล' : `ค่าเฉลี่ยอัตราออกปี ${item.year}` };
+  }
+  if (item.type === 'ratio') {
+    const value = item.calc ? item.calc(rows) : null;
+    return { value: value == null ? '—' : `${fmtNum(value, item.digits ?? 1)}%`, note: value == null ? 'ยังไม่มีข้อมูล' : item.note || 'คำนวณจากข้อมูลทั้งหมด' };
+  }
+  if (item.type === 'text') {
+    return ch1TextSummary(rows, item.field);
+  }
+  if (item.type === 'file') {
+    return ch1FileSummary(rows, item.field);
+  }
+  return { value: '—', note: '—' };
+}
+
+function ch1DecodeHtml(value) {
+  const div = document.createElement('div');
+  div.innerHTML = String(value ?? '');
+  return (div.textContent || div.innerText || '').replace(/\s+/g, ' ').trim();
+}
+
+function ch1NumericFromText(value) {
+  if (value == null) return null;
+  const text = String(value).trim();
+  if (!text || text === '—') return null;
+  const cleaned = text.replace(/,/g, '').replace(/%/g, '').trim();
+  const num = Number(cleaned);
+  return Number.isFinite(num) ? num : null;
+}
+
+function ch1FileFieldFromColumn(col) {
+  if (col.key === '_strategy_file') return ['strategy_file_url'];
+  if (col.key === '_orgstruct_file') return ['org_structure_file_url'];
+  if (col.key === '_hrd_file') return ['hrd_plan_file_url', 'hrd_plan_url'];
+  return null;
+}
+
+function ch1TopText(values, limit = 3) {
+  if (!values.length) return '—';
+  const counts = new Map();
+  values.forEach((v) => counts.set(v, (counts.get(v) || 0) + 1));
+  return [...counts.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, limit)
+    .map(([text, count]) => `${ch1ShortText(text, 38)}${count > 1 ? ` (${count})` : ''}`)
+    .join(' · ');
+}
+
+function ch1ColumnSummary(rows, col) {
+  const fileFields = ch1FileFieldFromColumn(col);
+  if (fileFields) {
+    const fileValues = rows
+      .map((row) => fileFields.map((f) => ch1v(row, f)).find(Boolean))
+      .filter(Boolean)
+      .map((v) => String(v));
+    return {
+      question: col.label,
+      value: `${fmtNum(fileValues.length)} / ${fmtNum(rows.length)} องค์กร`,
+      note: fileValues.length ? `ตัวอย่างไฟล์: ${ch1TopText(fileValues.map((v) => v.split('/').pop() || v), 2)}` : 'ยังไม่มีไฟล์แนบ',
+    };
+  }
+
+  const rawValues = rows
+    .map((row) => ch1DecodeHtml(col.get(row)))
+    .filter((v) => v && v !== '—');
+
+  if (!rawValues.length) {
+    return { question: col.label, value: 'ยังไม่มีข้อมูล', note: '—' };
+  }
+
+  const numericValues = rawValues.map(ch1NumericFromText).filter((v) => Number.isFinite(v));
+  const numericEnough = numericValues.length >= Math.max(2, Math.floor(rawValues.length * 0.7));
+
+  if (numericEnough) {
+    const total = numericValues.reduce((s, v) => s + v, 0);
+    const avg = numericValues.reduce((s, v) => s + v, 0) / numericValues.length;
+    const min = Math.min(...numericValues);
+    const max = Math.max(...numericValues);
+    const isPct = col.label.includes('(%)') || col.label.includes('อัตรา');
+    const suffix = isPct ? '%' : '';
+    return {
+      question: col.label,
+      value: `รวม ${fmtNum(total, 1)}${suffix} · เฉลี่ย ${fmtNum(avg, 1)}${suffix}`,
+      note: `ต่ำสุด ${fmtNum(min, 1)}${suffix} · สูงสุด ${fmtNum(max, 1)}${suffix} · กรอก ${fmtNum(rawValues.length)}/${fmtNum(rows.length)} องค์กร`,
+    };
+  }
+
+  return {
+    question: col.label,
+    value: `กรอก ${fmtNum(rawValues.length)}/${fmtNum(rows.length)} องค์กร`,
+    note: `พบบ่อย: ${ch1TopText(rawValues)}`,
+  };
+}
+
+function buildCh1QuestionSummaries(rows) {
+  const excluded = new Set(['_org', 'submitted_at', '_email']);
+  return CH1_COLUMNS
+    .filter((col) => !excluded.has(col.key))
+    .map((col) => ch1ColumnSummary(rows, col));
+}
+
+function ch1IsEmptyQuestionSummary(item) {
+  const value = String(item?.value || '').trim();
+  if (!value || value === 'ยังไม่มีข้อมูล' || value === '—') return true;
+  if (/^กรอก\s*0\s*\/\s*\d+\s*องค์กร$/.test(value)) return true;
+  if (/^0\s*\/\s*\d+\s*องค์กร$/.test(value)) return true;
+  return false;
+}
+
+function renderMiniBars(el, items) {
+  if (!el) return;
+  const max = Math.max(...items.map((item) => item.value), 1);
+  el.innerHTML = items.length
+    ? `<div class="summary-mini">${items.map((item) => {
+      const pct = max ? Math.max(6, (item.value / max) * 100) : 6;
+      return `<div class="summary-mini-row"><div class="summary-mini-label">${esc(item.label)}</div><div class="summary-mini-bar"><span style="width:${pct}%"></span></div><div class="summary-mini-val">${esc(item.display)}</div></div>`;
+    }).join('')}</div>`
+    : '<div class="summary-empty">ยังไม่มีข้อมูล</div>';
+}
+
+let CH1_TREND_UID = 0;
+function nextCh1TrendUid(prefix = 'ch1-trend') {
+  CH1_TREND_UID += 1;
+  return `${prefix}-${CH1_TREND_UID}`;
+}
+
+function ch1TrendTooltipShow(target, event) {
+  const wrap = target?.closest('.trend-wrap');
+  if (!wrap) return;
+  const tooltip = wrap.querySelector('.trend-tooltip');
+  if (!tooltip) return;
+  tooltip.textContent = target.dataset.tip || '';
+  const rect = wrap.getBoundingClientRect();
+  tooltip.style.left = `${Math.max(10, Math.min(rect.width - 10, event.clientX - rect.left))}px`;
+  tooltip.style.top = `${Math.max(10, event.clientY - rect.top)}px`;
+  tooltip.classList.add('show');
+}
+
+function ch1TrendTooltipHide(target) {
+  const wrap = target?.closest('.trend-wrap');
+  if (!wrap) return;
+  const tooltip = wrap.querySelector('.trend-tooltip');
+  if (!tooltip) return;
+  tooltip.classList.remove('show');
+}
+
+function ch1Clamp(v, min, max) {
+  return Math.max(min, Math.min(max, v));
+}
+
+function renderTrendLine(el, items, opts = {}) {
+  if (!el) return;
+  if (!items || !items.length) {
+    el.innerHTML = '<div class="summary-empty">ยังไม่มีข้อมูล</div>';
+    return;
+  }
+
+  const width = 620;
+  const height = 234;
+  const pad = { top: 28, right: 20, bottom: 42, left: 50 };
+  const chartW = width - pad.left - pad.right;
+  const chartH = height - pad.top - pad.bottom;
+
+  const values = items.map((item) => Number(item.value) || 0);
+  const minVRaw = Math.min(...values);
+  const maxVRaw = Math.max(...values);
+  const minV = Math.max(0, Math.floor((minVRaw - 1) * 10) / 10);
+  const maxV = Math.ceil((maxVRaw + 1) * 10) / 10;
+  const range = Math.max(maxV - minV, 1);
+
+  const x = (i) => pad.left + (items.length === 1 ? chartW / 2 : (i / (items.length - 1)) * chartW);
+  const y = (v) => ch1Clamp(pad.top + (1 - (v - minV) / range) * chartH, pad.top, pad.top + chartH);
+
+  const points = items.map((item, i) => ({
+    label: item.label,
+    value: Number(item.value) || 0,
+    x: x(i),
+    y: y(Number(item.value) || 0),
+  }));
+
+  const polyline = points.map((p) => `${p.x},${p.y}`).join(' ');
+  const area = `${pad.left},${pad.top + chartH} ${polyline} ${pad.left + chartW},${pad.top + chartH}`;
+  const clipId = nextCh1TrendUid('clip-one');
+
+  const grid = [0, 0.25, 0.5, 0.75, 1].map((t) => {
+    const yy = pad.top + t * chartH;
+    const v = maxV - t * range;
+    return `<g>
+      <line x1="${pad.left}" y1="${yy}" x2="${pad.left + chartW}" y2="${yy}" stroke="#E6EDF6" stroke-width="1" />
+      <text x="${pad.left - 8}" y="${yy + 4}" text-anchor="end" font-size="10" fill="#7A8EA6">${v.toFixed(1)}${opts.unit || ''}</text>
+    </g>`;
+  }).join('');
+
+  const circleEls = points.map((p) => `<g>
+      <circle cx="${p.x}" cy="${p.y}" r="4" fill="#0F4C81" />
+      <circle class="trend-dot-hit" cx="${p.x}" cy="${p.y}" r="10" fill="transparent" data-tip="${esc(`${p.label}: ${p.value.toFixed(2)}${opts.unit || ''}`)}"
+        onmousemove="ch1TrendTooltipShow(this,event)" onmouseenter="ch1TrendTooltipShow(this,event)" onmouseleave="ch1TrendTooltipHide(this)">
+        <title>${p.label}: ${p.value.toFixed(2)}${opts.unit || ''}</title>
+      </circle>
+    </g>`).join('');
+  const valueLabelEls = points.map((p) => `<text x="${p.x}" y="${p.y - 10}" text-anchor="middle" font-size="10" fill="#35506F">${p.value.toFixed(2)}${opts.unit || ''}</text>`).join('');
+  const xLabelEls = points.map((p) => `<text x="${p.x}" y="${pad.top + chartH + 18}" text-anchor="middle" font-size="10" fill="#6B7F95">${p.label}</text>`).join('');
+
+  const trend = points.length >= 2 ? (points[points.length - 1].value - points[0].value) : 0;
+  const trendText = trend > 0 ? `แนวโน้มเพิ่มขึ้น +${trend.toFixed(2)}${opts.unit || ''}` : trend < 0 ? `แนวโน้มลดลง ${trend.toFixed(2)}${opts.unit || ''}` : 'แนวโน้มคงที่';
+  const trendColor = trend > 0 ? '#B42318' : trend < 0 ? '#027A48' : '#6B7280';
+
+  el.innerHTML = `<div class="trend-wrap">
+    <div class="trend-tooltip" aria-hidden="true"></div>
+    <svg viewBox="0 0 ${width} ${height}" width="100%" height="${height}" style="display:block;overflow:hidden" role="img" aria-label="กราฟแนวโน้ม">
+      <defs><clipPath id="${clipId}"><rect x="${pad.left}" y="${pad.top}" width="${chartW}" height="${chartH}" /></clipPath></defs>
+      ${grid}
+      <g clip-path="url(#${clipId})">
+        <polygon points="${area}" fill="rgba(15, 76, 129, 0.08)" />
+        <polyline points="${polyline}" fill="none" stroke="#0F4C81" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+        ${circleEls}
+      </g>
+      ${valueLabelEls}
+      ${xLabelEls}
+      <line x1="${pad.left}" y1="${pad.top + chartH}" x2="${pad.left + chartW}" y2="${pad.top + chartH}" stroke="#C8D7E8" stroke-width="1" />
+      <line x1="${pad.left}" y1="${pad.top}" x2="${pad.left}" y2="${pad.top + chartH}" stroke="#C8D7E8" stroke-width="1" />
+    </svg>
+    <div style="font-size:11.5px;color:${trendColor};font-weight:700;margin-top:4px">${trendText}</div>
+  </div>`;
+}
+
+function renderTrendLines(el, labels, series) {
+  if (!el) return;
+  const validSeries = (series || []).filter((s) => Array.isArray(s.values) && s.values.length === labels.length);
+  if (!labels?.length || !validSeries.length) {
+    el.innerHTML = '<div class="summary-empty">ยังไม่มีข้อมูล</div>';
+    return;
+  }
+
+  const width = 640;
+  const height = 250;
+  const pad = { top: 28, right: 22, bottom: 42, left: 54 };
+  const chartW = width - pad.left - pad.right;
+  const chartH = height - pad.top - pad.bottom;
+
+  const allValues = validSeries.flatMap((s) => s.values.map((v) => Number(v) || 0));
+  const minVRaw = Math.min(...allValues);
+  const maxVRaw = Math.max(...allValues);
+  const minV = Math.max(0, Math.floor((minVRaw - 1) * 10) / 10);
+  const maxV = Math.ceil((maxVRaw + 1) * 10) / 10;
+  const range = Math.max(maxV - minV, 1);
+
+  const x = (i) => pad.left + (labels.length === 1 ? chartW / 2 : (i / (labels.length - 1)) * chartW);
+  const y = (v) => ch1Clamp(pad.top + (1 - ((Number(v) || 0) - minV) / range) * chartH, pad.top, pad.top + chartH);
+  const clipId = nextCh1TrendUid('clip-multi');
+
+  const grid = [0, 0.25, 0.5, 0.75, 1].map((t) => {
+    const yy = pad.top + t * chartH;
+    const val = maxV - t * range;
+    return `<g>
+      <line x1="${pad.left}" y1="${yy}" x2="${pad.left + chartW}" y2="${yy}" stroke="#E6EDF6" stroke-width="1"/>
+      <text x="${pad.left - 8}" y="${yy + 4}" text-anchor="end" font-size="10" fill="#7A8EA6">${fmtNum(val, 1)}</text>
+    </g>`;
+  }).join('');
+
+  const lineEls = validSeries.map((s) => {
+    const pts = s.values.map((v, i) => ({ x: x(i), y: y(v), v: Number(v) || 0, label: labels[i] }));
+    const polyline = pts.map((p) => `${p.x},${p.y}`).join(' ');
+    const dots = pts.map((p) => `<g>
+      <circle cx="${p.x}" cy="${p.y}" r="3.8" fill="${s.color}" />
+      <circle class="trend-dot-hit" cx="${p.x}" cy="${p.y}" r="10" fill="transparent" data-tip="${esc(`${s.name} ${p.label}: ${fmtNum(p.v, 2)}`)}"
+        onmousemove="ch1TrendTooltipShow(this,event)" onmouseenter="ch1TrendTooltipShow(this,event)" onmouseleave="ch1TrendTooltipHide(this)"><title>${s.name} ${p.label}: ${fmtNum(p.v, 2)}</title></circle>
+    </g>`).join('');
+    return `<g>
+      <polyline points="${polyline}" fill="none" stroke="${s.color}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+      ${dots}
+    </g>`;
+  }).join('');
+
+  const xLabels = labels.map((lb, i) => `<text x="${x(i)}" y="${pad.top + chartH + 18}" text-anchor="middle" font-size="10" fill="#6B7F95">${lb}</text>`).join('');
+  const legend = validSeries.map((s) => `<div style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:99px;background:${s.color};display:inline-block"></span><span>${esc(s.name)}</span></div>`).join('');
+
+  el.innerHTML = `<div class="trend-wrap">
+    <div class="trend-tooltip" aria-hidden="true"></div>
+    <svg viewBox="0 0 ${width} ${height}" width="100%" height="${height}" style="display:block;overflow:hidden" role="img" aria-label="กราฟเส้นแนวโน้มรายปี">
+      <defs><clipPath id="${clipId}"><rect x="${pad.left}" y="${pad.top}" width="${chartW}" height="${chartH}" /></clipPath></defs>
+      ${grid}
+      <g clip-path="url(#${clipId})">${lineEls}</g>
+      ${xLabels}
+      <line x1="${pad.left}" y1="${pad.top + chartH}" x2="${pad.left + chartW}" y2="${pad.top + chartH}" stroke="#C8D7E8" stroke-width="1" />
+      <line x1="${pad.left}" y1="${pad.top}" x2="${pad.left}" y2="${pad.top + chartH}" stroke="#C8D7E8" stroke-width="1" />
+    </svg>
+    <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:#4D6078;margin-top:4px">${legend}</div>
+  </div>`;
+}
+
+const CH1_SUMMARY_SECTIONS = [
+  {
+    title: 'โครงสร้างบุคลากร',
+    badge: 'จำนวนและอายุ',
+    items: [
+      { label: 'บุคลากรรวม', type: 'sum', fields: ['total_staff', 'total_personnel'], unit: 'คน' },
+      { label: 'ข้าราชการ', type: 'sum', field: 'type_official', unit: 'คน' },
+      { label: 'พนักงานราชการ', type: 'sum', field: 'type_employee', unit: 'คน' },
+      { label: 'ลูกจ้าง', type: 'sum', field: 'type_contract', unit: 'คน' },
+      { label: 'บุคลากรอื่น ๆ', type: 'sum', field: 'type_other', unit: 'คน' },
+      { label: 'อายุ ≤30 ปี', type: 'sum', fields: ['age_u30', 'age_under30'], unit: 'คน' },
+      { label: 'อายุ 31–40 ปี', type: 'sum', field: 'age_31_40', unit: 'คน' },
+      { label: 'อายุ 41–50 ปี', type: 'sum', field: 'age_41_50', unit: 'คน' },
+      { label: 'อายุ 51–60 ปี', type: 'sum', field: 'age_51_60', unit: 'คน' },
+    ],
+  },
+  {
+    title: 'อายุราชการและตำแหน่ง',
+    badge: 'เส้นทางอาชีพ',
+    items: [
+      { label: 'อายุราชการ <1 ปี', type: 'sum', field: 'service_u1', unit: 'คน' },
+      { label: 'อายุราชการ 1–5 ปี', type: 'sum', field: 'service_1_5', unit: 'คน' },
+      { label: 'อายุราชการ 6–10 ปี', type: 'sum', field: 'service_6_10', unit: 'คน' },
+      { label: 'อายุราชการ 11–15 ปี', type: 'sum', field: 'service_11_15', unit: 'คน' },
+      { label: 'อายุราชการ 16–20 ปี', type: 'sum', field: 'service_16_20', unit: 'คน' },
+      { label: 'อายุราชการ 21–25 ปี', type: 'sum', field: 'service_21_25', unit: 'คน' },
+      { label: 'อายุราชการ 26–30 ปี', type: 'sum', field: 'service_26_30', unit: 'คน' },
+      { label: 'อายุราชการ >30 ปี', type: 'sum', field: 'service_over30', unit: 'คน' },
+    ],
+  },
+  {
+    title: 'การลาออก / โอนย้ายย้อนหลัง',
+    badge: '5 ปี',
+    items: [
+      { label: 'อัตราออกปี 2564', type: 'rate', year: '2564' },
+      { label: 'อัตราออกปี 2565', type: 'rate', year: '2565' },
+      { label: 'อัตราออกปี 2566', type: 'rate', year: '2566' },
+      { label: 'อัตราออกปี 2567', type: 'rate', year: '2567' },
+      { label: 'อัตราออกปี 2568', type: 'rate', year: '2568' },
+      { label: 'ภาพรวมยุทธศาสตร์', type: 'text', field: 'strategic_overview' },
+      { label: 'โครงสร้างองค์กร', type: 'text', field: 'org_structure' },
+    ],
+  },
+  {
+    title: 'สุขภาพกาย / NCD',
+    badge: 'โรคและการใช้บริการ',
+    items: [
+      { label: 'โรคเบาหวาน', type: 'sum', field: 'disease_diabetes', unit: 'คน' },
+      { label: 'ความดันโลหิตสูง', type: 'sum', field: 'disease_hypertension', unit: 'คน' },
+      { label: 'โรคหัวใจและหลอดเลือด', type: 'sum', field: 'disease_cardiovascular', unit: 'คน' },
+      { label: 'โรคไต', type: 'sum', field: 'disease_kidney', unit: 'คน' },
+      { label: 'โรคตับ', type: 'sum', field: 'disease_liver', unit: 'คน' },
+      { label: 'โรคมะเร็ง', type: 'sum', field: 'disease_cancer', unit: 'คน' },
+      { label: 'ภาวะอ้วน/น้ำหนักเกิน', type: 'sum', field: 'disease_obesity', unit: 'คน' },
+      { label: 'NCD รวม', type: 'sum', field: 'ncd_count', unit: 'คน' },
+      { label: 'NCD ต่อบุคลากร', type: 'ratio', digits: 2, calc: (rows) => ch1Pct(ch1Sum(rows, 'ncd_count'), ch1Sum(rows, ['total_staff', 'total_personnel'])), note: 'สัดส่วนรวมจากยอด NCD / บุคลากรรวม' },
+      { label: 'วันลาป่วยรวม', type: 'sum', field: 'sick_leave_days', unit: 'วัน' },
+      { label: 'วันลาป่วยเฉลี่ย/คน/ปี', type: 'avg', field: 'sick_leave_avg', unit: 'วัน' },
+      { label: 'ผู้ใช้คลินิก/ปี', type: 'sum', field: 'clinic_users_per_year', unit: 'คน' },
+    ],
+  },
+  {
+    title: 'สุขภาพจิต / ความผูกพัน',
+    badge: 'Wellbeing',
+    items: [
+      { label: 'ภาวะเครียดเรื้อรัง', type: 'text', field: 'mental_stress' },
+      { label: 'ภาวะวิตกกังวล', type: 'text', field: 'mental_anxiety' },
+      { label: 'ปัญหาการนอนหลับ', type: 'text', field: 'mental_sleep' },
+      { label: 'ภาวะหมดไฟ', type: 'text', field: 'mental_burnout' },
+      { label: 'ภาวะซึมเศร้า', type: 'text', field: 'mental_depression' },
+      { label: 'Engagement Score', type: 'avg', field: 'engagement_score', unit: 'คะแนน', digits: 1 },
+      { label: 'ความพึงพอใจงาน', type: 'text', field: 'job_satisfaction' },
+      { label: 'ปัญหาสำคัญสุด', type: 'text', field: 'main_problem' },
+    ],
+  },
+  {
+    title: 'นโยบาย / บริบท / เอกสารแนบ',
+    badge: 'ข้อความอธิบาย',
+    items: [
+      { label: 'นโยบายที่เกี่ยวข้อง', type: 'text', field: 'related_policies' },
+      { label: 'บริบทภายนอก / ความท้าทาย', type: 'text', field: 'context_challenges' },
+      { label: 'ไฟล์ยุทธศาสตร์', type: 'file', field: 'strategy_file_url' },
+      { label: 'ไฟล์โครงสร้างองค์กร', type: 'file', field: 'org_structure_file_url' },
+      { label: 'ผลสำรวจสุขภาพจิต', type: 'text', field: 'mental_health_report_type' },
+      { label: 'ผลสำรวจ NCD', type: 'text', field: 'disease_report_type' },
+      { label: 'ผลการลาป่วย', type: 'text', field: 'sick_leave_report_type' },
+      { label: 'ผลการคลินิก', type: 'text', field: 'clinic_report_type' },
+    ],
+  },
+];
+
+function renderCh1SummaryChart(el, items, formatter = (item) => fmtNum(item.value)) {
+  renderMiniBars(el, items.map((item) => ({
+    label: item.label,
+    value: item.value,
+    display: formatter(item),
+  })));
+}
+
+function renderCh1Summary() {
+  const page = document.getElementById('page-ch1-summary');
+  if (!page) return;
+
+  const orgList = document.getElementById('ch1-org-list');
+  if (orgList && !orgList.hasChildNodes()) {
+    const orgs = [...new Set(state.ch1Rows.map((row) => getCh1Org(row)).filter(Boolean))].sort();
+    orgList.innerHTML = orgs.map(org => `<label class="org-check-item"><input type="checkbox" value="${esc(org)}" checked onchange="ch1OrgCheckOne()"> <span>${esc(org)}</span></label>`).join('');
+  }
+
+  const rows = ch1VisibleRows();
+  const selectedOrgs = ch1GetSelectedOrgs();
+  const orgsInScope = [...new Set(rows.map((row) => getCh1Org(row)).filter(Boolean))];
+  const totalStaff = ch1Sum(rows, ['total_staff', 'total_personnel']);
+  const totalNcd = ch1Sum(rows, 'ncd_count');
+  const ncdRatio = ch1Pct(totalNcd, totalStaff);
+  const sickLeave = ch1Sum(rows, 'sick_leave_days');
+  const burnoutAvg = ch1Avg(rows, 'mental_burnout');
+  const engAvg = ch1Avg(rows, 'engagement_score');
+
+  const sub = document.getElementById('ch1-summary-sub');
+  if (sub) {
+    sub.textContent = !selectedOrgs
+      ? `สรุปข้อมูลที่กรอกแล้วทั้งหมด ${fmtNum(orgsInScope.length)} องค์กร จาก ${fmtNum(state.ch1Rows.length)} รายการ`
+      : selectedOrgs.length === 1
+        ? `สรุปเฉพาะองค์กร: ${selectedOrgs[0]}`
+        : `สรุป ${selectedOrgs.length} องค์กรที่เลือก จาก ${fmtNum(state.ch1Rows.length)} รายการ`;
+  }
+
+  const setEl = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value; };
+  setEl('ch1sum-kpi-orgs', !selectedOrgs ? fmtNum(orgsInScope.length) : selectedOrgs.length === 1 ? '1' : fmtNum(selectedOrgs.length));
+  setEl('ch1sum-kpi-staff', totalStaff ? fmtNum(totalStaff) + ' คน' : '—');
+  setEl('ch1sum-kpi-ncd', ncdRatio == null ? '—' : `${fmtNum(ncdRatio, 1)}%`);
+  setEl('ch1sum-kpi-sick', sickLeave ? fmtNum(sickLeave) + ' วัน' : '—');
+  setEl('ch1sum-kpi-burnout', burnoutAvg == null ? '—' : fmtNum(burnoutAvg, 1));
+  setEl('ch1sum-kpi-eng', engAvg == null ? '—' : fmtNum(engAvg, 1));
+
+  renderCh1SummaryChart(document.getElementById('ch1sum-age-chart'), [
+    { label: '≤30 ปี', value: ch1Sum(rows, ['age_u30', 'age_under30']) },
+    { label: '31–40 ปี', value: ch1Sum(rows, 'age_31_40') },
+    { label: '41–50 ปี', value: ch1Sum(rows, 'age_41_50') },
+    { label: '51–60 ปี', value: ch1Sum(rows, 'age_51_60') },
+  ], (item) => `${fmtNum(item.value)} คน`);
+
+  renderCh1SummaryChart(document.getElementById('ch1sum-service-chart'), [
+    { label: '<1 ปี', value: ch1Sum(rows, 'service_u1') },
+    { label: '1–5 ปี', value: ch1Sum(rows, 'service_1_5') },
+    { label: '6–10 ปี', value: ch1Sum(rows, 'service_6_10') },
+    { label: '11–15 ปี', value: ch1Sum(rows, 'service_11_15') },
+    { label: '16–20 ปี', value: ch1Sum(rows, 'service_16_20') },
+    { label: '21–25 ปี', value: ch1Sum(rows, 'service_21_25') },
+    { label: '26–30 ปี', value: ch1Sum(rows, 'service_26_30') },
+    { label: '>30 ปี', value: ch1Sum(rows, 'service_over30') },
+  ], (item) => `${fmtNum(item.value)} คน`);
+
+  renderCh1SummaryChart(document.getElementById('ch1sum-position-chart'), [
+    { label: 'O1', value: ch1Sum(rows, 'pos_o1') },
+    { label: 'O2', value: ch1Sum(rows, 'pos_o2') },
+    { label: 'O3', value: ch1Sum(rows, 'pos_o3') },
+    { label: 'O4', value: ch1Sum(rows, 'pos_o4') },
+    { label: 'K1', value: ch1Sum(rows, 'pos_k1') },
+    { label: 'K2', value: ch1Sum(rows, 'pos_k2') },
+    { label: 'K3', value: ch1Sum(rows, 'pos_k3') },
+    { label: 'K4', value: ch1Sum(rows, 'pos_k4') },
+    { label: 'K5', value: ch1Sum(rows, 'pos_k5') },
+    { label: 'M1', value: ch1Sum(rows, 'pos_m1') },
+    { label: 'M2', value: ch1Sum(rows, 'pos_m2') },
+    { label: 'S1', value: ch1Sum(rows, 'pos_s1') },
+    { label: 'S2', value: ch1Sum(rows, 'pos_s2') },
+  ], (item) => `${fmtNum(item.value)} คน`);
+
+  renderTrendLine(document.getElementById('ch1sum-turnover-chart'), [
+    { label: '2564', value: ch1AvgRate(rows, '2564') || 0 },
+    { label: '2565', value: ch1AvgRate(rows, '2565') || 0 },
+    { label: '2566', value: ch1AvgRate(rows, '2566') || 0 },
+    { label: '2567', value: ch1AvgRate(rows, '2567') || 0 },
+    { label: '2568', value: ch1AvgRate(rows, '2568') || 0 },
+  ], { unit: '%' });
+
+  const years = ['2564', '2565', '2566', '2567', '2568'];
+  renderTrendLines(document.getElementById('ch1sum-headcount-trend-chart'), years, [
+    { name: 'ต้นปี (คน)', color: '#0F4C81', values: years.map((y) => ch1Avg(rows, `begin_${y}`) || 0) },
+    { name: 'ปลายปี (คน)', color: '#1E8E3E', values: years.map((y) => ch1Avg(rows, `end_${y}`) || 0) },
+    { name: 'ลาออก/โอนย้าย (คน)', color: '#C2410C', values: years.map((y) => ch1Avg(rows, `leave_${y}`) || 0) },
+  ]);
+
+  renderTrendLines(document.getElementById('ch1sum-eng-trend-chart'), years, [
+    { name: 'Engagement (คะแนน)', color: '#7C3AED', values: [
+      ch1Avg(rows, 'engagement_score_2564') || 0,
+      ch1Avg(rows, 'engagement_score_2565') || 0,
+      ch1Avg(rows, 'engagement_score_2566') || 0,
+      ch1Avg(rows, 'engagement_score_2567') || 0,
+      ch1Avg(rows, 'engagement_score_2568') || 0,
+    ] },
+  ]);
+
+  renderCh1SummaryChart(document.getElementById('ch1sum-ncd-chart'), [
+    { label: 'เบาหวาน', value: ch1Sum(rows, 'disease_diabetes') },
+    { label: 'ความดัน', value: ch1Sum(rows, 'disease_hypertension') },
+    { label: 'หัวใจ/หลอดเลือด', value: ch1Sum(rows, 'disease_cardiovascular') },
+    { label: 'ไต', value: ch1Sum(rows, 'disease_kidney') },
+    { label: 'อ้วน/น้ำหนักเกิน', value: ch1Sum(rows, 'disease_obesity') },
+    { label: 'NCD รวม', value: totalNcd },
+  ], (item) => `${fmtNum(item.value)} คน`);
+
+  renderCh1SummaryChart(document.getElementById('ch1sum-mental-chart'), [
+    { label: 'Burnout', value: burnoutAvg || 0 },
+    { label: 'Engagement', value: engAvg || 0 },
+    { label: 'ลาป่วยเฉลี่ย', value: ch1Avg(rows, 'sick_leave_avg') || 0 },
+    { label: 'ผู้ใช้คลินิก', value: ch1Sum(rows, 'clinic_users_per_year') || 0 },
+  ], (item) => `${fmtNum(item.value, 1)}`);
+
+  // Top-3 Priority Rankings
+  const priorityEl = document.getElementById('ch1sum-priority-ranking');
+  if (priorityEl) {
+    const priorityCounts = {};
+    rows.forEach(row => {
+      ['strategic_priority_rank1', 'strategic_priority_rank2', 'strategic_priority_rank3'].forEach((field, idx) => {
+        const val = (ch1v(row, field) || '').toString().trim();
+        if (val && val !== '—' && val !== '-') {
+          if (!priorityCounts[val]) priorityCounts[val] = { topic: val, rank1: 0, rank2: 0, rank3: 0, total: 0, isNew: false };
+          if (idx === 0) priorityCounts[val].rank1++;
+          else if (idx === 1) priorityCounts[val].rank2++;
+          else priorityCounts[val].rank3++;
+          priorityCounts[val].total++;
+        }
+      });
+      const other = (ch1v(row, 'strategic_priority_other') || '').toString().trim();
+      if (other && other !== '—' && other !== '-') {
+        if (!priorityCounts[other]) priorityCounts[other] = { topic: other, rank1: 0, rank2: 0, rank3: 0, total: 0, isNew: true };
+        priorityCounts[other].total++;
+        priorityCounts[other].isNew = true;
+      }
+    });
+    const sorted = Object.values(priorityCounts).sort((a, b) => b.total - a.total || b.rank1 - a.rank1);
+    if (sorted.length) {
+      priorityEl.innerHTML = sorted.map((item, i) => `<tr>
+        <td style="width:32px;text-align:center;color:var(--tx3);font-size:11px">${i + 1}</td>
+        <td style="font-size:12px;color:var(--tx);font-weight:500;padding-left:8px">${esc(item.topic)}${item.isNew ? ' <span style="background:#FEF3C7;color:#92400E;padding:1px 6px;border-radius:99px;font-size:9.5px;font-weight:600">เสนอใหม่</span>' : ''}</td>
+        <td style="width:56px;text-align:center;font-size:12px;font-weight:600;color:var(--P)">${item.rank1 || '—'}</td>
+        <td style="width:56px;text-align:center;font-size:12px;color:var(--tx2)">${item.rank2 || '—'}</td>
+        <td style="width:56px;text-align:center;font-size:12px;color:var(--tx3)">${item.rank3 || '—'}</td>
+        <td style="width:50px;text-align:center;font-size:12.5px;font-weight:700;color:var(--tx)">${item.total}</td>
+      </tr>`).join('');
+    } else {
+      priorityEl.innerHTML = '<tr><td colspan="6" class="summary-empty">ยังไม่มีข้อมูลจุดเน้น</td></tr>';
+    }
+  }
+
+  const sectionsEl = document.getElementById('ch1-summary-sections');
+  if (!sectionsEl) return;
+
+  const questionSummaries = buildCh1QuestionSummaries(rows);
+  const visibleSummaries = questionSummaries.filter((item) => !ch1IsEmptyQuestionSummary(item));
+  const hiddenCount = questionSummaries.length - visibleSummaries.length;
+  const summaryRows = visibleSummaries.map((item, index) => `<tr>
+      <td style="width:52px;color:var(--tx3);font-size:11px">${index + 1}</td>
+      <td class="summary-label" style="width:34%">${esc(item.question)}</td>
+      <td>
+        <div class="summary-value">${esc(item.value)}</div>
+        <div class="summary-note">${esc(item.note)}</div>
+      </td>
+    </tr>`).join('');
+
+  sectionsEl.innerHTML = `<div class="card summary-section-card" style="grid-column:1/-1">
+    <div class="card-head"><h3>สรุปรายข้อคำถาม Ch1</h3><span class="section-badge">แสดง ${fmtNum(visibleSummaries.length)} / ${fmtNum(questionSummaries.length)} ข้อ</span></div>
+    <div style="padding:0 14px 10px;color:var(--tx3);font-size:11.5px">ซ่อนข้อที่ยังไม่มีข้อมูลแล้ว ${fmtNum(hiddenCount)} ข้อ</div>
+    <div class="card-body" style="max-height:640px;overflow:auto">
+      <table class="summary-table"><tbody>${summaryRows || '<tr><td class="summary-empty" colspan="3">ยังไม่มีข้อมูล</td></tr>'}</tbody></table>
+    </div>
+  </div>`;
+}
+
+function resetCh1SummaryFilter() {
+  const allCb = document.querySelector('#ch1-org-dropdown > label input[type="checkbox"]');
+  if (allCb) allCb.checked = true;
+  document.querySelectorAll('#ch1-org-list input[type="checkbox"]').forEach(cb => cb.checked = true);
+  ch1UpdateOrgLabel();
+  renderCh1Summary();
+}
+
+function exportCh1SummaryReport() {
+  const rows = ch1VisibleRows();
+  if (!rows.length) {
+    showToast('ยังไม่มีข้อมูล Ch1 ในระบบ', 'warn');
+    return;
+  }
+
+  const exportRows = buildCh1QuestionSummaries(rows).map((item, index) => ({
+    index: index + 1,
+    question: item.question,
+    summary: item.value,
+    detail: item.note,
+  }));
+
+  const selOrgs = ch1GetSelectedOrgs();
+  downloadWorkbook(`ch1_summary_${selOrgs ? selOrgs.join('_') : 'all'}.xlsx`, 'Ch1_Summary', exportRows);
+  showToast('Export สรุป Ch1 สำเร็จ ✅', 'success');
+}
+
+function exportCh1SummaryPdf() {
+  const page = document.getElementById('page-ch1-summary');
+  if (!page) {
+    showToast('ไม่พบหน้าสรุป Ch1', 'warn');
+    return;
+  }
+  const rows = ch1VisibleRows();
+  if (!rows.length) {
+    showToast('ยังไม่มีข้อมูลสำหรับ Export PDF', 'warn');
+    return;
+  }
+
+  const selOrgs = ch1GetSelectedOrgs();
+  const selectedOrg = !selOrgs ? 'ทุกองค์กร' : selOrgs.length === 1 ? selOrgs[0] : `${selOrgs.length} องค์กร`;
+  const printable = `
+    <h1>สรุปภาพรวม Ch1 (${esc(selectedOrg)})</h1>
+    ${page.querySelector('.page-sub')?.outerHTML || ''}
+    ${page.querySelector('.kpi-grid')?.outerHTML || ''}
+    ${page.querySelector('.summary-sections')?.outerHTML || ''}
+    ${document.getElementById('ch1-summary-sections')?.outerHTML || ''}
+  `;
+
+  const html = `<!DOCTYPE html><html lang="th"><head><meta charset="UTF-8" />
+    <title>Ch1 Summary PDF</title>
+    <style>
+      @page { size: A4 landscape; margin: 10mm; }
+      body{font-family:Segoe UI,Tahoma,sans-serif;color:#1F2D3D;margin:0}
+      h1{margin:0 0 6px;font-size:20px;color:#0F4C81}
+      .page-sub{margin-bottom:12px;font-size:12px;color:#52677F}
+      .kpi-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:12px}
+      .kpi{border:1px solid #d9e2ef;border-radius:8px;padding:10px;background:#fff}
+      .kpi-val{font-size:20px;font-weight:700;color:#0f4c81}
+      .kpi-label{font-size:12px;font-weight:600}
+      .kpi-sub{font-size:11px;color:#6b7f95}
+      .summary-sections{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+      .card{border:1px solid #d9e2ef;border-radius:8px;break-inside:avoid;background:#fff}
+      .card-head{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #e8eef6;padding:9px 12px}
+      .card-head h3{font-size:14px;margin:0;color:#1f2d3d}
+      .section-badge{font-size:10px;background:#edf2f7;color:#51657d;padding:2px 8px;border-radius:99px}
+      .card-body{padding:10px 12px}
+      .summary-table{width:100%;border-collapse:collapse}
+      .summary-table td{padding:6px 0;border-bottom:1px solid #eef3f9;vertical-align:top;font-size:11px}
+      .summary-table tr:last-child td{border-bottom:none}
+      .summary-mini-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+      .summary-mini-label{width:96px;font-size:10.5px;color:#5b7088}
+      .summary-mini-bar{flex:1;height:7px;background:#edf2f7;border-radius:99px;overflow:hidden}
+      .summary-mini-bar span{display:block;height:100%;background:#0F4C81;border-radius:99px}
+      .summary-mini-val{width:64px;text-align:right;font-size:10.5px;font-weight:600;color:#445b74}
+      .trend-tooltip{display:none !important}
+      svg{max-width:100%;height:auto}
+    </style>
+  </head><body>${printable}<script>window.onload=function(){window.print()}<\/script></body></html>`;
+
+  const w = window.open('', '_blank', 'width=1360,height=900');
+  if (w) {
+    w.document.write(html);
+    w.document.close();
+    showToast('เปิดหน้า PDF แล้ว (เลือก Save as PDF ได้ทันที)', 'success');
+  } else {
+    showToast('กรุณาอนุญาต Popup เพื่อ Export PDF', 'warn');
+  }
+}
+
 function exportCurrentPage() {
   const pageId = visiblePageId();
+  if (pageId === 'page-ch1-summary') {
+    exportCh1SummaryReport();
+    return;
+  }
   if (pageId === 'page-form-wb') {
     exportRawTable();
     return;
@@ -2357,6 +3565,7 @@ async function init() {
     renderProgress(summary);
     renderOrgs(summary);
     renderCh1(summary);
+    renderCh1Summary();
     renderWellbeingControl(summary);
     renderWellbeingOrg(summary);
     renderWellbeingRaw();
