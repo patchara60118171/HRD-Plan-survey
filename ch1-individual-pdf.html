@@ -44,11 +44,11 @@ body{font-family:'Sarabun',sans-serif;background:#f0f4f8;color:#1e293b;font-size
 .field-item{padding:7px 10px;border-bottom:1px solid #f1f5f9;border-right:1px solid #f1f5f9}
 .field-item:nth-child(even){border-right:none}
 .field-item .fl{font-size:11px;color:#64748b;margin-bottom:2px}
-.field-item .fv{font-size:13px;font-weight:500;color:#1e293b}
+.field-item .fv{font-size:13px;font-weight:500;color:#1e293b;word-break:break-word}
 .field-item .fv.empty{color:#cbd5e1;font-style:italic}
 .field-full{padding:7px 10px;border-bottom:1px solid #f1f5f9;grid-column:1/-1}
 .field-full .fl{font-size:11px;color:#64748b;margin-bottom:3px}
-.field-full .fv{font-size:13px;line-height:1.5}
+.field-full .fv{font-size:13px;line-height:1.5;word-break:break-word}
 
 /* Footer */
 .pdf-footer{border-top:1px solid #e2e8f0;padding-top:14px;margin-top:auto;display:flex;justify-content:space-between;font-size:11px;color:#94a3b8;position:absolute;bottom:32px;left:48px;right:48px}
@@ -144,9 +144,9 @@ async function loadResponse(orgCode) {
 function getLabel(key) {
   if (schema?.questionsMap) {
     const q = schema.questionsMap.get(key);
-    if (q) return q.label_th;
+    if (q) return q.label_th || q.label;
   }
-  return key;
+  return key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 }
 
 function fv(key) {
@@ -158,7 +158,86 @@ function fv(key) {
 
 function fieldItem(key, full = false) {
   const cls = full ? 'field-full' : 'field-item';
-  return `<div class="${cls}"><div class="fl">${getLabel(key)}</div><div>${fv(key)}</div></div>`;
+  const label = getLabel(key);
+  const value = fv(key);
+  return `<div class="${cls}"><div class="fl">${label}</div><div>${value}</div></div>`;
+}
+
+function renderFileAttachments(prefix) {
+  const pathField = `${prefix}_file_path`;
+  const urlField = `${prefix}_file_url`;
+  const nameField = `${prefix}_file_name`;
+  
+  const filePath = responseData[pathField];
+  const fileUrl = responseData[urlField];
+  const fileName = responseData[nameField];
+  
+  if (!filePath && !fileUrl) return '';
+  
+  const displayName = fileName || filePath?.split('/').pop() || 'ไฟล์แนบ';
+  const link = fileUrl || '#';
+  
+  return `
+    <div class="file-attachment">
+      <span class="file-icon">📎</span>
+      <div>
+        <div class="file-name">${displayName}</div>
+        ${fileUrl ? `<a href="${link}" target="_blank" class="file-link">ดูไฟล์</a>` : ''}
+      </div>
+    </div>
+  `;
+}
+
+function renderSection(section) {
+  const questions = section.questions || [];
+  if (questions.length === 0) return '';
+  
+  let html = `<div class="pdf-section">`;
+  html += `<div class="pdf-section-title">${section.title_th || section.title || section.section_key}</div>`;
+  
+  html += `<div class="field-grid">`;
+  
+  for (const q of questions) {
+    const key = q.question_key;
+    const value = responseData[key];
+    
+    if (q.input_type === 'heading' || q.input_type === 'divider') continue;
+    
+    const isFullWidth = q.input_type === 'textarea' || 
+                        (value && String(value).length > 50) ||
+                        key.includes('overview') ||
+                        key.includes('structure') ||
+                        key.includes('policy') ||
+                        key.includes('challenge');
+    
+    html += fieldItem(key, isFullWidth);
+    
+    const filePrefix = ['strategy', 'org_structure', 'hrd_plan'].find(f => key.startsWith(f) || key.includes(f));
+    if (filePrefix) {
+      const fileHtml = renderFileAttachments(filePrefix);
+      if (fileHtml) html += `<div class="field-full">${fileHtml}</div>`;
+    }
+  }
+  
+  html += `</div></div>`;
+  return html;
+}
+
+function renderFallbackSections() {
+  let html = '<div class="pdf-section"><div class="pdf-section-title">� ข้อมูลทั้งหมด</div><div class="field-grid">';
+  
+  const excludeFields = ['id', 'created_at', 'updated_at', 'org_code', 'organization', 'status', 'submitted_at', 'submitted_by', 'form_version', 'is_test'];
+  
+  for (const [key, value] of Object.entries(responseData)) {
+    if (excludeFields.includes(key)) continue;
+    if (value === null || value === undefined || value === '') continue;
+    if (key.endsWith('_file_path') || key.endsWith('_file_url')) continue;
+    
+    html += fieldItem(key, String(value).length > 50);
+  }
+  
+  html += '</div></div>';
+  return html;
 }
 
 function renderPDF() {
@@ -170,11 +249,18 @@ function renderPDF() {
   const printDate = new Date().toLocaleDateString('th-TH', {day:'numeric',month:'long',year:'numeric'});
   const updateDate = r.updated_at ? new Date(r.updated_at).toLocaleDateString('th-TH', {day:'numeric',month:'long',year:'numeric'}) : '—';
 
+  let sectionsHtml = '';
+  if (schema?.sections && schema.sections.length > 0) {
+    for (const section of schema.sections) {
+      sectionsHtml += renderSection(section);
+    }
+  } else {
+    sectionsHtml = renderFallbackSections();
+  }
+
   const html = `
   <div class="page-wrap">
     <div class="pdf-page">
-
-      <!-- Header -->
       <div class="pdf-header">
         <div class="pdf-header-left">
           <div class="pdf-logo">🏛️</div>
@@ -187,76 +273,16 @@ function renderPDF() {
           <div>รหัสเอกสาร: ${r.id ? r.id.slice(0,8).toUpperCase() : '—'}</div>
         </div>
       </div>
-
-      <!-- Org strip -->
       <div class="org-strip">
         <div class="item"><label>หน่วยงาน</label><div class="val">${orgName}</div></div>
         <div class="item"><label>รหัสหน่วยงาน</label><div class="val">${r.org_code || '—'}</div></div>
         <div class="item"><label>สถานะ</label><div class="val"><span class="${chipCls}">${statusLabel}</span></div></div>
       </div>
-
-      <!-- Section 1: Workforce -->
-      <div class="pdf-section">
-        <div class="pdf-section-title">👥 ข้อมูลบุคลากร</div>
-        <div class="field-grid">
-          ${fieldItem('total_staff')}${fieldItem('type_official')}
-          ${fieldItem('type_employee')}${fieldItem('type_contract')}
-          ${fieldItem('type_other')}${fieldItem('age_u30')}
-          ${fieldItem('age_31_40')}${fieldItem('age_41_50')}
-          ${fieldItem('age_51_60')}${''}
-        </div>
-      </div>
-
-      <!-- Section 2: Turnover -->
-      <div class="pdf-section">
-        <div class="pdf-section-title">🔄 การเปลี่ยนแปลงบุคลากร</div>
-        <div class="field-grid">
-          ${fieldItem('turnover_count')}${fieldItem('turnover_rate')}
-          ${fieldItem('transfer_count')}${fieldItem('transfer_rate')}
-        </div>
-      </div>
-
-      <!-- Section 3: Health NCD -->
-      <div class="pdf-section">
-        <div class="pdf-section-title">💊 สุขภาพและโรคไม่ติดต่อ (NCD)</div>
-        <div class="field-grid">
-          ${fieldItem('ncd_count')}${fieldItem('ncd_ratio_pct')}
-          ${fieldItem('disease_diabetes')}${fieldItem('disease_hypertension')}
-          ${fieldItem('disease_cardiovascular')}${fieldItem('disease_kidney')}
-          ${fieldItem('disease_liver')}${fieldItem('disease_cancer')}
-          ${fieldItem('disease_obesity')}${fieldItem('sick_leave_days')}
-          ${fieldItem('sick_leave_avg')}${fieldItem('clinic_users_per_year')}
-        </div>
-      </div>
-
-      <!-- Section 4: Engagement -->
-      <div class="pdf-section">
-        <div class="pdf-section-title">🎯 Engagement & พัฒนาบุคลากร</div>
-        <div class="field-grid">
-          ${fieldItem('engagement_score')}${fieldItem('training_hours')}
-          ${fieldItem('mentoring_system')}${fieldItem('job_rotation')}
-          ${fieldItem('idp_system')}${fieldItem('career_path_system')}
-        </div>
-      </div>
-
-      <!-- Section 5: Strategy -->
-      <div class="pdf-section">
-        <div class="pdf-section-title">📌 ยุทธศาสตร์และบริบทองค์กร</div>
-        <div class="field-grid">
-          ${fieldItem('strategic_priority_rank1')}${fieldItem('strategic_priority_rank2')}
-          ${fieldItem('strategic_priority_rank3',false)}${''}
-          ${fieldItem('related_policies',true)}
-          ${fieldItem('context_challenges',true)}
-          ${fieldItem('strategic_overview',true)}
-        </div>
-      </div>
-
-      <!-- Footer -->
+      ${sectionsHtml}
       <div class="pdf-footer">
         <span>จัดทำโดย: ระบบ HRD Plan Survey | สสส.</span>
         <span>${orgName} | ${printDate}</span>
       </div>
-
     </div>
   </div>`;
 
@@ -264,7 +290,6 @@ function renderPDF() {
   document.getElementById('loading-screen').style.display = 'none';
   document.getElementById('pdf-container').style.display = '';
 
-  // Auto-print if ?print=1
   if (new URLSearchParams(location.search).get('print') === '1') {
     setTimeout(() => window.print(), 600);
   }
