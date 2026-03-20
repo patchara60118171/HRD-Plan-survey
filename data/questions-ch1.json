@@ -1,0 +1,553 @@
+{
+  "form_id": "ch1",
+  "form_version": "ch1-v4.0",
+  "form_title": "แบบสอบถามข้อมูลองค์กร (CH1)",
+  "form_title_en": "Organizational Data Form",
+  "total_steps": 5,
+  "steps": [
+    {
+      "step": 1,
+      "title": "ข้อมูลเบื้องต้นของส่วนราชการ",
+      "title_en": "Basic Organizational Information",
+      "sections": [
+        {
+          "section_id": "org_info",
+          "title": "ข้อมูลองค์กร",
+          "fields": [
+            {
+              "id": "organization",
+              "label": "ส่วนราชการ / หน่วยงาน",
+              "type": "select",
+              "required": true,
+              "options": [
+                { "value": "สำนักงานสภาพัฒนาการเศรษฐกิจและสังคมแห่งชาติ", "label": "สำนักงานสภาพัฒนาการเศรษฐกิจและสังคมแห่งชาติ" },
+                { "value": "สำนักงานนโยบายและยุทธศาสตร์การค้า", "label": "สำนักงานนโยบายและยุทธศาสตร์การค้า" },
+                { "value": "กรมวิทยาศาสตร์บริการ", "label": "กรมวิทยาศาสตร์บริการ" },
+                { "value": "สำนักงบประมาณ", "label": "สำนักงบประมาณ" },
+                { "value": "กรมอุตุนิยมวิทยา", "label": "กรมอุตุนิยมวิทยา" },
+                { "value": "กรมส่งเสริมวัฒนธรรม", "label": "กรมส่งเสริมวัฒนธรรม" },
+                { "value": "กรมคุมประพฤติ", "label": "กรมคุมประพฤติ" },
+                { "value": "สำนักงานปลัดกระทรวงการท่องเที่ยวและกีฬา", "label": "สำนักงานปลัดกระทรวงการท่องเที่ยวและกีฬา" },
+                { "value": "กรมสุขภาพจิต", "label": "กรมสุขภาพจิต" },
+                { "value": "สำนักงานนโยบายและแผนทรัพยากรธรรมชาติและสิ่งแวดล้อม", "label": "สำนักงานนโยบายและแผนทรัพยากรธรรมชาติและสิ่งแวดล้อม" },
+                { "value": "สำนักงานการวิจัยแห่งชาติ", "label": "สำนักงานการวิจัยแห่งชาติ" },
+                { "value": "สำนักงานมาตรฐานสินค้าเกษตรและอาหารแห่งชาติ", "label": "สำนักงานมาตรฐานสินค้าเกษตรและอาหารแห่งชาติ" },
+                { "value": "สำนักงาน กพร.", "label": "สำนักงาน กพร." },
+                { "value": "กรมชลประทาน", "label": "กรมชลประทาน" },
+                { "value": "กรมกิจการเด็กและเยาวชน", "label": "กรมกิจการเด็กและเยาวชน" }
+              ]
+            },
+            {
+              "id": "strategic_overview",
+              "label": "ภาพรวมยุทธศาสตร์องค์กร",
+              "label_en": "Strategic Overview",
+              "type": "textarea",
+              "required": false,
+              "placeholder": "อธิบายยุทธศาสตร์และทิศทางหลักขององค์กร",
+              "has_file_upload": true,
+              "file_field_prefix": "strategy",
+              "file_label": "เอกสารแผนยุทธศาสตร์ (PDF)"
+            },
+            {
+              "id": "org_structure",
+              "label": "โครงสร้างองค์กร",
+              "label_en": "Organizational Structure",
+              "type": "textarea",
+              "required": false,
+              "placeholder": "อธิบายโครงสร้างองค์กรและสายการบังคับบัญชา",
+              "has_file_upload": true,
+              "file_field_prefix": "org_structure",
+              "file_label": "เอกสารโครงสร้างองค์กร (PDF)"
+            },
+            {
+              "id": "total_staff",
+              "label": "จำนวนบุคลากรทั้งหมด (คน)",
+              "label_en": "Total Staff",
+              "type": "number",
+              "required": true,
+              "min": 1
+            }
+          ]
+        },
+        {
+          "section_id": "staff_type",
+          "title": "ประเภทบุคลากร",
+          "description": "จำนวนบุคลากรแบ่งตามประเภท (รวมต้องเท่ากับจำนวนบุคลากรทั้งหมด)",
+          "fields": [
+            { "id": "type_official",  "label": "ข้าราชการ",            "type": "number", "required": false, "min": 0 },
+            { "id": "type_employee",  "label": "พนักงานราชการ",        "type": "number", "required": false, "min": 0 },
+            { "id": "type_contract",  "label": "ลูกจ้าง/สัญญาจ้าง",   "type": "number", "required": false, "min": 0 },
+            { "id": "type_other",     "label": "อื่นๆ",                 "type": "number", "required": false, "min": 0 }
+          ]
+        },
+        {
+          "section_id": "age_distribution",
+          "title": "การกระจายตัวตามช่วงอายุ",
+          "description": "จำนวนบุคลากรแบ่งตามช่วงอายุ",
+          "fields": [
+            { "id": "age_u30",   "label": "ต่ำกว่า 30 ปี", "type": "number", "required": false, "min": 0 },
+            { "id": "age_31_40", "label": "31–40 ปี",       "type": "number", "required": false, "min": 0 },
+            { "id": "age_41_50", "label": "41–50 ปี",       "type": "number", "required": false, "min": 0 },
+            { "id": "age_51_60", "label": "51–60 ปี",       "type": "number", "required": false, "min": 0 }
+          ]
+        },
+        {
+          "section_id": "service_years",
+          "title": "การกระจายตัวตามอายุราชการ",
+          "description": "จำนวนบุคลากรแบ่งตามช่วงอายุราชการ",
+          "fields": [
+            { "id": "service_u1",     "label": "น้อยกว่า 1 ปี",   "type": "number", "required": false, "min": 0 },
+            { "id": "service_1_5",    "label": "1–5 ปี",           "type": "number", "required": false, "min": 0 },
+            { "id": "service_6_10",   "label": "6–10 ปี",          "type": "number", "required": false, "min": 0 },
+            { "id": "service_11_15",  "label": "11–15 ปี",         "type": "number", "required": false, "min": 0 },
+            { "id": "service_16_20",  "label": "16–20 ปี",         "type": "number", "required": false, "min": 0 },
+            { "id": "service_21_25",  "label": "21–25 ปี",         "type": "number", "required": false, "min": 0 },
+            { "id": "service_26_30",  "label": "26–30 ปี",         "type": "number", "required": false, "min": 0 },
+            { "id": "service_over30", "label": "มากกว่า 30 ปี",   "type": "number", "required": false, "min": 0 }
+          ]
+        },
+        {
+          "section_id": "position_levels",
+          "title": "การกระจายตัวตามระดับตำแหน่ง",
+          "description": "จำนวนบุคลากรแบ่งตามระดับตำแหน่ง",
+          "subsections": [
+            {
+              "subsection_label": "ระดับปฏิบัติการ (O)",
+              "fields": [
+                { "id": "pos_o1", "label": "O1", "type": "number", "required": false, "min": 0 },
+                { "id": "pos_o2", "label": "O2", "type": "number", "required": false, "min": 0 },
+                { "id": "pos_o3", "label": "O3", "type": "number", "required": false, "min": 0 },
+                { "id": "pos_o4", "label": "O4", "type": "number", "required": false, "min": 0 }
+              ]
+            },
+            {
+              "subsection_label": "ระดับชำนาญการ (K)",
+              "fields": [
+                { "id": "pos_k1", "label": "K1", "type": "number", "required": false, "min": 0 },
+                { "id": "pos_k2", "label": "K2", "type": "number", "required": false, "min": 0 },
+                { "id": "pos_k3", "label": "K3", "type": "number", "required": false, "min": 0 },
+                { "id": "pos_k4", "label": "K4", "type": "number", "required": false, "min": 0 },
+                { "id": "pos_k5", "label": "K5", "type": "number", "required": false, "min": 0 }
+              ]
+            },
+            {
+              "subsection_label": "ระดับบริหาร (M)",
+              "fields": [
+                { "id": "pos_m1", "label": "M1", "type": "number", "required": false, "min": 0 },
+                { "id": "pos_m2", "label": "M2", "type": "number", "required": false, "min": 0 }
+              ]
+            },
+            {
+              "subsection_label": "ระดับสูง (S)",
+              "fields": [
+                { "id": "pos_s1", "label": "S1", "type": "number", "required": false, "min": 0 },
+                { "id": "pos_s2", "label": "S2", "type": "number", "required": false, "min": 0 }
+              ]
+            }
+          ]
+        },
+        {
+          "section_id": "turnover",
+          "title": "อัตราการลาออกและโอนย้าย (ย้อนหลัง 5 ปี)",
+          "description": "กรอกจำนวนบุคลากรต้นปี ปลายปี และจำนวนที่ลาออก/โอนย้ายในแต่ละปี ระบบจะคำนวณอัตราให้อัตโนมัติ",
+          "type": "turnover_table",
+          "years": [2564, 2565, 2566, 2567, 2568],
+          "row_fields": [
+            { "id_prefix": "begin", "label": "จำนวนบุคลากรต้นปี (คน)",          "type": "number" },
+            { "id_prefix": "end",   "label": "จำนวนบุคลากรปลายปี (คน)",         "type": "number" },
+            { "id_prefix": "leave", "label": "จำนวนที่ลาออก/โอนย้าย (คน)",     "type": "number" },
+            { "id_prefix": "rate",  "label": "อัตราการลาออก/โอนย้าย (%)",      "type": "computed", "formula": "(leave / ((begin + end) / 2)) * 100" }
+          ]
+        }
+      ]
+    },
+    {
+      "step": 2,
+      "title": "นโยบายและบริบทภายนอก",
+      "title_en": "Policy Context & External Challenges",
+      "sections": [
+        {
+          "section_id": "policy_context",
+          "title": "นโยบายและบริบท",
+          "fields": [
+            {
+              "id": "related_policies",
+              "label": "นโยบายที่เกี่ยวข้อง",
+              "label_en": "Related Policies",
+              "type": "textarea",
+              "required": false,
+              "placeholder": "ระบุนโยบายระดับชาติ นโยบายกระทรวง หรือนโยบายองค์กรที่เกี่ยวข้องกับสุขภาวะบุคลากร"
+            },
+            {
+              "id": "context_challenges",
+              "label": "ความท้าทายและบริบทภายนอก",
+              "label_en": "Context & Challenges",
+              "type": "textarea",
+              "required": false,
+              "placeholder": "ระบุความท้าทายสำคัญจากบริบทภายนอกที่ส่งผลต่อสุขภาวะบุคลากร"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "step": 3,
+      "title": "ข้อมูลสุขภาวะ",
+      "title_en": "Well-being Data",
+      "sections": [
+        {
+          "section_id": "disease_data",
+          "title": "ข้อมูลโรคไม่ติดต่อเรื้อรัง (NCDs)",
+          "fields": [
+            {
+              "id": "disease_report_type",
+              "label": "ประเภทข้อมูลโรค",
+              "type": "radio",
+              "required": false,
+              "options": [
+                { "value": "actual",    "label": "ข้อมูลจริง" },
+                { "value": "estimated", "label": "ประมาณการ" },
+                { "value": "none",      "label": "ไม่มีข้อมูล" }
+              ]
+            },
+            { "id": "disease_diabetes",       "label": "โรคเบาหวาน (คน)",               "type": "number", "required": false, "min": 0 },
+            { "id": "disease_hypertension",   "label": "โรคความดันโลหิตสูง (คน)",       "type": "number", "required": false, "min": 0 },
+            { "id": "disease_cardiovascular", "label": "โรคหัวใจและหลอดเลือด (คน)",    "type": "number", "required": false, "min": 0 },
+            { "id": "disease_kidney",         "label": "โรคไต (คน)",                    "type": "number", "required": false, "min": 0 },
+            { "id": "disease_liver",          "label": "โรคตับ (คน)",                   "type": "number", "required": false, "min": 0 },
+            { "id": "disease_cancer",         "label": "โรคมะเร็ง (คน)",               "type": "number", "required": false, "min": 0 },
+            { "id": "disease_obesity",        "label": "โรคอ้วน (คน)",                  "type": "number", "required": false, "min": 0 },
+            { "id": "disease_other_detail",   "label": "โรคอื่นๆ (ระบุชื่อ)",          "type": "text",   "required": false },
+            { "id": "disease_other_count",    "label": "โรคอื่นๆ จำนวน (คน)",          "type": "number", "required": false, "min": 0 }
+          ]
+        },
+        {
+          "section_id": "sick_leave",
+          "title": "ข้อมูลการลาป่วย",
+          "fields": [
+            {
+              "id": "sick_leave_report_type",
+              "label": "ประเภทข้อมูลการลาป่วย",
+              "type": "radio",
+              "required": false,
+              "options": [
+                { "value": "actual",    "label": "ข้อมูลจริง" },
+                { "value": "estimated", "label": "ประมาณการ" },
+                { "value": "none",      "label": "ไม่มีข้อมูล" }
+              ]
+            },
+            { "id": "sick_leave_days", "label": "จำนวนวันลาป่วยรวมทั้งองค์กร (วัน/ปี)", "type": "number", "required": false, "min": 0 },
+            { "id": "sick_leave_avg",  "label": "เฉลี่ยวันลาป่วยต่อคนต่อปี (วัน)",       "type": "number", "required": false, "min": 0, "step": 0.1 }
+          ]
+        },
+        {
+          "section_id": "mental_health",
+          "title": "ข้อมูลสุขภาพจิต",
+          "fields": [
+            {
+              "id": "mental_health_report_type",
+              "label": "ประเภทข้อมูลสุขภาพจิต",
+              "type": "radio",
+              "required": false,
+              "options": [
+                { "value": "actual",    "label": "ข้อมูลจริง" },
+                { "value": "estimated", "label": "ประมาณการ" },
+                { "value": "none",      "label": "ไม่มีข้อมูล" }
+              ]
+            },
+            { "id": "mental_stress",     "label": "ความเครียด (Stress)",         "type": "text", "required": false, "placeholder": "ระบุจำนวนหรือร้อยละของบุคลากรที่มีภาวะความเครียด" },
+            { "id": "mental_anxiety",    "label": "ความวิตกกังวล (Anxiety)",     "type": "text", "required": false, "placeholder": "ระบุจำนวนหรือร้อยละ" },
+            { "id": "mental_sleep",      "label": "ปัญหาการนอนหลับ (Sleep)",    "type": "text", "required": false, "placeholder": "ระบุจำนวนหรือร้อยละ" },
+            { "id": "mental_burnout",    "label": "ภาวะหมดไฟ (Burnout)",        "type": "text", "required": false, "placeholder": "ระบุจำนวนหรือร้อยละ" },
+            { "id": "mental_depression", "label": "ภาวะซึมเศร้า (Depression)",  "type": "text", "required": false, "placeholder": "ระบุจำนวนหรือร้อยละ" }
+          ]
+        },
+        {
+          "section_id": "engagement",
+          "title": "คะแนน Employee Engagement (ย้อนหลัง 5 ปี)",
+          "description": "คะแนนความผูกพันของบุคลากร (เต็ม 100 หรือตามระดับที่องค์กรใช้)",
+          "fields": [
+            { "id": "engagement_score_2568", "label": "คะแนน Engagement ปี 2568", "type": "number", "required": false, "min": 0, "step": 0.01 },
+            { "id": "engagement_score_2567", "label": "คะแนน Engagement ปี 2567", "type": "number", "required": false, "min": 0, "step": 0.01 },
+            { "id": "engagement_score_2566", "label": "คะแนน Engagement ปี 2566", "type": "number", "required": false, "min": 0, "step": 0.01 },
+            { "id": "engagement_score_2565", "label": "คะแนน Engagement ปี 2565", "type": "number", "required": false, "min": 0, "step": 0.01 },
+            { "id": "engagement_score_2564", "label": "คะแนน Engagement ปี 2564", "type": "number", "required": false, "min": 0, "step": 0.01 },
+            {
+              "id": "engagement_low_areas",
+              "label": "มิติ/ด้านที่คะแนนต่ำ",
+              "type": "textarea",
+              "required": false,
+              "placeholder": "ระบุมิติหรือด้านที่บุคลากรมีคะแนน Engagement ต่ำที่สุด"
+            }
+          ]
+        },
+        {
+          "section_id": "other_surveys",
+          "title": "แบบสำรวจสุขภาวะอื่นๆ",
+          "fields": [
+            {
+              "id": "other_wellbeing_surveys",
+              "label": "แบบสำรวจสุขภาวะอื่นๆ ที่เคยดำเนินการ",
+              "type": "textarea",
+              "required": false,
+              "placeholder": "ระบุชื่อแบบสำรวจ เครื่องมือ หรือดัชนีชี้วัดสุขภาวะที่องค์กรเคยใช้"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "step": 4,
+      "title": "ระบบการบริหารและสภาพแวดล้อม",
+      "title_en": "Management Systems & Work Environment",
+      "sections": [
+        {
+          "section_id": "support_systems",
+          "title": "ระบบสนับสนุนการพัฒนาบุคลากร",
+          "description": "ประเมินระดับการดำเนินงานของระบบในปัจจุบัน",
+          "fields": [
+            {
+              "id": "mentoring_system",
+              "label": "ระบบพี่เลี้ยง (Mentoring System)",
+              "type": "radio",
+              "required": false,
+              "options": [
+                { "value": "full",    "label": "มีและดำเนินการครบถ้วน" },
+                { "value": "partial", "label": "มีบางส่วน" },
+                { "value": "none",    "label": "ยังไม่มี" }
+              ]
+            },
+            {
+              "id": "job_rotation",
+              "label": "ระบบหมุนเวียนงาน (Job Rotation)",
+              "type": "radio",
+              "required": false,
+              "options": [
+                { "value": "full",    "label": "มีและดำเนินการครบถ้วน" },
+                { "value": "partial", "label": "มีบางส่วน" },
+                { "value": "none",    "label": "ยังไม่มี" }
+              ]
+            },
+            {
+              "id": "idp_system",
+              "label": "ระบบแผนพัฒนารายบุคคล (IDP)",
+              "type": "radio",
+              "required": false,
+              "options": [
+                { "value": "full",    "label": "มีและดำเนินการครบถ้วน" },
+                { "value": "partial", "label": "มีบางส่วน" },
+                { "value": "none",    "label": "ยังไม่มี" }
+              ]
+            },
+            {
+              "id": "career_path_system",
+              "label": "ระบบเส้นทางความก้าวหน้า (Career Path)",
+              "type": "radio",
+              "required": false,
+              "options": [
+                { "value": "full",    "label": "มีและดำเนินการครบถ้วน" },
+                { "value": "partial", "label": "มีบางส่วน" },
+                { "value": "none",    "label": "ยังไม่มี" }
+              ]
+            }
+          ]
+        },
+        {
+          "section_id": "training_hours",
+          "title": "ชั่วโมงการพัฒนาบุคลากร (ย้อนหลัง 5 ปี)",
+          "description": "ชั่วโมงการฝึกอบรมเฉลี่ยต่อคนต่อปี",
+          "fields": [
+            { "id": "training_hours_2568", "label": "ปี 2568 (ชม./คน/ปี)", "type": "number", "required": false, "min": 0, "step": 0.1 },
+            { "id": "training_hours_2567", "label": "ปี 2567 (ชม./คน/ปี)", "type": "number", "required": false, "min": 0, "step": 0.1 },
+            { "id": "training_hours_2566", "label": "ปี 2566 (ชม./คน/ปี)", "type": "number", "required": false, "min": 0, "step": 0.1 },
+            { "id": "training_hours_2565", "label": "ปี 2565 (ชม./คน/ปี)", "type": "number", "required": false, "min": 0, "step": 0.1 },
+            { "id": "training_hours_2564", "label": "ปี 2564 (ชม./คน/ปี)", "type": "number", "required": false, "min": 0, "step": 0.1 }
+          ]
+        },
+        {
+          "section_id": "digital_systems",
+          "title": "ระบบดิจิทัลในองค์กร",
+          "description": "เลือกระบบดิจิทัลที่องค์กรใช้งานในปัจจุบัน",
+          "fields": [
+            {
+              "id": "digital_systems",
+              "label": "ระบบดิจิทัล",
+              "type": "checkbox_group",
+              "required": false,
+              "options": [
+                { "value": "e_doc",      "label": "ระบบเอกสารอิเล็กทรอนิกส์ (e-Doc)" },
+                { "value": "e_sign",     "label": "ระบบลายเซ็นอิเล็กทรอนิกส์ (e-Sign)" },
+                { "value": "cloud",      "label": "ระบบ Cloud Storage" },
+                { "value": "hr_digital", "label": "ระบบ HR ดิจิทัล" },
+                { "value": "health_db",  "label": "ระบบฐานข้อมูลสุขภาพ" },
+                { "value": "none",       "label": "ยังไม่มีระบบดิจิทัล" }
+              ]
+            }
+          ]
+        },
+        {
+          "section_id": "ergonomics",
+          "title": "การปรับสภาพแวดล้อมการทำงาน (Ergonomics)",
+          "fields": [
+            {
+              "id": "ergonomics_status",
+              "label": "สถานะการดำเนินงานด้าน Ergonomics",
+              "type": "radio",
+              "required": false,
+              "options": [
+                { "value": "none",        "label": "ยังไม่มีแผน" },
+                { "value": "planned",     "label": "มีแผนแล้ว (ยังไม่ดำเนินการ)" },
+                { "value": "in_progress", "label": "อยู่ระหว่างดำเนินการ" },
+                { "value": "done",        "label": "ดำเนินการแล้วเสร็จ" }
+              ]
+            },
+            {
+              "id": "ergonomics_planned_detail",
+              "label": "รายละเอียดแผน Ergonomics",
+              "type": "textarea",
+              "required": false,
+              "condition": { "field": "ergonomics_status", "value": "planned" },
+              "placeholder": "ระบุรายละเอียดแผนงาน"
+            },
+            {
+              "id": "ergonomics_in_progress_detail",
+              "label": "รายละเอียดการดำเนินการ Ergonomics",
+              "type": "textarea",
+              "required": false,
+              "condition": { "field": "ergonomics_status", "value": "in_progress" },
+              "placeholder": "ระบุความคืบหน้าและรายละเอียดการดำเนินการ"
+            },
+            {
+              "id": "ergonomics_done_detail",
+              "label": "ผลการดำเนินงาน Ergonomics",
+              "type": "textarea",
+              "required": false,
+              "condition": { "field": "ergonomics_status", "value": "done" },
+              "placeholder": "ระบุผลลัพธ์และความสำเร็จ"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "step": 5,
+      "title": "ทิศทาง เป้าหมาย และข้อเสนอแนะ",
+      "title_en": "Priorities, Goals & Recommendations",
+      "sections": [
+        {
+          "section_id": "strategic_priority",
+          "title": "ลำดับความสำคัญเชิงกลยุทธ์",
+          "description": "เรียงลำดับประเด็นด้านสุขภาวะที่สำคัญที่สุดสำหรับองค์กร (อันดับ 1–3)",
+          "fields": [
+            {
+              "id": "rank_priority_1",
+              "label": "ลำดับที่ 1 (สำคัญที่สุด)",
+              "type": "ranking",
+              "rank_position": 1,
+              "required": false
+            },
+            {
+              "id": "rank_priority_2",
+              "label": "ลำดับที่ 2",
+              "type": "ranking",
+              "rank_position": 2,
+              "required": false
+            },
+            {
+              "id": "rank_priority_3",
+              "label": "ลำดับที่ 3",
+              "type": "ranking",
+              "rank_position": 3,
+              "required": false
+            },
+            {
+              "id": "strategic_priority_other",
+              "label": "ประเด็นสำคัญอื่นๆ (ที่ไม่อยู่ในรายการ)",
+              "type": "textarea",
+              "required": false,
+              "placeholder": "ระบุประเด็นสุขภาวะที่องค์กรให้ความสำคัญ แต่ไม่อยู่ในตัวเลือก"
+            }
+          ]
+        },
+        {
+          "section_id": "intervention_feedback",
+          "title": "ความคิดเห็นต่อชุดการดำเนินการ (Intervention Packages)",
+          "fields": [
+            {
+              "id": "intervention_packages_feedback",
+              "label": "ข้อเสนอแนะต่อ Intervention Packages",
+              "type": "textarea",
+              "required": false,
+              "placeholder": "แสดงความคิดเห็นหรือข้อเสนอแนะต่อชุดการดำเนินการส่งเสริมสุขภาวะที่นำเสนอ"
+            }
+          ]
+        },
+        {
+          "section_id": "hrd_plan",
+          "title": "แผนพัฒนาทรัพยากรมนุษย์ (HRD Plan)",
+          "fields": [
+            {
+              "id": "hrd_plan_results",
+              "label": "ผลลัพธ์จากแผน HRD ที่ผ่านมา",
+              "type": "textarea",
+              "required": false,
+              "placeholder": "สรุปผลลัพธ์สำคัญจากการดำเนินงานตามแผน HRD ที่ผ่านมา",
+              "has_file_upload": true,
+              "file_field_prefix": "hrd_plan",
+              "file_label": "เอกสารแผน HRD (PDF)"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "computed_fields": {
+    "ncd_count": {
+      "label": "จำนวน NCD รวม (คน)",
+      "formula": "disease_diabetes + disease_hypertension + disease_cardiovascular + disease_kidney + disease_liver + disease_cancer + disease_obesity + disease_other_count"
+    },
+    "ncd_ratio_pct": {
+      "label": "สัดส่วน NCD ต่อบุคลากรทั้งหมด (%)",
+      "formula": "(ncd_count / total_staff) * 100"
+    },
+    "rate_2564": { "label": "อัตราลาออก/โอนย้าย ปี 2564 (%)", "formula": "(leave_2564 / ((begin_2564 + end_2564) / 2)) * 100" },
+    "rate_2565": { "label": "อัตราลาออก/โอนย้าย ปี 2565 (%)", "formula": "(leave_2565 / ((begin_2565 + end_2565) / 2)) * 100" },
+    "rate_2566": { "label": "อัตราลาออก/โอนย้าย ปี 2566 (%)", "formula": "(leave_2566 / ((begin_2566 + end_2566) / 2)) * 100" },
+    "rate_2567": { "label": "อัตราลาออก/โอนย้าย ปี 2567 (%)", "formula": "(leave_2567 / ((begin_2567 + end_2567) / 2)) * 100" },
+    "rate_2568": { "label": "อัตราลาออก/โอนย้าย ปี 2568 (%)", "formula": "(leave_2568 / ((begin_2568 + end_2568) / 2)) * 100" }
+  },
+  "file_upload_fields": [
+    {
+      "field_prefix": "strategy",
+      "path_field": "strategy_file_path",
+      "url_field": "strategy_file_url",
+      "name_field": "strategy_file_name",
+      "label": "เอกสารแผนยุทธศาสตร์",
+      "step": 1
+    },
+    {
+      "field_prefix": "org_structure",
+      "path_field": "org_structure_file_path",
+      "url_field": "org_structure_file_url",
+      "name_field": "org_structure_file_name",
+      "label": "เอกสารโครงสร้างองค์กร",
+      "step": 1
+    },
+    {
+      "field_prefix": "hrd_plan",
+      "path_field": "hrd_plan_file_path",
+      "url_field": "hrd_plan_file_url",
+      "name_field": "hrd_plan_file_name",
+      "label": "เอกสารแผน HRD",
+      "step": 5
+    }
+  ],
+  "metadata_fields": [
+    { "id": "respondent_email",  "label": "อีเมลผู้กรอก",            "type": "email" },
+    { "id": "form_version",      "label": "เวอร์ชันฟอร์ม",           "type": "text" },
+    { "id": "submitted_at",      "label": "วันเวลาที่ส่ง",           "type": "datetime" },
+    { "id": "is_test",           "label": "โหมดทดสอบ",               "type": "boolean" },
+    { "id": "submission_mode",   "label": "ประเภทการส่ง (live/test)", "type": "text" },
+    { "id": "test_run_id",       "label": "Test Run ID",              "type": "text" }
+  ]
+}

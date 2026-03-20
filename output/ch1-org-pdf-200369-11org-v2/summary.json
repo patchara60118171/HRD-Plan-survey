@@ -1,0 +1,81 @@
+{
+  "sourceFile": "C:\\Users\\Pchr Pyl\\Desktop\\Well-being Survey\\ch1_all_data 200369 11org.xlsx",
+  "worksheet": "Ch1_Raw",
+  "totalRows": 12,
+  "totalOrganizations": 12,
+  "generatedAt": "2026-03-19T18:25:17.441Z",
+  "files": [
+    {
+      "organization": "สำนักงานนโยบายและยุทธศาสตร์การค้า",
+      "path": "C:\\Users\\Pchr Pyl\\Desktop\\Well-being Survey\\output\\ch1-org-pdf-200369-11org-v2\\สำนักงานนโยบายและยุทธศาสตร์การค้า.pdf",
+      "rowCount": 1,
+      "attachmentCount": 1
+    },
+    {
+      "organization": "กรมกิจการเด็กและเยาวชน",
+      "path": "C:\\Users\\Pchr Pyl\\Desktop\\Well-being Survey\\output\\ch1-org-pdf-200369-11org-v2\\กรมกิจการเด็กและเยาวชน.pdf",
+      "rowCount": 1,
+      "attachmentCount": 0
+    },
+    {
+      "organization": "สำนักงานสภาพัฒนาการเศรษฐกิจและสังคมแห่งชาติ",
+      "path": "C:\\Users\\Pchr Pyl\\Desktop\\Well-being Survey\\output\\ch1-org-pdf-200369-11org-v2\\สำนักงานสภาพัฒนาการเศรษฐกิจและสังคมแห่งชาติ.pdf",
+      "rowCount": 1,
+      "attachmentCount": 0
+    },
+    {
+      "organization": "สำนักงานปลัดกระทรวงการท่องเที่ยวและกีฬา",
+      "path": "C:\\Users\\Pchr Pyl\\Desktop\\Well-being Survey\\output\\ch1-org-pdf-200369-11org-v2\\สำนักงานปลัดกระทรวงการท่องเที่ยวและกีฬา.pdf",
+      "rowCount": 1,
+      "attachmentCount": 3
+    },
+    {
+      "organization": "สำนักงาน กพร.",
+      "path": "C:\\Users\\Pchr Pyl\\Desktop\\Well-being Survey\\output\\ch1-org-pdf-200369-11org-v2\\สำนักงาน กพร..pdf",
+      "rowCount": 1,
+      "attachmentCount": 0
+    },
+    {
+      "organization": "กรมสุขภาพจิต",
+      "path": "C:\\Users\\Pchr Pyl\\Desktop\\Well-being Survey\\output\\ch1-org-pdf-200369-11org-v2\\กรมสุขภาพจิต.pdf",
+      "rowCount": 1,
+      "attachmentCount": 0
+    },
+    {
+      "organization": "สำนักงานการวิจัยแห่งชาติ",
+      "path": "C:\\Users\\Pchr Pyl\\Desktop\\Well-being Survey\\output\\ch1-org-pdf-200369-11org-v2\\สำนักงานการวิจัยแห่งชาติ.pdf",
+      "rowCount": 1,
+      "attachmentCount": 0
+    },
+    {
+      "organization": "สำนักงานนโยบายและแผนทรัพยากรธรรมชาติและสิ่งแวดล้อม",
+      "path": "C:\\Users\\Pchr Pyl\\Desktop\\Well-being Survey\\output\\ch1-org-pdf-200369-11org-v2\\สำนักงานนโยบายและแผนทรัพยากรธรรมชาติและสิ่งแวดล้อม.pdf",
+      "rowCount": 1,
+      "attachmentCount": 0
+    },
+    {
+      "organization": "สำนักงานมาตรฐานสินค้าเกษตรและอาหารแห่งชาติ",
+      "path": "C:\\Users\\Pchr Pyl\\Desktop\\Well-being Survey\\output\\ch1-org-pdf-200369-11org-v2\\สำนักงานมาตรฐานสินค้าเกษตรและอาหารแห่งชาติ.pdf",
+      "rowCount": 1,
+      "attachmentCount": 0
+    },
+    {
+      "organization": "กรมส่งเสริมวัฒนธรรม",
+      "path": "C:\\Users\\Pchr Pyl\\Desktop\\Well-being Survey\\output\\ch1-org-pdf-200369-11org-v2\\กรมส่งเสริมวัฒนธรรม.pdf",
+      "rowCount": 1,
+      "attachmentCount": 0
+    },
+    {
+      "organization": "องค์กรทดสอบระบบ",
+      "path": "C:\\Users\\Pchr Pyl\\Desktop\\Well-being Survey\\output\\ch1-org-pdf-200369-11org-v2\\องค์กรทดสอบระบบ.pdf",
+      "rowCount": 1,
+      "attachmentCount": 0
+    },
+    {
+      "organization": "กรมวิทยาศาสตร์บริการ",
+      "path": "C:\\Users\\Pchr Pyl\\Desktop\\Well-being Survey\\output\\ch1-org-pdf-200369-11org-v2\\กรมวิทยาศาสตร์บริการ.pdf",
+      "rowCount": 1,
+      "attachmentCount": 0
+    }
+  ]
+}

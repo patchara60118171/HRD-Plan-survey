@@ -1,0 +1,79 @@
+{
+  "organizations": [
+    {
+      "id": "org_001",
+      "name": "สำนักงานสภาพัฒนาการเศรษฐกิจและสังคมแห่งชาติ",
+      "nameEN": "Office of the National Economic and Social Development Council"
+    },
+    {
+      "id": "org_002",
+      "name": "สำนักงานนโยบายและยุทธศาสตร์การค้า",
+      "nameEN": "Office of Trade Policy and Strategy"
+    },
+    {
+      "id": "org_003",
+      "name": "กรมวิทยาศาสตร์บริการ",
+      "nameEN": "Department of Science Service"
+    },
+    {
+      "id": "org_004",
+      "name": "สำนักงบประมาณ",
+      "nameEN": "Budget Bureau"
+    },
+    {
+      "id": "org_005",
+      "name": "กรมอุตุนิยมวิทยา",
+      "nameEN": "Thai Meteorological Department"
+    },
+    {
+      "id": "org_006",
+      "name": "กรมส่งเสริมวัฒนธรรม",
+      "nameEN": "Department of Cultural Promotion"
+    },
+    {
+      "id": "org_007",
+      "name": "กรมคุมประพฤติ",
+      "nameEN": "Department of Probation"
+    },
+    {
+      "id": "org_008",
+      "name": "สำนักงานปลัดกระทรวงการท่องเที่ยวและกีฬา",
+      "nameEN": "Office of Permanent Secretary for Tourism and Sports"
+    },
+    {
+      "id": "org_009",
+      "name": "กรมสุขภาพจิต",
+      "nameEN": "Department of Mental Health"
+    },
+    {
+      "id": "org_010",
+      "name": "สำนักงานนโยบายและแผนทรัพยากรธรรมชาติและสิ่งแวดล้อม",
+      "nameEN": "Office of Natural Resources and Environmental Policy and Planning"
+    },
+    {
+      "id": "org_011",
+      "name": "สำนักงานการวิจัยแห่งชาติ",
+      "nameEN": "National Research Council of Thailand"
+    },
+    {
+      "id": "org_012",
+      "name": "สำนักงานมาตรฐานสินค้าเกษตรและอาหารแห่งชาติ",
+      "nameEN": "Thai Agricultural Standard Bureau"
+    },
+    {
+      "id": "org_013",
+      "name": "สำนักงาน กพร.",
+      "nameEN": "Government Pension Fund"
+    },
+    {
+      "id": "org_014",
+      "name": "กรมชลประทาน",
+      "nameEN": "Royal Irrigation Department"
+    },
+    {
+      "id": "org_015",
+      "name": "กรมกิจการเด็กและเยาวชน",
+      "nameEN": "Department of Children and Youth Affairs"
+    }
+  ]
+}

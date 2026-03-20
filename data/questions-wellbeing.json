@@ -1,0 +1,469 @@
+{
+  "form_id": "wellbeing",
+  "form_version": "wb-v1.0",
+  "form_title": "แบบสำรวจสุขภาวะบุคลากร",
+  "form_title_en": "Individual Well-being Survey",
+  "dimensions": ["physical", "mental", "social", "environment"],
+  "sections_order": ["personal", "consumption", "nutrition", "activity", "mental", "loneliness", "safety", "environment"],
+  "sections": {
+    "personal": {
+      "section_id": "personal",
+      "title": "ส่วนที่ 1 ข้อมูลส่วนบุคคล และการตรวจวัดร่างกาย",
+      "dimension": "physical",
+      "description": "ข้อมูลทั่วไปและสุขภาพเบื้องต้น",
+      "subsections": [
+        {
+          "subsection_id": "personal_info",
+          "title": "ข้อมูลส่วนบุคคล",
+          "questions": [
+            {
+              "id": "title",
+              "text": "คำนำหน้า",
+              "type": "radio",
+              "options": ["นาย", "นาง", "นางสาว", "อื่นๆ"],
+              "required": true
+            },
+            {
+              "id": "name",
+              "text": "ชื่อ-สกุล",
+              "type": "text",
+              "placeholder": "ระบุชื่อและนามสกุล",
+              "required": true
+            },
+            {
+              "id": "gender",
+              "text": "เพศ",
+              "type": "radio",
+              "options": ["ชาย", "หญิง", "LGBTQ+"],
+              "required": true
+            },
+            {
+              "id": "age",
+              "text": "อายุ (ปี)",
+              "type": "number",
+              "required": true
+            },
+            {
+              "id": "org_type",
+              "text": "ประเภทหน่วยงาน",
+              "type": "radio",
+              "options": ["นโยบาย", "ปฏิบัติการ", "สนับสนุน"],
+              "required": true
+            },
+            {
+              "id": "job",
+              "text": "ตำแหน่งงานปัจจุบัน",
+              "type": "radio",
+              "options": [
+                "ปฏิบัติการ",
+                "ปฏิบัติงาน",
+                "ชำนาญการ",
+                "ชำนาญงาน",
+                "ชำนาญการพิเศษ",
+                "หัวหน้า",
+                "ผู้บริหารระดับกลาง",
+                { "label": "อื่นๆ", "value": "other", "hasInput": true }
+              ],
+              "required": true
+            },
+            {
+              "id": "job_duration",
+              "text": "ระยะเวลาที่ทำงานในตำแหน่งปัจจุบัน (ปี)",
+              "type": "number",
+              "required": true
+            },
+            {
+              "id": "activity_org",
+              "text": "ท่านเคยเข้ารับกิจกรรมส่งเสริมสุขภาพของพนักงานในองค์กรหรือไม่",
+              "type": "radio",
+              "options": ["เคย", "ไม่เคย"],
+              "required": true
+            },
+            {
+              "id": "activity_thaihealth",
+              "text": "ท่านเคยเข้ารับกิจกรรมส่งเสริมสุขภาพจาก สสส. หรือไม่",
+              "type": "radio",
+              "options": ["เคย", "ไม่เคย"],
+              "required": true
+            },
+            {
+              "id": "diseases",
+              "text": "ท่านมีปัญหาสุขภาพเหล่านี้หรือไม่",
+              "type": "checkbox",
+              "options": ["เบาหวาน", "ความดันโลหิตสูง", "โรคหัวใจและหลอดเลือด", "โรคไต", "โรคตับ", "มะเร็ง", "ไม่มี"],
+              "required": true
+            }
+          ]
+        },
+        {
+          "subsection_id": "body_measurements",
+          "title": "ข้อมูลร่างกายเบื้องต้น",
+          "questions": [
+            { "id": "height", "text": "ส่วนสูง (เซนติเมตร)", "type": "number", "required": true },
+            { "id": "weight", "text": "น้ำหนัก (กิโลกรัม)", "type": "number", "required": true },
+            { "id": "waist",  "text": "เส้นรอบเอว (เซนติเมตร)", "type": "number", "required": true }
+          ]
+        }
+      ]
+    },
+
+    "consumption": {
+      "section_id": "consumption",
+      "title": "การบริโภคยาสูบและแอลกอฮอล์",
+      "dimension": "physical",
+      "description": "พฤติกรรมเสี่ยงด้านสุขภาพ",
+      "subsections": [
+        {
+          "subsection_id": "consumption_2mo",
+          "title": "ในระยะเวลา 2 เดือนที่ผ่านมา",
+          "questions": [
+            {
+              "id": "q2001",
+              "text": "ท่านเคยสูบบุหรี่หรือไม่",
+              "type": "radio",
+              "options": ["ไม่เคยสูบ", "สูบเป็นประจำทุกวัน", "สูบ 2 – 3 ครั้งต่อสัปดาห์", "สูบบางโอกาส/นานๆสูบที"],
+              "required": true
+            },
+            {
+              "id": "q2002",
+              "text": "ท่านเคยสูบบุหรี่ไฟฟ้าหรือไม่",
+              "type": "radio",
+              "options": ["ไม่เคยสูบ", "สูบเป็นประจำทุกวัน", "สูบ 2 – 3 ครั้งต่อสัปดาห์", "สูบบางโอกาส/นานๆสูบที"],
+              "required": true
+            },
+            {
+              "id": "q2003",
+              "text": "ท่านเคยดื่มสุราหรือเครื่องดื่มผสมแอลกอฮอล์หรือไม่",
+              "type": "radio",
+              "options": ["ไม่เคยดื่ม", "ดื่มเป็นประจำทุกวัน", "ดื่ม 2 – 3 ครั้งต่อสัปดาห์", "ดื่มบางโอกาส/นานๆดื่มที"],
+              "required": true
+            },
+            {
+              "id": "q2004",
+              "text": "ท่านเคยดื่มเครื่องดื่มที่มีส่วนผสมของกัญชาหรือไม่",
+              "type": "radio",
+              "options": ["ไม่เคยดื่ม", "ดื่มเป็นประจำทุกวัน", "ดื่ม 2 – 3 ครั้งต่อสัปดาห์", "ดื่มบางโอกาส/นานๆดื่มที"],
+              "required": true
+            },
+            {
+              "id": "q2005_drug",
+              "text": "ท่านเคยใช้สารเสพติดอื่นๆ เช่น ยาบ้า กัญชา หรือไม่",
+              "type": "radio",
+              "options": ["ไม่เคยเสพ", "เสพเป็นประจำทุกวัน", "เสพ 2 – 3 ครั้งต่อสัปดาห์", "เสพบางโอกาส/นานๆเสพที"],
+              "required": true
+            }
+          ]
+        }
+      ]
+    },
+
+    "nutrition": {
+      "section_id": "nutrition",
+      "title": "พฤติกรรมการบริโภค",
+      "dimension": "physical",
+      "description": "ประเมินการกิน หวาน มัน เค็ม",
+      "subsections": [
+        {
+          "subsection_id": "sweet",
+          "title": "รสหวาน",
+          "hint": "ความถี่: ทุกวัน, 3-4 ครั้ง/สัปดาห์, แทบไม่ทำ",
+          "questions": [
+            { "id": "sweet_1", "text": "ดื่มน้ำเปล่า / กาแฟดำ / ชาไม่ใส่น้ำตาล / โซดา", "type": "radio", "options": ["ทุกวัน / เกือบทุกวัน", "3-4 ครั้งต่อสัปดาห์", "แทบไม่ทำ / ไม่ทำเลย"], "required": true },
+            { "id": "sweet_2", "text": "ดื่มน้ำอัดลม / กาแฟ 3 in 1 / กาแฟเป็น / กาแฟปั่น / เครื่องดื่มชง / น้ำหวาน / นมเปรี้ยว", "type": "radio", "options": ["ทุกวัน / เกือบทุกวัน", "3-4 ครั้งต่อสัปดาห์", "แทบไม่ทำ / ไม่ทำเลย"], "required": true },
+            { "id": "sweet_3", "text": "ดื่มน้ำผัก / ผลไม้สำเร็จรูป", "type": "radio", "options": ["ทุกวัน / เกือบทุกวัน", "3-4 ครั้งต่อสัปดาห์", "แทบไม่ทำ / ไม่ทำเลย"], "required": true },
+            { "id": "sweet_4", "text": "กินไอศกรีม / เบเกอรี่ หรือขนมหวานไทย", "type": "radio", "options": ["ทุกวัน / เกือบทุกวัน", "3-4 ครั้งต่อสัปดาห์", "แทบไม่ทำ / ไม่ทำเลย"], "required": true },
+            { "id": "sweet_5", "text": "เติมน้ำตาล / น้ำผึ้ง / น้ำเชื่อมลงในอาหาร", "type": "radio", "options": ["ทุกวัน / เกือบทุกวัน", "3-4 ครั้งต่อสัปดาห์", "แทบไม่ทำ / ไม่ทำเลย"], "required": true }
+          ]
+        },
+        {
+          "subsection_id": "fat",
+          "title": "ไขมัน",
+          "questions": [
+            { "id": "fat_1", "text": "เลือกกินเนื้อสัตว์ติดมัน ติดหนัง มีไขมันแทรก", "type": "radio", "options": ["ทุกวัน / เกือบทุกวัน", "3-4 ครั้งต่อสัปดาห์", "แทบไม่ทำ / ไม่ทำเลย"], "required": true },
+            { "id": "fat_2", "text": "กินอาหารทอด อาหารฟาสต์ฟู้ด อาหารผัดน้ำมัน", "type": "radio", "options": ["ทุกวัน / เกือบทุกวัน", "3-4 ครั้งต่อสัปดาห์", "แทบไม่ทำ / ไม่ทำเลย"], "required": true },
+            { "id": "fat_3", "text": "กินอาหารจานเดียว ไขมันสูง หรืออาหารประเภทแกงกะทิ", "type": "radio", "options": ["ทุกวัน / เกือบทุกวัน", "3-4 ครั้งต่อสัปดาห์", "แทบไม่ทำ / ไม่ทำเลย"], "required": true },
+            { "id": "fat_4", "text": "ดื่มเครื่องดื่มชงผสมนมข้นหวาน ครีมเทียม วิปปิ้งครีม ครีม", "type": "radio", "options": ["ทุกวัน / เกือบทุกวัน", "3-4 ครั้งต่อสัปดาห์", "แทบไม่ทำ / ไม่ทำเลย"], "required": true },
+            { "id": "fat_5", "text": "ซดน้ำผัด น้ำแกง หรือราดน้ำผัดน้ำแกง ลงในข้าว", "type": "radio", "options": ["ทุกวัน / เกือบทุกวัน", "3-4 ครั้งต่อสัปดาห์", "แทบไม่ทำ / ไม่ทำเลย"], "required": true }
+          ]
+        },
+        {
+          "subsection_id": "salt",
+          "title": "โซเดียม (เค็ม)",
+          "questions": [
+            { "id": "salt_1", "text": "ชิมอาหารก่อนปรุง / น้ำปลา ซีอิ๊ว ซอส ปรุงน้อย หรือไม่ปรุงเพิ่ม", "type": "radio", "options": ["ทุกวัน / เกือบทุกวัน", "3-4 ครั้งต่อสัปดาห์", "แทบไม่ทำ / ไม่ทำเลย"], "required": true },
+            { "id": "salt_2", "text": "ใช้สมุนไพร หรือเครื่องเทศเป็นส่วนประกอบอาหาร แทนเครื่องปรุง", "type": "radio", "options": ["ทุกวัน / เกือบทุกวัน", "3-4 ครั้งต่อสัปดาห์", "แทบไม่ทำ / ไม่ทำเลย"], "required": true },
+            { "id": "salt_3", "text": "กินเนื้อสัตว์แปรรูป ไส้กรอก หมูยอ แฮม ปลาเค็ม กุ้งแห้ง ปลาร้า", "type": "radio", "options": ["ทุกวัน / เกือบทุกวัน", "3-4 ครั้งต่อสัปดาห์", "แทบไม่ทำ / ไม่ทำเลย"], "required": true },
+            { "id": "salt_4", "text": "กินบะหมี่ โจ๊กกึ่งสำเร็จรูป หรืออาหารกล่องแช่แข็ง", "type": "radio", "options": ["ทุกวัน / เกือบทุกวัน", "3-4 ครั้งต่อสัปดาห์", "แทบไม่ทำ / ไม่ทำเลย"], "required": true },
+            { "id": "salt_5", "text": "กินผักผลไม้ดอง หรือผลไม้แช่อิ่ม จิ้มพริกเกลือ น้ำปลาหวาน", "type": "radio", "options": ["ทุกวัน / เกือบทุกวัน", "3-4 ครั้งต่อสัปดาห์", "แทบไม่ทำ / ไม่ทำเลย"], "required": true }
+          ]
+        }
+      ]
+    },
+
+    "activity": {
+      "section_id": "activity",
+      "title": "กิจกรรมทางกาย (TPAX)",
+      "dimension": "physical",
+      "description": "การเคลื่อนไหวร่างกายในชีวิตประจำวัน",
+      "subsections": [
+        {
+          "subsection_id": "act_work",
+          "title": "การทำงาน",
+          "questions": [
+            { "id": "act_work_days", "text": "กิจกรรมทางกายขณะทำงาน (วัน/สัปดาห์)", "type": "number", "required": true },
+            { "id": "act_work_dur",  "text": "ระยะเวลาเฉลี่ยต่อวัน", "type": "time", "required": true }
+          ]
+        },
+        {
+          "subsection_id": "act_commute",
+          "title": "การเดินทาง",
+          "questions": [
+            { "id": "act_commute_days", "text": "เดินทางด้วยเท้า/จักรยาน (วัน/สัปดาห์)", "type": "number", "required": true },
+            { "id": "act_commute_dur",  "text": "ระยะเวลาเฉลี่ยต่อวัน", "type": "time", "required": true }
+          ]
+        },
+        {
+          "subsection_id": "act_recreation",
+          "title": "นันทนาการ/ออกกำลังกาย",
+          "questions": [
+            { "id": "act_rec_days", "text": "ออกกำลังกาย/นันทนาการ (วัน/สัปดาห์)", "type": "number", "required": true },
+            { "id": "act_rec_dur",  "text": "ระยะเวลาเฉลี่ยต่อวัน", "type": "time", "required": true }
+          ]
+        },
+        {
+          "subsection_id": "sedentary",
+          "title": "พฤติกรรมเนือยนิ่ง/หน้าจอ",
+          "questions": [
+            { "id": "sedentary_dur",     "text": "เวลานั่ง/เอนกาย (ไม่รวมนอนหลับ) ต่อวัน", "type": "time", "required": true },
+            { "id": "screen_entertain",  "text": "เวลาหน้าจอเพื่อความบันเทิงต่อวัน", "type": "time", "required": true },
+            { "id": "screen_work",       "text": "เวลาหน้าจอเพื่อการทำงานต่อวัน", "type": "time", "required": true }
+          ]
+        }
+      ]
+    },
+
+    "mental": {
+      "section_id": "mental",
+      "title": "สุขภาพจิต (TMHI-15)",
+      "dimension": "mental",
+      "description": "วัดสุขภาพจิตคนไทยฉบับสั้น",
+      "subsections": [
+        {
+          "subsection_id": "tmhi",
+          "title": "ความรู้สึกในช่วง 1 เดือนที่ผ่านมา",
+          "hint": "ระดับ: ไม่เลย, เล็กน้อย, มาก, มากที่สุด",
+          "scale_labels": ["ไม่เลย", "เล็กน้อย", "มาก", "มากที่สุด"],
+          "questions": [
+            { "id": "tmhi_1",  "text": "ท่านรู้สึกพึงพอใจในชีวิต",                                                            "type": "scale", "labels": ["ไม่เลย", "เล็กน้อย", "มาก", "มากที่สุด"], "required": true },
+            { "id": "tmhi_2",  "text": "ท่านรู้สึกสบายใจ",                                                                    "type": "scale", "labels": ["ไม่เลย", "เล็กน้อย", "มาก", "มากที่สุด"], "required": true },
+            { "id": "tmhi_3",  "text": "ท่านรู้สึกภูมิใจในตนเอง",                                                             "type": "scale", "labels": ["ไม่เลย", "เล็กน้อย", "มาก", "มากที่สุด"], "required": true },
+            { "id": "tmhi_4",  "text": "ท่านรู้สึกเบื่อหน่ายท้อแท้กับการดำเนินชีวิตประจำวัน",                               "type": "scale", "labels": ["ไม่เลย", "เล็กน้อย", "มาก", "มากที่สุด"], "required": true },
+            { "id": "tmhi_5",  "text": "ท่านรู้สึกผิดหวังในตนเอง",                                                            "type": "scale", "labels": ["ไม่เลย", "เล็กน้อย", "มาก", "มากที่สุด"], "required": true },
+            { "id": "tmhi_6",  "text": "ท่านรู้สึกว่าชีวิตมีแต่ความทุกข์",                                                    "type": "scale", "labels": ["ไม่เลย", "เล็กน้อย", "มาก", "มากที่สุด"], "required": true },
+            { "id": "tmhi_7",  "text": "ท่านสามารถทำใจยอมรับได้สำหรับปัญหาที่ยากจะแก้ไข",                                   "type": "scale", "labels": ["ไม่เลย", "เล็กน้อย", "มาก", "มากที่สุด"], "required": true },
+            { "id": "tmhi_8",  "text": "ท่านมั่นใจว่าจะสามารถควบคุมอารมณ์ได้เมื่อมีเหตุการณ์คับขัน",                      "type": "scale", "labels": ["ไม่เลย", "เล็กน้อย", "มาก", "มากที่สุด"], "required": true },
+            { "id": "tmhi_9",  "text": "ท่านมั่นใจที่จะเผชิญกับเหตุการณ์ร้ายแรงที่เกิดขึ้นในชีวิต",                        "type": "scale", "labels": ["ไม่เลย", "เล็กน้อย", "มาก", "มากที่สุด"], "required": true },
+            { "id": "tmhi_10", "text": "ท่านรู้สึกเห็นอกเห็นใจเมื่อผู้อื่นมีความทุกข์",                                     "type": "scale", "labels": ["ไม่เลย", "เล็กน้อย", "มาก", "มากที่สุด"], "required": true },
+            { "id": "tmhi_11", "text": "ท่านรู้สึกเป็นสุขในการช่วยเหลือผู้อื่นที่มีปัญหา",                                  "type": "scale", "labels": ["ไม่เลย", "เล็กน้อย", "มาก", "มากที่สุด"], "required": true },
+            { "id": "tmhi_12", "text": "ท่านให้ความช่วยเหลือแก่ผู้อื่นเมื่อมีโอกาส",                                        "type": "scale", "labels": ["ไม่เลย", "เล็กน้อย", "มาก", "มากที่สุด"], "required": true },
+            { "id": "tmhi_13", "text": "ท่านรู้สึกมั่นคงปลอดภัยเมื่ออยู่ในครอบครัว",                                       "type": "scale", "labels": ["ไม่เลย", "เล็กน้อย", "มาก", "มากที่สุด"], "required": true },
+            { "id": "tmhi_14", "text": "หากท่านป่วยหนัก ท่านเชื่อว่าคนในครอบครัวจะดูแลท่านเป็นอย่างดี",                   "type": "scale", "labels": ["ไม่เลย", "เล็กน้อย", "มาก", "มากที่สุด"], "required": true },
+            { "id": "tmhi_15", "text": "สมาชิกในครอบครัวมีความรักและผูกพันต่อกัน",                                          "type": "scale", "labels": ["ไม่เลย", "เล็กน้อย", "มาก", "มากที่สุด"], "required": true }
+          ]
+        }
+      ]
+    },
+
+    "loneliness": {
+      "section_id": "loneliness",
+      "title": "แบบสำรวจความเหงา (UCLA Loneliness Scale)",
+      "dimension": "social",
+      "description": "การมีปฏิสัมพันธ์กับผู้อื่นในที่ทำงาน ความสัมพันธ์และการติดต่อสื่อสารกับเพื่อนร่วมงาน",
+      "subsections": [
+        {
+          "subsection_id": "lonely_1",
+          "title": "ความรู้สึกโดดเดี่ยว",
+          "hint": "3 = บ่อยครั้ง, 2 = เป็นบางครั้ง, 1 = แทบไม่เคย, 0 = ไม่เคย",
+          "scale_labels": ["0", "1", "2", "3"],
+          "questions": [
+            { "id": "lonely_1",  "text": "ฉันไม่มีความสุขที่ต้องทำหลายสิ่งหลายอย่างคนเดียว", "type": "scale", "labels": ["0","1","2","3"], "required": true },
+            { "id": "lonely_2",  "text": "ฉันไม่มีใครคุยด้วย",                                   "type": "scale", "labels": ["0","1","2","3"], "required": true },
+            { "id": "lonely_3",  "text": "ฉันทนไม่ได้ที่จะอยู่คนเดียวอย่างนี้",                  "type": "scale", "labels": ["0","1","2","3"], "required": true },
+            { "id": "lonely_4",  "text": "ฉันขาดมิตรภาพ",                                         "type": "scale", "labels": ["0","1","2","3"], "required": true },
+            { "id": "lonely_5",  "text": "ฉันรู้สึกราวกับว่าไม่มีใครเข้าใจฉันจริงๆ",             "type": "scale", "labels": ["0","1","2","3"], "required": true }
+          ]
+        },
+        {
+          "subsection_id": "lonely_2",
+          "title": "ความสัมพันธ์ทางสังคม",
+          "hint": "3 = บ่อยครั้ง, 2 = เป็นบางครั้ง, 1 = แทบไม่เคย, 0 = ไม่เคย",
+          "questions": [
+            { "id": "lonely_6",  "text": "ฉันพบว่าตัวเองรอคนโทรหา",                             "type": "scale", "labels": ["0","1","2","3"], "required": true },
+            { "id": "lonely_7",  "text": "ฉันไม่มีใครให้พึ่ง",                                   "type": "scale", "labels": ["0","1","2","3"], "required": true },
+            { "id": "lonely_8",  "text": "ฉันไม่สนิทกับใคร",                                     "type": "scale", "labels": ["0","1","2","3"], "required": true },
+            { "id": "lonely_9",  "text": "ความเห็นจากคนอื่นไม่มีผลต่อความสนใจหรือแนวคิดของฉัน", "type": "scale", "labels": ["0","1","2","3"], "required": true },
+            { "id": "lonely_10", "text": "ฉันรู้สึกถูกทอดทิ้ง",                                   "type": "scale", "labels": ["0","1","2","3"], "required": true }
+          ]
+        },
+        {
+          "subsection_id": "lonely_3",
+          "title": "ความรู้สึกเกี่ยวกับตนเอง",
+          "hint": "3 = บ่อยครั้ง, 2 = เป็นบางครั้ง, 1 = แทบไม่เคย, 0 = ไม่เคย",
+          "questions": [
+            { "id": "lonely_11", "text": "ฉันรู้สึกโดดเดี่ยว",                                    "type": "scale", "labels": ["0","1","2","3"], "required": true },
+            { "id": "lonely_12", "text": "ฉันไม่สามารถติดต่อสื่อสารกับคนรอบข้างได้",            "type": "scale", "labels": ["0","1","2","3"], "required": true },
+            { "id": "lonely_13", "text": "ความสัมพันธ์ทางสังคมของฉันเป็นเพียงผิวเผิน",           "type": "scale", "labels": ["0","1","2","3"], "required": true },
+            { "id": "lonely_14", "text": "ฉันโหยหาการมีเพื่อนพ้อง",                              "type": "scale", "labels": ["0","1","2","3"], "required": true },
+            { "id": "lonely_15", "text": "ไม่มีใครรู้จักฉันดีพอ",                                "type": "scale", "labels": ["0","1","2","3"], "required": true }
+          ]
+        },
+        {
+          "subsection_id": "lonely_4",
+          "title": "พฤติกรรมทางสังคม",
+          "hint": "3 = บ่อยครั้ง, 2 = เป็นบางครั้ง, 1 = แทบไม่เคย, 0 = ไม่เคย",
+          "questions": [
+            { "id": "lonely_16", "text": "ฉันรู้สึกถูกแยกออกจากคนอื่นๆ",                                                    "type": "scale", "labels": ["0","1","2","3"], "required": true },
+            { "id": "lonely_17", "text": "ฉันรู้สึกไม่มีความสุขเมื่อต้องเริ่มออกห่างจากบางสิ่งบางอย่าง",                  "type": "scale", "labels": ["0","1","2","3"], "required": true },
+            { "id": "lonely_18", "text": "เป็นการยากสำหรับฉันที่จะหาเพื่อน",                                               "type": "scale", "labels": ["0","1","2","3"], "required": true },
+            { "id": "lonely_19", "text": "ฉันรู้สึกถูกกีดกัน และถูกตัดขาดออกจากผู้อื่น",                                  "type": "scale", "labels": ["0","1","2","3"], "required": true },
+            { "id": "lonely_20", "text": "แม้มีคนมากมายอยู่รอบตัวแต่ฉันก็ยังรู้สึกโดดเดี่ยว",                             "type": "scale", "labels": ["0","1","2","3"], "required": true }
+          ]
+        }
+      ]
+    },
+
+    "safety": {
+      "section_id": "safety",
+      "title": "อุบัติเหตุและความปลอดภัย",
+      "dimension": "environment",
+      "description": "พฤติกรรมความปลอดภัย",
+      "subsections": [
+        {
+          "subsection_id": "traffic_safety",
+          "title": "การขับขี่และการเดินทาง",
+          "questions": [
+            {
+              "id": "helmet_driver",
+              "text": "ในช่วง 30 วันที่ผ่านมา ท่านสวมหมวกนิรภัยขณะขับขี่รถจักรยานยนต์หรือไม่",
+              "type": "radio",
+              "options": ["ใช้ทุกครั้ง", "ใช้บางครั้ง", "ไม่เคยใช้", "ไม่เคยขี่"],
+              "required": true
+            },
+            {
+              "id": "helmet_passenger",
+              "text": "ในช่วง 30 วันที่ผ่านมา ท่านสวมหมวกนิรภัยขณะโดยสารรถจักรยานยนต์หรือไม่",
+              "type": "radio",
+              "options": ["ใช้ทุกครั้ง", "ใช้บางครั้ง", "ไม่เคยใช้", "ไม่เคยนั่งซ้อนท้าย"],
+              "required": true
+            },
+            {
+              "id": "seatbelt_driver",
+              "text": "ในช่วง 30 วันที่ผ่านมา ท่านใช้เข็มขัดนิรภัยขณะขับรถยนต์หรือไม่",
+              "type": "radio",
+              "options": ["ใช้ทุกครั้ง", "ใช้บางครั้ง", "ไม่เคยใช้", "ไม่เคยขับ"],
+              "required": true
+            },
+            {
+              "id": "seatbelt_passenger",
+              "text": "ในช่วง 30 วันที่ผ่านมา ท่านใช้เข็มขัดนิรภัยขณะเป็นผู้โดยสารข้างคนขับหรือไม่",
+              "type": "radio",
+              "options": ["ใช้ทุกครั้ง", "ใช้บางครั้ง", "ไม่เคยใช้", "ไม่เคยนั่งข้างคนขับ"],
+              "required": true
+            },
+            {
+              "id": "accident_hist",
+              "text": "ในช่วง 12 เดือนที่ผ่านมา ท่านเคยประสบอุบัติเหตุจราจรในลักษณะใดบ้าง (เลือกได้มากกว่า 1 ข้อ)",
+              "type": "checkbox",
+              "options": ["คนขับรถยนต์", "ผู้โดยสารรถยนต์", "คนขี่จักรยานยนต์", "ผู้โดยสารจักรยานยนต์", "คนขี่จักรยาน", "คนเดินเท้า", "ไม่เคย"],
+              "required": true
+            },
+            {
+              "id": "drunk_drive",
+              "text": "ในช่วง 12 เดือนที่ผ่านมา เคยขับขี่หลังดื่มแอลกอฮอล์หรือไม่",
+              "type": "radio",
+              "options": ["ไม่เคย", "เคย 1 ครั้ง/เดือนหรือน้อยกว่า", "เคย 2-3 ครั้ง/เดือน", "เคย > 3 ครั้ง/เดือน", "ไม่เคยขับขี่"],
+              "required": true
+            }
+          ]
+        }
+      ]
+    },
+
+    "environment": {
+      "section_id": "environment",
+      "title": "สิ่งแวดล้อมและโรคอุบัติใหม่",
+      "dimension": "environment",
+      "description": "สภาพแวดล้อมและผลกระทบ",
+      "subsections": [
+        {
+          "subsection_id": "work_environment",
+          "title": "สภาพแวดล้อมในที่ทำงาน",
+          "questions": [
+            { "id": "env_satisfaction", "text": "ความพึงพอใจในสิ่งแวดล้อมที่ทำงาน",                    "type": "scale", "labels": ["แย่มาก", "แย่", "ปานกลาง", "ดี", "ดีมาก"], "required": true },
+            { "id": "env_glare",        "text": "แสงจ้า/ทำงานกลางแดด",                                 "type": "radio", "options": ["ใช่ (มีผลต่อสุขภาพ)", "ใช่ (ไม่มีผล)", "ไม่ใช่"],  "required": true },
+            { "id": "env_noise",        "text": "เสียงดัง/แรงสั่นสะเทือน",                             "type": "radio", "options": ["ใช่ (มีผลต่อสุขภาพ)", "ใช่ (ไม่มีผล)", "ไม่ใช่"],  "required": true },
+            { "id": "env_smell",        "text": "กลิ่นเหม็น/สารเคมี",                                  "type": "radio", "options": ["ใช่ (มีผลต่อสุขภาพ)", "ใช่ (ไม่มีผล)", "ไม่ใช่"],  "required": true },
+            { "id": "env_smoke",        "text": "ควัน/ไอระเหย",                                        "type": "radio", "options": ["ใช่ (มีผลต่อสุขภาพ)", "ใช่ (ไม่มีผล)", "ไม่ใช่"],  "required": true },
+            { "id": "env_posture",      "text": "ท่าทางเดิมนานๆ/ก้มเงย",                               "type": "radio", "options": ["ใช่ (มีผลต่อสุขภาพ)", "ใช่ (ไม่มีผล)", "ไม่ใช่"],  "required": true },
+            { "id": "env_awkward",      "text": "ท่าทางฝืนธรรมชาติ (ยกของ/เขย่ง)",                    "type": "radio", "options": ["ใช่ (มีผลต่อสุขภาพ)", "ใช่ (ไม่มีผล)", "ไม่ใช่"],  "required": true }
+          ]
+        },
+        {
+          "subsection_id": "pollution",
+          "title": "มลพิษและโรคอุบัติใหม่",
+          "questions": [
+            {
+              "id": "pm25_impact",
+              "text": "ปัญหา PM 2.5 ในพื้นที่ (1 ปีที่ผ่านมา)",
+              "type": "radio",
+              "options": ["ไม่มีเลย", "น้อย", "ปานกลาง", "มาก", "รุนแรงมาก"],
+              "required": true
+            },
+            {
+              "id": "pm25_symptom",
+              "text": "อาการเจ็บป่วยจาก PM 2.5",
+              "type": "checkbox",
+              "options": ["ไม่มี", "ไอ/คัดจมูก/แสบคอ", "หายใจไม่เต็มอิ่ม", "แสบตา", "ปวดศีรษะ"],
+              "required": true
+            },
+            {
+              "id": "life_quality",
+              "text": "คุณภาพชีวิตโดยรวม",
+              "type": "scale",
+              "labels": ["แย่มาก", "แย่", "ปานกลาง", "ดี", "ดีมาก"],
+              "required": true
+            },
+            {
+              "id": "emerging_known",
+              "text": "รู้จัก \"โรคอุบัติใหม่\" หรือไม่",
+              "type": "radio",
+              "options": ["เคยได้ยิน", "ไม่เคย"],
+              "required": true
+            },
+            {
+              "id": "emerging_list",
+              "text": "โรคอุบัติใหม่ที่รู้จัก",
+              "type": "checkbox",
+              "options": ["COVID-19", "ไข้หวัดนก", "ไข้ซิกา", "อื่นๆ"],
+              "required": true
+            },
+            {
+              "id": "climate_impact",
+              "text": "ผลกระทบจากโลกร้อนต่อสุขภาพ",
+              "type": "radio",
+              "options": ["ไม่มีเลย", "น้อย", "ปานกลาง", "มาก", "รุนแรงมาก"],
+              "required": true
+            },
+            {
+              "id": "covid_history",
+              "text": "ติด COVID-19 ใน 6 เดือนที่ผ่านมา",
+              "type": "radio",
+              "options": ["ไม่เคย", "1 ครั้ง", "> 1 ครั้ง"],
+              "required": true
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
