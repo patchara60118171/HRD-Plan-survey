@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>แบบสำรวจสุขภาวะบุคลากร (PDF)</title>
+<style>
+  @page { size: A4; margin: 14mm 12mm; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'IBM Plex Sans Thai Looped','Segoe UI',Tahoma,sans-serif;color:#1F2D3D;font-size:11.5pt;line-height:1.55;padding:0}
+  .no-print{margin:14px auto;max-width:800px;display:flex;justify-content:space-between;align-items:center}
+  .no-print .btn{padding:8px 16px;border:none;border-radius:8px;font-size:14px;cursor:pointer;font-weight:600}
+  .no-print .btn-primary{background:#0F4C81;color:#fff}
+  .no-print .btn-secondary{background:#E5E7EB;color:#374151}
+  @media print{.no-print{display:none!important}}
+  .page-wrap{max-width:780px;margin:0 auto;padding:0 12px}
+  .cover{text-align:center;padding:34px 20px 24px;border-bottom:3px solid #0F4C81;margin-bottom:18px}
+  .cover-icon{font-size:38px;margin-bottom:8px}
+  .cover h1{font-size:20pt;color:#0F4C81;font-weight:700;line-height:1.35}
+  .cover p{color:#4D6078;font-size:10.5pt;margin-top:6px}
+  .section{break-inside:avoid;margin-bottom:16px;border:1px solid #D1DAE5;border-radius:8px;overflow:hidden}
+  .section-head{background:#0F4C81;color:#fff;padding:8px 14px;font-size:12pt;font-weight:700}
+  .section-desc{background:#E8F1FB;color:#0A3560;padding:6px 14px;font-size:10pt}
+  .subsection{padding:10px 14px 6px}
+  .subsection-title{font-size:11pt;font-weight:700;color:#0F4C81;margin-bottom:6px;border-bottom:1px solid #E2EAF4;padding-bottom:4px}
+  .question{padding:6px 0;display:flex;gap:6px;break-inside:avoid}
+  .q-num{width:28px;flex-shrink:0;color:#8896A5;font-size:10pt;text-align:right;padding-top:1px}
+  .q-body{flex:1}
+  .q-text{font-weight:500;font-size:11pt;margin-bottom:3px}
+  .q-required{color:#B42318}
+  .q-opts{display:flex;flex-wrap:wrap;gap:2px 12px;margin-top:2px}
+  .q-opt{font-size:10pt;color:#4D6078;display:flex;align-items:center;gap:4px}
+  .q-opt::before{content:'○';color:#8896A5;font-size:10pt}
+  .q-opt.cb::before{content:'☐'}
+  .q-input{border-bottom:1px dashed #8896A5;min-width:120px;height:16px;display:inline-block;color:#8896A5;font-size:9pt}
+  .q-scale{display:flex;gap:6px;margin-top:3px;flex-wrap:wrap}
+  .q-scale-item{text-align:center;padding:2px 8px;border:1px solid #D1DAE5;border-radius:6px;font-size:9.5pt;color:#4D6078}
+  .footer{text-align:center;color:#8896A5;font-size:9pt;margin-top:18px;padding:10px 0;border-top:1px solid #E2EAF4}
+  .loading{text-align:center;padding:60px 20px;color:#8896A5;font-size:14pt}
+</style>
+</head>
+<body>
+
+<div class="no-print">
+  <h2 style="color:#0F4C81;font-size:16px">📄 แบบสำรวจสุขภาวะบุคลากร (PDF)</h2>
+  <div style="display:flex;gap:8px">
+    <button class="btn btn-secondary" onclick="history.back()">← กลับ</button>
+    <button class="btn btn-primary" onclick="window.print()">🖨️ พิมพ์ / บันทึก PDF</button>
+  </div>
+</div>
+
+<div class="page-wrap" id="content">
+  <div class="loading" id="loading-msg">กำลังโหลดคำถาม...</div>
+</div>
+
+<script>
+const sectionIcons = {
+  personal:'📋', consumption:'🍷', nutrition:'🥗', activity:'🏃',
+  mental:'🧠', loneliness:'💭', safety:'⛑️', environment:'🌳'
+};
+
+async function init() {
+  try {
+    const resp = await fetch('/data/questions-wellbeing.json');
+    if (!resp.ok) throw new Error('ไม่สามารถโหลดไฟล์คำถามได้');
+    const data = await resp.json();
+    render(data);
+  } catch (err) {
+    document.getElementById('loading-msg').textContent = '⛔ ' + err.message;
+  }
+}
+
+function render(data) {
+  const wrap = document.getElementById('content');
+  let html = `<div class="cover">
+    <div class="cover-icon">🌿</div>
+    <h1>${esc(data.form_title)}</h1>
+    <p>${esc(data.form_title_en)}</p>
+    <p style="margin-top:10px;font-size:9.5pt;color:#6B7F95">แบบสำรวจนี้จัดทำขึ้นเพื่อรวบรวมข้อมูลสุขภาวะบุคลากร 4 มิติ: กาย ใจ สังคม และสภาพแวดล้อม<br>ตามคู่มือการประเมินรางวัลองค์กรสุขภาวะแห่งชาติ</p>
+  </div>`;
+
+  let qNum = 0;
+  const order = data.sections_order || Object.keys(data.sections);
+
+  for (const secId of order) {
+    const sec = data.sections[secId];
+    if (!sec) continue;
+    const icon = sectionIcons[secId] || '📝';
+
+    html += `<div class="section">
+      <div class="section-head">${icon} ${esc(sec.title)}</div>`;
+    if (sec.description) html += `<div class="section-desc">${esc(sec.description)}</div>`;
+
+    for (const sub of (sec.subsections || [])) {
+      html += `<div class="subsection">`;
+      if (sub.title) html += `<div class="subsection-title">${esc(sub.title)}</div>`;
+
+      for (const q of (sub.questions || [])) {
+        qNum++;
+        html += renderQuestion(qNum, q);
+      }
+      html += `</div>`;
+    }
+    html += `</div>`;
+  }
+
+  html += `<div class="footer">แบบสำรวจสุขภาวะบุคลากร — สถาบันบัณฑิตพัฒนบริหารศาสตร์ (NIDA)</div>`;
+  wrap.innerHTML = html;
+}
+
+function renderQuestion(num, q) {
+  const req = q.required ? ' <span class="q-required">*</span>' : '';
+  let body = `<div class="q-text">${esc(q.text)}${req}</div>`;
+
+  if (q.type === 'radio' && q.options) {
+    body += `<div class="q-opts">${q.options.map(o => {
+      const label = typeof o === 'string' ? o : o.label;
+      return `<span class="q-opt">${esc(label)}</span>`;
+    }).join('')}</div>`;
+  } else if (q.type === 'checkbox' && q.options) {
+    body += `<div class="q-opts">${q.options.map(o => {
+      const label = typeof o === 'string' ? o : o.label;
+      return `<span class="q-opt cb">${esc(label)}</span>`;
+    }).join('')}</div>`;
+  } else if (q.type === 'scale' || q.type === 'likert') {
+    const labels = q.scaleLabels || q.scale_labels || {};
+    const min = q.min ?? 1;
+    const max = q.max ?? 5;
+    body += `<div class="q-scale">`;
+    for (let i = min; i <= max; i++) {
+      const lbl = labels[String(i)] || '';
+      body += `<div class="q-scale-item">${i}${lbl ? '<br><span style="font-size:8.5pt;color:#8896A5">' + esc(lbl) + '</span>' : ''}</div>`;
+    }
+    body += `</div>`;
+  } else if (q.type === 'number') {
+    body += `<div class="q-input" style="width:80px"></div> ${esc(q.unit || '')}`;
+  } else if (q.type === 'text' || q.type === 'textarea') {
+    body += `<div class="q-input" style="width:100%;min-width:200px"></div>`;
+  }
+
+  return `<div class="question"><div class="q-num">${num}.</div><div class="q-body">${body}</div></div>`;
+}
+
+function esc(s) {
+  if (s == null) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+init();
+</script>
+</body>
+</html>

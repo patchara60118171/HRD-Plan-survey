@@ -109,6 +109,15 @@ function renderWelcome() {
                 ${emailForm}
                 ${startButton}
             </div>
+
+            <p style="color:#9CA3AF; font-size:0.78rem; margin-top:1.5rem; margin-bottom:0.8rem;">แบบฟอร์มนี้จัดทำโดยสถาบันบัณฑิตพัฒนบริหารศาสตร์</p>
+            <div>
+                <a href="/wb-printable" target="_blank"
+                    style="display:inline-flex; align-items:center; gap:0.5rem; padding:0.6rem 1.2rem; background:white; color:#4B5563; border:1px solid #D1D5DB; border-radius:8px; font-size:0.9rem; font-weight:500; text-decoration:none; transition:all 0.2s; box-shadow:0 1px 2px rgba(0,0,0,0.05);"
+                    onmouseover="this.style.background='#F3F4F6'; this.style.color='#1F2937'" onmouseout="this.style.background='white'; this.style.color='#4B5563'">
+                    📄 ดาวน์โหลดแบบฟอร์มนี้ (PDF)
+                </a>
+            </div>
         </div>
     `;
 }
