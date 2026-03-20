@@ -34,7 +34,11 @@
   .q-opt.cb::before{content:'☐'}
   .q-input{border-bottom:1px dashed #8896A5;min-width:120px;height:16px;display:inline-block;color:#8896A5;font-size:9pt}
   .q-scale{display:flex;gap:6px;margin-top:3px;flex-wrap:wrap}
-  .q-scale-item{text-align:center;padding:2px 8px;border:1px solid #D1DAE5;border-radius:6px;font-size:9.5pt;color:#4D6078}
+  .q-scale-item{text-align:center;padding:3px 10px;border:1px solid #D1DAE5;border-radius:6px;font-size:9.5pt;color:#4D6078;min-width:44px}
+  .q-scale-lbl{font-size:8pt;color:#8896A5;display:block;margin-top:1px}
+  .q-time{display:inline-flex;align-items:center;gap:6px;margin-top:3px}
+  .q-time-box{width:52px;height:22px;border:1px solid #D1DAE5;border-radius:4px;text-align:center;font-size:9.5pt;color:#8896A5}
+  .q-time-sep{font-weight:700;color:#4D6078;font-size:11pt}
   .footer{text-align:center;color:#8896A5;font-size:9pt;margin-top:18px;padding:10px 0;border-top:1px solid #E2EAF4}
   .loading{text-align:center;padding:60px 20px;color:#8896A5;font-size:14pt}
 </style>
@@ -94,10 +98,13 @@ function render(data) {
     for (const sub of (sec.subsections || [])) {
       html += `<div class="subsection">`;
       if (sub.title) html += `<div class="subsection-title">${esc(sub.title)}</div>`;
+      if (sub.hint) html += `<div style="font-size:9.5pt;color:#6B7F95;margin-bottom:6px;font-style:italic">${esc(sub.hint)}</div>`;
 
       for (const q of (sub.questions || [])) {
         qNum++;
-        html += renderQuestion(qNum, q);
+        const qWithDefaults = { ...q };
+        if (!qWithDefaults.labels && sub.scale_labels) qWithDefaults.labels = sub.scale_labels;
+        html += renderQuestion(qNum, qWithDefaults);
       }
       html += `</div>`;
     }
@@ -123,15 +130,25 @@ function renderQuestion(num, q) {
       return `<span class="q-opt cb">${esc(label)}</span>`;
     }).join('')}</div>`;
   } else if (q.type === 'scale' || q.type === 'likert') {
-    const labels = q.scaleLabels || q.scale_labels || {};
-    const min = q.min ?? 1;
-    const max = q.max ?? 5;
-    body += `<div class="q-scale">`;
-    for (let i = min; i <= max; i++) {
-      const lbl = labels[String(i)] || '';
-      body += `<div class="q-scale-item">${i}${lbl ? '<br><span style="font-size:8.5pt;color:#8896A5">' + esc(lbl) + '</span>' : ''}</div>`;
+    if (Array.isArray(q.labels) && q.labels.length) {
+      body += `<div class="q-scale">`;
+      q.labels.forEach((lbl, i) => {
+        body += `<div class="q-scale-item">${i}<span class="q-scale-lbl">${esc(lbl)}</span></div>`;
+      });
+      body += `</div>`;
+    } else {
+      const labels = q.scaleLabels || q.scale_labels || {};
+      const min = q.min ?? 0;
+      const max = q.max ?? 3;
+      body += `<div class="q-scale">`;
+      for (let i = min; i <= max; i++) {
+        const lbl = labels[String(i)] || '';
+        body += `<div class="q-scale-item">${i}${lbl ? '<span class="q-scale-lbl">' + esc(lbl) + '</span>' : ''}</div>`;
+      }
+      body += `</div>`;
     }
-    body += `</div>`;
+  } else if (q.type === 'time') {
+    body += `<div class="q-time"><div class="q-time-box">ชม.</div><span class="q-time-sep">:</span><div class="q-time-box">นาที</div><span style="font-size:9.5pt;color:#4D6078">ชม./นาที</span></div>`;
   } else if (q.type === 'number') {
     body += `<div class="q-input" style="width:80px"></div> ${esc(q.unit || '')}`;
   } else if (q.type === 'text' || q.type === 'textarea') {
