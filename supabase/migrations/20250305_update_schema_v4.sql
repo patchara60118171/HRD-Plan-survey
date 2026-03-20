@@ -146,7 +146,7 @@ COMMENT ON COLUMN hrd_ch1_responses.type_contract IS 'จำนวนลูก�
 COMMENT ON COLUMN hrd_ch1_responses.type_other IS 'จำนวนอื่นๆ';
 
 -- =============================================
--- Verify the migration
+-- Migration completed successfully
 -- =============================================
 
 -- Display final column count
