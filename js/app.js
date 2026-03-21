@@ -264,46 +264,190 @@ function initSupabase() {
     }
 }
 
-// Save to Supabase
+// ========================================
+// Offline Sync Helpers
+// ========================================
+
+// IndexedDB: save form data for offline sync
+async function saveToOfflineQueue(formType, formData) {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open('WellbeingSurveyDB', 1);
+        request.onupgradeneeded = (e) => {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains('offlineData')) {
+                db.createObjectStore('offlineData', { keyPath: 'id', autoIncrement: true });
+            }
+        };
+        request.onsuccess = () => {
+            const db = request.result;
+            const tx = db.transaction(['offlineData'], 'readwrite');
+            const store = tx.objectStore('offlineData');
+            store.add({
+                formType: formType,  // 'wellbeing' or 'ch1'
+                formData: formData,
+                authToken: null,     // Will be set if user is authenticated
+                synced: false,
+                savedAt: new Date().toISOString()
+            });
+            tx.oncomplete = () => resolve(true);
+            tx.onerror = () => reject(tx.error);
+        };
+        request.onerror = () => reject(request.error);
+    });
+}
+
+// Get count of pending offline items
+async function getOfflineQueueCount() {
+    return new Promise((resolve) => {
+        const request = indexedDB.open('WellbeingSurveyDB', 1);
+        request.onupgradeneeded = (e) => {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains('offlineData')) {
+                db.createObjectStore('offlineData', { keyPath: 'id', autoIncrement: true });
+            }
+        };
+        request.onsuccess = () => {
+            try {
+                const db = request.result;
+                const tx = db.transaction(['offlineData'], 'readonly');
+                const store = tx.objectStore('offlineData');
+                const countReq = store.count();
+                countReq.onsuccess = () => resolve(countReq.result);
+                countReq.onerror = () => resolve(0);
+            } catch { resolve(0); }
+        };
+        request.onerror = () => resolve(0);
+    });
+}
+
+// Request Background Sync
+async function requestBackgroundSync() {
+    if ('serviceWorker' in navigator && 'SyncManager' in window) {
+        try {
+            const reg = await navigator.serviceWorker.ready;
+            await reg.sync.register('sync-form-data');
+            console.log('[App] Background sync registered');
+        } catch (e) {
+            console.warn('[App] Background sync registration failed:', e);
+            // Fallback: attempt direct sync via SW message
+            const reg = await navigator.serviceWorker.ready;
+            reg.active?.postMessage({ type: 'FORCE_SYNC' });
+        }
+    }
+}
+
+// Network Status UI
+function initNetworkStatus() {
+    // Create status indicator
+    const indicator = document.createElement('div');
+    indicator.id = 'network-status';
+    indicator.style.cssText = 'position:fixed;bottom:16px;left:16px;padding:6px 14px;border-radius:99px;font-size:12px;font-weight:600;z-index:9999;transition:all .3s;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,.15);cursor:pointer;display:none';
+    document.body.appendChild(indicator);
+
+    function updateStatus() {
+        const online = navigator.onLine;
+        indicator.style.background = online ? '#059669' : '#DC2626';
+        indicator.style.color = '#fff';
+        indicator.textContent = online ? '🟢 ออนไลน์' : '🔴 ออฟไลน์';
+        if (!online) {
+            indicator.style.display = 'block';
+        } else {
+            // Show briefly then hide
+            indicator.style.display = 'block';
+            setTimeout(() => { indicator.style.display = 'none'; }, 3000);
+        }
+    }
+
+    window.addEventListener('online', () => {
+        updateStatus();
+        showToast('🟢 กลับมาออนไลน์แล้ว — กำลังซิงค์ข้อมูล...', 'success');
+        // Trigger background sync
+        requestBackgroundSync();
+    });
+
+    window.addEventListener('offline', () => {
+        updateStatus();
+        showToast('🔴 ขาดการเชื่อมต่อ — ข้อมูลจะบันทึกในเครื่องก่อน', 'error');
+    });
+
+    // Initial check
+    if (!navigator.onLine) updateStatus();
+}
+
+// Listen for SW sync messages
+function initSWListener() {
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.addEventListener('message', (event) => {
+            const { type, message, synced, failed } = event.data || {};
+            if (type === 'SYNC_COMPLETE') {
+                const indicator = document.getElementById('network-status');
+                if (indicator) {
+                    indicator.textContent = `🔄 ซิงค์แล้ว ${synced || 0} รายการ`;
+                    indicator.style.background = '#059669';
+                    indicator.style.display = 'block';
+                    setTimeout(() => { indicator.style.display = 'none'; }, 4000);
+                }
+                showToast(message || '✅ ซิงค์ข้อมูลสำเร็จ', 'success');
+            } else if (type === 'SYNC_ERROR') {
+                showToast(message || '❌ การซิงค์ล้มเหลว', 'error');
+            }
+        });
+    }
+}
+
+// Save to Supabase (with offline fallback)
 async function saveToSupabase(email, responses, isDraft = false) {
-    if (!supabaseClient || !email) return false;
+    if (!email) return false;
+
+    // Prepare data regardless of online status
+    const height = parseFloat(responses.height);
+    const weight = parseFloat(responses.weight);
+    let bmi = null, bmiCategory = '';
+    if (height && weight) {
+        bmi = parseFloat(calculateBMI(height, weight));
+        const bmiInfo = getBMICategory(bmi);
+        bmiCategory = bmiInfo ? bmiInfo.category : '';
+    }
+
+    const tmhiScore = calculateTMHIScore(responses);
+    const tmhiInfo = getTMHILevel(tmhiScore);
+
+    const dataToSave = {
+        email: email,
+        name: responses.name || null,
+        title: responses.title || null,
+        gender: responses.gender || null,
+        age: responses.age ? parseInt(responses.age) : null,
+        organization: responses.organization || null,
+        org_type: responses.org_type || null,
+        height: height || null,
+        weight: weight || null,
+        waist: responses.waist ? parseFloat(responses.waist) : null,
+        bmi: bmi,
+        bmi_category: bmiCategory,
+        tmhi_score: tmhiScore || null,
+        tmhi_level: tmhiInfo ? tmhiInfo.level : null,
+        raw_responses: responses,
+        is_draft: isDraft,
+        submitted_at: isDraft ? null : new Date().toISOString()
+    };
+
+    // Offline detection: save to IndexedDB queue if offline
+    if (!navigator.onLine) {
+        try {
+            await saveToOfflineQueue('wellbeing', dataToSave);
+            console.log('[App] 📴 Saved to offline queue (will sync when online)');
+            return 'offline';  // indicate offline save
+        } catch (e) {
+            console.error('[App] Failed to save to offline queue:', e);
+            return false;
+        }
+    }
+
+    // Online: try Supabase directly
+    if (!supabaseClient) return false;
 
     try {
-        // Calculate BMI if height and weight exist
-        const height = parseFloat(responses.height);
-        const weight = parseFloat(responses.weight);
-        let bmi = null, bmiCategory = '';
-        if (height && weight) {
-            bmi = parseFloat(calculateBMI(height, weight));
-            const bmiInfo = getBMICategory(bmi);
-            bmiCategory = bmiInfo ? bmiInfo.category : '';
-        }
-
-        // Calculate TMHI score
-        const tmhiScore = calculateTMHIScore(responses);
-        const tmhiInfo = getTMHILevel(tmhiScore);
-
-        const dataToSave = {
-            email: email,
-            name: responses.name || null,
-            title: responses.title || null,
-            gender: responses.gender || null,
-            age: responses.age ? parseInt(responses.age) : null,
-            organization: responses.organization || null, // Organization from URL Parameter
-            org_type: responses.org_type || null, // Added new field
-            height: height || null,
-            weight: weight || null,
-            waist: responses.waist ? parseFloat(responses.waist) : null,
-            bmi: bmi,
-            bmi_category: bmiCategory,
-            tmhi_score: tmhiScore || null,
-            tmhi_level: tmhiInfo ? tmhiInfo.level : null,
-            raw_responses: responses,
-            is_draft: isDraft,
-            submitted_at: isDraft ? null : new Date().toISOString()
-        };
-
-        // Upsert: update if exists, insert if not
         const { data, error } = await supabaseClient
             .from('survey_responses')
             .upsert(dataToSave, {
@@ -313,6 +457,13 @@ async function saveToSupabase(email, responses, isDraft = false) {
 
         if (error) {
             console.error('Supabase save error:', error);
+            // Fallback to offline queue on network error
+            if (error.message?.includes('fetch') || error.message?.includes('network')) {
+                try {
+                    await saveToOfflineQueue('wellbeing', dataToSave);
+                    return 'offline';
+                } catch { /* ignore */ }
+            }
             return false;
         }
 
@@ -320,6 +471,11 @@ async function saveToSupabase(email, responses, isDraft = false) {
         return true;
     } catch (e) {
         console.error('Supabase save exception:', e);
+        // Network error fallback
+        try {
+            await saveToOfflineQueue('wellbeing', dataToSave);
+            return 'offline';
+        } catch { /* ignore */ }
         return false;
     }
 }
@@ -387,6 +543,10 @@ const app = {
 
         // Initialize Supabase
         initSupabase();
+
+        // Initialize offline sync features
+        initNetworkStatus();
+        initSWListener();
 
         // Fetch form config overrides (silent — falls back to defaults on error)
         try {
@@ -944,7 +1104,7 @@ const app = {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     },
 
-    // Submit Survey (Final Save)
+    // Submit Survey (Final Save — with offline support)
     async submitSurvey() {
         showToast('กำลังบันทึกข้อมูล...', 'info');
 
@@ -966,16 +1126,21 @@ const app = {
             this.responses.tmhi_level = tmhiInfo ? tmhiInfo.level : '';
         }
 
-        // 1. Save to Supabase (Primary)
+        // 1. Save to Supabase (Primary) — with offline fallback
         if (this.userInfo && this.userInfo.email) {
-            const supabaseSuccess = await saveToSupabase(this.userInfo.email, this.responses, false);
-            if (supabaseSuccess) {
-                showToast('บันทึกข้อมูลสำเร็จ!', 'success');
+            const result = await saveToSupabase(this.userInfo.email, this.responses, false);
+            if (result === true) {
+                showToast('✅ บันทึกข้อมูลสำเร็จ!', 'success');
+            } else if (result === 'offline') {
+                showToast('📴 บันทึกในเครื่องแล้ว — จะซิงค์อัตโนมัติเมื่อออนไลน์', 'info');
+                requestBackgroundSync();
+            } else {
+                showToast('⚠️ ไม่สามารถบันทึกได้ กรุณาลองใหม่', 'error');
             }
         }
 
-        // 2. Also save to Google Apps Script (Backup)
-        if (GOOGLE_SCRIPT_URL) {
+        // 2. Also save to Google Apps Script (Backup) — skip if offline
+        if (GOOGLE_SCRIPT_URL && navigator.onLine) {
             const success = await submitResponseToGAS(this.responses, GOOGLE_SCRIPT_URL);
             if (!success) {
                 console.log('GAS backup save failed, but Supabase succeeded');
@@ -1223,6 +1388,21 @@ const app = {
 };
 
 // Initialize when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    // ── Sprint 1 (1f): Preload wellbeing schema from DB (primary), fallback to questions.js ──
+    if (typeof FormSchema !== 'undefined') {
+        try {
+            const schema = await FormSchema.loadFormSchema('wellbeing');
+            if (schema && schema.source === 'supabase') {
+                console.log('[app] Wellbeing schema loaded from DB:', schema.questions.length, 'questions');
+                // Future Sprint: replace SURVEY_DATA rendering with DB schema
+                // For now: schema is cached, label overrides accessible via FormSchema.getFieldLabel()
+            } else {
+                console.log('[app] Using fallback schema from questions.js (source:', schema?.source, ')');
+            }
+        } catch (e) {
+            console.warn('[app] Schema preload failed, using questions.js fallback:', e.message);
+        }
+    }
     app.init();
 });

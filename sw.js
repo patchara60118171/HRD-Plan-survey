@@ -194,45 +194,88 @@ self.addEventListener('sync', (event) => {
   }
 });
 
-// Sync ข้อมูลที่ค้างอยู่
+// Supabase config (duplicated here because SW can't import modules)
+const SB_URL = 'https://fgdommhiqhzvsedfzyrr.supabase.co';
+const SB_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZnZG9tbWhpcWh6dnNlZGZ6eXJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkzMzY2MzUsImV4cCI6MjA4NDkxMjYzNX0.GFMOeDArhq-9lPt39OizkBOFFgK4TDpVDJrk_HRQ6Xc';
+
+// Sync ข้อมูลที่ค้างอยู่ — ส่งตรงไป Supabase REST API
 async function syncFormData() {
   try {
     const offlineData = await getOfflineData();
+    let syncedCount = 0;
+    let failedCount = 0;
     
     for (const data of offlineData) {
-      if (!data.synced) {
-        try {
-          // ส่งข้อมูลไปยัง Supabase
-          const response = await fetch('/api/submit', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data.formData)
-          });
-          
-          if (response.ok) {
-            data.synced = true;
-            console.log('[SW] Synced data for:', data.formData.respondent_email);
-          }
-        } catch (error) {
-          console.error('[SW] Failed to sync data:', error);
+      if (data.synced) continue;
+      
+      try {
+        const { formType, formData, authToken } = data;
+        // เลือกตารางตาม formType
+        const tableName = formType === 'ch1' ? 'hrd_ch1_responses' : 'survey_responses';
+        
+        const headers = {
+          'Content-Type': 'application/json',
+          'apikey': SB_ANON_KEY,
+          'Prefer': 'return=minimal'
+        };
+        // ใส่ auth token ถ้ามี (สำหรับ authenticated forms)
+        if (authToken) {
+          headers['Authorization'] = `Bearer ${authToken}`;
+        } else {
+          headers['Authorization'] = `Bearer ${SB_ANON_KEY}`;
         }
+        
+        const response = await fetch(`${SB_URL}/rest/v1/${tableName}`, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify(formData)
+        });
+        
+        if (response.ok || response.status === 201) {
+          data.synced = true;
+          data.syncedAt = new Date().toISOString();
+          syncedCount++;
+          console.log('[SW] ✅ Synced:', formType, data.formData?.respondent_email || data.formData?.organization || '');
+        } else {
+          const errText = await response.text().catch(() => '');
+          console.error('[SW] Sync HTTP error:', response.status, errText);
+          data.lastError = `HTTP ${response.status}: ${errText}`;
+          failedCount++;
+        }
+      } catch (error) {
+        console.error('[SW] Failed to sync item:', error);
+        data.lastError = error.message;
+        failedCount++;
       }
     }
     
-    // Save updated offline data
-    await saveOfflineData(offlineData);
+    // Save updated offline data (keep failed for retry)
+    await saveOfflineData(offlineData.filter(d => !d.synced));
     
     // Notify clients
     const clients = await self.clients.matchAll();
     clients.forEach(client => {
       client.postMessage({
         type: 'SYNC_COMPLETE',
-        message: 'ข้อมูลทั้งหมดถูกซิงค์เรียบร้อยแล้ว'
+        synced: syncedCount,
+        failed: failedCount,
+        remaining: offlineData.filter(d => !d.synced).length,
+        message: failedCount === 0
+          ? `✅ ซิงค์สำเร็จ ${syncedCount} รายการ`
+          : `⚠️ ซิงค์สำเร็จ ${syncedCount} รายการ, ล้มเหลว ${failedCount} รายการ`
       });
     });
     
   } catch (error) {
     console.error('[SW] Sync failed:', error);
+    // Notify clients of failure
+    const clients = await self.clients.matchAll();
+    clients.forEach(client => {
+      client.postMessage({
+        type: 'SYNC_ERROR',
+        message: '❌ การซิงค์ล้มเหลว: ' + error.message
+      });
+    });
   }
 }
 

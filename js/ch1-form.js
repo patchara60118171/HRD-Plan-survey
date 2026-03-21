@@ -119,7 +119,21 @@ function parseUrlParameters() {
 // =============================================
 // INIT
 // =============================================
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    // ── Sprint 1 (1e): Preload CH1 schema from DB (primary), fallback to hardcoded ──
+    if (typeof FormSchema !== 'undefined') {
+        try {
+            const schema = await FormSchema.loadFormSchema('ch1');
+            if (schema && schema.source === 'supabase') {
+                console.log('[ch1-form] Schema loaded from DB:', schema.questions.length, 'questions');
+            } else {
+                console.log('[ch1-form] Using fallback schema (source:', schema?.source, ')');
+            }
+        } catch (e) {
+            console.warn('[ch1-form] Schema preload failed, using hardcoded fallback:', e.message);
+        }
+    }
+
     // Build step-dot labels
     const STEP_NAMES = ['เริ่มต้น', 'ข้อมูลพื้นฐาน', 'นโยบาย/บริบท', 'สุขภาวะ', 'ระบบ/สภาพแวดล้อม', 'ทิศทาง/เป้าหมาย'];
     const dotsRow = document.getElementById('step-dots-row');
@@ -134,7 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupNegativeGuards();
     setupAgeWatcher();
     startAutoSave();
-    
+
     // Parse URL parameter to auto-select organization
     parseUrlParameters();
     renderTestModeBanner();
