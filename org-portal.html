@@ -35,7 +35,7 @@
 body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh}
 
 /* ── Login Gate ── */
-.login-gate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:var(--bg)}
+.login-gate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:linear-gradient(135deg,#581c87,#7c3aed,#be185d)}
 
 @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
 .fade-up{animation:fadeUp .5s ease}
@@ -43,8 +43,8 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
 .login-card{
   background:#fff;border:1px solid var(--bdr);border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,.08);
   padding:40px;max-width:420px;width:100%;text-align:center;position:relative}
-.login-card .icon{width:52px;height:52px;background:var(--P);
-  border-radius:8px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;
+.login-card .icon{width:52px;height:52px;background:linear-gradient(135deg,#9333ea,#ec4899);
+  border-radius:10px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;
   font-size:24px;color:#fff}
 .login-card h1{font-size:20px;font-weight:700;color:var(--tx);margin-bottom:4px}
 .login-card h2{font-size:15px;font-weight:600;color:var(--tx2);margin-bottom:4px}
@@ -53,18 +53,18 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
 .login-card label{font-size:11px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px}
 .login-card input{width:100%;padding:10px 13px;border:1.5px solid var(--bdr);border-radius:7px;font-size:14px;font-family:inherit;
   background:#fafbfc;transition:border-color .15s,box-shadow .15s;outline:none}
-.login-card input:focus{border-color:var(--P);box-shadow:0 0 0 3px rgba(15,76,129,.1)}
+.login-card input:focus{border-color:rgba(147,51,234,.5);box-shadow:0 0 0 3px rgba(147,51,234,.1)}
 .login-card input::placeholder{color:var(--tx3)}
-.login-btn{width:100%;padding:12px;background:var(--P);color:#fff;border:none;
-  border-radius:7px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .15s}
-.login-btn:hover{background:var(--PD)}
+.login-btn{width:100%;padding:13px;background:linear-gradient(to right,#9333ea,#ec4899);color:#fff;border:none;
+  border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;transition:opacity .15s}
+.login-btn:hover{opacity:.9}
 .login-btn:disabled{opacity:.5;cursor:not-allowed}
 .login-msg{font-size:12px;margin-top:12px;min-height:18px;text-align:center}
-.login-msg.err{color:#dc2626}
+.login-msg.err{color:#fecdd3}
 .login-back{margin-top:20px;text-align:center}
-.login-back a{font-size:12px;color:var(--tx3);text-decoration:none;transition:color .15s}
-.login-back a:hover{color:var(--tx)}
-.login-footer{text-align:center;margin-top:16px;font-size:11px;color:var(--tx3)}
+.login-back a{font-size:12px;color:rgba(255,255,255,.6);text-decoration:none;transition:color .15s}
+.login-back a:hover{color:#fff}
+.login-footer{text-align:center;margin-top:16px;font-size:11px;color:rgba(255,255,255,.4)}
 
 .pw-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:14px;color:var(--tx3);padding:4px}
 .pw-toggle:hover{color:var(--tx2)}
