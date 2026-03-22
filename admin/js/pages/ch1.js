@@ -427,11 +427,6 @@ function showCh1RowDetail(index) {
       <tr><th>อายุ 41–50 ปี</th><td>${n('age_41_50')} คน</td></tr>
       <tr><th>อายุ 51–60 ปี</th><td>${n('age_51_60')} คน</td></tr>
     </table>
-    <h3>เพศ</h3>
-    <table>
-      <tr><th>เพศชาย</th><td>${n('gender_male')} คน</td></tr>
-      <tr><th>เพศหญิง</th><td>${n('gender_female')} คน</td></tr>
-    </table>
   </div>
   <div>
     <h3>อายุราชการ (ปี)</h3>
@@ -449,12 +444,25 @@ function showCh1RowDetail(index) {
 </div>
 <div class="two-col">
   <div>
-    <h3>ประเภทตำแหน่ง (อำนวยการ)</h3>
+    <h3>ระดับตำแหน่ง</h3>
     <table>
-      <tr><th>ระดับ C-Suite/อธิบดี</th><td>${n('pos_o1')} คน</td></tr>
-      <tr><th>รองอธิบดี/ผู้ช่วยฯ</th><td>${n('pos_o2')} คน</td></tr>
-      <tr><th>ผู้อำนวยการกอง/สำนัก</th><td>${n('pos_o3')} คน</td></tr>
-      <tr><th>หัวหน้าฝ่าย/กลุ่ม</th><td>${n('pos_o4')} คน</td></tr>
+      <tr><th colspan="2" style="background:#E8F1FB;color:#0F4C81">ประเภททั่วไป (O)</th></tr>
+      <tr><th>ปฏิบัติงาน (O1)</th><td>${n('pos_o1')} คน</td></tr>
+      <tr><th>ชำนาญงาน (O2)</th><td>${n('pos_o2')} คน</td></tr>
+      <tr><th>อาวุโส (O3)</th><td>${n('pos_o3')} คน</td></tr>
+      <tr><th>ทักษะพิเศษ (O4)</th><td>${n('pos_o4')} คน</td></tr>
+      <tr><th colspan="2" style="background:#E8F1FB;color:#0F4C81">ประเภทวิชาการ (K)</th></tr>
+      <tr><th>ปฏิบัติการ (K1)</th><td>${n('pos_k1')} คน</td></tr>
+      <tr><th>ชำนาญการ (K2)</th><td>${n('pos_k2')} คน</td></tr>
+      <tr><th>ชำนาญการพิเศษ (K3)</th><td>${n('pos_k3')} คน</td></tr>
+      <tr><th>เชี่ยวชาญ (K4)</th><td>${n('pos_k4')} คน</td></tr>
+      <tr><th>ทรงคุณวุฒิ (K5)</th><td>${n('pos_k5')} คน</td></tr>
+      <tr><th colspan="2" style="background:#E8F1FB;color:#0F4C81">ประเภทอำนวยการ (M)</th></tr>
+      <tr><th>ระดับต้น (M1)</th><td>${n('pos_m1')} คน</td></tr>
+      <tr><th>ระดับสูง (M2)</th><td>${n('pos_m2')} คน</td></tr>
+      <tr><th colspan="2" style="background:#E8F1FB;color:#0F4C81">ประเภทบริหาร (S)</th></tr>
+      <tr><th>ระดับต้น (S1)</th><td>${n('pos_s1')} คน</td></tr>
+      <tr><th>ระดับสูง (S2)</th><td>${n('pos_s2')} คน</td></tr>
     </table>
   </div>
   <div>
@@ -630,11 +638,6 @@ function showCh1PDF(index) {
       <tr><th>อายุ 41–50 ปี</th><td>${n('age_41_50')} คน</td></tr>
       <tr><th>อายุ 51–60 ปี</th><td>${n('age_51_60')} คน</td></tr>
     </table>
-    <h3>เพศ</h3>
-    <table>
-      <tr><th>เพศชาย</th><td>${n('gender_male')} คน</td></tr>
-      <tr><th>เพศหญิง</th><td>${n('gender_female')} คน</td></tr>
-    </table>
   </div>
   <div>
     <h3>อายุราชการ (ปี)</h3>
@@ -652,12 +655,25 @@ function showCh1PDF(index) {
 </div>
 <div class="two-col">
   <div>
-    <h3>ประเภทตำแหน่ง (อำนวยการ)</h3>
+    <h3>ระดับตำแหน่ง</h3>
     <table>
-      <tr><th>ระดับ C-Suite/อธิบดี</th><td>${n('pos_o1')} คน</td></tr>
-      <tr><th>รองอธิบดี/ผู้ช่วยฯ</th><td>${n('pos_o2')} คน</td></tr>
-      <tr><th>ผู้อำนวยการกอง/สำนัก</th><td>${n('pos_o3')} คน</td></tr>
-      <tr><th>หัวหน้าฝ่าย/กลุ่ม</th><td>${n('pos_o4')} คน</td></tr>
+      <tr><th colspan="2" style="background:#E8F1FB;color:#0F4C81">ประเภททั่วไป (O)</th></tr>
+      <tr><th>ปฏิบัติงาน (O1)</th><td>${n('pos_o1')} คน</td></tr>
+      <tr><th>ชำนาญงาน (O2)</th><td>${n('pos_o2')} คน</td></tr>
+      <tr><th>อาวุโส (O3)</th><td>${n('pos_o3')} คน</td></tr>
+      <tr><th>ทักษะพิเศษ (O4)</th><td>${n('pos_o4')} คน</td></tr>
+      <tr><th colspan="2" style="background:#E8F1FB;color:#0F4C81">ประเภทวิชาการ (K)</th></tr>
+      <tr><th>ปฏิบัติการ (K1)</th><td>${n('pos_k1')} คน</td></tr>
+      <tr><th>ชำนาญการ (K2)</th><td>${n('pos_k2')} คน</td></tr>
+      <tr><th>ชำนาญการพิเศษ (K3)</th><td>${n('pos_k3')} คน</td></tr>
+      <tr><th>เชี่ยวชาญ (K4)</th><td>${n('pos_k4')} คน</td></tr>
+      <tr><th>ทรงคุณวุฒิ (K5)</th><td>${n('pos_k5')} คน</td></tr>
+      <tr><th colspan="2" style="background:#E8F1FB;color:#0F4C81">ประเภทอำนวยการ (M)</th></tr>
+      <tr><th>ระดับต้น (M1)</th><td>${n('pos_m1')} คน</td></tr>
+      <tr><th>ระดับสูง (M2)</th><td>${n('pos_m2')} คน</td></tr>
+      <tr><th colspan="2" style="background:#E8F1FB;color:#0F4C81">ประเภทบริหาร (S)</th></tr>
+      <tr><th>ระดับต้น (S1)</th><td>${n('pos_s1')} คน</td></tr>
+      <tr><th>ระดับสูง (S2)</th><td>${n('pos_s2')} คน</td></tr>
     </table>
   </div>
   <div>
