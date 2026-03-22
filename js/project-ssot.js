@@ -3,7 +3,7 @@
 const PROJECT_SSOT = {
   constants: {
     surveyBaseUrl: 'https://nidawellbeing.vercel.app',
-    lockedSuperadminEmails: ['admin@gmail.com'],
+    lockedSuperadminEmails: ['admin@gmail.com', 'admin@ocsc.go.th'],
     orgHrEmailDomain: '@wellbeing.go.th',
   },
 

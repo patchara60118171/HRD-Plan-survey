@@ -1,5 +1,11 @@
 /* ========== ADMIN PORTAL — AUTH & SESSION ========== */
 
+// Top-level so logout always works even if renderChrome() has not run yet.
+async function doLogout() {
+  await sb.auth.signOut();
+  window.location.href = '/admin-login';
+}
+
 async function requireSession() {
   const { data: { session } } = await sb.auth.getSession();
   if (!session) {
@@ -18,8 +24,10 @@ function renderChrome() {
   const myRow = state.userRows.find((r) => r.email === email);
   // Locked superadmin emails — ไม่สามารถเปลี่ยน role ได้จาก UI
   const isLockedSuper = LOCKED_SUPERADMIN_EMAILS.includes(email);
-  state.myRole = isLockedSuper ? 'superadmin' : (myRow?.role || 'viewer');
-  const roleLvl = { viewer: 0, admin: 1, superadmin: 2 };
+  // Normalize: DB may store 'super_admin' (underscore) — canonicalize to 'superadmin'
+  const rawRole = (myRow?.role || 'viewer').replace('super_admin', 'superadmin');
+  state.myRole = isLockedSuper ? 'superadmin' : rawRole;
+  const roleLvl = { viewer: 0, admin: 1, superadmin: 2, super_admin: 2 };
   const myLvl = roleLvl[state.myRole] ?? 0;
   document.querySelectorAll('[data-min-role]').forEach((el) => {
     const minLvl = roleLvl[el.dataset.minRole] ?? 99;
@@ -32,18 +40,5 @@ function renderChrome() {
     else if (state.myRole === 'admin') roleInfoEl.innerHTML = '🔑 คุณเข้าสู่ระบบในฐานะ <b>Admin</b> — สามารถเพิ่ม/จัดการ Viewer ได้เท่านั้น';
   }
 
-  window.doLogout = async () => {
-    await sb.auth.signOut();
-    window.location.href = '/admin-login';
-  };
-
-  const buttons = document.querySelectorAll('.topbar-btn');
-  if (buttons[0]) {
-    buttons[0].textContent = '🔄 รีเฟรช';
-    buttons[0].onclick = () => window.location.reload();
-  }
-  if (buttons[1]) {
-    buttons[1].textContent = '📤 Export';
-    buttons[1].onclick = exportCurrentPage;
-  }
+  // doLogout is defined at top-level above — no need to reassign here.
 }

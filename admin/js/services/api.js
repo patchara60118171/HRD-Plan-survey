@@ -34,15 +34,17 @@ async function callEdgeFunction(functionName, body) {
 
 async function fetchAdminUserRoles() {
   // Reads from view that excludes sensitive columns like initial_password.
+  // Returns [] gracefully if the view is missing or RLS blocks — loadBackend must not fail here.
   const { data, error } = await sb.from('admin_user_roles_public').select('*').order('email', { ascending: true });
-  if (error) throw error;
+  if (error) { console.warn('fetchAdminUserRoles:', error.message); return []; }
   return data || [];
 }
 
 async function fetchOrgHrCredentials() {
   // Security-definer RPC — never exposes initial_password to the client directly.
+  // Returns [] gracefully if RPC is missing — non-critical for initial page load.
   const { data, error } = await sb.rpc('get_org_hr_credentials');
-  if (error) throw error;
+  if (error) { console.warn('fetchOrgHrCredentials:', error.message); return []; }
   return data || [];
 }
 
@@ -70,7 +72,7 @@ async function deleteAdminUserRole(id) {
 
 async function fetchOrganizations() {
   const { data, error } = await sb.from('organizations').select('*').eq('is_active', true).order('org_name_th', { ascending: true });
-  if (error) throw error;
+  if (error) { console.warn('fetchOrganizations:', error.message); return []; }
   return data || [];
 }
 
