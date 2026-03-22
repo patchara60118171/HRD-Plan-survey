@@ -6,6 +6,18 @@
     "trailingSlash": false,
     "rewrites": [
         {
+            "source": "/ch1",
+            "destination": "/org-portal.html"
+        },
+        {
+            "source": "/ch1-form",
+            "destination": "/ch1.html"
+        },
+        {
+            "source": "/org-portal",
+            "destination": "/org-portal.html"
+        },
+        {
             "source": "/admin-login",
             "destination": "/admin-login.html"
         },

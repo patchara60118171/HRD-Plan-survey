@@ -1,177 +1,220 @@
-# Well-being Survey Chapter 1 Form v3.0
+# Well-being Survey System
 
-แบบสอบถามสำรวจข้อมูลสุขภาวะบุคลากร บทที่ 1 - โครงสร้างใหม่ 5 ส่วน
+ระบบสำรวจสุขภาวะบุคลากรสำหรับหน่วยงานภาครัฐ ประกอบด้วยแบบสำรวจหลัก 2 ส่วน และพอร์ทัลผู้ดูแลระบบสำหรับจัดการข้อมูล วิเคราะห์ผล และดูแลสิทธิ์การเข้าถึง
 
-## 📋 ภาพรวม
+## ภาพรวมระบบ
 
-โปรเจคนี้พัฒนาแบบสอบถามสำรวจข้อมูลสุขภาวะบุคลากรสำหรับหน่วยงานภาครัฐ ปรับปรุงจากเวอร์ชัน 7 ส่วนเป็น 5 ส่วนเพื่อความกระชับและใช้งานง่ายขึ้น
+โปรเจกต์นี้ไม่ได้มีเฉพาะแบบฟอร์ม CH1 อีกต่อไป แต่เป็นระบบสำรวจครบชุดที่ครอบคลุม
 
-### 🔄 การเปลี่ยนแปลงหลัก v2.1 → v3.0
+1. แบบสำรวจสุขภาวะรายบุคคลสำหรับบุคลากรทั่วไป
+2. แบบสำรวจ CH1 สำหรับ HR หรือผู้ดูแลขององค์กร
+3. Admin Portal สำหรับจัดการองค์กร ผู้ใช้ สิทธิ์ และดูรายงาน
+4. Backend บน Supabase สำหรับฐานข้อมูล สิทธิ์ RLS การยืนยันตัวตน และ Edge Functions
+5. Deployment บน Vercel สำหรับ production
 
-- **โครงสร้าง**: 7 ส่วน → 5 ส่วน + Landing page
-- **ฟิลด์ใหม่**: เพิ่ม ~30 ฟิลด์ (โครงสร้างอัตรากำลัง 13 ระดับ, อายุราชการ 8 ช่วง)
-- **ฟิลด์เก่า**: ลบฟิลด์ที่ไม่จำเป็น (vision_mission, hrd_budget_url, etc.)
-- **UI**: ปรับปรุงการแสดงผลและการนำทาง
+## แอปหลักในระบบ
 
-## 🏗️ โครงสร้างแบบสอบถาม (5 ส่วน)
+| ส่วนระบบ | ไฟล์หลัก | เส้นทางใช้งาน | จุดประสงค์ |
+|---|---|---|---|
+| Well-being Survey | `index.html` | `/` | แบบสำรวจสุขภาวะของบุคลากรทั่วไป |
+| CH1 Survey | `ch1.html` | `/ch1` | แบบฟอร์มสำรวจข้อมูล HRD บทที่ 1 |
+| Admin Portal | `admin.html` | `/admin` | จัดการระบบ ดูข้อมูล และวิเคราะห์ผล |
 
-### ส่วนที่ 1: ข้อมูลเบื้องต้นของส่วนราชการ
-- ชื่อหน่วยงาน
-- ภาพรวมยุทธศาสตร์
-- โครงสร้างองค์กร
-- จำนวนบุคลากรรวม
-- การกระจายอายุ (4 กลุ่ม)
-- การกระจายอายุราชการ (8 ช่วง)
-- ประเภทตำแหน่ง (13 ระดับ)
-- อัตราการลาออก/ย้าย
+## ฟีเจอร์หลัก
 
-### ส่วนที่ 2: นโยบายและบริบทภายนอก
-- นโยบายที่เกี่ยวข้อง
-- บริบทและความท้าทาย
+### 1. Well-being Survey
 
-### ส่วนที่ 3: ข้อมูลสุขภาวะ
-- โรค NCD (7 ประเภท)
-- ข้อมูลการลาป่วย (5 ปีย้อนหลัง)
-- ข้อมูลคลินิก
-- สุขภาพจิต (5 ประเภท)
-- ข้อมูลความผูกพัน (5 ปีย้อนหลัง)
-- แบบสอบถามอื่นๆ
+- รองรับลิงก์เฉพาะองค์กรผ่าน `?org=`
+- เรนเดอร์คำถามแบบไดนามิก
+- รองรับคำถามหลายประเภท เช่น ตัวเลือก ตัวเลข เวลา และข้อความ
+- บันทึกแบบร่างอัตโนมัติ
+- กลับมากรอกต่อได้
+- ตรวจสอบความถูกต้องของข้อมูลก่อนส่ง
+- รองรับการสร้างไฟล์พิมพ์สำหรับดาวน์โหลด PDF
+- มีโครงสร้างคำถามด้านสุขภาพจิตและ UCLA Loneliness Scale
 
-### ส่วนที่ 4: ระบบการบริหารและสภาพแวดล้อม
-- ระบบสนับสนุนบุคลากร (4 ระบบ)
-- ชั่วโมงการอบรม
-- ระบบดิจิทัล
-- การจัดสภาพแวดล้อมตามหลักการยศาสตร์
-- การวิเคราะห์สุขภาวะ
+### 2. CH1 Survey
 
-### ส่วนที่ 5: ทิศทาง เป้าหมาย และข้อเสนอแนะ
-- จุดเน้นการพัฒนา (สูงสุด 3 ประเด็น)
-- ข้อเสนอแนะ Intervention Packages
-- ไฟล์แผน HRD และผลการดำเนินงาน
+- แบบฟอร์มหลายขั้นตอน
+- โครงสร้าง 5 ส่วนตามแบบฟอร์มล่าสุด
+- ตรวจสอบผลรวมข้อมูลกำลังคนและข้อมูลเชิงโครงสร้าง
+- จัดอันดับประเด็นสำคัญได้
+- รองรับแนบไฟล์ PDF ที่เกี่ยวข้อง
+- มีสถานะ lifecycle ของแบบฟอร์ม เช่น `draft`, `submitted`, `reopened`, `locked`
+- รองรับการพิมพ์/ดาวน์โหลด PDF จากข้อมูลจริง
 
-## 🛠️ เทคโนโลยีที่ใช้
+### 3. Admin Portal
 
-- **Frontend**: HTML5, Tailwind CSS, Vanilla JavaScript
-- **Backend**: Supabase (PostgreSQL + Auth + Storage)
-- **Features**: Auto-save, Form validation, Multi-step navigation
+- ล็อกอินด้วย Supabase Auth
+- แสดงเมนูตามบทบาทผู้ใช้
+- แดชบอร์ดสรุปผลและกราฟวิเคราะห์
+- ดูคำตอบรายบุคคล
+- ส่งออกข้อมูลเป็น CSV/Excel
+- จัดการข้อมูลองค์กร
+- จัดการสิทธิ์ผู้ใช้และบทบาท
+- จำกัดสิทธิ์ตามองค์กรสำหรับ `org_hr`
 
-## 📁 โครงสร้างโปรเจค
+### 4. Backend และ Security
 
-```
+- ใช้ Supabase PostgreSQL เป็นฐานข้อมูลหลัก
+- ใช้ Row Level Security (RLS) แยกสิทธิ์ตามบทบาท
+- มี helper functions เช่น `requester_email()`, `requester_role()`, `requester_org()`, `requester_is_admin()`
+- มีตาราง `admin_user_roles`, `organizations`, `survey_responses`, `hrd_ch1_responses`, `form_windows`, `form_question_overrides`
+- มี Edge Functions สำหรับงาน integration บางส่วน
+
+### 5. Integration และ Operations
+
+- เชื่อม Google Sheets / Apps Script สำหรับงาน sync
+- มีสคริปต์ช่วยตรวจ schema และ readiness
+- มีสคริปต์ seed, clear test data, export และดูสถิติฐานข้อมูล
+- มีการตั้งค่า route, headers และ cache ผ่าน `vercel.json`
+
+## เทคโนโลยีที่ใช้
+
+| ชั้นระบบ | เทคโนโลยี |
+|---|---|
+| Frontend | HTML5, CSS, Vanilla JavaScript |
+| Backend | Supabase (PostgreSQL, Auth, Storage, Edge Functions) |
+| Deployment | Vercel |
+| Integration | Google Sheets, Google Apps Script |
+| Utility Scripts | Node.js |
+
+## โครงสร้างโปรเจกต์โดยสรุป
+
+```text
 Well-being Survey/
-├── ch1.html                     # หน้าแบบสอบถามหลัก
-├── js/
-│   ├── supabase-config.js       # ค่า Supabase
-│   └── ch1-form.js             # Logic แบบสอบถาม
-├── css/
-│   └── ch1-form.css            # สไตล์เพิ่มเติม
+├── index.html                  # Well-being Survey
+├── ch1.html                    # CH1 Survey
+├── admin.html                  # Admin Portal
+├── admin-login.html            # หน้าเข้าสู่ระบบแอดมิน
+├── wb-printable.html           # หน้าแบบพิมพ์ Well-being
+├── ch1-printable.html          # หน้าแบบพิมพ์ CH1
+├── js/                         # JavaScript หลักของระบบ
+├── css/                        # CSS หลักของระบบ
+├── assets/                     # รูปภาพ ฟอนต์ และไฟล์ประกอบ
+├── scripts/                    # สคริปต์ dev / audit / ops / one-off
 ├── supabase/
-│   └── migrations/
-│       └── 20250303_update_schema_v3.sql  # Migration ฐานข้อมูล
-├── scripts/
-│   └── seed-test-data.js       # สคริปต์เติมข้อมูลทดสอบ
-├── docs/
-│   └── README.md               # ไฟล์นี้
-└── แบบสอบถามบท 1(ร่าง) แบบฟอร์มสำรวจข้อมูล บท 1.md  # เอกสารอ้างอิง
+│   ├── migrations/             # SQL migrations
+│   └── functions/              # Edge Functions
+├── apps/                       # โครงสร้างอ้างอิงสำหรับการแยกแอป
+├── backend/                    # งานหลังบ้านเชิงโครงสร้าง
+├── docs/                       # เอกสารระบบ
+└── vercel.json                 # การตั้งค่า deployment บน Vercel
 ```
 
-## 🚀 การติดตั้งและใช้งาน
+## ตารางหลักในฐานข้อมูล
 
-### 1. เตรียม Supabase
+| ตาราง | หน้าที่ |
+|---|---|
+| `organizations` | ข้อมูลองค์กรหลัก |
+| `admin_user_roles` | ผู้ใช้และบทบาทของระบบ |
+| `survey_responses` | คำตอบแบบสำรวจสุขภาวะรายบุคคล |
+| `hrd_ch1_responses` | คำตอบแบบสำรวจ CH1 |
+| `org_form_links` | ลิงก์ฟอร์มเฉพาะองค์กร |
+| `survey_forms` | รายการฟอร์มและสิทธิ์การแก้ไข |
+| `form_windows` | ช่วงเวลาเปิด-ปิดแบบฟอร์ม |
+| `form_question_overrides` | ข้อความคำถามที่แอดมินแก้ไขได้ |
+| `admin_audit_logs` | ประวัติการกระทำในระบบหลังบ้าน |
+
+## การติดตั้งสำหรับพัฒนาในเครื่อง
+
+### 1. ติดตั้ง dependencies
 
 ```bash
-# 1. ติดตั้ง Supabase CLI
-npm install -g supabase
-
-# 2. Login และ Link โปรเจกต์
-npx supabase login
-npx supabase link --project-ref [YOUR_PROJECT_REF]
-
-# 3. Deploy Edge Functions (สำหรับ Google Sheets Sync)
-npm run supabase:deploy
+npm install
 ```
 
-### 2. ตั้งค่า Environment Variables
+### 2. เตรียม Environment Variables
 
-สร้างไฟล์ `.env.local` จาก `.env.local.example`:
+สร้างไฟล์ `.env.local` แล้วกำหนดค่าอย่างน้อยดังนี้
+
 ```env
-SUPABASE_URL=https://[REF].supabase.co
-SUPABASE_ANON_KEY=[ANON_KEY]
-SUPABASE_SERVICE_ROLE_KEY=[SERVICE_ROLE_KEY]
-GOOGLE_SYNC_WEBHOOK_URL=[GAS_URL]
-GOOGLE_SYNC_SHARED_SECRET=[SECRET]
+SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co
+SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
+SUPABASE_SERVICE_ROLE_KEY=YOUR_SUPABASE_SERVICE_ROLE_KEY
+GOOGLE_SYNC_WEBHOOK_URL=YOUR_GOOGLE_APPS_SCRIPT_URL
+GOOGLE_SYNC_SHARED_SECRET=YOUR_SHARED_SECRET
 ```
 
-### 3. เติมข้อมูลทดสอบ (ถ้าต้องการ)
+หมายเหตุ:
+
+- ฝั่งหน้าเว็บใช้ค่า public/anon key
+- ฝั่งสคริปต์ admin และงานหลังบ้านใช้ service role key
+
+### 3. เปิดระบบในเครื่อง
+
+ใช้ static server ตัวใดตัวหนึ่ง เช่น
 
 ```bash
-# ติดตั้ง dependencies
-npm install @supabase/supabase-js
-
-# แก้ไข SERVICE_KEY ใน scripts/seed-test-data.js
-# รันสคริปต์
-node scripts/seed-test-data.js
+npm run dev
 ```
 
-### 4. เปิดใช้งาน
+หรือ
 
-เปิด `ch1.html` ในเว็บเบราว์เซอร์
-
-## 📊 ฐานข้อมูล
-
-### ตาราง: `hrd_ch1_responses`
-
-คอลัมน์หลัก:
-- **Metadata**: `organization`, `form_version`, `submitted_at`
-- **Step 1**: `strategic_overview`, `org_structure`, ฟิลด์อายุ/อายุราชการ/ตำแหน่ง
-- **Step 2**: `related_policies`, `context_challenges`
-- **Step 3**: ฟิลด์ NCD, `sick_leave_data`, `clinic_*`, `mental_*`, `engagement_data`
-- **Step 4**: `mentoring_system`, `training_hours`, `digital_systems`, `ergonomics_status`
-- **Step 5**: `strategic_priorities`, `intervention_suggestions`, `hrd_plan_results`
-
-## 🔄 การพัฒนา
-
-### Local Development
 ```bash
-# ใช้ Live Server ใน VS Code หรือ
 python -m http.server 8000
 ```
 
-### Testing
-- ทดสอบ validation ในแต่ละส่วน
-- ทดสอบ auto-save ทุก 30 วินาที
-- ทดสอบการ submit ข้อมูล
+### 4. เตรียม Supabase CLI ถ้าต้อง deploy functions
 
-### Deployment
-- **Vercel**: สำหรับ production (recommended)
-- **GitHub Pages**: สำหรับ demo
-- **Custom Domain**: สำหรับการใช้งานจริง
+```bash
+npx supabase login
+npx supabase link --project-ref YOUR_PROJECT_REF
+npm run supabase:deploy
+```
 
-## 📝 การบำรุงรักษา
+## คำสั่งที่ใช้บ่อย
 
-### เวอร์ชัน
-- v1.0: เวอร์ชันเริ่มต้น
-- v2.1: 7 ส่วน พร้อมฟีเจอร์ครบ
-- v3.0: 5 ส่วน ปรับปรุง UI/UX
+```bash
+npm run dev
+npm run deploy
+npm run deploy:preview
+npm run supabase:test
+npm run supabase:stats
+npm run supabase:export
+npm run sync:google:pending
+npm run sync:google:all
+npm run db:clear-test
+npm run supabase:deploy
+```
 
-### Roadmap
-- [ ] เพิ่ม dashboard สำหรับดูผลลัพธ์
-- [ ] รองรับการอัพโหลดไฟล์
-- [ ] ระบบแจ้งเตือนอีเมล
-- [ ] รองรับภาษาอังกฤษ
+## การ deploy
 
-## 👥 ทีมพัฒนา
+Production ใช้ Vercel โดยมีแนวทางดังนี้
 
-- **Frontend**: HTML5, Tailwind CSS, JavaScript
-- **Backend**: Supabase
-- **Database**: PostgreSQL
-- **Testing**: Manual testing
+1. Static files ที่ route หลักต้องคงไว้คือ `/`, `/ch1`, `/admin`
+2. ใช้ `vercel.json` สำหรับ rewrite, security headers และ cache control
+3. ถ้ามีการเปลี่ยน Edge Functions ให้ deploy ผ่าน Supabase CLI แยกจากตัวเว็บ
 
-## 📄 License
+## สถานะปัจจุบันของระบบ
 
-โปรเจคนี้เป็นของหน่วยงานภาครัฐ ใช้สำหรับการสำรวจข้อมูลสุขภาวะบุคลากรเท่านั้น
+ภาพรวม ณ ปัจจุบัน
 
----
+- Supabase schema และ migration หลักพร้อมใช้งาน
+- ระบบบทบาทและ RLS หลักพร้อมใช้งาน
+- Vercel deployment พร้อมใช้งาน
+- Admin Portal ใช้งานได้จริง
+- Well-being Survey และ CH1 Survey ใช้งานได้จริง
+- ยังมีงานปรับปรุงต่อเนื่องในส่วน modularization, automation tests และ admin UI บางฟีเจอร์
 
-**ติดต่อ**: ทีมพัฒนาระบบสุขภาวะบุคลากร  
-**อัพเดตล่าสุด**: 3 มีนาคม 2568
+## เอกสารที่ควรอ่านต่อ
+
+- `PROJECT_STATUS.md`
+- `SOURCE_OF_TRUTH.md`
+- `docs/architecture/SYSTEM_PLAN.md`
+- `docs/architecture/ROLE_PERMISSION_MATRIX.md`
+- `docs/SUPABASE_SETUP.md`
+- `docs/VERCEL_SETUP.md`
+- `docs/TESTING_GUIDE.md`
+
+## หมายเหตุสำคัญ
+
+- Entry points หลักของระบบตอนนี้คือ `index.html`, `ch1.html`, `admin.html`
+- โฟลเดอร์ `apps/` เป็นโครงสร้างอ้างอิงสำหรับการแยกแอปในระยะถัดไป ไม่ใช่ source of truth สำหรับ deployment ปัจจุบัน
+- หากจะแก้ routing หรือ deployment ให้ตรวจ `vercel.json` และเอกสาร deployment ควบคู่กันเสมอ
+
+## License
+
+โปรเจกต์นี้เป็นของหน่วยงานภาครัฐ ใช้สำหรับงานสำรวจข้อมูลสุขภาวะบุคลากรและการบริหารข้อมูลที่เกี่ยวข้องเท่านั้น
+
+อัปเดตล่าสุด: 20 มีนาคม 2569

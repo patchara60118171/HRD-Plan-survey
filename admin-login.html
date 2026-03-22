@@ -85,33 +85,33 @@
             <div class="w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"></div>
         </div>
 
-        <div class="relative bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl p-8">
+        <div class="relative bg-white border border-gray-200 rounded-3xl shadow-2xl p-8">
             <div class="text-center mb-8">
                 <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-500/25 pulse-icon">
                     <span class="text-white text-2xl font-bold">🏛️</span>
                 </div>
-                <h1 class="text-2xl font-bold text-white mb-1">NIDA WELLBEING</h1>
-                <h2 class="text-xl font-semibold text-white/90 mb-2">Admin Portal</h2>
-                <p class="text-sm text-blue-200/60">ระบบจัดการข้อมูลสุขภาวะบุคลากร</p>
+                <h1 class="text-2xl font-bold text-gray-900 mb-1">NIDA WELLBEING</h1>
+                <h2 class="text-xl font-semibold text-gray-800 mb-2">Admin Portal</h2>
+                <p class="text-sm text-gray-600">ระบบจัดการข้อมูลสุขภาวะบุคลากร</p>
             </div>
 
             <form id="login-form" onsubmit="handleLogin(event)" class="space-y-5">
                 <div>
-                    <label class="text-xs font-semibold text-blue-200/70 uppercase tracking-wider block mb-2">อีเมล</label>
+                    <label class="text-xs font-semibold text-gray-700 uppercase tracking-wider block mb-2">อีเมล</label>
                     <input type="email" id="email" required placeholder="admin@example.com"
-                        class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 text-sm text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition" />
+                        class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-3.5 text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition" />
                 </div>
                 <div>
-                    <label class="text-xs font-semibold text-blue-200/70 uppercase tracking-wider block mb-2">รหัสผ่าน</label>
+                    <label class="text-xs font-semibold text-gray-700 uppercase tracking-wider block mb-2">รหัสผ่าน</label>
                     <div class="relative">
                         <input type="password" id="password" required placeholder="••••••••"
-                            class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 text-sm text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition pr-12" />
+                            class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-3.5 text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition pr-12" />
                         <button type="button" onclick="togglePassword()" id="toggle-pw"
-                            class="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition text-sm">👁️</button>
+                            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition text-sm">👁️</button>
                     </div>
                 </div>
 
-                <div id="error-box" class="bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 text-sm text-red-300" style="display:none">
+                <div id="error-box" class="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-700" style="display:none">
                     <span id="error-text"></span>
                 </div>
 
@@ -122,11 +122,11 @@
             </form>
 
             <div class="mt-6 text-center">
-                <a href="/" class="text-xs text-blue-300/40 hover:text-blue-300/70 transition">← กลับไปหน้าแบบสอบถาม</a>
+                <a href="/" class="text-xs text-gray-500 hover:text-gray-700 transition">← กลับไปหน้าแบบสอบถาม</a>
             </div>
         </div>
 
-        <p class="text-center text-xs text-white/20 mt-6">NIDA Well-being Survey System</p>
+        <p class="text-center text-xs text-gray-400 mt-6">NIDA Well-being Survey System</p>
     </div>
 
     <script>
