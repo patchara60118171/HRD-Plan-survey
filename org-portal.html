@@ -13,146 +13,170 @@
 <style>
 /* ── Reset & Base ── */
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:#F7F8FA;color:#1A2433;min-height:100vh}
+:root{
+  --P:#0F4C81;
+  --PD:#0A3560;
+  --PL:#E8F1FB;
+  --A:#00A86B;
+  --AL:#E6F7F1;
+  --W:#92681A;
+  --WL:#FEF3CD;
+  --D:#DC2626;
+  --DL:#FEE2E2;
+  --bg:#F4F6F9;
+  --card:#FFFFFF;
+  --bdr:#D8DCE3;
+  --tx:#1A2433;
+  --tx2:#4A5568;
+  --tx3:#8896A5;
+  --shadow:0 1px 3px rgba(0,0,0,.08);
+  --sidebar-w:240px;
+}
+body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh}
 
 /* ── Login Gate ── */
-.login-gate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;
-  background:linear-gradient(135deg,#581c87,#701a75,#831843)}
+.login-gate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:var(--bg)}
 
 @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
 .fade-up{animation:fadeUp .5s ease}
 
-@keyframes pulse-ring{0%{transform:scale(.9);opacity:.7}50%{transform:scale(1.05);opacity:1}100%{transform:scale(.9);opacity:.7}}
-.pulse-icon{animation:pulse-ring 2s ease-in-out infinite}
-
 .login-card{
-  background:#fff;border:1px solid #e5e7eb;border-radius:24px;box-shadow:0 25px 50px -12px rgba(0,0,0,.25);
+  background:#fff;border:1px solid var(--bdr);border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,.08);
   padding:40px;max-width:420px;width:100%;text-align:center;position:relative}
-.login-card .icon{width:64px;height:64px;background:linear-gradient(135deg,#9333ea,#ec4899);
-  border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;
-  box-shadow:0 10px 15px -3px rgba(147,51,234,.25);font-size:28px;color:#fff}
-.login-card h1{font-size:22px;font-weight:700;color:#1f2937;margin-bottom:4px}
-.login-card h2{font-size:17px;font-weight:600;color:#6b7280;margin-bottom:4px}
-.login-card .sub{font-size:13px;color:#9ca3af;margin-bottom:28px}
+.login-card .icon{width:52px;height:52px;background:var(--P);
+  border-radius:8px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;
+  font-size:24px;color:#fff}
+.login-card h1{font-size:20px;font-weight:700;color:var(--tx);margin-bottom:4px}
+.login-card h2{font-size:15px;font-weight:600;color:var(--tx2);margin-bottom:4px}
+.login-card .sub{font-size:13px;color:var(--tx3);margin-bottom:28px}
 .login-card .fg{margin-bottom:14px;text-align:left}
-.login-card label{font-size:11px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px}
-.login-card input{width:100%;padding:12px 14px;border:1.5px solid #d1d5db;border-radius:12px;font-size:14px;font-family:inherit;
-  background:#f9fafb;transition:border-color .15s,box-shadow .15s;outline:none}
-.login-card input:focus{border-color:rgba(147,51,234,.5);box-shadow:0 0 0 3px rgba(147,51,234,.1)}
-.login-card input::placeholder{color:#9ca3af}
-.login-btn{width:100%;padding:14px;background:linear-gradient(to right,#9333ea,#ec4899);color:#fff;border:none;
-  border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;
-  box-shadow:0 10px 15px -3px rgba(147,51,234,.25);transition:all .15s;transform:translateY(0)}
-.login-btn:hover{opacity:.95;transform:translateY(-1px);box-shadow:0 12px 20px -3px rgba(147,51,234,.35)}
-.login-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.login-card label{font-size:11px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px}
+.login-card input{width:100%;padding:10px 13px;border:1.5px solid var(--bdr);border-radius:7px;font-size:14px;font-family:inherit;
+  background:#fafbfc;transition:border-color .15s,box-shadow .15s;outline:none}
+.login-card input:focus{border-color:var(--P);box-shadow:0 0 0 3px rgba(15,76,129,.1)}
+.login-card input::placeholder{color:var(--tx3)}
+.login-btn{width:100%;padding:12px;background:var(--P);color:#fff;border:none;
+  border-radius:7px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .15s}
+.login-btn:hover{background:var(--PD)}
+.login-btn:disabled{opacity:.5;cursor:not-allowed}
 .login-msg{font-size:12px;margin-top:12px;min-height:18px;text-align:center}
 .login-msg.err{color:#dc2626}
 .login-back{margin-top:20px;text-align:center}
-.login-back a{font-size:12px;color:rgba(255,255,255,.6);text-decoration:none;transition:color .15s}
-.login-back a:hover{color:#fff}
-.login-footer{text-align:center;margin-top:24px;font-size:11px;color:rgba(255,255,255,.4)}
+.login-back a{font-size:12px;color:var(--tx3);text-decoration:none;transition:color .15s}
+.login-back a:hover{color:var(--tx)}
+.login-footer{text-align:center;margin-top:16px;font-size:11px;color:var(--tx3)}
 
-.pw-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:14px;color:#9ca3af;padding:4px}
-.pw-toggle:hover{color:#6b7280}
+.pw-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:14px;color:var(--tx3);padding:4px}
+.pw-toggle:hover{color:var(--tx2)}
 
-.err-box{background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:10px 14px;font-size:13px;color:#dc2626;display:none;margin-bottom:12px}
+.err-box{background:#fef2f2;border:1px solid #fecaca;border-radius:7px;padding:10px 14px;font-size:13px;color:#dc2626;display:none;margin-bottom:12px}
 
 /* ── spinner (login) ── */
 .spinner-sm{border:3px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;width:18px;height:18px;animation:spin .6s linear infinite;display:inline-block;vertical-align:middle;margin-right:8px}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* ── Portal App ── */
-:root{--P:#7c3aed;--P2:#9333ea;--PL:#f3e8ff;--A:#00A86B;--AL:#E6F7F0;--W:#D97706;--WL:#FEF3C7;--D:#DC2626;--pink:#ec4899;--bg:#F7F8FA;--card:#fff;--bdr:#E2E6EB;--tx:#1A2433;--tx2:#4A5568;--tx3:#8896A5;--shadow:0 1px 3px rgba(0,0,0,.08)}
+/* ── Portal App Layout ── */
+#portal-app{display:flex;min-height:100vh}
 
-/* ── Header ── */
-.portal-header{background:linear-gradient(135deg,#7c3aed,#9333ea,#c026d3);color:#fff;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 12px rgba(124,58,237,.3)}
-.portal-logo{display:flex;align-items:center;gap:12px}
-.portal-logo-icon{font-size:26px}
-.portal-title{font-size:17px;font-weight:700;line-height:1.3}
-.portal-title small{font-size:11px;font-weight:400;opacity:.8;display:block}
-.portal-user{display:flex;align-items:center;gap:10px;font-size:12px}
-.portal-org-badge{background:rgba(255,255,255,.18);padding:4px 12px;border-radius:99px;font-weight:600;font-size:11px}
-.btn-logout{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:5px 12px;border-radius:6px;cursor:pointer;font-size:11px;font-weight:600;transition:background .15s;font-family:inherit}
-.btn-logout:hover{background:rgba(255,255,255,.25)}
+/* ── Sidebar ── */
+.sidebar{width:var(--sidebar-w);background:var(--PD);color:#fff;display:flex;flex-direction:column;flex-shrink:0;position:fixed;top:0;left:0;height:100vh;z-index:100;overflow-y:auto}
+.sidebar-logo{padding:18px 16px 14px;border-bottom:1px solid rgba(255,255,255,.1)}
+.sidebar-logo .logo-row{display:flex;align-items:center;gap:10px}
+.sidebar-logo .logo-icon{width:30px;height:30px;background:var(--A);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.sidebar-logo .logo-title{font-size:13px;font-weight:700;color:#fff;line-height:1.25}
+.sidebar-logo .logo-sub{font-size:10px;color:rgba(255,255,255,.4);margin-top:2px;padding-left:40px}
+.sidebar-org{margin:10px 12px;background:rgba(255,255,255,.07);border-radius:6px;padding:8px 10px;border:1px solid rgba(255,255,255,.06)}
+.sidebar-org .o-label{font-size:9px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px}
+.sidebar-org .o-name{font-size:12px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sidebar-org .o-email{font-size:10px;color:rgba(255,255,255,.4);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+nav.portal-nav{flex:1;padding:6px 0 12px}
+.nav-group{padding:14px 14px 4px;font-size:9px;font-weight:700;letter-spacing:.08em;color:rgba(255,255,255,.3);text-transform:uppercase}
+.nav-item{display:flex;align-items:center;gap:9px;padding:9px 14px;cursor:pointer;color:rgba(255,255,255,.65);transition:background .12s,color .12s;border-left:2px solid transparent;font-size:13px;user-select:none;font-family:inherit;background:none;border-right:none;border-top:none;border-bottom:none;width:100%;text-align:left}
+.nav-item:hover{background:rgba(255,255,255,.06);color:rgba(255,255,255,.9)}
+.nav-item.active{background:rgba(255,255,255,.1);color:#fff;border-left-color:var(--A)}
+.nav-item .ni{width:17px;font-size:14px;text-align:center;flex-shrink:0}
+.sidebar-foot{border-top:1px solid rgba(255,255,255,.08);padding:8px 12px}
+.sidebar-foot .nav-item{padding:7px 6px;font-size:12px;border-left:none}
 
-/* ── Tabs ── */
-.portal-tabs{background:#fff;border-bottom:1px solid var(--bdr);display:flex;padding:0 24px;gap:0;overflow-x:auto}
-.tab-btn{padding:12px 18px;font-size:13px;font-weight:600;color:var(--tx3);border:none;background:none;cursor:pointer;border-bottom:3px solid transparent;transition:all .15s;white-space:nowrap;font-family:inherit;display:flex;align-items:center;gap:6px}
-.tab-btn:hover{color:var(--tx)}
-.tab-btn.active{color:var(--P);border-bottom-color:var(--P)}
+/* ── Main Content ── */
+.portal-main-wrap{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{background:var(--card);border-bottom:1px solid var(--bdr);padding:0 22px;height:52px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:50}
+.tb-title{font-size:14px;font-weight:700;color:var(--P)}
+.tb-bc{font-size:12px;color:var(--tx3)}
+.tb-space{flex:1}
+.tb-user{font-size:11.5px;color:var(--tx3)}
 
-/* ── Main ── */
-.portal-main{max-width:960px;margin:0 auto;padding:24px 20px}
+/* ── Content Area ── */
+.portal-content{padding:22px;max-width:960px;width:100%}
 .tab-page{display:none}
 .tab-page.active{display:block}
 
 /* ── Welcome Bar ── */
-.welcome-bar{background:var(--card);border-radius:12px;padding:18px 24px;margin-bottom:20px;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:space-between}
-.welcome-bar h2{font-size:17px;color:var(--P)}
-.welcome-bar .sub{font-size:12px;color:var(--tx3);margin-top:3px}
-.status-badge{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:99px;font-size:11px;font-weight:700}
+.welcome-bar{background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:16px 20px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between}
+.welcome-bar h2{font-size:16px;font-weight:700;color:var(--P)}
+.welcome-bar .sub{font-size:12px;color:var(--tx3);margin-top:2px}
+.status-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:5px;font-size:11px;font-weight:600}
 .status-badge.submitted{background:var(--AL);color:var(--A)}
 .status-badge.draft{background:var(--WL);color:var(--W)}
 .status-badge.reopened{background:#FEF3CD;color:#92400E}
-.status-badge.none{background:#f3f4f6;color:var(--tx3)}
+.status-badge.none{background:#f0f1f3;color:var(--tx3)}
 
 /* ── Cards ── */
-.section-card{background:var(--card);border-radius:12px;padding:22px;margin-bottom:20px;box-shadow:var(--shadow);border-left:4px solid var(--P)}
+.section-card{background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:20px;margin-bottom:16px;border-left:3px solid var(--P)}
 .section-card.wb{border-left-color:var(--A)}
-.section-card.share{border-left-color:var(--pink)}
-.section-card h3{font-size:15px;color:var(--tx);margin-bottom:6px;display:flex;align-items:center;gap:8px}
-.section-card .desc{font-size:13px;color:var(--tx2);margin-bottom:14px;line-height:1.6}
+.section-card.share{border-left-color:var(--P)}
+.section-card h3{font-size:14px;font-weight:700;color:var(--tx);margin-bottom:4px;display:flex;align-items:center;gap:7px}
+.section-card .desc{font-size:12.5px;color:var(--tx2);margin-bottom:12px;line-height:1.6}
 
 /* ── Summary Grid ── */
-.summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:14px}
-.summary-item{background:var(--bg);border-radius:10px;padding:14px;text-align:center}
-.summary-item .val{font-size:22px;font-weight:700;color:var(--P)}
+.summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:12px}
+.summary-item{background:var(--bg);border:1px solid var(--bdr);border-radius:8px;padding:12px;text-align:center}
+.summary-item .val{font-size:20px;font-weight:700;color:var(--P)}
 .summary-item .val.green{color:var(--A)}
-.summary-item .val.pink{color:var(--pink)}
-.summary-item .lbl{font-size:11px;color:var(--tx3);margin-top:4px}
+.summary-item .val.pink{color:var(--P)}
+.summary-item .lbl{font-size:11px;color:var(--tx3);margin-top:3px}
 
 /* ── Progress Bar ── */
-.progress-wrap{margin:16px 0}
+.progress-wrap{margin:14px 0}
 .progress-label{display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px}
 .progress-label .left{color:var(--tx2);font-weight:600}
 .progress-label .right{color:var(--P);font-weight:700}
-.progress-track{width:100%;height:16px;background:#ede9fe;border-radius:99px;overflow:hidden;position:relative}
-.progress-fill{height:100%;background:linear-gradient(90deg,#9333ea,#ec4899);border-radius:99px;transition:width .6s ease;min-width:2px;position:relative}
-.progress-fill::after{content:attr(data-pct);position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:10px;font-weight:700;color:#fff}
-.progress-text{font-size:14px;color:var(--tx2);margin-top:10px;text-align:center;line-height:1.6}
+.progress-track{width:100%;height:12px;background:var(--PL);border-radius:99px;overflow:hidden}
+.progress-fill{height:100%;background:var(--P);border-radius:99px;transition:width .6s ease;min-width:2px}
+.progress-text{font-size:13px;color:var(--tx2);margin-top:8px;text-align:center;line-height:1.6}
 .progress-text strong{color:var(--P)}
 
 /* ── Buttons ── */
 .section-actions{display:flex;gap:8px;flex-wrap:wrap}
-.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;border:none;cursor:pointer;font-family:inherit;transition:all .15s}
-.btn-primary{background:var(--P);color:#fff}.btn-primary:hover{background:#6d28d9}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:7px;font-size:13px;font-weight:600;border:none;cursor:pointer;font-family:inherit;transition:all .15s}
+.btn-primary{background:var(--P);color:#fff}.btn-primary:hover{background:var(--PD)}
 .btn-green{background:var(--A);color:#fff}.btn-green:hover{background:#008F5B}
-.btn-pink{background:var(--pink);color:#fff}.btn-pink:hover{background:#db2777}
+.btn-pink{background:var(--P);color:#fff}.btn-pink:hover{background:var(--PD)}
 .btn-outline{background:transparent;border:1.5px solid var(--bdr);color:var(--tx2)}.btn-outline:hover{border-color:var(--P);color:var(--P)}
 .btn:disabled{opacity:.5;cursor:not-allowed}
 
 /* ── Info boxes ── */
-.info-box{padding:12px 16px;border-radius:8px;font-size:13px;margin-bottom:14px;line-height:1.6}
-.info-box.blue{background:var(--PL);color:#6d28d9}
+.info-box{padding:10px 14px;border-radius:7px;font-size:13px;margin-bottom:12px;line-height:1.6}
+.info-box.blue{background:var(--PL);color:var(--P)}
 .info-box.yellow{background:var(--WL);color:#92400E}
 .info-box.green{background:var(--AL);color:#047857}
 .info-box.red{background:#FEE2E2;color:var(--D)}
 
 /* ── QR Section ── */
-.qr-section{display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap}
-.qr-box{background:#fdf4ff;border:2px solid #f0abfc;border-radius:16px;padding:20px;text-align:center;min-width:200px}
-.qr-box img{border-radius:8px;margin:8px 0}
+.qr-section{display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap}
+.qr-box{background:var(--bg);border:1px solid var(--bdr);border-radius:10px;padding:18px;text-align:center;min-width:200px}
+.qr-box img{border-radius:6px;margin:8px 0}
 .link-box{flex:1;min-width:260px}
 .link-input-wrap{display:flex;gap:8px;margin-bottom:12px}
-.link-input{flex:1;padding:10px 14px;border:1.5px solid var(--bdr);border-radius:8px;font-size:13px;font-family:inherit;background:var(--bg);color:var(--tx)}
-.copy-btn{padding:10px 18px;background:var(--P);color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-family:inherit;font-size:13px;transition:background .15s}
-.copy-btn:hover{background:#6d28d9}
+.link-input{flex:1;padding:9px 12px;border:1.5px solid var(--bdr);border-radius:7px;font-size:13px;font-family:inherit;background:var(--bg);color:var(--tx)}
+.copy-btn{padding:9px 16px;background:var(--P);color:#fff;border:none;border-radius:7px;font-weight:600;cursor:pointer;font-family:inherit;font-size:13px;transition:background .15s;white-space:nowrap}
+.copy-btn:hover{background:var(--PD)}
 .copy-btn.copied{background:var(--A)}
 
 /* ── Loading & Toast ── */
 .loading-overlay{position:fixed;inset:0;background:rgba(255,255,255,.85);display:flex;align-items:center;justify-content:center;z-index:9999;flex-direction:column;gap:12px}
-.spinner{width:36px;height:36px;border:3px solid #ede9fe;border-top-color:var(--P);border-radius:50%;animation:spin .8s linear infinite}
-.toast{position:fixed;bottom:20px;right:20px;padding:12px 20px;border-radius:8px;font-size:13px;font-weight:600;color:#fff;z-index:99999;transform:translateY(100px);opacity:0;transition:all .3s}
+.spinner{width:32px;height:32px;border:3px solid var(--PL);border-top-color:var(--P);border-radius:50%;animation:spin .8s linear infinite}
+.toast{position:fixed;bottom:20px;right:20px;padding:11px 18px;border-radius:7px;font-size:13px;font-weight:600;color:#fff;z-index:99999;transform:translateY(100px);opacity:0;transition:all .3s}
 .toast.show{transform:translateY(0);opacity:1}
 .toast.success{background:var(--A)}
 .toast.error{background:var(--D)}
@@ -160,13 +184,11 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:#F7F8FA;color
 .toast.info{background:var(--P)}
 
 /* ── Responsive ── */
-@media(max-width:640px){
-  .portal-header{flex-direction:column;gap:10px;text-align:center}
-  .portal-user{justify-content:center}
-  .welcome-bar{flex-direction:column;gap:10px;text-align:center}
+@media(max-width:768px){
+  .sidebar{width:0;overflow:hidden}
+  .portal-main-wrap{margin-left:0}
   .qr-section{flex-direction:column;align-items:center}
   .summary-grid{grid-template-columns:repeat(2,1fr)}
-  .tab-btn{padding:10px 12px;font-size:12px}
 }
 </style>
 </head>
@@ -175,13 +197,8 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:#F7F8FA;color
 <!-- ===== LOGIN GATE ===== -->
 <div id="login-gate" class="login-gate">
   <div style="width:100%;max-width:420px" class="fade-up">
-    <!-- Glow blob -->
-    <div style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none" aria-hidden="true">
-      <div style="width:384px;height:384px;background:rgba(147,51,234,.12);border-radius:50%;filter:blur(48px)"></div>
-    </div>
-
-    <div class="login-card" style="position:relative">
-      <div class="icon pulse-icon">🏛️</div>
+    <div class="login-card">
+      <div class="icon">🏛️</div>
       <h1>NIDA WELLBEING</h1>
       <h2>Org HR Portal</h2>
       <p class="sub">ระบบสำหรับ HR ประจำองค์กร</p>
@@ -208,38 +225,56 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:#F7F8FA;color
     </div>
 
     <div class="login-back"><a href="/">← กลับไปหน้าแบบสอบถาม</a></div>
-    <p class="login-footer">NIDA Well-being Survey System</p>
+    <p class="login-footer">ระบบสำรวจสุขภาวะบุคลากรภาครัฐ · NIDA</p>
   </div>
 </div>
 
 <!-- ===== PORTAL APP ===== -->
 <div id="portal-app" style="display:none">
 
-  <!-- Header -->
-  <div class="portal-header">
-    <div class="portal-logo">
-      <span class="portal-logo-icon">🏛️</span>
-      <div>
-        <div class="portal-title">Org HR Portal<small>ระบบสำรวจสุขภาวะบุคลากรภาครัฐ</small></div>
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-row">
+        <div class="logo-icon">🏛️</div>
+        <div>
+          <div class="logo-title">NIDA Wellbeing</div>
+        </div>
       </div>
+      <div class="logo-sub">Org HR Portal</div>
     </div>
-    <div class="portal-user">
-      <span id="user-email-display">—</span>
-      <span class="portal-org-badge" id="user-org-badge">—</span>
-      <button class="btn-logout" onclick="doLogout()">ออกจากระบบ</button>
+
+    <div class="sidebar-org">
+      <div class="o-label">องค์กร</div>
+      <div class="o-name" id="user-org-badge">—</div>
+      <div class="o-email" id="user-email-display">—</div>
+    </div>
+
+    <nav class="portal-nav">
+      <div class="nav-group">เมนูหลัก</div>
+      <button class="nav-item active" data-tab="home" onclick="switchTab('home')"><span class="ni">🏠</span> หน้าหลัก</button>
+      <button class="nav-item" data-tab="ch1" onclick="switchTab('ch1')"><span class="ni">📝</span> CH1 ข้อมูลองค์กร</button>
+      <button class="nav-item" data-tab="wb" onclick="switchTab('wb')"><span class="ni">💚</span> Well-being ผลสำรวจ</button>
+      <button class="nav-item" data-tab="share" onclick="switchTab('share')"><span class="ni">🔗</span> แชร์ลิงก์</button>
+    </nav>
+
+    <div class="sidebar-foot">
+      <button class="nav-item" onclick="doLogout()"><span class="ni">↩</span> ออกจากระบบ</button>
     </div>
   </div>
 
-  <!-- Tabs -->
-  <div class="portal-tabs">
-    <button class="tab-btn active" data-tab="home" onclick="switchTab('home')">🏠 หน้าหลัก</button>
-    <button class="tab-btn" data-tab="ch1" onclick="switchTab('ch1')">📝 CH1 ข้อมูลองค์กร</button>
-    <button class="tab-btn" data-tab="wb" onclick="switchTab('wb')">💚 Well-being ผลสำรวจ</button>
-    <button class="tab-btn" data-tab="share" onclick="switchTab('share')">🔗 แชร์ลิงก์</button>
-  </div>
+  <!-- Main Wrap -->
+  <div class="portal-main-wrap">
+
+    <!-- Topbar -->
+    <div class="topbar">
+      <div class="tb-title" id="topbar-title">หน้าหลัก</div>
+      <div class="tb-space"></div>
+      <span class="tb-user" id="topbar-org-name">—</span>
+    </div>
 
   <!-- Content -->
-  <div class="portal-main">
+  <div class="portal-content">
 
     <!-- ───── TAB: HOME ───── -->
     <div class="tab-page active" id="page-home">
@@ -271,7 +306,7 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:#F7F8FA;color
       </div>
 
       <!-- Progress Section -->
-      <div class="section-card" style="border-left-color:var(--pink)">
+      <div class="section-card" style="border-left-color:var(--A)">
         <h3>📊 ความคืบหน้าการกรอก Well-being Survey</h3>
         <div class="desc">ติดตามจำนวนบุคลากรที่ตอบแบบสอบถาม Well-being เทียบกับจำนวนบุคลากรทั้งหมดขององค์กร</div>
         <div class="progress-wrap" id="wb-progress-wrap">
@@ -353,7 +388,7 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:#F7F8FA;color
         <div class="qr-section">
           <!-- QR Code -->
           <div class="qr-box">
-            <div style="font-size:13px;font-weight:600;color:#9333ea;margin-bottom:8px">QR Code</div>
+            <div style="font-size:13px;font-weight:600;color:var(--P);margin-bottom:8px">QR Code</div>
             <img id="qr-img" width="200" height="200" alt="QR Code" style="background:#f3f4f6;min-height:200px">
             <div style="margin-top:10px">
               <button class="btn btn-outline" onclick="downloadQR()" style="font-size:12px">📥 ดาวน์โหลด QR</button>
@@ -373,8 +408,8 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:#F7F8FA;color
             </div>
 
             <!-- Progress Summary -->
-            <div style="background:#fdf4ff;border-radius:10px;padding:16px;border:1px solid #f0abfc">
-              <div style="font-size:13px;font-weight:600;color:#9333ea;margin-bottom:6px">📊 สถานะการตอบ</div>
+            <div style="background:var(--bg);border-radius:8px;padding:16px;border:1px solid var(--bdr)">
+              <div style="font-size:13px;font-weight:600;color:var(--P);margin-bottom:6px">📊 สถานะการตอบ</div>
               <div id="share-progress-text" style="font-size:14px;color:var(--tx2);line-height:1.6">กำลังโหลด...</div>
             </div>
           </div>
@@ -382,7 +417,8 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:#F7F8FA;color
       </div>
     </div>
 
-  </div><!-- /portal-main -->
+  </div><!-- /portal-content -->
+  </div><!-- /portal-main-wrap -->
 </div><!-- /portal-app -->
 
 <!-- Toast -->
@@ -428,9 +464,12 @@ function togglePw() {
 }
 
 // ── Tab Switching ──
+const TAB_TITLES = {home:'หน้าหลัก',ch1:'CH1 ข้อมูลองค์กร',wb:'Well-being ผลสำรวจ',share:'แชร์ลิงก์'};
 function switchTab(tab) {
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  document.querySelectorAll('.nav-item[data-tab]').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
   document.querySelectorAll('.tab-page').forEach(p => p.classList.toggle('active', p.id === `page-${tab}`));
+  const titleEl = document.getElementById('topbar-title');
+  if (titleEl) titleEl.textContent = TAB_TITLES[tab] || tab;
 }
 
 // ── Login ──
@@ -540,6 +579,8 @@ async function initPortal() {
   document.getElementById('portal-app').style.display = '';
   document.getElementById('user-email-display').textContent = email;
   document.getElementById('user-org-badge').textContent = portalState.orgName || portalState.orgCode;
+  const topbarOrg = document.getElementById('topbar-org-name');
+  if (topbarOrg) topbarOrg.textContent = portalState.orgName || portalState.orgCode;
   document.getElementById('org-name-display').textContent = portalState.orgName || '—';
   document.getElementById('org-code-display').textContent = `รหัสองค์กร: ${portalState.orgCode}`;
 
@@ -788,7 +829,7 @@ function updateProgress() {
 function generateOrgQR() {
   const orgName = portalState.orgName || '';
   const surveyUrl = `${window.location.origin}/?org=${encodeURIComponent(orgName)}`;
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(surveyUrl)}&color=7c3aed`;
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(surveyUrl)}&color=0F4C81`;
 
   document.getElementById('qr-img').src = qrUrl;
   document.getElementById('survey-link').value = surveyUrl;
