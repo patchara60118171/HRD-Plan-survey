@@ -1,7 +1,7 @@
 /**
  * dashboard.js — Page: Dashboard + Progress
  * Sprint 3C: Extracted from admin.html inline script
- * Depends on: config.js (state, ORG_NAMES, ORG_META), utils.js (esc, fmtDate, fmtNum)
+ * Depends on: config.js (state, ORG_NAMES, ORG_LOOKUP), utils.js (esc, fmtDate, fmtNum)
  *
  * Functions:
  *   renderDashboard(summary)

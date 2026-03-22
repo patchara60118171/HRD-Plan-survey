@@ -78,48 +78,49 @@ const PROJECT_SSOT = {
   },
 
   organizations: {
-    // orgHrMap — used by admin config.js → ORG_HR_MAP for the "create org_hr" dropdown
+    // orgHrMap — canonical order (1–15) ตามที่โปรเจคกำหนด
+    // Admin portal uses Supabase `organizations` table as SSOT; this is the form-side static fallback.
     orgHrMap: [
-      { org_code: 'nesdc', org_name_th: 'สำนักงานสภาพัฒนาการเศรษฐกิจและสังคมแห่งชาติ' },
-      { org_code: 'tpso',  org_name_th: 'สำนักงานนโยบายและยุทธศาสตร์การค้า' },
-      { org_code: 'dss',   org_name_th: 'กรมวิทยาศาสตร์บริการ' },
-      { org_code: 'bob',   org_name_th: 'กรมสนับสนุนบริการสุขภาพ' },
-      { org_code: 'tmd',   org_name_th: 'กรมอุตุนิยมวิทยา' },
-      { org_code: 'dcp',   org_name_th: 'กรมส่งเสริมวัฒนธรรม' },
-      { org_code: 'prob',  org_name_th: 'กรมคุมประพฤติ' },
-      { org_code: 'mots',  org_name_th: 'สำนักงานปลัดกระทรวงการท่องเที่ยวและกีฬา' },
-      { org_code: 'dmh',   org_name_th: 'กรมสุขภาพจิต' },
-      { org_code: 'onep',  org_name_th: 'สำนักงานนโยบายและแผนทรัพยากรธรรมชาติและสิ่งแวดล้อม' },
-      { org_code: 'nrct',  org_name_th: 'สำนักงานการวิจัยแห่งชาติ' },
-      { org_code: 'acfs',  org_name_th: 'สำนักงานมาตรฐานสินค้าเกษตรและอาหารแห่งชาติ' },
-      { org_code: 'opdc',  org_name_th: 'สำนักงานคณะกรรมการพัฒนาระบบราชการ (ก.พ.ร.)' },
-      { org_code: 'rid',   org_name_th: 'กรมชลประทาน' },
-      { org_code: 'dcy',   org_name_th: 'กรมกิจการเด็กและเยาวชน' },
-      { org_code: 'doh',   org_name_th: 'กองฝึกอบรม กรมทางหลวง' },
+      { org_code: 'nesdc',     org_name_th: 'สำนักงานสภาพัฒนาการเศรษฐกิจและสังคมแห่งชาติ' },       // 1
+      { org_code: 'tpso',      org_name_th: 'สำนักงานนโยบายและยุทธศาสตร์การค้า' },                  // 2
+      { org_code: 'dss',       org_name_th: 'กรมวิทยาศาสตร์บริการ' },                               // 3
+      { org_code: 'tmd',       org_name_th: 'กรมอุตุนิยมวิทยา (สถาบันอุตุนิยมวิทยา)' },           // 4
+      { org_code: 'dcp',       org_name_th: 'กรมส่งเสริมวัฒนธรรม' },                               // 5
+      { org_code: 'prob',      org_name_th: 'กรมคุมประพฤติ' },                                       // 6
+      { org_code: 'bob',       org_name_th: 'กรมสนับสนุนบริการสุขภาพ' },                            // 7
+      { org_code: 'mots',      org_name_th: 'สำนักงานปลัดกระทรวงการท่องเที่ยวและกีฬา' },           // 8
+      { org_code: 'dmh',       org_name_th: 'กรมสุขภาพจิต' },                                       // 9
+      { org_code: 'onep',      org_name_th: 'สำนักงานนโยบายและแผนทรัพยากรธรรมชาติและสิ่งแวดล้อม' }, // 10
+      { org_code: 'nrct',      org_name_th: 'สำนักงานการวิจัยแห่งชาติ' },                           // 11
+      { org_code: 'acfs',      org_name_th: 'สำนักงานมาตรฐานสินค้าเกษตรและอาหารแห่งชาติ (มกอช.)' }, // 12
+      { org_code: 'opdc',      org_name_th: 'สำนักงานคณะกรรมการพัฒนาระบบราชการ (ก.พ.ร.)' },        // 13
+      { org_code: 'rid',       org_name_th: 'กรมชลประทาน' },                                         // 14
+      { org_code: 'dcy',       org_name_th: 'กรมกิจการเด็กและเยาวชน' },                              // 15
+      { org_code: 'doh',       org_name_th: 'กองฝึกอบรม กรมทางหลวง' },                              // extra
     ],
     // orgCodeNameMap — lowercase keys; ch1-form.js normalises ?org= param to lowercase.
-    // Covers both the ORG_META codes (NESDC→nesdc) and alternate codes (probation, hssd, ocsc).
+    // Covers canonical codes + alternate codes used in DB (probation, hssd, ocsc).
     // Admin portal uses Supabase `organizations` table as SSOT; this is the form-side static fallback.
     orgCodeNameMap: {
-      nesdc:      'สำนักงานสภาพัฒนาการเศรษฐกิจและสังคมแห่งชาติ',
-      tpso:       'สำนักงานนโยบายและยุทธศาสตร์การค้า',
-      dss:        'กรมวิทยาศาสตร์บริการ',
-      bob:        'กรมสนับสนุนบริการสุขภาพ',
-      hssd:       'กรมสนับสนุนบริการสุขภาพ',
-      tmd:        'กรมอุตุนิยมวิทยา',
-      dcp:        'กรมส่งเสริมวัฒนธรรม',
-      prob:       'กรมคุมประพฤติ',
-      probation:  'กรมคุมประพฤติ',
-      mots:       'สำนักงานปลัดกระทรวงการท่องเที่ยวและกีฬา',
-      dmh:        'กรมสุขภาพจิต',
-      onep:       'สำนักงานนโยบายและแผนทรัพยากรธรรมชาติและสิ่งแวดล้อม',
-      nrct:       'สำนักงานการวิจัยแห่งชาติ',
-      acfs:       'สำนักงานมาตรฐานสินค้าเกษตรและอาหารแห่งชาติ',
-      opdc:       'สำนักงานคณะกรรมการพัฒนาระบบราชการ (ก.พ.ร.)',
-      ocsc:       'สำนักงาน กพร.',
-      rid:        'กรมชลประทาน',
-      dcy:        'กรมกิจการเด็กและเยาวชน',
-      doh:        'กองฝึกอบรม กรมทางหลวง',
+      nesdc:      'สำนักงานสภาพัฒนาการเศรษฐกิจและสังคมแห่งชาติ',       // 1
+      tpso:       'สำนักงานนโยบายและยุทธศาสตร์การค้า',                  // 2
+      dss:        'กรมวิทยาศาสตร์บริการ',                               // 3
+      tmd:        'กรมอุตุนิยมวิทยา (สถาบันอุตุนิยมวิทยา)',            // 4
+      dcp:        'กรมส่งเสริมวัฒนธรรม',                               // 5
+      prob:       'กรมคุมประพฤติ',                                       // 6
+      probation:  'กรมคุมประพฤติ',                                       // 6 alt
+      bob:        'กรมสนับสนุนบริการสุขภาพ',                            // 7
+      hssd:       'กรมสนับสนุนบริการสุขภาพ',                            // 7 alt
+      mots:       'สำนักงานปลัดกระทรวงการท่องเที่ยวและกีฬา',           // 8
+      dmh:        'กรมสุขภาพจิต',                                       // 9
+      onep:       'สำนักงานนโยบายและแผนทรัพยากรธรรมชาติและสิ่งแวดล้อม', // 10
+      nrct:       'สำนักงานการวิจัยแห่งชาติ',                           // 11
+      acfs:       'สำนักงานมาตรฐานสินค้าเกษตรและอาหารแห่งชาติ (มกอช.)', // 12
+      opdc:       'สำนักงานคณะกรรมการพัฒนาระบบราชการ (ก.พ.ร.)',        // 13
+      ocsc:       'สำนักงานคณะกรรมการพัฒนาระบบราชการ (ก.พ.ร.)',        // 13 alt (DB uses this code)
+      rid:        'กรมชลประทาน',                                         // 14
+      dcy:        'กรมกิจการเด็กและเยาวชน',                              // 15
+      doh:        'กองฝึกอบรม กรมทางหลวง',                              // extra
     },
   },
 };

@@ -1,5 +1,5 @@
 /* ========== ADMIN PORTAL — USER MANAGEMENT SERVICE ========== */
-/* SURVEY_BASE_URL, LOCKED_SUPERADMIN_EMAILS, ORG_HR_MAP, ORG_HR_EMAIL_DOMAIN → defined in config.js */
+/* SURVEY_BASE_URL, LOCKED_SUPERADMIN_EMAILS, ORG_HR_EMAIL_DOMAIN → defined in config.js */
 
 function buildLinkUrl(org) {
   const code = org.org_code || org.code || encodeURIComponent(org.name);
@@ -231,7 +231,8 @@ async function saveUserFromModal(isEdit) {
   if (role === 'org_hr' && newPwd) payload.initial_password = newPwd;
   // For org_hr role, also set org_code from org mapping
   if (role === 'org_hr' && orgName) {
-    const orgMatch = ORG_HR_MAP.find(o => o.org_name_th === orgName) || ORG_META.find(o => o.name === orgName);
+    // org_code resolved from DB-driven ORG_LOOKUP (populated by refreshOrgDerivedState after loadBackend)
+    const orgMatch = ORG_LOOKUP.get(orgName) || state.orgProfiles.find(o => o.org_name_th === orgName);
     if (orgMatch) {
       payload.org_code = orgMatch.org_code || orgMatch.code?.toLowerCase();
       payload.display_name = orgName;
@@ -524,7 +525,8 @@ async function batchCreateOrgHrUsers() {
   // Check which org_hr users already exist
   const existingOrgHr = state.userRows.filter(r => r.role === 'org_hr');
   const existingCodes = existingOrgHr.map(r => r.org_code);
-  const toCreate = ORG_HR_MAP.filter(org => !existingCodes.includes(org.org_code));
+  // Use DB-driven state.orgProfiles as source of orgs (Supabase = SSOT)
+  const toCreate = state.orgProfiles.filter(org => org.org_code && !existingCodes.includes(org.org_code));
 
   if (toCreate.length === 0) {
     showToast('✅ org_hr users ครบทุกองค์กรแล้ว — ไม่ต้องสร้างเพิ่ม', 'info');

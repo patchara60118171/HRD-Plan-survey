@@ -243,7 +243,7 @@ tbody tr:hover td{background:#FAFBFD}
 .trend-dot-hit{cursor:pointer}
 .org-multi-wrap{position:relative;display:inline-block;width:260px}
 .org-multi-btn{width:100%;text-align:left;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
-.org-dropdown{display:none;position:absolute;top:100%;left:0;width:100%;max-height:260px;overflow-y:auto;background:#fff;border:1px solid var(--bg3);border-radius:8px;box-shadow:0 4px 14px rgba(0,0,0,.12);z-index:20;padding:6px 0;margin-top:4px}
+.org-dropdown{display:none;position:absolute;top:100%;left:0;width:100%;max-height:260px;overflow-y:auto;background:#fff;border:1px solid var(--bdr);border-radius:8px;box-shadow:0 4px 14px rgba(0,0,0,.12);z-index:20;padding:6px 0;margin-top:4px}
 .org-dropdown.show{display:block}
 .org-check-item{display:flex;align-items:center;gap:8px;padding:6px 12px;cursor:pointer;font-size:12.5px;color:var(--tx)}
 .org-check-item:hover{background:var(--bg2)}

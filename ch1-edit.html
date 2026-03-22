@@ -84,6 +84,7 @@ textarea.si{resize:vertical;min-height:80px}
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase-config.js"></script>
+<script src="js/project-ssot.js"></script>
 <script src="js/form-schema.js"></script>
 <script>
 'use strict';
@@ -172,7 +173,8 @@ function renderPage(orgCode) {
   }
 
   // Render sections from schema
-  if (schema && schema.sections.length > 0) {
+  const totalQuestions = schema ? schema.sections.reduce((n, s) => n + (s.questions||[]).length, 0) : 0;
+  if (schema && schema.sections.length > 0 && totalQuestions > 0) {
     schema.sections.forEach(sec => {
       const card = document.createElement('div');
       card.className = 'section-card';
@@ -192,8 +194,17 @@ function renderPage(orgCode) {
       contentArea.appendChild(card);
     });
   } else {
-    // Fallback: render from HRD_CH1_FIELDS keys
-    contentArea.innerHTML = '<div class="alert alert-info">ไม่พบข้อมูล Schema — กำลังใช้ fallback</div>';
+    // Schema not available or has no questions — show diagnostics
+    contentArea.innerHTML = `
+      <div class="alert alert-warning">
+        ⚠️ ไม่สามารถโหลดคำถาม CH1 ได้จาก Database<br>
+        <small>กรุณาตรวจสอบ: ตาราง <code>form_questions</code> ใน Supabase ต้องมีข้อมูล <code>form_code = 'ch1'</code>
+        หรือติดต่อ Admin เพื่อ seed คำถาม</small>
+      </div>
+      <div class="alert alert-info" style="font-size:12px">
+        🔍 Debug: schema=${schema ? 'loaded' : 'null'}, sections=${schema?.sections?.length||0}, questions=${totalQuestions}
+        (source: ${schema?.source || 'none'})
+      </div>`;
   }
 
   // Show buttons

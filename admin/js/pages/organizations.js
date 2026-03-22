@@ -1,7 +1,7 @@
 /**
  * organizations.js — Page: Organizations Management
  * Sprint 3C: Extracted from admin.html inline script
- * Depends on: config.js (state, ORG_NAMES, ORG_META, sb), utils.js (esc, fmtDate, fmtNum, showToast, showConfirm)
+ * Depends on: config.js (state, ORG_NAMES, ORG_LOOKUP, sb), utils.js (esc, fmtDate, fmtNum, showToast, showConfirm)
  *
  * Functions:
  *   renderOrgs(summary)

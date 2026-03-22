@@ -1,7 +1,7 @@
 /* ========== ADMIN PORTAL — NAVIGATION ========== */
 
 function go(id, el) {
-  const roleLvl = { viewer: 0, admin: 1, superadmin: 2 };
+  const roleLvl = { viewer: 0, admin: 1, superadmin: 2, super_admin: 2 };
   const myLvl = roleLvl[state.myRole] ?? 0;
   const adminOnlyPages = { users: 1, links: 1, notif: 1, audit: 1, 'form-editor': 1 };
   const superOnlyPages = { settings: 2 };

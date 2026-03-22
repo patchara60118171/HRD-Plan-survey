@@ -1,7 +1,6 @@
 /* ========== ADMIN PORTAL — DATA LOADING & ORG CATALOG ========== */
 
 function getOrgCatalog() {
-  if (!state.orgProfiles.length) return ORG_META;
   return state.orgProfiles.map((row) => ({
     name: row.org_name_th,
     ministry: row.settings?.ministry || 'ไม่ระบุ',
@@ -74,8 +73,9 @@ async function loadBackend() {
     fetchOrgHrCredentials(),
   ]);
 
-  if (surveyRes.error) throw surveyRes.error;
-  if (ch1Res.error) throw ch1Res.error;
+  // Degrade gracefully — RLS may block access for some roles; don't abort the entire init.
+  if (surveyRes.error) console.warn('loadBackend survey_responses:', surveyRes.error.message);
+  if (ch1Res.error) console.warn('loadBackend hrd_ch1_responses:', ch1Res.error.message);
 
   state.surveyRows = (surveyRes.data || [])
     .map(normalizeSurveyRow)

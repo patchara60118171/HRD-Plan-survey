@@ -558,9 +558,14 @@ async function initPortal() {
     portalState.orgName = roleRow.display_name || roleRow.org_code;
   }
 
-  // Only org_hr can use this portal
+  // Only org_hr can use this portal — admin/super_admin redirect to admin.html
   if (roleRow.role !== 'org_hr') {
-    showToast('⚠️ บัญชีนี้ไม่มีสิทธิ์เข้าใช้งาน Portal นี้', 'warn', 6000);
+    if (roleRow.role === 'admin' || roleRow.role === 'super_admin') {
+      showToast('🔀 กำลัง redirect ไปยัง Admin Portal...', 'info', 2000);
+      setTimeout(() => { location.href = 'admin.html'; }, 1200);
+    } else {
+      showToast('⚠️ บัญชีนี้ไม่มีสิทธิ์เข้าใช้งาน Portal นี้', 'warn', 6000);
+    }
     showLoading(false);
     return;
   }

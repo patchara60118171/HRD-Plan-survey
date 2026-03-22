@@ -71,7 +71,7 @@ async function deleteAdminUserRole(id) {
 }
 
 async function fetchOrganizations() {
-  const { data, error } = await sb.from('organizations').select('*').eq('is_active', true).order('org_name_th', { ascending: true });
+  const { data, error } = await sb.from('organizations').select('*').eq('is_active', true).order('sort_order', { ascending: true }).order('org_name_th', { ascending: true });
   if (error) { console.warn('fetchOrganizations:', error.message); return []; }
   return data || [];
 }
