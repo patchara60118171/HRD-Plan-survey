@@ -92,9 +92,10 @@ const PROJECT_SSOT = {
       { org_code: 'onep',  org_name_th: 'สำนักงานนโยบายและแผนทรัพยากรธรรมชาติและสิ่งแวดล้อม' },
       { org_code: 'nrct',  org_name_th: 'สำนักงานการวิจัยแห่งชาติ' },
       { org_code: 'acfs',  org_name_th: 'สำนักงานมาตรฐานสินค้าเกษตรและอาหารแห่งชาติ' },
-      { org_code: 'opdc',  org_name_th: 'สำนักงาน กพร.' },
+      { org_code: 'opdc',  org_name_th: 'สำนักงานคณะกรรมการพัฒนาระบบราชการ (ก.พ.ร.)' },
       { org_code: 'rid',   org_name_th: 'กรมชลประทาน' },
       { org_code: 'dcy',   org_name_th: 'กรมกิจการเด็กและเยาวชน' },
+      { org_code: 'doh',   org_name_th: 'กองฝึกอบรม กรมทางหลวง' },
     ],
     // orgCodeNameMap — lowercase keys; ch1-form.js normalises ?org= param to lowercase.
     // Covers both the ORG_META codes (NESDC→nesdc) and alternate codes (probation, hssd, ocsc).
@@ -114,10 +115,11 @@ const PROJECT_SSOT = {
       onep:       'สำนักงานนโยบายและแผนทรัพยากรธรรมชาติและสิ่งแวดล้อม',
       nrct:       'สำนักงานการวิจัยแห่งชาติ',
       acfs:       'สำนักงานมาตรฐานสินค้าเกษตรและอาหารแห่งชาติ',
-      opdc:       'สำนักงาน กพร.',
+      opdc:       'สำนักงานคณะกรรมการพัฒนาระบบราชการ (ก.พ.ร.)',
       ocsc:       'สำนักงาน กพร.',
       rid:        'กรมชลประทาน',
       dcy:        'กรมกิจการเด็กและเยาวชน',
+      doh:        'กองฝึกอบรม กรมทางหลวง',
     },
   },
 };

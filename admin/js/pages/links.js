@@ -302,7 +302,13 @@ async function createNewLink() {
   const base = form === 'ch1' ? 'ch1.html' : 'index.html';
   const url = `${SURVEY_BASE_URL}/${base}?org=${orgCode}`;
   if (msg) { msg.style.color = 'var(--tx2)'; msg.textContent = 'กำลังสร้างลิงก์...'; }
-  const { error } = await sb.from('org_form_links').insert({ org_id: orgId, full_url: url, is_active: true });
+
+  // Look up form_id from survey_forms (required FK)
+  const formKey = form === 'ch1' ? 'ch1' : 'wellbeing';
+  const { data: formRows } = await sb.from('survey_forms').select('id').eq('form_key', formKey).limit(1);
+  const formId = formRows?.[0]?.id || null;
+
+  const { error } = await sb.from('org_form_links').insert({ org_id: orgId, form_id: formId, full_url: url, is_active: true });
   if (error) { if (msg) { msg.style.color = 'var(--D)'; msg.textContent = 'ไม่สำเร็จ: ' + error.message; } return; }
   const { data } = await sb.from('org_form_links').select('*');
   state.linkRows = data || [];
