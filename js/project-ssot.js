@@ -78,40 +78,48 @@ const PROJECT_SSOT = {
   },
 
   organizations: {
+    // orgHrMap — used by admin config.js → ORG_HR_MAP for the "create org_hr" dropdown
     orgHrMap: [
-      { org_code: 'dcy', org_name_th: 'กรมกิจการเด็กและเยาวชน' },
-      { org_code: 'probation', org_name_th: 'กรมคุมประพฤติ' },
-      { org_code: 'rid', org_name_th: 'กรมชลประทาน' },
-      { org_code: 'dss', org_name_th: 'กรมวิทยาศาสตร์บริการ' },
-      { org_code: 'dcp', org_name_th: 'กรมส่งเสริมวัฒนธรรม' },
-      { org_code: 'dmh', org_name_th: 'กรมสุขภาพจิต' },
-      { org_code: 'tmd', org_name_th: 'กรมอุตุนิยมวิทยา' },
-      { org_code: 'hssd', org_name_th: 'กรมสนับสนุนบริการสุขภาพ' },
-      { org_code: 'ocsc', org_name_th: 'สำนักงาน กพร.' },
-      { org_code: 'nrct', org_name_th: 'สำนักงานการวิจัยแห่งชาติ' },
-      { org_code: 'onep', org_name_th: 'สำนักงานนโยบายและแผนทรัพยากรธรรมชาติและสิ่งแวดล้อม' },
-      { org_code: 'tpso', org_name_th: 'สำนักงานนโยบายและยุทธศาสตร์การค้า' },
-      { org_code: 'mots', org_name_th: 'สำนักงานปลัดกระทรวงการท่องเที่ยวและกีฬา' },
-      { org_code: 'acfs', org_name_th: 'สำนักงานมาตรฐานสินค้าเกษตรและอาหารแห่งชาติ' },
       { org_code: 'nesdc', org_name_th: 'สำนักงานสภาพัฒนาการเศรษฐกิจและสังคมแห่งชาติ' },
+      { org_code: 'tpso',  org_name_th: 'สำนักงานนโยบายและยุทธศาสตร์การค้า' },
+      { org_code: 'dss',   org_name_th: 'กรมวิทยาศาสตร์บริการ' },
+      { org_code: 'bob',   org_name_th: 'กรมสนับสนุนบริการสุขภาพ' },
+      { org_code: 'tmd',   org_name_th: 'กรมอุตุนิยมวิทยา' },
+      { org_code: 'dcp',   org_name_th: 'กรมส่งเสริมวัฒนธรรม' },
+      { org_code: 'prob',  org_name_th: 'กรมคุมประพฤติ' },
+      { org_code: 'mots',  org_name_th: 'สำนักงานปลัดกระทรวงการท่องเที่ยวและกีฬา' },
+      { org_code: 'dmh',   org_name_th: 'กรมสุขภาพจิต' },
+      { org_code: 'onep',  org_name_th: 'สำนักงานนโยบายและแผนทรัพยากรธรรมชาติและสิ่งแวดล้อม' },
+      { org_code: 'nrct',  org_name_th: 'สำนักงานการวิจัยแห่งชาติ' },
+      { org_code: 'acfs',  org_name_th: 'สำนักงานมาตรฐานสินค้าเกษตรและอาหารแห่งชาติ' },
+      { org_code: 'opdc',  org_name_th: 'สำนักงาน กพร.' },
+      { org_code: 'rid',   org_name_th: 'กรมชลประทาน' },
+      { org_code: 'dcy',   org_name_th: 'กรมกิจการเด็กและเยาวชน' },
     ],
+    // orgCodeNameMap — lowercase keys; ch1-form.js normalises ?org= param to lowercase.
+    // Covers both the ORG_META codes (NESDC→nesdc) and alternate codes (probation, hssd, ocsc).
+    // Admin portal uses Supabase `organizations` table as SSOT; this is the form-side static fallback.
     orgCodeNameMap: {
-      nesdc: 'สำนักงานสภาพัฒนาการเศรษฐกิจและสังคมแห่งชาติ',
-      dss: 'กรมวิทยาศาสตร์บริการ',
-      tmd: 'กรมอุตุนิยมวิทยา',
-      probation: 'กรมคุมประพฤติ',
-      dmh: 'กรมสุขภาพจิต',
-      onep: 'สำนักงานนโยบายและแผนทรัพยากรธรรมชาติและสิ่งแวดล้อม',
-      nrct: 'สำนักงานการวิจัยแห่งชาติ',
-      opdc: 'สำนักงานคณะกรรมการพัฒนาระบบราชการ (ก.พ.ร.)',
-      rid: 'กรมชลประทาน',
-      doh: 'กองฝึกอบรม กรมทางหลวง',
-      mots: 'สำนักงานปลัดกระทรวงการท่องเที่ยวและกีฬา',
-      tpso: 'สำนักงานนโยบายและยุทธศาสตร์การค้า',
-      dcp: 'กรมส่งเสริมวัฒนธรรม',
-      acfs: 'สำนักงานมาตรฐานสินค้าเกษตรและอาหารแห่งชาติ'
-    }
-  }
+      nesdc:      'สำนักงานสภาพัฒนาการเศรษฐกิจและสังคมแห่งชาติ',
+      tpso:       'สำนักงานนโยบายและยุทธศาสตร์การค้า',
+      dss:        'กรมวิทยาศาสตร์บริการ',
+      bob:        'กรมสนับสนุนบริการสุขภาพ',
+      hssd:       'กรมสนับสนุนบริการสุขภาพ',
+      tmd:        'กรมอุตุนิยมวิทยา',
+      dcp:        'กรมส่งเสริมวัฒนธรรม',
+      prob:       'กรมคุมประพฤติ',
+      probation:  'กรมคุมประพฤติ',
+      mots:       'สำนักงานปลัดกระทรวงการท่องเที่ยวและกีฬา',
+      dmh:        'กรมสุขภาพจิต',
+      onep:       'สำนักงานนโยบายและแผนทรัพยากรธรรมชาติและสิ่งแวดล้อม',
+      nrct:       'สำนักงานการวิจัยแห่งชาติ',
+      acfs:       'สำนักงานมาตรฐานสินค้าเกษตรและอาหารแห่งชาติ',
+      opdc:       'สำนักงาน กพร.',
+      ocsc:       'สำนักงาน กพร.',
+      rid:        'กรมชลประทาน',
+      dcy:        'กรมกิจการเด็กและเยาวชน',
+    },
+  },
 };
 
 PROJECT_SSOT.setWellbeingSurveyData = function setWellbeingSurveyData(sectionsOrder, surveyData) {

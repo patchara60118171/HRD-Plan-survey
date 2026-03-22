@@ -922,27 +922,7 @@
 
 
 
-function getOrgCatalog() {
-  if (!state.orgProfiles.length) return ORG_META;
-  return state.orgProfiles.map((row) => ({
-    name: row.org_name_th,
-    ministry: row.settings?.ministry || 'ไม่ระบุ',
-    code: row.org_code || 'ORG',
-    letter: row.settings?.salutation || 'ไม่ระบุ',
-    email: row.settings?.saraban_email || row.contact_email || '',
-    contact: row.settings?.coordinator_name || '',
-    contactRole: row.settings?.coordinator_position || '',
-    contactPhone: row.settings?.coordinator_contact_line || '',
-    contactLine: row.settings?.coordinator_contact_line || '',
-    contactEmail: row.settings?.coordinator_email || row.contact_email || '',
-  }));
-}
-
-function refreshOrgDerivedState() {
-  const catalog = getOrgCatalog();
-  ORG_NAMES = catalog.map((org) => org.name);
-  ORG_LOOKUP = new Map(catalog.map((org) => [org.name, org]));
-}
+/* getOrgCatalog + refreshOrgDerivedState → canonical in data.js (Supabase organizations = SSOT) */
 
 function esc(value) {
   return String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[char]));
@@ -1204,111 +1184,10 @@ function swb(el, targetId) {
   if (target) target.style.display = 'block';
 }
 
-async function requireSession() {
-  const { data: { session } } = await sb.auth.getSession();
-  if (!session) {
-    window.location.href = '/admin-login';
-    return null;
-  }
-  state.session = session;
-  return session;
-}
-
-async function loadBackend() {
-  const [surveyRes, ch1Res, linksRes, usersRes, orgRes] = await Promise.all([
-    sb.from('survey_responses').select('id,email,name,title,organization,gender,age,org_type,job,job_duration,bmi,bmi_category,is_draft,submitted_at,timestamp,tmhi_score,raw_responses'),
-    sb.from('hrd_ch1_responses').select('*'),
-    sb.from('org_form_links').select('*'),
-    sb.from('admin_user_roles').select('*').order('email', { ascending: true }),
-    sb.from('organizations').select('*').eq('is_active', true).order('org_name_th', { ascending: true }),
-  ]);
-
-  if (surveyRes.error) throw surveyRes.error;
-  if (ch1Res.error) throw ch1Res.error;
-
-  state.surveyRows = (surveyRes.data || [])
-    .map(normalizeSurveyRow)
-    .sort((a, b) => new Date(getRowDate(b) || 0) - new Date(getRowDate(a) || 0));
-  state.ch1Rows = (ch1Res.data || [])
-    .sort((a, b) => new Date(getRowDate(b) || 0) - new Date(getRowDate(a) || 0));
-  state.linkRows = linksRes.error ? [] : (linksRes.data || []);
-  state.userRows = usersRes.error ? [] : (usersRes.data || []);
-  state.orgProfiles = orgRes.error ? [] : (orgRes.data || []);
-  refreshOrgDerivedState();
-}
-
-function summarizeOrgs() {
-  const map = new Map(getOrgCatalog().map((org) => [org.name, {
-    ...org,
-    wellbeingTotal: 0,
-    wellbeingSubmitted: 0,
-    draft: 0,
-    flagged: 0,
-    latestWb: null,
-    ch1Count: 0,
-    latestCh1: null,
-  }]));
-
-  state.surveyRows.forEach((row) => {
-    const org = map.get(row.organization);
-    if (!org) return;
-    org.wellbeingTotal += 1;
-    if (row.is_draft) org.draft += 1;
-    else org.wellbeingSubmitted += 1;
-    if ((getPhq9(row) || 0) >= 15) org.flagged += 1;
-    const date = getRowDate(row);
-    if (date && (!org.latestWb || new Date(date) > new Date(org.latestWb))) org.latestWb = date;
-  });
-
-  state.ch1Rows.forEach((row) => {
-    const orgName = getCh1Org(row);
-    const org = map.get(orgName);
-    if (!org) return;
-    org.ch1Count += 1;
-    const date = getRowDate(row);
-    if (date && (!org.latestCh1 || new Date(date) > new Date(org.latestCh1))) org.latestCh1 = date;
-  });
-
-  return [...map.values()];
-}
-
-function renderChrome() {
-  const email = state.session?.user?.email || 'admin';
-  document.querySelector('.u-name').textContent = email;
-  document.querySelector('.u-avatar').textContent = email.charAt(0).toUpperCase();
-  // ตรวจสอบ role ของผู้ใช้ที่ login อยู่
-  const myRow = state.userRows.find((r) => r.email === email);
-  // Locked superadmin emails — ไม่สามารถเปลี่ยน role ได้จาก UI
-  const isLockedSuper = LOCKED_SUPERADMIN_EMAILS.includes(email);
-  state.myRole = isLockedSuper ? 'superadmin' : (myRow?.role || 'viewer');
-  const roleLvl = { viewer: 0, admin: 1, superadmin: 2 };
-  const myLvl = roleLvl[state.myRole] ?? 0;
-  document.querySelectorAll('[data-min-role]').forEach((el) => {
-    const minLvl = roleLvl[el.dataset.minRole] ?? 99;
-    el.style.display = myLvl >= minLvl ? '' : 'none';
-  });
-  document.querySelector('.u-role').innerHTML = `<div class="u-role-dot"></div> ${state.myRole === 'superadmin' ? 'Super Admin' : state.myRole === 'admin' ? 'Admin' : 'Viewer'}`;
-  const roleInfoEl = document.getElementById('users-role-info');
-  if (roleInfoEl) {
-    if (state.myRole === 'superadmin') roleInfoEl.innerHTML = '🔑 คุณเข้าสู่ระบบในฐานะ <b>Super Admin</b> — สามารถจัดการผู้ใช้ทุกระดับได้';
-    else if (state.myRole === 'admin') roleInfoEl.innerHTML = '🔑 คุณเข้าสู่ระบบในฐานะ <b>Admin</b> — สามารถเพิ่ม/จัดการ Viewer ได้เท่านั้น';
-  }
-
-  window.doLogout = async () => {
-    await sb.auth.signOut();
-    window.location.href = '/admin-login';
-  };
-
-  const buttons = document.querySelectorAll('.topbar-btn');
-  if (buttons[0]) {
-    buttons[0].textContent = '🔄 รีเฟรช';
-    buttons[0].onclick = () => window.location.reload();
-  }
-  if (buttons[1]) {
-    buttons[1].textContent = '📤 Export';
-    buttons[1].onclick = exportCurrentPage;
-  }
-}
+/* requireSession, loadBackend, summarizeOrgs, renderChrome
+   → now exclusively in admin/js/services/auth.js + data.js
+   (removed from inline to avoid stale override; data.js uses
+    admin_user_roles_public VIEW + scopeRowsForCurrentUser) */
 
 function renderDashboard(summary) {
   const dashboard = document.getElementById('page-dashboard');
@@ -2280,12 +2159,6 @@ function renderMiniBars(el, items) {
     : '<div class="summary-empty">ยังไม่มีข้อมูล</div>';
 }
 
-let CH1_TREND_UID = 0;
-function nextCh1TrendUid(prefix = 'ch1-trend') {
-  CH1_TREND_UID += 1;
-  return `${prefix}-${CH1_TREND_UID}`;
-}
-
 function ch1TrendTooltipShow(target, event) {
   const wrap = target?.closest('.trend-wrap');
   if (!wrap) return;
@@ -2758,8 +2631,8 @@ async function init() {
   try {
     const session = await requireSession();
     if (!session) return;
-    renderChrome();
     await loadBackend();
+    renderChrome(); // ← after loadBackend so state.userRows is populated for role check
     const summary = summarizeOrgs();
     renderDashboard(summary);
     renderProgress(summary);
@@ -3137,7 +3010,7 @@ async function saveUserFromModal(isEdit) {
   const payload = { email, role, org_name: orgName || null, is_active: isActive };
   // For org_hr role, also set org_code from org mapping
   if (role === 'org_hr' && orgName) {
-    const orgMatch = ORG_HR_MAP.find(o => o.org_name_th === orgName) || ORG_META.find(o => o.name === orgName);
+    const orgMatch = ORG_LOOKUP.get(orgName) || state.orgProfiles.find(o => o.org_name_th === orgName);
     if (orgMatch) {
       payload.org_code = orgMatch.org_code || orgMatch.code?.toLowerCase();
       payload.display_name = orgName;
@@ -3426,7 +3299,7 @@ async function batchCreateOrgHrUsers() {
   // Check which org_hr users already exist
   const existingOrgHr = state.userRows.filter(r => r.role === 'org_hr');
   const existingCodes = existingOrgHr.map(r => r.org_code);
-  const toCreate = ORG_HR_MAP.filter(org => !existingCodes.includes(org.org_code));
+  const toCreate = state.orgProfiles.filter(org => org.org_code && !existingCodes.includes(org.org_code));
 
   if (toCreate.length === 0) {
     showToast('✅ org_hr users ครบทุกองค์กรแล้ว — ไม่ต้องสร้างเพิ่ม', 'info');

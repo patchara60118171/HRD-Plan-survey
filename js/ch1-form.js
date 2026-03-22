@@ -25,20 +25,31 @@ const SUPPORT_OPTIONS = PROJECT_SSOT?.ch1?.supportOptions || [];
 const STRATEGIC_TOPICS = PROJECT_SSOT?.ch1?.strategicTopics || [];
 
 // =============================================
-// ORGANIZATION MAPPING
+// ORGANIZATION MAPPING — DB-driven (Supabase = SSOT)
 // =============================================
-const ORG_MAP = PROJECT_SSOT?.organizations?.orgCodeNameMap || {};
 
-function parseUrlParameters() {
+async function parseUrlParameters() {
     const params = new URLSearchParams(window.location.search);
-    const orgCode = params.get('org');
-    
-    if (!orgCode || !ORG_MAP[orgCode]) {
-        if (orgCode) console.warn(`Unknown organization code: ${orgCode}`);
+    const orgCodeRaw = params.get('org');
+    // Case-insensitive lookup: org links may use uppercase (NESDC) or lowercase (nesdc)
+    const orgCode = orgCodeRaw ? orgCodeRaw.toLowerCase() : null;
+    if (!orgCode) return;
+
+    // Fetch org name from organizations_public view (anon-accessible, no PII)
+    let orgName = null;
+    try {
+        const { data, error } = await ch1Sb
+            .from('organizations_public')
+            .select('org_name_th')
+            .eq('org_code', orgCode)
+            .single();
+        if (!error && data) orgName = data.org_name_th;
+    } catch (_) {}
+
+    if (!orgName) {
+        console.warn(`Unknown organization code: ${orgCodeRaw}`);
         return;
     }
-    
-    const orgName = ORG_MAP[orgCode];
     
     // 1. Always show badges on landing page
     const badgeContainer = document.getElementById('org-badge-container');
@@ -118,8 +129,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupAgeWatcher();
     startAutoSave();
 
-    // Parse URL parameter to auto-select organization
-    parseUrlParameters();
+    // Parse URL parameter to auto-select organization (async — fetches from Supabase organizations_public)
+    await parseUrlParameters();
     renderTestModeBanner();
 });
 
