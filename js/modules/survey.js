@@ -477,274 +477,32 @@ class CH1FormHandler {
 }
 
 // ========================================
-// Questions Data (from questions.js)
+// SSOT-backed compatibility data
 // ========================================
 
-// Survey sections order
-const SECTIONS_ORDER = [
-    'basic_info',
-    'policies_context', 
-    'health_data',
-    'management_systems',
-    'strategic_goals'
-];
+const SECTIONS_ORDER = ['ch1'];
 
-// Survey data structure
 const SURVEY_DATA = {
-    basic_info: {
-        title: 'ส่วนที่ 1: ข้อมูลเบื้องต้นของส่วนราชการ',
-        description: 'ข้อมูลพื้นฐาน โครงสร้างองค์กร และอัตรากำลัง',
-        questions: [
-            {
-                id: 'organization',
-                type: 'select',
-                label: 'ชื่อหน่วยงาน',
-                required: true,
-                options: [
-                    'กรมอนามัย',
-                    'กรมควบคุมโรค',
-                    'กรมการแพทย์',
-                    'กรมสุขภาพจิต',
-                    'สำนักงานคณะกรรมการอาหารและยา',
-                    'กรมสนับสนุนบริการสุขภาพ',
-                    'กรมการแพทย์แผนไทยและการแพทย์ทางเลือก',
-                    'สถาบันการแพทย์ฉุกเฉินแห่งชาติ',
-                    'สำนักงานหลักประกันสุขภาพแห่งชาติ',
-                    'สำนักงานประกันสังคม'
-                ]
-            },
-            {
-                id: 'strategic_overview',
-                type: 'textarea',
-                label: 'ภาพรวมยุทธศาสตร์และทิศทางของส่วนราชการ',
-                required: false,
-                placeholder: 'อธิบายภาพรวมยุทธศาสตร์และทิศทางของหน่วยงาน'
-            },
-            {
-                id: 'org_structure',
-                type: 'textarea',
-                label: 'โครงสร้างองค์กรและบทบาทหน้าที่หลัก',
-                required: false,
-                placeholder: 'อธิบายโครงสร้างองค์กรและบทบาทหน้าที่หลัก'
-            },
-            {
-                id: 'total_staff',
-                type: 'number',
-                label: 'จำนวนข้าราชการรวม',
-                required: true,
-                min: 1,
-                placeholder: 'เช่น 500'
-            }
-        ]
-    },
-    
-    policies_context: {
-        title: 'ส่วนที่ 2: นโยบายและบริบทภายนอก',
-        description: 'นโยบายที่เกี่ยวข้องและบริบทแวดล้อม',
-        questions: [
-            {
-                id: 'related_policies',
-                type: 'textarea',
-                label: 'นโยบายที่เกี่ยวข้อง',
-                required: false,
-                placeholder: 'ระบุนโยบายที่เกี่ยวข้องกับการดำเนินงาน'
-            },
-            {
-                id: 'context_challenges',
-                type: 'textarea',
-                label: 'บริบทและความท้าทาย',
-                required: false,
-                placeholder: 'อธิบายบริบทและความท้าทายในการดำเนินงาน'
-            }
-        ]
-    },
-    
-    health_data: {
-        title: 'ส่วนที่ 3: ข้อมูลสุขภาวะ',
-        description: 'ข้อมูลสุขภาพทั้ง 4 มิติ',
-        questions: [
-            {
-                id: 'ncd_count',
-                type: 'number',
-                label: 'จำนวนบุคลากรที่เป็นโรค NCD',
-                required: false,
-                min: 0
-            },
-            {
-                id: 'sick_leave_days',
-                type: 'number',
-                label: 'จำนวนวันลาป่วย 5 ปีย้อนหลัง',
-                required: false,
-                min: 0
-            },
-            {
-                id: 'training_hours',
-                type: 'number',
-                label: 'จำนวนชั่วโมงการอบรมต่อปี',
-                required: false,
-                min: 0
-            }
-        ]
-    },
-    
-    management_systems: {
-        title: 'ส่วนที่ 4: ระบบการบริหารและสภาพแวดล้อม',
-        description: 'ระบบสนับสนุนบุคลากรและการจัดสภาพแวดล้อม',
-        questions: [
-            {
-                id: 'mentoring_system',
-                type: 'radio',
-                label: 'ระบบพี่เลี้ยง',
-                required: false,
-                options: [
-                    { value: 'full', label: 'ครบถ้วน' },
-                    { value: 'partial', label: 'บางส่วน' },
-                    { value: 'none', label: 'ไม่มี' }
-                ]
-            },
-            {
-                id: 'idp_system',
-                type: 'radio',
-                label: 'ระบบพัฒนาการแผนแผน (IDP)',
-                required: false,
-                options: [
-                    { value: 'full', label: 'ครบถ้วน' },
-                    { value: 'partial', label: 'บางส่วน' },
-                    { value: 'none', label: 'ไม่มี' }
-                ]
-            },
-            {
-                id: 'career_path_system',
-                type: 'radio',
-                label: 'ระบบเส้นทางอาชีพ',
-                required: false,
-                options: [
-                    { value: 'full', label: 'ครบถ้วน' },
-                    { value: 'partial', label: 'บางส่วน' },
-                    { value: 'none', label: 'ไม่มี' }
-                ]
-            },
-            {
-                id: 'job_rotation',
-                type: 'radio',
-                label: 'ระบบหมุนเวียนตำแหน่งงาน',
-                required: false,
-                options: [
-                    { value: 'full', label: 'ครบถ้วน' },
-                    { value: 'partial', label: 'บางส่วน' },
-                    { value: 'none', label: 'ไม่มี' }
-                ]
-            }
-        ]
-    },
-    
-    strategic_goals: {
-        title: 'ส่วนที่ 5: ทิศทาง เป้าหมาย และข้อเสนอแนะ',
-        description: 'จุดเน้นการพัฒนาและข้อเสนอแนะ',
-        questions: [
-            {
-                id: 'strategic_priority_rank1',
-                type: 'select',
-                label: 'จุดเน้นการพัฒนา อันดับ 1',
-                required: true,
-                options: [
-                    'การเพิ่มประสิทธิภาพการให้บริการประชาชน',
-                    'การพัฒนาศักยภาพดิจิทัล',
-                    'การพัฒนาผู้นำรุ่นใหม่',
-                    'การลดอัตราการลาป่วย',
-                    'การลดอัตราการลาออก',
-                    'อื่นๆ'
-                ]
-            },
-            {
-                id: 'strategic_priority_rank2',
-                type: 'select',
-                label: 'จุดเน้นการพัฒนา อันดับ 2',
-                required: false,
-                options: [
-                    'การเพิ่มประสิทธิภาพการให้บริการประชาชน',
-                    'การพัฒนาศักยภาพดิจิทัล',
-                    'การพัฒนาผู้นำรุ่นใหม่',
-                    'การลดอัตราการลาป่วย',
-                    'การลดอัตราการลาออก',
-                    'อื่นๆ'
-                ]
-            },
-            {
-                id: 'strategic_priority_rank3',
-                type: 'select',
-                label: 'จุดเน้นการพัฒนา อันดับ 3',
-                required: false,
-                options: [
-                    'การเพิ่มประสิทธิภาพการให้บริการประชาชน',
-                    'การพัฒนาศักยภาพดิจิทัล',
-                    'การพัฒนาผู้นำรุ่นใหม่',
-                    'การลดอัตราการลาป่วย',
-                    'การลดอัตราการลาออก',
-                    'อื่นๆ'
-                ]
-            },
-            {
-                id: 'intervention_packages_feedback',
-                type: 'textarea',
-                label: 'ข้อเสนอแนะเกี่ยวกับฐานข้อมูล Intervention Packages',
-                required: false,
-                placeholder: 'โปรดระบุข้อเสนอแนะ...'
-            },
-            {
-                id: 'hrd_plan_results',
-                type: 'textarea',
-                label: 'ผลการปฏิบัติงานตามแผนปีล่าสุด',
-                required: false,
-                placeholder: 'สรุปผลการปฏิบัติงาน...'
-            }
-        ]
+    ch1: {
+        title: 'แบบสำรวจ Ch1',
+        description: 'Legacy survey module now reads CH1 metadata from PROJECT_SSOT/FormSchema compatibility layer',
+        questions: Object.entries(PROJECT_SSOT?.ch1?.fallbackFields || {}).map(([id, label]) => ({
+            id,
+            type: 'text',
+            label,
+            required: false
+        }))
     }
 };
 
-// Support systems data
-const SUPPORT_SYSTEMS = {
-    mentoring_system: {
-        full: 'ครบถ้วน',
-        partial: 'บางส่วน',
-        none: 'ไม่มี'
-    },
-    idp_system: {
-        full: 'ครบถ้วน',
-        partial: 'บางส่วน',
-        none: 'ไม่มี'
-    },
-    career_path_system: {
-        full: 'ครบถ้วน',
-        partial: 'บางส่วน',
-        none: 'ไม่มี'
-    },
-    job_rotation: {
-        full: 'ครบถ้วน',
-        partial: 'บางส่วน',
-        none: 'ไม่มี'
-    }
-};
+const SUPPORT_SYSTEMS = (PROJECT_SSOT?.ch1?.supportSystems || []).reduce((acc, item) => {
+    acc[item.id] = Object.fromEntries((PROJECT_SSOT?.ch1?.supportOptions || []).map((opt) => [opt.v, opt.l]));
+    return acc;
+}, {});
 
-// Support options for digital systems
-const SUPPORT_OPTIONS = [
-    'e_document',
-    'e_signature',
-    'cloud',
-    'hr_digital',
-    'health_db',
-    'none'
-];
+const SUPPORT_OPTIONS = (PROJECT_SSOT?.ch1?.supportOptions || []).map((opt) => opt.v);
 
-// Strategic topics
-const STRATEGIC_TOPICS = [
-    'service_efficiency',
-    'digital_capability',
-    'new_leaders',
-    'reduce_sick_leave',
-    'reduce_turnover',
-    'other'
-];
+const STRATEGIC_TOPICS = (PROJECT_SSOT?.ch1?.strategicTopics || []).map((item) => item.id);
 
 // ========================================
 // EXPORTS

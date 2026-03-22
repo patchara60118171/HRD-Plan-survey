@@ -358,14 +358,16 @@ function renderDepressionScore(score) {
 
 // Render Review Screen
 function renderReviewScreen(responses) {
+    const sectionsOrder = PROJECT_SSOT.wellbeing.sectionsOrder;
+    const surveyData = PROJECT_SSOT.wellbeing.surveyData;
     let html = `
         <div class="review-screen fade-in">
             <h2 class="section-title">ตรวจสอบคำตอบของท่าน</h2>
             <p class="section-desc">โปรดตรวจสอบข้อมูลก่อนยืนยันการส่งแบบสำรวจ</p>
     `;
 
-    SECTIONS_ORDER.forEach(sectionKey => {
-        const section = SURVEY_DATA[sectionKey];
+    sectionsOrder.forEach(sectionKey => {
+        const section = surveyData[sectionKey];
         html += `<div class="review-section">
             <h3 class="review-section-title">${section.title}</h3>
             <div class="review-list">`;

@@ -15,6 +15,7 @@
 5. [Prompt E — ตรวจสอบ RLS ครบทุกตาราง](#prompt-e)
 6. [Prompt F — Vercel Redeploy + Route Verification](#prompt-f)
 7. [Prompt G — Full Verification Test](#prompt-g)
+8. [Prompt H — Hardening: จำกัดการเข้าถึง initial_password](#prompt-h)
 
 ---
 
@@ -653,6 +654,117 @@ HAVING COUNT(*) > 1;
 
 ---
 
+## Prompt H — Hardening: จำกัดการเข้าถึง initial_password {#prompt-h}
+
+<details>
+<summary>📋 คลิกเพื่อดู Prompt เต็ม</summary>
+
+```
+คุณเชื่อมต่อกับ Supabase ของโปรเจค Well-being Survey แล้ว
+
+## งาน
+ทำ hardening ฝั่ง backend เพื่อให้ข้อมูลรหัสผ่านเริ่มต้น (initial_password) เห็นได้เฉพาะ admin/super_admin เท่านั้น
+
+## บริบท
+- ฝั่ง frontend ปัจจุบันซ่อน UI credentials สำหรับ role ที่ไม่ใช่ admin/superadmin แล้ว
+- ต้องเสริม backend อีกชั้น เพื่อป้องกันการยิง query โดยตรง
+
+## Step 1: ตรวจ schema + policy ปัจจุบัน
+```sql
+SELECT column_name
+FROM information_schema.columns
+WHERE table_schema = 'public' AND table_name = 'admin_user_roles'
+ORDER BY ordinal_position;
+
+SELECT tablename, policyname, roles, cmd, qual, with_check
+FROM pg_policies
+WHERE schemaname = 'public' AND tablename = 'admin_user_roles'
+ORDER BY policyname;
+```
+
+## Step 2: สร้าง VIEW สำหรับใช้งานทั่วไปแบบไม่เผย initial_password
+```sql
+CREATE OR REPLACE VIEW public.admin_user_roles_public AS
+SELECT
+  id,
+  email,
+  role,
+  org_name,
+  org_code,
+  display_name,
+  is_active,
+  last_login_at,
+  created_at,
+  created_by
+FROM public.admin_user_roles;
+```
+
+## Step 3: สร้าง RPC สำหรับดึง credentials เฉพาะ admin
+```sql
+CREATE OR REPLACE FUNCTION public.get_org_hr_credentials()
+RETURNS TABLE (
+  id uuid,
+  org_code text,
+  org_name text,
+  display_name text,
+  email text,
+  initial_password text,
+  is_active boolean,
+  created_at timestamptz
+)
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT
+    aur.id,
+    aur.org_code,
+    aur.org_name,
+    aur.display_name,
+    aur.email,
+    aur.initial_password,
+    aur.is_active,
+    aur.created_at
+  FROM public.admin_user_roles aur
+  WHERE aur.role = 'org_hr'
+    AND requester_is_admin();
+$$;
+
+REVOKE ALL ON FUNCTION public.get_org_hr_credentials() FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.get_org_hr_credentials() TO authenticated;
+```
+
+## Step 4: ปรับสิทธิ์ view/function
+```sql
+GRANT SELECT ON public.admin_user_roles_public TO authenticated;
+REVOKE ALL ON public.admin_user_roles FROM anon;
+```
+
+หมายเหตุ:
+- ถ้า frontend ยัง query `admin_user_roles` ตรงด้วย `select('*')` ให้รายงานกลับว่า Dev ต้องเปลี่ยนไปใช้
+  1) `admin_user_roles_public` สำหรับรายการผู้ใช้ทั่วไป
+  2) `rpc('get_org_hr_credentials')` สำหรับ credentials table
+
+## Step 5: ตรวจสอบผลลัพธ์
+```sql
+-- ตรวจ view
+SELECT * FROM public.admin_user_roles_public LIMIT 5;
+
+-- ตรวจ function
+SELECT proname FROM pg_proc WHERE proname = 'get_org_hr_credentials';
+```
+
+## ผลลัพธ์ที่ต้องการ
+1. มี view `admin_user_roles_public` (ไม่มี initial_password)
+2. มี RPC `get_org_hr_credentials()`
+3. ยืนยันว่าเฉพาะ admin/super_admin เรียกแล้วได้ผลลัพธ์
+4. รายงานคำแนะนำถัดไปถ้าต้องแก้ frontend query
+```
+
+</details>
+
+---
+
 ## ลำดับการส่ง Prompt ให้ Cowork
 
 ```
@@ -663,6 +775,7 @@ HAVING COUNT(*) > 1;
 5. Prompt E → ตรวจ RLS (ต้องรอ A เสร็จ)
 6. Prompt F → Vercel redeploy (ทำเมื่อมีไฟล์ใหม่)
 7. Prompt G → Full test (ทำหลังสุด)
+8. Prompt H → Hardening initial_password (ทำหลัง C และ E)
 ```
 
 > 📌 หลังจาก Cowork ทำ Prompt A-G เสร็จแล้ว Dev สามารถเริ่มทำงาน Sprint 2 (Admin UI) ได้ทันที

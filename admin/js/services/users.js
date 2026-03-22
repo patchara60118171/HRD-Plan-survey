@@ -1,9 +1,14 @@
 /* ========== ADMIN PORTAL — USER MANAGEMENT SERVICE ========== */
-/* SURVEY_BASE_URL, LOCKED_SUPERADMIN_EMAILS → defined in admin.html inline script */
+/* SURVEY_BASE_URL, LOCKED_SUPERADMIN_EMAILS, ORG_HR_MAP, ORG_HR_EMAIL_DOMAIN → defined in config.js */
 
 function buildLinkUrl(org) {
   const code = org.org_code || org.code || encodeURIComponent(org.name);
   return `${SURVEY_BASE_URL}/index.html?org=${code}`;
+}
+
+async function refreshOrgHrCredentialsState() {
+  if (typeof fetchOrgHrCredentials !== 'function') return;
+  state.orgHrCredentials = await fetchOrgHrCredentials();
 }
 
 function renderUsers() {
@@ -223,6 +228,7 @@ async function saveUserFromModal(isEdit) {
 
   // Note: expires_at column removed — not in schema; use is_active for access control
   const payload = { email, role, org_name: orgName || null, is_active: isActive };
+  if (role === 'org_hr' && newPwd) payload.initial_password = newPwd;
   // For org_hr role, also set org_code from org mapping
   if (role === 'org_hr' && orgName) {
     const orgMatch = ORG_HR_MAP.find(o => o.org_name_th === orgName) || ORG_META.find(o => o.name === orgName);
@@ -231,27 +237,19 @@ async function saveUserFromModal(isEdit) {
       payload.display_name = orgName;
     }
   }
-  let error = null;
+  let rows = [];
 
-  if (isEdit) {
-    const rowId = overlay?.dataset.rowId;
-    const editEmail = overlay?.dataset.editEmail;
-    if (rowId) {
-      ({ error } = await sb.from('admin_user_roles').update(payload).eq('id', rowId));
-    } else if (editEmail) {
-      ({ error } = await sb.from('admin_user_roles').update(payload).eq('email', editEmail));
-    }
-  } else {
-    ({ error } = await sb.from('admin_user_roles').insert(payload));
-  }
-
-  if (error) {
+  try {
+    const rowId = overlay?.dataset.rowId || null;
+    const editEmail = overlay?.dataset.editEmail || null;
+    rows = await saveAdminUserRole(payload, isEdit ? rowId : null, isEdit ? editEmail : null);
+  } catch (error) {
     if (msg) { msg.style.color = 'var(--D)'; msg.textContent = '❌ บันทึกไม่สำเร็จ: ' + error.message; }
     return;
   }
 
-  const { data } = await sb.from('admin_user_roles').select('*').order('email', { ascending: true });
-  state.userRows = data || [];
+  state.userRows = rows || [];
+  await refreshOrgHrCredentialsState();
   renderUsers();
   renderOrgHrCredentials();
 
@@ -259,6 +257,11 @@ async function saveUserFromModal(isEdit) {
   if (isEdit && newPwd) {
     if (msg) { msg.style.color = 'var(--tx2)'; msg.textContent = 'กำลังเปลี่ยนรหัสผ่าน...'; }
     const fnResult = await callSetUserPasswordFn(email, newPwd, 'update');
+    if (fnResult.success && role === 'org_hr') {
+      await sb.from('admin_user_roles').update({ initial_password: newPwd }).eq('email', email);
+      await refreshOrgHrCredentialsState();
+      renderOrgHrCredentials();
+    }
     closeUserModal();
     if (fnResult.success) {
       showToast(`✅ แก้ไข ${email} สำเร็จ · 🔑 รหัสผ่านใหม่: ${newPwd} — แจ้งผู้ใช้ได้เลย`, 'success', 12000);
@@ -314,17 +317,29 @@ async function applyPasswordChange(email, pwd, silent = false) {
       if (msgEl) { msgEl.style.color = 'var(--D)'; msgEl.textContent = '❌ ' + error.message; }
       return false;
     }
+    const selfRow = state.userRows.find((r) => r.email === email);
+    if (selfRow?.role === 'org_hr') {
+      await sb.from('admin_user_roles').update({ initial_password: pwd }).eq('email', email);
+      await refreshOrgHrCredentialsState();
+      renderOrgHrCredentials();
+    }
     if (!silent) showToast('🔐 เปลี่ยนรหัสผ่านสำเร็จ ✅', 'success');
     return true;
   } else {
     // เปลี่ยนรหัสผ่านผู้ใช้อื่นผ่าน Edge Function (มี service_role key)
     const msgEl = document.getElementById('um-msg');
     if (msgEl) { msgEl.style.color = 'var(--tx2)'; msgEl.textContent = 'กำลังเปลี่ยนรหัสผ่าน...'; }
-    const result = await callSetUserPasswordFn(email, pwd, 'update');
+    const result = await callEdgeFunction('set-user-password', { email, password: pwd, action: 'update' });
     if (!result.success) {
       if (!silent) showToast('❌ เปลี่ยนรหัสผ่านไม่สำเร็จ: ' + result.error, 'error');
       if (msgEl) { msgEl.style.color = 'var(--D)'; msgEl.textContent = '❌ ' + result.error; }
       return false;
+    }
+    const row = state.userRows.find((r) => r.email === email);
+    if (row?.role === 'org_hr') {
+      await sb.from('admin_user_roles').update({ initial_password: pwd }).eq('email', email);
+      await refreshOrgHrCredentialsState();
+      renderOrgHrCredentials();
     }
     if (!silent) showToast('🔐 เปลี่ยนรหัสผ่านสำเร็จ ✅', 'success');
     return true;
@@ -437,9 +452,12 @@ async function resetUserPassword(email) {
 
 async function deleteViewer(id, email) {
   showConfirm(`ต้องการลบ Viewer: ${email} ออกจากระบบใช่หรือไม่?`, async () => {
-    const { error } = await sb.from('admin_user_roles').delete().eq('id', id);
-    if (error) { showToast('ลบไม่สำเร็จ: ' + error.message, 'error'); return; }
-    state.userRows = state.userRows.filter((r) => r.id !== id);
+    try {
+      state.userRows = await deleteAdminUserRole(id);
+    } catch (error) {
+      showToast('ลบไม่สำเร็จ: ' + error.message, 'error');
+      return;
+    }
     renderUsers();
     renderOrgHrCredentials();
     showToast(`ลบ ${email} เรียบร้อยแล้ว`, 'success');
@@ -464,23 +482,18 @@ async function saveViewer() {
 
   const editId = document.getElementById('viewer-edit-id')?.value;
   const payload = { email, role: 'viewer', org_name: orgName, is_active: true };
-  let error = null;
-  if (editId) {
-    const existing = state.userRows.find((r) => r.email === editId);
-    if (existing?.id) {
-      ({ error } = await sb.from('admin_user_roles').update(payload).eq('id', existing.id));
+  try {
+    if (editId) {
+      const existing = state.userRows.find((r) => r.email === editId);
+      state.userRows = await saveAdminUserRole(payload, existing?.id || null, null);
+    } else {
+      state.userRows = await saveAdminUserRole(payload, null, null);
     }
-  } else {
-    ({ error } = await sb.from('admin_user_roles').insert(payload));
-  }
-
-  if (error) {
+  } catch (error) {
     if (msg) { msg.style.color = 'var(--D)'; msg.textContent = 'บันทึกไม่สำเร็จ: ' + error.message; }
     return;
   }
 
-  const { data } = await sb.from('admin_user_roles').select('*').order('email', { ascending: true });
-  state.userRows = data || [];
   renderUsers();
   renderOrgHrCredentials();
   resetViewerForm();
@@ -497,7 +510,6 @@ function copyTempCode() {
 }
 
 /* ========== ORG HR BATCH CREATION ========== */
-/* ORG_HR_MAP, ORG_HR_EMAIL_DOMAIN → defined in admin.html inline script */
 
 function generateOrgHrPassword() {
   const yr = new Date().getFullYear() + 543;
@@ -547,22 +559,26 @@ async function batchCreateOrgHrUsers() {
         }
 
         // Step 2: Insert role into admin_user_roles
-        const { error: roleError } = await sb.from('admin_user_roles').insert({
-          email: email,
-          role: 'org_hr',
-          org_code: org.org_code,
-          org_name: org.org_name_th,
-          display_name: org.org_name_th,
-          is_active: true,
-          initial_password: password,
-          created_by: state.session?.user?.email || 'system',
-        });
-
-        if (roleError) {
+        let roleSaved = false;
+        try {
+          await saveAdminUserRole({
+            email: email,
+            role: 'org_hr',
+            org_code: org.org_code,
+            org_name: org.org_name_th,
+            display_name: org.org_name_th,
+            is_active: true,
+            initial_password: password,
+            created_by: state.session?.user?.email || 'system',
+          }, null, null);
+          roleSaved = true;
+        } catch (roleError) {
           // Auth user created but role insert failed
           results.push({ ...org, email, password, status: 'partial', error: roleError.message });
           failCount++;
-        } else {
+        }
+
+        if (roleSaved) {
           results.push({ ...org, email, password, status: 'success' });
           successCount++;
         }
@@ -573,8 +589,8 @@ async function batchCreateOrgHrUsers() {
     }
 
     // Refresh user list
-    const { data } = await sb.from('admin_user_roles').select('*').order('email', { ascending: true });
-    state.userRows = data || [];
+    state.userRows = await fetchAdminUserRoles();
+    await refreshOrgHrCredentialsState();
     renderUsers();
     renderOrgHrCredentials();
 
@@ -601,11 +617,13 @@ async function batchCreateOrgHrUsers() {
   });
 }
 
-function renderOrgHrCredentials() {
+async function renderOrgHrCredentials() {
+  await refreshOrgHrCredentialsState();
+
   const tbody = document.getElementById('orghr-cred-tbody');
   if (!tbody) return;
 
-  const orgHrUsers = state.userRows.filter(r => r.role === 'org_hr');
+  const orgHrUsers = state.orgHrCredentials || [];
 
   if (orgHrUsers.length === 0) {
     tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--tx3);padding:20px">ยังไม่มีข้อมูล org_hr — กดปุ่ม "🔑 สร้าง org_hr ทั้งหมด" เพื่อเริ่มสร้าง</td></tr>';
@@ -639,7 +657,7 @@ function copyOrgHrRow(email, pwd, orgName) {
 }
 
 function copyAllOrgHrCredentials() {
-  const orgHrUsers = state.userRows.filter(r => r.role === 'org_hr' && r.initial_password);
+  const orgHrUsers = (state.orgHrCredentials || []).filter(r => r.initial_password);
   if (orgHrUsers.length === 0) {
     showToast('ยังไม่มีข้อมูล org_hr credentials', 'warn');
     return;
@@ -656,7 +674,7 @@ function copyAllOrgHrCredentials() {
 }
 
 function exportOrgHrCredentialsCsv() {
-  const orgHrUsers = state.userRows.filter(r => r.role === 'org_hr' && r.initial_password);
+  const orgHrUsers = (state.orgHrCredentials || []).filter(r => r.initial_password);
   if (orgHrUsers.length === 0) {
     showToast('ยังไม่มีข้อมูล org_hr credentials', 'warn');
     return;

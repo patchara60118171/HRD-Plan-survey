@@ -587,10 +587,10 @@ tbody tr:hover td{background:#FAFBFD}
         <div class="tbl-wrap">
           <table id="org-table">
             <thead>
-              <tr><th>#</th><th>ชื่อองค์กร</th><th>กระทรวง</th><th>Tag</th><th>Wellbeing</th><th>Ch1</th><th>จัดการ</th></tr>
+              <tr><th>#</th><th>ชื่อองค์กร</th><th>กระทรวง</th><th>Tag</th><th>Wellbeing</th><th>Ch1</th><th>Dashboard</th><th>จัดการ</th></tr>
             </thead>
             <tbody>
-              <tr><td colspan="7" style="text-align:center;color:var(--tx3);padding:24px">กำลังโหลดข้อมูล...</td></tr>
+              <tr><td colspan="8" style="text-align:center;color:var(--tx3);padding:24px">กำลังโหลดข้อมูล...</td></tr>
             </tbody>
           </table>
         </div>
@@ -1765,18 +1765,53 @@ function renderOrgs(summary) {
   const table = document.querySelector('#org-table tbody');
   if (!table) return;
   if (summary.length === 0) {
-    table.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--tx3);padding:24px">ยังไม่มีข้อมูลองค์กร</td></tr>';
+    table.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--tx3);padding:24px">ยังไม่มีข้อมูลองค์กร</td></tr>';
     return;
   }
-  table.innerHTML = summary.map((org, index) => `<tr>
-    <td>${index + 1}</td>
-    <td><b>${esc(org.name)}</b><div style="font-size:11px;color:var(--tx3);margin-top:2px">${esc(org.letter || '—')}</div></td>
-    <td>${esc(org.ministry)}</td>
-    <td><span class="badge bb">นำร่อง</span></td>
-    <td>${fmtNum(org.wellbeingSubmitted)}</td>
-    <td><span class="badge ${org.ch1Count > 0 ? 'bg' : 'br'}">${org.ch1Count > 0 ? '✓' : '—'}</span></td>
-    <td class="td-act"><button class="btn b-blue" onclick="openOrgModal('${esc(org.name)}')">ดู/แก้ไข</button></td>
-  </tr>`).join('');
+  table.innerHTML = summary.map((org, index) => {
+    const profile = state.orgProfiles.find((p) => p.org_name_th === org.name);
+    const orgId = profile?.id || null;
+    const showDash = profile?.show_in_dashboard !== false;
+    return `<tr>
+      <td>${index + 1}</td>
+      <td><b>${esc(org.name)}</b><div style="font-size:11px;color:var(--tx3);margin-top:2px">${esc(org.letter || '—')}</div></td>
+      <td>${esc(org.ministry)}</td>
+      <td><span class="badge bb">นำร่อง</span></td>
+      <td>${fmtNum(org.wellbeingSubmitted)}</td>
+      <td><span class="badge ${org.ch1Count > 0 ? 'bg' : 'br'}">${org.ch1Count > 0 ? '✓' : '—'}</span></td>
+      <td style="text-align:center">
+        <label class="tgl" title="แสดงใน Dashboard">
+          <input type="checkbox" ${showDash ? 'checked' : ''} ${orgId ? `onchange="toggleOrgDash('${orgId}',${showDash})"` : 'disabled'}>
+          <div class="tgl-s"></div>
+        </label>
+      </td>
+      <td class="td-act">
+        <button class="btn b-blue" onclick="openOrgModal('${esc(org.name)}')">✏️ จัดการ</button>
+        ${orgId ? `<button class="btn b-red" onclick="deleteOrg('${orgId}','${esc(org.name)}')">🗑️</button>` : ''}
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+async function toggleOrgDash(id, currentValue) {
+  try {
+    state.orgProfiles = await toggleOrgVisibility(id, currentValue);
+    renderOrgs(summarizeOrgs());
+    showToast(currentValue ? 'ซ่อนจาก Dashboard แล้ว' : 'แสดงใน Dashboard แล้ว ✅', 'success');
+  } catch (error) {
+    showToast('เกิดข้อผิดพลาด: ' + error.message, 'error');
+  }
+}
+
+async function deleteOrg(id, name) {
+  if (!confirm(`ลบองค์กร "${name}" ออกจากระบบ?\n\nข้อมูลการส่งแบบสอบถามจะยังคงอยู่ในฐานข้อมูล`)) return;
+  try {
+    state.orgProfiles = await deleteOrganization(id);
+    renderOrgs(summarizeOrgs());
+    showToast(`ลบ "${name}" เรียบร้อย`, 'success');
+  } catch (error) {
+    showToast('ลบไม่สำเร็จ: ' + error.message, 'error');
+  }
 }
 
 
@@ -1804,14 +1839,42 @@ function openOrgModal(orgName) {
   if (titleEl) titleEl.textContent = orgName ? '✏️ แก้ไขหน่วยงาน' : '➕ เพิ่มหน่วยงานใหม่';
   const msg = document.getElementById('org-form-msg');
   if (msg) msg.textContent = '';
+  const deleteBtn = document.getElementById('org-delete-btn');
   if (!orgName) {
     document.getElementById('org-profile-form')?.reset();
     const box = document.getElementById('org-detail-box');
     if (box) box.innerHTML = '<div class="info blue">กรอกข้อมูลให้ครบแล้วกดบันทึกเพื่อสร้างหน่วยงานใหม่</div>';
+    if (deleteBtn) deleteBtn.style.display = 'none';
+    const toggle = document.getElementById('org-show-dashboard');
+    if (toggle) toggle.checked = true;
   } else {
     showOrgDetail(orgName);
+    const profile = state.orgProfiles.find((p) => p.org_name_th === orgName);
+    if (deleteBtn) {
+      deleteBtn.style.display = profile?.id ? '' : 'none';
+      deleteBtn.dataset.orgId = profile?.id || '';
+      deleteBtn.dataset.orgName = orgName;
+    }
+    const toggle = document.getElementById('org-show-dashboard');
+    if (toggle) toggle.checked = profile?.show_in_dashboard !== false;
   }
   modal.style.display = 'flex';
+}
+
+async function deleteOrgFromModal() {
+  const btn = document.getElementById('org-delete-btn');
+  const id = btn?.dataset.orgId;
+  const name = btn?.dataset.orgName;
+  if (!id) return;
+  if (!confirm(`ลบองค์กร "${name}" ออกจากระบบ?\n\nข้อมูลการส่งแบบสอบถามจะยังคงอยู่ในฐานข้อมูล`)) return;
+  try {
+    state.orgProfiles = await deleteOrganization(id);
+    document.getElementById('org-modal').style.display = 'none';
+    renderOrgs(summarizeOrgs());
+    showToast(`ลบ "${name}" เรียบร้อย`, 'success');
+  } catch (error) {
+    showToast('ลบไม่สำเร็จ: ' + error.message, 'error');
+  }
 }
 
 function createOrgModal() {
@@ -1848,6 +1911,13 @@ function createOrgModal() {
       </div>
       <div class="umodal-foot">
         <button class="btn b-gray" onclick="document.getElementById('org-modal').style.display='none'">ยกเลิก</button>
+        <button class="btn b-red" id="org-delete-btn" style="display:none" onclick="deleteOrgFromModal()">🗑️ ลบองค์กร</button>
+        <div style="flex:1"></div>
+        <label class="tgl" title="แสดงใน Dashboard" style="margin-right:8px">
+          <input type="checkbox" id="org-show-dashboard" checked>
+          <div class="tgl-s"></div>
+        </label>
+        <span style="font-size:12px;color:var(--tx2);margin-right:12px">แสดงใน Dashboard</span>
         <button class="btn b-solid" onclick="document.getElementById('org-profile-form').requestSubmit()">💾 บันทึก</button>
       </div>
     </div>`;
@@ -1912,11 +1982,13 @@ async function saveOrgProfile(event) {
   event.preventDefault();
   const get = (id) => document.getElementById(id)?.value?.trim() || '';
   const organizationName = get('org-name');
+  const showInDashboard = document.getElementById('org-show-dashboard')?.checked !== false;
   const payload = {
     org_name_th: organizationName,
     org_type: 'government',
     contact_email: get('org-coordinator-email'),
     is_active: true,
+    show_in_dashboard: showInDashboard,
     settings: {
       ministry: get('org-ministry') || null,
       salutation: get('org-salutation'),

@@ -2,20 +2,8 @@
 // Survey Questions Data (Updated)
 // ========================================
 
-const SECTIONS_ORDER = [
-    // 1. Physical (กาย)
-    'personal',
-    'consumption',
-    'nutrition',
-    'activity',
-    // 2. Mental (ใจ)
-    'mental',
-    // 3. Social (สังคม)
-    'loneliness',
-    // 4. Environment (แวดล้อม)
-    'safety',
-    'environment'
-];
+// Alias — authoritative list lives in PROJECT_SSOT (js/project-ssot.js)
+const SECTIONS_ORDER = PROJECT_SSOT.wellbeing.sectionsOrder;
 
 const SURVEY_DATA = {
     // ----------------------------------------
@@ -431,4 +419,15 @@ function applyWellbeingFormConfig(configJson) {
             }
         }
     });
+}
+
+if (typeof PROJECT_SSOT !== 'undefined') {
+    if (typeof PROJECT_SSOT.setWellbeingSurveyData === 'function') {
+        PROJECT_SSOT.setWellbeingSurveyData(SECTIONS_ORDER, SURVEY_DATA);
+    } else {
+        PROJECT_SSOT.wellbeing = {
+            sectionsOrder: SECTIONS_ORDER,
+            surveyData: SURVEY_DATA
+        };
+    }
 }

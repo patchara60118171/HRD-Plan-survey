@@ -1043,8 +1043,10 @@ const app = {
 
     // Render Survey Section
     renderSurvey() {
-        const sectionKey = SECTIONS_ORDER[this.currentSectionIndex];
-        const section = SURVEY_DATA[sectionKey];
+        const sectionsOrder = PROJECT_SSOT.wellbeing.sectionsOrder;
+        const surveyData = PROJECT_SSOT.wellbeing.surveyData;
+        const sectionKey = sectionsOrder[this.currentSectionIndex];
+        const section = surveyData[sectionKey];
         const subsection = section.subsections[this.currentSubsectionIndex];
 
         let html = renderSectionHeader(section);
@@ -1216,8 +1218,10 @@ const app = {
         let totalSubsections = 0;
         let currentPosition = 0;
 
-        SECTIONS_ORDER.forEach((key, sIndex) => {
-            const section = SURVEY_DATA[key];
+        const sectionsOrder = PROJECT_SSOT.wellbeing.sectionsOrder;
+        const surveyData = PROJECT_SSOT.wellbeing.surveyData;
+        sectionsOrder.forEach((key, sIndex) => {
+            const section = surveyData[key];
             section.subsections.forEach((sub, subIndex) => {
                 totalSubsections++;
                 if (sIndex < this.currentSectionIndex ||
@@ -1244,9 +1248,11 @@ const app = {
         prevBtn.disabled = (this.currentSectionIndex === 0 && this.currentSubsectionIndex === 0);
 
         // Check if at last subsection of last section
-        const lastSectionKey = SECTIONS_ORDER[SECTIONS_ORDER.length - 1];
-        const lastSection = SURVEY_DATA[lastSectionKey];
-        const isLast = (this.currentSectionIndex === SECTIONS_ORDER.length - 1 &&
+        const sectionsOrder = PROJECT_SSOT.wellbeing.sectionsOrder;
+        const surveyData = PROJECT_SSOT.wellbeing.surveyData;
+        const lastSectionKey = sectionsOrder[sectionsOrder.length - 1];
+        const lastSection = surveyData[lastSectionKey];
+        const isLast = (this.currentSectionIndex === sectionsOrder.length - 1 &&
             this.currentSubsectionIndex === lastSection.subsections.length - 1);
 
         if (isLast) {
@@ -1258,14 +1264,16 @@ const app = {
 
     // Next section
     nextSection() {
-        const sectionKey = SECTIONS_ORDER[this.currentSectionIndex];
-        const section = SURVEY_DATA[sectionKey];
+        const sectionsOrder = PROJECT_SSOT.wellbeing.sectionsOrder;
+        const surveyData = PROJECT_SSOT.wellbeing.surveyData;
+        const sectionKey = sectionsOrder[this.currentSectionIndex];
+        const section = surveyData[sectionKey];
 
         // Check if there are more subsections
         if (this.currentSubsectionIndex < section.subsections.length - 1) {
             this.currentSubsectionIndex++;
             this.renderSurvey();
-        } else if (this.currentSectionIndex < SECTIONS_ORDER.length - 1) {
+        } else if (this.currentSectionIndex < sectionsOrder.length - 1) {
             // Move to next section
             this.currentSectionIndex++;
             this.currentSubsectionIndex = 0;
@@ -1278,13 +1286,15 @@ const app = {
 
     // Previous section
     prevSection() {
+        const sectionsOrder = PROJECT_SSOT.wellbeing.sectionsOrder;
+        const surveyData = PROJECT_SSOT.wellbeing.surveyData;
         if (this.currentSubsectionIndex > 0) {
             this.currentSubsectionIndex--;
             this.renderSurvey();
         } else if (this.currentSectionIndex > 0) {
             this.currentSectionIndex--;
-            const prevSectionKey = SECTIONS_ORDER[this.currentSectionIndex];
-            const prevSection = SURVEY_DATA[prevSectionKey];
+            const prevSectionKey = sectionsOrder[this.currentSectionIndex];
+            const prevSection = surveyData[prevSectionKey];
             this.currentSubsectionIndex = prevSection.subsections.length - 1;
             this.renderSurvey();
         }

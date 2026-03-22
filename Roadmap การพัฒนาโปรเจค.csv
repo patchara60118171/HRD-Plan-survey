@@ -1,233 +1,1001 @@
-"﻿""Commit ที่""","Timestamp","รายละเอียดการดำเนินการ","รายละเอียดการดำเนินการ (แปลไทย)","โน้ตอื่น ๆ ที่ควรรู้"
-"Commit ที่ 1","2026-01-24 23:51:13 +0700","feat: add Google Sheets data collection and history view","เพิ่มความสามารถ: add ระบบบันทึกข้อมูลแบบสอบถามลงตาราง Google Sheets and หน้าดูประวัติข้อมูล","hash=5b3b116; author=Antigravity Agent"
-"Commit ที่ 2","2026-01-25 00:02:47 +0700","feat: enforce login check and update footer text","เพิ่มความสามารถ: บังคับตรวจสอบสถานะการเข้าสู่ระบบแบบปลอดภัย and update footer text","hash=2b9abc6; author=Antigravity Agent"
-"Commit ที่ 3","2026-01-25 00:06:08 +0700","feat: switch to WHO BMI standards and add criteria note","เพิ่มความสามารถ: switch to who bmi standards and add criteria note","hash=f90a162; author=Antigravity Agent"
-"Commit ที่ 4","2026-01-25 00:13:38 +0700","chore: trigger deployment with correct user","จัดการระบบหลังบ้าน: trigger deployment with correct user","hash=2945dfd; author=Patchara"
-"Commit ที่ 5","2026-01-25 00:19:12 +0700","fix: redirect to welcome screen after logout","แก้ไขปัญหา: redirect to welcome screen after logout","hash=65e3ef4; author=Patchara"
-"Commit ที่ 6","2026-01-25 21:40:44 +0700","feat: implement cloud draft sync, 24h time input, and progress bar v2","เพิ่มความสามารถ: implement cloud ระบบบันทึกข้อมูลร่างอัตโนมัติกันข้อมูลผู้ใช้หาย, 24h ช่องกรอกเวลา, and แถบแสดงความคืบหน้าการตอบแบบสอบถาม v2","hash=15cdf13; author=Patchara Phongyeelar"
-"Commit ที่ 7","2026-01-25 21:45:50 +0700","feat: simplify time minutes to 15-min intervals","เพิ่มความสามารถ: simplify time minutes to 15-min intervals","hash=a150104; author=Patchara Phongyeelar"
-"Commit ที่ 8","2026-01-25 22:01:56 +0700","fix: use official google sign-in button for better ios compatibility","แก้ไขปัญหา: use official ระบบลงชื่อเข้าใช้งานที่เชื่อถือได้ผ่านบัญชี Google button for better อุปกรณ์ตระกูล Apple (iPhone/iPad) compatibility","hash=71eab28; author=Patchara Phongyeelar"
-"Commit ที่ 9","2026-01-25 22:10:20 +0700","feat: major survey update - new structure, questions, and TMHI-15 scoring","เพิ่มความสามารถ: major survey update - new structure, questions, and ระบบคำนวณคะแนนประเมินสุขภาพจิต TMHI-15","hash=1ec991b; author=Patchara Phongyeelar"
-"Commit ที่ 10","2026-01-25 22:16:21 +0700","feat: add admin dashboard with export and header setup features","เพิ่มความสามารถ: เพิ่มหน้าแดชบอร์ดสรุปสถิติสำหรับผู้ดูแลระบบ with การดาวน์โหลดไฟล์รายงาน and header setup features","hash=d24a6a8; author=Patchara Phongyeelar"
-"Commit ที่ 11","2026-01-25 22:20:00 +0700","fix: improve admin error handling and debug logging","แก้ไขปัญหา: improve admin error handling and deข้อบกพร่องเล็กน้อย logging","hash=38d6edd; author=Patchara Phongyeelar"
-"Commit ที่ 12","2026-01-25 22:24:03 +0700","fix: remove social card and improve ios login button rendering","แก้ไขปัญหา: remove social card and improve อุปกรณ์ตระกูล Apple (iPhone/iPad) login button rendering","hash=0d22cc4; author=Patchara Phongyeelar"
-"Commit ที่ 13","2026-01-25 22:27:09 +0700","fix: add robust manual login fallback for ios/safari","แก้ไขปัญหา: add robust manual login fallback for อุปกรณ์ตระกูล Apple (iPhone/iPad)/เซิร์ฟเวอร์บนเบราว์เซอร์ Safari","hash=98ff3fc; author=Patchara Phongyeelar"
-"Commit ที่ 14","2026-01-25 23:26:25 +0700","feat: Login UI, Title Selection, Review Flow","เพิ่มความสามารถ: login หน้าการแสดงผล, title selection, review flow","hash=e6d2e07; author=Patchara Phongyeelar"
-"Commit ที่ 15","2026-01-25 23:44:17 +0700","Fix Google Login for Safari/iOS, update BMI display, reorder questions, fix Admin URL","แก้ไขปัญหา: google login for เซิร์ฟเวอร์บนเบราว์เซอร์ Safari/อุปกรณ์ตระกูล Apple (iPhone/iPad), update bmi display, reorder questions, fix admin url","hash=11f7ff8; author=Patchara Phongyeelar"
-"Commit ที่ 16","2026-01-25 23:48:56 +0700","Fix redirect URI to use origin only","แก้ไขปัญหา: redirect uri to use origin only","hash=0f3a082; author=Patchara Phongyeelar"
-"Commit ที่ 17","2026-01-25 23:50:58 +0700","Show Welcome page first with Google Login button","อัปเดตระบบ: show welcome page first with google login button","hash=69fbd7f; author=Patchara Phongyeelar"
-"Commit ที่ 18","2026-01-26 00:04:45 +0700","Fix iOS login with modal button, separate login and start buttons, add welcome buttons CSS","แก้ไขปัญหา: อุปกรณ์ตระกูล Apple (iPhone/iPad) login with modal button, separate login and start buttons, add welcome buttons การตกแต่งสีสันเว็บไซต์","hash=371fd33; author=Patchara Phongyeelar"
-"Commit ที่ 19","2026-01-26 00:30:01 +0700","Add Supabase integration for cross-device sync","อัปเดตระบบ: add ระบบโครงสร้างฐานข้อมูลความปลอดภัย integration for cross-device sync","hash=c3712fe; author=Patchara Phongyeelar"
-"Commit ที่ 20","2026-01-26 00:46:41 +0700","Fix iOS login: force manual redirect flow to avoid popup/mismatch issues","แก้ไขปัญหา: force manual redirect flow to avoid popup/mismatch issues","hash=b6d4f49; author=Patchara Phongyeelar"
-"Commit ที่ 21","2026-01-26 01:02:43 +0700","Add Admin Dashboard with Chart.js visualization","อัปเดตระบบ: เพิ่มหน้าแดชบอร์ดสรุปสถิติสำหรับผู้ดูแลระบบ with การแสดงผลตารางกราฟและแผนภูมิข้อมูลภาพรวม visualization","hash=c36526e; author=Patchara Phongyeelar"
-"Commit ที่ 22","2026-01-26 01:06:25 +0700","Fix Excel export to flatten JSON response data","แก้ไขปัญหา: ปุ่มดาวน์โหลดข้อมูลทั้งหมดออกมาตราง Excel (CSV) to flatten json response data","hash=93b9430; author=Patchara Phongyeelar"
-"Commit ที่ 23","2026-01-26 01:10:14 +0700","Fix logout logic to clear localStorage and reset state","แก้ไขปัญหา: logout logic to clear localstorage and reset state","hash=f038f8f; author=Patchara Phongyeelar"
-"Commit ที่ 24","2026-01-26 01:12:41 +0700","Fix missing progress bar CSS","แก้ไขปัญหา: missing แถบแสดงความคืบหน้าการตอบแบบสอบถาม การตกแต่งสีสันเว็บไซต์","hash=1db9bc1; author=Patchara Phongyeelar"
-"Commit ที่ 25","2026-01-26 01:17:05 +0700","Fix CSS class conflict for progress bar","แก้ไขปัญหา: การตกแต่งสีสันเว็บไซต์ class conflict for แถบแสดงความคืบหน้าการตอบแบบสอบถาม","hash=0a9b8dc; author=Patchara Phongyeelar"
-"Commit ที่ 26","2026-01-26 01:51:51 +0700","Implement advanced admin dashboard with 5 sections and logout","อัปเดตระบบ: implement advanced admin dashboard with 5 sections and logout","hash=9ea4ffb; author=Patchara Phongyeelar"
-"Commit ที่ 27","2026-01-26 01:59:02 +0700","Fix admin dashboard processing error handling and excel download","แก้ไขปัญหา: admin dashboard processing error handling and excel download","hash=16beb7c; author=Patchara Phongyeelar"
-"Commit ที่ 28","2026-01-26 02:11:19 +0700","Fix missing stat-risk element in admin dashboard HTML","แก้ไขปัญหา: missing stat-risk element in admin dashboard html","hash=1b36bb0; author=Patchara Phongyeelar"
-"Commit ที่ 29","2026-01-26 02:36:55 +0700","Update safety questions timeframe and options","อัปเดตระบบ: update safety questions timeframe and options","hash=94f7df6; author=Patchara Phongyeelar"
-"Commit ที่ 30","2026-01-26 10:31:47 +0700","Update survey questions and center login button text","อัปเดตระบบ: update survey questions and center login button text","hash=d4897c4; author=Patchara Phongyeelar"
-"Commit ที่ 31","2026-01-26 10:34:02 +0700","Update DB schema docs to match survey changes","อัปเดตระบบ: update db schema docs to match survey changes","hash=3502a3b; author=Patchara Phongyeelar"
-"Commit ที่ 32","2026-01-26 10:36:44 +0700","Add org_type to Supabase save payload","อัปเดตระบบ: add org_type to ระบบโครงสร้างฐานข้อมูลความปลอดภัย save payload","hash=e61e3c9; author=Patchara Phongyeelar"
-"Commit ที่ 33","2026-01-26 10:43:22 +0700","Remove Region filter/chart from Admin Dashboard","อัปเดตระบบ: remove region filter/chart from admin dashboard","hash=90bd864; author=Patchara Phongyeelar"
-"Commit ที่ 34","2026-01-28 16:35:11 +0700","Add UCLA Loneliness Scale survey with 20 questions","อัปเดตระบบ: add ucla แบบสำรวจสุขภาพและสังคม (UCLA Loneliness) with 20 questions","hash=56993c6; author=pchr-pyl"
-"Commit ที่ 35","2026-01-28 21:57:36 +0700","Trigger Vercel deployment","อัปเดตระบบบนเซิร์ฟเวอร์เพื่อให้ผู้ใช้งานเข้าถึงเวอร์ชันล่าสุด","hash=bf02cb2; author=pchr-pyl"
-"Commit ที่ 36","2026-01-28 22:11:33 +0700","Change Health Behaviors charts (smoke/alcohol) from Pie to Bar chart","อัปเดตระบบ: change health behaviors charts (smoke/alcohol) from pie to bar chart","hash=4265df8; author=pchr-pyl"
-"Commit ที่ 37","2026-01-28 22:19:58 +0700","Merge remote changes with local","รวมชุดคำสั่งและอัปเดตโค้ดของระบบเข้าด้วยกันเป็นเวอร์ชันล่าสุด","hash=5bb1741; author=Patchara Phongyeelar"
-"Commit ที่ 38","2026-01-28 22:54:24 +0700","fix: update loneliness survey scale from 1-4 to 0-3 with Thai labels","แก้ไขปัญหา: update loneliness survey scale from 1-4 to 0-3 with thai labels","hash=d7b679d; author=Patchara"
-"Commit ที่ 39","2026-01-29 11:47:46 +0700","Remove Google OAuth login system and replace with email input","อัปเดตระบบ: remove google oauth login system and replace with email input","hash=6a4cd2d; author=pchr-pyl"
-"Commit ที่ 40","2026-01-29 14:30:48 +0700","Organize project structure","อัปเดตระบบ: organize project structure","hash=12c6706; author=pchr-pyl"
-"Commit ที่ 41","2026-02-04 10:47:32 +0700","Refactor: Separate Social dimension and update survey order","ปรับปรุงโครงสร้างระบบ: separate social dimension and update survey order","hash=c14fecb; author=pchr-pyl"
-"Commit ที่ 42","2026-02-04 11:02:33 +0700","Fix: Add package.json for Render build","แก้ไขปัญหา: add package.json for render bหน้าการแสดงผลld","hash=878ccd1; author=pchr-pyl"
-"Commit ที่ 43","2026-02-04 11:13:06 +0700","Fix: Improve summary layout & Fix Excel export with Thai headers","แก้ไขปัญหา: improve summary layout & fix ปุ่มดาวน์โหลดข้อมูลทั้งหมดออกมาตราง Excel (CSV) with thai headers","hash=995bf7f; author=pchr-pyl"
-"Commit ที่ 44","2026-02-04 11:15:35 +0700","Fix: Add requirements.txt to satisfy Render","แก้ไขปัญหา: add reqหน้าการแสดงผลrements.txt to satisfy render","hash=aaab381; author=pchr-pyl"
-"Commit ที่ 45","2026-02-04 11:18:01 +0700","Refactor: Cleanup dead code and removed features","ปรับปรุงโครงสร้างระบบ: cleanup dead code and removed features","hash=8254029; author=pchr-pyl"
-"Commit ที่ 46","2026-02-04 11:21:44 +0700","Fix: Update build script to output to public directory","แก้ไขปัญหา: update bหน้าการแสดงผลld script to output to public directory","hash=f5f9cfe; author=pchr-pyl"
-"Commit ที่ 47","2026-02-04 11:26:43 +0700","Fix: Add vercel.json to configure output directory","แก้ไขปัญหา: add vercel.json to configure output directory","hash=19fbc5a; author=pchr-pyl"
-"Commit ที่ 48","2026-02-04 11:35:45 +0700","Refactor: Remove requirements.txt (Render not needed)","ปรับปรุงโครงสร้างระบบ: remove reqหน้าการแสดงผลrements.txt (render not needed)","hash=f0a574d; author=pchr-pyl"
-"Commit ที่ 49","2026-02-04 13:32:27 +0700","Fix: Export functionality for users and cleanup code","แก้ไขปัญหา: การดาวน์โหลดไฟล์รายงาน functionality for users and cleanup code","hash=201ef17; author=pchr-pyl"
-"Commit ที่ 50","2026-02-04 14:05:53 +0700","Update Social dimension questions and fix numbering","อัปเดตระบบ: update social dimension questions and fix numbering","hash=1808ad8; author=pchr-pyl"
-"Commit ที่ 51","2026-02-04 14:07:50 +0700","Fix question text redundancy","แก้ไขปัญหา: question text redundancy","hash=102d8fa; author=pchr-pyl"
-"Commit ที่ 52","2026-02-04 14:12:45 +0700","Restore Social dimension categories","อัปเดตระบบ: restore social dimension categories","hash=944783c; author=pchr-pyl"
-"Commit ที่ 53","2026-02-11 11:40:43 +0700","Fix admin dashboard fetch error - extract shared Supabase config","แก้ไขปัญหา: admin dashboard fetch error - extract shared ระบบโครงสร้างฐานข้อมูลความปลอดภัย config","hash=d346a17; author=pchr-pyl"
-"Commit ที่ 54","2026-02-11 11:42:16 +0700","Update Supabase credentials to new project","อัปเดตระบบ: update ระบบโครงสร้างฐานข้อมูลความปลอดภัย credentials to new project","hash=72c6963; author=pchr-pyl"
-"Commit ที่ 55","2026-02-11 11:49:22 +0700","Revert to original Supabase credentials","อัปเดตระบบ: revert to original ระบบโครงสร้างฐานข้อมูลความปลอดภัย credentials","hash=8e9062f; author=pchr-pyl"
-"Commit ที่ 56","2026-02-20 10:04:20 +0700","feat: Add URL parameter support for 14 organizations","เพิ่มความสามารถ: add url parameter support for 14 organizations","hash=f1d9f25; author=pchr-pyl"
-"Commit ที่ 57","2026-02-20 10:07:46 +0700","feat: Add welcome toast popup for organization","เพิ่มความสามารถ: add welcome toast popup for organization","hash=c9cce26; author=pchr-pyl"
-"Commit ที่ 58","2026-02-20 10:14:49 +0700","fix: adjust timing of welcome toast","แก้ไขปัญหา: adjust timing of welcome toast","hash=0a62601; author=pchr-pyl"
-"Commit ที่ 59","2026-02-20 10:30:32 +0700","chore: trigger vercel deployment","จัดการระบบหลังบ้าน: trigger vercel deployment","hash=ae7e9f6; author=pchr-pyl"
-"Commit ที่ 60","2026-02-20 10:50:37 +0700","fix: implement button debouncing and offline fallback","แก้ไขปัญหา: implement button debouncing and ระบบรองรับการทําแบบสำรวจต่อตอนอินเทอร์เน็ตใช้งานไม่ได้","hash=530e63c; author=pchr-pyl"
-"Commit ที่ 61","2026-02-20 11:08:29 +0700","Revert ""fix: implement button debouncing and offline fallback""","อัปเดตระบบ: revert ""fix: implement button debouncing and ระบบรองรับการทําแบบสำรวจต่อตอนอินเทอร์เน็ตใช้งานไม่ได้""","hash=bf9012a; author=pchr-pyl"
-"Commit ที่ 62","2026-03-01 13:23:02 +0700","Update from local","อัปเดตระบบ: update from local","hash=935013f; author=Patchara Phongyeelar"
-"Commit ที่ 63","2026-03-01 13:23:18 +0700","Merge branch 'main' of https://github.com/pchr-pyl/well-being-survey","รวมชุดคำสั่งและอัปเดตโค้ดของระบบเข้าด้วยกันเป็นเวอร์ชันล่าสุด","hash=346de43; author=Patchara Phongyeelar"
-"Commit ที่ 64","2026-03-01 13:36:04 +0700","feat: add HRD ch1 survey and admin dashboard","เพิ่มความสามารถ: add แบบฟอร์มรายงาน CH1 สำหรับองค์กร survey and admin dashboard","hash=46bdd66; author=Patchara Phongyeelar"
-"Commit ที่ 65","2026-03-01 14:52:58 +0700","chore: trigger vercel deploy","จัดการระบบหลังบ้าน: trigger vercel deploy","hash=3ea1363; author=Patchara Phongyeelar"
-"Commit ที่ 66","2026-03-01 14:53:44 +0700","deploy: update author email to trigger vercel","อัปเดตระบบบนเซิร์ฟเวอร์เพื่อให้ผู้ใช้งานเข้าถึงเวอร์ชันล่าสุด","hash=1f731fb; author=Patchara Phongyeelar"
-"Commit ที่ 67","2026-03-01 14:57:33 +0700","fix(ch1): remove .select() from insert to avoid anon RLS error","แก้ไขปัญหา: remove .select() from insert to avoid anon ระบบล็อกความเป็นส่วนตัว (Row Level Security) กันข้อมูลข้ามองค์กร error","hash=47c1cf3; author=Patchara Phongyeelar"
-"Commit ที่ 68","2026-03-01 15:00:16 +0700","fix(routing): point /admin-login to correct folder","แก้ไขปัญหา: point /admin-login to correct folder","hash=139e337; author=Patchara Phongyeelar"
-"Commit ที่ 69","2026-03-01 15:01:32 +0700","feat(ch1): add validation for staff age sum against total","เพิ่มความสามารถ: add validation for staff age sum against total","hash=1bb12d4; author=Patchara Phongyeelar"
-"Commit ที่ 70","2026-03-01 15:06:07 +0700","fix(ch1): move admin-login to root and use correct supabase project","แก้ไขปัญหา: move admin-login to root and use correct ระบบโครงสร้างฐานข้อมูลความปลอดภัย project","hash=a7d3439; author=Patchara Phongyeelar"
-"Commit ที่ 71","2026-03-01 15:06:34 +0700","trigger: deploy with correct vercel author email","อัปเดตระบบบนเซิร์ฟเวอร์เพื่อให้ผู้ใช้งานเข้าถึงเวอร์ชันล่าสุด","hash=6f735a1; author=Patchara Phongyeelar"
-"Commit ที่ 72","2026-03-01 15:09:51 +0700","trigger: deploy with old verified email","อัปเดตระบบบนเซิร์ฟเวอร์เพื่อให้ผู้ใช้งานเข้าถึงเวอร์ชันล่าสุด","hash=aad4c54; author=Patchara Phongyeelar"
-"Commit ที่ 73","2026-03-02 22:29:33 +0700","fix: resolve document.write TDZ bug + age-sum spinner + negative guards; add QA test report","แก้ไขปัญหา: resolve document.write tdz ข้อบกพร่องเล็กน้อย + age-sum spinner + negative guards; add qa test report","hash=a29db83; author=Patchara Phongyeelar"
-"Commit ที่ 74","2026-03-02 23:31:13 +0700","Fix critical bugs: step navigation, draft save, and input validation","แก้ไขปัญหา: step navigation, draft save, and input validation","hash=7ba8c11; author=Patchara Phongyeelar"
-"Commit ที่ 75","2026-03-02 23:49:52 +0700","Fix critical QA test failures: leading zeros and step navigation","แก้ไขปัญหา: leading zeros and step navigation","hash=8c1f2a5; author=Patchara Phongyeelar"
-"Commit ที่ 76","2026-03-02 23:52:53 +0700","Fix timing issue: call setupNegativeGuards after elements are ready","แก้ไขปัญหา: call setupnegativeguards after elements are ready","hash=0588264; author=Patchara Phongyeelar"
-"Commit ที่ 77","2026-03-02 23:54:36 +0700","Trigger deployment - version bump to v2.1","อัปเดตระบบบนเซิร์ฟเวอร์เพื่อให้ผู้ใช้งานเข้าถึงเวอร์ชันล่าสุด","hash=9b392be; author=Patchara Phongyeelar"
-"Commit ที่ 78","2026-03-03 00:28:44 +0700","Add Landing Page + Fix column mapping + Add email validation","อัปเดตระบบ: add หน้าแรกก่อนเข้าทำแบบสำรวจ + fix column mapping + add email validation","hash=58acf60; author=Patchara Phongyeelar"
-"Commit ที่ 79","2026-03-03 00:37:54 +0700","Fix: Remove 4 cards from landing page + fix email button navigation","แก้ไขปัญหา: remove 4 cards from หน้าแรกก่อนเข้าทำแบบสำรวจ + fix email button navigation","hash=88e8c7a; author=Patchara Phongyeelar"
-"Commit ที่ 80","2026-03-03 00:43:22 +0700","fix: TOTAL_STEPS 7->8, remap validateStep for step-0 landing, hide nav on landing, clamp prevStep to step 1","แก้ไขปัญหา: total_steps 7->8, remap validatestep for step-0 landing, hide nav on landing, clamp prevstep to step 1","hash=b0bc2ba; author=Patchara Phongyeelar"
-"Commit ที่ 81","2026-03-03 00:45:07 +0700","Fix: Update step navigation and progress for landing page integration","แก้ไขปัญหา: update step navigation and progress for หน้าแรกก่อนเข้าทำแบบสำรวจ integration","hash=d3f866d; author=Patchara Phongyeelar"
-"Commit ที่ 82","2026-03-03 01:00:57 +0700","fix: add id form-nav/form-progress to HTML, fix updateUI querySelector, hide nav+progress initially on landing","แก้ไขปัญหา: add id form-nav/form-progress to html, fix updateหน้าการแสดงผล queryselector, hide nav+progress initially on landing","hash=6ff92ce; author=Patchara Phongyeelar"
-"Commit ที่ 83","2026-03-03 01:18:16 +0700","fix: FIX2+3+4 force-hide step-0 in confirmEmailAndStart, explicit display in updateUI","แก้ไขปัญหา: fix2+3+4 force-hide step-0 in confirmemailandstart, explicit display in updateหน้าการแสดงผล","hash=647af16; author=Patchara Phongyeelar"
-"Commit ที่ 84","2026-03-03 01:24:13 +0700","fix: silent localStorage errors, remove all auto-save error toasts, skip auto-save on landing","แก้ไขปัญหา: silent localstorage errors, remove all auto-save error toasts, skip auto-save on landing","hash=ddb4388; author=Patchara Phongyeelar"
-"Commit ที่ 85","2026-03-03 01:43:01 +0700","Fix: Use showStep() in nextStep() and prevStep() for proper navigation","แก้ไขปัญหา: use showstep() in nextstep() and prevstep() for proper navigation","hash=33c1d57; author=Patchara Phongyeelar"
-"Commit ที่ 86","2026-03-03 01:55:29 +0700","Fix: Add missing Supabase client script","แก้ไขปัญหา: add missing ระบบโครงสร้างฐานข้อมูลความปลอดภัย client script","hash=b1b3759; author=Patchara Phongyeelar"
-"Commit ที่ 87","2026-03-02 19:09:56 +0000","Initial plan","จุดเริ่มต้นโครงสร้างระบบ","hash=ca0fd6e; author=copilot-swe-agent[bot]"
-"Commit ที่ 88","2026-03-02 19:11:59 +0000","Clean up: remove test/debug files, screenshots, playwright dependency; update .gitignore","จัดระเบียบไฟล์และลบไฟล์ขยะในระบบเพื่อให้เว็บทำงานเร็วขึ้น","hash=2c73bab; author=copilot-swe-agent[bot]"
-"Commit ที่ 89","2026-03-03 02:32:13 +0700","chore: update latest changes","จัดการระบบหลังบ้าน: update latest changes","hash=68e23ca; author=Patchara Phongyeelar"
-"Commit ที่ 90","2026-03-03 02:50:26 +0700","Merge branch 'copilot/clean-up-project-files' - Clean up test files and dependencies","รวมชุดคำสั่งและอัปเดตโค้ดของระบบเข้าด้วยกันเป็นเวอร์ชันล่าสุด","hash=0425eb1; author=Patchara Phongyeelar"
-"Commit ที่ 91","2026-03-03 02:54:37 +0700","chore: remove all debug, test, and screenshot files","จัดการระบบหลังบ้าน: remove all deข้อบกพร่องเล็กน้อย, test, and screenshot files","hash=050ee58; author=Patchara Phongyeelar"
-"Commit ที่ 92","2026-03-03 02:55:10 +0700","chore: update .gitignore to prevent debug files","จัดการระบบหลังบ้าน: update .gitignore to prevent deข้อบกพร่องเล็กน้อย files","hash=897cb77; author=Patchara Phongyeelar"
-"Commit ที่ 93","2026-03-03 15:18:39 +0700","Route /admin to unified Supabase admin login","อัปเดตระบบ: route /admin to unified ระบบโครงสร้างฐานข้อมูลความปลอดภัย admin login","hash=54fbd2b; author=Patchara Phongyeelar"
-"Commit ที่ 94","2026-03-03 15:38:56 +0700","Separate CH1 login and unify admin auth with Supabase","อัปเดตระบบ: separate ch1 login and unify admin auth with ระบบโครงสร้างฐานข้อมูลความปลอดภัย","hash=b2c44d6; author=Patchara Phongyeelar"
-"Commit ที่ 95","2026-03-03 15:46:18 +0700","Fix /admin dashboard page encoding and restore clean state","แก้ไขปัญหา: /admin dashboard page encoding and restore clean state","hash=da9f615; author=Patchara Phongyeelar"
-"Commit ที่ 96","2026-03-03 15:48:24 +0700","Restore admin/index.html to working version from 897cb77","อัปเดตระบบ: restore admin/index.html to working version from 897cb77","hash=4fa4ab6; author=Patchara Phongyeelar"
-"Commit ที่ 97","2026-03-03 15:53:22 +0700","Fix /admin login page with Supabase auth and restore dashboard","แก้ไขปัญหา: /admin login page with ระบบโครงสร้างฐานข้อมูลความปลอดภัย auth and restore dashboard","hash=ca67754; author=Patchara Phongyeelar"
-"Commit ที่ 98","2026-03-03 08:55:54 +0000","Initial plan","จุดเริ่มต้นโครงสร้างระบบ","hash=c45d1a2; author=copilot-swe-agent[bot]"
-"Commit ที่ 99","2026-03-03 08:59:40 +0000","Switch all fonts to IBM Plex Sans Thai Looped","อัปเดตระบบ: switch all fonts to ibm plex sans thai looped","hash=430c478; author=copilot-swe-agent[bot]"
-"Commit ที่ 100","2026-03-03 16:10:23 +0700","Merge pull request #2 from pchr-pyl/copilot/update-font-to-ibm-plex-sans-thai","รวมชุดคำสั่งและอัปเดตโค้ดของระบบเข้าด้วยกันเป็นเวอร์ชันล่าสุด","hash=e37094c; author=Patchara Phongyeelar"
-"Commit ที่ 101","2026-03-03 16:48:07 +0700","feat: Update to Well-being Survey v3.0 - 5-part structure","เพิ่มความสามารถ: update to well-being survey v3.0 - 5-part structure","hash=58bbd9e; author=Patchara Phongyeelar"
-"Commit ที่ 102","2026-03-03 16:51:56 +0700","feat: Update admin dashboard for v3.0","เพิ่มความสามารถ: update admin dashboard for v3.0","hash=3b6842f; author=Patchara Phongyeelar"
-"Commit ที่ 103","2026-03-03 22:55:22 +0700","feat: Complete rewrite to Well-being Survey v3.0 - 5 part structure","เพิ่มความสามารถ: complete rewrite to well-being survey v3.0 - 5 part structure","hash=592e01c; author=Patchara Phongyeelar"
-"Commit ที่ 104","2026-03-03 22:57:39 +0700","feat: Update admin dashboard for v3.0","เพิ่มความสามารถ: update admin dashboard for v3.0","hash=d546096; author=Patchara Phongyeelar"
-"Commit ที่ 105","2026-03-03 23:04:30 +0700","fix: Remove age validation to allow any values","แก้ไขปัญหา: remove age validation to allow any values","hash=5f66e03; author=Patchara Phongyeelar"
-"Commit ที่ 106","2026-03-03 23:05:55 +0700","feat: Add age distribution validation","เพิ่มความสามารถ: add age distribution validation","hash=c014931; author=Patchara Phongyeelar"
-"Commit ที่ 107","2026-03-03 23:15:00 +0700","feat: Add comprehensive validation for staff distribution","เพิ่มความสามารถ: add comprehensive validation for staff distribution","hash=47b0f7f; author=Patchara Phongyeelar"
-"Commit ที่ 108","2026-03-03 23:19:00 +0700","feat: Add automatic calculation for turnover and transfer rates","เพิ่มความสามารถ: add automatic calculation for turnover and transfer rates","hash=68d27c5; author=Patchara Phongyeelar"
-"Commit ที่ 109","2026-03-03 23:22:06 +0700","feat: Add 'Other (specify)' field for staff types","เพิ่มความสามารถ: add 'other (specify)' field for staff types","hash=7914629; author=Patchara Phongyeelar"
-"Commit ที่ 110","2026-03-03 23:26:18 +0700","Add comprehensive admin portal and update HRD Ch1 form","อัปเดตระบบ: add comprehensive admin portal and update แบบฟอร์มรายงาน CH1 สำหรับองค์กร form","hash=97c83ae; author=Patchara Phongyeelar"
-"Commit ที่ 111","2026-03-03 23:41:44 +0700","Clean up project and add /admin route","จัดระเบียบไฟล์และลบไฟล์ขยะในระบบเพื่อให้เว็บทำงานเร็วขึ้น","hash=83e820a; author=Patchara Phongyeelar"
-"Commit ที่ 112","2026-03-03 23:46:35 +0700","Add predefined Wellbeing Survey orgs and improve sidebar toggle","อัปเดตระบบ: add predefined wellbeing survey orgs and improve sidebar toggle","hash=4abc3ee; author=Patchara Phongyeelar"
-"Commit ที่ 113","2026-03-04 00:00:38 +0700","fix: remove invalid outputDirectory and stale rewrites from vercel.json","แก้ไขปัญหา: remove invalid outputdirectory and stale rewrites from vercel.json","hash=1d3ad4e; author=Patchara Phongyeelar"
-"Commit ที่ 114","2026-03-04 00:07:07 +0700","fix: remove UTF-8 BOM from vercel.json causing Vercel deployment failure","แก้ไขปัญหา: remove utf-8 bom from vercel.json causing vercel deployment failure","hash=87febd7; author=Patchara Phongyeelar"
-"Commit ที่ 115","2026-03-04 00:10:14 +0700","fix: restore outputDirectory for static site (no BOM)","แก้ไขปัญหา: restore outputdirectory for static site (no bom)","hash=8f7df4a; author=Patchara Phongyeelar"
-"Commit ที่ 116","2026-03-04 00:20:30 +0700","feat: add floating expand button for sidebar toggle","เพิ่มความสามารถ: add floating expand button for sidebar toggle","hash=e328871; author=Patchara Phongyeelar"
-"Commit ที่ 117","2026-03-04 00:42:37 +0700","feat: sidebar edge-tab toggle, add dcy/doh_main orgs to WB_ORGS","เพิ่มความสามารถ: sidebar edge-tab toggle, add dcy/doh_main orgs to wb_orgs","hash=7b04c73; author=Patchara Phongyeelar"
-"Commit ที่ 118","2026-03-04 05:24:25 +0700","fix: remove UTF-8 BOM from ch1.html causing garbled Thai text","แก้ไขปัญหา: remove utf-8 bom from ch1.html causing garbled thai text","hash=c9a81ad; author=Patchara Phongyeelar"
-"Commit ที่ 119","2026-03-05 06:02:44 +0700","fix(ch1): remove v3.0 (5 ส่วน) version text from header and meta","แก้ไขปัญหา: remove v3.0 (5 ส่วน) version text from header and meta","hash=bf8c8fb; author=Patchara Phongyeelar"
-"Commit ที่ 120","2026-03-05 06:28:06 +0700","Update turnover section layout to table format","อัปเดตระบบ: update turnover section layout to table format","hash=591853f; author=Patchara Phongyeelar"
-"Commit ที่ 121","2026-03-05 11:54:08 +0700","Update Section 5 numbering: renumber questions 17-19 and add Intervention Packages feedback question","อัปเดตระบบ: update section 5 numbering: renumber questions 17-19 and add intervention packages feedback question","hash=dce1a2b; author=pchr-pyl"
-"Commit ที่ 122","2026-03-05 12:06:00 +0700","Update question 17 to use Click to Rank layout","อัปเดตระบบ: update question 17 to use click to rank layout","hash=e85af87; author=pchr-pyl"
-"Commit ที่ 123","2026-03-05 12:49:01 +0700","feat: Add interactive ranking system and PDF upload support","เพิ่มความสามารถ: add โต้ตอบได้ ระบบการคลิกจัดอันดับจุดเน้นสำคัญในการพัฒนา and ปุ่มอัปโหลดและแนบไฟล์เอกสาร PDF รองรับ 1MB support","hash=60839fd; author=pchr-pyl"
-"Commit ที่ 124","2026-03-05 14:10:11 +0700","Fix form submission issues and add debugging tools","แก้ไขปัญหา: form submission issues and add deข้อบกพร่องเล็กน้อยging tools","hash=51522a9; author=pchr-pyl"
-"Commit ที่ 125","2026-03-05 15:17:24 +0700","fix: fix security-scan CI job - replace trufflehog with grep-based scan","แก้ไขปัญหา: fix security-scan ci job - replace trufflehog with grep-based scan","hash=35eb95c; author=pchr-pyl"
-"Commit ที่ 126","2026-03-05 23:26:27 +0700","Update project with latest changes - March 5, 2026","อัปเดตระบบให้เป็นข้อมูลล่าสุด","hash=0b8b92d; author=Patchara Phongyeelar"
-"Commit ที่ 127","2026-03-06 00:17:16 +0700","Add CH1 form automation script with 10 rounds testing","อัปเดตระบบ: add ch1 form automation script with 10 rounds testing","hash=9be37b6; author=Patchara Phongyeelar"
-"Commit ที่ 128","2026-03-06 00:19:44 +0700","Clean up project - remove unnecessary files","จัดระเบียบไฟล์และลบไฟล์ขยะในระบบเพื่อให้เว็บทำงานเร็วขึ้น","hash=20dc6ae; author=Patchara Phongyeelar"
-"Commit ที่ 129","2026-03-06 09:18:06 +0700","Update code and submit forms","อัปเดตระบบ: update code and submit forms","hash=e5e18d5; author=pchr-pyl"
-"Commit ที่ 130","2026-03-06 09:19:50 +0700","Merge branch 'main' of https://github.com/pchr-pyl/well-being-survey","รวมชุดคำสั่งและอัปเดตโค้ดของระบบเข้าด้วยกันเป็นเวอร์ชันล่าสุด","hash=fcfef09; author=pchr-pyl"
-"Commit ที่ 131","2026-03-06 10:14:23 +0700","Clean up project: remove duplicate playwright scripts, test artifacts, and unused files","จัดระเบียบไฟล์และลบไฟล์ขยะในระบบเพื่อให้เว็บทำงานเร็วขึ้น","hash=87ebc91; author=Patchara"
-"Commit ที่ 132","2026-03-06 10:36:22 +0700"," Fix CI/CD Pipeline - Resolve deployment failures","อัปเดตระบบ:  fix ระบบอัปเดตเวอร์ชันบนเซิร์ฟเวอร์แบบอัตโนมัติ pipeline - resolve deployment failures","hash=01733af; author=Patchara"
-"Commit ที่ 133","2026-03-06 10:39:18 +0700"," Remove deploy-production job - Fix CI/CD failures","อัปเดตระบบ:  remove deploy-production job - fix ระบบอัปเดตเวอร์ชันบนเซิร์ฟเวอร์แบบอัตโนมัติ failures","hash=4463d5e; author=Patchara"
-"Commit ที่ 134","2026-03-10 10:20:26 +0700","Update ch1.html title to 2 lines and fix admin panel to load from correct table","อัปเดตระบบ: update ch1.html title to 2 lines and fix admin panel to load from correct table","hash=6f6ef53; author=Patchara"
-"Commit ที่ 135","2026-03-10 03:26:01 +0000","Initial plan","จุดเริ่มต้นโครงสร้างระบบ","hash=33e20f1; author=copilot-swe-agent[bot]"
-"Commit ที่ 136","2026-03-10 03:28:53 +0000","Fix lighthouse-check CI/CD failure: set uploadArtifacts to false","แก้ไขปัญหา: set uploadartifacts to false","hash=b35d559; author=copilot-swe-agent[bot]"
-"Commit ที่ 137","2026-03-10 10:31:31 +0700","Merge pull request #3 from pchr-pyl/copilot/fix-ci-cd-issues","รวมชุดคำสั่งและอัปเดตโค้ดของระบบเข้าด้วยกันเป็นเวอร์ชันล่าสุด","hash=1adc1eb; author=Patchara Phongyeelar"
-"Commit ที่ 138","2026-03-10 03:34:53 +0000","Initial plan","จุดเริ่มต้นโครงสร้างระบบ","hash=148b85c; author=copilot-swe-agent[bot]"
-"Commit ที่ 139","2026-03-10 03:36:58 +0000","Enable deploy-preview job for all push events on main and develop branches","อัปเดตระบบ: enable deploy-preview job for all push events on main and develop branches","hash=e3ff40b; author=copilot-swe-agent[bot]"
-"Commit ที่ 140","2026-03-10 10:47:57 +0700","Merge pull request #4 from pchr-pyl/copilot/remove-skip-deploy-preview","รวมชุดคำสั่งและอัปเดตโค้ดของระบบเข้าด้วยกันเป็นเวอร์ชันล่าสุด","hash=9665c48; author=Patchara Phongyeelar"
-"Commit ที่ 141","2026-03-10 04:09:29 +0000","Initial plan","จุดเริ่มต้นโครงสร้างระบบ","hash=4b28748; author=copilot-swe-agent[bot]"
-"Commit ที่ 142","2026-03-10 04:16:45 +0000","Initial plan","จุดเริ่มต้นโครงสร้างระบบ","hash=eadf570; author=copilot-swe-agent[bot]"
-"Commit ที่ 143","2026-03-10 04:18:20 +0000","Add individual PDF export for Ch1 responses in admin panel","อัปเดตระบบ: add individual pdf การดาวน์โหลดไฟล์รายงาน for ch1 responses in admin panel","hash=d543b80; author=copilot-swe-agent[bot]"
-"Commit ที่ 144","2026-03-10 11:22:50 +0700","Merge pull request #5 from pchr-pyl/copilot/generate-pdf-individual-data","รวมชุดคำสั่งและอัปเดตโค้ดของระบบเข้าด้วยกันเป็นเวอร์ชันล่าสุด","hash=fbf11dd; author=Patchara Phongyeelar"
-"Commit ที่ 145","2026-03-10 04:26:48 +0000","Add NocoDB Smart Spreadsheet integration to Admin Portal","อัปเดตระบบ: add nocodb ระบบตารางวิเคราะห์ฐานข้อมูลแบบ NocoDB integration to admin portal","hash=c1db7b9; author=copilot-swe-agent[bot]"
-"Commit ที่ 146","2026-03-10 04:27:57 +0000","Initial plan","จุดเริ่มต้นโครงสร้างระบบ","hash=e087db5; author=copilot-swe-agent[bot]"
-"Commit ที่ 147","2026-03-10 04:31:31 +0000","fix: load Sarabun-Bold font to fix garbled Thai bold text in PDF","แก้ไขปัญหา: load sarabun-bold font to fix garbled thai bold text in pdf","hash=e05c944; author=copilot-swe-agent[bot]"
-"Commit ที่ 148","2026-03-10 11:37:46 +0700","Merge pull request #7 from pchr-pyl/copilot/fix-pdf-font-issue","รวมชุดคำสั่งและอัปเดตโค้ดของระบบเข้าด้วยกันเป็นเวอร์ชันล่าสุด","hash=920cb90; author=Patchara Phongyeelar"
-"Commit ที่ 149","2026-03-10 11:40:10 +0700","Merge pull request #6 from pchr-pyl/copilot/convert-database-to-smart-spreadsheet","รวมชุดคำสั่งและอัปเดตโค้ดของระบบเข้าด้วยกันเป็นเวอร์ชันล่าสุด","hash=70c69fc; author=Patchara Phongyeelar"
-"Commit ที่ 150","2026-03-10 04:43:12 +0000","Initial plan","จุดเริ่มต้นโครงสร้างระบบ","hash=b750a3c; author=copilot-swe-agent[bot]"
-"Commit ที่ 151","2026-03-10 04:46:02 +0000","fix: skip deploy-preview step when Vercel secrets are not configured","แก้ไขปัญหา: skip deploy-preview step when vercel secrets are not configured","hash=a795108; author=copilot-swe-agent[bot]"
-"Commit ที่ 152","2026-03-10 11:53:10 +0700","Merge: Combine Windsurf (ModeratorViewer) and Copilot (Smart Spreadsheet) changes","รวมชุดคำสั่งและอัปเดตโค้ดของระบบเข้าด้วยกันเป็นเวอร์ชันล่าสุด","hash=6a32f1f; author=Patchara"
-"Commit ที่ 153","2026-03-10 04:57:28 +0000","Initial plan","จุดเริ่มต้นโครงสร้างระบบ","hash=5fe765d; author=copilot-swe-agent[bot]"
-"Commit ที่ 154","2026-03-10 05:08:06 +0000","Add 2-tab survey selector to Smart Spreadsheet and fix hrd_ch1_responses.email column error","อัปเดตระบบ: add 2-tab survey selector to ระบบตารางวิเคราะห์ฐานข้อมูลแบบ NocoDB and fix hrd_ch1_responses.email column error","hash=f81cb00; author=copilot-swe-agent[bot]"
-"Commit ที่ 155","2026-03-10 12:15:53 +0700","Merge pull request #8 from pchr-pyl/copilot/fix-issue-in-code","รวมชุดคำสั่งและอัปเดตโค้ดของระบบเข้าด้วยกันเป็นเวอร์ชันล่าสุด","hash=712149a; author=Patchara Phongyeelar"
-"Commit ที่ 156","2026-03-10 12:16:59 +0700","Merge pull request #9 from pchr-pyl/copilot/add-nocodb-smart-spreadsheet","รวมชุดคำสั่งและอัปเดตโค้ดของระบบเข้าด้วยกันเป็นเวอร์ชันล่าสุด","hash=8894c8b; author=Patchara Phongyeelar"
-"Commit ที่ 157","2026-03-10 12:19:58 +0700","Merge remote-tracking branch 'origin/main'","รวมชุดคำสั่งและอัปเดตโค้ดของระบบเข้าด้วยกันเป็นเวอร์ชันล่าสุด","hash=b068b41; author=Patchara"
-"Commit ที่ 158","2026-03-10 12:20:16 +0700","Sync with GitHub: merge remote changes and add local updates","รวมชุดคำสั่งและอัปเดตโค้ดของระบบเข้าด้วยกันเป็นเวอร์ชันล่าสุด","hash=d1f93a4; author=Patchara"
-"Commit ที่ 159","2026-03-10 12:25:09 +0700","Cleanup project: organize files and remove unused content","จัดระเบียบไฟล์และลบไฟล์ขยะในระบบเพื่อให้เว็บทำงานเร็วขึ้น","hash=2053c3c; author=Patchara"
-"Commit ที่ 160","2026-03-10 12:26:24 +0700","Fix security and performance issues","แก้ไขปัญหา: security and performance issues","hash=cdf73d9; author=Patchara"
-"Commit ที่ 161","2026-03-10 14:59:15 +0700","Update form fields: improve data collection and remove HRD plan URL","อัปเดตระบบ: update form fields: improve data collection and remove hrd plan url","hash=d02aded; author=Patchara"
-"Commit ที่ 162","2026-03-10 16:26:58 +0700","Add PDF download button to CH1 form","อัปเดตระบบ: add pdf download button to ch1 form","hash=64fb9d0; author=Patchara"
-"Commit ที่ 163","2026-03-10 09:32:33 +0000","Initial plan","จุดเริ่มต้นโครงสร้างระบบ","hash=dfcefc0; author=copilot-swe-agent[bot]"
-"Commit ที่ 164","2026-03-10 09:57:00 +0000","fix: replace missing PDF with dynamic printable form page (ch1-printable.html)","แก้ไขปัญหา: replace missing pdf with dynamic หน้าจอแบบฟอร์มที่รองรับการปรินต์ออกมาเป็น PDF page (ch1-printable.html)","hash=b823924; author=copilot-swe-agent[bot]"
-"Commit ที่ 165","2026-03-11 11:12:18 +0700","Update ch1-printable.html with new content","อัปเดตระบบ: update ch1-printable.html with new content","hash=a55f07c; author=Patchara Phongyeelar"
-"Commit ที่ 166","2026-03-11 11:40:02 +0700","Phase 1: Code Organization - Restructure 28 JS files into 5 modules","อัปเดตระบบ: phase 1: code organization - restructure 28 js files into 5 modules","hash=21830a2; author=Patchara"
-"Commit ที่ 167","2026-03-11 04:42:11 +0000","Initial plan","จุดเริ่มต้นโครงสร้างระบบ","hash=79821b3; author=copilot-swe-agent[bot]"
-"Commit ที่ 168","2026-03-11 04:46:28 +0000","Fix broken PDF link in ch1.html and update ch1-printable.html with dynamic printable form","แก้ไขปัญหา: broken pdf link in ch1.html and update ch1-printable.html with dynamic หน้าจอแบบฟอร์มที่รองรับการปรินต์ออกมาเป็น PDF","hash=e279bbc; author=copilot-swe-agent[bot]"
-"Commit ที่ 169","2026-03-11 11:48:40 +0700","Merge pull request #11 from pchr-pyl/copilot/fix-merge-issues","รวมชุดคำสั่งและอัปเดตโค้ดของระบบเข้าด้วยกันเป็นเวอร์ชันล่าสุด","hash=12abac5; author=Patchara Phongyeelar"
-"Commit ที่ 170","2026-03-11 04:56:06 +0000","fix: resolve merge conflict in ch1.html - keep ch1-printable.html href + include new js modules","แก้ไขปัญหา: resolve merge conflict in ch1.html - keep ch1-printable.html href + include new js modules","hash=9457b2b; author=copilot-swe-agent[bot]"
-"Commit ที่ 171","2026-03-11 12:12:28 +0700","Fix: Restore missing modules and update HTML to use legacy files","แก้ไขปัญหา: restore missing modules and update html to use legacy files","hash=551051d; author=Patchara"
-"Commit ที่ 172","2026-03-11 05:15:19 +0000","Initial plan","จุดเริ่มต้นโครงสร้างระบบ","hash=fd18cc7; author=copilot-swe-agent[bot]"
-"Commit ที่ 173","2026-03-11 05:23:17 +0000","Add missing CH1_Form.pdf to assets directory to fix 404 error","อัปเดตระบบ: add missing ch1_form.pdf to assets directory to fix 404 error","hash=0d9bb7f; author=copilot-swe-agent[bot]"
-"Commit ที่ 174","2026-03-11 12:27:52 +0700","Merge pull request #12 from pchr-pyl/copilot/fix-ch1-form-pdf-issue","รวมชุดคำสั่งและอัปเดตโค้ดของระบบเข้าด้วยกันเป็นเวอร์ชันล่าสุด","hash=caba603; author=Patchara Phongyeelar"
-"Commit ที่ 175","2026-03-11 13:36:45 +0700","Refine printable PDF flow and clean CH1 form sections","อัปเดตระบบ: refine printable pdf flow and clean ch1 form sections","hash=0962917; author=Patchara"
-"Commit ที่ 176","2026-03-11 13:40:33 +0700","Fix CH1 PDF button to open printable page","แก้ไขปัญหา: ch1 pdf button to open printable page","hash=0472bdc; author=Patchara"
-"Commit ที่ 177","2026-03-11 13:44:10 +0700","Prevent zero autofill in printable number fields","อัปเดตระบบ: prevent zero autofill in printable number fields","hash=fd607a6; author=Patchara"
-"Commit ที่ 178","2026-03-11 14:17:13 +0700","Update: Add printable form and fix module references","อัปเดตระบบ: update: add หน้าจอแบบฟอร์มที่รองรับการปรินต์ออกมาเป็น PDF and fix module references","hash=765da0f; author=Patchara"
-"Commit ที่ 179","2026-03-13 18:00:05 +0700","Update organization options and add Google sync infrastructure","อัปเดตระบบ: update organization options and add google sync infrastructure","hash=b466dde; author=Patchara"
-"Commit ที่ 180","2026-03-13 11:07:39 +0000","Initial plan","จุดเริ่มต้นโครงสร้างระบบ","hash=ce6984c; author=copilot-swe-agent[bot]"
-"Commit ที่ 181","2026-03-13 11:21:28 +0000","Fix Vercel deployment: add framework null, remove redundant rewrites, improve vercelignore","แก้ไขปัญหา: add framework null, remove redundant rewrites, improve vercelignore","hash=7bff02f; author=copilot-swe-agent[bot]"
-"Commit ที่ 182","2026-03-13 18:23:03 +0700","Merge pull request #13 from pchr-pyl/copilot/fix-urgent-issue","รวมชุดคำสั่งและอัปเดตโค้ดของระบบเข้าด้วยกันเป็นเวอร์ชันล่าสุด","hash=b06ffb2; author=Patchara Phongyeelar"
-"Commit ที่ 183","2026-03-13 18:26:17 +0700","Update Git configuration to patchara60118171@gmail.com","อัปเดตระบบ: update git configuration to patchara60118171@gmail.com","hash=992b7cf; author=Patchara"
-"Commit ที่ 184","2026-03-13 18:59:57 +0700","Merge remote changes","รวมชุดคำสั่งและอัปเดตโค้ดของระบบเข้าด้วยกันเป็นเวอร์ชันล่าสุด","hash=b260208; author=Patchara"
-"Commit ที่ 185","2026-03-13 19:02:31 +0700","Switch to patchara60118171 account","อัปเดตระบบ: switch to patchara60118171 account","hash=0ddd3a6; author=Patchara"
-"Commit ที่ 186","2026-03-13 19:03:26 +0700","Verify push with patchara60118171 account","อัปเดตระบบ: verify push with patchara60118171 account","hash=72cef15; author=Patchara"
-"Commit ที่ 187","2026-03-13 19:20:33 +0700","Update project with latest features and analysis","อัปเดตระบบให้เป็นข้อมูลล่าสุด","hash=c19bc5e; author=Patchara Phongyeelar"
-"Commit ที่ 188","2026-03-14 08:53:01 +0700","chore: add supabase:deploy script and update configuration","จัดการระบบหลังบ้าน: add ระบบโครงสร้างฐานข้อมูลความปลอดภัย:deploy script and update configuration","hash=1539d95; author=Patchara"
-"Commit ที่ 189","2026-03-14 08:53:16 +0700","docs: update installation instructions and setup guide","อัปเดตเอกสาร: update installation instructions and setup gหน้าการแสดงผลde","hash=260c5c9; author=Patchara"
-"Commit ที่ 190","2026-03-14 10:18:23 +0700","security: admin role DB, edge function auth, anti-replay, RLS hardening","ความปลอดภัย: admin role db, ฟังก์ชั่นความปลอดภัยระดับสูงทำงานบนคลาวด์ auth, การป้องกันระบบจากการโจมตีด้วยการส่งข้อมูลซ้ำแป้น, ระบบล็อกความเป็นส่วนตัว (Row Level Security) กันข้อมูลข้ามองค์กร hardening","hash=aeb8e45; author=Patchara"
-"Commit ที่ 191","2026-03-14 16:29:02 +0700","feat(admin): sync claude portal and backend wiring","เพิ่มความสามารถ: sync claude portal and backend wiring","hash=b454f72; author=patchara60118171"
-"Commit ที่ 192","2026-03-14 16:29:02 +0700","feat(admin): sync claude portal and backend wiring","เพิ่มความสามารถ: sync claude portal and backend wiring","hash=09c62b9; author=patchara60118171"
-"Commit ที่ 193","2026-03-14 17:01:41 +0700","fix(route): restore canonical admin-login path","แก้ไขปัญหา: restore canonical admin-login path","hash=c0a5bef; author=Pchr Pyl"
-"Commit ที่ 194","2026-03-14 17:01:41 +0700","fix(route): restore canonical admin-login path","แก้ไขปัญหา: restore canonical admin-login path","hash=1723045; author=Pchr Pyl"
-"Commit ที่ 195","2026-03-14 17:04:53 +0700","fix(login): restore root admin-login page","แก้ไขปัญหา: restore root admin-login page","hash=b96021f; author=Pchr Pyl"
-"Commit ที่ 196","2026-03-14 17:04:53 +0700","fix(login): restore root admin-login page","แก้ไขปัญหา: restore root admin-login page","hash=ab559eb; author=Pchr Pyl"
-"Commit ที่ 197","2026-03-14 17:10:50 +0700","fix(auth): unify supabase config and restore admin flow","แก้ไขปัญหา: unify ระบบโครงสร้างฐานข้อมูลความปลอดภัย config and restore admin flow","hash=5a27567; author=Pchr Pyl"
-"Commit ที่ 198","2026-03-14 17:10:50 +0700","fix(auth): unify supabase config and restore admin flow","แก้ไขปัญหา: unify ระบบโครงสร้างฐานข้อมูลความปลอดภัย config and restore admin flow","hash=890f6a2; author=Pchr Pyl"
-"Commit ที่ 199","2026-03-14 17:30:54 +0700","feat(org): add supabase-backed organization master CRUD","เพิ่มความสามารถ: add ระบบโครงสร้างฐานข้อมูลความปลอดภัย-backed organization master crud","hash=b05b562; author=Pchr Pyl"
-"Commit ที่ 200","2026-03-14 17:30:54 +0700","feat(org): add supabase-backed organization master CRUD","เพิ่มความสามารถ: add ระบบโครงสร้างฐานข้อมูลความปลอดภัย-backed organization master crud","hash=8fc0131; author=Pchr Pyl"
-"Commit ที่ 201","2026-03-14 17:37:27 +0700","feat(org): use organizations table for admin master data","เพิ่มความสามารถ: use organizations table for admin master data","hash=c652976; author=Pchr Pyl"
-"Commit ที่ 202","2026-03-14 17:37:37 +0700","feat(org): wire admin CRUD to organizations table","เพิ่มความสามารถ: wire admin crud to organizations table","hash=635ae67; author=Pchr Pyl"
-"Commit ที่ 203","2026-03-14 17:37:27 +0700","feat(org): use organizations table for admin master data","เพิ่มความสามารถ: use organizations table for admin master data","hash=eb2a6ec; author=Pchr Pyl"
-"Commit ที่ 204","2026-03-14 17:37:37 +0700","feat(org): wire admin CRUD to organizations table","เพิ่มความสามารถ: wire admin crud to organizations table","hash=f363fe1; author=Pchr Pyl"
-"Commit ที่ 205","2026-03-15 13:41:37 +0700","chore: update admin pages and survey modules","จัดการระบบหลังบ้าน: update admin pages and survey modules","hash=ff5c6f3; author=Pchr Pyl"
-"Commit ที่ 206","2026-03-15 13:42:09 +0700","chore: resolve merge conflicts (keep local)","จัดการระบบหลังบ้าน: resolve merge conflicts (keep local)","hash=61fd7ae; author=Pchr Pyl"
-"Commit ที่ 207","2026-03-15 17:34:15 +0700","chore: update survey and admin scripts","จัดการระบบหลังบ้าน: update survey and admin scripts","hash=03de30f; author=Pchr Pyl"
-"Commit ที่ 208","2026-03-15 23:27:33 +0700","🧹 Project cleanup and fixes","จัดระเบียบไฟล์และลบไฟล์ขยะในระบบเพื่อให้เว็บทำงานเร็วขึ้น","hash=52428b7; author=Pchr Pyl"
-"Commit ที่ 209","2026-03-16 00:13:33 +0700","🔧 Fix Ch1 form position total display","อัปเดตระบบ: 🔧 fix ch1 form position total display","hash=6943023; author=Pchr Pyl"
-"Commit ที่ 210","2026-03-16 00:37:39 +0700","📝 Add Google Apps Script and update PDF functionality","อัปเดตระบบ: 📝 add google apps script and update pdf functionality","hash=81acaed; author=Pchr Pyl"
-"Commit ที่ 211","2026-03-16 06:20:49 +0700","🔧 Update admin portal functionality","อัปเดตระบบ: 🔧 update admin portal functionality","hash=f7b8256; author=Pchr Pyl"
-"Commit ที่ 212","2026-03-17 17:24:59 +0700","fix: restore respondentEmail when loading CH1 draft","แก้ไขปัญหา: restore respondentemail when loading ch1 draft","hash=5d33732; author=Pchr Pyl"
-"Commit ที่ 213","2026-03-17 17:42:48 +0700","chore: adjust vercel cache headers for js and css","จัดการระบบหลังบ้าน: adjust vercel cache headers for js and การตกแต่งสีสันเว็บไซต์","hash=1507264; author=Pchr Pyl"
-"Commit ที่ 214","2026-03-17 18:06:15 +0700","fix: cache-bust pdf-upload.js to force browser reload new version","แก้ไขปัญหา: cache-bust pdf-upload.js to force browser reload new version","hash=6cc075c; author=Patchara"
-"Commit ที่ 215","2026-03-18 09:17:25 +0700","feat: add testorg mode + increase PDF upload limit to 1MB","เพิ่มความสามารถ: add testorg mode + increase ปุ่มอัปโหลดและแนบไฟล์เอกสาร PDF รองรับ 1MB limit to 1mb","hash=ea6f5ce; author=Patchara"
-"Commit ที่ 216","2026-03-18 10:05:54 +0700","feat: Centralized Question Management System Phase 1-4","เพิ่มความสามารถ: คลังระบบจัดการคำถามทั้งหมดแบบรวมศูนย์ system phase 1-4","hash=e1566fc; author=Patchara"
-"Commit ที่ 217","2026-03-18 10:28:04 +0700","fix: rewrite questions-ch1.json with 100% accurate field structure","แก้ไขปัญหา: rewrite questions-ch1.json with 100% accurate field structure","hash=31118de; author=Patchara"
-"Commit ที่ 218","2026-03-19 09:14:02 +0700","Resolve merge conflicts and update from GitHub","รวมชุดคำสั่งและอัปเดตโค้ดของระบบเข้าด้วยกันเป็นเวอร์ชันล่าสุด","hash=9d83ca4; author=pchr-pyl"
-"Commit ที่ 219","2026-03-19 10:03:34 +0700","🔒 Fix security: Remove leaked Supabase Service Role Key from .env.local.example","อัปเดตระบบ: 🔒 fix security: remove leaked ระบบโครงสร้างฐานข้อมูลความปลอดภัย service role key from .env.local.example","hash=01ab25f; author=pchr-pyl"
-"Commit ที่ 220","2026-03-20 00:35:25 +0700","feat: Phase C2 + org-portal nav fix, form-schema, migrations, handoff doc","เพิ่มความสามารถ: phase c2 + พอร์ทัลทางเข้าเฉพาะละองค์กรและหน่วยงาน nav fix, form-schema, migrations, handoff doc","hash=a3d1f43; author=Patchara"
-"Commit ที่ 221","2026-03-20 09:51:53 +0700","chore: update organization list - replace Budget Bureau with Department of Health Service Support","จัดการระบบหลังบ้าน: update organization list - replace budget bureau with department of health service support","hash=f1a6ca0; author=Patchara"
-"Commit ที่ 222","2026-03-20 09:52:31 +0700","index on (no branch): f1a6ca0 chore: update organization list - replace Budget Bureau with Department of Health Service Support","อัปเดตระบบ: index on (no branch): f1a6ca0 chore: update organization list - replace budget bureau with department of health service support","hash=802b619; author=Patchara"
-"Commit ที่ 223","2026-03-20 09:52:31 +0700","On (no branch): temp stash for pull","อัปเดตระบบ: on (no branch): temp stash for pull","hash=ab778c3; author=Patchara"
-"Commit ที่ 224","2026-03-20 09:54:09 +0700","Merge origin/main and resolve conflicts","รวมชุดคำสั่งและอัปเดตโค้ดของระบบเข้าด้วยกันเป็นเวอร์ชันล่าสุด","hash=d46017e; author=Patchara"
-"Commit ที่ 225","2026-03-20 09:56:10 +0700","Merge patchara/main - keep local organization list changes","รวมชุดคำสั่งและอัปเดตโค้ดของระบบเข้าด้วยกันเป็นเวอร์ชันล่าสุด","hash=c2490b5; author=Patchara"
-"Commit ที่ 226","2026-03-20 09:58:48 +0700","fix: update organization dropdown - replace Budget Bureau with Dept of Health Service Support","แก้ไขปัญหา: update organization dropdown - replace budget bureau with dept of health service support","hash=63f7aa6; author=Patchara"
-"Commit ที่ 227","2026-03-20 10:00:18 +0700","fix: replace all Budget Bureau references with Dept of Health Service Support","แก้ไขปัญหา: replace all budget bureau references with dept of health service support","hash=b6f5fe3; author=Patchara"
-"Commit ที่ 228","2026-03-20 10:06:16 +0700","fix: CH1 PDF export now uses dynamic schema from form_questions table","แก้ไขปัญหา: ch1 pdf การดาวน์โหลดไฟล์รายงาน now uses dynamic schema from form_questions table","hash=bc19818; author=Patchara"
-"Commit ที่ 229","2026-03-20 12:30:20 +0700","fix: chart overflow, multi-select org filter, top-3 priority ranking, export PDF","แก้ไขปัญหา: chart overflow, multi-select org filter, top-3 priority ranking, การดาวน์โหลดไฟล์รายงาน pdf","hash=21b0152; author=Patchara"
-"Commit ที่ 230","2026-03-20 14:03:14 +0700","feat: add PDF download button to well-being survey welcome page","เพิ่มความสามารถ: add pdf download button to well-being survey welcome page","hash=07f970a; author=Patchara"
-"Commit ที่ 231","2026-03-20 14:15:15 +0700","fix: correct scale labels (0-3, 0-4), add time input blocks in wb-printable PDF","แก้ไขปัญหา: correct scale labels (0-3, 0-4), add ช่องกรอกเวลา blocks in wb-printable pdf","hash=5caf765; author=Patchara"
-"Commit ที่ 232","2026-03-20 14:21:23 +0700","fix: UCLA loneliness scale shows proper labels (ไม่เคย/แทบไม่เคย/เป็นบางครั้ง/บ่อยครั้ง) from hint","แก้ไขปัญหา: ucla loneliness scale shows proper labels (ไม่เคย/แทบไม่เคย/เป็นบางครั้ง/บ่อยครั้ง) from hint","hash=0361884; author=Patchara"
+Commit,Timestamp,Detail,?????????????????????? (??????),Note
+Commit ??? 1,2026-01-24 23:51:13 +0700,feat: add Google Sheets data collection and history view,???????????????: add ???????????????????????????????? Google Sheets and ???????????????????,hash=5b3b116; author=Antigravity Agent
+Commit ??? 2,2026-01-25 00:02:47 +0700,feat: enforce login check and update footer text,???????????????: ?????????????????????????????????????????? and update footer text,hash=2b9abc6; author=Antigravity Agent
+Commit ??? 3,2026-01-25 00:06:08 +0700,feat: switch to WHO BMI standards and add criteria note,???????????????: switch to who bmi standards and add criteria note,hash=f90a162; author=Antigravity Agent
+Commit ??? 4,2026-01-25 00:13:38 +0700,chore: trigger deployment with correct user,??????????????????: trigger deployment with correct user,hash=2945dfd; author=Patchara
+Commit ??? 5,2026-01-25 00:19:12 +0700,fix: redirect to welcome screen after logout,??????????: redirect to welcome screen after logout,hash=65e3ef4; author=Patchara
+Commit ??? 6,2026-01-25 21:40:44 +0700,"feat: implement cloud draft sync, 24h time input, and progress bar v2","???????????????: implement cloud ???????????????????????????????????????????????, 24h ????????????, and ????????????????????????????????? v2",hash=15cdf13; author=Patchara Phongyeelar
+Commit ??? 7,2026-01-25 21:45:50 +0700,feat: simplify time minutes to 15-min intervals,???????????????: simplify time minutes to 15-min intervals,hash=a150104; author=Patchara Phongyeelar
+Commit ??? 8,2026-01-25 22:01:56 +0700,fix: use official google sign-in button for better ios compatibility,??????????: use official ??????????????????????????????????????????? Google button for better ????????????? Apple (iPhone/iPad) compatibility,hash=71eab28; author=Patchara Phongyeelar
+Commit ??? 9,2026-01-25 22:10:20 +0700,"feat: major survey update - new structure, questions, and TMHI-15 scoring","???????????????: major survey update - new structure, questions, and ?????????????????????????????? TMHI-15",hash=1ec991b; author=Patchara Phongyeelar
+Commit ??? 10,2026-01-25 22:16:21 +0700,feat: add admin dashboard with export and header setup features,???????????????: ??????????????????????????????????????????? with ?????????????????????? and header setup features,hash=d24a6a8; author=Patchara Phongyeelar
+Commit ??? 11,2026-01-25 22:20:00 +0700,fix: improve admin error handling and debug logging,??????????: improve admin error handling and de?????????????????? logging,hash=38d6edd; author=Patchara Phongyeelar
+Commit ??? 12,2026-01-25 22:24:03 +0700,fix: remove social card and improve ios login button rendering,??????????: remove social card and improve ????????????? Apple (iPhone/iPad) login button rendering,hash=0d22cc4; author=Patchara Phongyeelar
+Commit ??? 13,2026-01-25 22:27:09 +0700,fix: add robust manual login fallback for ios/safari,??????????: add robust manual login fallback for ????????????? Apple (iPhone/iPad)/???????????????????????? Safari,hash=98ff3fc; author=Patchara Phongyeelar
+Commit ??? 14,2026-01-25 23:26:25 +0700,"feat: Login UI, Title Selection, Review Flow","???????????????: login ?????????????, title selection, review flow",hash=e6d2e07; author=Patchara Phongyeelar
+Commit ??? 15,2026-01-25 23:44:17 +0700,"Fix Google Login for Safari/iOS, update BMI display, reorder questions, fix Admin URL","??????????: google login for ???????????????????????? Safari/????????????? Apple (iPhone/iPad), update bmi display, reorder questions, fix admin url",hash=11f7ff8; author=Patchara Phongyeelar
+Commit ??? 16,2026-01-25 23:48:56 +0700,Fix redirect URI to use origin only,??????????: redirect uri to use origin only,hash=0f3a082; author=Patchara Phongyeelar
+Commit ??? 17,2026-01-25 23:50:58 +0700,Show Welcome page first with Google Login button,??????????: show welcome page first with google login button,hash=69fbd7f; author=Patchara Phongyeelar
+Commit ??? 18,2026-01-26 00:04:45 +0700,"Fix iOS login with modal button, separate login and start buttons, add welcome buttons CSS","??????????: ????????????? Apple (iPhone/iPad) login with modal button, separate login and start buttons, add welcome buttons ??????????????????????",hash=371fd33; author=Patchara Phongyeelar
+Commit ??? 19,2026-01-26 00:30:01 +0700,Add Supabase integration for cross-device sync,??????????: add ????????????????????????????????? integration for cross-device sync,hash=c3712fe; author=Patchara Phongyeelar
+Commit ??? 20,2026-01-26 00:46:41 +0700,Fix iOS login: force manual redirect flow to avoid popup/mismatch issues,??????????: force manual redirect flow to avoid popup/mismatch issues,hash=b6d4f49; author=Patchara Phongyeelar
+Commit ??? 21,2026-01-26 01:02:43 +0700,Add Admin Dashboard with Chart.js visualization,??????????: ??????????????????????????????????????????? with ???????????????????????????????????????? visualization,hash=c36526e; author=Patchara Phongyeelar
+Commit ??? 22,2026-01-26 01:06:25 +0700,Fix Excel export to flatten JSON response data,??????????: ??????????????????????????????????? Excel (CSV) to flatten json response data,hash=93b9430; author=Patchara Phongyeelar
+Commit ??? 23,2026-01-26 01:10:14 +0700,Fix logout logic to clear localStorage and reset state,??????????: logout logic to clear localstorage and reset state,hash=f038f8f; author=Patchara Phongyeelar
+Commit ??? 24,2026-01-26 01:12:41 +0700,Fix missing progress bar CSS,??????????: missing ????????????????????????????????? ??????????????????????,hash=1db9bc1; author=Patchara Phongyeelar
+Commit ??? 25,2026-01-26 01:17:05 +0700,Fix CSS class conflict for progress bar,??????????: ?????????????????????? class conflict for ?????????????????????????????????,hash=0a9b8dc; author=Patchara Phongyeelar
+Commit ??? 26,2026-01-26 01:51:51 +0700,Implement advanced admin dashboard with 5 sections and logout,??????????: implement advanced admin dashboard with 5 sections and logout,hash=9ea4ffb; author=Patchara Phongyeelar
+Commit ??? 27,2026-01-26 01:59:02 +0700,Fix admin dashboard processing error handling and excel download,??????????: admin dashboard processing error handling and excel download,hash=16beb7c; author=Patchara Phongyeelar
+Commit ??? 28,2026-01-26 02:11:19 +0700,Fix missing stat-risk element in admin dashboard HTML,??????????: missing stat-risk element in admin dashboard html,hash=1b36bb0; author=Patchara Phongyeelar
+Commit ??? 29,2026-01-26 02:36:55 +0700,Update safety questions timeframe and options,??????????: update safety questions timeframe and options,hash=94f7df6; author=Patchara Phongyeelar
+Commit ??? 30,2026-01-26 10:31:47 +0700,Update survey questions and center login button text,??????????: update survey questions and center login button text,hash=d4897c4; author=Patchara Phongyeelar
+Commit ??? 31,2026-01-26 10:34:02 +0700,Update DB schema docs to match survey changes,??????????: update db schema docs to match survey changes,hash=3502a3b; author=Patchara Phongyeelar
+Commit ??? 32,2026-01-26 10:36:44 +0700,Add org_type to Supabase save payload,??????????: add org_type to ????????????????????????????????? save payload,hash=e61e3c9; author=Patchara Phongyeelar
+Commit ??? 33,2026-01-26 10:43:22 +0700,Remove Region filter/chart from Admin Dashboard,??????????: remove region filter/chart from admin dashboard,hash=90bd864; author=Patchara Phongyeelar
+Commit ??? 34,2026-01-28 16:35:11 +0700,Add UCLA Loneliness Scale survey with 20 questions,??????????: add ucla ?????????????????????? (UCLA Loneliness) with 20 questions,hash=56993c6; author=pchr-pyl
+Commit ??? 35,2026-01-28 21:57:36 +0700,Trigger Vercel deployment,?????????????????????????????????????????????????????????????,hash=bf02cb2; author=pchr-pyl
+Commit ??? 36,2026-01-28 22:11:33 +0700,Change Health Behaviors charts (smoke/alcohol) from Pie to Bar chart,??????????: change health behaviors charts (smoke/alcohol) from pie to bar chart,hash=4265df8; author=pchr-pyl
+Commit ??? 37,2026-01-28 22:19:58 +0700,Merge remote changes with local,?????????????????????????????????????????????????????????????,hash=5bb1741; author=Patchara Phongyeelar
+Commit ??? 38,2026-01-28 22:54:24 +0700,fix: update loneliness survey scale from 1-4 to 0-3 with Thai labels,??????????: update loneliness survey scale from 1-4 to 0-3 with thai labels,hash=d7b679d; author=Patchara
+Commit ??? 39,2026-01-29 11:47:46 +0700,Remove Google OAuth login system and replace with email input,??????????: remove google oauth login system and replace with email input,hash=6a4cd2d; author=pchr-pyl
+Commit ??? 40,2026-01-29 14:30:48 +0700,Organize project structure,??????????: organize project structure,hash=12c6706; author=pchr-pyl
+Commit ??? 41,2026-02-04 10:47:32 +0700,Refactor: Separate Social dimension and update survey order,?????????????????????: separate social dimension and update survey order,hash=c14fecb; author=pchr-pyl
+Commit ??? 42,2026-02-04 11:02:33 +0700,Fix: Add package.json for Render build,??????????: add package.json for render b?????????????ld,hash=878ccd1; author=pchr-pyl
+Commit ??? 43,2026-02-04 11:13:06 +0700,Fix: Improve summary layout & Fix Excel export with Thai headers,??????????: improve summary layout & fix ??????????????????????????????????? Excel (CSV) with thai headers,hash=995bf7f; author=pchr-pyl
+Commit ??? 44,2026-02-04 11:15:35 +0700,Fix: Add requirements.txt to satisfy Render,??????????: add req?????????????rements.txt to satisfy render,hash=aaab381; author=pchr-pyl
+Commit ??? 45,2026-02-04 11:18:01 +0700,Refactor: Cleanup dead code and removed features,?????????????????????: cleanup dead code and removed features,hash=8254029; author=pchr-pyl
+Commit ??? 46,2026-02-04 11:21:44 +0700,Fix: Update build script to output to public directory,??????????: update b?????????????ld script to output to public directory,hash=f5f9cfe; author=pchr-pyl
+Commit ??? 47,2026-02-04 11:26:43 +0700,Fix: Add vercel.json to configure output directory,??????????: add vercel.json to configure output directory,hash=19fbc5a; author=pchr-pyl
+Commit ??? 48,2026-02-04 11:35:45 +0700,Refactor: Remove requirements.txt (Render not needed),?????????????????????: remove req?????????????rements.txt (render not needed),hash=f0a574d; author=pchr-pyl
+Commit ??? 49,2026-02-04 13:32:27 +0700,Fix: Export functionality for users and cleanup code,??????????: ?????????????????????? functionality for users and cleanup code,hash=201ef17; author=pchr-pyl
+Commit ??? 50,2026-02-04 14:05:53 +0700,Update Social dimension questions and fix numbering,??????????: update social dimension questions and fix numbering,hash=1808ad8; author=pchr-pyl
+Commit ??? 51,2026-02-04 14:07:50 +0700,Fix question text redundancy,??????????: question text redundancy,hash=102d8fa; author=pchr-pyl
+Commit ??? 52,2026-02-04 14:12:45 +0700,Restore Social dimension categories,??????????: restore social dimension categories,hash=944783c; author=pchr-pyl
+Commit ??? 53,2026-02-11 11:40:43 +0700,Fix admin dashboard fetch error - extract shared Supabase config,??????????: admin dashboard fetch error - extract shared ????????????????????????????????? config,hash=d346a17; author=pchr-pyl
+Commit ??? 54,2026-02-11 11:42:16 +0700,Update Supabase credentials to new project,??????????: update ????????????????????????????????? credentials to new project,hash=72c6963; author=pchr-pyl
+Commit ??? 55,2026-02-11 11:49:22 +0700,Revert to original Supabase credentials,??????????: revert to original ????????????????????????????????? credentials,hash=8e9062f; author=pchr-pyl
+Commit ??? 56,2026-02-20 10:04:20 +0700,feat: Add URL parameter support for 14 organizations,???????????????: add url parameter support for 14 organizations,hash=f1d9f25; author=pchr-pyl
+Commit ??? 57,2026-02-20 10:07:46 +0700,feat: Add welcome toast popup for organization,???????????????: add welcome toast popup for organization,hash=c9cce26; author=pchr-pyl
+Commit ??? 58,2026-02-20 10:14:49 +0700,fix: adjust timing of welcome toast,??????????: adjust timing of welcome toast,hash=0a62601; author=pchr-pyl
+Commit ??? 59,2026-02-20 10:30:32 +0700,chore: trigger vercel deployment,??????????????????: trigger vercel deployment,hash=ae7e9f6; author=pchr-pyl
+Commit ??? 60,2026-02-20 10:50:37 +0700,fix: implement button debouncing and offline fallback,??????????: implement button debouncing and ??????????????????????????????????????????????????????,hash=530e63c; author=pchr-pyl
+Commit ??? 61,2026-02-20 11:08:29 +0700,"Revert ""fix: implement button debouncing and offline fallback""","??????????: revert ""fix: implement button debouncing and ??????????????????????????????????????????????????????""",hash=bf9012a; author=pchr-pyl
+Commit ??? 62,2026-03-01 13:23:02 +0700,Update from local,??????????: update from local,hash=935013f; author=Patchara Phongyeelar
+Commit ??? 63,2026-03-01 13:23:18 +0700,Merge branch 'main' of https://github.com/pchr-pyl/well-being-survey,?????????????????????????????????????????????????????????????,hash=346de43; author=Patchara Phongyeelar
+Commit ??? 64,2026-03-01 13:36:04 +0700,feat: add HRD ch1 survey and admin dashboard,???????????????: add ?????????????? CH1 ???????????? survey and admin dashboard,hash=46bdd66; author=Patchara Phongyeelar
+Commit ??? 65,2026-03-01 14:52:58 +0700,chore: trigger vercel deploy,??????????????????: trigger vercel deploy,hash=3ea1363; author=Patchara Phongyeelar
+Commit ??? 66,2026-03-01 14:53:44 +0700,deploy: update author email to trigger vercel,?????????????????????????????????????????????????????????????,hash=1f731fb; author=Patchara Phongyeelar
+Commit ??? 67,2026-03-01 14:57:33 +0700,fix(ch1): remove .select() from insert to avoid anon RLS error,??????????: remove .select() from insert to avoid anon ??????????????????????? (Row Level Security) ??????????????????? error,hash=47c1cf3; author=Patchara Phongyeelar
+Commit ??? 68,2026-03-01 15:00:16 +0700,fix(routing): point /admin-login to correct folder,??????????: point /admin-login to correct folder,hash=139e337; author=Patchara Phongyeelar
+Commit ??? 69,2026-03-01 15:01:32 +0700,feat(ch1): add validation for staff age sum against total,???????????????: add validation for staff age sum against total,hash=1bb12d4; author=Patchara Phongyeelar
+Commit ??? 70,2026-03-01 15:06:07 +0700,fix(ch1): move admin-login to root and use correct supabase project,??????????: move admin-login to root and use correct ????????????????????????????????? project,hash=a7d3439; author=Patchara Phongyeelar
+Commit ??? 71,2026-03-01 15:06:34 +0700,trigger: deploy with correct vercel author email,?????????????????????????????????????????????????????????????,hash=6f735a1; author=Patchara Phongyeelar
+Commit ??? 72,2026-03-01 15:09:51 +0700,trigger: deploy with old verified email,?????????????????????????????????????????????????????????????,hash=aad4c54; author=Patchara Phongyeelar
+Commit ??? 73,2026-03-02 22:29:33 +0700,fix: resolve document.write TDZ bug + age-sum spinner + negative guards; add QA test report,??????????: resolve document.write tdz ?????????????????? + age-sum spinner + negative guards; add qa test report,hash=a29db83; author=Patchara Phongyeelar
+Commit ??? 74,2026-03-02 23:31:13 +0700,"Fix critical bugs: step navigation, draft save, and input validation","??????????: step navigation, draft save, and input validation",hash=7ba8c11; author=Patchara Phongyeelar
+Commit ??? 75,2026-03-02 23:49:52 +0700,Fix critical QA test failures: leading zeros and step navigation,??????????: leading zeros and step navigation,hash=8c1f2a5; author=Patchara Phongyeelar
+Commit ??? 76,2026-03-02 23:52:53 +0700,Fix timing issue: call setupNegativeGuards after elements are ready,??????????: call setupnegativeguards after elements are ready,hash=0588264; author=Patchara Phongyeelar
+Commit ??? 77,2026-03-02 23:54:36 +0700,Trigger deployment - version bump to v2.1,?????????????????????????????????????????????????????????????,hash=9b392be; author=Patchara Phongyeelar
+Commit ??? 78,2026-03-03 00:28:44 +0700,Add Landing Page + Fix column mapping + Add email validation,??????????: add ????????????????????????? + fix column mapping + add email validation,hash=58acf60; author=Patchara Phongyeelar
+Commit ??? 79,2026-03-03 00:37:54 +0700,Fix: Remove 4 cards from landing page + fix email button navigation,??????????: remove 4 cards from ????????????????????????? + fix email button navigation,hash=88e8c7a; author=Patchara Phongyeelar
+Commit ??? 80,2026-03-03 00:43:22 +0700,"fix: TOTAL_STEPS 7->8, remap validateStep for step-0 landing, hide nav on landing, clamp prevStep to step 1","??????????: total_steps 7->8, remap validatestep for step-0 landing, hide nav on landing, clamp prevstep to step 1",hash=b0bc2ba; author=Patchara Phongyeelar
+Commit ??? 81,2026-03-03 00:45:07 +0700,Fix: Update step navigation and progress for landing page integration,??????????: update step navigation and progress for ????????????????????????? integration,hash=d3f866d; author=Patchara Phongyeelar
+Commit ??? 82,2026-03-03 01:00:57 +0700,"fix: add id form-nav/form-progress to HTML, fix updateUI querySelector, hide nav+progress initially on landing","??????????: add id form-nav/form-progress to html, fix update????????????? queryselector, hide nav+progress initially on landing",hash=6ff92ce; author=Patchara Phongyeelar
+Commit ??? 83,2026-03-03 01:18:16 +0700,"fix: FIX2+3+4 force-hide step-0 in confirmEmailAndStart, explicit display in updateUI","??????????: fix2+3+4 force-hide step-0 in confirmemailandstart, explicit display in update?????????????",hash=647af16; author=Patchara Phongyeelar
+Commit ??? 84,2026-03-03 01:24:13 +0700,"fix: silent localStorage errors, remove all auto-save error toasts, skip auto-save on landing","??????????: silent localstorage errors, remove all auto-save error toasts, skip auto-save on landing",hash=ddb4388; author=Patchara Phongyeelar
+Commit ??? 85,2026-03-03 01:43:01 +0700,Fix: Use showStep() in nextStep() and prevStep() for proper navigation,??????????: use showstep() in nextstep() and prevstep() for proper navigation,hash=33c1d57; author=Patchara Phongyeelar
+Commit ??? 86,2026-03-03 01:55:29 +0700,Fix: Add missing Supabase client script,??????????: add missing ????????????????????????????????? client script,hash=b1b3759; author=Patchara Phongyeelar
+Commit ??? 87,2026-03-02 19:09:56 +0000,Initial plan,????????????????????????,hash=ca0fd6e; author=copilot-swe-agent[bot]
+Commit ??? 88,2026-03-02 19:11:59 +0000,"Clean up: remove test/debug files, screenshots, playwright dependency; update .gitignore",?????????????????????????????????????????????????????????,hash=2c73bab; author=copilot-swe-agent[bot]
+Commit ??? 89,2026-03-03 02:32:13 +0700,chore: update latest changes,??????????????????: update latest changes,hash=68e23ca; author=Patchara Phongyeelar
+Commit ??? 90,2026-03-03 02:50:26 +0700,Merge branch 'copilot/clean-up-project-files' - Clean up test files and dependencies,?????????????????????????????????????????????????????????????,hash=0425eb1; author=Patchara Phongyeelar
+Commit ??? 91,2026-03-03 02:54:37 +0700,"chore: remove all debug, test, and screenshot files","??????????????????: remove all de??????????????????, test, and screenshot files",hash=050ee58; author=Patchara Phongyeelar
+Commit ??? 92,2026-03-03 02:55:10 +0700,chore: update .gitignore to prevent debug files,??????????????????: update .gitignore to prevent de?????????????????? files,hash=897cb77; author=Patchara Phongyeelar
+Commit ??? 93,2026-03-03 15:18:39 +0700,Route /admin to unified Supabase admin login,??????????: route /admin to unified ????????????????????????????????? admin login,hash=54fbd2b; author=Patchara Phongyeelar
+Commit ??? 94,2026-03-03 15:38:56 +0700,Separate CH1 login and unify admin auth with Supabase,??????????: separate ch1 login and unify admin auth with ?????????????????????????????????,hash=b2c44d6; author=Patchara Phongyeelar
+Commit ??? 95,2026-03-03 15:46:18 +0700,Fix /admin dashboard page encoding and restore clean state,??????????: /admin dashboard page encoding and restore clean state,hash=da9f615; author=Patchara Phongyeelar
+Commit ??? 96,2026-03-03 15:48:24 +0700,Restore admin/index.html to working version from 897cb77,??????????: restore admin/index.html to working version from 897cb77,hash=4fa4ab6; author=Patchara Phongyeelar
+Commit ??? 97,2026-03-03 15:53:22 +0700,Fix /admin login page with Supabase auth and restore dashboard,??????????: /admin login page with ????????????????????????????????? auth and restore dashboard,hash=ca67754; author=Patchara Phongyeelar
+Commit ??? 98,2026-03-03 08:55:54 +0000,Initial plan,????????????????????????,hash=c45d1a2; author=copilot-swe-agent[bot]
+Commit ??? 99,2026-03-03 08:59:40 +0000,Switch all fonts to IBM Plex Sans Thai Looped,??????????: switch all fonts to ibm plex sans thai looped,hash=430c478; author=copilot-swe-agent[bot]
+Commit ??? 100,2026-03-03 16:10:23 +0700,Merge pull request #2 from pchr-pyl/copilot/update-font-to-ibm-plex-sans-thai,?????????????????????????????????????????????????????????????,hash=e37094c; author=Patchara Phongyeelar
+Commit ??? 101,2026-03-03 16:48:07 +0700,feat: Update to Well-being Survey v3.0 - 5-part structure,???????????????: update to well-being survey v3.0 - 5-part structure,hash=58bbd9e; author=Patchara Phongyeelar
+Commit ??? 102,2026-03-03 16:51:56 +0700,feat: Update admin dashboard for v3.0,???????????????: update admin dashboard for v3.0,hash=3b6842f; author=Patchara Phongyeelar
+Commit ??? 103,2026-03-03 22:55:22 +0700,feat: Complete rewrite to Well-being Survey v3.0 - 5 part structure,???????????????: complete rewrite to well-being survey v3.0 - 5 part structure,hash=592e01c; author=Patchara Phongyeelar
+Commit ??? 104,2026-03-03 22:57:39 +0700,feat: Update admin dashboard for v3.0,???????????????: update admin dashboard for v3.0,hash=d546096; author=Patchara Phongyeelar
+Commit ??? 105,2026-03-03 23:04:30 +0700,fix: Remove age validation to allow any values,??????????: remove age validation to allow any values,hash=5f66e03; author=Patchara Phongyeelar
+Commit ??? 106,2026-03-03 23:05:55 +0700,feat: Add age distribution validation,???????????????: add age distribution validation,hash=c014931; author=Patchara Phongyeelar
+Commit ??? 107,2026-03-03 23:15:00 +0700,feat: Add comprehensive validation for staff distribution,???????????????: add comprehensive validation for staff distribution,hash=47b0f7f; author=Patchara Phongyeelar
+Commit ??? 108,2026-03-03 23:19:00 +0700,feat: Add automatic calculation for turnover and transfer rates,???????????????: add automatic calculation for turnover and transfer rates,hash=68d27c5; author=Patchara Phongyeelar
+Commit ??? 109,2026-03-03 23:22:06 +0700,feat: Add 'Other (specify)' field for staff types,???????????????: add 'other (specify)' field for staff types,hash=7914629; author=Patchara Phongyeelar
+Commit ??? 110,2026-03-03 23:26:18 +0700,Add comprehensive admin portal and update HRD Ch1 form,??????????: add comprehensive admin portal and update ?????????????? CH1 ???????????? form,hash=97c83ae; author=Patchara Phongyeelar
+Commit ??? 111,2026-03-03 23:41:44 +0700,Clean up project and add /admin route,?????????????????????????????????????????????????????????,hash=83e820a; author=Patchara Phongyeelar
+Commit ??? 112,2026-03-03 23:46:35 +0700,Add predefined Wellbeing Survey orgs and improve sidebar toggle,??????????: add predefined wellbeing survey orgs and improve sidebar toggle,hash=4abc3ee; author=Patchara Phongyeelar
+Commit ??? 113,2026-03-04 00:00:38 +0700,fix: remove invalid outputDirectory and stale rewrites from vercel.json,??????????: remove invalid outputdirectory and stale rewrites from vercel.json,hash=1d3ad4e; author=Patchara Phongyeelar
+Commit ??? 114,2026-03-04 00:07:07 +0700,fix: remove UTF-8 BOM from vercel.json causing Vercel deployment failure,??????????: remove utf-8 bom from vercel.json causing vercel deployment failure,hash=87febd7; author=Patchara Phongyeelar
+Commit ??? 115,2026-03-04 00:10:14 +0700,fix: restore outputDirectory for static site (no BOM),??????????: restore outputdirectory for static site (no bom),hash=8f7df4a; author=Patchara Phongyeelar
+Commit ??? 116,2026-03-04 00:20:30 +0700,feat: add floating expand button for sidebar toggle,???????????????: add floating expand button for sidebar toggle,hash=e328871; author=Patchara Phongyeelar
+Commit ??? 117,2026-03-04 00:42:37 +0700,"feat: sidebar edge-tab toggle, add dcy/doh_main orgs to WB_ORGS","???????????????: sidebar edge-tab toggle, add dcy/doh_main orgs to wb_orgs",hash=7b04c73; author=Patchara Phongyeelar
+Commit ??? 118,2026-03-04 05:24:25 +0700,fix: remove UTF-8 BOM from ch1.html causing garbled Thai text,??????????: remove utf-8 bom from ch1.html causing garbled thai text,hash=c9a81ad; author=Patchara Phongyeelar
+Commit ??? 119,2026-03-05 06:02:44 +0700,fix(ch1): remove v3.0 (5 ????) version text from header and meta,??????????: remove v3.0 (5 ????) version text from header and meta,hash=bf8c8fb; author=Patchara Phongyeelar
+Commit ??? 120,2026-03-05 06:28:06 +0700,Update turnover section layout to table format,??????????: update turnover section layout to table format,hash=591853f; author=Patchara Phongyeelar
+Commit ??? 121,2026-03-05 11:54:08 +0700,Update Section 5 numbering: renumber questions 17-19 and add Intervention Packages feedback question,??????????: update section 5 numbering: renumber questions 17-19 and add intervention packages feedback question,hash=dce1a2b; author=pchr-pyl
+Commit ??? 122,2026-03-05 12:06:00 +0700,Update question 17 to use Click to Rank layout,??????????: update question 17 to use click to rank layout,hash=e85af87; author=pchr-pyl
+Commit ??? 123,2026-03-05 12:49:01 +0700,feat: Add interactive ranking system and PDF upload support,???????????????: add ????????? ?????????????????????????????????????????? and ??????????????????????????? PDF ?????? 1MB support,hash=60839fd; author=pchr-pyl
+Commit ??? 124,2026-03-05 14:10:11 +0700,Fix form submission issues and add debugging tools,??????????: form submission issues and add de??????????????????ging tools,hash=51522a9; author=pchr-pyl
+Commit ??? 125,2026-03-05 15:17:24 +0700,fix: fix security-scan CI job - replace trufflehog with grep-based scan,??????????: fix security-scan ci job - replace trufflehog with grep-based scan,hash=35eb95c; author=pchr-pyl
+Commit ??? 126,2026-03-05 23:26:27 +0700,"Update project with latest changes - March 5, 2026",?????????????????????????????,hash=0b8b92d; author=Patchara Phongyeelar
+Commit ??? 127,2026-03-06 00:17:16 +0700,Add CH1 form automation script with 10 rounds testing,??????????: add ch1 form automation script with 10 rounds testing,hash=9be37b6; author=Patchara Phongyeelar
+Commit ??? 128,2026-03-06 00:19:44 +0700,Clean up project - remove unnecessary files,?????????????????????????????????????????????????????????,hash=20dc6ae; author=Patchara Phongyeelar
+Commit ??? 129,2026-03-06 09:18:06 +0700,Update code and submit forms,??????????: update code and submit forms,hash=e5e18d5; author=pchr-pyl
+Commit ??? 130,2026-03-06 09:19:50 +0700,Merge branch 'main' of https://github.com/pchr-pyl/well-being-survey,?????????????????????????????????????????????????????????????,hash=fcfef09; author=pchr-pyl
+Commit ??? 131,2026-03-06 10:14:23 +0700,"Clean up project: remove duplicate playwright scripts, test artifacts, and unused files",?????????????????????????????????????????????????????????,hash=87ebc91; author=Patchara
+Commit ??? 132,2026-03-06 10:36:22 +0700,Fix CI/CD Pipeline - Resolve deployment failures,??????????: fix ??????????????????????????????????????????? pipeline - resolve deployment failures,hash=01733af; author=Patchara
+Commit ??? 133,2026-03-06 10:39:18 +0700,Remove deploy-production job - Fix CI/CD failures,??????????: remove deploy-production job - fix ??????????????????????????????????????????? failures,hash=4463d5e; author=Patchara
+Commit ??? 134,2026-03-10 10:20:26 +0700,Update ch1.html title to 2 lines and fix admin panel to load from correct table,??????????: update ch1.html title to 2 lines and fix admin panel to load from correct table,hash=6f6ef53; author=Patchara
+Commit ??? 135,2026-03-10 03:26:01 +0000,Initial plan,????????????????????????,hash=33e20f1; author=copilot-swe-agent[bot]
+Commit ??? 136,2026-03-10 03:28:53 +0000,Fix lighthouse-check CI/CD failure: set uploadArtifacts to false,??????????: set uploadartifacts to false,hash=b35d559; author=copilot-swe-agent[bot]
+Commit ??? 137,2026-03-10 10:31:31 +0700,Merge pull request #3 from pchr-pyl/copilot/fix-ci-cd-issues,?????????????????????????????????????????????????????????????,hash=1adc1eb; author=Patchara Phongyeelar
+Commit ??? 138,2026-03-10 03:34:53 +0000,Initial plan,????????????????????????,hash=148b85c; author=copilot-swe-agent[bot]
+Commit ??? 139,2026-03-10 03:36:58 +0000,Enable deploy-preview job for all push events on main and develop branches,??????????: enable deploy-preview job for all push events on main and develop branches,hash=e3ff40b; author=copilot-swe-agent[bot]
+Commit ??? 140,2026-03-10 10:47:57 +0700,Merge pull request #4 from pchr-pyl/copilot/remove-skip-deploy-preview,?????????????????????????????????????????????????????????????,hash=9665c48; author=Patchara Phongyeelar
+Commit ??? 141,2026-03-10 04:09:29 +0000,Initial plan,????????????????????????,hash=4b28748; author=copilot-swe-agent[bot]
+Commit ??? 142,2026-03-10 04:16:45 +0000,Initial plan,????????????????????????,hash=eadf570; author=copilot-swe-agent[bot]
+Commit ??? 143,2026-03-10 04:18:20 +0000,Add individual PDF export for Ch1 responses in admin panel,??????????: add individual pdf ?????????????????????? for ch1 responses in admin panel,hash=d543b80; author=copilot-swe-agent[bot]
+Commit ??? 144,2026-03-10 11:22:50 +0700,Merge pull request #5 from pchr-pyl/copilot/generate-pdf-individual-data,?????????????????????????????????????????????????????????????,hash=fbf11dd; author=Patchara Phongyeelar
+Commit ??? 145,2026-03-10 04:26:48 +0000,Add NocoDB Smart Spreadsheet integration to Admin Portal,??????????: add nocodb ?????????????????????????????? NocoDB integration to admin portal,hash=c1db7b9; author=copilot-swe-agent[bot]
+Commit ??? 146,2026-03-10 04:27:57 +0000,Initial plan,????????????????????????,hash=e087db5; author=copilot-swe-agent[bot]
+Commit ??? 147,2026-03-10 04:31:31 +0000,fix: load Sarabun-Bold font to fix garbled Thai bold text in PDF,??????????: load sarabun-bold font to fix garbled thai bold text in pdf,hash=e05c944; author=copilot-swe-agent[bot]
+Commit ??? 148,2026-03-10 11:37:46 +0700,Merge pull request #7 from pchr-pyl/copilot/fix-pdf-font-issue,?????????????????????????????????????????????????????????????,hash=920cb90; author=Patchara Phongyeelar
+Commit ??? 149,2026-03-10 11:40:10 +0700,Merge pull request #6 from pchr-pyl/copilot/convert-database-to-smart-spreadsheet,?????????????????????????????????????????????????????????????,hash=70c69fc; author=Patchara Phongyeelar
+Commit ??? 150,2026-03-10 04:43:12 +0000,Initial plan,????????????????????????,hash=b750a3c; author=copilot-swe-agent[bot]
+Commit ??? 151,2026-03-10 04:46:02 +0000,fix: skip deploy-preview step when Vercel secrets are not configured,??????????: skip deploy-preview step when vercel secrets are not configured,hash=a795108; author=copilot-swe-agent[bot]
+Commit ??? 152,2026-03-10 11:53:10 +0700,Merge: Combine Windsurf (ModeratorViewer) and Copilot (Smart Spreadsheet) changes,?????????????????????????????????????????????????????????????,hash=6a32f1f; author=Patchara
+Commit ??? 153,2026-03-10 04:57:28 +0000,Initial plan,????????????????????????,hash=5fe765d; author=copilot-swe-agent[bot]
+Commit ??? 154,2026-03-10 05:08:06 +0000,Add 2-tab survey selector to Smart Spreadsheet and fix hrd_ch1_responses.email column error,??????????: add 2-tab survey selector to ?????????????????????????????? NocoDB and fix hrd_ch1_responses.email column error,hash=f81cb00; author=copilot-swe-agent[bot]
+Commit ??? 155,2026-03-10 12:15:53 +0700,Merge pull request #8 from pchr-pyl/copilot/fix-issue-in-code,?????????????????????????????????????????????????????????????,hash=712149a; author=Patchara Phongyeelar
+Commit ??? 156,2026-03-10 12:16:59 +0700,Merge pull request #9 from pchr-pyl/copilot/add-nocodb-smart-spreadsheet,?????????????????????????????????????????????????????????????,hash=8894c8b; author=Patchara Phongyeelar
+Commit ??? 157,2026-03-10 12:19:58 +0700,Merge remote-tracking branch 'origin/main',?????????????????????????????????????????????????????????????,hash=b068b41; author=Patchara
+Commit ??? 158,2026-03-10 12:20:16 +0700,Sync with GitHub: merge remote changes and add local updates,?????????????????????????????????????????????????????????????,hash=d1f93a4; author=Patchara
+Commit ??? 159,2026-03-10 12:25:09 +0700,Cleanup project: organize files and remove unused content,?????????????????????????????????????????????????????????,hash=2053c3c; author=Patchara
+Commit ??? 160,2026-03-10 12:26:24 +0700,Fix security and performance issues,??????????: security and performance issues,hash=cdf73d9; author=Patchara
+Commit ??? 161,2026-03-10 14:59:15 +0700,Update form fields: improve data collection and remove HRD plan URL,??????????: update form fields: improve data collection and remove hrd plan url,hash=d02aded; author=Patchara
+Commit ??? 162,2026-03-10 16:26:58 +0700,Add PDF download button to CH1 form,??????????: add pdf download button to ch1 form,hash=64fb9d0; author=Patchara
+Commit ??? 163,2026-03-10 09:32:33 +0000,Initial plan,????????????????????????,hash=dfcefc0; author=copilot-swe-agent[bot]
+Commit ??? 164,2026-03-10 09:57:00 +0000,fix: replace missing PDF with dynamic printable form page (ch1-printable.html),??????????: replace missing pdf with dynamic ????????????????????????????????????????? PDF page (ch1-printable.html),hash=b823924; author=copilot-swe-agent[bot]
+Commit ??? 165,2026-03-11 11:12:18 +0700,Update ch1-printable.html with new content,??????????: update ch1-printable.html with new content,hash=a55f07c; author=Patchara Phongyeelar
+Commit ??? 166,2026-03-11 11:40:02 +0700,Phase 1: Code Organization - Restructure 28 JS files into 5 modules,??????????: phase 1: code organization - restructure 28 js files into 5 modules,hash=21830a2; author=Patchara
+Commit ??? 167,2026-03-11 04:42:11 +0000,Initial plan,????????????????????????,hash=79821b3; author=copilot-swe-agent[bot]
+Commit ??? 168,2026-03-11 04:46:28 +0000,Fix broken PDF link in ch1.html and update ch1-printable.html with dynamic printable form,??????????: broken pdf link in ch1.html and update ch1-printable.html with dynamic ????????????????????????????????????????? PDF,hash=e279bbc; author=copilot-swe-agent[bot]
+Commit ??? 169,2026-03-11 11:48:40 +0700,Merge pull request #11 from pchr-pyl/copilot/fix-merge-issues,?????????????????????????????????????????????????????????????,hash=12abac5; author=Patchara Phongyeelar
+Commit ??? 170,2026-03-11 04:56:06 +0000,fix: resolve merge conflict in ch1.html - keep ch1-printable.html href + include new js modules,??????????: resolve merge conflict in ch1.html - keep ch1-printable.html href + include new js modules,hash=9457b2b; author=copilot-swe-agent[bot]
+Commit ??? 171,2026-03-11 12:12:28 +0700,Fix: Restore missing modules and update HTML to use legacy files,??????????: restore missing modules and update html to use legacy files,hash=551051d; author=Patchara
+Commit ??? 172,2026-03-11 05:15:19 +0000,Initial plan,????????????????????????,hash=fd18cc7; author=copilot-swe-agent[bot]
+Commit ??? 173,2026-03-11 05:23:17 +0000,Add missing CH1_Form.pdf to assets directory to fix 404 error,??????????: add missing ch1_form.pdf to assets directory to fix 404 error,hash=0d9bb7f; author=copilot-swe-agent[bot]
+Commit ??? 174,2026-03-11 12:27:52 +0700,Merge pull request #12 from pchr-pyl/copilot/fix-ch1-form-pdf-issue,?????????????????????????????????????????????????????????????,hash=caba603; author=Patchara Phongyeelar
+Commit ??? 175,2026-03-11 13:36:45 +0700,Refine printable PDF flow and clean CH1 form sections,??????????: refine printable pdf flow and clean ch1 form sections,hash=0962917; author=Patchara
+Commit ??? 176,2026-03-11 13:40:33 +0700,Fix CH1 PDF button to open printable page,??????????: ch1 pdf button to open printable page,hash=0472bdc; author=Patchara
+Commit ??? 177,2026-03-11 13:44:10 +0700,Prevent zero autofill in printable number fields,??????????: prevent zero autofill in printable number fields,hash=fd607a6; author=Patchara
+Commit ??? 178,2026-03-11 14:17:13 +0700,Update: Add printable form and fix module references,??????????: update: add ????????????????????????????????????????? PDF and fix module references,hash=765da0f; author=Patchara
+Commit ??? 179,2026-03-13 18:00:05 +0700,Update organization options and add Google sync infrastructure,??????????: update organization options and add google sync infrastructure,hash=b466dde; author=Patchara
+Commit ??? 180,2026-03-13 11:07:39 +0000,Initial plan,????????????????????????,hash=ce6984c; author=copilot-swe-agent[bot]
+Commit ??? 181,2026-03-13 11:21:28 +0000,"Fix Vercel deployment: add framework null, remove redundant rewrites, improve vercelignore","??????????: add framework null, remove redundant rewrites, improve vercelignore",hash=7bff02f; author=copilot-swe-agent[bot]
+Commit ??? 182,2026-03-13 18:23:03 +0700,Merge pull request #13 from pchr-pyl/copilot/fix-urgent-issue,?????????????????????????????????????????????????????????????,hash=b06ffb2; author=Patchara Phongyeelar
+Commit ??? 183,2026-03-13 18:26:17 +0700,Update Git configuration to patchara60118171@gmail.com,??????????: update git configuration to patchara60118171@gmail.com,hash=992b7cf; author=Patchara
+Commit ??? 184,2026-03-13 18:59:57 +0700,Merge remote changes,?????????????????????????????????????????????????????????????,hash=b260208; author=Patchara
+Commit ??? 185,2026-03-13 19:02:31 +0700,Switch to patchara60118171 account,??????????: switch to patchara60118171 account,hash=0ddd3a6; author=Patchara
+Commit ??? 186,2026-03-13 19:03:26 +0700,Verify push with patchara60118171 account,??????????: verify push with patchara60118171 account,hash=72cef15; author=Patchara
+Commit ??? 187,2026-03-13 19:20:33 +0700,Update project with latest features and analysis,?????????????????????????????,hash=c19bc5e; author=Patchara Phongyeelar
+Commit ??? 188,2026-03-14 08:53:01 +0700,chore: add supabase:deploy script and update configuration,??????????????????: add ?????????????????????????????????:deploy script and update configuration,hash=1539d95; author=Patchara
+Commit ??? 189,2026-03-14 08:53:16 +0700,docs: update installation instructions and setup guide,????????????: update installation instructions and setup g?????????????de,hash=260c5c9; author=Patchara
+Commit ??? 190,2026-03-14 10:18:23 +0700,"security: admin role DB, edge function auth, anti-replay, RLS hardening","???????????: admin role db, ????????????????????????????????????????? auth, ????????????????????????????????????????????????, ??????????????????????? (Row Level Security) ??????????????????? hardening",hash=aeb8e45; author=Patchara
+Commit ??? 191,2026-03-14 16:29:02 +0700,feat(admin): sync claude portal and backend wiring,???????????????: sync claude portal and backend wiring,hash=b454f72; author=patchara60118171
+Commit ??? 192,2026-03-14 16:29:02 +0700,feat(admin): sync claude portal and backend wiring,???????????????: sync claude portal and backend wiring,hash=09c62b9; author=patchara60118171
+Commit ??? 193,2026-03-14 17:01:41 +0700,fix(route): restore canonical admin-login path,??????????: restore canonical admin-login path,hash=c0a5bef; author=Pchr Pyl
+Commit ??? 194,2026-03-14 17:01:41 +0700,fix(route): restore canonical admin-login path,??????????: restore canonical admin-login path,hash=1723045; author=Pchr Pyl
+Commit ??? 195,2026-03-14 17:04:53 +0700,fix(login): restore root admin-login page,??????????: restore root admin-login page,hash=b96021f; author=Pchr Pyl
+Commit ??? 196,2026-03-14 17:04:53 +0700,fix(login): restore root admin-login page,??????????: restore root admin-login page,hash=ab559eb; author=Pchr Pyl
+Commit ??? 197,2026-03-14 17:10:50 +0700,fix(auth): unify supabase config and restore admin flow,??????????: unify ????????????????????????????????? config and restore admin flow,hash=5a27567; author=Pchr Pyl
+Commit ??? 198,2026-03-14 17:10:50 +0700,fix(auth): unify supabase config and restore admin flow,??????????: unify ????????????????????????????????? config and restore admin flow,hash=890f6a2; author=Pchr Pyl
+Commit ??? 199,2026-03-14 17:30:54 +0700,feat(org): add supabase-backed organization master CRUD,???????????????: add ?????????????????????????????????-backed organization master crud,hash=b05b562; author=Pchr Pyl
+Commit ??? 200,2026-03-14 17:30:54 +0700,feat(org): add supabase-backed organization master CRUD,???????????????: add ?????????????????????????????????-backed organization master crud,hash=8fc0131; author=Pchr Pyl
+Commit ??? 201,2026-03-14 17:37:27 +0700,feat(org): use organizations table for admin master data,???????????????: use organizations table for admin master data,hash=c652976; author=Pchr Pyl
+Commit ??? 202,2026-03-14 17:37:37 +0700,feat(org): wire admin CRUD to organizations table,???????????????: wire admin crud to organizations table,hash=635ae67; author=Pchr Pyl
+Commit ??? 203,2026-03-14 17:37:27 +0700,feat(org): use organizations table for admin master data,???????????????: use organizations table for admin master data,hash=eb2a6ec; author=Pchr Pyl
+Commit ??? 204,2026-03-14 17:37:37 +0700,feat(org): wire admin CRUD to organizations table,???????????????: wire admin crud to organizations table,hash=f363fe1; author=Pchr Pyl
+Commit ??? 205,2026-03-15 13:41:37 +0700,chore: update admin pages and survey modules,??????????????????: update admin pages and survey modules,hash=ff5c6f3; author=Pchr Pyl
+Commit ??? 206,2026-03-15 13:42:09 +0700,chore: resolve merge conflicts (keep local),??????????????????: resolve merge conflicts (keep local),hash=61fd7ae; author=Pchr Pyl
+Commit ??? 207,2026-03-15 17:34:15 +0700,chore: update survey and admin scripts,??????????????????: update survey and admin scripts,hash=03de30f; author=Pchr Pyl
+Commit ??? 208,2026-03-15 23:27:33 +0700,?? Project cleanup and fixes,?????????????????????????????????????????????????????????,hash=52428b7; author=Pchr Pyl
+Commit ??? 209,2026-03-16 00:13:33 +0700,?? Fix Ch1 form position total display,??????????: ?? fix ch1 form position total display,hash=6943023; author=Pchr Pyl
+Commit ??? 210,2026-03-16 00:37:39 +0700,?? Add Google Apps Script and update PDF functionality,??????????: ?? add google apps script and update pdf functionality,hash=81acaed; author=Pchr Pyl
+Commit ??? 211,2026-03-16 06:20:49 +0700,?? Update admin portal functionality,??????????: ?? update admin portal functionality,hash=f7b8256; author=Pchr Pyl
+Commit ??? 212,2026-03-17 17:24:59 +0700,fix: restore respondentEmail when loading CH1 draft,??????????: restore respondentemail when loading ch1 draft,hash=5d33732; author=Pchr Pyl
+Commit ??? 213,2026-03-17 17:42:48 +0700,chore: adjust vercel cache headers for js and css,??????????????????: adjust vercel cache headers for js and ??????????????????????,hash=1507264; author=Pchr Pyl
+Commit ??? 214,2026-03-17 18:06:15 +0700,fix: cache-bust pdf-upload.js to force browser reload new version,??????????: cache-bust pdf-upload.js to force browser reload new version,hash=6cc075c; author=Patchara
+Commit ??? 215,2026-03-18 09:17:25 +0700,feat: add testorg mode + increase PDF upload limit to 1MB,???????????????: add testorg mode + increase ??????????????????????????? PDF ?????? 1MB limit to 1mb,hash=ea6f5ce; author=Patchara
+Commit ??? 216,2026-03-18 10:05:54 +0700,feat: Centralized Question Management System Phase 1-4,???????????????: ????????????????????????????????????? system phase 1-4,hash=e1566fc; author=Patchara
+Commit ??? 217,2026-03-18 10:28:04 +0700,fix: rewrite questions-ch1.json with 100% accurate field structure,??????????: rewrite questions-ch1.json with 100% accurate field structure,hash=31118de; author=Patchara
+Commit ??? 218,2026-03-19 09:14:02 +0700,Resolve merge conflicts and update from GitHub,?????????????????????????????????????????????????????????????,hash=9d83ca4; author=pchr-pyl
+Commit ??? 219,2026-03-19 10:03:34 +0700,?? Fix security: Remove leaked Supabase Service Role Key from .env.local.example,??????????: ?? fix security: remove leaked ????????????????????????????????? service role key from .env.local.example,hash=01ab25f; author=pchr-pyl
+Commit ??? 220,2026-03-20 00:35:25 +0700,"feat: Phase C2 + org-portal nav fix, form-schema, migrations, handoff doc","???????????????: phase c2 + ?????????????????????????????????????? nav fix, form-schema, migrations, handoff doc",hash=a3d1f43; author=Patchara
+Commit ??? 221,2026-03-20 09:51:53 +0700,chore: update organization list - replace Budget Bureau with Department of Health Service Support,??????????????????: update organization list - replace budget bureau with department of health service support,hash=f1a6ca0; author=Patchara
+Commit ??? 222,2026-03-20 09:52:31 +0700,index on (no branch): f1a6ca0 chore: update organization list - replace Budget Bureau with Department of Health Service Support,??????????: index on (no branch): f1a6ca0 chore: update organization list - replace budget bureau with department of health service support,hash=802b619; author=Patchara
+Commit ??? 223,2026-03-20 09:52:31 +0700,On (no branch): temp stash for pull,??????????: on (no branch): temp stash for pull,hash=ab778c3; author=Patchara
+Commit ??? 224,2026-03-20 09:54:09 +0700,Merge origin/main and resolve conflicts,?????????????????????????????????????????????????????????????,hash=d46017e; author=Patchara
+Commit ??? 225,2026-03-20 09:56:10 +0700,Merge patchara/main - keep local organization list changes,?????????????????????????????????????????????????????????????,hash=c2490b5; author=Patchara
+Commit ??? 226,2026-03-20 09:58:48 +0700,fix: update organization dropdown - replace Budget Bureau with Dept of Health Service Support,??????????: update organization dropdown - replace budget bureau with dept of health service support,hash=63f7aa6; author=Patchara
+Commit ??? 227,2026-03-20 10:00:18 +0700,fix: replace all Budget Bureau references with Dept of Health Service Support,??????????: replace all budget bureau references with dept of health service support,hash=b6f5fe3; author=Patchara
+Commit ??? 228,2026-03-20 10:06:16 +0700,fix: CH1 PDF export now uses dynamic schema from form_questions table,??????????: ch1 pdf ?????????????????????? now uses dynamic schema from form_questions table,hash=bc19818; author=Patchara
+Commit ??? 229,2026-03-20 12:30:20 +0700,"fix: chart overflow, multi-select org filter, top-3 priority ranking, export PDF","??????????: chart overflow, multi-select org filter, top-3 priority ranking, ?????????????????????? pdf",hash=21b0152; author=Patchara
+Commit ??? 230,2026-03-20 14:03:14 +0700,feat: add PDF download button to well-being survey welcome page,???????????????: add pdf download button to well-being survey welcome page,hash=07f970a; author=Patchara
+Commit ??? 231,2026-03-20 14:15:15 +0700,"fix: correct scale labels (0-3, 0-4), add time input blocks in wb-printable PDF","??????????: correct scale labels (0-3, 0-4), add ???????????? blocks in wb-printable pdf",hash=5caf765; author=Patchara
+Commit ??? 232,2026-03-20 14:21:23 +0700,fix: UCLA loneliness scale shows proper labels (??????/?????????/????????????/?????????) from hint,??????????: ucla loneliness scale shows proper labels (??????/?????????/????????????/?????????) from hint,hash=0361884; author=Patchara
+Commit ??? 233,2026-03-21 10:25:52 +0700,"feat: Sprint 1+2 - form-schema.js integration, admin features, offline sync","???????????????: sprint 1+2 - form-schema.js integration, admin features, offline sync",hash=de47798; author=Patchara Phongyeelar
+Commit ??? 234,2026-03-22 10:00:48 +0700,"feat: expand admin portal, org operations, and project docs","???????????????: expand admin portal, org operations, and project docs",hash=36ea455; author=pchr-pyl
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,

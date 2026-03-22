@@ -885,7 +885,9 @@
   </div><!-- /content -->
 </div><!-- /main -->
 
+<script src="js/project-ssot.js"></script>
 <!-- ===== Extracted Service Modules ===== -->
+<script src="admin/js/services/api.js"></script>
 <script src="admin/js/services/config.js"></script>
 <script src="admin/js/services/utils.js"></script>
 <script src="admin/js/services/data.js"></script>
@@ -894,8 +896,16 @@
 <script src="admin/js/services/users.js"></script>
 <script src="admin/js/services/export.js"></script>
 <script src="admin/js/services/audit.js"></script>
+<script src="admin/js/services/form-editor-schema.js"></script>
 <script src="admin/js/services/forms.js"></script>
-<!-- Sprint 3C — Page modules (not yet created - will be done in Sprint 3C) -->
+<!-- Sprint 3C — Page modules -->
+<script src="admin/js/pages/dashboard.js"></script>
+<script src="admin/js/pages/users.js"></script>
+<script src="admin/js/pages/organizations.js"></script>
+<script src="admin/js/pages/ch1.js"></script>
+<script src="admin/js/pages/wellbeing.js"></script>
+<script src="admin/js/pages/links.js"></script>
+<script src="admin/js/pages/settings.js"></script>
 
 <script>
 /* ========== PAGE-SPECIFIC RENDERING (services loaded via external scripts above) ========== */
@@ -1880,205 +1890,6 @@ function renderWellbeingControl(summary) {
   }
 }
 
-function renderWellbeingOrg(summary) {
-  const section = document.getElementById('wb-org');
-  section.innerHTML = `
-    <div class="card">
-      <div class="card-head">
-        <h3>👥 สถิติรายองค์กร</h3>
-        <div class="filter-bar">
-          <select class="sel" id="wb-org-filter"><option value="">ทุกสถานะ</option><option value="active">มีข้อมูล</option><option value="empty">ยังไม่มีข้อมูล</option></select>
-          <button class="btn b-gray" id="wb-org-export">📤 Export</button>
-        </div>
-      </div>
-      <div class="tbl-wrap">
-        <table>
-          <thead><tr><th>องค์กร</th><th>ตอบแล้ว</th><th>Draft</th><th>% สัดส่วนผู้ตอบ</th><th>PHQ-9 สูง</th><th>อัปเดตล่าสุด</th><th>จัดการ</th></tr></thead>
-          <tbody id="wb-org-tbody"></tbody>
-        </table>
-      </div>
-    </div>`;
-
-  const totalSubmitted = Math.max(state.surveyRows.filter((row) => !row.is_draft).length, 1);
-  const renderBody = () => {
-    const filter = document.getElementById('wb-org-filter').value;
-    const rows = summary.filter((org) => {
-      if (filter === 'active') return org.wellbeingSubmitted > 0;
-      if (filter === 'empty') return org.wellbeingSubmitted === 0;
-      return true;
-    });
-    document.getElementById('wb-org-tbody').innerHTML = rows.map((org) => `<tr>
-      <td>${esc(org.name)}</td>
-      <td>${fmtNum(org.wellbeingSubmitted)}</td>
-      <td>${fmtNum(org.draft)}</td>
-      <td><span class="badge ${org.wellbeingSubmitted > 0 ? 'bg' : 'br'}">${fmtNum((org.wellbeingSubmitted / totalSubmitted) * 100, 1)}%</span></td>
-      <td>${org.flagged ? `<span style="color:#991B1B;font-weight:700">⚠️ ${fmtNum(org.flagged)}</span>` : '—'}</td>
-      <td>${fmtDate(org.latestWb)}</td>
-      <td class="td-act"><button class="btn b-blue" onclick="openWbRaw('${esc(org.name)}')">ดูรายคน</button></td>
-    </tr>`).join('');
-  };
-
-  document.getElementById('wb-org-filter').onchange = renderBody;
-  document.getElementById('wb-org-export').onclick = () => downloadWorkbook('wellbeing_org_stats.xlsx', 'Wellbeing_By_Org', summary.map((org) => ({
-    organization: org.name,
-    submitted: org.wellbeingSubmitted,
-    draft: org.draft,
-    response_share_pct: Number(((org.wellbeingSubmitted / totalSubmitted) * 100).toFixed(1)),
-    high_phq9_count: org.flagged,
-    latest_submitted_at: org.latestWb,
-  })));
-  renderBody();
-}
-
-function openWbRaw(orgName) {
-  window.location.href = `admin-wb-rawdata.html?org=${encodeURIComponent(orgName)}`;
-}
-
-function renderWellbeingRaw() {
-  const section = document.getElementById('wb-sheet');
-  section.innerHTML = `
-    <div class="card">
-      <div class="card-head">
-        <h3>🗂️ ข้อมูลรายคน — Wellbeing Survey</h3>
-        <div class="filter-bar">
-          <input class="si" id="wb-search" placeholder="🔍 ค้นหาองค์กร/อีเมล/ปัญหา...">
-          <select class="sel" id="wb-org-select"><option value="">ทุกองค์กร</option>${ORG_NAMES.map((name) => `<option value="${esc(name)}">${esc(name)}</option>`).join('')}</select>
-          <select class="sel" id="wb-gender-select"><option value="">ทุกเพศ</option><option value="ชาย">ชาย</option><option value="หญิง">หญิง</option><option value="ไม่ระบุ">ไม่ระบุ</option></select>
-          <select class="sel" id="wb-age-select"><option value="">ทุกกลุ่มอายุ</option><option value="≤30 ปี">≤30 ปี</option><option value="31–40 ปี">31–40 ปี</option><option value="41–50 ปี">41–50 ปี</option><option value="51+ ปี">51+ ปี</option></select>
-          <button class="btn b-gray" id="wb-raw-export">📤 Export .xlsx</button>
-          <button class="btn b-blue" id="wb-full-raw">เปิด Raw ครบทุกข้อ</button>
-        </div>
-      </div>
-      <div id="wb-raw-meta" style="padding:8px 18px;background:var(--bg);border-bottom:1px solid var(--bdr);font-size:11.5px;color:var(--tx2)"></div>
-      <div class="sheet-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>#</th><th>องค์กร</th><th>วันที่ตอบ</th><th>เพศ</th><th>กลุ่มอายุ</th><th>ประเภทตำแหน่ง</th><th>ระดับ</th><th>อายุราชการ</th><th>PHQ-9</th><th>GAD-7</th><th>Burnout</th><th>Engagement</th><th>WLB Score</th><th>นอนหลับ</th><th>ออกกำลังกาย</th><th>โรคเรื้อรัง</th><th>BMI</th><th>ความพึงพอใจงาน</th><th>ปัญหาสำคัญสุด</th><th>จัดการ</th>
-            </tr>
-          </thead>
-          <tbody id="wb-raw-tbody"></tbody>
-        </table>
-      </div>
-      <div style="padding:10px 18px;border-top:1px solid var(--bdr);display:flex;align-items:center;gap:10px;background:var(--bg)">
-        <div style="font-size:11.5px;color:var(--tx2)" id="wb-page-info"></div>
-        <div style="flex:1"></div>
-        <button class="btn b-gray" style="padding:5px 10px" id="wb-prev">← ก่อนหน้า</button>
-        <button class="btn b-gray" style="padding:5px 10px" id="wb-next">ถัดไป →</button>
-        <select class="sel" style="font-size:11.5px" id="wb-size"><option value="50">50 แถว/หน้า</option><option value="100">100 แถว/หน้า</option><option value="99999">ทั้งหมด</option></select>
-      </div>
-    </div>
-    <div class="info yellow" style="margin-top:10px" id="wb-flag-note">กำลังประมวลผลคะแนน PHQ-9...</div>`;
-
-  document.getElementById('wb-search').oninput = applyRawFilters;
-  document.getElementById('wb-org-select').onchange = applyRawFilters;
-  document.getElementById('wb-gender-select').onchange = applyRawFilters;
-  document.getElementById('wb-age-select').onchange = applyRawFilters;
-  document.getElementById('wb-size').onchange = () => {
-    state.rawPageSize = Number(document.getElementById('wb-size').value);
-    state.rawPage = 1;
-    renderRawTable();
-  };
-  document.getElementById('wb-prev').onclick = () => { state.rawPage -= 1; renderRawTable(); };
-  document.getElementById('wb-next').onclick = () => { state.rawPage += 1; renderRawTable(); };
-  document.getElementById('wb-raw-export').onclick = exportRawTable;
-  document.getElementById('wb-full-raw').onclick = () => { window.location.href = 'admin-wb-rawdata.html'; };
-
-  applyRawFilters();
-}
-
-function applyRawFilters() {
-  const search = (document.getElementById('wb-search')?.value || '').toLowerCase();
-  const org = document.getElementById('wb-org-select')?.value || '';
-  const gender = document.getElementById('wb-gender-select')?.value || '';
-  const age = document.getElementById('wb-age-select')?.value || '';
-
-  state.rawFiltered = state.surveyRows.filter((row) => {
-    if (org && row.organization !== org) return false;
-    if (gender && row.gender !== gender) return false;
-    if (age && ageGroup(row) !== age) return false;
-    if (search) {
-      const hay = [row.organization, row.email, row.name, getMainProblem(row), getChronic(row)].join(' ').toLowerCase();
-      if (!hay.includes(search)) return false;
-    }
-    return true;
-  });
-  state.rawPage = 1;
-  renderRawTable();
-}
-
-function renderRawTable() {
-  const total = state.rawFiltered.length;
-  const pageSize = state.rawPageSize;
-  const pageCount = Math.max(1, Math.ceil(total / pageSize));
-  if (state.rawPage < 1) state.rawPage = 1;
-  if (state.rawPage > pageCount) state.rawPage = pageCount;
-
-  const start = (state.rawPage - 1) * pageSize;
-  const rows = state.rawFiltered.slice(start, start + pageSize);
-  document.getElementById('wb-raw-meta').textContent = `แสดง ${fmtNum(total)} รายการ · เชื่อมต่อจาก survey_responses จริง`;
-  document.getElementById('wb-page-info').textContent = `แสดง ${total ? start + 1 : 0}–${Math.min(start + pageSize, total)} จาก ${fmtNum(total)} รายการ`;
-  document.getElementById('wb-prev').disabled = state.rawPage === 1;
-  document.getElementById('wb-next').disabled = state.rawPage === pageCount;
-
-  document.getElementById('wb-raw-tbody').innerHTML = rows.map((row, index) => {
-    const phq = getPhq9(row);
-    const flagged = (phq || 0) >= 15;
-    return `<tr${flagged ? ' style="background:#FFF7F7"' : ''}>
-      <td>${start + index + 1}</td>
-      <td>${esc(row.organization)}</td>
-      <td>${fmtDate(row.submitted_at, true)}</td>
-      <td>${esc(row.gender)}</td>
-      <td>${esc(ageGroup(row))}</td>
-      <td>${esc(row.org_type)}</td>
-      <td>${esc(row.job)}</td>
-      <td>${esc(row.job_duration)}</td>
-      <td>${flagged ? `<b style="color:#991B1B">${fmtNum(phq)}</b>` : fmtNum(phq)}</td>
-      <td>${fmtNum(getGad7(row))}</td>
-      <td>${fmtNum(getBurnout(row), 1)}</td>
-      <td>${fmtNum(getEngagement(row), 1)}</td>
-      <td>${fmtNum(getWlb(row), 1)}</td>
-      <td>${esc(getSleep(row))}</td>
-      <td>${esc(getExercise(row))}</td>
-      <td>${esc(getChronic(row))}</td>
-      <td>${row.bmi != null ? fmtNum(row.bmi, 1) + ' (' + esc(row.bmi_category) + ')' : '—'}</td>
-      <td>${esc(getJobSat(row))}</td>
-      <td>${esc(getMainProblem(row))}</td>
-      <td class="td-act"><button class="btn b-gray" style="padding:3px 8px;font-size:11px" onclick="showWbRowPDF(${start+index})">📄 PDF</button></td>
-    </tr>`;
-  }).join('');
-
-  const flaggedCount = state.rawFiltered.filter((row) => (getPhq9(row) || 0) >= 15).length;
-  document.getElementById('wb-flag-note').textContent = flaggedCount
-    ? `⚠️ พบผู้ตอบที่มี PHQ-9 ≥ 15 จำนวน ${fmtNum(flaggedCount)} คนในผลลัพธ์ปัจจุบัน แถวสีแดงควรติดตามดูแลเพิ่มเติม`
-    : 'ไม่พบผู้ตอบที่มี PHQ-9 สูงมากในผลลัพธ์ปัจจุบัน';
-}
-
-function exportRawTable() {
-  downloadWorkbook('wellbeing_raw_data.xlsx', 'Raw', state.rawFiltered.map((row, index) => ({
-    index: index + 1,
-    organization: row.organization,
-    submitted_at: row.submitted_at,
-    gender: row.gender,
-    age_group: ageGroup(row),
-    position_type: row.org_type,
-    level: row.job,
-    service_years: row.job_duration,
-    phq9: getPhq9(row),
-    gad7: getGad7(row),
-    burnout: getBurnout(row),
-    engagement: getEngagement(row),
-    wlb_score: getWlb(row),
-    sleep: getSleep(row),
-    exercise: getExercise(row),
-    chronic: getChronic(row),
-    bmi: row.bmi,
-    bmi_category: row.bmi_category,
-    job_satisfaction: getJobSat(row),
-    main_problem: getMainProblem(row),
-  })));
-}
-
 function renderUsers() {
   const tbody = document.getElementById('users-tbody');
   if (!tbody) return;
@@ -2120,10 +1931,6 @@ function renderUsers() {
     orgFilter.innerHTML = `<option value="">ทุกองค์กร</option>${ORG_NAMES.map((name) => `<option${name===cur?' selected':''}>${esc(name)}</option>`).join('')}`;
   }
 }
-
-const SURVEY_BASE_URL = 'https://nidawellbeing.vercel.app';
-// ⚠️ Emails ที่ถูก lock เป็น Super Admin ตลอด — แก้ไขโดย UI ไม่ได้
-const LOCKED_SUPERADMIN_EMAILS = ['admin@gmail.com'];
 
 function buildLinkUrl(org) {
   const code = org.org_code || org.code || encodeURIComponent(org.name);
@@ -3829,36 +3636,18 @@ async function saveViewer() {
 
 function copyTempCode() {
   const code = document.getElementById('temp-code-display')?.textContent || '';
-  navigator.clipboard.writeText(code).then(() => showToast('คัดลอกรหัส: ' + code));
+  if (!code) {
+    showToast('ยังไม่มีรหัสชั่วคราวให้คัดลอก', 'warn');
+    return;
+  }
+  navigator.clipboard.writeText(code).then(() => showToast('📋 คัดลอกรหัสชั่วคราวแล้ว ✅'));
 }
 
 /* ========== ORG HR BATCH CREATION ========== */
 
-// Org HR mapping: org_code → org_name_th (from seed data)
-const ORG_HR_MAP = [
-  { org_code: 'dcy',       org_name_th: 'กรมกิจการเด็กและเยาวชน' },
-  { org_code: 'probation', org_name_th: 'กรมคุมประพฤติ' },
-  { org_code: 'rid',       org_name_th: 'กรมชลประทาน' },
-  { org_code: 'dss',       org_name_th: 'กรมวิทยาศาสตร์บริการ' },
-  { org_code: 'dcp',       org_name_th: 'กรมส่งเสริมวัฒนธรรม' },
-  { org_code: 'dmh',       org_name_th: 'กรมสุขภาพจิต' },
-  { org_code: 'tmd',       org_name_th: 'กรมอุตุนิยมวิทยา' },
-  { org_code: 'hssd',      org_name_th: 'กรมสนับสนุนบริการสุขภาพ' },
-  { org_code: 'ocsc',      org_name_th: 'สำนักงาน กพร.' },
-  { org_code: 'nrct',      org_name_th: 'สำนักงานการวิจัยแห่งชาติ' },
-  { org_code: 'onep',      org_name_th: 'สำนักงานนโยบายและแผนทรัพยากรธรรมชาติและสิ่งแวดล้อม' },
-  { org_code: 'tpso',      org_name_th: 'สำนักงานนโยบายและยุทธศาสตร์การค้า' },
-  { org_code: 'mots',      org_name_th: 'สำนักงานปลัดกระทรวงการท่องเที่ยวและกีฬา' },
-  { org_code: 'acfs',      org_name_th: 'สำนักงานมาตรฐานสินค้าเกษตรและอาหารแห่งชาติ' },
-  { org_code: 'nesdc',     org_name_th: 'สำนักงานสภาพัฒนาการเศรษฐกิจและสังคมแห่งชาติ' },
-];
-
-const ORG_HR_EMAIL_DOMAIN = '@wellbeing.go.th';
-
 function generateOrgHrPassword() {
   const yr = new Date().getFullYear() + 543;
-  const rand = Math.random().toString(36).slice(2, 6).toUpperCase();
-  return `WB-${rand}-${yr}`;
+  return `WB${yr}`;
 }
 
 async function batchCreateOrgHrUsers() {
@@ -3957,11 +3746,15 @@ async function batchCreateOrgHrUsers() {
   });
 }
 
-function renderOrgHrCredentials() {
+async function renderOrgHrCredentials() {
+  if (typeof fetchOrgHrCredentials === 'function') {
+    state.orgHrCredentials = await fetchOrgHrCredentials();
+  }
+
   const tbody = document.getElementById('orghr-cred-tbody');
   if (!tbody) return;
 
-  const orgHrUsers = state.userRows.filter(r => r.role === 'org_hr');
+  const orgHrUsers = state.orgHrCredentials || [];
 
   if (orgHrUsers.length === 0) {
     tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--tx3);padding:20px">ยังไม่มีข้อมูล org_hr — กดปุ่ม "🔑 สร้าง org_hr ทั้งหมด" เพื่อเริ่มสร้าง</td></tr>';
@@ -3995,7 +3788,7 @@ function copyOrgHrRow(email, pwd, orgName) {
 }
 
 function copyAllOrgHrCredentials() {
-  const orgHrUsers = state.userRows.filter(r => r.role === 'org_hr' && r.initial_password);
+  const orgHrUsers = (state.orgHrCredentials || []).filter(r => r.initial_password);
   if (orgHrUsers.length === 0) {
     showToast('ยังไม่มีข้อมูล org_hr credentials', 'warn');
     return;
@@ -4012,7 +3805,7 @@ function copyAllOrgHrCredentials() {
 }
 
 function exportOrgHrCredentialsCsv() {
-  const orgHrUsers = state.userRows.filter(r => r.role === 'org_hr' && r.initial_password);
+  const orgHrUsers = (state.orgHrCredentials || []).filter(r => r.initial_password);
   if (orgHrUsers.length === 0) {
     showToast('ยังไม่มีข้อมูล org_hr credentials', 'warn');
     return;
@@ -4427,402 +4220,7 @@ function filterAuditLog() {
 }
 
 /* ========== FORM EDITOR ========== */
-const FORM_CONFIG_SCHEMAS = {
-  ch1: {
-    label: 'ฟอร์ม Ch1 (ข้อมูลองค์กร)',
-    sections: [
-      { key: 'general', label: '🏠 ทั่วไป', fields: [
-        { key: 'main_title', label: 'ชื่อฟอร์มหลัก', default: 'แบบสำรวจข้อมูลเพื่อจัดทำแผนการพัฒนาองค์กร สุขภาวะข้าราชการพลเรือน' },
-        { key: 'main_desc', label: 'คำอธิบายฟอร์ม', default: 'แบบสำรวจนี้จัดทำขึ้นเพื่อรวบรวมข้อมูลจากหน่วยงานนำร่อง สำหรับใช้ประกอบการจัดทำแผนปฏิบัติการสร้างเสริมสุขภาวะองค์กรข้าราชการพลเรือน', long: true },
-      ]},
-      { key: 'steps', label: '📋 ชื่อหัวข้อแต่ละส่วน', fields: [
-        { key: 'step1_title', label: 'ส่วนที่ 1 — ข้อมูลเบื้องต้น', default: '🏛️ ส่วนที่ 1: ข้อมูลเบื้องต้นของส่วนราชการ' },
-        { key: 'step2_title', label: 'ส่วนที่ 2 — นโยบายและบริบท', default: '📋 ส่วนที่ 2: นโยบายและบริบทภายนอกองค์กร' },
-        { key: 'step3_title', label: 'ส่วนที่ 3 — ข้อมูลสุขภาวะ', default: '🩺 ส่วนที่ 3: ข้อมูลสุขภาวะของข้าราชการในปีที่ผ่านมา' },
-        { key: 'step4_title', label: 'ส่วนที่ 4 — ระบบการบริหาร', default: '⚙️ ส่วนที่ 4: ระบบการบริหารและสภาพแวดล้อมที่เอื้อต่อสุขภาวะ' },
-        { key: 'step5_title', label: 'ส่วนที่ 5 — ทิศทางและเป้าหมาย', default: '🎯 ส่วนที่ 5: ทิศทาง เป้าหมาย และข้อเสนอแนะ' },
-      ]},
-    ]
-  },
-  wellbeing: {
-    label: 'Wellbeing Survey (รายบุคคล)',
-    sections: [
-      { key: 'personal', label: '👤 ส่วนที่ 1: ข้อมูลส่วนบุคคล + ร่างกาย', fields: [
-        { key: 'personal.title', label: 'ชื่อหัวข้อหลัก', default: 'ส่วนที่ 1 ข้อมูลส่วนบุคคล และการตรวจวัดร่างกาย' },
-        { key: 'personal.sub.0.title', label: 'หัวข้อย่อย: ข้อมูลส่วนบุคคล', default: 'ข้อมูลส่วนบุคคล' },
-        { key: 'personal.q.title', label: 'คำถามคำนำหน้า', default: 'คำนำหน้า' },
-        { key: 'personal.q.name', label: 'คำถามชื่อ-สกุล', default: 'ชื่อ-สกุล' },
-        { key: 'personal.q.gender', label: 'คำถามเพศ', default: 'เพศ' },
-        { key: 'personal.q.age', label: 'คำถามอายุ', default: 'อายุ (ปี)' },
-        { key: 'personal.q.org_type', label: 'คำถามประเภทตำแหน่ง', default: 'ประเภทตำแหน่ง' },
-        { key: 'personal.q.job', label: 'คำถามตำแหน่ง/ระดับ', default: 'ตำแหน่ง / ระดับ' },
-        { key: 'personal.q.job_duration', label: 'คำถามอายุราชการ', default: 'ระยะเวลาที่ทำงานในตำแหน่งปัจจุบัน (ปี)' },
-        { key: 'personal.q.activity_org', label: 'คำถามร่วมกิจกรรมส่งเสริมสุขภาพขององค์กร', default: 'ท่านเคยเข้าร่วมกิจกรรมส่งเสริมสุขภาพขององค์กรหรือไม่' },
-        { key: 'personal.q.activity_thaihealth', label: 'คำถามร่วมกิจกรรม สสส.', default: 'ท่านเคยเข้าร่วมกิจกรรมส่งเสริมสุขภาพของ สสส. หรือไม่' },
-        { key: 'personal.q.diseases', label: 'คำถามโรคประจำตัว', default: 'โรคประจำตัวที่ได้รับการวินิจฉัย (เลือกได้มากกว่า 1 ข้อ)' },
-        { key: 'personal.sub.1.title', label: 'หัวข้อย่อย: ข้อมูลร่างกายเบื้องต้น', default: 'ข้อมูลร่างกายเบื้องต้น' },
-        { key: 'personal.q.height', label: 'คำถามส่วนสูง', default: 'ส่วนสูง (เซนติเมตร)' },
-        { key: 'personal.q.weight', label: 'คำถามน้ำหนัก', default: 'น้ำหนัก (กิโลกรัม)' },
-        { key: 'personal.q.waist', label: 'คำถามเส้นรอบเอว', default: 'เส้นรอบเอว (เซนติเมตร)' },
-      ]},
-      { key: 'consumption', label: '🚬 ส่วนที่ 2: การบริโภคยาสูบและแอลกอฮอล์', fields: [
-        { key: 'consumption.title', label: 'ชื่อหัวข้อหลัก', default: 'การบริโภคยาสูบและแอลกอฮอล์' },
-        { key: 'consumption.sub.0.title', label: 'หัวข้อย่อย: ในระยะเวลา 2 เดือนที่ผ่านมา', default: 'ในระยะเวลา 2 เดือนที่ผ่านมา' },
-        { key: 'consumption.q.q2001', label: 'คำถามสูบบุหรี่', default: 'ท่านสูบบุหรี่หรือไม่' },
-        { key: 'consumption.q.q2002', label: 'คำถามบุหรี่ไฟฟ้า', default: 'ท่านสูบบุหรี่ไฟฟ้าหรือไม่' },
-        { key: 'consumption.q.q2003', label: 'คำถามดื่มแอลกอฮอล์', default: 'ท่านดื่มเครื่องดื่มแอลกอฮอล์หรือไม่' },
-        { key: 'consumption.q.q2004', label: 'คำถามดื่มเครื่องดื่มกัญชา', default: 'ท่านเคยดื่มเครื่องดื่มที่มีส่วนผสมของกัญชาหรือไม่' },
-        { key: 'consumption.q.q2005_drug', label: 'คำถามใช้สารเสพติดอื่น', default: 'ท่านเคยใช้สารเสพติดประเภทอื่นหรือไม่' },
-      ]},
-      { key: 'nutrition', label: '🥗 ส่วนที่ 3: พฤติกรรมการบริโภค (โภชนาการ)', fields: [
-        { key: 'nutrition.title', label: 'ชื่อหัวข้อหลัก', default: 'พฤติกรรมการบริโภค' },
-        { key: 'nutrition.sub.0.title', label: 'หัวข้อย่อย: รสหวาน', default: 'รสหวาน' },
-        { key: 'nutrition.q.sweet_1', label: 'น้ำหวาน ข้อ 1', default: 'ดื่มน้ำเปล่า / กาแฟดำ / ชาไม่ใส่น้ำตาล / โซดา' },
-        { key: 'nutrition.q.sweet_2', label: 'น้ำหวาน ข้อ 2', default: 'ดื่มน้ำอัดลม / กาแฟ 3 in 1 / เครื่องดื่มชง / น้ำหวาน' },
-        { key: 'nutrition.q.sweet_3', label: 'น้ำหวาน ข้อ 3', default: 'ดื่มน้ำผัก / ผลไม้สำเร็จรูป' },
-        { key: 'nutrition.q.sweet_4', label: 'น้ำหวาน ข้อ 4', default: 'กินไอศกรีม / เบเกอรี่ หรือขนมหวานไทย' },
-        { key: 'nutrition.q.sweet_5', label: 'น้ำหวาน ข้อ 5', default: 'เติมน้ำตาล / น้ำผึ้ง / น้ำเชื่อมลงในอาหาร' },
-        { key: 'nutrition.sub.1.title', label: 'หัวข้อย่อย: ไขมัน', default: 'ไขมัน' },
-        { key: 'nutrition.q.fat_1', label: 'ไขมัน ข้อ 1', default: 'เลือกกินเนื้อสัตว์ติดมัน ติดหนัง มีไขมันแทรก' },
-        { key: 'nutrition.q.fat_2', label: 'ไขมัน ข้อ 2', default: 'กินอาหารทอด อาหารฟาสต์ฟู้ด อาหารผัดน้ำมัน' },
-        { key: 'nutrition.q.fat_3', label: 'ไขมัน ข้อ 3', default: 'กินอาหารจานเดียว ไขมันสูง หรืออาหารประเภทแกงกะทิ' },
-        { key: 'nutrition.q.fat_4', label: 'ไขมัน ข้อ 4', default: 'ดื่มเครื่องดื่มชงผสมนมข้นหวาน ครีมเทียม วิปปิ้งครีม' },
-        { key: 'nutrition.q.fat_5', label: 'ไขมัน ข้อ 5', default: 'ซดน้ำผัด น้ำแกง หรือราดน้ำผัดน้ำแกงลงในข้าว' },
-        { key: 'nutrition.sub.2.title', label: 'หัวข้อย่อย: โซเดียม (เค็ม)', default: 'โซเดียม (เค็ม)' },
-        { key: 'nutrition.q.salt_1', label: 'เค็ม ข้อ 1', default: 'ชิมอาหารก่อนปรุง / ปรุงน้ำปลา ซีอิ๊ว ซอส น้อย หรือไม่ปรุงเพิ่ม', long: true },
-        { key: 'nutrition.q.salt_2', label: 'เค็ม ข้อ 2', default: 'ใช้สมุนไพร หรือเครื่องเทศเป็นส่วนประกอบอาหารแทนเครื่องปรุง' },
-        { key: 'nutrition.q.salt_3', label: 'เค็ม ข้อ 3', default: 'กินเนื้อสัตว์แปรรูป ไส้กรอก หมูยอ แฮม ปลาเค็ม กุ้งแห้ง ปลาร้า', long: true },
-        { key: 'nutrition.q.salt_4', label: 'เค็ม ข้อ 4', default: 'กินบะหมี่ โจ๊กกึ่งสำเร็จรูป หรืออาหารกล่องแช่แข็ง' },
-        { key: 'nutrition.q.salt_5', label: 'เค็ม ข้อ 5', default: 'กินผักผลไม้ดอง หรือผลไม้แช่อิ่ม จิ้มพริกเกลือ น้ำปลาหวาน' },
-      ]},
-      { key: 'activity', label: '🏃 ส่วนที่ 4: กิจกรรมทางกาย (TPAX)', fields: [
-        { key: 'activity.title', label: 'ชื่อหัวข้อหลัก', default: 'กิจกรรมทางกาย (TPAX)' },
-        { key: 'activity.sub.0.title', label: 'หัวข้อย่อย: การทำงาน', default: 'การทำงาน' },
-        { key: 'activity.q.act_work_days', label: 'กิจกรรมทางกายขณะทำงาน (วัน/สัปดาห์)', default: 'กิจกรรมทางกายขณะทำงาน (วัน/สัปดาห์)' },
-        { key: 'activity.q.act_work_dur', label: 'ระยะเวลาทำงานเฉลี่ยต่อวัน', default: 'ระยะเวลาเฉลี่ยต่อวัน' },
-        { key: 'activity.sub.1.title', label: 'หัวข้อย่อย: การเดินทาง', default: 'การเดินทาง' },
-        { key: 'activity.q.act_commute_days', label: 'เดินทางด้วยเท้า/จักรยาน (วัน/สัปดาห์)', default: 'เดินทางด้วยเท้า/จักรยาน (วัน/สัปดาห์)' },
-        { key: 'activity.q.act_commute_dur', label: 'ระยะเวลาเดินทางเฉลี่ยต่อวัน', default: 'ระยะเวลาเฉลี่ยต่อวัน' },
-        { key: 'activity.sub.2.title', label: 'หัวข้อย่อย: นันทนาการ/ออกกำลังกาย', default: 'นันทนาการ/ออกกำลังกาย' },
-        { key: 'activity.q.act_rec_days', label: 'ออกกำลังกาย/นันทนาการ (วัน/สัปดาห์)', default: 'ออกกำลังกาย/นันทนาการ (วัน/สัปดาห์)' },
-        { key: 'activity.q.act_rec_dur', label: 'ระยะเวลาออกกำลังกายเฉลี่ยต่อวัน', default: 'ระยะเวลาเฉลี่ยต่อวัน' },
-        { key: 'activity.sub.3.title', label: 'หัวข้อย่อย: พฤติกรรมเนือยนิ่ง/หน้าจอ', default: 'พฤติกรรมเนือยนิ่ง/หน้าจอ' },
-        { key: 'activity.q.sedentary_dur', label: 'เวลานั่ง/เอนกาย (ไม่รวมนอนหลับ) ต่อวัน', default: 'เวลานั่ง/เอนกาย (ไม่รวมนอนหลับ) ต่อวัน' },
-        { key: 'activity.q.screen_entertain', label: 'เวลาหน้าจอเพื่อความบันเทิงต่อวัน', default: 'เวลาหน้าจอเพื่อความบันเทิงต่อวัน' },
-        { key: 'activity.q.screen_work', label: 'เวลาหน้าจอเพื่อการทำงานต่อวัน', default: 'เวลาหน้าจอเพื่อการทำงานต่อวัน' },
-      ]},
-      { key: 'mental', label: '🧠 ส่วนที่ 5: สุขภาพจิต (TMHI-15)', fields: [
-        { key: 'mental.title', label: 'ชื่อหัวข้อหลัก', default: 'สุขภาพจิต (TMHI-15)' },
-        { key: 'mental.sub.0.title', label: 'หัวข้อย่อย: ความรู้สึกในช่วง 1 เดือนที่ผ่านมา', default: 'ความรู้สึกในช่วง 1 เดือนที่ผ่านมา' },
-        { key: 'mental.q.tmhi_1', label: 'TMHI ข้อ 1', default: 'ท่านรู้สึกพึงพอใจในชีวิต' },
-        { key: 'mental.q.tmhi_2', label: 'TMHI ข้อ 2', default: 'ท่านรู้สึกสบายใจ' },
-        { key: 'mental.q.tmhi_3', label: 'TMHI ข้อ 3', default: 'ท่านรู้สึกภูมิใจในตนเอง' },
-        { key: 'mental.q.tmhi_4', label: 'TMHI ข้อ 4', default: 'ท่านรู้สึกเบื่อหน่ายท้อแท้กับการดำเนินชีวิตประจำวัน' },
-        { key: 'mental.q.tmhi_5', label: 'TMHI ข้อ 5', default: 'ท่านรู้สึกผิดหวังในตนเอง' },
-        { key: 'mental.q.tmhi_6', label: 'TMHI ข้อ 6', default: 'ท่านรู้สึกว่าชีวิตมีแต่ความทุกข์' },
-        { key: 'mental.q.tmhi_7', label: 'TMHI ข้อ 7', default: 'ท่านสามารถทำใจยอมรับได้สำหรับปัญหาที่ยากจะแก้ไข' },
-        { key: 'mental.q.tmhi_8', label: 'TMHI ข้อ 8', default: 'ท่านมั่นใจว่าจะสามารถควบคุมอารมณ์ได้เมื่อมีเหตุการณ์คับขัน' },
-        { key: 'mental.q.tmhi_9', label: 'TMHI ข้อ 9', default: 'ท่านมั่นใจที่จะเผชิญกับเหตุการณ์ร้ายแรงที่เกิดขึ้นในชีวิต' },
-        { key: 'mental.q.tmhi_10', label: 'TMHI ข้อ 10', default: 'ท่านรู้สึกเห็นอกเห็นใจเมื่อผู้อื่นมีความทุกข์' },
-        { key: 'mental.q.tmhi_11', label: 'TMHI ข้อ 11', default: 'ท่านรู้สึกเป็นสุขในการช่วยเหลือผู้อื่นที่มีปัญหา' },
-        { key: 'mental.q.tmhi_12', label: 'TMHI ข้อ 12', default: 'ท่านให้ความช่วยเหลือแก่ผู้อื่นเมื่อมีโอกาส' },
-        { key: 'mental.q.tmhi_13', label: 'TMHI ข้อ 13', default: 'ท่านรู้สึกมั่นคงปลอดภัยเมื่ออยู่ในครอบครัว' },
-        { key: 'mental.q.tmhi_14', label: 'TMHI ข้อ 14', default: 'หากท่านป่วยหนัก ท่านเชื่อว่าคนในครอบครัวจะดูแลท่านเป็นอย่างดี', long: true },
-        { key: 'mental.q.tmhi_15', label: 'TMHI ข้อ 15', default: 'สมาชิกในครอบครัวมีความรักและผูกพันต่อกัน' },
-      ]},
-      { key: 'loneliness', label: '🤝 ส่วนที่ 6: ความเหงา (UCLA Loneliness Scale)', fields: [
-        { key: 'loneliness.title', label: 'ชื่อหัวข้อหลัก', default: 'แบบสำรวจความเหงา (UCLA Loneliness Scale)' },
-        { key: 'loneliness.sub.0.title', label: 'หัวข้อย่อย: ความรู้สึกโดดเดี่ยว', default: 'ความรู้สึกโดดเดี่ยว' },
-        { key: 'loneliness.q.lonely_1', label: 'UCLA ข้อ 1', default: 'ฉันไม่มีความสุขที่ต้องทำหลายสิ่งหลายอย่างคนเดียว' },
-        { key: 'loneliness.q.lonely_2', label: 'UCLA ข้อ 2', default: 'ฉันไม่มีใครคุยด้วย' },
-        { key: 'loneliness.q.lonely_3', label: 'UCLA ข้อ 3', default: 'ฉันทนไม่ได้ที่จะอยู่คนเดียวอย่างนี้' },
-        { key: 'loneliness.q.lonely_4', label: 'UCLA ข้อ 4', default: 'ฉันขาดมิตรภาพ' },
-        { key: 'loneliness.q.lonely_5', label: 'UCLA ข้อ 5', default: 'ฉันรู้สึกราวกับว่าไม่มีใครเข้าใจฉันจริงๆ' },
-        { key: 'loneliness.sub.1.title', label: 'หัวข้อย่อย: ความสัมพันธ์ทางสังคม', default: 'ความสัมพันธ์ทางสังคม' },
-        { key: 'loneliness.q.lonely_6', label: 'UCLA ข้อ 6', default: 'ฉันพบว่าตัวเองรอคนโทรหา' },
-        { key: 'loneliness.q.lonely_7', label: 'UCLA ข้อ 7', default: 'ฉันไม่มีใครให้พึ่ง' },
-        { key: 'loneliness.q.lonely_8', label: 'UCLA ข้อ 8', default: 'ฉันไม่สนิทกับใคร' },
-        { key: 'loneliness.q.lonely_9', label: 'UCLA ข้อ 9', default: 'ความเห็นจากคนอื่นไม่มีผลต่อความสนใจหรือแนวคิดของฉัน' },
-        { key: 'loneliness.q.lonely_10', label: 'UCLA ข้อ 10', default: 'ฉันรู้สึกถูกทอดทิ้ง' },
-        { key: 'loneliness.sub.2.title', label: 'หัวข้อย่อย: ความรู้สึกเกี่ยวกับตนเอง', default: 'ความรู้สึกเกี่ยวกับตนเอง' },
-        { key: 'loneliness.q.lonely_11', label: 'UCLA ข้อ 11', default: 'ฉันรู้สึกโดดเดี่ยว' },
-        { key: 'loneliness.q.lonely_12', label: 'UCLA ข้อ 12', default: 'ฉันไม่สามารถติดต่อสื่อสารกับคนรอบข้างได้' },
-        { key: 'loneliness.q.lonely_13', label: 'UCLA ข้อ 13', default: 'ความสัมพันธ์ทางสังคมของฉันเป็นเพียงผิวเผิน' },
-        { key: 'loneliness.q.lonely_14', label: 'UCLA ข้อ 14', default: 'ฉันโหยหาการมีเพื่อนพ้อง' },
-        { key: 'loneliness.q.lonely_15', label: 'UCLA ข้อ 15', default: 'ไม่มีใครรู้จักฉันดีพอ' },
-        { key: 'loneliness.sub.3.title', label: 'หัวข้อย่อย: พฤติกรรมทางสังคม', default: 'พฤติกรรมทางสังคม' },
-        { key: 'loneliness.q.lonely_16', label: 'UCLA ข้อ 16', default: 'ฉันรู้สึกถูกแยกออกจากคนอื่นๆ' },
-        { key: 'loneliness.q.lonely_17', label: 'UCLA ข้อ 17', default: 'ฉันรู้สึกไม่มีความสุขเมื่อต้องเริ่มออกห่างจากบางสิ่งบางอย่าง' },
-        { key: 'loneliness.q.lonely_18', label: 'UCLA ข้อ 18', default: 'เป็นการยากสำหรับฉันที่จะหาเพื่อน' },
-        { key: 'loneliness.q.lonely_19', label: 'UCLA ข้อ 19', default: 'ฉันรู้สึกถูกกีดกัน และถูกตัดขาดออกจากผู้อื่น' },
-        { key: 'loneliness.q.lonely_20', label: 'UCLA ข้อ 20', default: 'แม้มีคนมากมายอยู่รอบตัวแต่ฉันก็ยังรู้สึกโดดเดี่ยว' },
-      ]},
-      { key: 'safety', label: '🦺 ส่วนที่ 7: อุบัติเหตุและความปลอดภัย', fields: [
-        { key: 'safety.title', label: 'ชื่อหัวข้อหลัก', default: 'อุบัติเหตุและความปลอดภัย' },
-        { key: 'safety.sub.0.title', label: 'หัวข้อย่อย: การขับขี่และการเดินทาง', default: 'การขับขี่และการเดินทาง' },
-        { key: 'safety.q.helmet_driver', label: 'สวมหมวกนิรภัยขณะขับขี่', default: 'ในช่วง 30 วันที่ผ่านมา ท่านสวมหมวกนิรภัยขณะขับขี่รถจักรยานยนต์หรือไม่', long: true },
-        { key: 'safety.q.helmet_passenger', label: 'สวมหมวกนิรภัยขณะโดยสาร', default: 'ในช่วง 30 วันที่ผ่านมา ท่านสวมหมวกนิรภัยขณะโดยสารรถจักรยานยนต์หรือไม่', long: true },
-        { key: 'safety.q.seatbelt_driver', label: 'ใช้เข็มขัดนิรภัยขณะขับ', default: 'ในช่วง 30 วันที่ผ่านมา ท่านใช้เข็มขัดนิรภัยขณะขับรถยนต์หรือไม่', long: true },
-        { key: 'safety.q.seatbelt_passenger', label: 'ใช้เข็มขัดนิรภัยขณะโดยสาร', default: 'ในช่วง 30 วันที่ผ่านมา ท่านใช้เข็มขัดนิรภัยขณะเป็นผู้โดยสารข้างคนขับหรือไม่', long: true },
-        { key: 'safety.q.accident_hist', label: 'ประวัติอุบัติเหตุจราจร', default: 'ในช่วง 12 เดือนที่ผ่านมา ท่านเคยประสบอุบัติเหตุจราจรในลักษณะใดบ้าง', long: true },
-        { key: 'safety.q.drunk_drive', label: 'ขับขี่หลังดื่มแอลกอฮอล์', default: 'ในช่วง 12 เดือนที่ผ่านมา เคยขับขี่หลังดื่มแอลกอฮอล์หรือไม่' },
-      ]},
-      { key: 'environment', label: '🌿 ส่วนที่ 8: สิ่งแวดล้อมและโรคอุบัติใหม่', fields: [
-        { key: 'environment.title', label: 'ชื่อหัวข้อหลัก', default: 'สิ่งแวดล้อมและโรคอุบัติใหม่' },
-        { key: 'environment.sub.0.title', label: 'หัวข้อย่อย: สภาพแวดล้อมในที่ทำงาน', default: 'สภาพแวดล้อมในที่ทำงาน' },
-        { key: 'environment.q.env_satisfaction', label: 'ความพึงพอใจสิ่งแวดล้อมที่ทำงาน', default: 'ความพึงพอใจในสิ่งแวดล้อมที่ทำงาน' },
-        { key: 'environment.q.env_glare', label: 'แสงจ้า/ทำงานกลางแดด', default: 'แสงจ้า/ทำงานกลางแดด' },
-        { key: 'environment.q.env_noise', label: 'เสียงดัง/แรงสั่นสะเทือน', default: 'เสียงดัง/แรงสั่นสะเทือน' },
-        { key: 'environment.q.env_smell', label: 'กลิ่นเหม็น/สารเคมี', default: 'กลิ่นเหม็น/สารเคมี' },
-        { key: 'environment.q.env_smoke', label: 'ควัน/ไอระเหย', default: 'ควัน/ไอระเหย' },
-        { key: 'environment.q.env_posture', label: 'ท่าทางเดิมนานๆ/ก้มเงย', default: 'ท่าทางเดิมนานๆ/ก้มเงย' },
-        { key: 'environment.q.env_awkward', label: 'ท่าทางฝืนธรรมชาติ', default: 'ท่าทางฝืนธรรมชาติ (ยกของ/เขย่ง)' },
-        { key: 'environment.sub.1.title', label: 'หัวข้อย่อย: มลพิษและโรคอุบัติใหม่', default: 'มลพิษและโรคอุบัติใหม่' },
-        { key: 'environment.q.pm25_impact', label: 'ปัญหา PM 2.5 ในพื้นที่', default: 'ปัญหา PM 2.5 ในพื้นที่ (1 ปีที่ผ่านมา)' },
-        { key: 'environment.q.pm25_symptom', label: 'อาการเจ็บป่วยจาก PM 2.5', default: 'อาการเจ็บป่วยจาก PM 2.5' },
-        { key: 'environment.q.life_quality', label: 'คุณภาพชีวิตโดยรวม', default: 'คุณภาพชีวิตโดยรวม' },
-        { key: 'environment.q.emerging_known', label: 'รู้จักโรคอุบัติใหม่', default: 'รู้จัก "โรคอุบัติใหม่" หรือไม่' },
-        { key: 'environment.q.emerging_list', label: 'โรคอุบัติใหม่ที่รู้จัก', default: 'โรคอุบัติใหม่ที่รู้จัก' },
-        { key: 'environment.q.climate_impact', label: 'ผลกระทบจากโลกร้อนต่อสุขภาพ', default: 'ผลกระทบจากโลกร้อนต่อสุขภาพ' },
-        { key: 'environment.q.covid_history', label: 'ติด COVID-19 ใน 6 เดือนที่ผ่านมา', default: 'ติด COVID-19 ใน 6 เดือนที่ผ่านมา' },
-      ]},
-    ]
-  }
-};
-
-let _feConfigCache = { ch1: {}, wellbeing: {} };
-
-async function loadFormEditorFields() {
-  const formIds = ['ch1', 'wellbeing'];
-  for (const formId of formIds) {
-    const statusEl = document.getElementById(`fe-${formId === 'wellbeing' ? 'wb' : formId}-status`);
-    if (statusEl) statusEl.textContent = 'กำลังโหลด config...';
-  }
-  try {
-    const { data, error } = await sb.from('form_configs').select('form_id,config_json').in('form_id', formIds);
-    if (error) throw error;
-    (data || []).forEach((row) => { _feConfigCache[row.form_id] = row.config_json || {}; });
-  } catch (e) {
-    console.warn('form_configs fetch error:', e);
-  }
-  renderFeFields('ch1');
-  renderFeFields('wellbeing');
-}
-
-function renderFeFields(formId) {
-  const schema = FORM_CONFIG_SCHEMAS[formId];
-  if (!schema) return;
-  const panelKey = formId === 'wellbeing' ? 'wb' : formId;
-  const container = document.getElementById(`fe-${panelKey}-fields`);
-  const statusEl = document.getElementById(`fe-${panelKey}-status`);
-  if (!container) return;
-  const cfg = _feConfigCache[formId] || {};
-  const overrideCount = Object.keys(cfg).filter(k => !k.endsWith('__opts')).length;
-  if (statusEl) {
-    statusEl.innerHTML = overrideCount
-      ? `<span style="color:var(--A);font-weight:600">✓ แก้ไขแล้ว ${overrideCount} ช่อง</span> — อัปเดตล่าสุดจาก Supabase`
-      : '<span style="color:var(--tx3)">ยังไม่มีการแก้ไข — แสดงค่า Default ทั้งหมด</span>';
-  }
-
-  const sectionsHtml = schema.sections.map((sec) => {
-    const editedInSec = sec.fields.filter((f) => cfg[f.key]).length;
-    const sectionHdr = `<div class="fe-section-hdr">
-      ${esc(sec.label)}
-      ${editedInSec > 0 ? `<span style="font-size:11px;font-weight:400;background:var(--AL);color:var(--A);padding:2px 10px;border-radius:99px">แก้ไขแล้ว ${editedInSec} ช่อง</span>` : ''}
-    </div>`;
-
-    const fieldsHtml = `<div style="display:flex;flex-direction:column;gap:2px;margin-bottom:6px">` +
-      sec.fields.map((field) => {
-        const currentVal = cfg[field.key] || '';
-        const isChanged = !!currentVal;
-        const safeKey = field.key.replace(/\./g, '-');
-        const fieldId = `fe-field-${formId}-${safeKey}`;
-        const inputEl = field.long
-          ? `<textarea class="fe-q-input" id="${fieldId}" rows="2" placeholder="${esc(field.default)}">${esc(currentVal)}</textarea>`
-          : `<input class="fe-q-input" id="${fieldId}" value="${esc(currentVal)}" placeholder="${esc(field.default)}">`;
-
-        return `<div class="fg" style="margin-bottom:0;padding:10px 12px;border-radius:8px;background:${isChanged ? 'var(--AL)' : 'var(--bg)'};border:1px solid ${isChanged ? 'var(--A)' : 'transparent'}">
-          <label style="display:flex;align-items:center;gap:6px;margin-bottom:5px">
-            <span style="flex:1;font-size:12px;font-weight:600;color:${isChanged ? 'var(--A)' : 'var(--tx2)'}">${esc(field.label)}</span>
-            ${isChanged
-              ? `<span style="font-size:10px;background:var(--A);color:#fff;padding:1px 8px;border-radius:99px;font-weight:700;flex-shrink:0">✓ แก้ไขแล้ว</span>
-                 <button type="button" class="btn b-gray" style="padding:1px 7px;font-size:10px;flex-shrink:0" onclick="resetFeField('${esc(formId)}','${esc(field.key)}')">↩ รีเซ็ต</button>`
-              : `<span style="font-size:10px;color:var(--tx3);flex-shrink:0">default</span>`
-            }
-          </label>
-          ${inputEl}
-          ${!isChanged ? `<div style="font-size:10px;color:var(--tx3);margin-top:3px;line-height:1.4">📌 ${esc(field.default)}</div>` : ''}
-        </div>`;
-      }).join('') + `</div>`;
-
-    return sectionHdr + fieldsHtml;
-  }).join('');
-
-  container.innerHTML = sectionsHtml;
-}
-
-function toggleFeFieldEdit(formId, fieldKey) {
-  const safeKey = fieldKey.replace(/\./g, '-');
-  const editbox = document.getElementById(`fe-editbox-${formId}-${safeKey}`);
-  const preview = document.getElementById(`fe-preview-${formId}-${safeKey}`);
-  const card = document.getElementById(`fe-card-${formId}-${safeKey}`);
-  if (!editbox || !preview) return;
-  // Close any other open editboxes in this form panel
-  const panelKey = formId === 'wellbeing' ? 'wb' : formId;
-  document.getElementById(`fe-${panelKey}-fields`)?.querySelectorAll('.fe-gf-editbox').forEach((box) => {
-    if (box !== editbox && box.style.display !== 'none') {
-      const otherId = box.id; // fe-editbox-{formId}-{safeKey}
-      const otherSafeKey = otherId.replace(`fe-editbox-${formId}-`, '');
-      const otherPreview = document.getElementById(`fe-preview-${formId}-${otherSafeKey}`);
-      const otherCard = document.getElementById(`fe-card-${formId}-${otherSafeKey}`);
-      box.style.display = 'none';
-      if (otherPreview) otherPreview.style.display = '';
-      if (otherCard) otherCard.classList.remove('fe-gf-editing');
-    }
-  });
-  // Open this editbox
-  editbox.style.display = '';
-  preview.style.display = 'none';
-  card.classList.add('fe-gf-editing');
-  const input = editbox.querySelector('input, textarea');
-  if (input) {
-    if (input.dataset.original === undefined) input.dataset.original = input.value;
-    input.focus();
-    if (input.tagName === 'INPUT') { const len = input.value.length; input.setSelectionRange(len, len); }
-  }
-}
-
-function cancelFeFieldInline(formId, fieldKey) {
-  const safeKey = fieldKey.replace(/\./g, '-');
-  const editbox = document.getElementById(`fe-editbox-${formId}-${safeKey}`);
-  const preview = document.getElementById(`fe-preview-${formId}-${safeKey}`);
-  const card = document.getElementById(`fe-card-${formId}-${safeKey}`);
-  if (!editbox || !preview) return;
-  // Revert value
-  const input = editbox.querySelector('input, textarea');
-  if (input && input.dataset.original !== undefined) {
-    input.value = input.dataset.original;
-  }
-  editbox.style.display = 'none';
-  preview.style.display = '';
-  card.classList.remove('fe-gf-editing');
-}
-
-function feDeleteOpt(fieldId, idx) {
-  const container = document.getElementById(`fe-opts-${fieldId}`);
-  if (!container) return;
-  const rows = [...container.querySelectorAll('.fe-option-row')];
-  if (rows.length <= 1) { showToast('ต้องมีตัวเลือกอย่างน้อย 1 ข้อ', 'warn'); return; }
-  rows[idx]?.remove();
-  // Re-index
-  [...container.querySelectorAll('.fe-option-row')].forEach((r, i) => {
-    r.querySelector('.fe-opt-prefix').textContent = (i+1) + '.';
-    r.id = `fe-opt-row-${fieldId}-${i}`;
-    const inp = r.querySelector('.fe-opt-input');
-    if (inp) inp.id = `fe-opt-${fieldId}-${i}`;
-    const del = r.querySelector('.fe-opt-del');
-    if (del) del.setAttribute('onclick', `feDeleteOpt('${fieldId}',${i})`);
-  });
-}
-
-function feAddOpt(fieldId, fieldKey, formId) {
-  const container = document.getElementById(`fe-opts-${fieldId}`);
-  if (!container) return;
-  const idx = container.querySelectorAll('.fe-option-row').length;
-  const row = document.createElement('div');
-  row.className = 'fe-option-row';
-  row.id = `fe-opt-row-${fieldId}-${idx}`;
-  row.innerHTML = `<span class="fe-opt-prefix">${idx+1}.</span>
-    <input class="fe-opt-input" id="fe-opt-${fieldId}-${idx}" placeholder="ตัวเลือกที่ ${idx+1}">
-    <button class="fe-opt-del" onclick="feDeleteOpt('${fieldId}',${idx})" title="ลบ">✕</button>`;
-  container.appendChild(row);
-  row.querySelector('.fe-opt-input')?.focus();
-}
-
-function feTab(formId, el) {
-  ['ch1','wb'].forEach((k) => {
-    document.getElementById(`fe-${k}-panel`).style.display = 'none';
-    document.getElementById(`fe-tab-${k === 'wb' ? 'wb' : k}`)?.classList.remove('active');
-  });
-  const panelKey = formId === 'wellbeing' ? 'wb' : formId;
-  document.getElementById(`fe-${panelKey}-panel`).style.display = '';
-  if (el) el.classList.add('active');
-}
-
-async function saveFormConfig(formId) {
-  const schema = FORM_CONFIG_SCHEMAS[formId];
-  if (!schema) return;
-  const cfg = {};
-  schema.sections.forEach((sec) => {
-    sec.fields.forEach((field) => {
-      const inputId = `fe-field-${formId}-${field.key.replace(/\./g, '-')}`;
-      const val = (document.getElementById(inputId)?.value || '').trim();
-      if (val && val !== field.default) cfg[field.key] = val;
-      // Save options if field has choices
-      if (Array.isArray(field.options)) {
-        const optsContainer = document.getElementById(`fe-opts-${inputId}`);
-        if (optsContainer) {
-          const optVals = [...optsContainer.querySelectorAll('.fe-opt-input')].map((inp) => inp.value.trim()).filter(Boolean);
-          const defaultOpts = field.options.join('||');
-          if (optVals.length && optVals.join('||') !== defaultOpts) {
-            cfg[field.key + '__opts'] = optVals.join('||');
-          }
-        }
-      }
-    });
-  });
-  try {
-    const { error } = await sb.from('form_configs').upsert(
-      { form_id: formId, form_name: schema.label, config_json: cfg, updated_by: state.session?.user?.email || 'admin', updated_at: new Date().toISOString() },
-      { onConflict: 'form_id' }
-    );
-    if (error) throw error;
-    _feConfigCache[formId] = cfg;
-    const overrideCount = Object.keys(cfg).length;
-    showToast(`บันทึก Config ฟอร์ม ${formId.toUpperCase()} สำเร็จ — ${overrideCount} ช่องที่แก้ไข ✅`);
-    renderFeFields(formId);
-  } catch (e) {
-    showToast(`บันทึกไม่สำเร็จ: ${e.message}`, 'error');
-  }
-}
-
-async function resetFeField(formId, fieldKey) {
-  showConfirm(`รีเซ็ต "${fieldKey}" กลับเป็นค่า default?`, async () => {
-    const cfg = { ..._feConfigCache[formId] };
-    delete cfg[fieldKey];
-    try {
-      const schema = FORM_CONFIG_SCHEMAS[formId];
-      const { error } = await sb.from('form_configs').upsert(
-        { form_id: formId, form_name: schema.label, config_json: cfg, updated_by: state.session?.user?.email || 'admin', updated_at: new Date().toISOString() },
-        { onConflict: 'form_id' }
-      );
-      if (error) throw error;
-      _feConfigCache[formId] = cfg;
-      showToast('รีเซ็ตช่องนั้นแล้ว ✅');
-      renderFeFields(formId);
-    } catch (e) {
-      showToast(`รีเซ็ตไม่สำเร็จ: ${e.message}`, 'error');
-    }
-  });
-}
-
-async function resetAllFe(formId) {
-  showConfirm(`รีเซ็ตทุกช่องของฟอร์ม ${formId.toUpperCase()} กลับเป็นค่า default ทั้งหมด?`, async () => {
-    try {
-      const schema = FORM_CONFIG_SCHEMAS[formId];
-      const { error } = await sb.from('form_configs').upsert(
-        { form_id: formId, form_name: schema.label, config_json: {}, updated_by: state.session?.user?.email || 'admin', updated_at: new Date().toISOString() },
-        { onConflict: 'form_id' }
-      );
-      if (error) throw error;
-      _feConfigCache[formId] = {};
-      showToast(`รีเซ็ต Config ฟอร์ม ${formId.toUpperCase()} เรียบร้อยแล้ว`);
-      renderFeFields(formId);
-    } catch (e) {
-      showToast(`รีเซ็ตไม่สำเร็จ: ${e.message}`, 'error');
-    }
-  });
-}
+/* form editor logic moved to admin/js/services/forms.js */
 
 /* ========== PDF GENERATION ========== */
 function showCh1PDF(index) {
@@ -5030,76 +4428,6 @@ ${histRows !== '<tr><td colspan="5" style="color:#9CA3AF;text-align:center">—<
 <script>window.onload=function(){window.print()}<\/script>
 </body></html>`;
   const w = window.open('', '_blank', 'width=960,height=780');
-  if (w) { w.document.write(pdfHtml); w.document.close(); }
-  else showToast('กรุณาอนุญาต Popup เพื่อดู PDF', 'warn');
-}
-
-function showWbRowPDF(idx) {
-  const row = state.rawFiltered[idx];
-  if (!row) { showToast('ไม่พบข้อมูลในตำแหน่งนี้', 'warn'); return; }
-  const phq = getPhq9(row);
-  const gad = getGad7(row);
-  const burnout = getBurnout(row);
-  const engagement = getEngagement(row);
-  const wlb = getWlb(row);
-  const flagged = (phq || 0) >= 15;
-  const pdfHtml = `<!DOCTYPE html><html lang="th"><head><meta charset="UTF-8">
-<title>Wellbeing Report — ${row.organization || 'ไม่ระบุ'}</title>
-<style>
-  body{font-family:'Sarabun',sans-serif;margin:32px;color:#1A2433;font-size:13px;line-height:1.7}
-  h1{font-size:18px;color:#0F4C81;margin-bottom:4px}
-  h2{font-size:14px;color:#0F4C81;margin:18px 0 6px;border-bottom:2px solid #E8F1FB;padding-bottom:4px}
-  .meta{font-size:12px;color:#6B7280;margin-bottom:20px}
-  .alert{background:#FEE2E2;border:1px solid #FCA5A5;border-radius:6px;padding:10px 14px;margin-bottom:14px;font-weight:600;color:#991B1B}
-  .kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
-  .kpi{background:#F4F6F9;border:1px solid #D8DCE3;border-radius:8px;padding:10px 14px;text-align:center}
-  .kpi-val{font-size:22px;font-weight:700;color:#0F4C81}
-  .kpi-val.red{color:#991B1B}
-  .kpi-label{font-size:11px;color:#6B7280;margin-top:3px}
-  table{width:100%;border-collapse:collapse;margin-bottom:12px}
-  th,td{padding:7px 10px;border:1px solid #D8DCE3;text-align:left;font-size:12.5px}
-  th{background:#F4F6F9;font-weight:600;color:#374151;width:45%}
-  .footer{margin-top:30px;font-size:11px;color:#9CA3AF;border-top:1px solid #E5E7EB;padding-top:10px}
-  @media print{body{margin:16px}}
-</style>
-</head><body>
-<h1>💚 รายงาน Wellbeing Survey — รายบุคคล</h1>
-<div class="meta">องค์กร: <b>${esc(row.organization || '—')}</b> &nbsp;|&nbsp; วันที่ตอบ: <b>${fmtDate(row.submitted_at, true)}</b></div>
-${flagged ? '<div class="alert">⚠️ คะแนน PHQ-9 ≥ 15 บุคคลนี้ควรได้รับการดูแลสุขภาพจิตเพิ่มเติม</div>' : ''}
-<div class="kpi-grid">
-  <div class="kpi"><div class="kpi-val ${flagged?'red':''}">${fmtNum(phq)}</div><div class="kpi-label">PHQ-9 (ภาวะซึมเศร้า)</div></div>
-  <div class="kpi"><div class="kpi-val">${fmtNum(gad)}</div><div class="kpi-label">GAD-7 (ความวิตกกังวล)</div></div>
-  <div class="kpi"><div class="kpi-val">${fmtNum(burnout,1)}</div><div class="kpi-label">Burnout Score</div></div>
-</div>
-<h2>ข้อมูลส่วนตัว</h2>
-<table>
-  <tr><th>เพศ</th><td>${esc(row.gender || '—')}</td></tr>
-  <tr><th>กลุ่มอายุ</th><td>${esc(ageGroup(row))}</td></tr>
-  <tr><th>ประเภทตำแหน่ง</th><td>${esc(row.org_type || '—')}</td></tr>
-  <tr><th>ระดับ</th><td>${esc(row.job || '—')}</td></tr>
-  <tr><th>อายุราชการ</th><td>${esc(row.job_duration || '—')}</td></tr>
-</table>
-<h2>ตัวชี้วัดสุขภาวะ</h2>
-<table>
-  <tr><th>PHQ-9 (ภาวะซึมเศร้า)</th><td><b>${fmtNum(phq)}</b> ${(phq||0) >= 15 ? '⚠️ ระดับรุนแรง' : (phq||0) >= 10 ? '⚠️ ระดับปานกลาง' : '✓ ปกติ'}</td></tr>
-  <tr><th>GAD-7 (ความวิตกกังวล)</th><td>${fmtNum(gad)}</td></tr>
-  <tr><th>Burnout Score</th><td>${fmtNum(burnout, 1)}</td></tr>
-  <tr><th>Engagement Score</th><td>${fmtNum(engagement, 1)}</td></tr>
-  <tr><th>Work-Life Balance</th><td>${fmtNum(wlb, 1)}</td></tr>
-</table>
-<h2>พฤติกรรมสุขภาพ</h2>
-<table>
-  <tr><th>การนอนหลับ</th><td>${esc(getSleep(row))}</td></tr>
-  <tr><th>การออกกำลังกาย</th><td>${esc(getExercise(row))}</td></tr>
-  <tr><th>โรคเรื้อรัง</th><td>${esc(getChronic(row))}</td></tr>
-  <tr><th>BMI</th><td>${row.bmi != null ? fmtNum(row.bmi, 1) + ' (' + esc(row.bmi_category) + ')' : '—'}</td></tr>
-  <tr><th>ความพึงพอใจในงาน</th><td>${esc(getJobSat(row))}</td></tr>
-  <tr><th>ปัญหาสำคัญที่สุด</th><td>${esc(getMainProblem(row))}</td></tr>
-</table>
-<div class="footer">พิมพ์เมื่อ: ${new Date().toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'})} &nbsp;|&nbsp; ระบบ Admin Portal Well-being Survey | ข้อมูลนี้เป็นความลับ</div>
-<script>window.onload=function(){window.print()}<\/script>
-</body></html>`;
-  const w = window.open('', '_blank', 'width=900,height=700');
   if (w) { w.document.write(pdfHtml); w.document.close(); }
   else showToast('กรุณาอนุญาต Popup เพื่อดู PDF', 'warn');
 }

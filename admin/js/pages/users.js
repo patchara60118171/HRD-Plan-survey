@@ -33,6 +33,11 @@ function renderUsers() {
     return `<span class="u-role-tag ${cls}">${label}</span>`;
   }
 
+  function getAccessibleOrgLabel(row, rowRole) {
+    if (rowRole === 'org_hr') return row.org_code || row.org_name || '—';
+    return row.org_name || 'ทุกองค์กร';
+  }
+
   tbody.innerHTML = rows.map((row) => {
     const isLocked = LOCKED_SUPERADMIN_EMAILS.includes(row.email);
     const rowRole = isLocked ? 'superadmin' : (row.role || 'viewer');
@@ -40,7 +45,7 @@ function renderUsers() {
     return `<tr ${isLocked ? 'style="background:#FFFBEB"' : ''}>
       <td>${esc(row.email)}${isLocked ? ' <span style="font-size:10px;color:#92400E;font-weight:600;background:#FEF3CD;padding:1px 5px;border-radius:4px">🔒 Locked</span>' : ''}</td>
       <td>${roleBadge(rowRole)}</td>
-      <td>${esc(row.org_name || 'ทุกองค์กร')}</td>
+      <td>${esc(getAccessibleOrgLabel(row, rowRole))}</td>
       <td>${fmtDate(row.last_login_at)}</td>
       <td><span class="badge ${row.is_active === false ? 'bx' : 'bg'}">${row.is_active === false ? 'Inactive' : 'Active'}</span></td>
       <td>${fmtDate(row.expires_at)}</td>
@@ -61,6 +66,13 @@ function renderUsers() {
     orgFilter.innerHTML = `<option value="">ทุกองค์กร</option>${ORG_NAMES.map((name) =>
       `<option${name === cur ? ' selected' : ''}>${esc(name)}</option>`).join('')}`;
   }
+
+  // Credentials ของ org_hr ให้เห็นเฉพาะ admin/superadmin เท่านั้น
+  const credCard = document.getElementById('orghr-cred-card');
+  if (credCard) {
+    const canViewCred = myRole === 'admin' || myRole === 'superadmin';
+    credCard.style.display = canViewCred ? '' : 'none';
+  }
 }
 
 // ─── Filter ───────────────────────────────────────────────────────────────────
@@ -78,24 +90,38 @@ function filterUsersTable() {
 
 // ─── Org HR Credentials Table ─────────────────────────────────────────────────
 
-function renderOrgHrCredentials() {
-  const tbody = document.getElementById('orghr-tbody');
+async function renderOrgHrCredentials() {
+  const myRole = state.myRole || 'viewer';
+  if (myRole !== 'admin' && myRole !== 'superadmin') return;
+
+  if (typeof fetchOrgHrCredentials === 'function') {
+    state.orgHrCredentials = await fetchOrgHrCredentials();
+  }
+
+  const tbody = document.getElementById('orghr-cred-tbody');
   if (!tbody) return;
-  const orgHrUsers = state.userRows.filter((r) => r.role === 'org_hr');
-  tbody.innerHTML = orgHrUsers.map((row) => `<tr>
-    <td>${esc(row.org_code || row.org_name || '—')}</td>
-    <td>${esc(row.display_name || '—')}</td>
-    <td><code style="font-size:11px">${esc(row.email)}</code></td>
-    <td>
-      <span style="font-family:monospace;font-size:12px;background:var(--bg2);padding:2px 8px;border-radius:4px">${esc(row.initial_password || '(ไม่มี)')}</span>
-      <button class="btn b-gray" style="margin-left:6px;font-size:11px" onclick="navigator.clipboard.writeText('${esc(row.initial_password || '')}').then(()=>showToast('คัดลอกแล้ว ✅'))">📋</button>
-    </td>
-    <td><span class="badge ${row.is_active !== false ? 'bg' : 'bx'}">${row.is_active !== false ? 'Active' : 'Inactive'}</span></td>
-  </tr>`).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--tx3)">ยังไม่มีข้อมูล org_hr</td></tr>';
+  const orgHrUsers = (state.orgHrCredentials || []);
+  tbody.innerHTML = orgHrUsers.map((row, i) => {
+    const pwd = row.initial_password || '(ไม่มี)';
+    return `<tr>
+      <td>${i + 1}</td>
+      <td>${esc(row.display_name || row.org_name || row.org_code || '—')}</td>
+      <td><code style="font-size:11px">${esc(row.email)}</code></td>
+      <td><span style="font-family:monospace;font-size:12px;background:var(--bg2);padding:2px 8px;border-radius:4px">${esc(pwd)}</span></td>
+      <td><span class="badge ${row.is_active !== false ? 'bg' : 'bx'}">${row.is_active !== false ? 'Active' : 'Inactive'}</span></td>
+      <td class="td-act">${row.initial_password ? `<button class="btn b-gray" style="font-size:11px;padding:3px 8px" onclick="navigator.clipboard.writeText('องค์กร: ${esc(row.display_name || row.org_name || row.org_code || '')}\nEmail: ${esc(row.email)}\nPassword: ${esc(row.initial_password)}').then(()=>showToast('คัดลอกแล้ว ✅'))">📋 Copy</button>` : '—'}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--tx3)">ยังไม่มีข้อมูล org_hr</td></tr>';
 }
 
 function exportOrgHrCredentialsCsv() {
-  const orgHrUsers = state.userRows.filter((r) => r.role === 'org_hr');
+  const myRole = state.myRole || 'viewer';
+  if (myRole !== 'admin' && myRole !== 'superadmin') {
+    showToast('ไม่มีสิทธิ์เข้าถึงข้อมูลนี้', 'warn');
+    return;
+  }
+
+  const orgHrUsers = (state.orgHrCredentials || []);
   if (!orgHrUsers.length) { showToast('ไม่มีข้อมูล Org HR', 'warn'); return; }
   const rows = orgHrUsers.map((r) => ({
     org_code: r.org_code || '',

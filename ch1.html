@@ -30,6 +30,8 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+    <script src="js/project-ssot.js"></script>
+
     <script>
 
         tailwind.config = {
@@ -500,39 +502,7 @@
 
                             class="w-full border-2 border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-primary focus:outline-none transition">
 
-                            <option value="">-- เลือกหน่วยงาน --</option>
-
-                            <option>สำนักงานสภาพัฒนาการเศรษฐกิจและสังคมแห่งชาติ</option>
-
-                            <option>สำนักงานนโยบายและยุทธศาสตร์การค้า</option>
-
-                            <option>กรมวิทยาศาสตร์บริการ</option>
-
-                            <option>กรมสนับสนุนบริการสุขภาพ</option>
-
-                            <option>กรมอุตุนิยมวิทยา</option>
-
-                            <option>กรมส่งเสริมวัฒนธรรม</option>
-
-                            <option>กรมคุมประพฤติ</option>
-
-                            <option>สำนักงานปลัดกระทรวงการท่องเที่ยวและกีฬา</option>
-
-                            <option>กรมสุขภาพจิต</option>
-
-                            <option>สำนักงานนโยบายและแผนทรัพยากรธรรมชาติและสิ่งแวดล้อม</option>
-
-                            <option>สำนักงานการวิจัยแห่งชาติ</option>
-
-                            <option>สำนักงานมาตรฐานสินค้าเกษตรและอาหารแห่งชาติ</option>
-
-                            <option>สำนักงาน กพร.</option>
-
-                            <option>กรมชลประทาน</option>
-
-                            <option>กรมกิจการเด็กและเยาวชน</option>
-
-                        </select>
+                            <option value="">-- เลือกหน่วยงาน --</option></select>
 
                         <p class="text-red-500 text-xs mt-1 hidden" id="err-org">กรุณาเลือกหน่วยงาน</p>
 
@@ -2981,6 +2951,47 @@
     <script src="js/ch1-form.js"></script>
 
     <script src="js/pdf-upload.js?v=2"></script>
+
+    <!-- Dynamic org dropdown loader -->
+    <script>
+    (async function loadOrgDropdown() {
+      const sel = document.getElementById('organization');
+      if (!sel) return;
+      // Fallback list in case Supabase is unavailable
+      const FALLBACK_ORGS = [
+        'สำนักงานสภาพัฒนาการเศรษฐกิจและสังคมแห่งชาติ','สำนักงานนโยบายและยุทธศาสตร์การค้า',
+        'กรมวิทยาศาสตร์บริการ','กรมสนับสนุนบริการสุขภาพ','กรมอุตุนิยมวิทยา',
+        'กรมส่งเสริมวัฒนธรรม','กรมคุมประพฤติ','สำนักงานปลัดกระทรวงการท่องเที่ยวและกีฬา',
+        'กรมสุขภาพจิต','สำนักงานนโยบายและแผนทรัพยากรธรรมชาติและสิ่งแวดล้อม',
+        'สำนักงานการวิจัยแห่งชาติ','สำนักงานมาตรฐานสินค้าเกษตรและอาหารแห่งชาติ',
+        'สำนักงาน กพร.','กรมชลประทาน','กรมกิจการเด็กและเยาวชน'
+      ];
+      function populateOrgs(names) {
+        sel.innerHTML = '<option value="">-- เลือกหน่วยงาน --</option>' +
+          names.map(n => `<option value="${n}">${n}</option>`).join('');
+      }
+      try {
+        const sbClient = typeof supabase !== 'undefined' && supabase.createClient
+          ? supabase.createClient(
+              'https://fgdommhiqhzvsedfzyrr.supabase.co',
+              'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZnZG9tbWhpcWh6dnNlZGZ6eXJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkzMzY2MzUsImV4cCI6MjA4NDkxMjYzNX0.GFMOeDArhq-9lPt39OizkBOFFgK4TDpVDJrk_HRQ6Xc'
+            )
+          : null;
+        if (!sbClient) { populateOrgs(FALLBACK_ORGS); return; }
+        const { data, error } = await sbClient
+          .from('organizations')
+          .select('org_name_th')
+          .eq('is_active', true)
+          .eq('show_in_dashboard', true)
+          .order('display_order', { ascending: true })
+          .order('org_name_th', { ascending: true });
+        if (error || !data?.length) { populateOrgs(FALLBACK_ORGS); return; }
+        populateOrgs(data.map(r => r.org_name_th));
+      } catch (_) {
+        populateOrgs(FALLBACK_ORGS);
+      }
+    })();
+    </script>
 
 
 

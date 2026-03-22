@@ -11,7 +11,15 @@
         },
         {
             "source": "/ch1-form",
-            "destination": "/ch1.html"
+            "destination": "/ch1-edit.html"
+        },
+        {
+            "source": "/ch1-preview",
+            "destination": "/ch1-preview.html"
+        },
+        {
+            "source": "/ch1-individual-pdf",
+            "destination": "/ch1-individual-pdf.html"
         },
         {
             "source": "/org-portal",

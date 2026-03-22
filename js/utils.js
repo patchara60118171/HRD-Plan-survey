@@ -152,8 +152,10 @@ function exportToExcel(responses, userInfo) {
         'tmhi_score': 'คะแนนสุขภาพจิต'
     };
 
-    if (typeof SURVEY_DATA !== 'undefined') {
-        Object.values(SURVEY_DATA).forEach(section => {
+    const surveyData = PROJECT_SSOT.wellbeing.surveyData;
+
+    if (surveyData && Object.keys(surveyData).length > 0) {
+        Object.values(surveyData).forEach(section => {
             if (section.subsections) {
                 section.subsections.forEach(sub => {
                     if (sub.questions) {

@@ -1,5 +1,5 @@
 ﻿/* ========== ADMIN PORTAL — FORM EDITOR SERVICE ========== */
-/* FORM_CONFIG_SCHEMAS, _feConfigCache → defined in admin.html inline script */
+/* FORM_CONFIG_SCHEMAS, _feConfigCache → defined in form-editor-schema.js */
 
 async function loadFormEditorFields() {
   const formIds = ['ch1', 'wellbeing'];

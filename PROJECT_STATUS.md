@@ -1,5 +1,5 @@
 # PROJECT STATUS
-> Well-being Survey System — อัปเดตล่าสุด: 2026-03-18
+> Well-being Survey System — อัปเดตล่าสุด: 2026-03-22 (session 3)
 
 ---
 
@@ -9,11 +9,13 @@
 |---|---|---|
 | Supabase Schema | ✅ สมบูรณ์ | Migrations ครบ 30+ รายการ |
 | RLS & Role Security | ✅ สมบูรณ์ | org_hr scoped, super_admin protected |
-| Vercel Deployment | ✅ สมบูรณ์ | cleanUrls, rewrites, .vercelignore ถูกต้อง |
+| Vercel Deployment | ✅ สมบูรณ์ | cleanUrls, rewrites ครบ incl. /ch1-form /ch1-preview /ch1-individual-pdf |
 | Admin Portal UI | ✅ สมบูรณ์ | login overlay, role-aware nav, org scoping |
 | Test Organization | ✅ พร้อม | test-org / hr@test-org.local / TestOrg2569 |
 | CH1 Lifecycle | ✅ พร้อม | round_2569, status draft→submitted→locked |
 | Well-being Public Form | ✅ ทำงาน | per-org links, anonymous |
+| SSOT (project-ssot.js) | ✅ สมบูรณ์ | sectionsOrder static (8), api.js no raw-table fallback, consumer files cleaned |
+| CH1 Org-Portal Files | ✅ ตรวจแล้ว | ch1-edit/preview/pdf.html: org param + cross-org guard + error handling ครบ |
 
 ---
 
@@ -131,6 +133,7 @@ nidawellbeing.vercel.app/admin      → admin.html   (Admin portal)
 | `org_code` NULL ใน 3 CH1 records เดิม | org_hr fallback ใช้ `organization` text match | Backfill migration applied (DSS/BOB/MOTS) |
 | `survey_responses.org_code` เป็น NULL สำหรับ responses เก่า | RLS fallback ผ่าน `org_name_th` join | Migration backfill applied |
 | org_code case inconsistency (`nesdc` vs `NESDC`) | อาจ duplicate ในอนาคต | Normalize ด้วย UPPER() ใน query |
+| T5 manual sync check ยังไม่ได้ทำ | section count บน production อาจไม่ตรง | เปิด nidawellbeing.vercel.app → นับ section (ควร 8) และ /ch1 → นับ steps (ควร 5) |
 | Admin portal: ยังไม่มี UI สำหรับ form_windows | ต้องแก้ผ่าน Supabase Dashboard | medium priority |
 | Admin portal: ยังไม่มี UI สำหรับ form_question_overrides | ต้องแก้ผ่าน Supabase Dashboard | medium priority |
 | smoke-test.js ไม่รันใน sandbox | รันจาก local machine เท่านั้น | ใช้ `node scripts/audit/smoke-test.js` |

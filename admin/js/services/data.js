@@ -22,13 +22,56 @@ function refreshOrgDerivedState() {
   ORG_LOOKUP = new Map(catalog.map((org) => [org.name, org]));
 }
 
+function getCurrentUserRow() {
+  const email = state.session?.user?.email;
+  if (!email) return null;
+  return state.userRows.find((row) => row.email === email) || null;
+}
+
+function scopeRowsForCurrentUser() {
+  const myRow = getCurrentUserRow();
+  const myRole = LOCKED_SUPERADMIN_EMAILS.includes(state.session?.user?.email || '')
+    ? 'superadmin'
+    : (myRow?.role || 'viewer');
+
+  if (myRole !== 'org_hr') return;
+
+  const myOrgCode = (myRow?.org_code || '').toLowerCase();
+  const myOrgName = myRow?.org_name || myRow?.display_name || '';
+
+  state.surveyRows = state.surveyRows.filter((row) => {
+    const rowOrgName = row.organization || '';
+    const rowOrgCode = (ORG_LOOKUP.get(rowOrgName)?.code || '').toLowerCase();
+    return (myOrgCode && rowOrgCode === myOrgCode) || (myOrgName && rowOrgName === myOrgName);
+  });
+
+  state.ch1Rows = state.ch1Rows.filter((row) => {
+    const rowOrgName = getCh1Org(row);
+    const rowOrgCode = (row.org_code || ORG_LOOKUP.get(rowOrgName)?.code || '').toLowerCase();
+    return (myOrgCode && rowOrgCode === myOrgCode) || (myOrgName && rowOrgName === myOrgName);
+  });
+
+  state.linkRows = state.linkRows.filter((row) => {
+    const rowOrgCode = (row.org_code || '').toLowerCase();
+    const rowOrgName = row.org_name || row.organization || '';
+    return (myOrgCode && rowOrgCode === myOrgCode) || (myOrgName && rowOrgName === myOrgName);
+  });
+
+  state.orgProfiles = state.orgProfiles.filter((row) => {
+    const rowOrgCode = (row.org_code || '').toLowerCase();
+    const rowOrgName = row.org_name_th || row.display_name || '';
+    return (myOrgCode && rowOrgCode === myOrgCode) || (myOrgName && rowOrgName === myOrgName);
+  });
+}
+
 async function loadBackend() {
-  const [surveyRes, ch1Res, linksRes, usersRes, orgRes] = await Promise.all([
+  const [surveyRes, ch1Res, linksRes, usersRows, orgRows, orgHrCredRows] = await Promise.all([
     sb.from('survey_responses').select('id,email,name,title,organization,gender,age,org_type,job,job_duration,bmi,bmi_category,is_draft,submitted_at,timestamp,tmhi_score,raw_responses'),
     sb.from('hrd_ch1_responses').select('*'),
     sb.from('org_form_links').select('*'),
-    sb.from('admin_user_roles').select('*').order('email', { ascending: true }),
-    sb.from('organizations').select('*').eq('is_active', true).order('org_name_th', { ascending: true }),
+    fetchAdminUserRoles(),
+    fetchOrganizations(),
+    fetchOrgHrCredentials(),
   ]);
 
   if (surveyRes.error) throw surveyRes.error;
@@ -40,8 +83,11 @@ async function loadBackend() {
   state.ch1Rows = (ch1Res.data || [])
     .sort((a, b) => new Date(getRowDate(b) || 0) - new Date(getRowDate(a) || 0));
   state.linkRows = linksRes.error ? [] : (linksRes.data || []);
-  state.userRows = usersRes.error ? [] : (usersRes.data || []);
-  state.orgProfiles = orgRes.error ? [] : (orgRes.data || []);
+  state.userRows = usersRows || [];
+  state.orgHrCredentials = orgHrCredRows || [];
+  state.orgProfiles = orgRows || [];
+  refreshOrgDerivedState();
+  scopeRowsForCurrentUser();
   refreshOrgDerivedState();
 }
 

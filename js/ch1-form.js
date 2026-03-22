@@ -18,47 +18,16 @@ const TEST_RUN_ID = IS_TEST_MODE
 // =============================================
 // STATIC DATA
 // =============================================
-const SUPPORT_SYSTEMS = [
-    { id: 'mentoring_system', label: 'ระบบพี่เลี้ยง (Mentoring)' },
-    { id: 'job_rotation', label: 'ระบบหมุนเวียนงาน (Job Rotation)' },
-    { id: 'idp_system', label: 'การจัดทำแผนพัฒนารายบุคคล (IDP)' },
-    { id: 'career_path_system', label: 'เส้นทางความก้าวหน้า (Career Path)' },
-];
+const SUPPORT_SYSTEMS = PROJECT_SSOT?.ch1?.supportSystems || [];
 
-const SUPPORT_OPTIONS = [
-    { v: 'full', l: 'มีตามแผน' },
-    { v: 'partial', l: 'มีไม่ครบตามแผน' },
-    { v: 'none', l: 'ไม่มี' },
-];
+const SUPPORT_OPTIONS = PROJECT_SSOT?.ch1?.supportOptions || [];
 
-const STRATEGIC_TOPICS = [
-    { id: 'service_efficiency', label: 'การเพิ่มประสิทธิภาพการให้บริการประชาชน' },
-    { id: 'digital_capability', label: 'การพัฒนาศักยภาพด้านดิจิทัล' },
-    { id: 'new_leaders', label: 'การพัฒนาผู้นำรุ่นใหม่' },
-    { id: 'reduce_sick_leave', label: 'การลดอัตราการลาป่วย' },
-    { id: 'reduce_turnover', label: 'การลดอัตราการลาออก' },
-    { id: 'other', label: 'อื่น ๆ' },
-];
+const STRATEGIC_TOPICS = PROJECT_SSOT?.ch1?.strategicTopics || [];
 
 // =============================================
 // ORGANIZATION MAPPING
 // =============================================
-const ORG_MAP = {
-    'nesdc': 'สำนักงานสภาพัฒนาการเศรษฐกิจและสังคมแห่งชาติ',
-    'dss': 'กรมวิทยาศาสตร์บริการ',
-    'tmd': 'กรมอุตุนิยมวิทยา',
-    'probation': 'กรมคุมประพฤติ',
-    'dmh': 'กรมสุขภาพจิต',
-    'onep': 'สำนักงานนโยบายและแผนทรัพยากรธรรมชาติและสิ่งแวดล้อม',
-    'nrct': 'สำนักงานการวิจัยแห่งชาติ',
-    'opdc': 'สำนักงานคณะกรรมการพัฒนาระบบราชการ (ก.พ.ร.)',
-    'rid': 'กรมชลประทาน',
-    'doh': 'กองฝึกอบรม กรมทางหลวง',
-    'mots': 'สำนักงานปลัดกระทรวงการท่องเที่ยวและกีฬา',
-    'tpso': 'สำนักงานนโยบายและยุทธศาสตร์การค้า',
-    'dcp': 'กรมส่งเสริมวัฒนธรรม',
-    'acfs': 'สำนักงานมาตรฐานสินค้าเกษตรและอาหารแห่งชาติ'
-};
+const ORG_MAP = PROJECT_SSOT?.organizations?.orgCodeNameMap || {};
 
 function parseUrlParameters() {
     const params = new URLSearchParams(window.location.search);
@@ -135,7 +104,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Build step-dot labels
-    const STEP_NAMES = ['เริ่มต้น', 'ข้อมูลพื้นฐาน', 'นโยบาย/บริบท', 'สุขภาวะ', 'ระบบ/สภาพแวดล้อม', 'ทิศทาง/เป้าหมาย'];
+    const STEP_NAMES = PROJECT_SSOT?.ch1?.stepNames || ['เริ่มต้น', 'ข้อมูลพื้นฐาน', 'นโยบาย/บริบท', 'สุขภาวะ', 'ระบบ/สภาพแวดล้อม', 'ทิศทาง/เป้าหมาย'];
     const dotsRow = document.getElementById('step-dots-row');
     if (dotsRow) {
         dotsRow.innerHTML = STEP_NAMES.map((n, i) =>

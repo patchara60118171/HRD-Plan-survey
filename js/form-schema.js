@@ -144,8 +144,7 @@ const FormSchema = (() => {
   }
 
   function buildCh1Fallback() {
-    // Use HRD_CH1_FIELDS if available
-    const fields = (typeof HRD_CH1_FIELDS !== 'undefined') ? HRD_CH1_FIELDS : {};
+    const fields = PROJECT_SSOT?.ch1?.fallbackFields || ((typeof HRD_CH1_FIELDS !== 'undefined') ? HRD_CH1_FIELDS : {});
     const questions = Object.entries(fields).map(([key, label], idx) => ({
       id: `fallback_ch1_${key}`,
       form_code: 'ch1',
@@ -221,9 +220,9 @@ const FormSchema = (() => {
       const q = cached.questionsMap.get(fieldKey);
       if (q) return q.label_th;
     }
-    // Fallback to HRD_CH1_FIELDS
-    if (formCode === 'ch1' && typeof HRD_CH1_FIELDS !== 'undefined') {
-      return HRD_CH1_FIELDS[fieldKey] || fieldKey;
+    if (formCode === 'ch1') {
+      const fallbackFields = PROJECT_SSOT?.ch1?.fallbackFields || ((typeof HRD_CH1_FIELDS !== 'undefined') ? HRD_CH1_FIELDS : {});
+      return fallbackFields[fieldKey] || fieldKey;
     }
     return fieldKey;
   }

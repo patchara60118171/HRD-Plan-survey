@@ -1,5 +1,5 @@
 # 📋 TASK TRACKER — Well-being Survey System
-> อัปเดตล่าสุด: 2026-03-21
+> อัปเดตล่าสุด: 2026-03-22 (session 3)
 > ผู้ดูแล: Faal (Patchara) + AI Cowork
 > Supabase Project: `fgdommhiqhzvsedfzyrr` — Survey Nida Wellbeing (ACTIVE_HEALTHY)
 > Vercel: `nidawellbeing.vercel.app`
@@ -93,6 +93,40 @@ RLS: enabled ทุกตาราง (ยกเว้น ch1_google_sync_queue 
 | C18 | ระบุตาราง/policies ที่ขาด | ✅ | 2026-03-21 | พบ 2 issues: form_configs + ch1_google_sync_queue |
 | C19 | Fix RLS gaps | ✅ | 2026-03-21 | Fix แล้ว 2 issues — ดู Issue #1 และ #2 ด้านล่าง |
 
+---
+
+### A5 — Org HR Scoping Fix + Hardening (2026-03-22)
+
+| Task | รายละเอียด | สถานะ | เสร็จเมื่อ | หมายเหตุ |
+|------|-----------|--------|-----------|---------|
+| C23 | แก้ org_hr เห็นข้อมูลทุกองค์กร (Frontend) | ✅ | 2026-03-22 | Dev แก้ `users.js` + `data.js` — label + client-side filter |
+| C24 | Backfill `org_code` NULL ใน hrd_ch1_responses | ✅ | 2026-03-22 | 10 rows NULL + 1 row uppercase 'DSS' → แก้ครบ ดู Issue #5 |
+| C25 | Prompt H — Hardening `initial_password` | ✅ | 2026-03-22 | สร้าง VIEW `admin_user_roles_public` + RPC `get_org_hr_credentials()` + REVOKE anon |
+| C26 | Prompt G — Full Verification Test | ✅ | 2026-03-22 | ผ่านทุก 6 จุด ดูผลด้านล่าง |
+| C27 | Fix auth.users NULL string columns (GoTrue v2.188.1) | ✅ | 2026-03-22 | confirmation_token, recovery_token, email_change_token_new/cur, email_change → set '' ครบ 15 accounts |
+| C28 | SSOT Refactor (T1–T8) | ✅ | 2026-03-22 | ครบทุก task — T5 = manual check เท่านั้น (ไม่มี code change) |
+| C29 | Fix vercel.json — CH1 routes | ✅ | 2026-03-22 | `/ch1-form` → ch1-edit.html, เพิ่ม `/ch1-preview`, `/ch1-individual-pdf` |
+| C30 | Tighten RLS INSERT hrd_ch1_responses | ✅ | 2026-03-22 | `hrd_insert_authenticated` with_check: org_code = requester_org() — ป้องกัน cross-org insert |
+| C31 | SSOT T8 — api.js hardening | ✅ | 2026-03-22 | ลบ backward-compat fallback จาก `fetchAdminUserRoles` + `fetchOrgHrCredentials` ครบ — ไม่มี direct SELECT initial_password จาก raw table อีกต่อไป |
+| C32 | SSOT T1 — project-ssot.js sectionsOrder static | ✅ | 2026-03-22 | sectionsOrder = 8 sections (hard-coded), questions.js เป็น alias: `const SECTIONS_ORDER = PROJECT_SSOT.wellbeing.sectionsOrder` |
+| C33 | SSOT T4 — ลบ fallback patterns ใน consumer files | ✅ | 2026-03-22 | app.js (5 สถานที่), components.js (1), utils.js (1) — ทั้งหมดชี้ตรงไป PROJECT_SSOT |
+| C34 | CH1 Portal file audit — ch1-edit/preview/pdf | ✅ | 2026-03-22 | ทั้งสามไฟล์รับ `?org=` + `?id=` ครบ, cross-org guard ทำงาน, saveForm error handling OK |
+
+**Prompt G — Full Verification Results (2026-03-22):**
+| จุดตรวจ | ผล | รายละเอียด |
+|---------|-----|-----------|
+| G1: Auth users 15 org_hr | ✅ Pass | COUNT = 15 |
+| G2: admin_user_roles ครบ + password + active | ✅ Pass | total=15, has_password=15, has_org_code=15, active=15 |
+| G3: RLS policies ครบ | ✅ Pass | hrd_ch1=5, survey=3, admin_user_roles=4, org=2, form_windows=2 |
+| G4: hrd_ch1_responses org_code ครบ ไม่มี NULL/uppercase | ✅ Pass | total=12, has_org_code=12, uppercase=0 |
+| G5: form_windows ครบทุก org | ✅ Pass | 16 orgs, 32 windows |
+| G6: Hardening view/rpc/no-leak | ✅ Pass | view=1, rpc=1, password_leaked=0 |
+
+**⚠️ Dev Action Required (หลัง Prompt H):**
+Frontend ที่ query `admin_user_roles` ด้วย `select('*')` โดยตรงควรเปลี่ยนเป็น:
+- รายการผู้ใช้ทั่วไป → ใช้ `admin_user_roles_public` (ไม่มี `initial_password`)
+- ดึง credentials → ใช้ `rpc('get_org_hr_credentials')` (เฉพาะ admin/super_admin เท่านั้น)
+
 **RLS Policies Summary (ตรวจ 2026-03-21):**
 | ตาราง | RLS | Policies |
 |-------|-----|---------|
@@ -103,7 +137,7 @@ RLS: enabled ทุกตาราง (ยกเว้น ch1_google_sync_queue 
 | form_questions | ✅ | public-read (active only), admin-write |
 | form_sections | ✅ | public-read, admin-write |
 | form_windows | ✅ | public-read (active), admin-write |
-| hrd_ch1_responses | ✅ | insert (anon+auth), select/update/delete (role-aware) |
+| hrd_ch1_responses | ✅ | insert (anon limited, auth org-scoped ✅ hardened C30), select/update/delete (role-aware) |
 | org_form_links | ✅ | read (authenticated), manage (admin) |
 | organizations | ✅ | read (authenticated), manage (admin) |
 | survey_forms | ✅ | read (authenticated), manage (admin) |
@@ -120,10 +154,10 @@ RLS: enabled ทุกตาราง (ยกเว้น ch1_google_sync_queue 
 | D-3B | แยก JS Services (9 files) | ✅ | 2026-03-21 | config/utils/data/nav/auth/users/export/audit/forms.js ครบ |
 | D1 (3C) | admin/js/pages/dashboard.js | ✅ | 2026-03-21 | renderDashboard, renderProgress, filterProgressTable, openOrgData — ครบ 100% |
 | D2 (3C) | admin/js/pages/users.js | ⚠️ | 2026-03-21 | renderUsers, filterUsersTable, renderOrgHrCredentials, exportOrgHrCredentialsCsv ครบ — modals delegate ไป services/users.js |
-| D3 (3C) | admin/js/pages/organizations.js | ⚠️ | 2026-03-21 | renderOrgs, filterOrgTable ครบ — showOrgDetail/saveOrgProfile/saveSimpleOrg ยังเป็น TODO stub |
-| D4 (3C) | admin/js/pages/links.js | ⚠️ | 2026-03-21 | buildLinkUrl, renderLinks, filterLinksTable, renderAnalytics ครบ — renderWbAnalytics/charts เป็น TODO stub |
-| D5 (3C) | admin/js/pages/wellbeing.js | ⚠️ | 2026-03-21 | renderWellbeingControl, renderWellbeingOrg, openWbRaw ครบ — renderRawTable/showWbRowPDF เป็น TODO stub |
-| D6 (3C) | admin/js/pages/ch1.js | ⚠️ | 2026-03-21 | ไฟล์สร้างแล้ว + TODO comments ครบทุก function — ยังไม่ย้าย impl (CH1 module ใหญ่สุด ~920 lines รอ sprint ถัดไป) |
+| D3 (3C) | admin/js/pages/organizations.js | ✅ | 2026-03-21 | renderOrgs, filterOrgTable, showOrgDetail, saveOrgProfile, saveSimpleOrg — ครบ 100% |
+| D4 (3C) | admin/js/pages/links.js | ✅ | 2026-03-21 | buildLinkUrl, renderLinks, filterLinksTable, renderAnalytics, renderWbAnalytics, toggleLink, createNewLink, showQRModal, exportCompareReport, exportCurrentPage — ครบ 100% |
+| D5 (3C) | admin/js/pages/wellbeing.js | ✅ | 2026-03-21 | renderWellbeingControl, renderWellbeingOrg, openWbRaw, renderWellbeingRaw, applyRawFilters, renderRawTable, exportRawTable, showWbRowPDF, exportWbFiltered — ครบ 100% |
+| D6 (3C) | admin/js/pages/ch1.js | ✅ | 2026-03-21 | renderCh1, renderCh1RawSheet, renderCh1Pdf, renderCh1Summary, showCh1RowDetail, showCh1PDF, CH1_COLUMNS, CH1_SUMMARY_SECTIONS + helpers — ครบ 100% (~1200 lines) |
 | D7 (3C) | admin/js/pages/settings.js | ✅ | 2026-03-21 | loadSettingsUI/saveSettings/resetSettings/showQRModal/sendLinkEmail/exportAuditLog/filterAuditLog/saveDeadlines ครบ — loadFormEditorFields เป็น TODO stub |
 | — | เพิ่ม `<script>` tags ใน admin.html | ✅ | 2026-03-21 | 7 script tags เพิ่มที่ line 899-905, โหลดก่อน inline script ✅ |
 
@@ -211,36 +245,54 @@ RLS: enabled ทุกตาราง (ยกเว้น ch1_google_sync_queue 
 | **ปัญหา** | RLS policy `Read organizations authenticated` ให้แค่ `authenticated` role — anon user อาจไม่เห็น org list ตอนโหลด survey |
 | **แนะนำ** | ตรวจสอบว่า public survey (index.html) อ่าน org list จาก organizations table หรือจาก org_form_links — ถ้าจาก org_form_links ก็โอเค |
 
+### Issue #5 — hrd_ch1_responses: org_code NULL + uppercase (Critical Data Bug)
+| Field | Value |
+|-------|-------|
+| **Severity** | 🔴 Critical |
+| **Discovered** | 2026-03-22 |
+| **Status** | ✅ Fixed 2026-03-22 |
+| **ปัญหา** | 10/12 rows ใน hrd_ch1_responses มี `org_code = NULL` และ 1 row มี `org_code = 'DSS'` (uppercase) ทำให้ RLS ไม่สามารถ match กับ `requester_org()` ที่คืน lowercase ได้ → org_hr เห็นข้อมูลผิด |
+| **Root Cause** | ข้อมูลที่ submit มาก่อนระบบ org_code พร้อม ไม่มีการ backfill และ case ไม่ consistent |
+| **แก้ไข** | Backfill `org_code` จาก `organizations.org_name_th` JOIN + normalize uppercase ด้วย `lower()` |
+| **Verified** | ✅ total=12, has_org_code=12, uppercase=0 |
+
 ---
 
-## 📊 สรุปภาพรวม (2026-03-21)
+## 📊 สรุปภาพรวม (2026-03-22)
 
 | หมวด | Total | ✅ Done | ⏳ Pending | สถานะ |
 |------|-------|---------|-----------|-------|
 | Backend / Schema | 10 | 10 | 0 | ✅ ครบ |
-| Edge Function | 3 | 2 | 1 | 🔄 |
-| Seed + Users | 3 | 2 | 1 | 🔄 |
-| RLS Audit + Security Fix | 4 | 4 | 0 | ✅ ครบ (form_configs fixed) |
+| Edge Function | 3 | 2 | 1 | 🔄 รอ browser test |
+| Seed + Users | 3 | 2 | 1 | 🔄 รอ browser login test |
+| RLS Audit + Security Fix | 4 | 4 | 0 | ✅ ครบ |
+| Org HR Scoping + Hardening | 4 | 4 | 0 | ✅ ครบ (2026-03-22) |
+| SSOT Refactor + CH1 Routes + DB Hardening | 7 | 7 | 0 | ✅ ครบ (2026-03-22 session 3) |
 | Frontend 3A/3B | 2 | 2 | 0 | ✅ ครบ |
-| Frontend 3C (pages) | 8 | 3 | 5 | 🔄 structure done, ch1/orgs/wb/links ต้องเติม impl |
+| Frontend 3C (pages) | 8 | 8 | 0 | ✅ ครบ (Dev แก้ users.js + data.js) |
 | DB Integration | 3 | 0 | 3 | ⏳ รอทดสอบ form-schema.js |
 | Admin UI Features | 4 | 0 | 4 | ⏳ ระยะถัดไป |
 | Testing | 4 | 1 | 3 | ⏳ |
 | Deployment | 3 | 0 | 3 | ⏳ รอ Vercel redeploy |
-| **รวม** | **44** | **24** | **20** | **55% done** |
+| **รวม** | **55** | **40** | **15** | **73% done** |
 
 ---
 
 ## 🎯 งานถัดไปที่แนะนำ (เรียงตาม priority)
 
-1. **[✅ เสร็จแล้ว]** Sprint 3C — 7 page files สร้างแล้ว + script tags เพิ่มใน admin.html แล้ว
+1. **[✅ เสร็จแล้ว]** Sprint 3C — 7 page files สร้าง + impl ครบ 100% + script tags เพิ่มใน admin.html แล้ว
 2. **[✅ เสร็จแล้ว]** Security fix — form_configs anon_write ลบออกแล้ว
-3. **[ทำได้เลย]** Vercel redeploy — push code ใหม่ขึ้น Vercel หลัง Sprint 3C
-4. **[ทำได้เลย]** ทดสอบ login org_hr ผ่าน browser (hr@dcy.go.th / DcyHR2569)
-5. **[Sprint ถัดไป]** เติม impl ที่ยังเป็น stub: ch1.js (~920 lines), organizations.js, wellbeing.js, links.js
-6. **[Sprint ถัดไป]** Wire ch1.html + index.html ให้โหลดคำถามจาก DB (form-schema.js พร้อมแล้ว)
-7. **[Sprint ถัดไป]** Admin UI: form_windows management UI, question overrides UI
-8. **[Clean up]** ลบ legacy users (xxx@wellbeing.local) 14 accounts จาก Supabase Auth → Dashboard
+3. **[✅ เสร็จแล้ว]** Org HR scoping fix — org_code backfill + frontend filter + hardening (2026-03-22)
+4. **[✅ เสร็จแล้ว]** Hardening initial_password — VIEW + RPC + REVOKE anon (2026-03-22)
+5. **[✅ เสร็จแล้ว]** SSOT Refactor T1–T8 — sectionsOrder static, questions.js alias, api.js no raw-table fallback, consumer files cleaned (2026-03-22)
+6. **[✅ เสร็จแล้ว]** vercel.json CH1 routes + RLS hrd INSERT cross-org guard (2026-03-22)
+7. **[✅ เสร็จแล้ว]** ch1-edit/preview/pdf.html — org param + cross-org auth + error handling ครบ (ตรวจแล้ว no action needed)
+8. **[ทำได้เลย]** T5 Manual sync check — เปิด https://nidawellbeing.vercel.app นับ sections (ควร = 8) และ /ch1 นับ steps (ควร = 5)
+9. **[ทำได้เลย]** Vercel redeploy — push code ใหม่ขึ้น Vercel
+10. **[ทำได้เลย]** ทดสอบ login org_hr ผ่าน browser (hr@dcy.go.th / DcyHR2569)
+11. **[Sprint ถัดไป]** Wire ch1.html + index.html ให้โหลดคำถามจาก DB (form-schema.js พร้อมแล้ว)
+12. **[Sprint ถัดไป]** Admin UI: form_windows management UI, question overrides UI
+13. **[Clean up]** ลบ legacy users (xxx@wellbeing.local) 14 accounts จาก Supabase Auth → Dashboard
 
 ---
 

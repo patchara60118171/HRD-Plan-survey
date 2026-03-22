@@ -521,7 +521,7 @@ async function initPortal() {
 
   // Only org_hr can use this portal
   if (roleRow.role !== 'org_hr') {
-    showToast('⚠️ Portal นี้สำหรับ Org HR เท่านั้น — Admin ใช้หน้า /admin', 'warn', 6000);
+    showToast('⚠️ บัญชีนี้ไม่มีสิทธิ์เข้าใช้งาน Portal นี้', 'warn', 6000);
     showLoading(false);
     return;
   }
