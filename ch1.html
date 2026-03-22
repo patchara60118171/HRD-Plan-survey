@@ -2983,7 +2983,7 @@
           .select('org_name_th')
           .eq('is_active', true)
           .eq('show_in_dashboard', true)
-          .order('display_order', { ascending: true })
+          .order('sort_order', { ascending: true })
           .order('org_name_th', { ascending: true });
         if (error || !data?.length) { populateOrgs(FALLBACK_ORGS); return; }
         populateOrgs(data.map(r => r.org_name_th));

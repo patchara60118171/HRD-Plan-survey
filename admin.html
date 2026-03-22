@@ -1431,7 +1431,7 @@ async function saveOrgProfile(event) {
     .from('organizations')
     .select('*')
     .eq('is_active', true)
-    .order('org_name_th', { ascending: true });
+    .order('sort_order', { ascending: true });
 
   if (reloadError) {
     msg.textContent = 'บันทึกแล้ว แต่รีโหลดข้อมูลไม่สำเร็จ: ' + reloadError.message;
@@ -2680,7 +2680,7 @@ async function saveSimpleOrg() {
     ({ error } = await sb.from('organizations').insert(payload));
   }
   if (error) { if (msg) { msg.style.color = 'var(--D)'; msg.textContent = 'บันทึกไม่สำเร็จ: ' + error.message; } return; }
-  const { data } = await sb.from('organizations').select('*').eq('is_active', true).order('org_name_th', { ascending: true });
+  const { data } = await sb.from('organizations').select('*').eq('is_active', true).order('sort_order', { ascending: true });
   state.orgProfiles = data || [];
   refreshOrgDerivedState();
   renderOrgs(summarizeOrgs());

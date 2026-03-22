@@ -183,8 +183,20 @@ function renderPage(orgCode) {
       body.className = 'section-body' + (isReadOnly ? ' readonly-overlay' : '');
 
       (sec.questions || []).forEach(q => {
-        const currentVal = responseData ? (responseData[q.question_key] ?? '') : '';
+        // org_code ต้องมาจาก session — auto-fill + lock ไม่ให้ user แก้
+        const autoFillKeys = { org_code: ORG_PARAM || userOrgCode };
+        const currentVal = autoFillKeys[q.question_key] !== undefined
+          ? autoFillKeys[q.question_key]
+          : (responseData ? (responseData[q.question_key] ?? '') : '');
         const wrapper = FormSchema.renderQuestion(q, body, currentVal);
+        // Lock org_code ไม่ว่า mode ใดก็ตาม
+        if (q.question_key === 'org_code') {
+          wrapper.querySelectorAll('input,textarea,select').forEach(el => {
+            el.readOnly = true;
+            el.style.background = '#f1f5f9';
+            el.style.color = '#64748b';
+          });
+        }
         if (isReadOnly) {
           wrapper.querySelectorAll('input,textarea,select').forEach(el => el.disabled = true);
         }
@@ -249,14 +261,22 @@ async function saveForm(newStatus) {
   try {
     const formData = collectFormData();
     formData.status = newStatus;
-    formData.updated_at = new Date().toISOString();
+    formData.last_saved_at = new Date().toISOString();
+    // org_code ต้องมาจาก session เสมอ (ป้องกัน user แก้ field ใน form)
+    formData.org_code = ORG_PARAM || userOrgCode;
+    // ลบ key ที่ไม่ใช่ column จริง
+    delete formData.updated_at;
+
+    if (newStatus === 'submitted') {
+      formData.submitted_at = new Date().toISOString();
+    }
 
     let result;
     if (responseData?.id) {
       const { error } = await sb.from('hrd_ch1_responses').update(formData).eq('id', responseData.id);
       if (error) throw error;
     } else {
-      formData.org_code = ORG_PARAM || userOrgCode;
+      formData.round_code = 'round_2569';
       formData.created_at = new Date().toISOString();
       const { data, error } = await sb.from('hrd_ch1_responses').insert(formData).select().single();
       if (error) throw error;

@@ -196,6 +196,7 @@ class AdminDashboard {
         const { data, error } = await supabase
             .from('organizations')
             .select('*')
+            .order('sort_order', { ascending: true })
             .order('org_name_th', { ascending: true });
 
         if (error) throw error;

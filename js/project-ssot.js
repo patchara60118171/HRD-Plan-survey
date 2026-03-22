@@ -80,23 +80,23 @@ const PROJECT_SSOT = {
   organizations: {
     // orgHrMap — canonical order (1–15) ตามที่โปรเจคกำหนด
     // Admin portal uses Supabase `organizations` table as SSOT; this is the form-side static fallback.
+    // orgHrMap — synced with Supabase `organizations` table (SSOT) 2026-03-22
     orgHrMap: [
       { org_code: 'nesdc',     org_name_th: 'สำนักงานสภาพัฒนาการเศรษฐกิจและสังคมแห่งชาติ' },       // 1
       { org_code: 'tpso',      org_name_th: 'สำนักงานนโยบายและยุทธศาสตร์การค้า' },                  // 2
       { org_code: 'dss',       org_name_th: 'กรมวิทยาศาสตร์บริการ' },                               // 3
       { org_code: 'tmd',       org_name_th: 'กรมอุตุนิยมวิทยา (สถาบันอุตุนิยมวิทยา)' },           // 4
       { org_code: 'dcp',       org_name_th: 'กรมส่งเสริมวัฒนธรรม' },                               // 5
-      { org_code: 'prob',      org_name_th: 'กรมคุมประพฤติ' },                                       // 6
-      { org_code: 'bob',       org_name_th: 'กรมสนับสนุนบริการสุขภาพ' },                            // 7
+      { org_code: 'probation', org_name_th: 'กรมคุมประพฤติ' },                                       // 6
+      { org_code: 'hssd',      org_name_th: 'กรมสนับสนุนบริการสุขภาพ' },                            // 7
       { org_code: 'mots',      org_name_th: 'สำนักงานปลัดกระทรวงการท่องเที่ยวและกีฬา' },           // 8
       { org_code: 'dmh',       org_name_th: 'กรมสุขภาพจิต' },                                       // 9
       { org_code: 'onep',      org_name_th: 'สำนักงานนโยบายและแผนทรัพยากรธรรมชาติและสิ่งแวดล้อม' }, // 10
       { org_code: 'nrct',      org_name_th: 'สำนักงานการวิจัยแห่งชาติ' },                           // 11
       { org_code: 'acfs',      org_name_th: 'สำนักงานมาตรฐานสินค้าเกษตรและอาหารแห่งชาติ (มกอช.)' }, // 12
-      { org_code: 'opdc',      org_name_th: 'สำนักงานคณะกรรมการพัฒนาระบบราชการ (ก.พ.ร.)' },        // 13
+      { org_code: 'ocsc',      org_name_th: 'สำนักงานคณะกรรมการพัฒนาระบบราชการ (ก.พ.ร.)' },        // 13
       { org_code: 'rid',       org_name_th: 'กรมชลประทาน' },                                         // 14
       { org_code: 'dcy',       org_name_th: 'กรมกิจการเด็กและเยาวชน' },                              // 15
-      { org_code: 'doh',       org_name_th: 'กองฝึกอบรม กรมทางหลวง' },                              // extra
     ],
     // orgCodeNameMap — lowercase keys; ch1-form.js normalises ?org= param to lowercase.
     // Covers canonical codes + alternate codes used in DB (probation, hssd, ocsc).
