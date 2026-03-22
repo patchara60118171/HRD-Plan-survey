@@ -1704,31 +1704,37 @@
 
                         <div class="mb-4">
 
-                            <label
-
-                                class="block text-sm font-medium text-slate-700 mb-2">โปรดระบุว่าข้อมูลที่รายงานเป็น</label>
+                            <label class="block text-sm font-medium text-slate-700 mb-2">ประเภทข้อมูลที่รายงาน</label>
 
                             <div class="space-y-2">
 
                                 <label class="flex items-center gap-2 cursor-pointer">
 
-                                    <input type="radio" name="disease_report_type" value="official_only"
+                                    <input type="radio" name="disease_report_type" value="actual"
 
                                         class="w-4 h-4 text-primary border-slate-300 focus:ring-primary mt-0.5">
 
-                                    <span class="text-sm text-slate-700">เฉพาะข้าราชการ</span>
+                                    <span class="text-sm text-slate-700">ข้อมูลจริง</span>
 
                                 </label>
 
                                 <label class="flex items-center gap-2 cursor-pointer">
 
-                                    <input type="radio" name="disease_report_type" value="all_staff"
+                                    <input type="radio" name="disease_report_type" value="estimated"
 
                                         class="w-4 h-4 text-primary border-slate-300 focus:ring-primary mt-0.5">
 
-                                    <span class="text-sm text-slate-700">บุคลากรทั้งหมด
+                                    <span class="text-sm text-slate-700">ประมาณการ</span>
 
-                                        (ไม่สามารถแยกตามประเภทบุคลากรได้)</span>
+                                </label>
+
+                                <label class="flex items-center gap-2 cursor-pointer">
+
+                                    <input type="radio" name="disease_report_type" value="none"
+
+                                        class="w-4 h-4 text-primary border-slate-300 focus:ring-primary mt-0.5">
+
+                                    <span class="text-sm text-slate-700">ไม่มีข้อมูล</span>
 
                                 </label>
 
@@ -1828,31 +1834,37 @@
 
                         <div class="mb-4">
 
-                            <label
-
-                                class="block text-sm font-medium text-slate-700 mb-2">โปรดระบุว่าข้อมูลที่รายงานเป็น</label>
+                            <label class="block text-sm font-medium text-slate-700 mb-2">ประเภทข้อมูลที่รายงาน</label>
 
                             <div class="space-y-2">
 
                                 <label class="flex items-center gap-2 cursor-pointer">
 
-                                    <input type="radio" name="sick_leave_report_type" value="official_only"
+                                    <input type="radio" name="sick_leave_report_type" value="actual"
 
                                         class="w-4 h-4 text-primary border-slate-300 focus:ring-primary mt-0.5">
 
-                                    <span class="text-sm text-slate-700">เฉพาะข้าราชการ</span>
+                                    <span class="text-sm text-slate-700">ข้อมูลจริง</span>
 
                                 </label>
 
                                 <label class="flex items-center gap-2 cursor-pointer">
 
-                                    <input type="radio" name="sick_leave_report_type" value="all_staff"
+                                    <input type="radio" name="sick_leave_report_type" value="estimated"
 
                                         class="w-4 h-4 text-primary border-slate-300 focus:ring-primary mt-0.5">
 
-                                    <span class="text-sm text-slate-700">บุคลากรทั้งหมด
+                                    <span class="text-sm text-slate-700">ประมาณการ</span>
 
-                                        (ไม่สามารถแยกตามประเภทบุคลากรได้)</span>
+                                </label>
+
+                                <label class="flex items-center gap-2 cursor-pointer">
+
+                                    <input type="radio" name="sick_leave_report_type" value="none"
+
+                                        class="w-4 h-4 text-primary border-slate-300 focus:ring-primary mt-0.5">
+
+                                    <span class="text-sm text-slate-700">ไม่มีข้อมูล</span>
 
                                 </label>
 
@@ -1894,6 +1906,104 @@
 
 
 
+
+
+                    <!-- 9. สถิติผู้ใช้บริการห้องพยาบาล -->
+
+                    <div class="bg-slate-50 rounded-xl p-4">
+
+                        <h3 class="text-sm font-bold text-slate-700 mb-3">9. สถิติผู้ใช้บริการห้องพยาบาล <span
+
+                                class="text-slate-400 font-normal">(ถ้ามี)</span></h3>
+
+                        <p class="text-xs text-slate-500 mb-3">
+
+                            กรุณาระบุข้อมูลการใช้บริการห้องพยาบาลภายในหน่วยงาน
+
+                        </p>
+
+                        <div class="mb-4">
+
+                            <label class="block text-sm font-medium text-slate-700 mb-2">ประเภทข้อมูลที่รายงาน</label>
+
+                            <div class="space-y-2">
+
+                                <label class="flex items-center gap-2 cursor-pointer">
+
+                                    <input type="radio" name="clinic_report_type" value="actual"
+
+                                        class="w-4 h-4 text-primary border-slate-300 focus:ring-primary mt-0.5">
+
+                                    <span class="text-sm text-slate-700">ข้อมูลจริง</span>
+
+                                </label>
+
+                                <label class="flex items-center gap-2 cursor-pointer">
+
+                                    <input type="radio" name="clinic_report_type" value="estimated"
+
+                                        class="w-4 h-4 text-primary border-slate-300 focus:ring-primary mt-0.5">
+
+                                    <span class="text-sm text-slate-700">ประมาณการ</span>
+
+                                </label>
+
+                                <label class="flex items-center gap-2 cursor-pointer">
+
+                                    <input type="radio" name="clinic_report_type" value="none"
+
+                                        class="w-4 h-4 text-primary border-slate-300 focus:ring-primary mt-0.5">
+
+                                    <span class="text-sm text-slate-700">ไม่มีข้อมูล</span>
+
+                                </label>
+
+                            </div>
+
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-3">
+
+                            <div>
+
+                                <label class="block text-sm font-medium text-slate-700 mb-1">จำนวนผู้ใช้บริการต่อปี (คน)</label>
+
+                                <input type="number" id="clinic_users_per_year" min="0" placeholder="0"
+
+                                    class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm" />
+
+                            </div>
+
+                        </div>
+
+                        <div class="space-y-3">
+
+                            <div>
+
+                                <label class="block text-sm font-medium text-slate-700 mb-1">อาการที่พบบ่อยที่สุด</label>
+
+                                <textarea id="clinic_top_symptoms" rows="2" placeholder="ระบุอาการที่พบบ่อยในห้องพยาบาล..."
+
+                                    class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm resize-none"></textarea>
+
+                            </div>
+
+                            <div>
+
+                                <label class="block text-sm font-medium text-slate-700 mb-1">ยาที่ใช้บ่อยที่สุด</label>
+
+                                <textarea id="clinic_top_medications" rows="2" placeholder="ระบุยาหรือวิธีรักษาที่ใช้บ่อยในห้องพยาบาล..."
+
+                                    class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm resize-none"></textarea>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+
                     <!-- 10. ผลสำรวจสุขภาพจิต -->
 
                     <div class="bg-slate-50 rounded-xl p-4">
@@ -1914,31 +2024,37 @@
 
                         <div class="mb-4">
 
-                            <label
-
-                                class="block text-sm font-medium text-slate-700 mb-2">โปรดระบุว่าข้อมูลที่รายงานเป็น</label>
+                            <label class="block text-sm font-medium text-slate-700 mb-2">ประเภทข้อมูลที่รายงาน</label>
 
                             <div class="space-y-2">
 
                                 <label class="flex items-center gap-2 cursor-pointer">
 
-                                    <input type="radio" name="mental_health_report_type" value="official_only"
+                                    <input type="radio" name="mental_health_report_type" value="actual"
 
                                         class="w-4 h-4 text-primary border-slate-300 focus:ring-primary mt-0.5">
 
-                                    <span class="text-sm text-slate-700">เฉพาะข้าราชการ</span>
+                                    <span class="text-sm text-slate-700">ข้อมูลจริง</span>
 
                                 </label>
 
                                 <label class="flex items-center gap-2 cursor-pointer">
 
-                                    <input type="radio" name="mental_health_report_type" value="all_staff"
+                                    <input type="radio" name="mental_health_report_type" value="estimated"
 
                                         class="w-4 h-4 text-primary border-slate-300 focus:ring-primary mt-0.5">
 
-                                    <span class="text-sm text-slate-700">บุคลากรทั้งหมด
+                                    <span class="text-sm text-slate-700">ประมาณการ</span>
 
-                                        (ไม่สามารถแยกตามประเภทบุคลากรได้)</span>
+                                </label>
+
+                                <label class="flex items-center gap-2 cursor-pointer">
+
+                                    <input type="radio" name="mental_health_report_type" value="none"
+
+                                        class="w-4 h-4 text-primary border-slate-300 focus:ring-primary mt-0.5">
+
+                                    <span class="text-sm text-slate-700">ไม่มีข้อมูล</span>
 
                                 </label>
 
@@ -2434,139 +2550,41 @@
 
 
 
-                        <!-- Rank Items -->
+                        <!-- Rank Items — built from PROJECT_SSOT.ch1.strategicTopics -->
 
                         <div class="space-y-2" id="rankList">
 
-
-
-                            <div class="rank-item flex items-center gap-3 px-3 py-2.5 rounded-lg border border-slate-200 bg-white cursor-pointer select-none"
-
-                                data-value="service_efficiency">
-
-                                <div
-
-                                    class="rank-badge w-7 h-7 rounded-full border-2 border-slate-300 bg-white flex items-center justify-center shrink-0">
-
-                                    <span class="rank-icon text-slate-300 text-xs font-bold leading-none">—</span>
-
-                                </div>
-
-                                <span class="text-sm text-slate-700">การเพิ่มประสิทธิภาพการให้บริการประชาชน</span>
-
-                            </div>
-
-
-
-                            <div class="rank-item flex items-center gap-3 px-3 py-2.5 rounded-lg border border-slate-200 bg-white cursor-pointer select-none"
-
-                                data-value="digital_capability">
-
-                                <div
-
-                                    class="rank-badge w-7 h-7 rounded-full border-2 border-slate-300 bg-white flex items-center justify-center shrink-0">
-
-                                    <span class="rank-icon text-slate-300 text-xs font-bold leading-none">—</span>
-
-                                </div>
-
-                                <span class="text-sm text-slate-700">การพัฒนาศักยภาพด้านดิจิทัล</span>
-
-                            </div>
-
-
-
-                            <div class="rank-item flex items-center gap-3 px-3 py-2.5 rounded-lg border border-slate-200 bg-white cursor-pointer select-none"
-
-                                data-value="new_leaders">
-
-                                <div
-
-                                    class="rank-badge w-7 h-7 rounded-full border-2 border-slate-300 bg-white flex items-center justify-center shrink-0">
-
-                                    <span class="rank-icon text-slate-300 text-xs font-bold leading-none">—</span>
-
-                                </div>
-
-                                <span class="text-sm text-slate-700">การพัฒนาผู้นำรุ่นใหม่</span>
-
-                            </div>
-
-
-
-                            <div class="rank-item flex items-center gap-3 px-3 py-2.5 rounded-lg border border-slate-200 bg-white cursor-pointer select-none"
-
-                                data-value="reduce_sick_leave">
-
-                                <div
-
-                                    class="rank-badge w-7 h-7 rounded-full border-2 border-slate-300 bg-white flex items-center justify-center shrink-0">
-
-                                    <span class="rank-icon text-slate-300 text-xs font-bold leading-none">—</span>
-
-                                </div>
-
-                                <span class="text-sm text-slate-700">การลดอัตราการลาป่วย</span>
-
-                            </div>
-
-
-
-                            <div class="rank-item flex items-center gap-3 px-3 py-2.5 rounded-lg border border-slate-200 bg-white cursor-pointer select-none"
-
-                                data-value="reduce_turnover">
-
-                                <div
-
-                                    class="rank-badge w-7 h-7 rounded-full border-2 border-slate-300 bg-white flex items-center justify-center shrink-0">
-
-                                    <span class="rank-icon text-slate-300 text-xs font-bold leading-none">—</span>
-
-                                </div>
-
-                                <span class="text-sm text-slate-700">การลดอัตราการลาออก</span>
-
-                            </div>
-
-
-
-                            <!-- อื่นๆ -->
-
-                            <div class="rank-item flex items-start gap-3 px-3 py-2.5 rounded-lg border border-dashed border-slate-200 bg-white cursor-pointer select-none"
-
-                                data-value="other">
-
-                                <div
-
-                                    class="rank-badge w-7 h-7 rounded-full border-2 border-slate-300 bg-white flex items-center justify-center shrink-0 mt-0.5">
-
-                                    <span class="rank-icon text-slate-300 text-xs font-bold leading-none">—</span>
-
-                                </div>
-
-                                <div class="flex-1">
-
-                                    <span class="text-sm text-slate-500">อื่น ๆ (โปรดระบุ)</span>
-
-                                    <input type="text" id="strategic_priority_other" placeholder="ระบุประเด็นอื่นๆ"
-
-                                        class="other-rank-input hidden mt-1.5 w-full border border-slate-200 rounded-lg px-3 py-1.5 text-sm
-
-                                            focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-400 bg-white"
-
-                                        onclick="event.stopPropagation()">
-
-                                </div>
-
-                            </div>
-
-
+                            <!-- Populated by SSOT builder script below -->
 
                         </div>
 
+                        <script>
+                        (function buildRankItems() {
+                            var topics = (typeof PROJECT_SSOT !== 'undefined' && PROJECT_SSOT.ch1 && PROJECT_SSOT.ch1.strategicTopics) ? PROJECT_SSOT.ch1.strategicTopics : [
+                                {id:'service_efficiency',label:'การเพิ่มประสิทธิภาพการให้บริการประชาชน'},
+                                {id:'digital_capability',label:'การพัฒนาศักยภาพด้านดิจิทัล'},
+                                {id:'new_leaders',label:'การพัฒนาผู้นำรุ่นใหม่'},
+                                {id:'reduce_sick_leave',label:'การลดอัตราการลาป่วย'},
+                                {id:'reduce_turnover',label:'การลดอัตราการลาออก'},
+                                {id:'other',label:'อื่น ๆ'}
+                            ];
+                            var container = document.getElementById('rankList');
+                            if (!container) return;
+                            container.innerHTML = topics.map(function(t) {
+                                if (t.id === 'other') return '<div class="rank-item flex items-start gap-3 px-3 py-2.5 rounded-lg border border-dashed border-slate-200 bg-white cursor-pointer select-none" data-value="other">'
+                                    + '<div class="rank-badge w-7 h-7 rounded-full border-2 border-slate-300 bg-white flex items-center justify-center shrink-0 mt-0.5"><span class="rank-icon text-slate-300 text-xs font-bold leading-none">—</span></div>'
+                                    + '<div class="flex-1"><span class="text-sm text-slate-500">อื่น ๆ (โปรดระบุ)</span>'
+                                    + '<input type="text" id="strategic_priority_other" placeholder="ระบุประเด็นอื่นๆ" class="other-rank-input hidden mt-1.5 w-full border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-400 bg-white" onclick="event.stopPropagation()"></div></div>';
+                                return '<div class="rank-item flex items-center gap-3 px-3 py-2.5 rounded-lg border border-slate-200 bg-white cursor-pointer select-none" data-value="'+t.id+'">'
+                                    + '<div class="rank-badge w-7 h-7 rounded-full border-2 border-slate-300 bg-white flex items-center justify-center shrink-0"><span class="rank-icon text-slate-300 text-xs font-bold leading-none">—</span></div>'
+                                    + '<span class="text-sm text-slate-700">'+t.label+'</span></div>';
+                            }).join('');
+                        })();
+                        </script>
 
 
-                        <!-- Summary (แสดงเมื่อเลือกแล้ว) -->
+
+                        <!-- Summary                      <!-- Summary (แสดงเมื่อเลือกแล้ว) -->
 
                         <div id="rankSummaryWrap" class="hidden mt-3">
 
@@ -3123,21 +3141,16 @@
 
 
 
-            const LABELS = {
-
-                service_efficiency: 'การเพิ่มประสิทธิภาพการให้บริการประชาชน',
-
-                digital_capability: 'การพัฒนาศักยภาพด้านดิจิทัล',
-
-                new_leaders: 'การพัฒนาผู้นำรุ่นใหม่',
-
-                reduce_sick_leave: 'การลดอัตราการลาป่วย',
-
-                reduce_turnover: 'การลดอัตราการลาออก',
-
-                other: 'อื่นๆ',
-
-            };
+            // LABELS: read from PROJECT_SSOT.ch1.strategicTopics for single source of truth
+            const LABELS = {};
+            (PROJECT_SSOT?.ch1?.strategicTopics || [
+                {id:'service_efficiency',label:'การเพิ่มประสิทธิภาพการให้บริการประชาชน'},
+                {id:'digital_capability',label:'การพัฒนาศักยภาพด้านดิจิทัล'},
+                {id:'new_leaders',label:'การพัฒนาผู้นำรุ่นใหม่'},
+                {id:'reduce_sick_leave',label:'การลดอัตราการลาป่วย'},
+                {id:'reduce_turnover',label:'การลดอัตราการลาออก'},
+                {id:'other',label:'อื่น ๆ'}
+            ]).forEach(function(t) { LABELS[t.id] = t.label; });
 
 
 
