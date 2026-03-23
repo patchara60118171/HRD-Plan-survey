@@ -972,6 +972,15 @@ async function getCh1WindowStatus(orgCode) {
 }
 
 async function loadCh1Data() {
+  const pickYearValue = (data, keys) => {
+    for (const key of keys) {
+      if (data[key] !== undefined && data[key] !== null) {
+        return data[key];
+      }
+    }
+    return null;
+  };
+
   let { data: rows } = await sb
     .from('hrd_ch1_responses')
     .select('*')
@@ -1074,7 +1083,7 @@ async function loadWbData() {
   } else {
     try {
       const { data: wbRows } = await sb
-        .from('wellbeing_responses')
+        .from('survey_responses')
         .select('id, organization, submitted_at, is_draft, gender, age, tmhi_score, tmhi_level, bmi, bmi_category, name, title, height, weight, waist')
         .eq('organization', portalState.orgName)
         .eq('is_draft', false)
@@ -1307,7 +1316,7 @@ async function loadWbIndividualPage() {
     if (rows.length === 0) {
       try {
         const { data: wRows } = await sb
-          .from('wellbeing_responses')
+          .from('survey_responses')
           .select('id, name, title, gender, age, bmi, bmi_category, tmhi_score, tmhi_level, submitted_at, raw_responses')
           .eq('organization', portalState.orgName)
           .eq('is_draft', false)
