@@ -213,3 +213,13 @@ function downloadWorkbook(fileName, sheetName, rows) {
   XLSX.utils.book_append_sheet(wb, ws, sheetName);
   XLSX.writeFile(wb, fileName);
 }
+
+function downloadTextFile(fileName, text, mimeType = 'text/markdown;charset=utf-8') {
+  const blob = new Blob(['\uFEFF' + String(text ?? '')], { type: mimeType });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = fileName;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 0);
+}

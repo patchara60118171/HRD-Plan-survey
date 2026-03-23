@@ -332,6 +332,82 @@ ${flagged ? '<div class="alert">⚠️ คะแนน PHQ-9 ≥ 15 บุคค
   else showToast('กรุณาอนุญาต Popup เพื่อดู PDF', 'warn');
 }
 
+// ─── Helper function to sort organizations according to desired order ─────────────────
+function sortOrganizations(orgList) {
+  const desiredOrder = [
+    'สำนักงานสภาพัฒนาการเศรษฐกิจและสังคมแห่งชาติ',
+    'สำนักงานนโยบายและยุทธศาสตร์การค้า',
+    'กรมวิทยาศาสตร์บริการ',
+    'กรมสนับสนุนบริการสุขภาพ',
+    'กรมอุตุนิยมวิทยา',
+    'กรมส่งเสริมวัฒนธรรม',
+    'กรมคุมประพฤติ',
+    'สำนักงานปลัดกระทรวงการท่องเที่ยวและกีฬา',
+    'กรมสุขภาพจิต',
+    'สำนักงานนโยบายและแผนทรัพยากรธรรมชาติและสิ่งแวดล้อม',
+    'สำนักงานการวิจัยแห่งชาติ',
+    'สำนักงานมาตรฐานสินค้าเกษตรและอาหารแห่งชาติ',
+    'สำนักงานคณะกรรมการพัฒนาระบบราชการ',
+    'กรมชลประทาน',
+    'กรมกิจการเด็กและเยาวชน'
+  ];
+
+  return [...orgList].sort((a, b) => {
+    const aName = a.display_name || a.org_name || a.org_code || a.name || '';
+    const bName = b.display_name || b.org_name || b.org_code || b.name || '';
+    
+    const aIndex = desiredOrder.indexOf(aName);
+    const bIndex = desiredOrder.indexOf(bName);
+    
+    // If both are in desired order, sort by index
+    if (aIndex !== -1 && bIndex !== -1) {
+      return aIndex - bIndex;
+    }
+    
+    // If only one is in desired order, prioritize it
+    if (aIndex !== -1) return -1;
+    if (bIndex !== -1) return 1;
+    
+    // If neither is in desired order, sort alphabetically
+    return aName.localeCompare(bName, 'th');
+  });
+}
+
+// ─── Wellbeing CH1 PDF Reports ───────────────────────────────────────────────────
+
+async function renderWellbeingCh1PdfReports() {
+  if (typeof fetchWellbeingCh1PdfReports === 'function') {
+    state.wellbeingCh1PdfReports = await fetchWellbeingCh1PdfReports();
+  }
+
+  const tbody = document.getElementById('wellbeing-ch1-pdf-tbody');
+  if (!tbody) return;
+
+  const reports = state.wellbeingCh1PdfReports || [];
+
+  if (reports.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--tx3);padding:20px">ยังไม่มีรายงาน PDF</td></tr>';
+    return;
+  }
+
+  // Sort reports by organization name using the helper function
+  const sortedReports = sortOrganizations(reports);
+
+  tbody.innerHTML = sortedReports.map((row, i) => {
+    const orgName = row.org_name || row.display_name || '—';
+    const createdAt = row.created_at ? new Date(row.created_at).toLocaleDateString('th-TH', { year: 'numeric', month: 'numeric', day: 'numeric' }) : '—';
+    return `<tr>
+      <td>${i + 1}</td>
+      <td style="font-weight:600;font-size:12px">${esc(orgName)}</td>
+      <td>${createdAt}</td>
+      <td>
+        <button class="btn b-outline" onclick="viewWellbeingCh1PdfReport('${row.id}')">ดูรายงาน</button>
+        <button class="btn b-outline" onclick="downloadWellbeingCh1PdfReport('${row.id}', '${orgName}')">PDF</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
 // ─── Export Filtered Wellbeing ───────────────────────────────────────────────
 
 function exportWbFiltered(orgFilter) {

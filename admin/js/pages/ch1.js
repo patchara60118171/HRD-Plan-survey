@@ -60,6 +60,47 @@ function renderCh1RawSheet() {
   ).join('');
 }
 
+// ─── Helper function to sort organizations according to desired order ─────────────────
+function sortOrganizations(orgList) {
+  const desiredOrder = [
+    'สำนักงานสภาพัฒนาการเศรษฐกิจและสังคมแห่งชาติ',
+    'สำนักงานนโยบายและยุทธศาสตร์การค้า',
+    'กรมวิทยาศาสตร์บริการ',
+    'กรมสนับสนุนบริการสุขภาพ',
+    'กรมอุตุนิยมวิทยา',
+    'กรมส่งเสริมวัฒนธรรม',
+    'กรมคุมประพฤติ',
+    'สำนักงานปลัดกระทรวงการท่องเที่ยวและกีฬา',
+    'กรมสุขภาพจิต',
+    'สำนักงานนโยบายและแผนทรัพยากรธรรมชาติและสิ่งแวดล้อม',
+    'สำนักงานการวิจัยแห่งชาติ',
+    'สำนักงานมาตรฐานสินค้าเกษตรและอาหารแห่งชาติ',
+    'สำนักงานคณะกรรมการพัฒนาระบบราชการ',
+    'กรมชลประทาน',
+    'กรมกิจการเด็กและเยาวชน'
+  ];
+
+  return [...orgList].sort((a, b) => {
+    const aName = a.display_name || a.org_name || a.org_code || a.name || '';
+    const bName = b.display_name || b.org_name || b.org_code || b.name || '';
+    
+    const aIndex = desiredOrder.indexOf(aName);
+    const bIndex = desiredOrder.indexOf(bName);
+    
+    // If both are in desired order, sort by index
+    if (aIndex !== -1 && bIndex !== -1) {
+      return aIndex - bIndex;
+    }
+    
+    // If only one is in desired order, prioritize it
+    if (aIndex !== -1) return -1;
+    if (bIndex !== -1) return 1;
+    
+    // If neither is in desired order, sort alphabetically
+    return aName.localeCompare(bName, 'th');
+  });
+}
+
 // ─── renderCh1Pdf ─────────────────────────────────────────────────────────────
 
 function renderCh1Pdf() {
@@ -67,22 +108,28 @@ function renderCh1Pdf() {
   if (!tbody) return;
   const orgSel = document.getElementById('c1pdf-org');
   if (orgSel) {
-    const orgs = [...new Set(state.ch1Rows.map((r) => getCh1Org(r)).filter(Boolean))].sort();
+    const orgs = [...new Set(state.ch1Rows.map((r) => getCh1Org(r)).filter(Boolean))];
+    // Sort organizations using the helper function
+    const sortedOrgs = sortOrganizations(orgs.map(o => ({ name: o }))).map(o => o.name);
     orgSel.innerHTML = '<option value="">ทุกองค์กร</option>' +
-      orgs.map((o) => `<option value="${esc(o)}">${esc(o)}</option>`).join('');
+      sortedOrgs.map((o) => `<option value="${esc(o)}">${esc(o)}</option>`).join('');
   }
   if (!state.ch1Rows.length) {
     tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--tx3)">ยังไม่มีข้อมูล Ch1</td></tr>';
     return;
   }
-  tbody.innerHTML = state.ch1Rows.map((row, i) => `<tr data-org="${esc(getCh1Org(row))}">
+  
+  // Sort ch1Rows using the helper function
+  const sortedCh1Rows = sortOrganizations(state.ch1Rows.map(row => ({
+    ...row,
+    name: getCh1Org(row)
+  })));
+  
+  tbody.innerHTML = sortedCh1Rows.map((row, i) => `<tr data-org="${esc(getCh1Org(row))}">
     <td style="text-align:center;font-weight:600;color:var(--tx3)">${i + 1}</td>
     <td>${esc(getCh1Org(row))}</td>
     <td>${fmtDate(getRowDate(row), true)}</td>
-    <td class="td-act">
-      <button class="btn b-gray" onclick="showCh1RowDetail(${i})">📋 ดูรายละเอียด</button>
-      <button class="btn b-blue" onclick="showCh1PDF(${i})">📄 ดู PDF</button>
-    </td>
+    <td class="td-act"><button class="btn b-gray" onclick="showCh1RowDetail(${state.ch1Rows.indexOf(row)})">📋 ดูรายละเอียด</button><button class="btn b-blue" onclick="showCh1PDF(${state.ch1Rows.indexOf(row)})">📄 PDF</button><button class="btn b-solid" onclick="exportCh1RowDocs(${state.ch1Rows.indexOf(row)})">📝 Docs</button></td>
   </tr>`).join('');
 }
 

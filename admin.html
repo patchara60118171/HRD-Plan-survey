@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="th">
 <head>
 <meta charset="UTF-8"/>
@@ -663,9 +663,9 @@
       <div class="page-title">Export รายงาน</div>
       <div class="page-sub">ดาวน์โหลดรายงานในรูปแบบต่าง ๆ</div>
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
-        <div class="fc"><div class="fc-head"><span style="font-size:20px">📊</span><h3>สรุปภาพรวม Ch1</h3></div><p style="font-size:12px;color:var(--tx2);margin-bottom:12px;line-height:1.6">ข้อมูลองค์กรทั้งหมด พร้อมกราฟโครงสร้างบุคลากร สุขภาวะ และ Engagement</p><div class="fg"><label>เลือกองค์กร</label><select id="exp-ch1-org"><option value="">ทุกองค์กร</option></select></div><div class="fc-actions"><button class="btn b-blue" onclick="exportCh1Filtered(document.getElementById('exp-ch1-org').value)">📊 Excel</button><button class="btn b-gray" onclick="showToast('PDF: กด Ctrl+P แล้วเลือก Save as PDF','info')"> 📄 PDF</button></div></div>
-        <div class="fc"><div class="fc-head"><span style="font-size:20px">💚</span><h3>รายงาน Wellbeing</h3></div><p style="font-size:12px;color:var(--tx2);margin-bottom:12px;line-height:1.6">ผลการสำรวจรายบุคคล ครบทุกมิติสุขภาวะ วิเคราะห์ตามองค์กร/เพศ/อายุ</p><div class="fg"><label>เลือกองค์กร</label><select id="exp-wb-org"><option value="">ทุกองค์กร</option></select></div><div class="fc-actions"><button class="btn b-blue" onclick="exportWbFiltered(document.getElementById('exp-wb-org').value)">📊 Excel</button><button class="btn b-gray" onclick="showToast('PDF: กด Ctrl+P แล้วเลือก Save as PDF','info')">📄 PDF</button></div></div>
-        <div class="fc"><div class="fc-head"><span style="font-size:20px">⚖️</span><h3>รายงานเปรียบเทียบ</h3></div><p style="font-size:12px;color:var(--tx2);margin-bottom:12px;line-height:1.6">Benchmark ระหว่างองค์กร Heatmap ตัวชี้วัดหลัก และ Ranking</p><div class="fg"><label>เลือกองค์กร</label><select id="exp-cmp-org"><option value="">ทุกองค์กร</option></select></div><div class="fc-actions"><button class="btn b-blue" onclick="exportCompareReport()">📊 Excel</button><button class="btn b-gray" onclick="showToast('PDF: กด Ctrl+P แล้วเลือก Save as PDF','info')">📄 PDF</button></div></div>
+        <div class="fc"><div class="fc-head"><span style="font-size:20px">📊</span><h3>สรุปภาพรวม Ch1</h3></div><p style="font-size:12px;color:var(--tx2);margin-bottom:12px;line-height:1.6">ข้อมูลองค์กรทั้งหมด พร้อมกราฟโครงสร้างบุคลากร สุขภาวะ และ Engagement</p><div class="fg"><label>เลือกองค์กร</label><select id="exp-ch1-org"><option value="">ทุกองค์กร</option></select></div><div class="fc-actions"><button class="btn b-blue" onclick="exportCh1Filtered(document.getElementById('exp-ch1-org').value)">📊 Excel</button><button class="btn b-gray" onclick="exportCh1FilteredDocs(document.getElementById('exp-ch1-org').value)">📝 Docs</button><button class="btn b-gray" onclick="showToast('PDF: กด Ctrl+P แล้วเลือก Save as PDF','info')"> 📄 PDF</button></div></div>
+        <div class="fc"><div class="fc-head"><span style="font-size:20px">💚</span><h3>รายงาน Wellbeing</h3></div><p style="font-size:12px;color:var(--tx2);margin-bottom:12px;line-height:1.6">ผลการสำรวจรายบุคคล ครบทุกมิติสุขภาวะ วิเคราะห์ตามองค์กร/เพศ/อายุ</p><div class="fg"><label>เลือกองค์กร</label><select id="exp-wb-org"><option value="">ทุกองค์กร</option></select></div><div class="fc-actions"><button class="btn b-blue" onclick="exportWbFiltered(document.getElementById('exp-wb-org').value)">📊 Excel</button><button class="btn b-gray" onclick="exportWbFilteredDocs(document.getElementById('exp-wb-org').value)">📝 Docs</button><button class="btn b-gray" onclick="showToast('PDF: กด Ctrl+P แล้วเลือก Save as PDF','info')">📄 PDF</button></div></div>
+        <div class="fc"><div class="fc-head"><span style="font-size:20px">⚖️</span><h3>รายงานเปรียบเทียบ</h3></div><p style="font-size:12px;color:var(--tx2);margin-bottom:12px;line-height:1.6">Benchmark ระหว่างองค์กร Heatmap ตัวชี้วัดหลัก และ Ranking</p><div class="fg"><label>เลือกองค์กร</label><select id="exp-cmp-org"><option value="">ทุกองค์กร</option></select></div><div class="fc-actions"><button class="btn b-blue" onclick="exportCompareReport()">📊 Excel</button><button class="btn b-gray" onclick="exportCompareReportDocs()">📝 Docs</button><button class="btn b-gray" onclick="showToast('PDF: กด Ctrl+P แล้วเลือก Save as PDF','info')">📄 PDF</button></div></div>
       </div>
     </div>
 
@@ -733,39 +733,7 @@
           </table>
         </div>
       </div>
-      <div class="panel">
-        <h3>🔗 สร้างลิงก์ Well-being</h3>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-          <div class="fg" style="margin:0"><label>เลือกองค์กร *</label>
-            <select id="create-link-org">
-              <option value="">— เลือก —</option>
-              <option>กรมกิจการเด็กและเยาวชน</option>
-              <option>กรมคุมประพฤติ</option>
-              <option>กรมชลประทาน</option>
-              <option>กรมวิทยาศาสตร์บริการ</option>
-              <option>กรมส่งเสริมวัฒนธรรม</option>
-              <option>กรมสุขภาพจิต</option>
-              <option>กรมอุตุนิยมวิทยา</option>
-              <option>กรมสนับสนุนบริการสุขภาพ</option>
-              <option>สำนักงาน กพร.</option>
-              <option>สำนักงานการวิจัยแห่งชาติ</option>
-              <option>สำนักงานนโยบายและแผนทรัพยากรธรรมชาติและสิ่งแวดล้อม</option>
-              <option>สำนักงานนโยบายและยุทธศาสตร์การค้า</option>
-              <option>สำนักงานปลัดกระทรวงการท่องเที่ยวและกีฬา</option>
-              <option>สำนักงานมาตรฐานสินค้าเกษตรและอาหารแห่งชาติ</option>
-              <option>สำนักงานสภาพัฒนาการเศรษฐกิจและสังคมแห่งชาติ</option>
-            </select>
-          </div>
-        </div>
-        <div style="margin-top:12px;display:flex;gap:8px;align-items:center">
-          <button class="btn b-solid" style="padding:8px 16px" onclick="createNewLink()">🔗 สร้างลิงก์</button>
-          <div id="create-link-msg" style="font-size:12px;color:var(--A)"></div>
-        </div>
-        <div style="margin-top:12px;font-size:12px;color:var(--tx2);line-height:1.7">
-          ชุดลิงก์อ้างอิง: NESDC, TPSO, DSS, DHSS, TMD, DCP, DOP, MOTS, DMH, ONEP, NRCT, ACFS, OPDC, RID, DCY
-        </div>
-      </div>
-
+      
     <!-- ==================== NOTIF ==================== -->
     </div>
     <div class="page" id="page-notif">
@@ -1467,7 +1435,7 @@ function renderCh1(summary) {
     <td>${fmtNum(row.total_staff || row.total_personnel || row.form_data?.total_personnel)}</td>
     <td>${esc(row.form_completion || '5/5 ส่วน')}</td>
     <td>${fmtDate(getRowDate(row))}</td>
-    <td class="td-act"><button class="btn b-blue" onclick="showCh1RowDetail(${index})">ดูละเอียด</button><button class="btn b-gray" onclick="showCh1PDF(${index})">📄 PDF</button></td>
+    <td class="td-act"><button class="btn b-blue" onclick="showCh1RowDetail(${index})">ดูละเอียด</button><button class="btn b-gray" onclick="showCh1PDF(${index})">📄 PDF</button><button class="btn b-gray" onclick="exportCh1RowDocs(${index})">📝 Docs</button></td>
   </tr>`).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--tx3)">ยังไม่มีข้อมูล Ch1</td></tr>';
 
   renderCh1RawSheet();
@@ -1533,6 +1501,7 @@ function renderCh1Pdf() {
     <td class="td-act">
       <button class="btn b-gray" onclick="showCh1RowDetail(${i})">📋 ดูรายละเอียด</button>
       <button class="btn b-blue" onclick="showCh1PDF(${i})">📄 ดู PDF</button>
+      <button class="btn b-gray" onclick="exportCh1RowDocs(${i})">📝 Docs</button>
     </td>
   </tr>`).join('');
 }
@@ -3363,6 +3332,47 @@ async function batchCreateOrgHrUsers() {
   });
 }
 
+// Helper function to sort organizations according to desired order
+function sortOrganizations(orgList) {
+  const desiredOrder = [
+    'สำนักงานสภาพัฒนาการเศรษฐกิจและสังคมแห่งชาติ',
+    'สำนักงานนโยบายและยุทธศาสตร์การค้า',
+    'กรมวิทยาศาสตร์บริการ',
+    'กรมสนับสนุนบริการสุขภาพ',
+    'กรมอุตุนิยมวิทยา',
+    'กรมส่งเสริมวัฒนธรรม',
+    'กรมคุมประพฤติ',
+    'สำนักงานปลัดกระทรวงการท่องเที่ยวและกีฬา',
+    'กรมสุขภาพจิต',
+    'สำนักงานนโยบายและแผนทรัพยากรธรรมชาติและสิ่งแวดล้อม',
+    'สำนักงานการวิจัยแห่งชาติ',
+    'สำนักงานมาตรฐานสินค้าเกษตรและอาหารแห่งชาติ',
+    'สำนักงานคณะกรรมการพัฒนาระบบราชการ',
+    'กรมชลประทาน',
+    'กรมกิจการเด็กและเยาวชน'
+  ];
+
+  return [...orgList].sort((a, b) => {
+    const aName = a.display_name || a.org_name || a.org_code || '';
+    const bName = b.display_name || b.org_name || b.org_code || '';
+    
+    const aIndex = desiredOrder.indexOf(aName);
+    const bIndex = desiredOrder.indexOf(bName);
+    
+    // If both are in desired order, sort by index
+    if (aIndex !== -1 && bIndex !== -1) {
+      return aIndex - bIndex;
+    }
+    
+    // If only one is in desired order, prioritize it
+    if (aIndex !== -1) return -1;
+    if (bIndex !== -1) return 1;
+    
+    // If neither is in desired order, sort alphabetically
+    return aName.localeCompare(bName, 'th');
+  });
+}
+
 async function renderOrgHrCredentials() {
   if (typeof fetchOrgHrCredentials === 'function') {
     state.orgHrCredentials = await fetchOrgHrCredentials();
@@ -3378,7 +3388,10 @@ async function renderOrgHrCredentials() {
     return;
   }
 
-  tbody.innerHTML = orgHrUsers.map((row, i) => {
+  // Sort orgHrUsers according to desired order
+  const sortedOrgHrUsers = sortOrganizations(orgHrUsers);
+
+  tbody.innerHTML = sortedOrgHrUsers.map((row, i) => {
     const pwd = row.initial_password || '••••••••';
     const hasPwd = !!row.initial_password;
     return `<tr>
@@ -3411,13 +3424,16 @@ function copyAllOrgHrCredentials() {
     return;
   }
 
+  // Sort organizations according to desired order
+  const sortedOrgHrUsers = sortOrganizations(orgHrUsers);
+
   const header = 'ข้อมูลเข้าสู่ระบบ org_hr — Well-being Survey\n' + '='.repeat(50) + '\n\n';
-  const body = orgHrUsers.map((row, i) =>
+  const body = sortedOrgHrUsers.map((row, i) =>
     `${i + 1}. ${row.display_name || row.org_name || row.org_code}\n   Email: ${row.email}\n   Password: ${row.initial_password}`
   ).join('\n\n');
 
   navigator.clipboard.writeText(header + body).then(() =>
-    showToast(`📋 คัดลอก credentials ทั้ง ${orgHrUsers.length} องค์กรแล้ว`, 'success', 5000)
+    showToast(`📋 คัดลอก credentials ทั้ง ${sortedOrgHrUsers.length} องค์กรแล้ว`, 'success', 5000)
   );
 }
 
@@ -3428,8 +3444,11 @@ function exportOrgHrCredentialsCsv() {
     return;
   }
 
+  // Sort organizations according to desired order
+  const sortedOrgHrUsers = sortOrganizations(orgHrUsers);
+
   const csv = 'องค์กร,Email,Password,org_code,สถานะ\n' +
-    orgHrUsers.map(row =>
+    sortedOrgHrUsers.map(row =>
       `"${row.display_name || row.org_name || ''}","${row.email}","${row.initial_password}","${row.org_code || ''}","${row.is_active !== false ? 'Active' : 'Inactive'}"`
     ).join('\n');
 

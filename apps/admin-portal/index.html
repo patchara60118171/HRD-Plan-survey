@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="th">
 <head>
 <meta charset="UTF-8"/>
@@ -1028,9 +1028,9 @@ tbody tr:hover td{background:#FAFBFD}
       <div class="page-title">Export รายงาน</div>
       <div class="page-sub">ดาวน์โหลดรายงานในรูปแบบต่าง ๆ</div>
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
-        <div class="fc"><div class="fc-head"><span style="font-size:20px">📊</span><h3>สรุปภาพรวม Ch1</h3></div><p style="font-size:12px;color:var(--tx2);margin-bottom:12px;line-height:1.6">ข้อมูลองค์กรทั้งหมด พร้อมกราฟโครงสร้างบุคลากร สุขภาวะ และ Engagement</p><div class="fg"><label>เลือกองค์กร</label><select id="exp-ch1-org"><option value="">ทุกองค์กร</option></select></div><div class="fc-actions"><button class="btn b-blue" onclick="exportCh1Filtered(document.getElementById('exp-ch1-org').value)">📊 Excel</button><button class="btn b-gray" onclick="showToast('PDF: กด Ctrl+P แล้วเลือก Save as PDF','info')"> 📄 PDF</button></div></div>
-        <div class="fc"><div class="fc-head"><span style="font-size:20px">💚</span><h3>รายงาน Wellbeing</h3></div><p style="font-size:12px;color:var(--tx2);margin-bottom:12px;line-height:1.6">ผลการสำรวจรายบุคคล ครบทุกมิติสุขภาวะ วิเคราะห์ตามองค์กร/เพศ/อายุ</p><div class="fg"><label>เลือกองค์กร</label><select id="exp-wb-org"><option value="">ทุกองค์กร</option></select></div><div class="fc-actions"><button class="btn b-blue" onclick="exportWbFiltered(document.getElementById('exp-wb-org').value)">📊 Excel</button><button class="btn b-gray" onclick="showToast('PDF: กด Ctrl+P แล้วเลือก Save as PDF','info')">📄 PDF</button></div></div>
-        <div class="fc"><div class="fc-head"><span style="font-size:20px">⚖️</span><h3>รายงานเปรียบเทียบ</h3></div><p style="font-size:12px;color:var(--tx2);margin-bottom:12px;line-height:1.6">Benchmark ระหว่างองค์กร Heatmap ตัวชี้วัดหลัก และ Ranking</p><div class="fg"><label>เลือกองค์กร</label><select id="exp-cmp-org"><option value="">ทุกองค์กร</option></select></div><div class="fc-actions"><button class="btn b-blue" onclick="exportCompareReport()">📊 Excel</button><button class="btn b-gray" onclick="showToast('PDF: กด Ctrl+P แล้วเลือก Save as PDF','info')">📄 PDF</button></div></div>
+        <div class="fc"><div class="fc-head"><span style="font-size:20px">📊</span><h3>สรุปภาพรวม Ch1</h3></div><p style="font-size:12px;color:var(--tx2);margin-bottom:12px;line-height:1.6">ข้อมูลองค์กรทั้งหมด พร้อมกราฟโครงสร้างบุคลากร สุขภาวะ และ Engagement</p><div class="fg"><label>เลือกองค์กร</label><select id="exp-ch1-org"><option value="">ทุกองค์กร</option></select></div><div class="fc-actions"><button class="btn b-blue" onclick="exportCh1Filtered(document.getElementById('exp-ch1-org').value)">📊 Excel</button><button class="btn b-gray" onclick="exportCh1FilteredDocs(document.getElementById('exp-ch1-org').value)">📝 Docs</button><button class="btn b-gray" onclick="showToast('PDF: กด Ctrl+P แล้วเลือก Save as PDF','info')"> 📄 PDF</button></div></div>
+        <div class="fc"><div class="fc-head"><span style="font-size:20px">💚</span><h3>รายงาน Wellbeing</h3></div><p style="font-size:12px;color:var(--tx2);margin-bottom:12px;line-height:1.6">ผลการสำรวจรายบุคคล ครบทุกมิติสุขภาวะ วิเคราะห์ตามองค์กร/เพศ/อายุ</p><div class="fg"><label>เลือกองค์กร</label><select id="exp-wb-org"><option value="">ทุกองค์กร</option></select></div><div class="fc-actions"><button class="btn b-blue" onclick="exportWbFiltered(document.getElementById('exp-wb-org').value)">📊 Excel</button><button class="btn b-gray" onclick="exportWbFilteredDocs(document.getElementById('exp-wb-org').value)">📝 Docs</button><button class="btn b-gray" onclick="showToast('PDF: กด Ctrl+P แล้วเลือก Save as PDF','info')">📄 PDF</button></div></div>
+        <div class="fc"><div class="fc-head"><span style="font-size:20px">⚖️</span><h3>รายงานเปรียบเทียบ</h3></div><p style="font-size:12px;color:var(--tx2);margin-bottom:12px;line-height:1.6">Benchmark ระหว่างองค์กร Heatmap ตัวชี้วัดหลัก และ Ranking</p><div class="fg"><label>เลือกองค์กร</label><select id="exp-cmp-org"><option value="">ทุกองค์กร</option></select></div><div class="fc-actions"><button class="btn b-blue" onclick="exportCompareReport()">📊 Excel</button><button class="btn b-gray" onclick="exportCompareReportDocs()">📝 Docs</button><button class="btn b-gray" onclick="showToast('PDF: กด Ctrl+P แล้วเลือก Save as PDF','info')">📄 PDF</button></div></div>
       </div>
     </div>
 
@@ -1522,6 +1522,16 @@ function downloadWorkbook(fileName, sheetName, rows) {
   const ws = XLSX.utils.json_to_sheet(rows);
   XLSX.utils.book_append_sheet(wb, ws, sheetName);
   XLSX.writeFile(wb, fileName);
+}
+
+function downloadTextFile(fileName, text, mimeType = 'text/markdown;charset=utf-8') {
+  const blob = new Blob(['\uFEFF' + String(text ?? '')], { type: mimeType });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = fileName;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 0);
 }
 
 function go(id, el) {
@@ -2076,7 +2086,7 @@ function renderCh1(summary) {
     <td>${fmtNum(row.total_staff || row.total_personnel || row.form_data?.total_personnel)}</td>
     <td>${esc(row.form_completion || '5/5 ส่วน')}</td>
     <td>${fmtDate(getRowDate(row))}</td>
-    <td class="td-act"><button class="btn b-blue" onclick="showCh1RowDetail(${index})">ดูละเอียด</button><button class="btn b-gray" onclick="showCh1PDF(${index})">📄 PDF</button></td>
+    <td class="td-act"><button class="btn b-blue" onclick="showCh1RowDetail(${index})">ดูละเอียด</button><button class="btn b-gray" onclick="showCh1PDF(${index})">📄 PDF</button><button class="btn b-gray" onclick="exportCh1RowDocs(${index})">📝 Docs</button></td>
   </tr>`).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--tx3)">ยังไม่มีข้อมูล Ch1</td></tr>';
 
   renderCh1RawSheet();
@@ -2283,6 +2293,7 @@ function renderCh1Pdf() {
     <td class="td-act">
       <button class="btn b-gray" onclick="showCh1RowDetail(${i})">📋 ดูรายละเอียด</button>
       <button class="btn b-blue" onclick="showCh1PDF(${i})">📄 ดู PDF</button>
+      <button class="btn b-gray" onclick="exportCh1RowDocs(${i})">📝 Docs</button>
     </td>
   </tr>`).join('');
 }
@@ -3814,6 +3825,146 @@ function exportCompareReport() {
     high_phq9: org.flagged, ch1_count: org.ch1Count,
     latest_wellbeing: org.latestWb, latest_ch1: org.latestCh1,
   })));
+}
+
+function mdEscapeCell(value) {
+  return String(value ?? '')
+    .replace(/\r\n/g, '\n')
+    .replace(/\n/g, '<br/>')
+    .replace(/\|/g, '\\|');
+}
+
+function mdTableFromObjects(rows, columns) {
+  const header = `| ${columns.map((c) => c.label).join(' | ')} |`;
+  const sep = `| ${columns.map(() => '---').join(' | ')} |`;
+  const body = rows.map((row) => (
+    `| ${columns.map((c) => mdEscapeCell(row?.[c.key])).join(' | ')} |`
+  )).join('\n');
+  return [header, sep, body].join('\n');
+}
+
+function downloadDocs(fileName, markdown) {
+  downloadTextFile(fileName, markdown, 'text/markdown;charset=utf-8');
+}
+
+function exportCh1FilteredDocs(orgFilter) {
+  const rows = orgFilter ? state.ch1Rows.filter((r) => getCh1Org(r) === orgFilter) : state.ch1Rows;
+  if (!rows.length) { showToast('ไม่มีข้อมูลสำหรับองค์กรที่เลือก','warn'); return; }
+
+  const exportRows = rows.map((row, i) => ({
+    index: i + 1,
+    organization: getCh1Org(row),
+    submitted_at: getRowDate(row),
+    total_personnel: row.total_personnel || row.total_staff || row.form_data?.total_personnel || '',
+    engagement_score: row.engagement_score || row.form_data?.engagement_score || '',
+  }));
+
+  const orgLabel = orgFilter ? `องค์กร: ${orgFilter}` : 'ทุกองค์กร';
+  const columns = [
+    { key: 'index', label: '#' },
+    { key: 'organization', label: 'องค์กร' },
+    { key: 'submitted_at', label: 'วันที่ส่ง' },
+    { key: 'total_personnel', label: 'จำนวนบุคลากร' },
+    { key: 'engagement_score', label: 'Engagement Score' },
+  ];
+
+  const markdown = [
+    `# Export Docs — สรุปภาพรวม Ch1`,
+    `Generated: ${new Date().toLocaleString('th-TH')}`,
+    `Filter: ${orgLabel}`,
+    '',
+    mdTableFromObjects(exportRows, columns),
+  ].join('\n');
+
+  downloadDocs(`ch1_${orgFilter || 'all'}.docs.md`, markdown);
+  showToast('Export Docs (Ch1) สำเร็จ ✅', 'success');
+}
+
+function exportCh1RowDocs(idx) {
+  const row = state.ch1Rows[idx];
+  if (!row) { showToast('ไม่พบข้อมูล Ch1 ในตำแหน่งนี้', 'warn'); return; }
+  const orgName = getCh1Org(row);
+  exportCh1FilteredDocs(orgName);
+}
+
+function exportWbFilteredDocs(orgFilter) {
+  const rows = orgFilter
+    ? state.surveyRows.filter((r) => r.organization === orgFilter && !r.is_draft)
+    : state.surveyRows.filter((r) => !r.is_draft);
+  if (!rows.length) { showToast('ไม่มีข้อมูล Wellbeing สำหรับองค์กรที่เลือก','warn'); return; }
+
+  const exportRows = rows.map((row, i) => ({
+    index: i + 1,
+    organization: row.organization,
+    submitted_at: row.submitted_at,
+    gender: row.gender,
+    age_group: ageGroup(row),
+    phq9: getPhq9(row),
+    gad7: getGad7(row),
+    burnout: getBurnout(row),
+    engagement: getEngagement(row),
+    wlb_score: getWlb(row),
+  }));
+
+  const orgLabel = orgFilter ? `องค์กร: ${orgFilter}` : 'ทุกองค์กร';
+  const columns = [
+    { key: 'index', label: '#' },
+    { key: 'organization', label: 'องค์กร' },
+    { key: 'submitted_at', label: 'วันที่ตอบ' },
+    { key: 'gender', label: 'เพศ' },
+    { key: 'age_group', label: 'กลุ่มอายุ' },
+    { key: 'phq9', label: 'PHQ-9' },
+    { key: 'gad7', label: 'GAD-7' },
+    { key: 'burnout', label: 'Burnout' },
+    { key: 'engagement', label: 'Engagement' },
+    { key: 'wlb_score', label: 'WLB Score' },
+  ];
+
+  const markdown = [
+    `# Export Docs — รายงาน Wellbeing`,
+    `Generated: ${new Date().toLocaleString('th-TH')}`,
+    `Filter: ${orgLabel}`,
+    '',
+    mdTableFromObjects(exportRows, columns),
+  ].join('\n');
+
+  downloadDocs(`wellbeing_${orgFilter || 'all'}.docs.md`, markdown);
+  showToast('Export Docs (Wellbeing) สำเร็จ ✅', 'success');
+}
+
+function exportCompareReportDocs() {
+  const summary = summarizeOrgs();
+  const exportRows = summary.map((org) => ({
+    organization: org.name,
+    ministry: org.ministry,
+    wellbeing_submitted: org.wellbeingSubmitted,
+    wellbeing_draft: org.draft,
+    high_phq9: org.flagged,
+    ch1_count: org.ch1Count,
+    latest_wellbeing: org.latestWb,
+    latest_ch1: org.latestCh1,
+  }));
+
+  const columns = [
+    { key: 'organization', label: 'องค์กร' },
+    { key: 'ministry', label: 'กระทรวง/หน่วยงาน' },
+    { key: 'wellbeing_submitted', label: 'Wellbeing ตอบแล้ว' },
+    { key: 'wellbeing_draft', label: 'Wellbeing Draft' },
+    { key: 'high_phq9', label: 'PHQ-9 สูง (≥15)' },
+    { key: 'ch1_count', label: 'จำนวน Ch1' },
+    { key: 'latest_wellbeing', label: 'อัปเดตล่าสุด Wellbeing' },
+    { key: 'latest_ch1', label: 'อัปเดตล่าสุด Ch1' },
+  ];
+
+  const markdown = [
+    `# Export Docs — รายงานเปรียบเทียบองค์กร`,
+    `Generated: ${new Date().toLocaleString('th-TH')}`,
+    '',
+    mdTableFromObjects(exportRows, columns),
+  ].join('\n');
+
+  downloadDocs('compare_report.docs.md', markdown);
+  showToast('Export Docs (Compare) สำเร็จ ✅', 'success');
 }
 
 /* ========== USERS PAGE ========== */
