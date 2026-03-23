@@ -283,21 +283,134 @@ async function saveToSupabase(email, responses, isDraft = false) {
         const tmhiScore = calculateTMHIScore(responses);
         const tmhiInfo = getTMHILevel(tmhiScore);
 
+        // Calculate UCLA Loneliness score
+        let uclaScore = null;
+        if (responses['lonely_1'] !== undefined && responses['lonely_1'] !== null && responses['lonely_1'] !== '') {
+            let uclaSum = 0;
+            for (let i = 1; i <= 20; i++) {
+                const v = parseInt(responses[`lonely_${i}`]);
+                if (!isNaN(v)) uclaSum += v;
+            }
+            uclaScore = uclaSum;
+        }
+
         const dataToSave = {
             email: email,
             name: responses.name || null,
             title: responses.title || null,
             gender: responses.gender || null,
             age: responses.age ? parseInt(responses.age) : null,
-            organization: responses.organization || null, // Organization from URL Parameter
-            org_type: responses.org_type || null, // Added new field
+            organization: responses.organization || null,
+            org_code: responses.org_code || null,
+            org_type: responses.org_type || null,
+            job: responses.job || null,
+            job_duration: responses.job_duration ? parseInt(responses.job_duration) : null,
             height: height || null,
             weight: weight || null,
             waist: responses.waist ? parseFloat(responses.waist) : null,
             bmi: bmi,
             bmi_category: bmiCategory,
+            // ส่วนบุคคล (เพิ่มเติม)
+            activity_org:        responses.activity_org        || null,
+            activity_thaihealth: responses.activity_thaihealth || null,
+            diseases:            Array.isArray(responses.diseases) ? responses.diseases.join(', ') : (responses.diseases || null),
+            // ยาสูบ/แอลกอฮอล์
+            q2001:      responses.q2001      || null,
+            q2002:      responses.q2002      || null,
+            q2003:      responses.q2003      || null,
+            q2004:      responses.q2004      || null,
+            q2005_drug: responses.q2005_drug || null,
+            // พฤติกรรมการบริโภค - หวาน
+            sweet_1: responses.sweet_1 || null,
+            sweet_2: responses.sweet_2 || null,
+            sweet_3: responses.sweet_3 || null,
+            sweet_4: responses.sweet_4 || null,
+            sweet_5: responses.sweet_5 || null,
+            // มัน
+            fat_1: responses.fat_1 || null,
+            fat_2: responses.fat_2 || null,
+            fat_3: responses.fat_3 || null,
+            fat_4: responses.fat_4 || null,
+            fat_5: responses.fat_5 || null,
+            // เค็ม
+            salt_1: responses.salt_1 || null,
+            salt_2: responses.salt_2 || null,
+            salt_3: responses.salt_3 || null,
+            salt_4: responses.salt_4 || null,
+            salt_5: responses.salt_5 || null,
+            // กิจกรรมทางกาย TPAX
+            act_work_days:    responses.act_work_days    ? parseInt(responses.act_work_days)    : null,
+            act_work_dur:     responses.act_work_dur     || null,
+            act_commute_days: responses.act_commute_days ? parseInt(responses.act_commute_days) : null,
+            act_commute_dur:  responses.act_commute_dur  || null,
+            act_rec_days:     responses.act_rec_days     ? parseInt(responses.act_rec_days)     : null,
+            act_rec_dur:      responses.act_rec_dur      || null,
+            sedentary_dur:    responses.sedentary_dur    || null,
+            screen_entertain: responses.screen_entertain || null,
+            screen_work:      responses.screen_work      || null,
+            // TMHI-15 รายข้อ
             tmhi_score: tmhiScore || null,
             tmhi_level: tmhiInfo ? tmhiInfo.level : null,
+            tmhi_1:  responses.tmhi_1  ? parseInt(responses.tmhi_1)  : null,
+            tmhi_2:  responses.tmhi_2  ? parseInt(responses.tmhi_2)  : null,
+            tmhi_3:  responses.tmhi_3  ? parseInt(responses.tmhi_3)  : null,
+            tmhi_4:  responses.tmhi_4  ? parseInt(responses.tmhi_4)  : null,
+            tmhi_5:  responses.tmhi_5  ? parseInt(responses.tmhi_5)  : null,
+            tmhi_6:  responses.tmhi_6  ? parseInt(responses.tmhi_6)  : null,
+            tmhi_7:  responses.tmhi_7  ? parseInt(responses.tmhi_7)  : null,
+            tmhi_8:  responses.tmhi_8  ? parseInt(responses.tmhi_8)  : null,
+            tmhi_9:  responses.tmhi_9  ? parseInt(responses.tmhi_9)  : null,
+            tmhi_10: responses.tmhi_10 ? parseInt(responses.tmhi_10) : null,
+            tmhi_11: responses.tmhi_11 ? parseInt(responses.tmhi_11) : null,
+            tmhi_12: responses.tmhi_12 ? parseInt(responses.tmhi_12) : null,
+            tmhi_13: responses.tmhi_13 ? parseInt(responses.tmhi_13) : null,
+            tmhi_14: responses.tmhi_14 ? parseInt(responses.tmhi_14) : null,
+            tmhi_15: responses.tmhi_15 ? parseInt(responses.tmhi_15) : null,
+            // UCLA Loneliness Scale รายข้อ
+            ucla_score: uclaScore,
+            lonely_1:  responses.lonely_1  !== undefined && responses.lonely_1  !== '' ? parseInt(responses.lonely_1)  : null,
+            lonely_2:  responses.lonely_2  !== undefined && responses.lonely_2  !== '' ? parseInt(responses.lonely_2)  : null,
+            lonely_3:  responses.lonely_3  !== undefined && responses.lonely_3  !== '' ? parseInt(responses.lonely_3)  : null,
+            lonely_4:  responses.lonely_4  !== undefined && responses.lonely_4  !== '' ? parseInt(responses.lonely_4)  : null,
+            lonely_5:  responses.lonely_5  !== undefined && responses.lonely_5  !== '' ? parseInt(responses.lonely_5)  : null,
+            lonely_6:  responses.lonely_6  !== undefined && responses.lonely_6  !== '' ? parseInt(responses.lonely_6)  : null,
+            lonely_7:  responses.lonely_7  !== undefined && responses.lonely_7  !== '' ? parseInt(responses.lonely_7)  : null,
+            lonely_8:  responses.lonely_8  !== undefined && responses.lonely_8  !== '' ? parseInt(responses.lonely_8)  : null,
+            lonely_9:  responses.lonely_9  !== undefined && responses.lonely_9  !== '' ? parseInt(responses.lonely_9)  : null,
+            lonely_10: responses.lonely_10 !== undefined && responses.lonely_10 !== '' ? parseInt(responses.lonely_10) : null,
+            lonely_11: responses.lonely_11 !== undefined && responses.lonely_11 !== '' ? parseInt(responses.lonely_11) : null,
+            lonely_12: responses.lonely_12 !== undefined && responses.lonely_12 !== '' ? parseInt(responses.lonely_12) : null,
+            lonely_13: responses.lonely_13 !== undefined && responses.lonely_13 !== '' ? parseInt(responses.lonely_13) : null,
+            lonely_14: responses.lonely_14 !== undefined && responses.lonely_14 !== '' ? parseInt(responses.lonely_14) : null,
+            lonely_15: responses.lonely_15 !== undefined && responses.lonely_15 !== '' ? parseInt(responses.lonely_15) : null,
+            lonely_16: responses.lonely_16 !== undefined && responses.lonely_16 !== '' ? parseInt(responses.lonely_16) : null,
+            lonely_17: responses.lonely_17 !== undefined && responses.lonely_17 !== '' ? parseInt(responses.lonely_17) : null,
+            lonely_18: responses.lonely_18 !== undefined && responses.lonely_18 !== '' ? parseInt(responses.lonely_18) : null,
+            lonely_19: responses.lonely_19 !== undefined && responses.lonely_19 !== '' ? parseInt(responses.lonely_19) : null,
+            lonely_20: responses.lonely_20 !== undefined && responses.lonely_20 !== '' ? parseInt(responses.lonely_20) : null,
+            // อุบัติเหตุ/ความปลอดภัย
+            helmet_driver:      responses.helmet_driver      || null,
+            helmet_passenger:   responses.helmet_passenger   || null,
+            seatbelt_driver:    responses.seatbelt_driver    || null,
+            seatbelt_passenger: responses.seatbelt_passenger || null,
+            accident_hist:      Array.isArray(responses.accident_hist) ? responses.accident_hist.join(', ') : (responses.accident_hist || null),
+            drunk_drive:        responses.drunk_drive        || null,
+            // สิ่งแวดล้อมและโรคอุบัติใหม่
+            env_satisfaction: responses.env_satisfaction !== undefined ? String(responses.env_satisfaction) : null,
+            env_glare:        responses.env_glare        || null,
+            env_noise:        responses.env_noise        || null,
+            env_smell:        responses.env_smell        || null,
+            env_smoke:        responses.env_smoke        || null,
+            env_posture:      responses.env_posture      || null,
+            env_awkward:      responses.env_awkward      || null,
+            pm25_impact:      responses.pm25_impact      || null,
+            pm25_symptom:     Array.isArray(responses.pm25_symptom) ? responses.pm25_symptom.join(', ') : (responses.pm25_symptom || null),
+            life_quality:     responses.life_quality     !== undefined ? String(responses.life_quality) : null,
+            emerging_known:   responses.emerging_known   || null,
+            emerging_list:    Array.isArray(responses.emerging_list) ? responses.emerging_list.join(', ') : (responses.emerging_list || null),
+            climate_impact:   responses.climate_impact   || null,
+            covid_history:    responses.covid_history    || null,
+            // Metadata
             raw_responses: responses,
             is_draft: isDraft,
             submitted_at: isDraft ? null : new Date().toISOString()
@@ -1012,6 +1125,10 @@ const app = {
         saveResponses(this.responses);
         if (this.userInfo) this.debouncedSaveCloud(); // Auto-save to cloud
 
+        // Clear error highlight when question is answered
+        const card = document.getElementById(`card_${id}`);
+        if (card) card.classList.remove('question-error');
+
         // Update BMI if height or weight changed
         if (id === 'height' || id === 'weight') {
             const bmiContainer = document.getElementById('bmi-result');
@@ -1051,6 +1168,13 @@ const app = {
         this.responses[id] = arr;
         saveResponses(this.responses);
         if (this.userInfo) this.debouncedSaveCloud(); // Auto-save to cloud
+
+        // Clear error highlight when checkbox is answered
+        if (arr.length > 0) {
+            const card = document.getElementById(`card_${id}`);
+            if (card) card.classList.remove('question-error');
+        }
+
         showToast('บันทึกแล้ว', 'success');
     },
 
@@ -1099,8 +1223,48 @@ const app = {
         }
     },
 
+    // Validate required questions in current subsection (only for mandatory sections)
+    validateCurrentSubsection() {
+        const sectionKey = SECTIONS_ORDER[this.currentSectionIndex];
+        const REQUIRED_SECTIONS = ['personal', 'loneliness'];
+        if (!REQUIRED_SECTIONS.includes(sectionKey)) return true;
+
+        const section = SURVEY_DATA[sectionKey];
+        const subsection = section.subsections[this.currentSubsectionIndex];
+        const unanswered = [];
+
+        for (const q of subsection.questions) {
+            if (!q.required) continue;
+            const val = this.responses[q.id];
+            const isEmpty = val === undefined || val === null || val === '' ||
+                            (Array.isArray(val) && val.length === 0);
+            if (isEmpty) unanswered.push(q.text);
+        }
+
+        if (unanswered.length > 0) {
+            const msg = `กรุณาตอบคำถามที่ยังไม่ได้ตอบ (${unanswered.length} ข้อ)`;
+            showToast(msg, 'error');
+            // Highlight unanswered question cards (each card has id="card_<questionId>")
+            // First clear old errors
+            document.querySelectorAll('.question-error').forEach(el => el.classList.remove('question-error'));
+            for (const q of subsection.questions) {
+                const val = this.responses[q.id];
+                const isEmpty = val === undefined || val === null || val === '' ||
+                                (Array.isArray(val) && val.length === 0);
+                if (q.required && isEmpty) {
+                    const card = document.getElementById(`card_${q.id}`);
+                    if (card) { card.classList.add('question-error'); card.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+                }
+            }
+            return false;
+        }
+        return true;
+    },
+
     // Next section
     nextSection() {
+        if (!this.validateCurrentSubsection()) return;
+
         const sectionKey = SECTIONS_ORDER[this.currentSectionIndex];
         const section = SURVEY_DATA[sectionKey];
 

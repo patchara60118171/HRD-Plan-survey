@@ -741,6 +741,19 @@ body {
     box-shadow: var(--shadow-sm);
 }
 
+.question-card.question-error {
+    border-color: #e53e3e;
+    background: #fff5f5;
+    box-shadow: 0 0 0 3px rgba(229,62,62,0.15);
+    animation: shake 0.3s ease;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
+}
+
 .question-number {
     display: inline-flex;
     align-items: center;
