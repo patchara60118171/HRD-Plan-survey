@@ -105,11 +105,11 @@ ON CONFLICT ((lower(email))) DO UPDATE SET
 
 -- ─── 3. Ensure org_form_links for all 16 orgs ────────────────────────────────
 -- Insert missing links; ignore if already exists (on_conflict = nothing)
-INSERT INTO public.org_form_links (org_id, form_id, survey_url, is_active)
+INSERT INTO public.org_form_links (org_id, form_id, full_url, is_active)
 SELECT
     o.id   AS org_id,
     f.id   AS form_id,
-    'https://nidawellbeing.vercel.app/?org=' || o.org_code AS survey_url,
+    'https://nidawellbeing.vercel.app/?org=' || o.org_code AS full_url,
     true   AS is_active
 FROM public.organizations  o
 JOIN public.survey_forms   f ON f.form_key = 'wellbeing'
@@ -118,7 +118,7 @@ WHERE o.org_code IN (
     'dmh','onep','nrct','acfs','opdc','rid','dcy','test-org'
 )
 ON CONFLICT (org_id, form_id) DO UPDATE SET
-    survey_url = EXCLUDED.survey_url,
+    full_url   = EXCLUDED.full_url,
     is_active  = true;
 
 -- ─── 4. Verify final state ────────────────────────────────────────────────────
