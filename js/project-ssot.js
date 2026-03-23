@@ -80,22 +80,23 @@ const PROJECT_SSOT = {
   organizations: {
     // orgHrMap — canonical order (1–15) synced with Supabase `organizations` table (SSOT) 2026-03-23
     // Migration canonicalize_org_codes_abbr_sort applied: hssd→dhss(sort4), probation→dop(sort7), ocsc→opdc(sort13)
+    // abbr_th / abbr_en confirmed by project owner 2026-03-23
     orgHrMap: [
-      { org_code: 'nesdc', org_name_th: 'สำนักงานสภาพัฒนาการเศรษฐกิจและสังคมแห่งชาติ' },          // 1
-      { org_code: 'tpso',  org_name_th: 'สำนักงานนโยบายและยุทธศาสตร์การค้า' },                     // 2
-      { org_code: 'dss',   org_name_th: 'กรมวิทยาศาสตร์บริการ' },                                  // 3
-      { org_code: 'dhss',  org_name_th: 'กรมสนับสนุนบริการสุขภาพ' },                               // 4
-      { org_code: 'tmd',   org_name_th: 'กรมอุตุนิยมวิทยา (สถาบันอุตุนิยมวิทยา)' },              // 5
-      { org_code: 'dcp',   org_name_th: 'กรมส่งเสริมวัฒนธรรม' },                                  // 6
-      { org_code: 'dop',   org_name_th: 'กรมคุมประพฤติ' },                                          // 7
-      { org_code: 'mots',  org_name_th: 'สำนักงานปลัดกระทรวงการท่องเที่ยวและกีฬา' },              // 8
-      { org_code: 'dmh',   org_name_th: 'กรมสุขภาพจิต' },                                          // 9
-      { org_code: 'onep',  org_name_th: 'สำนักงานนโยบายและแผนทรัพยากรธรรมชาติและสิ่งแวดล้อม' },  // 10
-      { org_code: 'nrct',  org_name_th: 'สำนักงานการวิจัยแห่งชาติ' },                              // 11
-      { org_code: 'acfs',  org_name_th: 'สำนักงานมาตรฐานสินค้าเกษตรและอาหารแห่งชาติ (มกอช.)' },  // 12
-      { org_code: 'opdc',  org_name_th: 'สำนักงานคณะกรรมการพัฒนาระบบราชการ (ก.พ.ร.)' },           // 13
-      { org_code: 'rid',   org_name_th: 'กรมชลประทาน' },                                            // 14
-      { org_code: 'dcy',   org_name_th: 'กรมกิจการเด็กและเยาวชน' },                                // 15
+      { org_code: 'nesdc', abbr_th: 'สศช.',          abbr_en: 'NESDC', org_name_th: 'สำนักงานสภาพัฒนาการเศรษฐกิจและสังคมแห่งชาติ' },         // 1
+      { org_code: 'tpso',  abbr_th: 'สนค.',          abbr_en: 'TPSO',  org_name_th: 'สำนักงานนโยบายและยุทธศาสตร์การค้า' },                    // 2
+      { org_code: 'dss',   abbr_th: 'วศ.',           abbr_en: 'DSS',   org_name_th: 'กรมวิทยาศาสตร์บริการ' },                                 // 3
+      { org_code: 'dhss',  abbr_th: 'สบส.',          abbr_en: 'DHSS',  org_name_th: 'กรมสนับสนุนบริการสุขภาพ' },                              // 4
+      { org_code: 'tmd',   abbr_th: 'อต.',           abbr_en: 'TMD',   org_name_th: 'กรมอุตุนิยมวิทยา' },                                     // 5
+      { org_code: 'dcp',   abbr_th: 'สวธ.',          abbr_en: 'DCP',   org_name_th: 'กรมส่งเสริมวัฒนธรรม' },                                  // 6
+      { org_code: 'dop',   abbr_th: 'คป.',           abbr_en: 'DOP',   org_name_th: 'กรมคุมประพฤติ' },                                         // 7
+      { org_code: 'mots',  abbr_th: 'สป.กก.',        abbr_en: 'MOTS',  org_name_th: 'สำนักงานปลัดกระทรวงการท่องเที่ยวและกีฬา' },             // 8
+      { org_code: 'dmh',   abbr_th: 'สจ.',           abbr_en: 'DMH',   org_name_th: 'กรมสุขภาพจิต' },                                         // 9
+      { org_code: 'onep',  abbr_th: 'สผ.',           abbr_en: 'ONEP',  org_name_th: 'สำนักงานนโยบายและแผนทรัพยากรธรรมชาติและสิ่งแวดล้อม' }, // 10
+      { org_code: 'nrct',  abbr_th: 'วช.',           abbr_en: 'NRCT',  org_name_th: 'สำนักงานการวิจัยแห่งชาติ' },                             // 11
+      { org_code: 'acfs',  abbr_th: 'มกอช.',         abbr_en: 'ACFS',  org_name_th: 'สำนักงานมาตรฐานสินค้าเกษตรและอาหารแห่งชาติ' },          // 12
+      { org_code: 'opdc',  abbr_th: 'สำนักงาน ก.พ.ร.', abbr_en: 'OPDC', org_name_th: 'สำนักงานคณะกรรมการพัฒนาระบบราชการ' },                  // 13
+      { org_code: 'rid',   abbr_th: 'ชป.',           abbr_en: 'RID',   org_name_th: 'กรมชลประทาน' },                                           // 14
+      { org_code: 'dcy',   abbr_th: 'ดย.',           abbr_en: 'DCY',   org_name_th: 'กรมกิจการเด็กและเยาวชน' },                               // 15
     ],
     // orgCodeNameMap — lowercase keys; ch1-form.js normalises ?org= param to lowercase.
     // Admin portal uses Supabase `organizations` table as SSOT; this is the form-side static fallback.
