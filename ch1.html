@@ -3539,6 +3539,18 @@
     })();
     </script>
 
+
+    <!-- Hide header/nav when embedded in Org Portal iframe -->
+    <script>
+    (function() {
+        var p = new URLSearchParams(window.location.search);
+        if (p.get('from') === 'org_portal') {
+            var h = document.querySelector('header');
+            if (h) h.style.display = 'none';
+        }
+    })();
+    </script>
+
 </body>
 
 

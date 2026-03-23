@@ -644,6 +644,7 @@ function collectAllData() {
         org_code: currentOrgCode || null,
         form_version: 'ch1-v4.0',
         submitted_at: new Date().toISOString(),
+        status: IS_TEST_MODE ? 'draft' : 'submitted',
         is_test: IS_TEST_MODE,
         submission_mode: IS_TEST_MODE ? 'test' : 'live',
         test_run_id: TEST_RUN_ID,
