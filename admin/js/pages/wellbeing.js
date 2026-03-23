@@ -45,7 +45,7 @@ function renderWellbeingControl(summary) {
   }
   if (actions[2]) {
     actions[2].textContent = '🗂️ Raw Data ครบทุกข้อ';
-    actions[2].onclick = () => { window.location.href = 'admin-wb-rawdata.html'; };
+    actions[2].onclick = () => { window.location.href = '/admin-wb-rawdata'; };
   }
 }
 
@@ -102,11 +102,7 @@ function renderWellbeingOrg(summary) {
 }
 
 function openWbRaw(orgName) {
-  if (typeof go === 'function') go('wellbeing-raw');
-  setTimeout(() => {
-    const orgFilter = document.getElementById('raw-org-filter');
-    if (orgFilter) { orgFilter.value = orgName; filterRawData(); }
-  }, 100);
+  window.location.href = `/admin-wb-rawdata?org=${encodeURIComponent(orgName)}`;
 }
 
 // ─── Wellbeing Raw Data Page ──────────────────────────────────────────────────
@@ -159,7 +155,7 @@ function renderWellbeingRaw() {
   document.getElementById('wb-prev').onclick = () => { state.rawPage -= 1; renderRawTable(); };
   document.getElementById('wb-next').onclick = () => { state.rawPage += 1; renderRawTable(); };
   document.getElementById('wb-raw-export').onclick = exportRawTable;
-  document.getElementById('wb-full-raw').onclick = () => { window.location.href = 'admin-wb-rawdata.html'; };
+  document.getElementById('wb-full-raw').onclick = () => { window.location.href = '/admin-wb-rawdata'; };
 
   applyRawFilters();
 }

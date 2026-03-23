@@ -56,7 +56,7 @@ function renderUsers() {
 // ========== USER MODAL FUNCTIONS ==========
 function showAddUserModal() {
   const myRole = state.myRole || 'superadmin';
-  const isSuper = myRole === 'superadmin';
+  const isSuper = myRole === 'superadmin' || myRole === 'super_admin';
   _openUserModal({ title: '➕ เพิ่มผู้ใช้ใหม่', isEdit: false, email: '', role: 'viewer', orgName: '', expiresAt: '2026-06-30', isActive: true, isSuper });
 }
 
@@ -65,7 +65,7 @@ function showEditUserModal(email) {
   const row = state.userRows.find((r) => r.email === email);
   if (!row) { showToast('ไม่พบข้อมูลผู้ใช้', 'warn'); return; }
   const myRole = state.myRole || 'superadmin';
-  const isSuper = myRole === 'superadmin';
+  const isSuper = myRole === 'superadmin' || myRole === 'super_admin';
   _openUserModal({
     title: `✏️ จัดการผู้ใช้`, isEdit: true,
     email: row.email, role: row.role || 'viewer',
@@ -82,7 +82,7 @@ function _openUserModal(opts) {
     ? `<option value="viewer"${opts.role==='viewer'?' selected':''}>👁 Viewer — ดูข้อมูลเท่านั้น</option>
        <option value="org_hr"${opts.role==='org_hr'?' selected':''}>🏢 Org HR — HR ขององค์กร ดูข้อมูลเฉพาะองค์กร</option>
        <option value="admin"${opts.role==='admin'?' selected':''}>🔧 Admin — จัดการข้อมูลและ Viewer</option>
-       <option value="superadmin"${opts.role==='superadmin'?' selected':''}>👑 Super Admin — สิทธิ์สูงสุด</option>`
+       <option value="super_admin"${opts.role==='super_admin' || opts.role==='superadmin'?' selected':''}>👑 Super Admin — สิทธิ์สูงสุด</option>`
     : `<option value="viewer" selected>👁 Viewer — ดูข้อมูลเท่านั้น</option>`;
 
   // Password section — ทั้ง add/edit ใช้ manual input ได้ (Edge Function จัดการ)
@@ -201,12 +201,13 @@ function closeUserModal() {
 
 async function saveUserFromModal(isEdit) {
   const overlay = document.getElementById('user-modal-overlay');
-  const email = document.getElementById('um-email')?.value?.trim();
+  const email = document.getElementById('um-email')?.value?.trim().toLowerCase();
   const role = document.getElementById('um-role')?.value || 'viewer';
   const orgName = document.getElementById('um-org')?.value || '';
   const expires = document.getElementById('um-expires')?.value || null;
   const isActive = document.getElementById('um-active')?.checked !== false;
   const msg = document.getElementById('um-msg');
+  const newPwd = document.getElementById('um-new-pwd')?.value?.trim();
 
   if (!email || !email.includes('@')) {
     if (msg) { msg.style.color = 'var(--D)'; msg.textContent = '⚠️ กรุณากรอกอีเมลให้ถูกต้อง'; }
@@ -214,8 +215,12 @@ async function saveUserFromModal(isEdit) {
   }
   if (msg) { msg.style.color = 'var(--tx2)'; msg.textContent = 'กำลังบันทึก...'; }
 
+  if (!isEdit && !newPwd) {
+    if (msg) { msg.style.color = 'var(--D)'; msg.textContent = '⚠️ กรุณาตั้งรหัสผ่านเริ่มต้นก่อนเพิ่มผู้ใช้'; }
+    return;
+  }
+
   // Password — ใช้ Edge Function (set-user-password) ที่มี service_role key
-  const newPwd = document.getElementById('um-new-pwd')?.value?.trim();
   if (!isEdit && newPwd) {
     if (msg) { msg.style.color = 'var(--tx2)'; msg.textContent = 'กำลังสร้าง Auth account...'; }
     const fnResult = await callSetUserPasswordFn(email, newPwd, 'create');

@@ -146,7 +146,11 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
 .summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
 .summary-item{background:#fcfbff;border:1px solid var(--bdr);border-radius:10px;padding:14px 10px;text-align:center}
 .summary-item .val{font-size:20px;font-weight:700;color:#7c3aed;line-height:1.2}
-.summary-item .lbl{font-size:11px;color:var(--tx3);margin-top:6px}
+.summary-item .lbl{font-size:11px;color:var(--tx3);margin-top:6px;display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap}
+.info-tip{position:relative;display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:999px;background:#ede9fe;color:#6d28d9;font-size:10px;font-weight:700;cursor:help;flex-shrink:0}
+.info-tip::after{content:attr(data-tip);position:absolute;left:50%;bottom:calc(100% + 8px);transform:translateX(-50%);min-width:210px;max-width:280px;padding:8px 10px;border-radius:8px;background:#1f2937;color:#fff;font-size:11px;font-weight:500;line-height:1.5;white-space:normal;text-align:left;box-shadow:0 10px 25px rgba(15,23,42,.22);opacity:0;pointer-events:none;transition:opacity .15s ease;z-index:30}
+.info-tip::before{content:'';position:absolute;left:50%;bottom:calc(100% + 2px);transform:translateX(-50%);border:6px solid transparent;border-top-color:#1f2937;opacity:0;pointer-events:none;transition:opacity .15s ease;z-index:30}
+.info-tip:hover::after,.info-tip:hover::before{opacity:1}
 
 .ch1-strip{margin-top:12px;padding:10px 14px;border-radius:8px;font-size:13px;font-weight:600}
 .ch1-strip.ok{background:#fdf2f8;color:#be185d}
@@ -248,6 +252,29 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
 .pagination button.active{background:#7c3aed;color:#fff;border-color:#7c3aed}
 .pagination button:hover:not(.active){background:#faf8ff}
 .dash-full{grid-column:1/-1}
+
+.wbi-kpi-strip{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.wbi-kpi{background:#fff;border:1px solid var(--bdr);border-radius:12px;padding:12px 16px;flex:1;min-width:120px;box-shadow:var(--shadow)}
+.wbi-kpi .wk-val{font-size:20px;font-weight:700;color:var(--P);line-height:1}
+.wbi-kpi .wk-lbl{font-size:10.5px;color:var(--tx3);margin-top:4px}
+.wbi-toolbar{background:#fff;border:1px solid var(--bdr);border-radius:14px 14px 0 0;padding:12px 16px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;box-shadow:var(--shadow)}
+.wbi-toolbar .wbi-si{padding:8px 12px;border:1.5px solid var(--bdr);border-radius:10px;font-size:13px;font-family:inherit;background:#fff;color:var(--tx);min-width:160px}
+.wbi-toolbar .wbi-si:focus{outline:none;border-color:#a78bfa;box-shadow:0 0 0 3px rgba(167,139,250,.12)}
+.wbi-toolbar .wbi-sel{padding:8px 12px;border:1.5px solid var(--bdr);border-radius:10px;font-size:13px;font-family:inherit;background:#fff;color:var(--tx);cursor:pointer}
+.wbi-toolbar .wbi-count{font-size:12px;color:var(--tx3);font-weight:600;margin-left:auto;white-space:nowrap}
+.wbi-table-wrap{background:#fff;border:1px solid var(--bdr);border-top:none;overflow-x:auto;max-height:calc(100vh - 340px);box-shadow:var(--shadow)}
+.wbi-table-wrap table{width:100%;border-collapse:collapse;font-size:12.5px;white-space:nowrap}
+.wbi-table-wrap thead{position:sticky;top:0;z-index:5}
+.wbi-table-wrap th{text-align:left;padding:10px 12px;background:var(--PL);border-bottom:2px solid var(--bdr);font-weight:700;color:var(--P);font-size:11px}
+.wbi-table-wrap td{padding:9px 12px;border-bottom:1px solid #f3f0fa;color:var(--tx);vertical-align:middle}
+.wbi-table-wrap tr:hover td{background:#fdfbff}
+.wbi-table-wrap .num{text-align:center;color:var(--tx3);font-size:11px}
+.wbi-pager{background:#fff;border:1px solid var(--bdr);border-top:none;border-radius:0 0 14px 14px;padding:10px 16px;display:flex;align-items:center;gap:8px;box-shadow:var(--shadow)}
+.wbi-pager .wbi-info{font-size:12px;color:var(--tx3);flex:1}
+.wbi-pager button{padding:5px 10px;border-radius:8px;border:1px solid var(--bdr);background:#fff;font-size:12px;cursor:pointer;font-family:inherit;color:var(--tx2);font-weight:600}
+.wbi-pager button.active{background:var(--P);color:#fff;border-color:var(--P)}
+.wbi-pager button:hover:not(.active):not(:disabled){background:#faf8ff}
+.wbi-pager button:disabled{opacity:.4;cursor:default}
 
 @media(max-width:900px){
   .sidebar{position:static;width:100%;height:auto}
@@ -432,7 +459,7 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
       <div class="tab-page" id="page-wb-individual">
         <div class="section-card wb">
           <h3>👤 Well-being รายบุคคล</h3>
-          <div class="desc">ข้อมูลผลสำรวจรายบุคคลทุกข้อ (Raw Data)</div>
+          <div class="desc">ข้อมูลผลสำรวจสุขภาวะรายบุคคลทุกข้อ (Raw Data)</div>
         </div>
         <div id="wb-individual-area">
           <div class="info-box blue">กำลังโหลดข้อมูลรายบุคคล...</div>
@@ -455,7 +482,7 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
                 <input class="link-input" id="survey-link" readonly value="กำลังสร้างลิงก์...">
                 <button class="copy-btn" id="copy-btn" onclick="copyLink()">📋 คัดลอก</button>
               </div>
-              <div class="info-box blue" style="margin-bottom:14px">แชร์ลิงก์นี้ให้บุคลากรในองค์กรเพื่อกรอกแบบสอบถาม Well-being โดยระบบจะระบุชื่อองค์กรให้อัตโนมัติ</div>
+              <div class="info-box blue" style="margin-bottom:14px">แชร์ลิงก์นี้ให้บุคลากรในองค์กรเพื่อกรอกแบบสำรวจ Well-being โดยระบบจะระบุชื่อองค์กรให้อัตโนมัติ</div>
               <div style="background:#faf8ff;border:1px solid var(--bdr);border-radius:12px;padding:16px">
                 <div style="font-size:13px;font-weight:700;color:var(--P);margin-bottom:6px">สถานะการตอบ</div>
                 <div id="share-progress-text" style="font-size:13px;color:var(--tx2);line-height:1.7">กำลังโหลด...</div>
@@ -965,6 +992,10 @@ async function loadCh1Data() {
   const fd = ch1Row?.form_data || ch1Row || {};
   portalState.ch1Row = ch1Row;
   portalState.totalStaff = fd.total_staff || fd.total_personnel || 0;
+  const turnoverRate = pickYearValue(fd, ['rate_2568', 'turnover_rate', 'rate_2567', 'rate_2566', 'rate_2565', 'rate_2564']);
+  const ncdCount = pickYearValue(fd, ['ncd_count', 'ncd_total']);
+  const engagementScore = pickYearValue(fd, ['engagement_score_2568', 'engagement_score', 'engagement_score_2567', 'engagement_score_2566', 'engagement_score_2565', 'engagement_score_2564']);
+  const trainingHours = pickYearValue(fd, ['training_hours_2568', 'training_hours', 'training_hours_2567', 'training_hours_2566', 'training_hours_2565', 'training_hours_2564']);
 
   const badgeEl = document.getElementById('ch1-status-badge');
   if (!ch1Row) {
@@ -982,7 +1013,7 @@ async function loadCh1Data() {
     homeCh1.innerHTML = `
       <div class="summary-grid" style="grid-template-columns:repeat(2,minmax(0,1fr))">
         <div class="summary-item"><div class="val">${fmtNum(portalState.totalStaff)}</div><div class="lbl">บุคลากรรวม</div></div>
-        <div class="summary-item"><div class="val">${fmtNum(fd.ncd_count || fd.ncd_total)}</div><div class="lbl">NCD รวม</div></div>
+        <div class="summary-item"><div class="val">${fmtNum(ncdCount)}</div><div class="lbl">${kpiLabel('NCD รวม', 'มาจากข้อข้อมูลโรคเรื้อรัง (NCDs): disease_diabetes, disease_hypertension, disease_cardiovascular, disease_kidney, disease_liver, disease_cancer, disease_obesity และ disease_other_count')}</div></div>
       </div>`;
   }
 
@@ -994,10 +1025,10 @@ async function loadCh1Data() {
     summaryEl.style.display = '';
     summaryGrid.innerHTML = [
       { val: fmtNum(fd.total_staff || fd.total_personnel), lbl: 'บุคลากรรวม' },
-      { val: fd.turnover_rate ? `${fd.turnover_rate}%` : '−', lbl: 'อัตราลาออก' },
-      { val: fmtNum(fd.ncd_count || fd.ncd_total), lbl: 'NCD รวม' },
-      { val: fmtNum(fd.engagement_score, 2), lbl: 'Engagement' },
-      { val: fmtNum(fd.training_hours, 2), lbl: 'ชม.อบรม/คน/ปี' },
+      { val: turnoverRate !== null ? `${fmtNum(turnoverRate, 2)}%` : '−', lbl: kpiLabel('อัตราลาออก', 'มาจากตารางการลาออกและโอนย้ายย้อนหลัง 5 ปี โดยใช้ค่า rate_2568 เป็นหลัก (คำนวณจาก begin_2568, end_2568, leave_2568)') },
+      { val: fmtNum(ncdCount), lbl: kpiLabel('NCD รวม', 'มาจากข้อข้อมูลโรคเรื้อรัง (NCDs): disease_diabetes, disease_hypertension, disease_cardiovascular, disease_kidney, disease_liver, disease_cancer, disease_obesity และ disease_other_count') },
+      { val: fmtNum(engagementScore, 2), lbl: kpiLabel('Engagement', 'มาจากข้อคะแนน Employee Engagement ย้อนหลัง 5 ปี โดยใช้ engagement_score_2568 เป็นหลัก') },
+      { val: fmtNum(trainingHours, 2), lbl: kpiLabel('ชม.อบรม/คน/ปี', 'มาจากข้อชั่วโมงการพัฒนาบุคลากรย้อนหลัง 5 ปี โดยใช้ training_hours_2568 เป็นหลัก') },
       { val: fmtNum(fd.sick_leave_avg, 2), lbl: 'ลาป่วยเฉลี่ย/คน' },
     ].map((item) => `<div class="summary-item"><div class="val">${item.val}</div><div class="lbl">${item.lbl}</div></div>`).join('');
   }
@@ -1252,133 +1283,212 @@ const WB_QUESTIONS = [
 ];
 
 let wbIndPage = 1;
-const WB_IND_PER_PAGE = 20;
+const WB_IND_PER_PAGE = 30;
+let _wbiAllRows = [];
+let _wbiFiltered = [];
 
 async function loadWbIndividualPage() {
   portalState._wbIndLoaded = true;
   const area = document.getElementById('wb-individual-area');
   area.innerHTML = '<div class="info-box blue">กำลังโหลดข้อมูลรายบุคคล...</div>';
 
-  let rows = [];
-  const { data: sRows } = await sb
-    .from('survey_responses')
-    .select('id, name, title, gender, age, bmi, bmi_category, tmhi_score, tmhi_level, submitted_at, raw_responses')
-    .eq('organization', portalState.orgName)
-    .eq('is_draft', false)
-    .order('submitted_at', { ascending: false });
-
-  if (sRows && sRows.length > 0) { rows = sRows; }
-  else {
+  try {
+    let rows = [];
     try {
-      const { data: wRows } = await sb
-        .from('wellbeing_responses')
+      const { data: sRows } = await sb
+        .from('survey_responses')
         .select('id, name, title, gender, age, bmi, bmi_category, tmhi_score, tmhi_level, submitted_at, raw_responses')
         .eq('organization', portalState.orgName)
         .eq('is_draft', false)
         .order('submitted_at', { ascending: false });
-      rows = wRows || [];
+      if (sRows && sRows.length > 0) rows = sRows;
     } catch (_) {}
-  }
 
-  portalState._wbIndRows = rows;
+    if (rows.length === 0) {
+      try {
+        const { data: wRows } = await sb
+          .from('wellbeing_responses')
+          .select('id, name, title, gender, age, bmi, bmi_category, tmhi_score, tmhi_level, submitted_at, raw_responses')
+          .eq('organization', portalState.orgName)
+          .eq('is_draft', false)
+          .order('submitted_at', { ascending: false });
+        rows = wRows || [];
+      } catch (_) {}
+    }
+
+    // Merge raw_responses into top-level for each row (handle string/null)
+    rows = rows.map(r => {
+      let raw = r.raw_responses;
+      if (typeof raw === 'string') { try { raw = JSON.parse(raw); } catch (_) { raw = {}; } }
+      if (!raw || typeof raw !== 'object') raw = {};
+      return {
+        ...raw,
+        id: r.id,
+        name: r.name || raw.name || r.title || raw.title || '',
+        gender: r.gender || raw.gender || '',
+        age: r.age ?? raw.age ?? null,
+        bmi: r.bmi ?? raw.bmi ?? null,
+        bmi_category: r.bmi_category || raw.bmi_category || '',
+        tmhi_score: r.tmhi_score ?? raw.tmhi_score ?? null,
+        tmhi_level: r.tmhi_level || raw.tmhi_level || '',
+        submitted_at: r.submitted_at,
+        _raw: raw,
+      };
+    });
+
+    _wbiAllRows = rows;
+    portalState._wbIndRows = rows;
+
+    if (rows.length === 0) {
+      area.innerHTML = '<div class="info-box yellow">ยังไม่มีข้อมูลรายบุคคล</div>';
+      return;
+    }
+
+    // Build KPI values
+    const tmhiRows = rows.filter(r => r.tmhi_score != null);
+    const avgTmhi = tmhiRows.length ? (tmhiRows.reduce((s, r) => s + Number(r.tmhi_score), 0) / tmhiRows.length) : null;
+    const bmiRows = rows.filter(r => r.bmi != null);
+    const avgBmi = bmiRows.length ? (bmiRows.reduce((s, r) => s + Number(r.bmi), 0) / bmiRows.length) : null;
+    const male = rows.filter(r => (r.gender||'').includes('ชาย') || r.gender === 'male').length;
+    const female = rows.filter(r => (r.gender||'').includes('หญิง') || r.gender === 'female').length;
+
+    // Render full UI into area
+    const kpis = [
+      { v: fmtNum(rows.length), l: 'ผู้ตอบทั้งหมด' },
+      { v: `${fmtNum(male)} / ${fmtNum(female)}`, l: 'ชาย / หญิง' },
+      { v: avgTmhi != null ? Number(avgTmhi).toFixed(1) : '—', l: 'TMHI เฉลี่ย' },
+      { v: avgBmi != null ? Number(avgBmi).toFixed(1) : '—', l: 'BMI เฉลี่ย' },
+    ];
+
+    area.innerHTML = `
+      <div class="wbi-kpi-strip">${kpis.map(k => `<div class="wbi-kpi"><div class="wk-val">${k.v}</div><div class="wk-lbl">${k.l}</div></div>`).join('')}</div>
+      <div class="wbi-toolbar">
+        <input class="wbi-si" id="wbi-search" placeholder="🔍 ค้นหาชื่อ...">
+        <select class="wbi-sel" id="wbi-gender"><option value="">ทุกเพศ</option><option value="ชาย">ชาย</option><option value="หญิง">หญิง</option></select>
+        <select class="wbi-sel" id="wbi-tmhi"><option value="">TMHI ทุกระดับ</option><option value="สูง">สูงกว่าเกณฑ์</option><option value="ปกติ">เกณฑ์ปกติ</option><option value="ต่ำ">ต่ำกว่าเกณฑ์</option></select>
+        <div class="wbi-count" id="wbi-count"></div>
+        <button class="btn btn-outline" style="font-size:12px;margin-left:4px" onclick="exportWbIndExcel()">📤 Export ทุกข้อ</button>
+      </div>
+      <div class="wbi-table-wrap" id="wbi-table-wrap"></div>
+      <div class="wbi-pager" id="wbi-pager"></div>`;
+
+    document.getElementById('wbi-search').oninput = applyWbiFilters;
+    document.getElementById('wbi-gender').onchange = applyWbiFilters;
+    document.getElementById('wbi-tmhi').onchange = applyWbiFilters;
+
+    wbIndPage = 1;
+    applyWbiFilters();
+  } catch (err) {
+    area.innerHTML = `<div class="info-box yellow">โหลดข้อมูลไม่สำเร็จ: ${esc(err.message || 'Unknown error')}</div>`;
+  }
+}
+
+function applyWbiFilters() {
+  const q = (document.getElementById('wbi-search')?.value || '').toLowerCase();
+  const gender = document.getElementById('wbi-gender')?.value || '';
+  const tmhi = document.getElementById('wbi-tmhi')?.value || '';
+
+  _wbiFiltered = _wbiAllRows.filter(r => {
+    if (gender && !(r.gender||'').includes(gender)) return false;
+    if (tmhi && !(r.tmhi_level || '').includes(tmhi)) return false;
+    if (q) {
+      const hay = [r.name, r.title, r.gender, r.tmhi_level].join(' ').toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+  portalState._wbIndRows = _wbiFiltered;
+  const countEl = document.getElementById('wbi-count');
+  if (countEl) countEl.textContent = `${fmtNum(_wbiFiltered.length)} / ${fmtNum(_wbiAllRows.length)} รายการ`;
   wbIndPage = 1;
   renderWbIndividualTable();
 }
 
 function renderWbIndividualTable() {
-  const rows = portalState._wbIndRows || [];
-  const area = document.getElementById('wb-individual-area');
-  if (rows.length === 0) {
-    area.innerHTML = '<div class="info-box yellow">ยังไม่มีข้อมูลรายบุคคล</div>';
-    return;
-  }
-
-  const totalPages = Math.ceil(rows.length / WB_IND_PER_PAGE);
+  const rows = _wbiFiltered;
+  const total = rows.length;
+  const totalPages = Math.max(1, Math.ceil(total / WB_IND_PER_PAGE));
   if (wbIndPage > totalPages) wbIndPage = totalPages;
+  if (wbIndPage < 1) wbIndPage = 1;
   const start = (wbIndPage - 1) * WB_IND_PER_PAGE;
   const pageRows = rows.slice(start, start + WB_IND_PER_PAGE);
 
-  let html = `<div class="section-card wb" style="padding:16px 18px">
-    <div class="wb-ind-toolbar">
-      <input class="search-input" placeholder="🔍 ค้นหาชื่อ..." oninput="filterWbInd(this.value)">
-      <div class="wb-ind-count">ทั้งหมด ${fmtNum(rows.length)} รายการ</div>
-      <button class="btn btn-outline" style="font-size:12px" onclick="exportWbIndExcel()">📤 Export ทั้งหมด</button>
-    </div>
-    <div style="overflow-x:auto">
-      <table class="ind-table">
-        <thead><tr><th>#</th><th>ชื่อ</th><th>เพศ</th><th>อายุ</th><th>BMI</th><th>TMHI</th><th>สถานะจิต</th><th>วันที่ส่ง</th><th></th></tr></thead>
-        <tbody>${pageRows.map((r, i) => {
-          const idx = start + i + 1;
-          const lvClass = (r.tmhi_level||'').includes('สูง') ? 'good' : (r.tmhi_level||'').includes('ปกติ') ? 'avg' : (r.tmhi_level||'').includes('ต่ำ') ? 'poor' : 'none';
-          const lvText = (r.tmhi_level||'').includes('สูง') ? '☀️ ดีมาก' : (r.tmhi_level||'').includes('ปกติ') ? '⛅ ปกติ' : (r.tmhi_level||'').includes('ต่ำ') ? '🌧️ ต่ำ' : '—';
-          return `<tr>
-            <td class="num">${idx}</td>
-            <td>${esc(r.name || r.title || '—')}</td>
-            <td>${esc(r.gender || '—')}</td>
-            <td>${r.age ?? '—'}</td>
-            <td>${r.bmi ? Number(r.bmi).toFixed(1) : '—'}</td>
-            <td>${r.tmhi_score ?? '—'}</td>
-            <td><span class="badge-sm badge-${lvClass}">${lvText}</span></td>
-            <td>${r.submitted_at ? new Date(r.submitted_at).toLocaleDateString('th-TH') : '—'}</td>
-            <td><button class="btn-view" onclick="openWbDetail(${start + i})">👁 ดู</button></td>
-          </tr>`;
-        }).join('')}</tbody>
-      </table>
-    </div>`;
-
-  if (totalPages > 1) {
-    html += '<div class="pagination">';
-    if (wbIndPage > 1) html += `<button onclick="wbIndPage=${wbIndPage - 1};renderWbIndividualTable()">◀</button>`;
-    for (let p = 1; p <= totalPages; p++) {
-      if (totalPages > 7 && Math.abs(p - wbIndPage) > 2 && p !== 1 && p !== totalPages) {
-        if (p === 2 || p === totalPages - 1) html += '<button disabled>…</button>';
-        continue;
-      }
-      html += `<button class="${p === wbIndPage ? 'active' : ''}" onclick="wbIndPage=${p};renderWbIndividualTable()">${p}</button>`;
-    }
-    if (wbIndPage < totalPages) html += `<button onclick="wbIndPage=${wbIndPage + 1};renderWbIndividualTable()">▶</button>`;
-    html += '</div>';
+  let thead = '<tr><th class="num">#</th><th>ชื่อ</th><th>เพศ</th><th>อายุ</th><th>BMI</th><th>ระดับ BMI</th><th>TMHI</th><th>สถานะจิต</th><th>วันที่ส่ง</th><th></th></tr>';
+  let tbody = '';
+  if (pageRows.length === 0) {
+    tbody = '<tr><td colspan="10" style="text-align:center;padding:24px;color:var(--tx3)">ไม่พบข้อมูลที่ตรงกับเงื่อนไข</td></tr>';
+  } else {
+    pageRows.forEach((r, i) => {
+      const idx = start + i + 1;
+      const lv = r.tmhi_level || '';
+      const lvClass = lv.includes('สูง') ? 'good' : lv.includes('ปกติ') ? 'avg' : lv.includes('ต่ำ') ? 'poor' : 'none';
+      const lvText = lv.includes('สูง') ? '☀️ ดีมาก' : lv.includes('ปกติ') ? '⛅ ปกติ' : lv.includes('ต่ำ') ? '🌧️ ต่ำ' : '—';
+      tbody += `<tr>
+        <td class="num">${idx}</td>
+        <td>${esc(r.name || r.title || '—')}</td>
+        <td>${esc(r.gender || '—')}</td>
+        <td>${r.age ?? '—'}</td>
+        <td>${r.bmi ? Number(r.bmi).toFixed(1) : '—'}</td>
+        <td>${esc(r.bmi_category || '—')}</td>
+        <td>${r.tmhi_score ?? '—'}</td>
+        <td><span class="badge-sm badge-${lvClass}">${lvText}</span></td>
+        <td>${r.submitted_at ? new Date(r.submitted_at).toLocaleDateString('th-TH') : '—'}</td>
+        <td><button class="btn-view" onclick="openWbDetail(${start + i})">👁 ดูทั้งหมด</button></td>
+      </tr>`;
+    });
   }
 
-  html += '</div>';
-  area.innerHTML = html;
+  const tableEl = document.getElementById('wbi-table-wrap');
+  if (tableEl) tableEl.innerHTML = `<table><thead>${thead}</thead><tbody>${tbody}</tbody></table>`;
+
+  // Pager
+  let pagerHtml = `<div class="wbi-info">${total ? start + 1 : 0}–${Math.min(start + WB_IND_PER_PAGE, total)} จาก ${fmtNum(total)}</div>`;
+  pagerHtml += `<button ${wbIndPage <= 1 ? 'disabled' : ''} onclick="wbIndPage--;renderWbIndividualTable()">◀ ก่อนหน้า</button>`;
+  const maxBtns = 7;
+  let pStart = Math.max(1, wbIndPage - 3);
+  let pEnd = Math.min(totalPages, pStart + maxBtns - 1);
+  if (pEnd - pStart < maxBtns - 1) pStart = Math.max(1, pEnd - maxBtns + 1);
+  for (let p = pStart; p <= pEnd; p++) {
+    pagerHtml += `<button class="${p === wbIndPage ? 'active' : ''}" onclick="wbIndPage=${p};renderWbIndividualTable()">${p}</button>`;
+  }
+  pagerHtml += `<button ${wbIndPage >= totalPages ? 'disabled' : ''} onclick="wbIndPage++;renderWbIndividualTable()">ถัดไป ▶</button>`;
+  const pagerEl = document.getElementById('wbi-pager');
+  if (pagerEl) pagerEl.innerHTML = pagerHtml;
 }
 
-function filterWbInd(query) {
-  const q = query.trim().toLowerCase();
-  if (!q) { portalState._wbIndRows = portalState._wbIndRowsFull || portalState._wbIndRows; wbIndPage = 1; renderWbIndividualTable(); return; }
-  if (!portalState._wbIndRowsFull) portalState._wbIndRowsFull = portalState._wbIndRows;
-  portalState._wbIndRows = portalState._wbIndRowsFull.filter(r => {
-    const name = (r.name || r.title || '').toLowerCase();
-    return name.includes(q);
-  });
-  wbIndPage = 1;
-  renderWbIndividualTable();
-}
+function filterWbInd(query) { applyWbiFilters(); }
 
 function openWbDetail(index) {
-  const rows = portalState._wbIndRows || [];
+  const rows = _wbiFiltered;
   const row = rows[index];
   if (!row) return;
-  const raw = row.raw_responses || {};
-  const merged = { ...raw, bmi: row.bmi, bmi_category: row.bmi_category, tmhi_score: row.tmhi_score, tmhi_level: row.tmhi_level };
 
-  document.getElementById('wb-modal-title').textContent = `${row.name || row.title || 'ผู้ตอบ'} — ข้อมูลทั้งหมด`;
+  // row has raw_responses already spread in at top-level + _raw backup
+  // Use row itself as source (it has ALL keys from raw_responses + top-level columns)
+  const merged = { ...(row._raw || {}), ...row };
+
+  document.getElementById('wb-modal-title').textContent = `${row.name || 'ผู้ตอบ'} — ข้อมูลทั้งหมด`;
   let body = '';
   WB_QUESTIONS.forEach(sec => {
-    const items = sec.keys.filter(([k]) => merged[k] !== undefined && merged[k] !== null && merged[k] !== '').map(([k, label]) => {
-      let val = merged[k];
-      if (Array.isArray(val)) val = val.join(', ');
-      return `<div class="raw-item"><div class="raw-q">${esc(label)}</div><div class="raw-a">${esc(String(val))}</div></div>`;
-    });
-    if (items.length === 0) return;
+    const items = sec.keys
+      .filter(([k]) => merged[k] !== undefined && merged[k] !== null && merged[k] !== '')
+      .map(([k, label]) => {
+        let val = merged[k];
+        if (Array.isArray(val)) val = val.join(', ');
+        return `<div class="raw-item"><div class="raw-q">${esc(label)}</div><div class="raw-a">${esc(String(val))}</div></div>`;
+      });
+    if (!items.length) return;
     body += `<div class="raw-section"><div class="raw-section-title">${esc(sec.section)}</div><div class="raw-grid">${items.join('')}</div></div>`;
   });
 
+  // Fallback: if WB_QUESTIONS matched nothing, show all available keys
   if (!body) {
-    const allKeys = Object.entries(merged).filter(([k, v]) => v !== null && v !== undefined && v !== '' && !['id','created_at','updated_at','is_draft','organization','email','raw_responses'].includes(k));
+    const skipKeys = new Set(['id','created_at','updated_at','is_draft','organization','email','raw_responses','_raw','submitted_at']);
+    const allEntries = Object.entries(merged).filter(([k, v]) =>
+      v != null && v !== '' && !skipKeys.has(k)
+    );
     body = '<div class="raw-section"><div class="raw-section-title">ข้อมูลทั้งหมด</div><div class="raw-grid">' +
-      allKeys.map(([k, v]) => `<div class="raw-item"><div class="raw-q">${esc(k)}</div><div class="raw-a">${esc(Array.isArray(v) ? v.join(', ') : String(v))}</div></div>`).join('') +
+      allEntries.map(([k, v]) => `<div class="raw-item"><div class="raw-q">${esc(k)}</div><div class="raw-a">${esc(Array.isArray(v) ? v.join(', ') : String(v))}</div></div>`).join('') +
       '</div></div>';
   }
 
@@ -1395,14 +1505,13 @@ document.getElementById('wb-modal')?.addEventListener('click', (e) => {
 });
 
 function exportWbIndExcel() {
-  const rows = portalState._wbIndRows || [];
+  const rows = _wbiFiltered.length ? _wbiFiltered : (_wbiAllRows.length ? _wbiAllRows : (portalState._wbIndRows || []));
   if (!rows.length) { showToast('ไม่มีข้อมูล', 'warn'); return; }
   try {
     const allKeys = new Map();
     WB_QUESTIONS.forEach(sec => sec.keys.forEach(([k, label]) => allKeys.set(k, label)));
     const data = rows.map((r, i) => {
-      const raw = r.raw_responses || {};
-      const merged = { ...raw, bmi: r.bmi, bmi_category: r.bmi_category, tmhi_score: r.tmhi_score, tmhi_level: r.tmhi_level };
+      const merged = { ...(r._raw || {}), ...r };
       const obj = { '#': i + 1 };
       allKeys.forEach((label, key) => {
         let v = merged[key];

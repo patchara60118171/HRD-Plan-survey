@@ -1,18 +1,53 @@
 /* ========== ADMIN PORTAL — DATA LOADING & ORG CATALOG ========== */
 
+const ADMIN_CANONICAL_ORGS = [
+  { code: 'nesdc', name: 'สำนักงานสภาพัฒนาการเศรษฐกิจและสังคมแห่งชาติ' },
+  { code: 'tpso', name: 'สำนักงานนโยบายและยุทธศาสตร์การค้า' },
+  { code: 'dss', name: 'กรมวิทยาศาสตร์บริการ' },
+  { code: 'dhss', name: 'กรมสนับสนุนบริการสุขภาพ' },
+  { code: 'tmd', name: 'กรมอุตุนิยมวิทยา' },
+  { code: 'dcp', name: 'กรมส่งเสริมวัฒนธรรม' },
+  { code: 'dop', name: 'กรมคุมประพฤติ' },
+  { code: 'mots', name: 'สำนักงานปลัดกระทรวงการท่องเที่ยวและกีฬา' },
+  { code: 'dmh', name: 'กรมสุขภาพจิต' },
+  { code: 'onep', name: 'สำนักงานนโยบายและแผนทรัพยากรธรรมชาติและสิ่งแวดล้อม' },
+  { code: 'nrct', name: 'สำนักงานการวิจัยแห่งชาติ' },
+  { code: 'acfs', name: 'สำนักงานมาตรฐานสินค้าเกษตรและอาหารแห่งชาติ' },
+  { code: 'opdc', name: 'สำนักงานคณะกรรมการพัฒนาระบบราชการ' },
+  { code: 'rid', name: 'กรมชลประทาน' },
+  { code: 'dcy', name: 'กรมกิจการเด็กและเยาวชน' },
+  { code: 'test-org', name: 'องค์กรทดสอบระบบ' },
+];
+
+const ADMIN_CANONICAL_ORG_CODES = new Set(ADMIN_CANONICAL_ORGS.map((org) => org.code));
+const ADMIN_CANONICAL_ORG_NAMES = new Set(ADMIN_CANONICAL_ORGS.map((org) => org.name));
+
 function getOrgCatalog() {
-  return state.orgProfiles.map((row) => ({
-    name: row.org_name_th,
-    ministry: row.settings?.ministry || 'ไม่ระบุ',
-    code: row.org_code || 'ORG',
-    letter: row.settings?.salutation || 'ไม่ระบุ',
-    email: row.settings?.saraban_email || row.contact_email || '',
-    contact: row.settings?.coordinator_name || '',
-    contactRole: row.settings?.coordinator_position || '',
-    contactPhone: row.settings?.coordinator_contact_line || '',
-    contactLine: row.settings?.coordinator_contact_line || '',
-    contactEmail: row.settings?.coordinator_email || row.contact_email || '',
-  }));
+  const profileMap = new Map(
+    state.orgProfiles.map((row) => {
+      const code = String(row.org_code || '').toLowerCase();
+      const name = row.org_name_th || row.display_name || '';
+      return [code || name, row];
+    })
+  );
+
+  return ADMIN_CANONICAL_ORGS.map((org) => {
+    const row = profileMap.get(org.code)
+      || state.orgProfiles.find((item) => (item.org_name_th || item.display_name || '') === org.name)
+      || {};
+    return {
+      name: org.name,
+      ministry: row.settings?.ministry || 'ไม่ระบุ',
+      code: row.org_code || org.code,
+      letter: row.settings?.salutation || 'ไม่ระบุ',
+      email: row.settings?.saraban_email || row.contact_email || '',
+      contact: row.settings?.coordinator_name || '',
+      contactRole: row.settings?.coordinator_position || '',
+      contactPhone: row.settings?.coordinator_contact_line || '',
+      contactLine: row.settings?.coordinator_contact_line || '',
+      contactEmail: row.settings?.coordinator_email || row.contact_email || '',
+    };
+  });
 }
 
 function refreshOrgDerivedState() {
@@ -94,7 +129,11 @@ async function loadBackend() {
   state.linkRows = linksRes.error ? [] : (linksRes.data || []);
   state.userRows = usersRows || [];
   state.orgHrCredentials = orgHrCredRows || [];
-  state.orgProfiles = orgRows || [];
+  state.orgProfiles = (orgRows || []).filter((row) => {
+    const code = String(row.org_code || '').toLowerCase();
+    const name = row.org_name_th || row.display_name || '';
+    return ADMIN_CANONICAL_ORG_CODES.has(code) || ADMIN_CANONICAL_ORG_NAMES.has(name);
+  });
   refreshOrgDerivedState();
   scopeRowsForCurrentUser();
   refreshOrgDerivedState();

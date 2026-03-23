@@ -6,6 +6,13 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+function jsonResponse(body: Record<string, unknown>, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+  })
+}
+
 serve(async (req) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
@@ -14,9 +21,15 @@ serve(async (req) => {
 
   try {
     // Admin client with service_role key (never exposed to frontend)
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? ''
+    const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    if (!supabaseUrl || !serviceRoleKey) {
+      throw new Error('Server config missing: SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY')
+    }
+
     const supabaseAdmin = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+      supabaseUrl,
+      serviceRoleKey
     )
 
     // Verify caller is authenticated admin
@@ -34,29 +47,34 @@ serve(async (req) => {
       .eq('email', user.email)
       .single()
 
-    if (!callerRole || !['super_admin', 'admin'].includes(callerRole.role)) {
+    const callerRoleValue = String(callerRole?.role || '').toLowerCase()
+    if (!callerRole || !['super_admin', 'superadmin', 'admin'].includes(callerRoleValue)) {
       throw new Error('Forbidden: requires admin or super_admin role')
     }
 
     const { email, password, action } = await req.json()
+    const normalizedEmail = String(email || '').trim().toLowerCase()
 
-    if (!email || !password) {
+    if (!normalizedEmail || !password) {
       throw new Error('Missing required fields: email, password')
     }
 
     // Action: create — create new auth user with email_confirm: true
     if (action === 'create') {
       const { data, error } = await supabaseAdmin.auth.admin.createUser({
-        email,
+        email: normalizedEmail,
         password,
         email_confirm: true,
       })
-      if (error) throw error
+      if (error) {
+        const message = (error.message || '').toLowerCase()
+        if (message.includes('checking email') || message.includes('already') || message.includes('duplicate')) {
+          throw new Error(`อีเมลนี้มีอยู่แล้วหรือระบบตรวจสอบอีเมลไม่ผ่าน: ${normalizedEmail}`)
+        }
+        throw new Error(`สร้าง Auth user ไม่สำเร็จ: ${error.message}`)
+      }
 
-      return new Response(
-        JSON.stringify({ success: true, user_id: data.user.id }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
+      return jsonResponse({ success: true, user_id: data.user.id })
     }
 
     // Action: update — change password for existing user
@@ -65,30 +83,21 @@ serve(async (req) => {
       const { data: { users }, error: listErr } = await supabaseAdmin.auth.admin.listUsers()
       if (listErr) throw listErr
 
-      const targetUser = users.find((u: any) => u.email === email)
-      if (!targetUser) throw new Error(`User not found: ${email}`)
+      const targetUser = users.find((u: any) => String(u.email || '').toLowerCase() === normalizedEmail)
+      if (!targetUser) throw new Error(`User not found: ${normalizedEmail}`)
 
       const { error } = await supabaseAdmin.auth.admin.updateUserById(
         targetUser.id,
         { password }
       )
-      if (error) throw error
+      if (error) throw new Error(`เปลี่ยนรหัสผ่านไม่สำเร็จ: ${error.message}`)
 
-      return new Response(
-        JSON.stringify({ success: true }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
+      return jsonResponse({ success: true })
     }
 
     throw new Error(`Invalid action: ${action}. Use 'create' or 'update'.`)
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
-    return new Response(
-      JSON.stringify({ error: message }),
-      {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      }
-    )
+    return jsonResponse({ error: message }, 400)
   }
 })

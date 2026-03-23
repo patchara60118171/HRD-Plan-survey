@@ -47,7 +47,6 @@
 
     <div class="nav-group">วิเคราะห์ข้อมูล</div>
     <div class="nav-item" onclick="go('ch1-summary',this)"><span class="ni">📊</span> สรุปภาพรวม Ch1</div>
-    <div class="nav-item" onclick="go('an-ch1',this)"><span class="ni">📈</span> วิเคราะห์ผล Ch1</div>
     <div class="nav-item" onclick="go('an-wb',this)"><span class="ni">🧠</span> วิเคราะห์ Wellbeing</div>
     <div class="nav-item" onclick="go('compare',this)"><span class="ni">⚖️</span> เปรียบเทียบองค์กร</div>
     <div class="nav-item" onclick="go('export',this)"><span class="ni">📤</span> Export รายงาน</div>
@@ -105,8 +104,8 @@
 
       <div style="display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:14px">
         <div class="card">
-          <div class="card-head"><h3>📊 ความคืบหน้าการตอบ Wellbeing Survey (รายวัน)</h3></div>
-          <div class="card-body"><div class="chart-ph" style="height:150px"><div class="cph-icon">📈</div><div>Bar Chart — จำนวนผู้ตอบสะสมรายวัน (Chart.js)</div></div></div>
+          <div class="card-head"><h3>📊 ความคืบหน้าการตอบ Wellbeing Survey (รายวัน)</h3><span class="chart-range-label" id="chart-range-label"></span></div>
+          <div class="card-body" style="padding:14px 18px 12px"><div id="wb-daily-chart" class="chart-ph" style="height:200px"><div class="cph-icon">📈</div><div>กำลังโหลดข้อมูล...</div></div></div>
         </div>
         <div class="card">
           <div class="card-head"><h3>🏛️ องค์กรตามกระทรวง</h3></div>
@@ -729,7 +728,7 @@
         </div>
         <div class="tbl-wrap">
           <table>
-            <thead><tr><th>องค์กร</th><th>ฟอร์ม</th><th>ลิงก์</th><th>ผู้ตอบ</th><th>สถานะ</th><th>หมดอายุ</th><th>จัดการ</th></tr></thead>
+            <thead><tr><th>องค์กร</th><th>ฟอร์ม</th><th>ลิงก์</th><th>ผู้ตอบ</th><th>สถานะ</th><th>จัดการ</th></tr></thead>
             <tbody id="links-tbody"></tbody>
           </table>
         </div>
@@ -757,7 +756,6 @@
               <option>สำนักงานสภาพัฒนาการเศรษฐกิจและสังคมแห่งชาติ</option>
             </select>
           </div>
-          <div class="fg" style="margin:0"><label>วันหมดอายุลิงก์ <span id="create-link-expires-be" style="font-size:11px;color:var(--A);font-weight:600"></span></label><input type="date" id="create-link-expires" value="2026-04-30" oninput="document.getElementById('create-link-expires-be').textContent=isoToBuddhistDisplay(this.value)"></div>
         </div>
         <div style="margin-top:12px;display:flex;gap:8px;align-items:center">
           <button class="btn b-solid" style="padding:8px 16px" onclick="createNewLink()">🔗 สร้างลิงก์</button>
@@ -1141,14 +1139,9 @@ function downloadWorkbook(fileName, sheetName, rows) {
 
 /* go, st, swb → exclusively in admin/js/services/nav.js (removed duplicate) */
 
-/* requireSession, loadBackend, summarizeOrgs, renderChrome
-   → now exclusively in admin/js/services/auth.js + data.js
-   (removed from inline to avoid stale override; data.js uses
-    admin_user_roles_public VIEW + scopeRowsForCurrentUser) */
-
 function renderDashboard(summary) {
   const dashboard = document.getElementById('page-dashboard');
-  const orgCount = ORG_NAMES.length;
+  const orgCount = summary.length;
   const submittedWb = state.surveyRows.filter((row) => !row.is_draft);
   const respondedCh1 = summary.filter((org) => org.ch1Count > 0).length;
   const welcome = dashboard.querySelector('.welcome');
@@ -1202,7 +1195,7 @@ function renderDashboard(summary) {
 
 function renderProgress(summary) {
   const page = document.getElementById('page-progress');
-  const orgCount = ORG_NAMES.length;
+  const orgCount = summary.length;
   const respondedCh1 = summary.filter((org) => org.ch1Count > 0).length;
   page.querySelector('.page-sub').textContent = `ติดตามความคืบหน้าทุกองค์กร · ส่งครบ ${respondedCh1}/${orgCount} (${fmtNum((respondedCh1 / Math.max(orgCount, 1)) * 100, 1)}%)`;
   page.querySelector('.info.yellow').textContent = `⚠️ มี ${orgCount - respondedCh1} องค์กรที่ยังไม่ส่ง Ch1 ครบ — หน้านี้ผูกกับข้อมูลจริงจาก hrd_ch1_responses แล้ว`;
@@ -1581,7 +1574,7 @@ function renderWellbeingControl(summary) {
   }
   if (actions[2]) {
     actions[2].textContent = '🗂️ Raw Data ครบทุกข้อ';
-    actions[2].onclick = () => { window.location.href = 'admin-wb-rawdata.html'; };
+    actions[2].onclick = () => { window.location.href = '/admin-wb-rawdata'; };
   }
 }
 
@@ -1628,38 +1621,63 @@ function renderUsers() {
 }
 
 function buildLinkUrl(org) {
-  const code = org.org_code || org.code || encodeURIComponent(org.name);
-  return `${SURVEY_BASE_URL}/index.html?org=${code}`;
+  const code = String(org.org_code || org.code || '').toLowerCase();
+  return `${SURVEY_BASE_URL}/?org=${code}`;
 }
 
 function renderLinks(summary) {
   const page = document.getElementById('page-links');
   const tbody = document.getElementById('links-tbody') || page.querySelector('tbody');
-  const links = state.linkRows.length ? state.linkRows : getOrgCatalog().map((org) => ({ org_id: org.id, full_url: buildLinkUrl(org), is_active: true }));
+  const seedMap = new Map(WELLBEING_LINK_MAP.map((item) => [item.code, {
+    id: item.code,
+    org_id: null,
+    org_code: item.code,
+    org_name_th: item.organization,
+    organization: item.organization,
+    full_url: buildLinkUrl({ org_code: item.code }),
+    is_active: true,
+    created_at: null,
+    short_label: item.label,
+    short_thai: item.shortThai,
+  }]));
+
+  const dbRows = state.linkRows
+    .map((row) => {
+      const orgProfile = state.orgProfiles.find((o) => o.id === row.org_id);
+      const orgName = orgProfile?.org_name_th || row.org_name_th || row.organization || '';
+      const orgCode = String(row.org_code || orgProfile?.org_code || '').toLowerCase();
+      return {
+        ...row,
+        org_name_th: orgName,
+        organization: orgName,
+        org_code: orgCode,
+        full_url: row.full_url || row.form_url || row.url || (orgCode ? buildLinkUrl({ org_code: orgCode }) : ''),
+      };
+    })
+    .filter((row) => seedMap.has(row.org_code));
+
+  const merged = new Map(seedMap);
+  dbRows.forEach((row) => merged.set(row.org_code, { ...merged.get(row.org_code), ...row }));
+  const links = WELLBEING_LINK_MAP.map((item) => merged.get(item.code)).filter(Boolean);
 
   function getFormType(url) {
     if (!url) return '—';
-    if (url.includes('ch1.html')) return '<span style="font-size:11px;background:var(--PL);color:var(--P);padding:2px 8px;border-radius:99px;font-weight:600">📝 Ch1</span>';
-    return '<span style="font-size:11px;background:var(--AL);color:var(--A);padding:2px 8px;border-radius:99px;font-weight:600">💚 Wellbeing</span>';
+    return '<span style="font-size:11px;background:var(--AL);color:var(--A);padding:2px 8px;border-radius:99px;font-weight:600">💚 Wellbeing Survey</span>';
   }
 
   tbody.innerHTML = links.map((row) => {
-    const orgProfile = state.orgProfiles.find((o) => o.id === row.org_id);
-    const organization = orgProfile?.org_name_th || row.org_name_th || row.organization || '—';
+    const organization = row.org_name_th || row.organization || '—';
     const summaryRow = summary.find((item) => item.name === organization);
-    const url = row.full_url || row.form_url || row.url || buildLinkUrl(orgProfile || { name: organization });
+    const url = row.full_url || buildLinkUrl({ org_code: row.org_code });
     const active = row.is_active !== false;
     const formType = getFormType(url);
-    const respondents = url.includes('ch1.html')
-      ? fmtNum(summaryRow?.ch1Count || 0)
-      : fmtNum(summaryRow?.wellbeingSubmitted || 0);
-    return `<tr data-org="${esc(organization)}" data-form="${url.includes('ch1.html') ? 'Ch1' : 'Wellbeing'}" data-status="${active ? 'เปิดอยู่' : 'ปิด'}">
+    const respondents = fmtNum(summaryRow?.wellbeingSubmitted || 0);
+    return `<tr data-org="${esc(organization)}" data-form="Wellbeing" data-status="${active ? 'เปิดอยู่' : 'ปิด'}">
       <td>${esc(organization)}</td>
       <td>${formType}</td>
       <td><code style="font-size:10.5px;background:var(--bg);padding:3px 6px;border-radius:4px;color:var(--P)">${esc(url)}</code></td>
       <td>${respondents}</td>
       <td><span class="badge ${active ? 'bg' : 'bx'}">${active ? 'เปิดอยู่' : 'ปิด'}</span></td>
-      <td>${fmtDate(row.created_at)}</td>
       <td class="td-act">
         <button class="btn b-gray" onclick="showQRModal('${esc(url)}')">QR</button>
         <button class="btn b-blue" onclick="navigator.clipboard.writeText('${esc(url)}').then(()=>showToast('คัดลอกแล้ว ✅'))">Copy</button>
@@ -1670,13 +1688,13 @@ function renderLinks(summary) {
 
   const createOrgSelect = document.getElementById('create-link-org');
   if (createOrgSelect) {
-    createOrgSelect.innerHTML = `<option value="">— เลือก —</option>${ORG_NAMES.map((name) => `<option>${esc(name)}</option>`).join('')}`;
+    createOrgSelect.innerHTML = `<option value="">— เลือก —</option>${WELLBEING_LINK_MAP.map((item) => `<option>${esc(item.organization)}</option>`).join('')}`;
   }
   // Populate org filter
   const orgFilter = document.getElementById('links-org-filter');
   if (orgFilter) {
     const cur = orgFilter.value;
-    orgFilter.innerHTML = `<option value="">ทุกองค์กร</option>${ORG_NAMES.map((n) => `<option${n===cur?' selected':''}>${esc(n)}</option>`).join('')}`;
+    orgFilter.innerHTML = `<option value="">ทุกองค์กร</option>${WELLBEING_LINK_MAP.map((item) => item.organization).map((n) => `<option${n===cur?' selected':''}>${esc(n)}</option>`).join('')}`;
   }
 }
 
@@ -2615,7 +2633,7 @@ async function init() {
 document.addEventListener('DOMContentLoaded', () => {
   init();
   // init Buddhist Era labels on date inputs
-  ['deadline-ch1','deadline-wb','viewer-expires','create-link-expires'].forEach(id => {
+  ['deadline-ch1','deadline-wb','viewer-expires'].forEach(id => {
     const el = document.getElementById(id);
     const labelEl = document.getElementById(id + '-be');
     if (el && labelEl) labelEl.textContent = isoToBuddhistDisplay(el.value);
@@ -3429,7 +3447,6 @@ function exportOrgHrCredentialsCsv() {
 async function createNewLink() {
   const orgName = document.getElementById('create-link-org')?.value;
   const form = document.getElementById('create-link-form')?.value || 'wb';
-  const expires = document.getElementById('create-link-expires')?.value || null;
   const msg = document.getElementById('create-link-msg');
   if (!orgName) { if (msg) { msg.style.color = 'var(--D)'; msg.textContent = 'กรุณาเลือกองค์กร'; } return; }
   const orgProfile = state.orgProfiles.find((o) => o.org_name_th === orgName) || ORG_LOOKUP.get(orgName);

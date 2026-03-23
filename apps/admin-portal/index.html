@@ -2379,7 +2379,7 @@ function renderWellbeingOrg(summary) {
 }
 
 function openWbRaw(orgName) {
-  window.location.href = `admin-wb-rawdata.html?org=${encodeURIComponent(orgName)}`;
+  window.location.href = `/admin-wb-rawdata?org=${encodeURIComponent(orgName)}`;
 }
 
 function renderWellbeingRaw() {
@@ -2430,7 +2430,7 @@ function renderWellbeingRaw() {
   document.getElementById('wb-prev').onclick = () => { state.rawPage -= 1; renderRawTable(); };
   document.getElementById('wb-next').onclick = () => { state.rawPage += 1; renderRawTable(); };
   document.getElementById('wb-raw-export').onclick = exportRawTable;
-  document.getElementById('wb-full-raw').onclick = () => { window.location.href = 'admin-wb-rawdata.html'; };
+  document.getElementById('wb-full-raw').onclick = () => { window.location.href = '/admin-wb-rawdata'; };
 
   applyRawFilters();
 }

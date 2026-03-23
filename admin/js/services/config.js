@@ -6,7 +6,7 @@ const SURVEY_BASE_URL = PROJECT_SSOT?.constants?.surveyBaseUrl || 'https://nidaw
 const LOCKED_SUPERADMIN_EMAILS = PROJECT_SSOT?.constants?.lockedSuperadminEmails || ['admin@gmail.com'];
 const ORG_HR_EMAIL_DOMAIN = PROJECT_SSOT?.constants?.orgHrEmailDomain || '@wellbeing.go.th';
 
-const titles = {
+ const titles = {
   dashboard:['Dashboard ภาพรวม','/ ภาพรวม'],
   progress:['สถานะการส่งข้อมูล','/ ติดตามความคืบหน้า'],
   timeline:['Timeline โครงการ','/ ภาพรวม'],
@@ -14,7 +14,6 @@ const titles = {
   'form-ch1':['ฟอร์ม Ch1','/ จัดการข้อมูล'],
   'form-wb':['Wellbeing Survey','/ จัดการข้อมูล'],
   'ch1-summary':['สรุปภาพรวม Ch1','/ วิเคราะห์ข้อมูล'],
-  'an-ch1':['วิเคราะห์ผล Ch1','/ วิเคราะห์'],
   'an-wb':['วิเคราะห์ Wellbeing','/ วิเคราะห์'],
   compare:['เปรียบเทียบองค์กร','/ วิเคราะห์'],
   export:['Export รายงาน','/ วิเคราะห์'],

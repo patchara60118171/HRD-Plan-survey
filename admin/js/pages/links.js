@@ -16,21 +16,22 @@
  */
 
  const WELLBEING_LINK_MAP = [
-  { code: 'nesdc', label: 'NESDC', organization: 'สำนักงานสภาพัฒนาการเศรษฐกิจและสังคมแห่งชาติ' },
-  { code: 'tpso', label: 'TPSO', organization: 'สำนักงานนโยบายและยุทธศาสตร์การค้า' },
-  { code: 'dss', label: 'DSS', organization: 'กรมวิทยาศาสตร์บริการ' },
-  { code: 'dhss', label: 'DHSS', organization: 'กรมสนับสนุนบริการสุขภาพ' },
-  { code: 'tmd', label: 'TMD', organization: 'กรมอุตุนิยมวิทยา' },
-  { code: 'dcp', label: 'DCP', organization: 'กรมส่งเสริมวัฒนธรรม' },
-  { code: 'dop', label: 'DOP', organization: 'กรมคุมประพฤติ' },
-  { code: 'mots', label: 'MOTS', organization: 'สำนักงานปลัดกระทรวงการท่องเที่ยวและกีฬา' },
-  { code: 'dmh', label: 'DMH', organization: 'กรมสุขภาพจิต' },
-  { code: 'onep', label: 'ONEP', organization: 'สำนักงานนโยบายและแผนทรัพยากรธรรมชาติและสิ่งแวดล้อม' },
-  { code: 'nrct', label: 'NRCT', organization: 'สำนักงานการวิจัยแห่งชาติ' },
-  { code: 'acfs', label: 'ACFS', organization: 'สำนักงานมาตรฐานสินค้าเกษตรและอาหารแห่งชาติ' },
-  { code: 'opdc', label: 'OPDC', organization: 'สำนักงานคณะกรรมการพัฒนาระบบราชการ' },
-  { code: 'rid', label: 'RID', organization: 'กรมชลประทาน' },
-  { code: 'dcy', label: 'DCY', organization: 'กรมกิจการเด็กและเยาวชน' },
+  { code: 'nesdc', label: 'NESDC', shortThai: 'สศช.', organization: 'สำนักงานสภาพัฒนาการเศรษฐกิจและสังคมแห่งชาติ' },
+  { code: 'tpso', label: 'TPSO', shortThai: 'สนค.', organization: 'สำนักงานนโยบายและยุทธศาสตร์การค้า' },
+  { code: 'dss', label: 'DSS', shortThai: 'วศ.', organization: 'กรมวิทยาศาสตร์บริการ' },
+  { code: 'dhss', label: 'DHSS', shortThai: 'สบส.', organization: 'กรมสนับสนุนบริการสุขภาพ' },
+  { code: 'tmd', label: 'TMD', shortThai: 'อต.', organization: 'กรมอุตุนิยมวิทยา' },
+  { code: 'dcp', label: 'DCP', shortThai: 'สวธ.', organization: 'กรมส่งเสริมวัฒนธรรม' },
+  { code: 'dop', label: 'DOP', shortThai: 'คป.', organization: 'กรมคุมประพฤติ' },
+  { code: 'mots', label: 'MOTS', shortThai: 'สป.กก.', organization: 'สำนักงานปลัดกระทรวงการท่องเที่ยวและกีฬา' },
+  { code: 'dmh', label: 'DMH', shortThai: 'สจ.', organization: 'กรมสุขภาพจิต' },
+  { code: 'onep', label: 'ONEP', shortThai: 'สผ.', organization: 'สำนักงานนโยบายและแผนทรัพยากรธรรมชาติและสิ่งแวดล้อม' },
+  { code: 'nrct', label: 'NRCT', shortThai: 'วช.', organization: 'สำนักงานการวิจัยแห่งชาติ' },
+  { code: 'acfs', label: 'ACFS', shortThai: 'มกอช.', organization: 'สำนักงานมาตรฐานสินค้าเกษตรและอาหารแห่งชาติ' },
+  { code: 'opdc', label: 'OPDC', shortThai: 'สำนักงาน ก.พ.ร.', organization: 'สำนักงานคณะกรรมการพัฒนาระบบราชการ' },
+  { code: 'rid', label: 'RID', shortThai: 'ชป.', organization: 'กรมชลประทาน' },
+  { code: 'dcy', label: 'DCY', shortThai: 'ดย.', organization: 'กรมกิจการเด็กและเยาวชน' },
+  { code: 'test-org', label: 'test', shortThai: 'ทดสอบ', organization: 'องค์กรทดสอบระบบ' },
  ];
 
 // ─── Build Link URL ──────────────────────────────────────────────────────────
@@ -103,7 +104,6 @@ function renderLinks(summary) {
       <td><code style="font-size:10.5px;background:var(--bg);padding:3px 6px;border-radius:4px;color:var(--P)">${esc(url)}</code></td>
       <td>${respondents}</td>
       <td><span class="badge ${active ? 'bg' : 'bx'}">${active ? 'เปิดอยู่' : 'ปิด'}</span></td>
-      <td>${fmtDate(row.created_at)}</td>
       <td class="td-act">
         <button class="btn b-gray" onclick="showQRModal('${esc(url)}')">QR</button>
         <button class="btn b-blue" onclick="navigator.clipboard.writeText('${esc(url)}').then(()=>showToast('คัดลอกแล้ว ✅'))">Copy</button>
@@ -342,7 +342,6 @@ async function toggleLink(id, orgName, newActive) {
 
 async function createNewLink() {
   const orgName = document.getElementById('create-link-org')?.value;
-  const expires = document.getElementById('create-link-expires')?.value || null;
   const msg = document.getElementById('create-link-msg');
   if (!orgName) { if (msg) { msg.style.color = 'var(--D)'; msg.textContent = 'กรุณาเลือกองค์กร'; } return; }
   const orgProfile = state.orgProfiles.find((o) => o.org_name_th === orgName) || ORG_LOOKUP.get(orgName);

@@ -32,6 +32,10 @@
         {
             "source": "/admin",
             "destination": "/admin.html"
+        },
+        {
+            "source": "/admin-wb-rawdata",
+            "destination": "/admin-wb-rawdata.html"
         }
     ],
     "headers": [

@@ -33,19 +33,79 @@ function renderDashboard(summary) {
   kpis[3].querySelector('.kpi-val').textContent = fmtNum(state.userRows.filter((row) => row.is_active !== false).length);
   kpis[3].querySelector('.kpi-sub').textContent = `${fmtNum(state.userRows.filter((row) => row.role === 'viewer').length)} Viewer · ${fmtNum(state.userRows.filter((row) => row.role !== 'viewer').length)} Admin`;
 
-  const chartPlaceholder = dashboard.querySelector('.chart-ph');
+  const chartEl = document.getElementById('wb-daily-chart');
+  const rangeLabel = document.getElementById('chart-range-label');
   const perDay = {};
   submittedWb.forEach((row) => {
     const key = String(getRowDate(row) || '').slice(0, 10);
     if (!key) return;
     perDay[key] = (perDay[key] || 0) + 1;
   });
-  const dailyRows = Object.entries(perDay).sort((a, b) => a[0].localeCompare(b[0])).slice(-7);
-  chartPlaceholder.innerHTML = dailyRows.length
-    ? `<div style="width:100%;display:flex;flex-direction:column;gap:8px">${dailyRows.map(([day, count]) =>
-        `<div><div style="display:flex;justify-content:space-between;font-size:11.5px;color:var(--tx2);margin-bottom:2px"><span>${fmtDate(day)}</span><span>${fmtNum(count)} คน</span></div><div style="height:7px;background:var(--bg2);border-radius:99px"><div style="width:${Math.max(8, (count / Math.max(...dailyRows.map((e) => e[1]), 1)) * 100)}%;height:100%;background:#00A86B;border-radius:99px"></div></div></div>`
-      ).join('')}</div>`
-    : '<div class="cph-icon">📈</div><div>ยังไม่มีข้อมูล Wellbeing ที่ submit แล้ว</div>';
+  const dailyRows = Object.entries(perDay).sort((a, b) => a[0].localeCompare(b[0])).slice(-14);
+
+  if (!dailyRows.length) {
+    chartEl.innerHTML = '<div class="cph-icon">📈</div><div>ยังไม่มีข้อมูล Wellbeing ที่ submit แล้ว</div>';
+  } else {
+    const maxCount = Math.max(...dailyRows.map(e => e[1]), 1);
+    const totalPeriod = dailyRows.reduce((s, e) => s + e[1], 0);
+    const avgPerDay = (totalPeriod / dailyRows.length).toFixed(1);
+    const peakDay = dailyRows.reduce((a, b) => b[1] > a[1] ? b : a);
+    if (rangeLabel) rangeLabel.textContent = `${fmtDate(dailyRows[0][0])} — ${fmtDate(dailyRows[dailyRows.length - 1][0])}`;
+
+    // Build cumulative
+    let cum = 0;
+    const cumArr = dailyRows.map(([, c]) => { cum += c; return cum; });
+    const cumMax = cumArr[cumArr.length - 1] || 1;
+
+    // Bar colors — gradient feel via hsl
+    const barColor = (count) => {
+      const intensity = 0.3 + 0.7 * (count / maxCount);
+      return `rgba(0,168,107,${intensity.toFixed(2)})`;
+    };
+
+    const thaiDay = (dateStr) => {
+      const d = new Date(dateStr);
+      const days = ['อา','จ','อ','พ','พฤ','ศ','ส'];
+      return days[d.getDay()] || '';
+    };
+    const shortDate = (dateStr) => {
+      const d = new Date(dateStr);
+      return `${d.getDate()}/${d.getMonth() + 1}`;
+    };
+
+    chartEl.innerHTML = `<div class="daily-chart-wrap">
+      <div class="daily-chart-summary">
+        <div class="dcs-item"><div class="dcs-dot" style="background:#00A86B"></div><div><div class="dcs-val">${fmtNum(totalPeriod)}</div><div>ตอบช่วงนี้</div></div></div>
+        <div class="dcs-item"><div class="dcs-dot" style="background:#0F4C81"></div><div><div class="dcs-val">${avgPerDay}</div><div>เฉลี่ย/วัน</div></div></div>
+        <div class="dcs-item"><div class="dcs-dot" style="background:#C08F2A"></div><div><div class="dcs-val">${fmtNum(peakDay[1])}</div><div>สูงสุด (${shortDate(peakDay[0])})</div></div></div>
+        <div class="dcs-item"><div class="dcs-dot" style="background:#8896A5"></div><div><div class="dcs-val">${fmtNum(submittedWb.length)}</div><div>สะสมทั้งหมด</div></div></div>
+      </div>
+      <div class="daily-bars">
+        ${dailyRows.map(([day, count], i) => {
+          const pct = Math.max(3, (count / maxCount) * 100);
+          const cumPct = (cumArr[i] / cumMax) * 100;
+          const isToday = day === new Date().toISOString().slice(0, 10);
+          const borderStyle = isToday ? 'box-shadow:0 0 0 2px #0F4C81,0 0 0 4px rgba(15,76,129,.15);' : '';
+          return `<div class="daily-bar-col">
+            <div class="daily-bar-val">${fmtNum(count)}</div>
+            <div class="daily-bar-inner" style="height:${pct}%;background:${barColor(count)};${borderStyle}" title="${fmtDate(day)}: ${fmtNum(count)} คน">
+              <div class="daily-cum-line" style="top:${Math.max(0, 100 - cumPct)}%"></div>
+            </div>
+            <div class="daily-bar-date"><div class="dbd-day">${thaiDay(day)}</div>${shortDate(day)}</div>
+          </div>`;
+        }).join('')}
+      </div>
+      <div class="daily-chart-footer">
+        <div class="dcf-legend">
+          <div class="dcf-leg"><div class="dcf-dot" style="background:#00A86B"></div>จำนวนผู้ตอบ/วัน</div>
+          <div class="dcf-leg"><div class="dcf-dot" style="background:#0F4C81;border-radius:50%"></div>สะสม</div>
+        </div>
+        <div>แสดง ${dailyRows.length} วันล่าสุด</div>
+      </div>
+    </div>`;
+    chartEl.style.height = 'auto';
+    chartEl.style.background = 'transparent';
+  }
 
   const donutCard = dashboard.querySelectorAll('.card')[1];
   const ministryCounts = getOrgCatalog().reduce((acc, org) => {
