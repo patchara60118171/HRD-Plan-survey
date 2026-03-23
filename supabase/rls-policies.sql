@@ -32,12 +32,6 @@ WITH CHECK (
     AND btrim(email) <> ''
     AND email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'
     AND pg_column_size(raw_responses) < 1048576
-    AND NOT EXISTS (
-        SELECT 1 FROM survey_responses sr
-        WHERE lower(sr.email) = lower(survey_responses.email)
-          AND coalesce(sr.is_draft, false) = false
-          AND coalesce(sr.submitted_at, sr.timestamp) > NOW() - INTERVAL '1 hour'
-    )
 );
 
 -- 3. Update ได้สำหรับ row ล่าสุด/ draft เพื่อรองรับ upsert จาก public survey

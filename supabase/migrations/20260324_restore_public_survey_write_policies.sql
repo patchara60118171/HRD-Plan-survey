@@ -4,6 +4,7 @@
 -- Purpose:
 --   1) Re-enable public INSERT for wellbeing form submissions
 --   2) Allow recent-row UPDATE so public upsert(email) can resolve conflicts
+--   3) Avoid self-select inside INSERT policy because anon cannot read survey_responses
 -- Notes:
 --   - This migration does not change table structure.
 --   - Existing unique constraint/index for onConflict(email) must remain in place.
@@ -28,13 +29,6 @@ WITH CHECK (
     AND btrim(email) <> ''
     AND email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'
     AND pg_column_size(raw_responses) < 1048576
-    AND NOT EXISTS (
-        SELECT 1
-        FROM public.survey_responses sr
-        WHERE lower(sr.email) = lower(survey_responses.email)
-          AND coalesce(sr.is_draft, false) = false
-          AND coalesce(sr.submitted_at, sr.timestamp) > now() - interval '1 hour'
-    )
 );
 
 CREATE POLICY "survey_update_recent"
@@ -53,7 +47,7 @@ WITH CHECK (
 );
 
 COMMENT ON POLICY "survey_insert_anon" ON public.survey_responses IS
-'Allow public wellbeing submissions with email validation, payload limit, and 1-hour duplicate protection.';
+'Allow public wellbeing submissions with email validation and payload limit. Duplicate handling is delegated to unique index + upsert.';
 
 COMMENT ON POLICY "survey_update_recent" ON public.survey_responses IS
 'Allow public upsert conflict resolution for recent rows and drafts.';

@@ -571,24 +571,36 @@ async function saveToSupabase(email, responses, isDraft = false) {
     if (!supabaseClient) return 'error:supabase-not-ready';
 
     try {
-        const { data, error } = await supabaseClient
-            .from('survey_responses')
-            .upsert(dataToSave, {
-                onConflict: 'email',
-                ignoreDuplicates: false
-            });
+        // Prefer INSERT for public submissions. If email already exists, fallback to UPDATE.
+        let writeError = null;
 
-        if (error) {
-            console.error('Supabase save error:', error);
+        const insertRes = await supabaseClient
+            .from('survey_responses')
+            .insert(dataToSave);
+
+        if (insertRes.error) {
+            if (insertRes.error.code === '23505') {
+                const updateRes = await supabaseClient
+                    .from('survey_responses')
+                    .update(dataToSave)
+                    .eq('email', email);
+                writeError = updateRes.error;
+            } else {
+                writeError = insertRes.error;
+            }
+        }
+
+        if (writeError) {
+            console.error('Supabase save error:', writeError);
             // Fallback to offline queue on network error
-            if (error.message?.includes('fetch') || error.message?.includes('network')) {
+            if (writeError.message?.includes('fetch') || writeError.message?.includes('network')) {
                 try {
                     await saveToOfflineQueue('wellbeing', dataToSave);
                     return 'offline';
                 } catch { /* ignore */ }
             }
-            if (error.code === '42501') return 'error:permission-denied';
-            return `error:${error.message || 'save-failed'}`;
+            if (writeError.code === '42501') return 'error:permission-denied';
+            return `error:${writeError.message || 'save-failed'}`;
         }
 
         console.log('Saved to Supabase:', isDraft ? 'draft' : 'submitted');
