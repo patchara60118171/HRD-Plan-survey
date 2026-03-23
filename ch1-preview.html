@@ -6,40 +6,60 @@
 <title>Preview CH1 — HRD Plan Survey</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Sarabun',sans-serif;background:#f5f7fb;color:#1e293b;font-size:15px}
-.topbar{background:#1e3a5f;color:#fff;padding:14px 24px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100}
-.topbar h1{font-size:17px;font-weight:600}
-.org-badge{background:rgba(255,255,255,.15);border-radius:6px;padding:3px 10px;font-size:13px}
-.status-badge{border-radius:6px;padding:3px 10px;font-size:12px;font-weight:600}
+body{font-family:'IBM Plex Sans Thai Looped','Sarabun',sans-serif;background:#F8FAFC;color:#1e293b;font-size:15px}
+.topbar{background:#fff;color:#1e293b;padding:14px 24px;display:flex;align-items:flex-start;gap:16px;position:sticky;top:0;z-index:100;border-bottom:1px solid #e2e8f0;box-shadow:0 1px 2px rgba(15,23,42,.04)}
+.topbar-main{display:flex;flex-direction:column;gap:8px;min-width:0}
+.topbar h1{font-size:17px;font-weight:700;line-height:1.35;color:#0F4C81}
+.topbar-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.topbar .org-badge{background:#E8F1FB;color:#0F4C81;border-radius:999px;padding:5px 12px;font-size:13px;border:1px solid #cfe0f5}
+.topbar .status-badge{border-radius:999px;padding:5px 12px;font-size:12px;font-weight:600}
 .status-draft{background:#fef3c7;color:#92400e}
 .status-submitted{background:#dcfce7;color:#166534}
 .status-reopened{background:#fce7f3;color:#9d174d}
-.topbar-right{margin-left:auto;display:flex;gap:8px;align-items:center}
-.btn{padding:7px 16px;border-radius:7px;border:none;cursor:pointer;font-size:14px;font-weight:500;transition:.15s}
-.btn-primary{background:#2563eb;color:#fff}.btn-primary:hover{background:#1d4ed8}
-.btn-secondary{background:#fff;color:#374151;border:1px solid #d1d5db}.btn-secondary:hover{background:#f9fafb}
+.topbar-right{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.btn{padding:8px 16px;border-radius:10px;border:none;cursor:pointer;font-size:13px;font-weight:600;transition:.15s}
+.btn-primary{background:#0F4C81;color:#fff}.btn-primary:hover{background:#0A3560}
+.btn-secondary{background:#fff;color:#475569;border:1px solid #d1d5db}.btn-secondary:hover{background:#f8fafc}
 .btn-green{background:#16a34a;color:#fff}.btn-green:hover{background:#15803d}
 .btn-pdf{background:#dc2626;color:#fff}.btn-pdf:hover{background:#b91c1c}
-.container{max-width:860px;margin:0 auto;padding:28px 20px 60px}
-.section-card{background:#fff;border-radius:12px;border:1px solid #e2e8f0;margin-bottom:24px}
-.section-header{background:#f8fafc;border-bottom:1px solid #e2e8f0;padding:14px 20px}
-.section-header h2{font-size:15px;font-weight:600;color:#1e3a5f}
-.section-body{padding:20px}
-.field-row{display:grid;grid-template-columns:200px 1fr;gap:10px;padding:9px 0;border-bottom:1px solid #f1f5f9;align-items:start}
-.field-row:last-child{border-bottom:none}
-.field-label{font-size:13px;color:#64748b;font-weight:500;padding-top:1px}
-.field-value{font-size:14px;color:#1e293b;font-weight:500}
+.container{max-width:768px;margin:0 auto;padding:20px 16px 60px}
+.page-shell{background:#fff;border-radius:24px;box-shadow:0 1px 3px rgba(15,23,42,.06);border:1px solid #f1f5f9;padding:24px 24px 8px}
+.section-card{margin-bottom:28px;overflow:visible;padding:0;background:transparent;border:none}
+.section-header{padding:0;margin-bottom:14px;display:block;background:transparent;border-bottom:none}
+.section-header h2{font-size:20px;font-weight:700;color:#0F4C81;line-height:1.35}
+.section-desc{font-size:13px;color:#64748b;line-height:1.7}
+.section-body{padding:0}
+.field-row{display:grid;grid-template-columns:1fr;gap:4px;margin-bottom:18px}
+.field-label{font-size:14px;font-weight:600;color:#334155;line-height:1.55}
+.field-value{font-size:14px;color:#1e293b;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:14px;padding:12px 16px;min-height:46px;line-height:1.6;word-break:break-word}
 .field-value.empty{color:#94a3b8;font-style:italic}
-.field-value.file-link a{color:#2563eb;text-decoration:none}
-.field-value.file-link a:hover{text-decoration:underline}
-.turnover-stack{display:grid;gap:22px}
-.turnover-block{display:grid;gap:18px}
-.turnover-item{display:grid;gap:8px}
-.turnover-label{display:inline-flex;align-items:center;width:max-content;background:#2f67d8;color:#fff;font-size:13px;font-weight:700;line-height:1;padding:6px 8px;border-radius:0}
-.turnover-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px}
-.turnover-value{min-height:46px;display:flex;align-items:center;padding:10px 14px;border:1px solid #cfd8e6;border-radius:10px;background:#fff;font-size:15px;font-weight:500;color:#1e293b}
-.turnover-value.empty{color:#94a3b8;font-style:italic}
-.turnover-unit{display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:30px;background:#2f67d8;color:#fff;font-size:12px;font-weight:700;padding:0 8px;border-radius:0}
+.compact-panel{background:#F8FAFC;border-radius:16px;padding:16px;border:1px solid #eef2f7;margin-bottom:16px}
+.compact-panel-title{font-size:14px;font-weight:700;color:#334155;margin-bottom:12px}
+.compact-subtitle{font-size:12px;font-weight:600;color:#475569;margin:0 0 8px}
+.compact-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.compact-grid.g5{grid-template-columns:repeat(5,minmax(0,1fr))}
+.compact-grid.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.compact-field{display:grid;gap:4px}
+.compact-field label{display:block;font-size:12px;color:#64748b;line-height:1.4}
+.compact-field .cv{width:100%;border:1px solid #E2E8F0;border-radius:10px;padding:9px 10px;font-size:14px;text-align:center;background:#fff;color:#1e293b;min-height:38px}
+.compact-field .cv.empty{color:#94a3b8;font-style:italic}
+.compact-total{margin-top:8px;text-align:right;font-size:12px;color:#94a3b8}
+.compact-total strong{color:#475569}
+.compact-section{display:grid;gap:14px}
+.turnover-table-wrap{overflow-x:auto;background:#F8FAFC;border-radius:16px;padding:16px;border:1px solid #eef2f7;margin-bottom:16px}
+.turnover-table{width:100%;min-width:640px;border-collapse:separate;border-spacing:0 8px}
+.turnover-table th{font-size:13px;font-weight:700;color:#334155;padding-bottom:6px;text-align:center}
+.turnover-table th:first-child{text-align:left;width:180px}
+.turnover-table td{vertical-align:middle}
+.turnover-row-label{padding-right:12px;color:#475569;font-weight:600;font-size:14px;line-height:1.5}
+.turnover-row-label small{display:block;font-size:12px;color:#94a3b8;font-weight:400;margin-top:2px}
+.turnover-table .tv{border:1px solid #e2e8f0;border-radius:10px;padding:9px 10px;font-size:13px;text-align:center;background:#fff;min-height:38px}
+.turnover-rate-box{border:1px solid #e2e8f0;border-radius:10px;padding:9px 10px;font-size:13px;text-align:center;background:#f8fafc;color:#64748b;font-weight:600}
+.turnover-divider td{padding:0}
+.turnover-divider-line{height:1px;background:#e2e8f0}
+.fq-row{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.rank-chip{display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:12px;border:1px solid #e2e8f0;background:#fff;font-size:14px;color:#334155;margin-bottom:8px}
+.rank-num{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0}
 .meta-box{background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:16px 20px;margin-bottom:24px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
 .meta-item label{font-size:12px;color:#64748b;display:block;margin-bottom:3px}
 .meta-item .val{font-size:15px;font-weight:600;color:#1e3a5f}
@@ -49,21 +69,21 @@ body{font-family:'Sarabun',sans-serif;background:#f5f7fb;color:#1e293b;font-size
 .alert{border-radius:8px;padding:14px 18px;margin-bottom:20px;font-size:14px}
 .alert-error{background:#fee2e2;border:1px solid #fca5a5;color:#7f1d1d}
 .alert-info{background:#eff6ff;border:1px solid #93c5fd;color:#1e3a8a}
-@media(max-width:640px){.meta-box{grid-template-columns:1fr 1fr}.field-row{grid-template-columns:1fr;gap:3px}.turnover-row{grid-template-columns:1fr}.turnover-unit{justify-self:start}}
-@media print{
-  .topbar,.topbar-right,.no-print{display:none!important}
-  body{background:#fff}
-  .section-card{break-inside:avoid;border:1px solid #ccc;margin-bottom:16px}
-  .container{padding:0;max-width:100%}
-}
+@media(max-width:900px){.topbar{flex-direction:column;align-items:stretch}.topbar-right{margin-left:0;justify-content:flex-start}.container{padding:16px 12px 60px}.page-shell{padding:18px 16px 8px}}
+@media(max-width:640px){.fq-row{grid-template-columns:1fr}.meta-box{grid-template-columns:1fr 1fr}.compact-grid,.compact-grid.g5,.compact-grid.g2{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media print{.topbar,.topbar-right,.no-print{display:none!important}body{background:#fff}.page-shell{box-shadow:none;border:none}.section-card{break-inside:avoid}.container{padding:0;max-width:100%}}
 </style>
 </head>
 <body>
 
 <div class="topbar">
-  <h1>👁️ Preview CH1</h1>
-  <span class="org-badge" id="org-name-badge">กำลังโหลด...</span>
-  <span class="status-badge" id="status-badge" style="display:none"></span>
+  <div class="topbar-main">
+    <h1>👁️ Preview CH1</h1>
+    <div class="topbar-meta">
+      <span class="org-badge" id="org-name-badge">กำลังโหลด...</span>
+      <span class="status-badge" id="status-badge" style="display:none"></span>
+    </div>
+  </div>
   <div class="topbar-right no-print">
     <button class="btn btn-secondary" onclick="history.back()">← กลับ</button>
     <button class="btn btn-secondary" id="btn-edit" onclick="goEdit()" style="display:none">✏️ แก้ไข</button>
@@ -73,15 +93,18 @@ body{font-family:'Sarabun',sans-serif;background:#f5f7fb;color:#1e293b;font-size
 </div>
 
 <div class="container">
-  <div class="loading-screen" id="loading-screen">
-    <div class="spinner"></div>
-    <div>กำลังโหลดข้อมูล...</div>
+  <div class="page-shell">
+    <div class="loading-screen" id="loading-screen">
+      <div class="spinner"></div>
+      <div>กำลังโหลดข้อมูล...</div>
+    </div>
+    <div id="content-area" style="display:none"></div>
   </div>
-  <div id="content-area" style="display:none"></div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase-config.js"></script>
+<script src="js/project-ssot.js"></script>
 <script src="js/form-schema.js"></script>
 <script>
 'use strict';
@@ -92,250 +115,276 @@ const ORG_PARAM = params.get('org');
 const ID_PARAM  = params.get('id');
 let userRole = null, userOrgCode = null, responseData = null, schema = null;
 
-const WORKFORCE_LAYOUT = {
-  pos_o1: { label: 'ระดับ O1', unit: 'คน' },
-  pos_o2: { label: 'ระดับ O2', unit: 'คน' },
-  pos_o3: { label: 'ระดับ O3', unit: 'คน' },
-  pos_o4: { label: 'ระดับ O4', unit: 'คน' },
-  pos_k1: { label: 'ระดับ K1', unit: 'คน' },
-  pos_k2: { label: 'ระดับ K2', unit: 'คน' },
-  pos_k3: { label: 'ระดับ K3', unit: 'คน' },
-  pos_k4: { label: 'ระดับ K4', unit: 'คน' },
-  pos_k5: { label: 'ระดับ K5', unit: 'คน' },
-  pos_m1: { label: 'ระดับ M1', unit: 'คน' },
-  pos_m2: { label: 'ระดับ M2', unit: 'คน' },
-  pos_s1: { label: 'ระดับ S1', unit: 'คน' },
-  pos_s2: { label: 'ระดับ S2', unit: 'คน' },
-  type_official: { label: 'ข้าราชการ', unit: 'คน' },
-  type_employee: { label: 'พนักงานราชการ', unit: 'คน' },
-  type_contract: { label: 'ลูกจ้างประจำ/ชั่วคราว', unit: 'คน' },
-  type_other: { label: 'อื่นๆ', unit: 'คน' },
-  age_u30: { label: 'อายุไม่เกิน 30 ปี', unit: 'คน' },
-  age_31_40: { label: 'อายุ 31 - 40 ปี', unit: 'คน' },
-  age_41_50: { label: 'อายุ 41 - 50 ปี', unit: 'คน' },
-  age_51_60: { label: 'อายุ 51 - 60 ปี', unit: 'คน' },
+const ORG_NAME_MAP = {
+  'nesdc':'สำนักงานสภาพัฒนาการเศรษฐกิจและสังคมแห่งชาติ',
+  'tpso':'สำนักงานนโยบายและยุทธศาสตร์การค้า',
+  'dss':'กรมวิทยาศาสตร์บริการ',
+  'dhss':'กรมสนับสนุนบริการสุขภาพ','hssd':'กรมสนับสนุนบริการสุขภาพ',
+  'tmd':'กรมอุตุนิยมวิทยา','dcp':'กรมส่งเสริมวัฒนธรรม',
+  'dop':'กรมคุมประพฤติ','probation':'กรมคุมประพฤติ',
+  'mots':'สำนักงานปลัดกระทรวงการท่องเที่ยวและกีฬา','dmh':'กรมสุขภาพจิต',
+  'onep':'สำนักงานนโยบายและแผนทรัพยากรธรรมชาติและสิ่งแวดล้อม',
+  'nrct':'สำนักงานการวิจัยแห่งชาติ',
+  'acfs':'สำนักงานมาตรฐานสินค้าเกษตรและอาหารแห่งชาติ',
+  'opdc':'สำนักงานคณะกรรมการพัฒนาระบบราชการ','ocsc':'สำนักงานคณะกรรมการพัฒนาระบบราชการ',
+  'rid':'กรมชลประทาน','dcy':'กรมกิจการเด็กและเยาวชน','doh':'กองฝึกอบรม กรมทางหลวง',
+  'tst':'องค์กรทดสอบระบบ',
 };
 
-function buildWorkforcePreview() {
-  const block = document.createElement('div');
-  block.className = 'turnover-stack';
+const WF = {
+  type_official:'ข้าราชการ', type_employee:'พนักงานราชการ', type_contract:'ลูกจ้าง', type_other:'อื่น ๆ',
+  age_u30:'ไม่เกิน 30 ปี', age_31_40:'31–40 ปี', age_41_50:'41–50 ปี', age_51_60:'51–60 ปี',
+  service_u1:'ไม่เกิน 1 ปี', service_1_5:'1-5 ปี', service_6_10:'6-10 ปี', service_11_15:'11-15 ปี',
+  service_16_20:'16-20 ปี', service_21_25:'21-25 ปี', service_26_30:'26-30 ปี', service_over30:'31 ปีขึ้นไป',
+  pos_o1:'ปฏิบัติงาน (O1)', pos_o2:'ชำนาญงาน (O2)', pos_o3:'อาวุโส (O3)', pos_o4:'ทักษะพิเศษ (O4)',
+  pos_k1:'ปฏิบัติการ (K1)', pos_k2:'ชำนาญการ (K2)', pos_k3:'ชำนาญการพิเศษ (K3)', pos_k4:'เชี่ยวชาญ (K4)', pos_k5:'ทรงคุณวุฒิ (K5)',
+  pos_m1:'ระดับต้น (M1)', pos_m2:'ระดับสูง (M2)',
+  pos_s1:'ระดับต้น (S1)', pos_s2:'ระดับสูง (S2)',
+};
 
-  const availableKeys = new Set(Object.keys(responseData || {}));
-  const groups = [
-    { heading: 'ข้อมูลโครงสร้างอัตรากำลัง', fields: ['pos_o1','pos_o2','pos_o3','pos_o4','pos_k1','pos_k2','pos_k3','pos_k4','pos_k5','pos_m1','pos_m2','pos_s1','pos_s2'] },
-    { heading: 'ประเภทบุคลากร', fields: ['type_official', 'type_employee', 'type_contract', 'type_other'] },
-    { heading: 'ช่วงอายุของบุคลากร', fields: ['age_u30', 'age_31_40', 'age_41_50', 'age_51_60'] },
-  ].filter((group) => group.fields.some((fieldKey) => availableKeys.has(fieldKey)));
+function esc(s){return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function vv(k){const v=responseData?.[k];return(v!==null&&v!==undefined&&v!=='')?esc(v):null}
+function displayVal(k){const v=vv(k);return v!==null?v:'<span class="empty">—</span>'}
+function compactVal(k){const v=vv(k);return `<div class="cv${v===null?' empty':''}">${v??'—'}</div>`}
+function sumF(keys){return keys.reduce((s,k)=>s+(Number(responseData?.[k]||0)||0),0)}
 
-  groups.forEach((group) => {
-    const groupEl = document.createElement('div');
-    groupEl.className = 'turnover-block';
-
-    if (group.heading) {
-      const heading = document.createElement('div');
-      heading.className = 'turnover-label';
-      heading.textContent = group.heading;
-      groupEl.appendChild(heading);
-    }
-
-    group.fields.forEach((fieldKey) => {
-      const meta = WORKFORCE_LAYOUT[fieldKey];
-      if (!meta) return;
-      const itemEl = document.createElement('div');
-      itemEl.className = 'turnover-item';
-
-      const label = document.createElement('div');
-      label.className = 'turnover-label';
-      label.textContent = meta.label;
-      itemEl.appendChild(label);
-
-      const row = document.createElement('div');
-      row.className = 'turnover-row';
-
-      const value = document.createElement('div');
-      value.className = 'turnover-value';
-      const raw = responseData?.[fieldKey];
-      if (raw !== null && raw !== undefined && raw !== '') {
-        value.textContent = raw;
-      } else {
-        value.classList.add('empty');
-        value.textContent = '—';
-      }
-      row.appendChild(value);
-
-      const unit = document.createElement('span');
-      unit.className = 'turnover-unit';
-      unit.textContent = meta.unit;
-      row.appendChild(unit);
-
-      itemEl.appendChild(row);
-      groupEl.appendChild(itemEl);
-    });
-
-    block.appendChild(groupEl);
-  });
-
-  return block;
+function compactPanel(title,keys,gc){
+  const a=keys.filter(k=>WF[k]);if(!a.length)return '';
+  return `<div class="compact-panel"><h3 class="compact-panel-title">${title}</h3>
+    <div class="compact-grid ${gc||''}">${a.map(k=>`<div class="compact-field"><label>${WF[k]}</label>${compactVal(k)}</div>`).join('')}</div>
+    <div class="compact-total">ผลรวม: <strong>${sumF(a)}</strong> คน</div></div>`;
 }
 
-async function init() {
-  const { data: { session } } = await sb.auth.getSession();
-  if (!session) { location.href = 'org-portal.html'; return; }
+function positionPanel(){
+  const sg=[
+    {t:'ประเภททั่วไป',k:['pos_o1','pos_o2','pos_o3','pos_o4'],g:''},
+    {t:'ประเภทวิชาการ',k:['pos_k1','pos_k2','pos_k3','pos_k4','pos_k5'],g:'g5'},
+    {t:'ประเภทอำนวยการ',k:['pos_m1','pos_m2'],g:'g2'},
+    {t:'ประเภทบริหาร',k:['pos_s1','pos_s2'],g:'g2'},
+  ];
+  const all=sg.flatMap(g=>g.k);
+  if(!all.some(k=>WF[k]))return '';
+  return `<div class="compact-panel compact-section"><h3 class="compact-panel-title">จำแนกตามประเภทและระดับตำแหน่ง</h3>
+    ${sg.map(g=>{const a=g.k.filter(k=>WF[k]);if(!a.length)return '';
+      return `<h4 class="compact-subtitle">${g.t}</h4><div class="compact-grid ${g.g}">${a.map(k=>`<div class="compact-field"><label>${WF[k]}</label>${compactVal(k)}</div>`).join('')}</div>`}).join('')}
+    <div class="compact-total">ผลรวม: <strong>${sumF(all.filter(k=>WF[k]))}</strong> คน</div></div>`;
+}
 
-  const email = session.user.email;
-  const { data: roleRow } = await sb.from('admin_user_roles').select('role,org_code').eq('email', email).maybeSingle();
-  if (!roleRow) { showError('ไม่พบสิทธิ์การเข้าใช้งาน'); return; }
+function turnoverHTML(){
+  const yrs=[2564,2565,2566,2567,2568];
+  const rows=[{k:'begin',t:'จำนวนข้าราชการ',s:'ต้นปี (1 ต.ค.)'},{k:'end',t:'จำนวนข้าราชการ',s:'ปลายปี (30 ก.ย.)'},{k:'leave',t:'จำนวนข้าราชการ',s:'ลาออกและโอนย้าย'}];
+  const rate=yrs.map(y=>{const b=Number(responseData?.[`begin_${y}`]||0),e=Number(responseData?.[`end_${y}`]||0),l=Number(responseData?.[`leave_${y}`]||0),d=(b+e)/2;return d>0?((l/d)*100).toFixed(2):'-'});
+  return `<div class="turnover-table-wrap"><table class="turnover-table">
+    <thead><tr><th></th>${yrs.map(y=>`<th>${y}</th>`).join('')}</tr></thead><tbody>
+    ${rows.map(r=>`<tr><td class="turnover-row-label">${r.t}<small>${r.s}</small></td>${yrs.map(y=>`<td><div class="tv">${displayVal(`${r.k}_${y}`)}</div></td>`).join('')}</tr>`).join('')}
+    <tr class="turnover-divider"><td colspan="6"><div class="turnover-divider-line"></div></td></tr>
+    <tr><td class="turnover-row-label">ร้อยละ<small>(คำนวณอัตโนมัติ)</small></td>${rate.map(r=>`<td><div class="turnover-rate-box">${r}</div></td>`).join('')}</tr>
+  </tbody></table></div>`;
+}
 
-  userRole = roleRow.role;
-  userOrgCode = roleRow.org_code || null;
-
-  if (userRole === 'org_hr') {
-    if (!userOrgCode || (ORG_PARAM && ORG_PARAM !== userOrgCode)) {
-      showError('คุณไม่มีสิทธิ์เข้าถึงข้อมูลองค์กรนี้'); return;
-    }
-  }
-
-  const targetOrg = ORG_PARAM || userOrgCode;
-  if (!targetOrg) { showError('ไม่พบรหัสองค์กร'); return; }
-
-  try {
-    [schema, responseData] = await Promise.all([
-      FormSchema.loadFormSchema('ch1'),
-      loadResponse(targetOrg)
-    ]);
-  } catch(e) { showError('โหลดข้อมูลไม่สำเร็จ: ' + e.message); return; }
-
-  if (!responseData) { showError('ไม่พบข้อมูล CH1 สำหรับองค์กรนี้'); return; }
+async function init(){
+  const{data:{session}}=await sb.auth.getSession();
+  if(!session){location.href='org-portal.html';return}
+  const{data:roleRow}=await sb.from('admin_user_roles').select('role,org_code').eq('email',session.user.email).maybeSingle();
+  if(!roleRow){showError('ไม่พบสิทธิ์การเข้าใช้งาน');return}
+  userRole=roleRow.role;userOrgCode=roleRow.org_code||null;
+  if(userRole==='org_hr'&&(!userOrgCode||(ORG_PARAM&&ORG_PARAM!==userOrgCode))){showError('คุณไม่มีสิทธิ์เข้าถึงข้อมูลองค์กรนี้');return}
+  const targetOrg=ORG_PARAM||userOrgCode;
+  if(!targetOrg){showError('ไม่พบรหัสองค์กร');return}
+  try{[schema,responseData]=await Promise.all([FormSchema.loadFormSchema('ch1'),loadResponse(targetOrg)])}
+  catch(e){showError('โหลดข้อมูลไม่สำเร็จ: '+e.message);return}
+  if(!responseData){showError('ไม่พบข้อมูล CH1 สำหรับองค์กรนี้');return}
   renderPage(targetOrg);
 }
 
-async function loadResponse(orgCode) {
-  let q = sb.from('hrd_ch1_responses').select('*').order('created_at', { ascending: false });
-  if (ID_PARAM) q = q.eq('id', ID_PARAM);
-  else q = q.eq('org_code', orgCode).limit(1);
-  const { data } = await q.maybeSingle();
-  return data;
+async function loadResponse(orgCode){
+  let q=sb.from('hrd_ch1_responses').select('*').order('created_at',{ascending:false});
+  if(ID_PARAM)q=q.eq('id',ID_PARAM);else q=q.eq('org_code',orgCode).limit(1);
+  const{data}=await q.maybeSingle();return data;
 }
 
-function renderPage(orgCode) {
-  const status = responseData?.status || 'draft';
-  const orgName = responseData?.organization || orgCode;
+function renderPage(orgCode){
+  const status=responseData?.status||'draft';
+  const orgName=responseData?.organization||ORG_NAME_MAP[orgCode]||orgCode;
+  const fd=responseData||{};
 
-  document.getElementById('org-name-badge').textContent = orgName;
-  const sb2 = document.getElementById('status-badge');
-  sb2.style.display = '';
-  sb2.textContent = {draft:'Draft', submitted:'ส่งแล้ว', reopened:'เปิดแก้ไข'}[status] || status;
-  sb2.className = 'status-badge status-' + status;
+  document.getElementById('org-name-badge').textContent=orgName;
+  const sb2=document.getElementById('status-badge');
+  sb2.style.display='';
+  sb2.textContent={draft:'Draft',submitted:'ส่งแล้ว',reopened:'เปิดแก้ไข'}[status]||status;
+  sb2.className='status-badge status-'+status;
 
-  // Show edit button if editable
-  const canEdit = userRole === 'super_admin' || userRole === 'admin'
-    || (userRole === 'org_hr' && ['draft','reopened'].includes(status));
-  if (canEdit) document.getElementById('btn-edit').style.display = '';
+  const canEdit=userRole==='super_admin'||userRole==='admin'||(userRole==='org_hr'&&['draft','reopened'].includes(status));
+  if(canEdit)document.getElementById('btn-edit').style.display='';
 
-  const content = document.getElementById('content-area');
-  content.innerHTML = '';
+  const diseaseFields=[['diabetes','เบาหวาน'],['hypertension','ความดันโลหิตสูง'],['cardiovascular','โรคหัวใจและหลอดเลือด'],['kidney','โรคไต'],['liver','โรคตับ'],['cancer','โรคมะเร็ง'],['obesity','ภาวะอ้วน/น้ำหนักเกิน']];
+  const mentalFields=[['stress','ภาวะเครียดเรื้อรัง'],['anxiety','ภาวะวิตกกังวล'],['sleep','ปัญหาการนอนหลับ'],['burnout','ภาวะหมดไฟ (Burnout)'],['depression','ภาวะซึมเศร้า']];
+  const systems=(typeof PROJECT_SSOT!=='undefined'&&PROJECT_SSOT.ch1?.supportSystems)||[
+    {id:'mentoring_system',label:'ระบบพี่เลี้ยง (Mentoring)'},
+    {id:'job_rotation',label:'ระบบหมุนเวียนงาน (Job Rotation)'},
+    {id:'idp_system',label:'การจัดทำแผนพัฒนารายบุคคล (IDP)'},
+    {id:'career_path_system',label:'เส้นทางความก้าวหน้า (Career Path)'},
+  ];
+  const optMap={full:'มีตามแผน',partial:'มีไม่ครบตามแผน',none:'ไม่มี'};
+  const reportMap={actual:'ข้อมูลจริง',estimated:'ประมาณการ',none:'ไม่มีข้อมูล'};
+  const ergoMap={none:'ยังไม่มี',planned:'มีแผนแต่ยังไม่ดำเนินการ',in_progress:'อยู่ระหว่างดำเนินการ',done:'ดำเนินการแล้ว'};
+  const digitalSystems=[['e_doc','ระบบเอกสารอิเล็กทรอนิกส์'],['e_sign','ระบบลงนามอิเล็กทรอนิกส์'],['cloud','ระบบ Cloud'],['hr_digital','ระบบ HR Digital'],['health_db','ระบบฐานข้อมูลสุขภาพ'],['none','ไม่มีระบบดังกล่าว']];
+  const dsVal=Array.isArray(fd.digital_systems)?fd.digital_systems:[];
+  const topics=(typeof PROJECT_SSOT!=='undefined'&&PROJECT_SSOT.ch1?.strategicTopics)||[];
+  const rankColors=['#2563eb','#7c3aed','#059669'];
+  const rankBg=['#dbeafe','#ede9fe','#d1fae5'];
 
-  // Meta summary box
-  const meta = document.createElement('div');
-  meta.className = 'meta-box no-print';
-  meta.innerHTML = `
-    <div class="meta-item"><label>องค์กร</label><div class="val">${orgName}</div></div>
-    <div class="meta-item"><label>รหัสองค์กร</label><div class="val">${responseData.org_code || orgCode}</div></div>
-    <div class="meta-item"><label>สถานะ</label><div class="val">${{draft:'📝 Draft', submitted:'✅ ส่งแล้ว', reopened:'🔄 เปิดแก้ไข'}[status] || status}</div></div>
-    <div class="meta-item"><label>บุคลากรรวม</label><div class="val">${responseData.total_staff || '-'} คน</div></div>
-    <div class="meta-item"><label>วันที่อัปเดต</label><div class="val">${responseData.updated_at ? new Date(responseData.updated_at).toLocaleDateString('th-TH') : '-'}</div></div>
-    <div class="meta-item"><label>ID</label><div class="val" style="font-size:11px;word-break:break-all">${responseData.id || '-'}</div></div>
-  `;
-  content.appendChild(meta);
+  let html='';
 
-  // Render sections
-  if (schema?.sections?.length > 0) {
-    schema.sections.forEach(sec => {
-      const questions = sec.questions || [];
-      // Skip docs section in preview — show as links
-      const card = document.createElement('div');
-      card.className = 'section-card';
-      card.innerHTML = `<div class="section-header"><h2>📋 ${sec.title_th}</h2></div>`;
-      const body = document.createElement('div');
-      body.className = 'section-body';
+  // Meta
+  html+=`<div class="meta-box no-print">
+    <div class="meta-item"><label>องค์กร</label><div class="val">${esc(orgName)}</div></div>
+    <div class="meta-item"><label>รหัสองค์กร</label><div class="val">${esc(fd.org_code||orgCode)}</div></div>
+    <div class="meta-item"><label>สถานะ</label><div class="val">${{draft:'📝 Draft',submitted:'✅ ส่งแล้ว',reopened:'🔄 เปิดแก้ไข'}[status]||status}</div></div>
+    <div class="meta-item"><label>บุคลากรรวม</label><div class="val">${fd.total_staff||'-'} คน</div></div>
+    <div class="meta-item"><label>วันที่อัปเดต</label><div class="val">${fd.updated_at?new Date(fd.updated_at).toLocaleDateString('th-TH'):'-'}</div></div>
+    <div class="meta-item"><label>ID</label><div class="val" style="font-size:11px;word-break:break-all">${fd.id||'-'}</div></div>
+  </div>`;
 
-      if (sec.section_key === 'ch1_workforce') {
-        body.appendChild(buildWorkforcePreview());
-        card.appendChild(body);
-        content.appendChild(card);
-        return;
-      }
+  // ═══ ส่วนที่ 1 ═══
+  html+=`<div class="section-card">
+    <div class="section-header"><h2>📋 ส่วนที่ 1: ข้อมูลทั่วไปขององค์กร</h2><div class="section-desc">ข้อมูลพื้นฐาน โครงสร้าง และอัตรากำลัง</div></div>
+    <div class="section-body">
+      <div class="field-row"><div class="field-label">ชื่อหน่วยงาน</div><div class="field-value">${esc(fd.organization||orgName)}</div></div>
+      <div class="field-row"><div class="field-label">1. ภาพรวมยุทธศาสตร์และทิศทางของส่วนราชการ</div><div class="field-value${!fd.strategic_overview?' empty':''}">${fd.strategic_overview?esc(fd.strategic_overview):'—'}</div></div>
+      <div class="field-row"><div class="field-label">2. โครงสร้างองค์กรและบทบาทหน้าที่หลัก</div><div class="field-value${!fd.org_structure?' empty':''}">${fd.org_structure?esc(fd.org_structure):'—'}</div></div>
+      <div class="field-row"><div class="field-label">3. ข้อมูลโครงสร้างอัตรากำลัง</div><div class="field-value">${fd.total_staff??'—'} คน</div></div>
+      ${compactPanel('จำนวนอัตรากำลังจำแนกตามประเภท',['type_official','type_employee','type_contract','type_other'])}
+      ${compactPanel('จำแนกตามช่วงอายุ (เฉพาะข้าราชการ)',['age_u30','age_31_40','age_41_50','age_51_60'])}
+      ${compactPanel('จำแนกตามอายุราชการ',['service_u1','service_1_5','service_6_10','service_11_15','service_16_20','service_21_25','service_26_30','service_over30'])}
+      ${positionPanel()}
+      <div class="field-row"><div class="field-label">4. การลาออกและโอนย้าย (ย้อนหลัง 5 ปี)</div></div>
+      ${turnoverHTML()}
+    </div>
+  </div>`;
 
-      questions.forEach(q => {
-        const val = responseData[q.question_key];
-        const row = document.createElement('div');
-        row.className = 'field-row';
+  // ═══ ส่วนที่ 2 ═══
+  html+=`<div class="section-card">
+    <div class="section-header"><h2>📋 ส่วนที่ 2: นโยบายและบริบทภายนอกองค์กร</h2><div class="section-desc">นโยบายที่เกี่ยวข้องและบริบทที่ส่วนราชการต้องเผชิญ</div></div>
+    <div class="section-body">
+      <div class="field-row"><div class="field-label">5. นโยบายและยุทธศาสตร์ที่เกี่ยวข้อง</div><div class="field-value${!fd.related_policies?' empty':''}">${fd.related_policies?esc(fd.related_policies):'—'}</div></div>
+      <div class="field-row"><div class="field-label">6. ข้อมูลบริบทและความท้าทาย</div><div class="field-value${!fd.context_challenges?' empty':''}">${fd.context_challenges?esc(fd.context_challenges):'—'}</div></div>
+    </div>
+  </div>`;
 
-        const labelEl = document.createElement('div');
-        labelEl.className = 'field-label';
-        labelEl.textContent = q.label_th;
-        row.appendChild(labelEl);
+  // ═══ ส่วนที่ 3 ═══
+  html+=`<div class="section-card">
+    <div class="section-header"><h2>🩺 ส่วนที่ 3: ข้อมูลสุขภาวะของข้าราชการในปีที่ผ่านมา</h2><div class="section-desc">ข้อมูลสุขภาพกาย สุขภาพจิต และการลาป่วย</div></div>
+    <div class="section-body">
+      <div class="compact-panel">
+        <h3 class="compact-panel-title">7. สุขภาวะทางกาย</h3>
+        <div style="font-size:12px;color:#64748b;margin-bottom:8px">ประเภทข้อมูล: <strong>${reportMap[fd.disease_report_type]||'—'}</strong></div>
+        <div class="compact-grid g2">${diseaseFields.map(([k,l])=>`<div class="compact-field"><label>${l}</label>${compactVal('disease_'+k)}</div>`).join('')}</div>
+        ${fd.disease_other_detail?`<div style="margin-top:8px;font-size:13px;color:#475569">อื่นๆ: ${esc(fd.disease_other_detail)} (${fd.disease_other_count??'-'} คน)</div>`:''}
+      </div>
+      <div class="compact-panel">
+        <h3 class="compact-panel-title">8. ข้อมูลการลาป่วย</h3>
+        <div style="font-size:12px;color:#64748b;margin-bottom:8px">ประเภทข้อมูล: <strong>${reportMap[fd.sick_leave_report_type]||'—'}</strong></div>
+        <div class="fq-row">
+          <div class="compact-field"><label>วันลาป่วยรวมต่อปี</label>${compactVal('sick_leave_days')}</div>
+          <div class="compact-field"><label>วันลาป่วยเฉลี่ยต่อคนต่อปี</label>${compactVal('sick_leave_avg')}</div>
+        </div>
+      </div>
+      <div class="compact-panel">
+        <h3 class="compact-panel-title">9. สถิติผู้ใช้บริการห้องพยาบาล</h3>
+        <div style="font-size:12px;color:#64748b;margin-bottom:8px">ประเภทข้อมูล: <strong>${reportMap[fd.clinic_report_type]||'—'}</strong></div>
+        <div class="compact-field" style="margin-bottom:8px"><label>จำนวนผู้ใช้บริการต่อปี</label>${compactVal('clinic_users_per_year')}</div>
+        <div class="field-row"><div class="field-label" style="font-size:13px">อาการที่พบบ่อย</div><div class="field-value${!fd.clinic_top_symptoms?' empty':''}">${fd.clinic_top_symptoms?esc(fd.clinic_top_symptoms):'—'}</div></div>
+        <div class="field-row"><div class="field-label" style="font-size:13px">ยาที่ใช้บ่อย</div><div class="field-value${!fd.clinic_top_medications?' empty':''}">${fd.clinic_top_medications?esc(fd.clinic_top_medications):'—'}</div></div>
+      </div>
+      <div class="compact-panel">
+        <h3 class="compact-panel-title">10. ผลสำรวจสุขภาพจิต</h3>
+        <div style="font-size:12px;color:#64748b;margin-bottom:8px">ประเภทข้อมูล: <strong>${reportMap[fd.mental_health_report_type]||'—'}</strong></div>
+        ${mentalFields.map(([k,l])=>`<div class="field-row"><div class="field-label" style="font-size:13px">${l}</div><div class="field-value${!fd['mental_'+k]?' empty':''}">${fd['mental_'+k]?esc(fd['mental_'+k]):'—'}</div></div>`).join('')}
+      </div>
+      <div class="compact-panel">
+        <h3 class="compact-panel-title">11. ผลสำรวจความผูกพันองค์กร (Employee Engagement)</h3>
+        <div class="compact-grid g5">${[2568,2567,2566,2565,2564].map(y=>`<div class="compact-field"><label>${y}</label>${compactVal('engagement_score_'+y)}</div>`).join('')}</div>
+        ${fd.engagement_low_areas?`<div class="field-row" style="margin-top:8px"><div class="field-label" style="font-size:13px">ประเด็นที่ได้คะแนนต่ำ</div><div class="field-value">${esc(fd.engagement_low_areas)}</div></div>`:''}
+      </div>
+      <div class="compact-panel">
+        <h3 class="compact-panel-title">12. ผลการสำรวจสุขภาวะด้วยเครื่องมืออื่น ๆ</h3>
+        <div class="field-value${!fd.other_wellbeing_surveys?' empty':''}">${fd.other_wellbeing_surveys?esc(fd.other_wellbeing_surveys):'—'}</div>
+      </div>
+    </div>
+  </div>`;
 
-        const valEl = document.createElement('div');
-        valEl.className = 'field-value';
+  // ═══ ส่วนที่ 4 ═══
+  html+=`<div class="section-card">
+    <div class="section-header"><h2>⚙️ ส่วนที่ 4: ระบบการบริหารและสภาพแวดล้อมที่เอื้อต่อสุขภาวะ</h2><div class="section-desc">สถานะระบบสนับสนุน การอบรม และสภาพแวดล้อม</div></div>
+    <div class="section-body">
+      <div class="compact-panel">
+        <h3 class="compact-panel-title">13. สถานะระบบการบริหารบุคลากร</h3>
+        ${systems.map(sys=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f1f5f9;font-size:14px">
+          <span style="color:#334155;font-weight:500">${sys.label}</span>
+          <span style="color:#0F4C81;font-weight:600">${optMap[fd[sys.id]]||'—'}</span>
+        </div>`).join('')}
+      </div>
+      <div class="compact-panel">
+        <h3 class="compact-panel-title">14. ชั่วโมงการอบรมเฉลี่ยต่อคนต่อปี</h3>
+        <div class="compact-grid g5">${[2568,2567,2566,2565,2564].map(y=>`<div class="compact-field"><label>${y}</label>${compactVal('training_hours_'+y)}</div>`).join('')}</div>
+      </div>
+      <div class="compact-panel">
+        <h3 class="compact-panel-title">15. ระบบสนับสนุนดิจิทัล</h3>
+        <div style="display:flex;flex-wrap:wrap;gap:8px">
+          ${digitalSystems.map(([val,lbl])=>{const active=dsVal.includes(val);
+            return `<span style="padding:6px 12px;border-radius:999px;font-size:13px;font-weight:500;${active?'background:#dbeafe;color:#1d4ed8;border:1px solid #93c5fd':'background:#f8fafc;color:#94a3b8;border:1px solid #e2e8f0'}">${active?'✓ ':''}${lbl}</span>`}).join('')}
+        </div>
+      </div>
+      <div class="compact-panel">
+        <h3 class="compact-panel-title">16. การจัดสภาพแวดล้อมตามหลักการยศาสตร์ (Ergonomics)</h3>
+        <div style="font-size:14px;color:#1e293b;font-weight:500">${ergoMap[fd.ergonomics_status]||'—'}</div>
+        ${fd.ergonomics_status==='planned'&&fd.ergonomics_planned_detail?`<div class="field-value" style="margin-top:6px">${esc(fd.ergonomics_planned_detail)}</div>`:''}
+        ${fd.ergonomics_status==='in_progress'&&fd.ergonomics_in_progress_detail?`<div class="field-value" style="margin-top:6px">${esc(fd.ergonomics_in_progress_detail)}</div>`:''}
+        ${fd.ergonomics_status==='done'&&fd.ergonomics_done_detail?`<div class="field-value" style="margin-top:6px">${esc(fd.ergonomics_done_detail)}</div>`:''}
+      </div>
+    </div>
+  </div>`;
 
-        if (q.input_type === 'file') {
-          if (val) {
-            valEl.className += ' file-link';
-            valEl.innerHTML = `<a href="${val}" target="_blank">📎 ดาวน์โหลดไฟล์</a>`;
-          } else {
-            valEl.className += ' empty'; valEl.textContent = 'ไม่มีไฟล์';
-          }
-        } else if (Array.isArray(val)) {
-          valEl.textContent = val.join(', ') || '—';
-        } else if (val !== null && val !== undefined && val !== '') {
-          valEl.textContent = val;
-        } else {
-          valEl.className += ' empty'; valEl.textContent = '—';
-        }
+  // ═══ ส่วนที่ 5 ═══
+  html+=`<div class="section-card">
+    <div class="section-header"><h2>🎯 ส่วนที่ 5: ทิศทาง เป้าหมาย และข้อเสนอแนะ</h2><div class="section-desc">จุดเน้นการพัฒนาและข้อเสนอแนะ</div></div>
+    <div class="section-body">
+      <div class="compact-panel">
+        <h3 class="compact-panel-title">17. จุดเน้นการพัฒนา</h3>
+        ${[1,2,3].map(i=>{const val=fd[`strategic_priority_rank${i}`];if(!val)return '';
+          const t=topics.find(t=>t.id===val);
+          const label=t?(val==='other'?`อื่น ๆ: ${esc(fd.strategic_priority_other||'')}`:t.label):val;
+          return `<div class="rank-chip" style="border-color:${rankColors[i-1]};background:${rankBg[i-1]}">
+            <span class="rank-num" style="background:${rankColors[i-1]}">${i}</span><span>${label}</span></div>`}).join('')||'<div class="field-value empty">— ยังไม่ได้เลือก —</div>'}
+      </div>
+      <div class="compact-panel">
+        <h3 class="compact-panel-title">18. ข้อเสนอแนะเกี่ยวกับ Intervention Packages</h3>
+        <div class="field-value${!fd.intervention_packages_feedback?' empty':''}">${fd.intervention_packages_feedback?esc(fd.intervention_packages_feedback):'—'}</div>
+      </div>
+      <div class="compact-panel">
+        <h3 class="compact-panel-title">19. ไฟล์ HRD PLAN ปี 2567-2570</h3>
+        <div class="field-value${!fd.hrd_plan_results?' empty':''}">${fd.hrd_plan_results?esc(fd.hrd_plan_results):'—'}</div>
+      </div>
+    </div>
+  </div>`;
 
-        row.appendChild(valEl);
-        body.appendChild(row);
-      });
-
-      card.appendChild(body);
-      content.appendChild(card);
-    });
-  } else {
-    // Fallback: render all keys from responseData
-    const card = document.createElement('div');
-    card.className = 'section-card';
-    card.innerHTML = '<div class="section-header"><h2>ข้อมูล CH1</h2></div>';
-    const body = document.createElement('div');
-    body.className = 'section-body';
-    const skip = ['id','created_at','updated_at','status','org_code'];
-    Object.entries(responseData).forEach(([k, v]) => {
-      if (skip.includes(k)) return;
-      const row = document.createElement('div');
-      row.className = 'field-row';
-      row.innerHTML = `<div class="field-label">${k}</div><div class="field-value">${v ?? '—'}</div>`;
-      body.appendChild(row);
-    });
-    card.appendChild(body);
-    content.appendChild(card);
-  }
-
-  document.getElementById('loading-screen').style.display = 'none';
-  content.style.display = '';
+  const content=document.getElementById('content-area');
+  content.innerHTML=html;
+  document.getElementById('loading-screen').style.display='none';
+  content.style.display='';
 }
 
-function goEdit() {
-  const orgCode = ORG_PARAM || userOrgCode;
-  location.href = `ch1-edit.html?org=${encodeURIComponent(orgCode)}&id=${responseData?.id || ''}`;
+function goEdit(){
+  const orgCode=ORG_PARAM||userOrgCode;
+  location.href=`ch1-edit?org=${encodeURIComponent(orgCode)}&id=${responseData?.id||''}`;
 }
-
-function goPDF() {
-  const orgCode = ORG_PARAM || userOrgCode;
-  location.href = `ch1-individual-pdf.html?org=${encodeURIComponent(orgCode)}&id=${responseData?.id || ''}`;
+function goPDF(){
+  const orgCode=ORG_PARAM||userOrgCode;
+  location.href=`ch1-individual-pdf?org=${encodeURIComponent(orgCode)}&id=${responseData?.id||''}`;
 }
-
-function showError(msg) {
-  document.getElementById('loading-screen').innerHTML = `<div class="alert alert-error" style="max-width:480px">⛔ ${msg}</div><br><a href="org-portal.html" style="color:#2563eb">← กลับหน้า Portal</a>`;
+function showError(msg){
+  document.getElementById('loading-screen').innerHTML=`<div class="alert alert-error" style="max-width:480px">⛔ ${msg}</div><br><a href="org-portal.html" style="color:#2563eb">← กลับหน้า Portal</a>`;
 }
 
 init();

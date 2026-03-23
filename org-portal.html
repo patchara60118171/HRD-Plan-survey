@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai+Looped:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 <script src="js/supabase-config.js"></script>
 <script src="js/form-schema.js"></script>
 <style>
@@ -196,6 +197,58 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
 .toast.warn{background:#b45309}
 .toast.info{background:#7c3aed}
 
+.dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+.dash-card{background:#fff;border:1px solid var(--bdr);border-radius:14px;padding:18px 20px;box-shadow:var(--shadow)}
+.dash-card h4{font-size:13px;font-weight:700;color:var(--P);margin-bottom:14px;display:flex;align-items:center;gap:6px}
+.dist-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.dist-label{min-width:80px;font-size:12px;color:var(--tx2);font-weight:600;text-align:right;flex-shrink:0}
+.dist-bar-wrap{flex:1;height:22px;background:#f3edff;border-radius:6px;overflow:hidden;position:relative}
+.dist-bar{height:100%;border-radius:6px;transition:width .5s ease}
+.dist-count{font-size:11px;font-weight:700;color:var(--tx2);min-width:36px;text-align:right;flex-shrink:0}
+.dist-pct{font-size:10px;color:var(--tx3);min-width:36px;text-align:right;flex-shrink:0}
+.legend-row{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--tx2)}
+.legend-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+.recent-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:10px}
+.recent-table th{text-align:left;padding:8px 10px;background:#faf8ff;border-bottom:2px solid var(--bdr);font-weight:700;color:var(--P);font-size:11px;white-space:nowrap}
+.recent-table td{padding:8px 10px;border-bottom:1px solid #f3f0fa;color:var(--tx);vertical-align:middle}
+.recent-table tr:hover td{background:#fdfbff}
+.badge-sm{display:inline-block;padding:3px 8px;border-radius:999px;font-size:10px;font-weight:700}
+.badge-good{background:#ecfdf3;color:#16a34a}
+.badge-avg{background:#fff7ed;color:#b45309}
+.badge-poor{background:#fef2f2;color:#dc2626}
+.badge-none{background:#f1f5f9;color:#64748b}
+.wb-ind-toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.wb-ind-toolbar .search-input{flex:1;min-width:200px;padding:9px 14px;border:1.5px solid var(--bdr);border-radius:10px;font:inherit;font-size:13px;background:#fff}
+.wb-ind-toolbar .search-input:focus{outline:none;border-color:#a78bfa;box-shadow:0 0 0 3px rgba(167,139,250,.12)}
+.wb-ind-count{font-size:12px;color:var(--tx3);font-weight:600}
+.ind-table{width:100%;border-collapse:collapse;font-size:13px}
+.ind-table th{text-align:left;padding:10px 12px;background:#faf8ff;border-bottom:2px solid var(--bdr);font-weight:700;color:var(--P);font-size:12px;position:sticky;top:0;white-space:nowrap}
+.ind-table td{padding:10px 12px;border-bottom:1px solid #f3f0fa;color:var(--tx);vertical-align:middle}
+.ind-table tr:hover td{background:#fdfbff}
+.ind-table .num{text-align:center;color:var(--tx3);font-size:11px}
+.btn-view{padding:5px 12px;border-radius:8px;background:#f3edff;color:#7c3aed;border:1px solid #e3def3;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit}
+.btn-view:hover{background:#ece5ff;border-color:#c4b5fd}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9000;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.open{opacity:1;pointer-events:auto}
+.modal-box{background:#fff;border-radius:18px;width:100%;max-width:720px;max-height:85vh;overflow-y:auto;box-shadow:0 25px 60px rgba(0,0,0,.2);padding:0}
+.modal-head{position:sticky;top:0;z-index:1;background:#fff;border-bottom:1px solid var(--bdr);padding:16px 22px;display:flex;align-items:center;justify-content:space-between;border-radius:18px 18px 0 0}
+.modal-head h3{font-size:15px;font-weight:700;color:var(--P)}
+.modal-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--tx3);padding:4px 8px;border-radius:8px}
+.modal-close:hover{background:#f3edff;color:var(--P)}
+.modal-body{padding:20px 22px 28px}
+.raw-section{margin-bottom:20px}
+.raw-section-title{font-size:13px;font-weight:700;color:var(--P);margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #f3edff}
+.raw-grid{display:grid;gap:8px}
+.raw-item{display:grid;grid-template-columns:1fr auto;gap:8px;padding:8px 12px;background:#faf8ff;border-radius:8px;border:1px solid #f1edf8}
+.raw-q{font-size:12px;color:var(--tx2);line-height:1.5}
+.raw-a{font-size:13px;font-weight:600;color:var(--tx);text-align:right;min-width:80px}
+.pagination{display:flex;justify-content:center;gap:6px;margin-top:16px}
+.pagination button{padding:6px 12px;border-radius:8px;border:1px solid var(--bdr);background:#fff;font-size:12px;cursor:pointer;font-family:inherit;color:var(--tx2);font-weight:600}
+.pagination button.active{background:#7c3aed;color:#fff;border-color:#7c3aed}
+.pagination button:hover:not(.active){background:#faf8ff}
+.dash-full{grid-column:1/-1}
+
 @media(max-width:900px){
   .sidebar{position:static;width:100%;height:auto}
   #portal-app{flex-direction:column}
@@ -205,6 +258,10 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
   .org-toolbar{justify-content:flex-start;margin-top:0}
   .org-layout{grid-template-columns:1fr}
   .detail-list.two-col{grid-template-columns:1fr}
+  .dash-grid{grid-template-columns:1fr}
+  .dist-label{min-width:60px}
+  .modal-box{max-width:100%;max-height:90vh;border-radius:12px}
+  .modal-head{border-radius:12px 12px 0 0}
 }
 </style>
 </head>
@@ -261,6 +318,7 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
       <button class="nav-item" data-tab="ch1" onclick="switchTab('ch1')"><span class="ni">📝</span> CH1 ข้อมูลองค์กร</button>
       <button class="nav-subitem" id="nav-ch1-edit" onclick="openCh1Editor()"><span class="ni">✏️</span> แก้ไขฟอร์ม</button>
       <button class="nav-item" data-tab="wb" onclick="switchTab('wb')"><span class="ni">💚</span> Well-being ผลสำรวจ</button>
+      <button class="nav-item" data-tab="wb-individual" onclick="switchTab('wb-individual')"><span class="ni">👤</span> Well-being รายบุคคล</button>
       <button class="nav-item" data-tab="share" onclick="switchTab('share')"><span class="ni">🔗</span> แชร์ลิงก์ Well-being</button>
     </nav>
 
@@ -356,7 +414,7 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
       <div class="tab-page" id="page-wb">
         <div class="section-card wb">
           <h3>💚 Well-being ผลสำรวจ</h3>
-          <div class="desc">ผลการสำรวจสุขภาวะรายบุคคลของบุคลากรในองค์กร</div>
+          <div class="desc">ภาพรวมผลสำรวจสุขภาวะรายบุคคลของบุคลากรในองค์กร</div>
           <div class="progress-wrap">
             <div class="progress-label">
               <span class="left">ผู้ตอบ Well-being Survey</span>
@@ -367,6 +425,17 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
           </div>
           <div id="wb-summary" style="display:none;margin-top:16px"><div class="summary-grid" id="wb-summary-grid"></div></div>
           <div class="section-actions" id="wb-actions"></div>
+        </div>
+        <div id="wb-dashboard-area"></div>
+      </div>
+
+      <div class="tab-page" id="page-wb-individual">
+        <div class="section-card wb">
+          <h3>👤 Well-being รายบุคคล</h3>
+          <div class="desc">ข้อมูลผลสำรวจรายบุคคลทุกข้อ (Raw Data)</div>
+        </div>
+        <div id="wb-individual-area">
+          <div class="info-box blue">กำลังโหลดข้อมูลรายบุคคล...</div>
         </div>
       </div>
 
@@ -399,6 +468,16 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
   </div>
 </div>
 
+<div class="modal-overlay" id="wb-modal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3 id="wb-modal-title">ข้อมูลรายบุคคล</h3>
+      <button class="modal-close" onclick="closeWbModal()">✕</button>
+    </div>
+    <div class="modal-body" id="wb-modal-body"></div>
+  </div>
+</div>
+
 <div class="toast" id="toast-el"></div>
 
 <div class="loading-overlay" id="loading" style="display:none">
@@ -427,6 +506,7 @@ const TAB_META = {
   'org-profile': { title: 'รายละเอียดองค์กร', subtitle: 'ข้อมูลโปรไฟล์และช่องทางติดต่อของหน่วยงานจากฐานข้อมูลกลาง' },
   ch1: { title: 'ข้อมูลองค์กร', subtitle: 'แบบสำรวจข้อมูลเพื่อจัดทำแผนการพัฒนาขององค์กรสุขภาวะข้าราชการพลเรือน' },
   wb: { title: 'Well-being ผลสำรวจ', subtitle: 'ภาพรวมผลสำรวจสุขภาวะรายบุคคลของบุคลากรในองค์กร' },
+  'wb-individual': { title: 'Well-being รายบุคคล', subtitle: 'ดูข้อมูลผลสำรวจสุขภาวะรายบุคคลทุกข้อ (Raw Data)' },
   share: { title: 'แชร์ลิงก์ Well-being', subtitle: 'ส่งต่อแบบสำรวจให้บุคลากรในองค์กร' },
 };
 
@@ -686,6 +766,7 @@ function switchTab(tab) {
   const meta = TAB_META[tab] || { title: tab, subtitle: '' };
   document.getElementById('topbar-title').textContent = meta.title;
   document.getElementById('topbar-subtitle').textContent = meta.subtitle;
+  if (tab === 'wb-individual' && !portalState._wbIndLoaded) loadWbIndividualPage();
 }
 
 function buildAppUrl(cleanPath, htmlFile, query = '') {
@@ -952,7 +1033,7 @@ async function loadWbData() {
 
   const { data: surveyRows } = await sb
     .from('survey_responses')
-    .select('id, organization, submitted_at, is_draft, gender, age, tmhi_score')
+    .select('id, organization, submitted_at, is_draft, gender, age, tmhi_score, tmhi_level, bmi, bmi_category, name, title, height, weight, waist')
     .eq('organization', portalState.orgName)
     .eq('is_draft', false)
     .order('submitted_at', { ascending: false });
@@ -963,7 +1044,7 @@ async function loadWbData() {
     try {
       const { data: wbRows } = await sb
         .from('wellbeing_responses')
-        .select('id, organization, submitted_at, is_draft, gender, age')
+        .select('id, organization, submitted_at, is_draft, gender, age, tmhi_score, tmhi_level, bmi, bmi_category, name, title, height, weight, waist')
         .eq('organization', portalState.orgName)
         .eq('is_draft', false)
         .order('submitted_at', { ascending: false });
@@ -981,14 +1062,19 @@ async function loadWbData() {
     homeWb.innerHTML = '<div class="info-box yellow">ยังไม่มีผู้ตอบ Well-being Survey จากองค์กรของท่าน</div>';
     summaryEl.style.display = 'none';
     actionsEl.innerHTML = '<div class="info-box blue">แชร์ลิงก์แบบสอบถามให้บุคลากรในองค์กรเพื่อเริ่มเก็บข้อมูล</div>';
+    document.getElementById('wb-dashboard-area').innerHTML = '';
     return;
   }
 
-  const male = rows.filter((row) => row.gender === 'ชาย').length;
-  const female = rows.filter((row) => row.gender === 'หญิง').length;
+  const male = rows.filter(r => r.gender === 'ชาย').length;
+  const female = rows.filter(r => r.gender === 'หญิง').length;
   const other = rows.length - male - female;
-  const tmhiRows = rows.filter((row) => row.tmhi_score !== null && row.tmhi_score !== undefined);
-  const avgTmhi = tmhiRows.length ? (tmhiRows.reduce((sum, row) => sum + Number(row.tmhi_score), 0) / tmhiRows.length) : null;
+  const tmhiRows = rows.filter(r => r.tmhi_score != null);
+  const avgTmhi = tmhiRows.length ? (tmhiRows.reduce((s, r) => s + Number(r.tmhi_score), 0) / tmhiRows.length) : null;
+  const bmiRows = rows.filter(r => r.bmi != null);
+  const avgBmi = bmiRows.length ? (bmiRows.reduce((s, r) => s + Number(r.bmi), 0) / bmiRows.length) : null;
+  const ageRows = rows.filter(r => r.age != null);
+  const avgAge = ageRows.length ? (ageRows.reduce((s, r) => s + Number(r.age), 0) / ageRows.length) : null;
 
   homeWb.innerHTML = `
     <div class="summary-grid" style="grid-template-columns:repeat(2,minmax(0,1fr))">
@@ -1003,11 +1089,335 @@ async function loadWbData() {
     { val: fmtNum(female), lbl: 'หญิง' },
     { val: fmtNum(other), lbl: 'อื่นๆ' },
     { val: fmtNum(avgTmhi, 1), lbl: 'TMHI เฉลี่ย' },
-  ].map((item) => `<div class="summary-item"><div class="val">${item.val}</div><div class="lbl">${item.lbl}</div></div>`).join('');
+  ].map(i => `<div class="summary-item"><div class="val">${i.val}</div><div class="lbl">${i.lbl}</div></div>`).join('');
 
   actionsEl.innerHTML = `
-    <button class="btn btn-green" onclick="showToast('📊 ฟีเจอร์ Dashboard กำลังพัฒนา','info')">💚 ดู Well-being Dashboard</button>
-    <button class="btn btn-outline" onclick="showToast('📤 ฟีเจอร์ Export กำลังพัฒนา','info')">📤 Export Excel</button>`;
+    <button class="btn btn-green" onclick="switchTab('wb')">💚 ดู Well-being Dashboard</button>
+    <button class="btn btn-outline" onclick="exportWbExcel()">📤 Export Excel</button>`;
+
+  renderWbDashboard(rows, { male, female, other, avgTmhi, avgBmi, avgAge });
+}
+
+function distBar(items, maxVal, colors) {
+  return items.map((it, i) => {
+    const pct = maxVal > 0 ? (it.count / maxVal * 100) : 0;
+    const color = colors[i % colors.length];
+    return `<div class="dist-row">
+      <div class="dist-label">${esc(it.label)}</div>
+      <div class="dist-bar-wrap"><div class="dist-bar" style="width:${pct.toFixed(1)}%;background:${color}"></div></div>
+      <div class="dist-count">${fmtNum(it.count)}</div>
+      <div class="dist-pct">${maxVal > 0 ? (it.count / maxVal * 100).toFixed(0) : 0}%</div>
+    </div>`;
+  }).join('');
+}
+
+function renderWbDashboard(rows, stats) {
+  const n = rows.length;
+  const genderData = [
+    { label: 'ชาย', count: stats.male },
+    { label: 'หญิง', count: stats.female },
+    { label: 'LGBTQ+ / อื่นๆ', count: stats.other },
+  ];
+  const genderColors = ['#6366f1', '#ec4899', '#f59e0b'];
+
+  const ageGroups = { '≤30 ปี': 0, '31-40 ปี': 0, '41-50 ปี': 0, '51-60 ปี': 0, '60+ ปี': 0 };
+  rows.forEach(r => {
+    const a = Number(r.age) || 0;
+    if (a <= 30) ageGroups['≤30 ปี']++;
+    else if (a <= 40) ageGroups['31-40 ปี']++;
+    else if (a <= 50) ageGroups['41-50 ปี']++;
+    else if (a <= 60) ageGroups['51-60 ปี']++;
+    else ageGroups['60+ ปี']++;
+  });
+  const ageData = Object.entries(ageGroups).map(([l, c]) => ({ label: l, count: c }));
+  const ageColors = ['#818cf8', '#a78bfa', '#c084fc', '#e879f9', '#f472b6'];
+
+  const bmiCats = { 'น้ำหนักน้อย': 0, 'น้ำหนักปกติ': 0, 'น้ำหนักเกิน': 0, 'อ้วน': 0 };
+  rows.forEach(r => { if (r.bmi_category && bmiCats.hasOwnProperty(r.bmi_category)) bmiCats[r.bmi_category]++; });
+  const bmiData = Object.entries(bmiCats).map(([l, c]) => ({ label: l, count: c }));
+  const bmiColors = ['#38bdf8', '#22c55e', '#f59e0b', '#ef4444'];
+
+  const tmhiCats = { 'สูงกว่าเกณฑ์': 0, 'เกณฑ์ปกติ': 0, 'ต่ำกว่าเกณฑ์': 0 };
+  rows.forEach(r => {
+    const lv = r.tmhi_level || '';
+    if (lv.includes('สูง')) tmhiCats['สูงกว่าเกณฑ์']++;
+    else if (lv.includes('ปกติ') || lv.includes('เกณฑ์')) tmhiCats['เกณฑ์ปกติ']++;
+    else if (lv.includes('ต่ำ') || lv.includes('ควรดูแล')) tmhiCats['ต่ำกว่าเกณฑ์']++;
+  });
+  const tmhiData = Object.entries(tmhiCats).map(([l, c]) => ({ label: l, count: c }));
+  const tmhiColors = ['#22c55e', '#f59e0b', '#ef4444'];
+
+  const recent = rows.slice(0, 8);
+
+  const area = document.getElementById('wb-dashboard-area');
+  area.innerHTML = `
+    <div class="dash-grid">
+      <div class="dash-card">
+        <h4>👫 เพศ</h4>
+        ${distBar(genderData, n, genderColors)}
+      </div>
+      <div class="dash-card">
+        <h4>📊 ช่วงอายุ</h4>
+        ${distBar(ageData, n, ageColors)}
+      </div>
+      <div class="dash-card">
+        <h4>⚖️ BMI</h4>
+        ${rows.some(r => r.bmi != null) ? distBar(bmiData, n, bmiColors) + `<div style="margin-top:8px;font-size:11px;color:var(--tx3)">BMI เฉลี่ย: <strong style="color:var(--tx)">${fmtNum(stats.avgBmi, 1)}</strong></div>` : '<div class="info-box blue" style="font-size:12px">ยังไม่มีข้อมูล BMI</div>'}
+      </div>
+      <div class="dash-card">
+        <h4>🧠 TMHI-15 สุขภาพจิต</h4>
+        ${rows.some(r => r.tmhi_level) ? distBar(tmhiData, n, tmhiColors) + `<div style="margin-top:8px;font-size:11px;color:var(--tx3)">คะแนนเฉลี่ย: <strong style="color:var(--tx)">${fmtNum(stats.avgTmhi, 1)}</strong> / 60</div>` : '<div class="info-box blue" style="font-size:12px">ยังไม่มีข้อมูล TMHI</div>'}
+      </div>
+      <div class="dash-card dash-full">
+        <h4>🕐 ผู้ตอบล่าสุด</h4>
+        ${recent.length ? `<div style="overflow-x:auto"><table class="recent-table">
+          <thead><tr><th>#</th><th>ชื่อ</th><th>เพศ</th><th>อายุ</th><th>BMI</th><th>TMHI</th><th>สถานะจิต</th><th>วันที่</th></tr></thead>
+          <tbody>${recent.map((r, i) => {
+            const lvClass = (r.tmhi_level || '').includes('สูง') ? 'good' : (r.tmhi_level || '').includes('ปกติ') ? 'avg' : (r.tmhi_level || '').includes('ต่ำ') ? 'poor' : 'none';
+            const lvText = (r.tmhi_level || '').includes('สูง') ? '☀️ ดีมาก' : (r.tmhi_level || '').includes('ปกติ') ? '⛅ ปกติ' : (r.tmhi_level || '').includes('ต่ำ') ? '🌧️ ต่ำ' : '—';
+            return `<tr>
+              <td style="text-align:center;color:var(--tx3)">${i + 1}</td>
+              <td>${esc(r.name || r.title || '—')}</td>
+              <td>${esc(r.gender || '—')}</td>
+              <td>${r.age ?? '—'}</td>
+              <td>${r.bmi ? Number(r.bmi).toFixed(1) : '—'}</td>
+              <td>${r.tmhi_score ?? '—'}</td>
+              <td><span class="badge-sm badge-${lvClass}">${lvText}</span></td>
+              <td>${r.submitted_at ? new Date(r.submitted_at).toLocaleDateString('th-TH') : '—'}</td>
+            </tr>`;
+          }).join('')}</tbody></table></div>` : '<div class="info-box blue">ยังไม่มีข้อมูล</div>'}
+      </div>
+    </div>`;
+}
+
+function exportWbExcel() {
+  const rows = portalState.wbRows;
+  if (!rows || rows.length === 0) { showToast('ไม่มีข้อมูลให้ส่งออก', 'warn'); return; }
+  try {
+    const data = rows.map((r, i) => ({
+      '#': i + 1,
+      'ชื่อ': r.name || '',
+      'คำนำหน้า': r.title || '',
+      'เพศ': r.gender || '',
+      'อายุ': r.age || '',
+      'ส่วนสูง (cm)': r.height || '',
+      'น้ำหนัก (kg)': r.weight || '',
+      'รอบเอว (cm)': r.waist || '',
+      'BMI': r.bmi ? Number(r.bmi).toFixed(1) : '',
+      'BMI ระดับ': r.bmi_category || '',
+      'TMHI คะแนน': r.tmhi_score || '',
+      'TMHI ระดับ': r.tmhi_level || '',
+      'วันที่ส่ง': r.submitted_at ? new Date(r.submitted_at).toLocaleDateString('th-TH') : '',
+    }));
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'WellbeingResponses');
+    XLSX.writeFile(wb, `wellbeing-${portalState.orgCode || 'data'}-${new Date().toISOString().slice(0,10)}.xlsx`);
+    showToast('ส่งออก Excel สำเร็จ', 'success');
+  } catch (e) { showToast('ส่งออกไม่สำเร็จ: ' + e.message, 'error'); }
+}
+
+const WB_QUESTIONS = [
+  { section: 'ส่วนที่ 1: ข้อมูลส่วนบุคคล', keys: [
+    ['title','คำนำหน้า'],['name','ชื่อ-สกุล'],['gender','เพศ'],['age','อายุ (ปี)'],['org_type','ประเภทหน่วยงาน'],['job','ตำแหน่งงาน'],['job_duration','ระยะเวลาทำงาน (ปี)'],['activity_org','เคยเข้ากิจกรรมส่งเสริมสุขภาพองค์กร'],['activity_thaihealth','เคยเข้ากิจกรรม สสส.'],['diseases','ปัญหาสุขภาพ'],['height','ส่วนสูง (cm)'],['weight','น้ำหนัก (kg)'],['waist','รอบเอว (cm)'],['bmi','BMI'],['bmi_category','ระดับ BMI'],
+  ]},
+  { section: 'ส่วนที่ 2: การบริโภคยาสูบและแอลกอฮอล์', keys: [
+    ['q2001','สูบบุหรี่'],['q2002','สูบบุหรี่ไฟฟ้า'],['q2003','ดื่มสุรา/แอลกอฮอล์'],['q2004','เครื่องดื่มผสมกัญชา'],['q2005_drug','สารเสพติดอื่นๆ'],
+  ]},
+  { section: 'ส่วนที่ 3: พฤติกรรมการบริโภค', keys: [
+    ['sweet_1','ดื่มน้ำเปล่า/กาแฟดำ'],['sweet_2','น้ำอัดลม/กาแฟ 3in1'],['sweet_3','น้ำผัก/ผลไม้สำเร็จรูป'],['sweet_4','ไอศกรีม/เบเกอรี่/ขนมหวาน'],['sweet_5','เติมน้ำตาล/น้ำผึ้ง'],
+    ['fat_1','เนื้อสัตว์ติดมัน/หนัง'],['fat_2','อาหารทอด/ฟาสต์ฟู้ด'],['fat_3','อาหารจานเดียวไขมันสูง/แกงกะทิ'],['fat_4','เครื่องดื่มนมข้นหวาน/ครีม'],['fat_5','ซดน้ำผัด/ราดข้าว'],
+    ['salt_1','ชิมก่อนปรุง/ปรุงน้อย'],['salt_2','ใช้สมุนไพรแทนเครื่องปรุง'],['salt_3','เนื้อสัตว์แปรรูป/ปลาเค็ม'],['salt_4','บะหมี่กึ่งสำเร็จรูป/อาหารแช่แข็ง'],['salt_5','ผัก/ผลไม้ดอง'],
+  ]},
+  { section: 'ส่วนที่ 4: กิจกรรมทางกาย (TPAX)', keys: [
+    ['act_work_days','กิจกรรมทางกายขณะทำงาน (วัน/สัปดาห์)'],['act_work_dur','ระยะเวลาเฉลี่ย/วัน (ทำงาน)'],
+    ['act_commute_days','เดินทางด้วยเท้า/จักรยาน (วัน/สัปดาห์)'],['act_commute_dur','ระยะเวลาเฉลี่ย/วัน (เดินทาง)'],
+    ['act_rec_days','ออกกำลังกาย/นันทนาการ (วัน/สัปดาห์)'],['act_rec_dur','ระยะเวลาเฉลี่ย/วัน (ออกกำลังกาย)'],
+    ['sedentary_dur','เวลานั่ง/เอนกาย/วัน'],['screen_entertain','เวลาหน้าจอบันเทิง/วัน'],['screen_work','เวลาหน้าจอทำงาน/วัน'],
+  ]},
+  { section: 'ส่วนที่ 5: สุขภาพจิต (TMHI-15)', keys: [
+    ['tmhi_1','พึงพอใจในชีวิต'],['tmhi_2','สบายใจ'],['tmhi_3','ภูมิใจในตนเอง'],['tmhi_4','เบื่อหน่ายท้อแท้'],['tmhi_5','ผิดหวังในตนเอง'],['tmhi_6','ชีวิตมีแต่ความทุกข์'],['tmhi_7','ยอมรับปัญหาที่ยากแก้ไข'],['tmhi_8','ควบคุมอารมณ์เมื่อคับขัน'],['tmhi_9','เผชิญเหตุการณ์ร้ายแรง'],['tmhi_10','เห็นอกเห็นใจผู้อื่น'],['tmhi_11','เป็นสุขในการช่วยเหลือ'],['tmhi_12','ช่วยเหลือผู้อื่น'],['tmhi_13','มั่นคงปลอดภัยในครอบครัว'],['tmhi_14','ครอบครัวจะดูแลเมื่อป่วย'],['tmhi_15','ครอบครัวรักและผูกพัน'],
+    ['tmhi_score','TMHI คะแนนรวม'],['tmhi_level','ระดับสุขภาพจิต'],
+  ]},
+  { section: 'ส่วนที่ 6: ความเหงา (UCLA)', keys: [
+    ['lonely_1','ไม่มีความสุขที่ต้องทำคนเดียว'],['lonely_2','ไม่มีใครคุยด้วย'],['lonely_3','ทนไม่ได้ที่อยู่คนเดียว'],['lonely_4','ขาดมิตรภาพ'],['lonely_5','ไม่มีใครเข้าใจ'],['lonely_6','รอคนโทรหา'],['lonely_7','ไม่มีใครให้พึ่ง'],['lonely_8','ไม่สนิทกับใคร'],['lonely_9','ความเห็นจากคนอื่นไม่มีผล'],['lonely_10','รู้สึกถูกทอดทิ้ง'],['lonely_11','รู้สึกโดดเดี่ยว'],['lonely_12','ไม่สามารถสื่อสารกับคนรอบข้าง'],['lonely_13','ความสัมพันธ์เป็นเพียงผิวเผิน'],['lonely_14','โหยหาเพื่อนพ้อง'],['lonely_15','ไม่มีใครรู้จักดีพอ'],['lonely_16','รู้สึกถูกแยกจากคนอื่น'],['lonely_17','ไม่มีความสุขเมื่อออกห่าง'],['lonely_18','ยากที่จะหาเพื่อน'],['lonely_19','รู้สึกถูกกีดกัน'],['lonely_20','รู้สึกโดดเดี่ยวแม้มีคน'],
+  ]},
+  { section: 'ส่วนที่ 7: อุบัติเหตุและความปลอดภัย', keys: [
+    ['helmet_driver','หมวกนิรภัยขณะขับขี่'],['helmet_passenger','หมวกนิรภัยขณะซ้อน'],['seatbelt_driver','เข็มขัดนิรภัยขณะขับ'],['seatbelt_passenger','เข็มขัดนิรภัยขณะโดยสาร'],['accident_hist','ประสบอุบัติเหตุจราจร'],['drunk_drive','ขับขี่หลังดื่ม'],
+  ]},
+  { section: 'ส่วนที่ 8: สิ่งแวดล้อมและโรคอุบัติใหม่', keys: [
+    ['env_satisfaction','พึงพอใจสิ่งแวดล้อมทำงาน'],['env_glare','แสงจ้า/ทำงานกลางแดด'],['env_noise','เสียงดัง/แรงสั่นสะเทือน'],['env_smell','กลิ่นเหม็น/สารเคมี'],['env_smoke','ควัน/ไอระเหย'],['env_posture','ท่าทางเดิมนานๆ'],['env_awkward','ท่าทางฝืนธรรมชาติ'],
+    ['pm25_impact','ปัญหา PM 2.5'],['pm25_symptom','อาการจาก PM 2.5'],['life_quality','คุณภาพชีวิตโดยรวม'],['emerging_known','รู้จักโรคอุบัติใหม่'],['emerging_list','โรคอุบัติใหม่ที่รู้จัก'],['climate_impact','ผลกระทบจากโลกร้อน'],['covid_history','ติด COVID-19'],
+  ]},
+];
+
+let wbIndPage = 1;
+const WB_IND_PER_PAGE = 20;
+
+async function loadWbIndividualPage() {
+  portalState._wbIndLoaded = true;
+  const area = document.getElementById('wb-individual-area');
+  area.innerHTML = '<div class="info-box blue">กำลังโหลดข้อมูลรายบุคคล...</div>';
+
+  let rows = [];
+  const { data: sRows } = await sb
+    .from('survey_responses')
+    .select('id, name, title, gender, age, bmi, bmi_category, tmhi_score, tmhi_level, submitted_at, raw_responses')
+    .eq('organization', portalState.orgName)
+    .eq('is_draft', false)
+    .order('submitted_at', { ascending: false });
+
+  if (sRows && sRows.length > 0) { rows = sRows; }
+  else {
+    try {
+      const { data: wRows } = await sb
+        .from('wellbeing_responses')
+        .select('id, name, title, gender, age, bmi, bmi_category, tmhi_score, tmhi_level, submitted_at, raw_responses')
+        .eq('organization', portalState.orgName)
+        .eq('is_draft', false)
+        .order('submitted_at', { ascending: false });
+      rows = wRows || [];
+    } catch (_) {}
+  }
+
+  portalState._wbIndRows = rows;
+  wbIndPage = 1;
+  renderWbIndividualTable();
+}
+
+function renderWbIndividualTable() {
+  const rows = portalState._wbIndRows || [];
+  const area = document.getElementById('wb-individual-area');
+  if (rows.length === 0) {
+    area.innerHTML = '<div class="info-box yellow">ยังไม่มีข้อมูลรายบุคคล</div>';
+    return;
+  }
+
+  const totalPages = Math.ceil(rows.length / WB_IND_PER_PAGE);
+  if (wbIndPage > totalPages) wbIndPage = totalPages;
+  const start = (wbIndPage - 1) * WB_IND_PER_PAGE;
+  const pageRows = rows.slice(start, start + WB_IND_PER_PAGE);
+
+  let html = `<div class="section-card wb" style="padding:16px 18px">
+    <div class="wb-ind-toolbar">
+      <input class="search-input" placeholder="🔍 ค้นหาชื่อ..." oninput="filterWbInd(this.value)">
+      <div class="wb-ind-count">ทั้งหมด ${fmtNum(rows.length)} รายการ</div>
+      <button class="btn btn-outline" style="font-size:12px" onclick="exportWbIndExcel()">📤 Export ทั้งหมด</button>
+    </div>
+    <div style="overflow-x:auto">
+      <table class="ind-table">
+        <thead><tr><th>#</th><th>ชื่อ</th><th>เพศ</th><th>อายุ</th><th>BMI</th><th>TMHI</th><th>สถานะจิต</th><th>วันที่ส่ง</th><th></th></tr></thead>
+        <tbody>${pageRows.map((r, i) => {
+          const idx = start + i + 1;
+          const lvClass = (r.tmhi_level||'').includes('สูง') ? 'good' : (r.tmhi_level||'').includes('ปกติ') ? 'avg' : (r.tmhi_level||'').includes('ต่ำ') ? 'poor' : 'none';
+          const lvText = (r.tmhi_level||'').includes('สูง') ? '☀️ ดีมาก' : (r.tmhi_level||'').includes('ปกติ') ? '⛅ ปกติ' : (r.tmhi_level||'').includes('ต่ำ') ? '🌧️ ต่ำ' : '—';
+          return `<tr>
+            <td class="num">${idx}</td>
+            <td>${esc(r.name || r.title || '—')}</td>
+            <td>${esc(r.gender || '—')}</td>
+            <td>${r.age ?? '—'}</td>
+            <td>${r.bmi ? Number(r.bmi).toFixed(1) : '—'}</td>
+            <td>${r.tmhi_score ?? '—'}</td>
+            <td><span class="badge-sm badge-${lvClass}">${lvText}</span></td>
+            <td>${r.submitted_at ? new Date(r.submitted_at).toLocaleDateString('th-TH') : '—'}</td>
+            <td><button class="btn-view" onclick="openWbDetail(${start + i})">👁 ดู</button></td>
+          </tr>`;
+        }).join('')}</tbody>
+      </table>
+    </div>`;
+
+  if (totalPages > 1) {
+    html += '<div class="pagination">';
+    if (wbIndPage > 1) html += `<button onclick="wbIndPage=${wbIndPage - 1};renderWbIndividualTable()">◀</button>`;
+    for (let p = 1; p <= totalPages; p++) {
+      if (totalPages > 7 && Math.abs(p - wbIndPage) > 2 && p !== 1 && p !== totalPages) {
+        if (p === 2 || p === totalPages - 1) html += '<button disabled>…</button>';
+        continue;
+      }
+      html += `<button class="${p === wbIndPage ? 'active' : ''}" onclick="wbIndPage=${p};renderWbIndividualTable()">${p}</button>`;
+    }
+    if (wbIndPage < totalPages) html += `<button onclick="wbIndPage=${wbIndPage + 1};renderWbIndividualTable()">▶</button>`;
+    html += '</div>';
+  }
+
+  html += '</div>';
+  area.innerHTML = html;
+}
+
+function filterWbInd(query) {
+  const q = query.trim().toLowerCase();
+  if (!q) { portalState._wbIndRows = portalState._wbIndRowsFull || portalState._wbIndRows; wbIndPage = 1; renderWbIndividualTable(); return; }
+  if (!portalState._wbIndRowsFull) portalState._wbIndRowsFull = portalState._wbIndRows;
+  portalState._wbIndRows = portalState._wbIndRowsFull.filter(r => {
+    const name = (r.name || r.title || '').toLowerCase();
+    return name.includes(q);
+  });
+  wbIndPage = 1;
+  renderWbIndividualTable();
+}
+
+function openWbDetail(index) {
+  const rows = portalState._wbIndRows || [];
+  const row = rows[index];
+  if (!row) return;
+  const raw = row.raw_responses || {};
+  const merged = { ...raw, bmi: row.bmi, bmi_category: row.bmi_category, tmhi_score: row.tmhi_score, tmhi_level: row.tmhi_level };
+
+  document.getElementById('wb-modal-title').textContent = `${row.name || row.title || 'ผู้ตอบ'} — ข้อมูลทั้งหมด`;
+  let body = '';
+  WB_QUESTIONS.forEach(sec => {
+    const items = sec.keys.filter(([k]) => merged[k] !== undefined && merged[k] !== null && merged[k] !== '').map(([k, label]) => {
+      let val = merged[k];
+      if (Array.isArray(val)) val = val.join(', ');
+      return `<div class="raw-item"><div class="raw-q">${esc(label)}</div><div class="raw-a">${esc(String(val))}</div></div>`;
+    });
+    if (items.length === 0) return;
+    body += `<div class="raw-section"><div class="raw-section-title">${esc(sec.section)}</div><div class="raw-grid">${items.join('')}</div></div>`;
+  });
+
+  if (!body) {
+    const allKeys = Object.entries(merged).filter(([k, v]) => v !== null && v !== undefined && v !== '' && !['id','created_at','updated_at','is_draft','organization','email','raw_responses'].includes(k));
+    body = '<div class="raw-section"><div class="raw-section-title">ข้อมูลทั้งหมด</div><div class="raw-grid">' +
+      allKeys.map(([k, v]) => `<div class="raw-item"><div class="raw-q">${esc(k)}</div><div class="raw-a">${esc(Array.isArray(v) ? v.join(', ') : String(v))}</div></div>`).join('') +
+      '</div></div>';
+  }
+
+  document.getElementById('wb-modal-body').innerHTML = body;
+  document.getElementById('wb-modal').classList.add('open');
+}
+
+function closeWbModal() {
+  document.getElementById('wb-modal').classList.remove('open');
+}
+
+document.getElementById('wb-modal')?.addEventListener('click', (e) => {
+  if (e.target === e.currentTarget) closeWbModal();
+});
+
+function exportWbIndExcel() {
+  const rows = portalState._wbIndRows || [];
+  if (!rows.length) { showToast('ไม่มีข้อมูล', 'warn'); return; }
+  try {
+    const allKeys = new Map();
+    WB_QUESTIONS.forEach(sec => sec.keys.forEach(([k, label]) => allKeys.set(k, label)));
+    const data = rows.map((r, i) => {
+      const raw = r.raw_responses || {};
+      const merged = { ...raw, bmi: r.bmi, bmi_category: r.bmi_category, tmhi_score: r.tmhi_score, tmhi_level: r.tmhi_level };
+      const obj = { '#': i + 1 };
+      allKeys.forEach((label, key) => {
+        let v = merged[key];
+        if (Array.isArray(v)) v = v.join(', ');
+        obj[label] = v ?? '';
+      });
+      obj['วันที่ส่ง'] = r.submitted_at ? new Date(r.submitted_at).toLocaleDateString('th-TH') : '';
+      return obj;
+    });
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'RawData');
+    XLSX.writeFile(wb, `wellbeing-individual-${portalState.orgCode || 'data'}-${new Date().toISOString().slice(0,10)}.xlsx`);
+    showToast('ส่งออก Excel (ทุกข้อ) สำเร็จ', 'success');
+  } catch (e) { showToast('ส่งออกไม่สำเร็จ: ' + e.message, 'error'); }
 }
 
 function updateProgress() {

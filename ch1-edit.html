@@ -156,6 +156,30 @@ const ID_PARAM  = params.get('id');
 const MODE      = params.get('mode') || 'edit'; // edit | view
 const IS_INLINE_PORTAL = window.parent && window.parent !== window;
 
+// Mapping: org_code → ชื่อเต็มภาษาไทย (fallback เมื่อยังไม่มีข้อมูลในฐาน)
+const ORG_NAME_MAP = {
+  'nesdc':     'สำนักงานสภาพัฒนาการเศรษฐกิจและสังคมแห่งชาติ',
+  'tpso':      'สำนักงานนโยบายและยุทธศาสตร์การค้า',
+  'dss':       'กรมวิทยาศาสตร์บริการ',
+  'dhss':      'กรมสนับสนุนบริการสุขภาพ',
+  'hssd':      'กรมสนับสนุนบริการสุขภาพ',
+  'tmd':       'กรมอุตุนิยมวิทยา',
+  'dcp':       'กรมส่งเสริมวัฒนธรรม',
+  'dop':       'กรมคุมประพฤติ',
+  'probation': 'กรมคุมประพฤติ',
+  'mots':      'สำนักงานปลัดกระทรวงการท่องเที่ยวและกีฬา',
+  'dmh':       'กรมสุขภาพจิต',
+  'onep':      'สำนักงานนโยบายและแผนทรัพยากรธรรมชาติและสิ่งแวดล้อม',
+  'nrct':      'สำนักงานการวิจัยแห่งชาติ',
+  'acfs':      'สำนักงานมาตรฐานสินค้าเกษตรและอาหารแห่งชาติ',
+  'opdc':      'สำนักงานคณะกรรมการพัฒนาระบบราชการ',
+  'ocsc':      'สำนักงานคณะกรรมการพัฒนาระบบราชการ',
+  'rid':       'กรมชลประทาน',
+  'dcy':       'กรมกิจการเด็กและเยาวชน',
+  'doh':       'กองฝึกอบรม กรมทางหลวง',
+  'tst':       'องค์กรทดสอบระบบ',
+};
+
 let userRole = null, userOrgCode = null, responseData = null, schema = null;
 
 const WORKFORCE_LAYOUT = {
@@ -489,7 +513,7 @@ function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt
 
 function renderPage(orgCode) {
   const status = responseData?.status || 'draft';
-  const orgName = responseData?.organization || orgCode;
+  const orgName = responseData?.organization || ORG_NAME_MAP[orgCode] || orgCode;
   const isReadOnly = MODE === 'view';
   const dis = isReadOnly ? 'disabled' : '';
   const fd = responseData || {};
@@ -960,6 +984,15 @@ async function saveForm(newStatus) {
     formData.org_code = ORG_PARAM || userOrgCode;
     // ลบ key ที่ไม่ใช่ column จริง
     delete formData.updated_at;
+
+    // คำนวณ rate_YYYY แล้วเก็บลง DB (rate box เป็น div ไม่มี name → collectFormData ดักไม่ได้)
+    [2564, 2565, 2566, 2567, 2568].forEach(year => {
+      const b = Number(formData[`begin_${year}`] || 0);
+      const e = Number(formData[`end_${year}`]   || 0);
+      const l = Number(formData[`leave_${year}`] || 0);
+      const denom = (b + e) / 2;
+      formData[`rate_${year}`] = denom > 0 ? parseFloat(((l / denom) * 100).toFixed(4)) : null;
+    });
 
     if (newStatus === 'submitted') {
       formData.submitted_at = new Date().toISOString();
