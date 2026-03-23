@@ -83,7 +83,7 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
 .sidebar-foot .nav-item{padding:8px 6px;border-left:none;font-size:12px}
 
 .portal-main-wrap{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-width:0}
-.topbar{background:#fff;border-bottom:1px solid var(--bdr);padding:10px 24px;display:flex;align-items:center;gap:12px;min-height:58px}
+.topbar{background:#fff;border-bottom:1px solid var(--bdr);padding:10px 24px;display:flex;align-items:center;gap:12px;min-height:58px;position:sticky;top:0;z-index:100}
 .tb-head{display:flex;flex-direction:column;gap:2px}
 .tb-title{font-size:14px;font-weight:700;color:var(--P)}
 .tb-sub{font-size:11.5px;color:var(--tx2);line-height:1.35}
@@ -247,6 +247,35 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
 .raw-item{display:grid;grid-template-columns:1fr auto;gap:8px;padding:8px 12px;background:#faf8ff;border-radius:8px;border:1px solid #f1edf8}
 .raw-q{font-size:12px;color:var(--tx2);line-height:1.5}
 .raw-a{font-size:13px;font-weight:600;color:var(--tx);text-align:right;min-width:80px}
+
+.tutorial-overlay{position:fixed;inset:0;background:rgba(17,24,39,.58);z-index:12000;display:flex;align-items:center;justify-content:center;padding:18px;opacity:0;pointer-events:none;transition:opacity .2s}
+.tutorial-overlay.open{opacity:1;pointer-events:auto}
+.tutorial-box{width:100%;max-width:760px;background:#fff;border-radius:20px;box-shadow:0 28px 70px rgba(15,23,42,.36);overflow:hidden;border:1px solid #e9defe}
+.tutorial-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 18px;border-bottom:1px solid var(--bdr);background:linear-gradient(90deg,#f5edff,#fff1f7)}
+.tutorial-kicker{font-size:11px;color:#7c3aed;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.tutorial-title{font-size:16px;color:#4b1f95;font-weight:700;margin-top:2px}
+.tutorial-close{border:none;background:#fff;color:#6b7280;width:34px;height:34px;border-radius:10px;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;border:1px solid #e8def8}
+.tutorial-close:hover{background:#f7f3ff;color:#4b1f95}
+.tutorial-body{padding:18px}
+.tutorial-progress{display:flex;gap:8px;margin-bottom:14px}
+.tutorial-dot{height:7px;flex:1;border-radius:999px;background:#ece8f9}
+.tutorial-dot.active{background:linear-gradient(90deg,#8b5cf6,#ec4899)}
+.tutorial-slide{display:none;background:#fff;border:1px solid #eee7fb;border-radius:14px;padding:16px}
+.tutorial-slide.active{display:block}
+.tutorial-slide h4{font-size:16px;color:#5b2aa8;margin-bottom:6px}
+.tutorial-slide p{font-size:13px;color:var(--tx2);line-height:1.7;margin-bottom:10px}
+.tutorial-slide ul{padding-left:18px;display:grid;gap:6px}
+.tutorial-slide li{font-size:13px;color:var(--tx);line-height:1.6}
+.tutorial-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:14px;flex-wrap:wrap}
+.tutorial-optout{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--tx2);cursor:pointer}
+.tutorial-optout input{accent-color:#7c3aed;cursor:pointer}
+.tutorial-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.tutorial-btn{padding:9px 14px;border-radius:10px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer}
+.tutorial-btn.prev{background:#fff;border:1px solid #ddd6fe;color:#6d28d9}
+.tutorial-btn.next{background:#7c3aed;border:1px solid #7c3aed;color:#fff}
+.tutorial-btn.finish{background:#ec4899;border:1px solid #ec4899;color:#fff}
+.tutorial-btn:hover{filter:brightness(.97)}
+
 .pagination{display:flex;justify-content:center;gap:6px;margin-top:16px}
 .pagination button{padding:6px 12px;border-radius:8px;border:1px solid var(--bdr);background:#fff;font-size:12px;cursor:pointer;font-family:inherit;color:var(--tx2);font-weight:600}
 .pagination button.active{background:#7c3aed;color:#fff;border-color:#7c3aed}
@@ -276,11 +305,45 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
 .wbi-pager button:hover:not(.active):not(:disabled){background:#faf8ff}
 .wbi-pager button:disabled{opacity:.4;cursor:default}
 
+/* Hamburger & sidebar close — hidden on desktop */
+.hamburger-btn{display:none}
+.sidebar-close-btn{display:none}
+/* Mobile sidebar overlay */
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.48);z-index:199;backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
+.sidebar-overlay.visible{display:block}
+
 @media(max-width:900px){
-  .sidebar{position:static;width:100%;height:auto}
+  /* Hamburger button */
+  .hamburger-btn{
+    display:flex;flex-direction:column;justify-content:center;align-items:center;
+    gap:5px;width:40px;height:40px;padding:8px;
+    background:none;border:none;cursor:pointer;
+    border-radius:8px;flex-shrink:0;
+  }
+  .hamburger-btn:hover{background:rgba(103,60,214,.08)}
+  .hamburger-btn span{
+    display:block;width:22px;height:2.5px;
+    background:var(--P);border-radius:2px;
+    transition:transform .2s ease,opacity .2s ease;
+  }
+  /* Close (X) button inside sidebar */
+  .sidebar-close-btn{
+    display:flex;align-items:center;justify-content:center;
+    width:32px;height:32px;border-radius:8px;
+    background:rgba(255,255,255,.12);border:none;
+    color:#fff;font-size:16px;cursor:pointer;flex-shrink:0;
+  }
+  .sidebar-close-btn:hover{background:rgba(255,255,255,.22)}
+  /* Sidebar becomes a fixed off-screen drawer */
+  .sidebar{
+    position:fixed;top:0;left:-280px;width:280px;height:100%;
+    z-index:200;transition:left .25s cubic-bezier(.4,0,.2,1);
+  }
+  .sidebar.open{left:0!important}
+  /* Main content takes full width */
   #portal-app{flex-direction:column}
   .portal-main-wrap{margin-left:0}
-  .portal-content{padding:18px}
+  .portal-content{padding:14px}
   .summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .org-toolbar{justify-content:flex-start;margin-top:0}
   .org-layout{grid-template-columns:1fr}
@@ -289,6 +352,9 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
   .dist-label{min-width:60px}
   .modal-box{max-width:100%;max-height:90vh;border-radius:12px}
   .modal-head{border-radius:12px 12px 0 0}
+  .tutorial-box{max-width:100%;border-radius:14px}
+  .tutorial-head{padding:12px 14px}
+  .tutorial-body{padding:14px}
 }
 </style>
 </head>
@@ -322,12 +388,17 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
   </div>
 </div>
 
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
 <div id="portal-app" style="display:none">
-  <aside class="sidebar">
+  <aside class="sidebar" id="main-sidebar">
     <div class="sidebar-logo">
-      <div class="logo-row">
-        <div class="logo-icon">🏛️</div>
-        <div class="logo-title">NIDA Wellbeing</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+        <div class="logo-row">
+          <div class="logo-icon">🏛️</div>
+          <div class="logo-title">NIDA Wellbeing</div>
+        </div>
+        <button class="sidebar-close-btn" onclick="closeSidebar()" aria-label="ปิดเมนู">✕</button>
       </div>
       <div class="logo-sub">Org HR Portal</div>
     </div>
@@ -356,6 +427,9 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
 
   <div class="portal-main-wrap">
     <div class="topbar">
+      <button class="hamburger-btn" id="hamburger-btn" onclick="openSidebar()" aria-label="เปิดเมนู">
+        <span></span><span></span><span></span>
+      </button>
       <div class="tb-head">
         <div class="tb-title" id="topbar-title">หน้าหลัก</div>
         <div class="tb-sub" id="topbar-subtitle">ภาพรวมข้อมูลขององค์กรและสถานะการส่งแบบสำรวจ</div>
@@ -505,6 +579,65 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
   </div>
 </div>
 
+<div class="tutorial-overlay" id="org-tutorial-overlay" role="dialog" aria-modal="true" aria-labelledby="tutorial-main-title">
+  <div class="tutorial-box">
+    <div class="tutorial-head">
+      <div>
+        <div class="tutorial-kicker">คู่มือการใช้งาน</div>
+        <div class="tutorial-title" id="tutorial-main-title">Org HR Portal</div>
+      </div>
+      <button type="button" class="tutorial-close" onclick="closeOrgTutorial()" aria-label="ปิดคู่มือ">✕</button>
+    </div>
+    <div class="tutorial-body">
+      <div class="tutorial-progress" id="tutorial-progress"></div>
+
+      <section class="tutorial-slide active" data-step="0">
+        <h4>ยินดีต้อนรับสู่ Org HR Portal</h4>
+        <p>หน้านี้คือศูนย์กลางการทำงานของ HR องค์กร สำหรับติดตามสถานะ CH1, ผลสำรวจ Well-being และแชร์ลิงก์ให้บุคลากรกรอกแบบประเมิน</p>
+        <ul>
+          <li>แถบเมนูซ้าย: เลือกหน้าที่ต้องการใช้งาน</li>
+          <li>แถบบน: แสดงชื่อเมนูและคำอธิบายสั้น ๆ</li>
+          <li>หน้าหลัก: ดูภาพรวมความคืบหน้าแบบรวดเร็ว</li>
+        </ul>
+      </section>
+
+      <section class="tutorial-slide" data-step="1">
+        <h4>เมนูหลักที่ต้องใช้บ่อย</h4>
+        <ul>
+          <li>หน้าหลัก: ดูสถานะ CH1 และจำนวนผู้ตอบ Well-being</li>
+          <li>รายละเอียดองค์กร: ตรวจสอบ/แก้ไขข้อมูลหน่วยงานและผู้ประสานงาน</li>
+          <li>CH1 ข้อมูลองค์กร: เข้าฟอร์ม, ดูข้อมูล, และดาวน์โหลด PDF</li>
+          <li>Well-being ผลสำรวจ: ดู Dashboard สรุปภาพรวมองค์กร</li>
+          <li>Well-being รายบุคคล: ดูข้อมูลรายคนแบบ Raw Data และ Export</li>
+          <li>แชร์ลิงก์ Well-being: คัดลอกลิงก์และดาวน์โหลด QR Code</li>
+        </ul>
+      </section>
+
+      <section class="tutorial-slide" data-step="2">
+        <h4>แนวทางใช้งานแนะนำ</h4>
+        <ul>
+          <li>เริ่มจากหน้า “แชร์ลิงก์ Well-being” เพื่อกระจายแบบสำรวจ</li>
+          <li>ติดตามผลที่หน้า “Well-being ผลสำรวจ” และ “รายบุคคล”</li>
+          <li>อัปเดตข้อมูลแผนงานที่หน้า “CH1 ข้อมูลองค์กร”</li>
+          <li>หากไม่ต้องการเห็นคู่มือนี้อีก ให้ติ๊ก “ไม่แสดงอีก” ก่อนกดเสร็จสิ้น</li>
+        </ul>
+      </section>
+
+      <div class="tutorial-foot">
+        <label class="tutorial-optout">
+          <input type="checkbox" id="tutorial-optout-checkbox">
+          ไม่แสดงคู่มือนี้อีก
+        </label>
+        <div class="tutorial-actions">
+          <button type="button" class="tutorial-btn prev" id="tutorial-prev-btn" onclick="prevTutorialStep()">ย้อนกลับ</button>
+          <button type="button" class="tutorial-btn next" id="tutorial-next-btn" onclick="nextTutorialStep()">ถัดไป</button>
+          <button type="button" class="tutorial-btn finish" id="tutorial-finish-btn" onclick="finishOrgTutorial()" style="display:none">เสร็จสิ้น</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast-el"></div>
 
 <div class="loading-overlay" id="loading" style="display:none">
@@ -537,6 +670,74 @@ const TAB_META = {
   share: { title: 'แชร์ลิงก์ Well-being', subtitle: 'ส่งต่อแบบสำรวจให้บุคลากรในองค์กร' },
 };
 
+const TUTORIAL_TOTAL_STEPS = 3;
+let tutorialStep = 0;
+
+function tutorialStorageKey(email) {
+  return `orgPortalTutorialDismissed:${String(email || '').toLowerCase()}`;
+}
+
+function updateTutorialProgress() {
+  const progressEl = document.getElementById('tutorial-progress');
+  if (!progressEl) return;
+  progressEl.innerHTML = Array.from({ length: TUTORIAL_TOTAL_STEPS })
+    .map((_, i) => `<span class="tutorial-dot ${i <= tutorialStep ? 'active' : ''}"></span>`)
+    .join('');
+
+  document.querySelectorAll('.tutorial-slide').forEach((slide, i) => {
+    slide.classList.toggle('active', i === tutorialStep);
+  });
+
+  const prevBtn = document.getElementById('tutorial-prev-btn');
+  const nextBtn = document.getElementById('tutorial-next-btn');
+  const finishBtn = document.getElementById('tutorial-finish-btn');
+  if (prevBtn) prevBtn.style.display = tutorialStep === 0 ? 'none' : '';
+  if (nextBtn) nextBtn.style.display = tutorialStep >= TUTORIAL_TOTAL_STEPS - 1 ? 'none' : '';
+  if (finishBtn) finishBtn.style.display = tutorialStep >= TUTORIAL_TOTAL_STEPS - 1 ? '' : 'none';
+}
+
+function openOrgTutorial(force = false) {
+  const email = portalState.session?.user?.email || '';
+  const key = tutorialStorageKey(email);
+  const dismissed = localStorage.getItem(key) === '1';
+  if (!force && dismissed) return;
+
+  tutorialStep = 0;
+  const optout = document.getElementById('tutorial-optout-checkbox');
+  if (optout) optout.checked = false;
+  updateTutorialProgress();
+  document.getElementById('org-tutorial-overlay')?.classList.add('open');
+}
+
+function closeOrgTutorial() {
+  const optout = document.getElementById('tutorial-optout-checkbox');
+  if (optout?.checked) {
+    const email = portalState.session?.user?.email || '';
+    localStorage.setItem(tutorialStorageKey(email), '1');
+  }
+  document.getElementById('org-tutorial-overlay')?.classList.remove('open');
+}
+
+function finishOrgTutorial() {
+  const optout = document.getElementById('tutorial-optout-checkbox');
+  const email = portalState.session?.user?.email || '';
+  if (optout?.checked) {
+    localStorage.setItem(tutorialStorageKey(email), '1');
+  }
+  document.getElementById('org-tutorial-overlay')?.classList.remove('open');
+  showToast('ปิดคู่มือการใช้งานแล้ว', 'success', 2200);
+}
+
+function nextTutorialStep() {
+  tutorialStep = Math.min(tutorialStep + 1, TUTORIAL_TOTAL_STEPS - 1);
+  updateTutorialProgress();
+}
+
+function prevTutorialStep() {
+  tutorialStep = Math.max(tutorialStep - 1, 0);
+  updateTutorialProgress();
+}
+
 function showToast(msg, type = 'info', duration = 4000) {
   const el = document.getElementById('toast-el');
   el.textContent = msg;
@@ -565,6 +766,11 @@ function fmtNum(value, digits = 0) {
 function fmtText(value) {
   if (value === null || value === undefined || value === '') return '<span class="detail-empty">—</span>';
   return esc(String(value));
+}
+
+function kpiLabel(label, tip) {
+  if (!tip) return esc(label);
+  return `${esc(label)} <span class="info-tip" data-tip="${esc(tip)}" aria-label="คำอธิบาย ${esc(label)}" title="${esc(tip)}">i</span>`;
 }
 
 function renderDetailItem(label, value) {
@@ -786,7 +992,19 @@ function togglePw() {
   }
 }
 
+function openSidebar() {
+  document.getElementById('main-sidebar').classList.add('open');
+  document.getElementById('sidebar-overlay').classList.add('visible');
+  document.body.style.overflow = 'hidden';
+}
+function closeSidebar() {
+  document.getElementById('main-sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('visible');
+  document.body.style.overflow = '';
+}
+
 function switchTab(tab) {
+  closeSidebar();
   document.querySelectorAll('.nav-item[data-tab]').forEach((btn) => btn.classList.toggle('active', btn.dataset.tab === tab));
   document.querySelectorAll('.tab-page').forEach((page) => page.classList.toggle('active', page.id === `page-${tab}`));
   document.getElementById('nav-ch1-edit').classList.toggle('active', tab === 'ch1');
@@ -956,10 +1174,44 @@ async function initPortal() {
   document.getElementById('org-code-display').textContent = `รหัสองค์กร: ${portalState.orgCode}`;
   renderOrgProfile();
 
-  await Promise.all([loadCh1Data(), loadWbData()]);
-  updateProgress();
-  generateOrgQR();
-  showLoading(false);
+  try {
+    const results = await Promise.allSettled([loadCh1Data(), loadWbData()]);
+    const ch1Failed = results[0]?.status === 'rejected';
+    const wbFailed = results[1]?.status === 'rejected';
+
+    if (ch1Failed) {
+      console.warn('[org-portal] loadCh1Data failed:', results[0].reason);
+      const homeCh1 = document.getElementById('home-ch1-summary');
+      const badgeEl = document.getElementById('ch1-status-badge');
+      const summaryEl = document.getElementById('ch1-summary');
+      const windowInfo = document.getElementById('ch1-window-info');
+      const actionsEl = document.getElementById('ch1-actions');
+      if (homeCh1) homeCh1.innerHTML = '<div class="info-box yellow">โหลดข้อมูล CH1 ไม่สำเร็จ กรุณาลองรีเฟรชอีกครั้ง</div>';
+      if (badgeEl) badgeEl.innerHTML = '<span class="status-badge none">⚠️ โหลดไม่สำเร็จ</span>';
+      if (summaryEl) summaryEl.style.display = 'none';
+      if (windowInfo) windowInfo.innerHTML = '<div class="ch1-strip yellow">ระบบดึงข้อมูล CH1 ไม่สำเร็จชั่วคราว</div>';
+      if (actionsEl) actionsEl.innerHTML = '';
+    }
+
+    if (wbFailed) {
+      console.warn('[org-portal] loadWbData failed:', results[1].reason);
+      const homeWb = document.getElementById('home-wb-summary');
+      const summaryEl = document.getElementById('wb-summary');
+      const actionsEl = document.getElementById('wb-actions');
+      const wbArea = document.getElementById('wb-dashboard-area');
+      if (homeWb) homeWb.innerHTML = '<div class="info-box yellow">โหลดข้อมูล Well-being ไม่สำเร็จ กรุณาลองรีเฟรชอีกครั้ง</div>';
+      if (summaryEl) summaryEl.style.display = 'none';
+      if (actionsEl) actionsEl.innerHTML = '<div class="info-box yellow">ระบบดึงข้อมูล Well-being ไม่สำเร็จชั่วคราว</div>';
+      if (wbArea) wbArea.innerHTML = '';
+      portalState.wbRows = [];
+    }
+
+    updateProgress();
+    generateOrgQR();
+    openOrgTutorial(false);
+  } finally {
+    showLoading(false);
+  }
 }
 
 async function getCh1WindowStatus(orgCode) {
@@ -981,20 +1233,41 @@ async function loadCh1Data() {
     return null;
   };
 
-  let { data: rows } = await sb
+  let { data: rows, error: ch1Err } = await sb
     .from('hrd_ch1_responses')
     .select('*')
     .eq('org_code', portalState.orgCode)
     .order('created_at', { ascending: false })
     .limit(1);
 
+  if (ch1Err) {
+    console.warn('[org-portal] CH1 query by org_code failed:', ch1Err.message || ch1Err);
+  }
+
   if ((!rows || rows.length === 0) && portalState.orgName) {
-    ({ data: rows } = await sb
+    ({ data: rows, error: ch1Err } = await sb
       .from('hrd_ch1_responses')
       .select('*')
-      .eq('organization', portalState.orgName)
+      .ilike('organization', portalState.orgName)
       .order('created_at', { ascending: false })
       .limit(1));
+
+    if (ch1Err) {
+      console.warn('[org-portal] CH1 query by organization failed:', ch1Err.message || ch1Err);
+    }
+  }
+
+  if ((!rows || rows.length === 0) && portalState.orgCode) {
+    ({ data: rows, error: ch1Err } = await sb
+      .from('hrd_ch1_responses')
+      .select('*')
+      .ilike('organization', `%${portalState.orgCode}%`)
+      .order('created_at', { ascending: false })
+      .limit(1));
+
+    if (ch1Err) {
+      console.warn('[org-portal] CH1 query by organization like org_code failed:', ch1Err.message || ch1Err);
+    }
   }
 
   const ch1Row = rows?.[0] || null;
@@ -1022,7 +1295,7 @@ async function loadCh1Data() {
     homeCh1.innerHTML = `
       <div class="summary-grid" style="grid-template-columns:repeat(2,minmax(0,1fr))">
         <div class="summary-item"><div class="val">${fmtNum(portalState.totalStaff)}</div><div class="lbl">บุคลากรรวม</div></div>
-        <div class="summary-item"><div class="val">${fmtNum(ncdCount)}</div><div class="lbl">${kpiLabel('NCD รวม', 'มาจากข้อข้อมูลโรคเรื้อรัง (NCDs): disease_diabetes, disease_hypertension, disease_cardiovascular, disease_kidney, disease_liver, disease_cancer, disease_obesity และ disease_other_count')}</div></div>
+        <div class="summary-item"><div class="val">${fmtNum(ncdCount)}</div><div class="lbl">${kpiLabel('NCD รวม', 'ค่านี้มาจากจำนวนบุคลากรที่มีโรคไม่ติดต่อเรื้อรัง (NCD) รวมทุกกลุ่มโรค')}</div></div>
       </div>`;
   }
 
@@ -1034,10 +1307,10 @@ async function loadCh1Data() {
     summaryEl.style.display = '';
     summaryGrid.innerHTML = [
       { val: fmtNum(fd.total_staff || fd.total_personnel), lbl: 'บุคลากรรวม' },
-      { val: turnoverRate !== null ? `${fmtNum(turnoverRate, 2)}%` : '−', lbl: kpiLabel('อัตราลาออก', 'มาจากตารางการลาออกและโอนย้ายย้อนหลัง 5 ปี โดยใช้ค่า rate_2568 เป็นหลัก (คำนวณจาก begin_2568, end_2568, leave_2568)') },
-      { val: fmtNum(ncdCount), lbl: kpiLabel('NCD รวม', 'มาจากข้อข้อมูลโรคเรื้อรัง (NCDs): disease_diabetes, disease_hypertension, disease_cardiovascular, disease_kidney, disease_liver, disease_cancer, disease_obesity และ disease_other_count') },
-      { val: fmtNum(engagementScore, 2), lbl: kpiLabel('Engagement', 'มาจากข้อคะแนน Employee Engagement ย้อนหลัง 5 ปี โดยใช้ engagement_score_2568 เป็นหลัก') },
-      { val: fmtNum(trainingHours, 2), lbl: kpiLabel('ชม.อบรม/คน/ปี', 'มาจากข้อชั่วโมงการพัฒนาบุคลากรย้อนหลัง 5 ปี โดยใช้ training_hours_2568 เป็นหลัก') },
+      { val: turnoverRate !== null ? `${fmtNum(turnoverRate, 2)}%` : '−', lbl: kpiLabel('อัตราลาออก', 'ค่านี้มาจากข้อมูลการลาออกย้อนหลัง 5 ปี โดยใช้ข้อมูลปีล่าสุดเป็นหลัก') },
+      { val: fmtNum(ncdCount), lbl: kpiLabel('NCD รวม', 'ค่านี้มาจากจำนวนบุคลากรที่มีโรคไม่ติดต่อเรื้อรัง (NCD) รวมทุกกลุ่มโรค') },
+      { val: fmtNum(engagementScore, 2), lbl: kpiLabel('คะแนนความผูกพัน', 'ค่านี้มาจากคะแนนความผูกพันของบุคลากร (Engagement) ย้อนหลัง 5 ปี โดยใช้ปีล่าสุดเป็นหลัก') },
+      { val: fmtNum(trainingHours, 2), lbl: kpiLabel('ชั่วโมงอบรม/คน/ปี', 'ค่านี้มาจากชั่วโมงการพัฒนาบุคลากรย้อนหลัง 5 ปี โดยใช้ปีล่าสุดเป็นหลัก') },
       { val: fmtNum(fd.sick_leave_avg, 2), lbl: 'ลาป่วยเฉลี่ย/คน' },
     ].map((item) => `<div class="summary-item"><div class="val">${item.val}</div><div class="lbl">${item.lbl}</div></div>`).join('');
   }
@@ -1070,25 +1343,51 @@ async function loadCh1Data() {
 
 async function loadWbData() {
   let rows = [];
+  const orgName = portalState.orgName || '';
+  const orgCode = portalState.orgCode || '';
 
-  const { data: surveyRows } = await sb
+  const { data: surveyRows, error: surveyErr } = await sb
     .from('survey_responses')
     .select('id, organization, submitted_at, is_draft, gender, age, tmhi_score, tmhi_level, bmi, bmi_category, name, title, height, weight, waist')
-    .eq('organization', portalState.orgName)
+    .eq('organization', orgName)
     .eq('is_draft', false)
     .order('submitted_at', { ascending: false });
+
+  if (surveyErr) {
+    console.warn('[org-portal] survey_responses query by organization failed:', surveyErr.message || surveyErr);
+  }
 
   if (surveyRows && surveyRows.length > 0) {
     rows = surveyRows;
   } else {
     try {
-      const { data: wbRows } = await sb
+      const { data: wbRows, error: wbErr } = await sb
         .from('survey_responses')
         .select('id, organization, submitted_at, is_draft, gender, age, tmhi_score, tmhi_level, bmi, bmi_category, name, title, height, weight, waist')
-        .eq('organization', portalState.orgName)
+        .ilike('organization', orgName)
         .eq('is_draft', false)
         .order('submitted_at', { ascending: false });
+
+      if (wbErr) {
+        console.warn('[org-portal] survey_responses ilike by organization failed:', wbErr.message || wbErr);
+      }
+
       rows = wbRows || [];
+    } catch (_) {}
+  }
+
+  if (rows.length === 0 && orgCode) {
+    try {
+      const { data: codeRows, error: codeErr } = await sb
+        .from('survey_responses')
+        .select('id, organization, submitted_at, is_draft, gender, age, tmhi_score, tmhi_level, bmi, bmi_category, name, title, height, weight, waist')
+        .ilike('organization', `%${orgCode}%`)
+        .eq('is_draft', false)
+        .order('submitted_at', { ascending: false });
+      if (codeErr) {
+        console.warn('[org-portal] survey_responses by org_code-like failed:', codeErr.message || codeErr);
+      }
+      rows = codeRows || [];
     } catch (_) {}
   }
 
@@ -1511,6 +1810,15 @@ function closeWbModal() {
 
 document.getElementById('wb-modal')?.addEventListener('click', (e) => {
   if (e.target === e.currentTarget) closeWbModal();
+});
+
+document.getElementById('org-tutorial-overlay')?.addEventListener('click', (e) => {
+  if (e.target === e.currentTarget) closeOrgTutorial();
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape') return;
+  if (document.getElementById('org-tutorial-overlay')?.classList.contains('open')) closeOrgTutorial();
 });
 
 function exportWbIndExcel() {
