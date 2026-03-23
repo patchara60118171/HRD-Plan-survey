@@ -3728,6 +3728,12 @@ ${histRows !== '<tr><td colspan="5" style="color:#9CA3AF;text-align:center">—<
 function showCh1PDF(index) {
   const row = state.ch1Rows[index];
   if (!row) { showToast('ไม่พบข้อมูลในตำแหน่งนี้', 'warn'); return; }
+  const orgCode = String(row.org_code || row.form_data?.org_code || '').trim().toLowerCase() || 'unknown';
+  const qs = new URLSearchParams({ org: orgCode, id: String(row.id || ''), export: 'pdf', autoclose: '1' });
+  const win = window.open(`ch1-preview?${qs.toString()}`, '_blank');
+  if (!win) showToast('กรุณาอนุญาต Popup เพื่อดาวน์โหลด PDF', 'warn');
+  return;
+
   const fd = row.form_data || row;
   const org = getCh1Org(row);
   const dateStr = fmtDate(getRowDate(row), true);

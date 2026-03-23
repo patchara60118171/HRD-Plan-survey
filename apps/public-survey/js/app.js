@@ -266,7 +266,14 @@ function initSupabase() {
 
 // Save to Supabase
 async function saveToSupabase(email, responses, isDraft = false) {
-    if (!supabaseClient || !email) return false;
+    if (!supabaseClient) return 'error:supabase-not-ready';
+    if (!email) return 'error:missing-email';
+
+    const normalizeArrayAnswer = (value) => {
+        if (Array.isArray(value)) return value.length > 0 ? value : null;
+        if (value === undefined || value === null || value === '') return null;
+        return [value];
+    };
 
     try {
         // Calculate BMI if height and weight exist
@@ -313,7 +320,7 @@ async function saveToSupabase(email, responses, isDraft = false) {
             // ส่วนบุคคล (เพิ่มเติม)
             activity_org:        responses.activity_org        || null,
             activity_thaihealth: responses.activity_thaihealth || null,
-            diseases:            Array.isArray(responses.diseases) ? responses.diseases.join(', ') : (responses.diseases || null),
+            diseases:            normalizeArrayAnswer(responses.diseases),
             // ยาสูบ/แอลกอฮอล์
             q2001:      responses.q2001      || null,
             q2002:      responses.q2002      || null,
@@ -393,7 +400,7 @@ async function saveToSupabase(email, responses, isDraft = false) {
             helmet_passenger:   responses.helmet_passenger   || null,
             seatbelt_driver:    responses.seatbelt_driver    || null,
             seatbelt_passenger: responses.seatbelt_passenger || null,
-            accident_hist:      Array.isArray(responses.accident_hist) ? responses.accident_hist.join(', ') : (responses.accident_hist || null),
+            accident_hist:      normalizeArrayAnswer(responses.accident_hist),
             drunk_drive:        responses.drunk_drive        || null,
             // สิ่งแวดล้อมและโรคอุบัติใหม่
             env_satisfaction: responses.env_satisfaction !== undefined ? String(responses.env_satisfaction) : null,
@@ -404,10 +411,10 @@ async function saveToSupabase(email, responses, isDraft = false) {
             env_posture:      responses.env_posture      || null,
             env_awkward:      responses.env_awkward      || null,
             pm25_impact:      responses.pm25_impact      || null,
-            pm25_symptom:     Array.isArray(responses.pm25_symptom) ? responses.pm25_symptom.join(', ') : (responses.pm25_symptom || null),
+            pm25_symptom:     normalizeArrayAnswer(responses.pm25_symptom),
             life_quality:     responses.life_quality     !== undefined ? String(responses.life_quality) : null,
             emerging_known:   responses.emerging_known   || null,
-            emerging_list:    Array.isArray(responses.emerging_list) ? responses.emerging_list.join(', ') : (responses.emerging_list || null),
+            emerging_list:    normalizeArrayAnswer(responses.emerging_list),
             climate_impact:   responses.climate_impact   || null,
             covid_history:    responses.covid_history    || null,
             // Metadata
@@ -426,14 +433,15 @@ async function saveToSupabase(email, responses, isDraft = false) {
 
         if (error) {
             console.error('Supabase save error:', error);
-            return false;
+            if (error.code === '42501') return 'error:permission-denied';
+            return `error:${error.message || 'save-failed'}`;
         }
 
         console.log('Saved to Supabase:', isDraft ? 'draft' : 'submitted');
         return true;
     } catch (e) {
         console.error('Supabase save exception:', e);
-        return false;
+        return `error:${e.message || 'save-exception'}`;
     }
 }
 
@@ -522,6 +530,7 @@ const app = {
 
         // Load saved responses
         this.responses = loadResponses();
+        this.applyOrgContextToResponses();
 
         // Check for saved section
         const savedSection = localStorage.getItem('wellbeing_survey_section');
@@ -591,6 +600,17 @@ const app = {
         }
     },
 
+    applyOrgContextToResponses() {
+        const urlOrgCode = (new URLSearchParams(window.location.search).get('org') || '').trim().toLowerCase();
+        if (!urlOrgCode || !this.orgMap[urlOrgCode]) return;
+
+        if (!this.responses) this.responses = {};
+        this.organization = this.orgMap[urlOrgCode];
+        this.responses.organization = this.organization;
+        this.responses.org_code = urlOrgCode;
+        saveResponses(this.responses);
+    },
+
     // Set user email
     setEmail() {
         const emailInput = document.getElementById('user-email-input');
@@ -646,7 +666,8 @@ const app = {
             const localDraft = loadResponses();
             if (Object.keys(cloudDraft).length >= Object.keys(localDraft).length) {
                 this.responses = cloudDraft;
-                saveResponses(cloudDraft);
+                this.applyOrgContextToResponses();
+                saveResponses(this.responses);
                 showToast('โหลดข้อมูลจาก Cloud สำเร็จ!', 'success');
             }
         }
@@ -1070,6 +1091,18 @@ const app = {
     async submitSurvey() {
         showToast('กำลังบันทึกข้อมูล...', 'info');
 
+        // Enforce organization context from URL before save
+        this.applyOrgContextToResponses();
+
+        if (!this.userInfo || !this.userInfo.email) {
+            showToast('กรุณายืนยันอีเมลก่อนส่งแบบสำรวจ', 'error');
+            return;
+        }
+        if (!this.responses.organization || !this.responses.org_code) {
+            showToast('ไม่พบข้อมูลองค์กรจากลิงก์ กรุณาเปิดลิงก์องค์กรใหม่อีกครั้ง', 'error');
+            return;
+        }
+
         // Calculate and add BMI to responses before saving
         const height = parseFloat(this.responses.height);
         const weight = parseFloat(this.responses.weight);
@@ -1088,12 +1121,19 @@ const app = {
             this.responses.tmhi_level = tmhiInfo ? tmhiInfo.level : '';
         }
 
-        // 1. Save to Supabase (Primary)
-        if (this.userInfo && this.userInfo.email) {
-            const supabaseSuccess = await saveToSupabase(this.userInfo.email, this.responses, false);
-            if (supabaseSuccess) {
-                showToast('บันทึกข้อมูลสำเร็จ!', 'success');
-            }
+        // 1. Save to Supabase (Primary) — only proceed to success screen when save is confirmed
+        const supabaseResult = await saveToSupabase(this.userInfo.email, this.responses, false);
+        if (supabaseResult === true) {
+            showToast('บันทึกข้อมูลสำเร็จ!', 'success');
+        } else if (supabaseResult === 'error:permission-denied') {
+            showToast('ไม่สามารถบันทึกได้ในขณะนี้ เนื่องจากสิทธิ์ฐานข้อมูลยังไม่พร้อม', 'error');
+            return;
+        } else if (typeof supabaseResult === 'string' && supabaseResult.startsWith('error:')) {
+            showToast(`ไม่สามารถบันทึกได้: ${supabaseResult.slice(6)}`, 'error');
+            return;
+        } else {
+            showToast('ไม่สามารถบันทึกได้ กรุณาลองใหม่', 'error');
+            return;
         }
 
         // 2. Also save to Google Apps Script (Backup)

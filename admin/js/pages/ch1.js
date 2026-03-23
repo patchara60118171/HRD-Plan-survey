@@ -633,6 +633,12 @@ ${histRows !== '<tr><td colspan="5" style="color:#9CA3AF;text-align:center">—<
 function showCh1PDF(index) {
   const row = state.ch1Rows[index];
   if (!row) { showToast('ไม่พบข้อมูลในตำแหน่งนี้', 'warn'); return; }
+  const orgCode = String(row.org_code || row.form_data?.org_code || '').trim().toLowerCase() || 'unknown';
+  const qs = new URLSearchParams({ org: orgCode, id: String(row.id || ''), export: 'pdf', autoclose: '1' });
+  const win = window.open(`ch1-preview?${qs.toString()}`, '_blank');
+  if (!win) showToast('กรุณาอนุญาต Popup เพื่อดาวน์โหลด PDF', 'warn');
+  return;
+
   const fd = row.form_data || row;
   const org = getCh1Org(row);
   const dateStr = fmtDate(getRowDate(row), true);
@@ -827,11 +833,52 @@ ${histRows !== '<tr><td colspan="5" style="color:#9CA3AF;text-align:center">—<
   <tr><th>ผลลัพธ์แผน HRD ที่คาดหวัง</th><td>${s('hrd_plan_results')}</td></tr>
 </table>
 <div class="footer">พิมพ์เมื่อ: ${new Date().toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'})} &nbsp;|&nbsp; ระบบ Admin Portal Well-being Survey</div>
-<script>window.onload=function(){window.print()}<\/script>
 </body></html>`;
-  const w = window.open('', '_blank', 'width=960,height=780');
-  if (w) { w.document.write(pdfHtml); w.document.close(); }
-  else showToast('กรุณาอนุญาต Popup เพื่อดู PDF', 'warn');
+
+  // Generate PDF filename
+  const sanitizedOrg = org.replace(/[^ก-๙a-zA-Z0-9]/g, '_');
+  const pdfFileName = `CH1_${sanitizedOrg}_${new Date().toISOString().split('T')[0]}.pdf`;
+  
+  showToast('กำลังเปิดหน้าต่างสำหรับบันทึก PDF...', 'info', 2000);
+  
+  // Create iframe for PDF generation
+  const iframe = document.createElement('iframe');
+  iframe.style.position = 'fixed';
+  iframe.style.right = '0';
+  iframe.style.bottom = '0';
+  iframe.style.width = '0';
+  iframe.style.height = '0';
+  iframe.style.border = '0';
+  document.body.appendChild(iframe);
+  
+  const iframeDoc = iframe.contentWindow.document;
+  iframeDoc.open();
+  iframeDoc.write(pdfHtml);
+  iframeDoc.close();
+  
+  // Wait for content to load
+  setTimeout(() => {
+    try {
+      // Trigger print dialog (user can save as PDF)
+      iframe.contentWindow.focus();
+      iframe.contentWindow.print();
+      
+      // Clean up after print dialog
+      setTimeout(() => {
+        if (iframe.parentNode) {
+          document.body.removeChild(iframe);
+        }
+      }, 1000);
+      
+      showToast('📄 กรุณาเลือก "Save as PDF" หรือ "บันทึกเป็น PDF" ในหน้าต่างพิมพ์', 'success', 5000);
+    } catch (err) {
+      console.error('PDF generation error:', err);
+      if (iframe.parentNode) {
+        document.body.removeChild(iframe);
+      }
+      showToast('ไม่สามารถเปิดหน้าต่างพิมพ์ได้ กรุณาลองใหม่อีกครั้ง', 'error');
+    }
+  }, 500);
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────

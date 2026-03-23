@@ -23,39 +23,37 @@ TO authenticated
 USING (true);
 
 -- 2. Insert ได้สำหรับทุกคน แต่จำกัดขนาดข้อมูล
-CREATE POLICY "Public can insert with limits"
+CREATE POLICY "survey_insert_anon"
 ON survey_responses
 FOR INSERT
 TO anon, authenticated
 WITH CHECK (
-    -- ต้องมี email
-    email IS NOT NULL 
-    AND email != ''
-    -- email ต้องถูกรูปแบบ
+    email IS NOT NULL
+    AND btrim(email) <> ''
     AND email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'
-    -- ไม่ให้ส่งซ้ำภายใน 1 ชั่วโมง (ตรวจจาก timestamp)
+    AND pg_column_size(raw_responses) < 1048576
     AND NOT EXISTS (
         SELECT 1 FROM survey_responses sr
-        WHERE sr.email = survey_responses.email
-        AND sr.timestamp > NOW() - INTERVAL '1 hour'
-        AND sr.is_draft = false
+        WHERE lower(sr.email) = lower(survey_responses.email)
+          AND coalesce(sr.is_draft, false) = false
+          AND coalesce(sr.submitted_at, sr.timestamp) > NOW() - INTERVAL '1 hour'
     )
-    -- จำกัดขนาด raw_responses ไม่เกิน 1MB
-    AND pg_column_size(raw_responses) < 1048576
 );
 
--- 3. Update ได้เฉพาะ draft ของตัวเอง (ภายใน 24 ชั่วโมง)
-CREATE POLICY "Can update own draft"
+-- 3. Update ได้สำหรับ row ล่าสุด/ draft เพื่อรองรับ upsert จาก public survey
+CREATE POLICY "survey_update_recent"
 ON survey_responses
 FOR UPDATE
 TO anon, authenticated
 USING (
-    is_draft = true
-    AND timestamp > NOW() - INTERVAL '24 hours'
+    coalesce(is_draft, false) = true
+    OR coalesce(submitted_at, timestamp) > NOW() - INTERVAL '24 hours'
 )
 WITH CHECK (
-    is_draft = true
-    AND email IS NOT NULL
+    email IS NOT NULL
+    AND btrim(email) <> ''
+    AND email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'
+    AND pg_column_size(raw_responses) < 1048576
 );
 
 -- 4. Delete ได้เฉพาะ admin

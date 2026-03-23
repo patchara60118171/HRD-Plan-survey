@@ -565,10 +565,12 @@ function buildCh1OrgDocsMarkdown({ meta, submittedAt, count, isSubmitted, rowDat
     `- บริหารต้น (S1): ${n('pos_s1')} คน`,
     `- บริหารสูง (S2): ${n('pos_s2')} คน`,
     '',
-    '#### อัตราการลาออก/โอนย้าย',
-    `- **จำนวนลาออก**: ${n('turnover_count')} คน`,
-    `- **อัตราการลาออก**: ${v('turnover_rate')}%`,
-    `- **จำนวนโอนย้าย**: ${n('transfer_count')} คน`,
+    '#### อัตราการลาออก/โอนย้าย (5 ปีย้อนหลัง)',
+    `- **ปี 2568**: ลาออก ${n('leave_count_2568')} คน (อัตรา ${v('turnover_rate_2568')}%)`,
+    `- **ปี 2567**: ลาออก ${n('leave_count_2567')} คน (อัตรา ${v('turnover_rate_2567')}%)`,
+    `- **ปี 2566**: ลาออก ${n('leave_count_2566')} คน (อัตรา ${v('turnover_rate_2566')}%)`,
+    `- **ปี 2565**: ลาออก ${n('leave_count_2565')} คน (อัตรา ${v('turnover_rate_2565')}%)`,
+    `- **ปี 2564**: ลาออก ${n('leave_count_2564')} คน (อัตรา ${v('turnover_rate_2564')}%)`,
     '',
     '### ข้อมูลสุขภาวะ',
     '',
@@ -636,13 +638,6 @@ function buildCh1OrgDocsMarkdown({ meta, submittedAt, count, isSubmitted, rowDat
     '',
   ].join('\n');
 }
-    '- ข้อมูลนี้สร้างจาก PDF ต้นฉบับ อาจต้องการแก้ไขรูปแบบใน Word',
-    '- สามารถตรวจสอบข้อมูลละเอียดจากไฟล์ PDF ได้',
-    '',
-    `*รายงานนี้สร้างเมื่อ ${new Date().toLocaleString('th-TH')}*`,
-    '',
-  ].join('\n');
-}
 
 function exportCh1FilteredDocs(orgFilter) {
   // orgFilter: ชื่อองค์กร (เหมือนในตาราง) หรือ '' = ทุกองค์กร
@@ -674,7 +669,26 @@ function exportCh1FilteredDocs(orgFilter) {
   }
 
   const meta = getCh1OrgDocMeta(orgFilter);
-  if (!meta) { showToast('ไม่พบข้อมูลองค์กรใน mapping สำหรับ Docs', 'warn'); return; }
+  if (!meta) { 
+    // Create dynamic metadata for organizations not in the predefined list
+    const dynamicMeta = {
+      num: '00',
+      orgName: orgFilter,
+      fileBase: orgFilter.replace(/[^ก-๙a-zA-Z0-9]/g, '_'),
+      pdfFile: null
+    };
+    
+    const rows = state.ch1Rows.filter((r) => getCh1Org(r) === orgFilter);
+    const isSubmitted = rows.length > 0;
+    const submittedAt = rows[0] ? getRowDate(rows[0]) : null;
+    const count = rows.length || 0;
+    const rowData = rows[0] || null;
+
+    const markdown = buildCh1OrgDocsMarkdown({ meta: dynamicMeta, submittedAt, count, isSubmitted, rowData });
+    downloadDocs(`${dynamicMeta.fileBase}.doc`, markdown);
+    showToast(`Export Docs (Ch1) สำเร็จ: ${dynamicMeta.fileBase}.doc ✅`, 'success');
+    return;
+  }
 
   const rows = state.ch1Rows.filter((r) => getCh1Org(r) === orgFilter);
   const isSubmitted = rows.length > 0;
@@ -690,6 +704,16 @@ function exportCh1FilteredDocs(orgFilter) {
 function exportCh1RowDocs(idx) {
   const row = state.ch1Rows[idx];
   if (!row) { showToast('ไม่พบข้อมูล Ch1 ในตำแหน่งนี้', 'warn'); return; }
+  const orgCode = String(row.org_code || row.form_data?.org_code || '').trim().toLowerCase() || 'unknown';
+  const qs = new URLSearchParams({ org: orgCode, id: String(row.id || ''), export: 'docs', autoclose: '1' });
+  const win = window.open(`ch1-preview?${qs.toString()}`, '_blank');
+  if (!win) {
+    showToast('กรุณาอนุญาต Popup เพื่อดาวน์โหลด Docs', 'warn');
+    return;
+  }
+  showToast('กำลังเตรียมไฟล์ Docs จากหน้า Preview...', 'info');
+  return;
+
   const orgName = getCh1Org(row);
   exportCh1FilteredDocs(orgName);
 }

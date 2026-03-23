@@ -397,7 +397,13 @@ function initSWListener() {
 
 // Save to Supabase (with offline fallback)
 async function saveToSupabase(email, responses, isDraft = false) {
-    if (!email) return false;
+    if (!email) return 'error:missing-email';
+
+    const normalizeArrayAnswer = (value) => {
+        if (Array.isArray(value)) return value.length > 0 ? value : null;
+        if (value === undefined || value === null || value === '') return null;
+        return [value];
+    };
 
     // Prepare data regardless of online status
     const height = parseFloat(responses.height);
@@ -412,6 +418,16 @@ async function saveToSupabase(email, responses, isDraft = false) {
     const tmhiScore = calculateTMHIScore(responses);
     const tmhiInfo = getTMHILevel(tmhiScore);
 
+    let uclaScore = null;
+    if (responses.lonely_1 !== undefined && responses.lonely_1 !== null && responses.lonely_1 !== '') {
+        let uclaSum = 0;
+        for (let i = 1; i <= 20; i++) {
+            const value = parseInt(responses[`lonely_${i}`], 10);
+            if (!isNaN(value)) uclaSum += value;
+        }
+        uclaScore = uclaSum;
+    }
+
     const dataToSave = {
         email: email,
         name: responses.name || null,
@@ -421,13 +437,119 @@ async function saveToSupabase(email, responses, isDraft = false) {
         organization: responses.organization || null,
         org_code: responses.org_code || null,
         org_type: responses.org_type || null,
+        job: responses.job || null,
+        job_duration: responses.job_duration ? parseInt(responses.job_duration) : null,
         height: height || null,
         weight: weight || null,
         waist: responses.waist ? parseFloat(responses.waist) : null,
         bmi: bmi,
         bmi_category: bmiCategory,
+        activity_org: responses.activity_org || null,
+        activity_thaihealth: responses.activity_thaihealth || null,
+        diseases: normalizeArrayAnswer(responses.diseases),
         tmhi_score: tmhiScore || null,
         tmhi_level: tmhiInfo ? tmhiInfo.level : null,
+        
+        // พฤติกรรมเสี่ยง (บุหรี่/แอลกอฮอล์/สารเสพติด)
+        q2001: responses.q2001 || null,
+        q2002: responses.q2002 || null,
+        q2003: responses.q2003 || null,
+        q2004: responses.q2004 || null,
+        q2005_drug: responses.q2005_drug || null,
+        
+        // โภชนาการ (หวาน/มัน/เค็ม)
+        sweet_1: responses.sweet_1 || null,
+        sweet_2: responses.sweet_2 || null,
+        sweet_3: responses.sweet_3 || null,
+        sweet_4: responses.sweet_4 || null,
+        sweet_5: responses.sweet_5 || null,
+        fat_1: responses.fat_1 || null,
+        fat_2: responses.fat_2 || null,
+        fat_3: responses.fat_3 || null,
+        fat_4: responses.fat_4 || null,
+        fat_5: responses.fat_5 || null,
+        salt_1: responses.salt_1 || null,
+        salt_2: responses.salt_2 || null,
+        salt_3: responses.salt_3 || null,
+        salt_4: responses.salt_4 || null,
+        salt_5: responses.salt_5 || null,
+        
+        // กิจกรรมทางกาย (TPAX)
+        act_work_days: responses.act_work_days ? parseInt(responses.act_work_days) : null,
+        act_work_dur: responses.act_work_dur || null,
+        act_commute_days: responses.act_commute_days ? parseInt(responses.act_commute_days) : null,
+        act_commute_dur: responses.act_commute_dur || null,
+        act_rec_days: responses.act_rec_days ? parseInt(responses.act_rec_days) : null,
+        act_rec_dur: responses.act_rec_dur || null,
+        sedentary_dur: responses.sedentary_dur || null,
+        screen_entertain: responses.screen_entertain || null,
+        screen_work: responses.screen_work || null,
+        
+        // สุขภาพจิต (TMHI-15)
+        tmhi_1: responses.tmhi_1 ? parseInt(responses.tmhi_1) : null,
+        tmhi_2: responses.tmhi_2 ? parseInt(responses.tmhi_2) : null,
+        tmhi_3: responses.tmhi_3 ? parseInt(responses.tmhi_3) : null,
+        tmhi_4: responses.tmhi_4 ? parseInt(responses.tmhi_4) : null,
+        tmhi_5: responses.tmhi_5 ? parseInt(responses.tmhi_5) : null,
+        tmhi_6: responses.tmhi_6 ? parseInt(responses.tmhi_6) : null,
+        tmhi_7: responses.tmhi_7 ? parseInt(responses.tmhi_7) : null,
+        tmhi_8: responses.tmhi_8 ? parseInt(responses.tmhi_8) : null,
+        tmhi_9: responses.tmhi_9 ? parseInt(responses.tmhi_9) : null,
+        tmhi_10: responses.tmhi_10 ? parseInt(responses.tmhi_10) : null,
+        tmhi_11: responses.tmhi_11 ? parseInt(responses.tmhi_11) : null,
+        tmhi_12: responses.tmhi_12 ? parseInt(responses.tmhi_12) : null,
+        tmhi_13: responses.tmhi_13 ? parseInt(responses.tmhi_13) : null,
+        tmhi_14: responses.tmhi_14 ? parseInt(responses.tmhi_14) : null,
+        tmhi_15: responses.tmhi_15 ? parseInt(responses.tmhi_15) : null,
+        
+        // ความเหงา (UCLA Loneliness Scale)
+        lonely_1: responses.lonely_1 ? parseInt(responses.lonely_1) : null,
+        lonely_2: responses.lonely_2 ? parseInt(responses.lonely_2) : null,
+        lonely_3: responses.lonely_3 ? parseInt(responses.lonely_3) : null,
+        lonely_4: responses.lonely_4 ? parseInt(responses.lonely_4) : null,
+        lonely_5: responses.lonely_5 ? parseInt(responses.lonely_5) : null,
+        lonely_6: responses.lonely_6 ? parseInt(responses.lonely_6) : null,
+        lonely_7: responses.lonely_7 ? parseInt(responses.lonely_7) : null,
+        lonely_8: responses.lonely_8 ? parseInt(responses.lonely_8) : null,
+        lonely_9: responses.lonely_9 ? parseInt(responses.lonely_9) : null,
+        lonely_10: responses.lonely_10 ? parseInt(responses.lonely_10) : null,
+        lonely_11: responses.lonely_11 ? parseInt(responses.lonely_11) : null,
+        lonely_12: responses.lonely_12 ? parseInt(responses.lonely_12) : null,
+        lonely_13: responses.lonely_13 ? parseInt(responses.lonely_13) : null,
+        lonely_14: responses.lonely_14 ? parseInt(responses.lonely_14) : null,
+        lonely_15: responses.lonely_15 ? parseInt(responses.lonely_15) : null,
+        lonely_16: responses.lonely_16 ? parseInt(responses.lonely_16) : null,
+        lonely_17: responses.lonely_17 ? parseInt(responses.lonely_17) : null,
+        lonely_18: responses.lonely_18 ? parseInt(responses.lonely_18) : null,
+        lonely_19: responses.lonely_19 ? parseInt(responses.lonely_19) : null,
+        lonely_20: responses.lonely_20 ? parseInt(responses.lonely_20) : null,
+        
+        // ความปลอดภัย (อุบัติเหตุและความปลอดภัย)
+        helmet_driver: responses.helmet_driver || null,
+        helmet_passenger: responses.helmet_passenger || null,
+        seatbelt_driver: responses.seatbelt_driver || null,
+        seatbelt_passenger: responses.seatbelt_passenger || null,
+        accident_hist: normalizeArrayAnswer(responses.accident_hist),
+        drunk_drive: responses.drunk_drive || null,
+        
+        // สิ่งแวดล้อมและโรคอุบัติใหม่
+        env_satisfaction: responses.env_satisfaction || null,
+        env_glare: responses.env_glare || null,
+        env_noise: responses.env_noise || null,
+        env_smell: responses.env_smell || null,
+        env_smoke: responses.env_smoke || null,
+        env_posture: responses.env_posture || null,
+        env_awkward: responses.env_awkward || null,
+        pm25_impact: responses.pm25_impact || null,
+        pm25_symptom: normalizeArrayAnswer(responses.pm25_symptom),
+        life_quality: responses.life_quality || null,
+        emerging_known: responses.emerging_known || null,
+        emerging_list: normalizeArrayAnswer(responses.emerging_list),
+        climate_impact: responses.climate_impact || null,
+        covid_history: responses.covid_history || null,
+
+        ucla_score: uclaScore,
+        
         raw_responses: responses,
         is_draft: isDraft,
         submitted_at: isDraft ? null : new Date().toISOString()
@@ -441,12 +563,12 @@ async function saveToSupabase(email, responses, isDraft = false) {
             return 'offline';  // indicate offline save
         } catch (e) {
             console.error('[App] Failed to save to offline queue:', e);
-            return false;
+            return 'error:offline-queue-failed';
         }
     }
 
     // Online: try Supabase directly
-    if (!supabaseClient) return false;
+    if (!supabaseClient) return 'error:supabase-not-ready';
 
     try {
         const { data, error } = await supabaseClient
@@ -465,7 +587,8 @@ async function saveToSupabase(email, responses, isDraft = false) {
                     return 'offline';
                 } catch { /* ignore */ }
             }
-            return false;
+            if (error.code === '42501') return 'error:permission-denied';
+            return `error:${error.message || 'save-failed'}`;
         }
 
         console.log('Saved to Supabase:', isDraft ? 'draft' : 'submitted');
@@ -477,7 +600,7 @@ async function saveToSupabase(email, responses, isDraft = false) {
             await saveToOfflineQueue('wellbeing', dataToSave);
             return 'offline';
         } catch { /* ignore */ }
-        return false;
+        return `error:${e.message || 'save-exception'}`;
     }
 }
 
@@ -569,6 +692,7 @@ const app = {
 
         // Load saved responses
         this.responses = loadResponses();
+        this.applyOrgContextToResponses();
 
         // Check for saved section
         const savedSection = localStorage.getItem('wellbeing_survey_section');
@@ -638,6 +762,17 @@ const app = {
         }
     },
 
+    applyOrgContextToResponses() {
+        const urlOrgCode = (new URLSearchParams(window.location.search).get('org') || '').trim().toLowerCase();
+        if (!urlOrgCode || !this.orgMap[urlOrgCode]) return;
+
+        if (!this.responses) this.responses = {};
+        this.organization = this.orgMap[urlOrgCode];
+        this.responses.organization = this.organization;
+        this.responses.org_code = urlOrgCode;
+        saveResponses(this.responses);
+    },
+
     // Set user email
     setEmail() {
         const emailInput = document.getElementById('user-email-input');
@@ -693,7 +828,8 @@ const app = {
             const localDraft = loadResponses();
             if (Object.keys(cloudDraft).length >= Object.keys(localDraft).length) {
                 this.responses = cloudDraft;
-                saveResponses(cloudDraft);
+                this.applyOrgContextToResponses();
+                saveResponses(this.responses);
                 showToast('โหลดข้อมูลจาก Cloud สำเร็จ!', 'success');
             }
         }
@@ -1119,6 +1255,18 @@ const app = {
     async submitSurvey() {
         showToast('กำลังบันทึกข้อมูล...', 'info');
 
+        // Enforce organization context from URL before save
+        this.applyOrgContextToResponses();
+
+        if (!this.userInfo || !this.userInfo.email) {
+            showToast('กรุณายืนยันอีเมลก่อนส่งแบบสำรวจ', 'error');
+            return;
+        }
+        if (!this.responses.organization || !this.responses.org_code) {
+            showToast('ไม่พบข้อมูลองค์กรจากลิงก์ กรุณาเปิดลิงก์องค์กรใหม่อีกครั้ง', 'error');
+            return;
+        }
+
         // Calculate and add BMI to responses before saving
         const height = parseFloat(this.responses.height);
         const weight = parseFloat(this.responses.weight);
@@ -1137,17 +1285,24 @@ const app = {
             this.responses.tmhi_level = tmhiInfo ? tmhiInfo.level : '';
         }
 
-        // 1. Save to Supabase (Primary) — with offline fallback
-        if (this.userInfo && this.userInfo.email) {
-            const result = await saveToSupabase(this.userInfo.email, this.responses, false);
-            if (result === true) {
-                showToast('✅ บันทึกข้อมูลสำเร็จ!', 'success');
-            } else if (result === 'offline') {
-                showToast('📴 บันทึกในเครื่องแล้ว — จะซิงค์อัตโนมัติเมื่อออนไลน์', 'info');
-                requestBackgroundSync();
-            } else {
-                showToast('⚠️ ไม่สามารถบันทึกได้ กรุณาลองใหม่', 'error');
-            }
+        // 1. Save to Supabase (Primary) — only proceed to success screen when save is confirmed
+        const result = await saveToSupabase(this.userInfo.email, this.responses, false);
+        if (result === true) {
+            showToast('✅ บันทึกข้อมูลสำเร็จ!', 'success');
+        } else if (result === 'offline') {
+            showToast('📴 บันทึกในเครื่องแล้ว — จะซิงค์อัตโนมัติเมื่อออนไลน์', 'info');
+            requestBackgroundSync();
+            return;
+        } else if (result === 'error:permission-denied') {
+            showToast('ไม่สามารถบันทึกได้ในขณะนี้ เนื่องจากสิทธิ์ฐานข้อมูลยังไม่พร้อม', 'error');
+            return;
+        } else if (typeof result === 'string' && result.startsWith('error:')) {
+            const detail = result.slice(6);
+            showToast(`ไม่สามารถบันทึกได้: ${detail}`, 'error');
+            return;
+        } else {
+            showToast('⚠️ ไม่สามารถบันทึกได้ กรุณาลองใหม่', 'error');
+            return;
         }
 
         // 2. Also save to Google Apps Script (Backup) — skip if offline

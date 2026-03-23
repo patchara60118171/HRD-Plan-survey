@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tester Quick Card – NIDA Well-being</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai+Looped:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --P:  #5b2aa8;
+    --PD: #4b1f95;
+    --PL: #f3edff;
+    --PM: #ede5ff;
+    --bg: #f7f5fc;
+    --card:#fff;
+    --bdr:#e3def3;
+    --tx: #1f2937;
+    --tx2:#4b5563;
+    --tx3:#8b94a7;
+    --G:  #16a34a;
+    --GL: #ecfdf3;
+    --B:  #2563eb;
+    --BL: #eff6ff;
+    --O:  #d97706;
+    --OL: #fffbeb;
+    --T:  #0891b2;
+    --TL: #ecfeff;
+    --A:  #ec4899;
+    --AL: #fdf2f8;
+    --R:  #dc2626;
+    --RL: #fef2f2;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{
+    font-family:'IBM Plex Sans Thai Looped',sans-serif;
+    background:var(--bg);
+    color:var(--tx);
+    -webkit-print-color-adjust:exact;
+    print-color-adjust:exact;
+  }
+  .wrap{ max-width:720px; margin:0 auto; padding:36px 20px 56px; }
+
+  /* print */
+  .print-bar{ display:flex; justify-content:flex-end; margin-bottom:20px; }
+  .btn-print{
+    display:flex; align-items:center; gap:7px;
+    background:var(--P); color:#fff; border:none;
+    border-radius:10px; padding:9px 18px;
+    font-family:inherit; font-size:13px; font-weight:600;
+    cursor:pointer; transition:background .15s;
+  }
+  .btn-print:hover{ background:var(--PD); }
+
+  /* hero */
+  .hero{
+    background:linear-gradient(135deg,#3b1683 0%,#5b2aa8 55%,#7c3aed 100%);
+    border-radius:20px;
+    padding:32px 32px 28px;
+    color:#fff;
+    margin-bottom:24px;
+    display:flex; align-items:center; gap:20px;
+  }
+  .hero-icon{
+    width:56px; height:56px; flex-shrink:0;
+    background:rgba(255,255,255,.18); border-radius:16px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:28px;
+  }
+  .hero-text{}
+  .hero-kicker{
+    font-size:10px; font-weight:700; letter-spacing:.14em;
+    text-transform:uppercase; opacity:.7; margin-bottom:6px;
+  }
+  .hero-title{ font-size:24px; font-weight:700; line-height:1.25; margin-bottom:6px; }
+  .hero-sub{ font-size:13px; opacity:.82; line-height:1.65; }
+  .hero-chips{ display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
+  .hero-chip{
+    background:rgba(255,255,255,.15);
+    border:1px solid rgba(255,255,255,.28);
+    border-radius:999px; padding:4px 12px;
+    font-size:11px; font-weight:600;
+  }
+
+  /* step cards */
+  .steps{ display:flex; flex-direction:column; gap:16px; }
+
+  .step{
+    background:var(--card);
+    border:1.5px solid var(--bdr);
+    border-radius:16px;
+    overflow:hidden;
+    box-shadow:0 2px 8px rgba(91,42,168,.05);
+  }
+
+  .step-head{
+    padding:14px 20px 12px;
+    display:flex; align-items:center; gap:13px;
+    border-bottom:1.5px solid var(--bdr);
+  }
+  .step-num{
+    width:32px; height:32px; border-radius:9px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:14px; font-weight:700; color:#fff; flex-shrink:0;
+  }
+  .step-head-label{
+    font-size:10px; font-weight:700; letter-spacing:.1em;
+    text-transform:uppercase; color:var(--tx3); margin-bottom:2px;
+  }
+  .step-head-title{ font-size:15px; font-weight:700; }
+  .step-body{ padding:16px 20px 18px; }
+
+  /* org links */
+  .org-links{ display:flex; flex-direction:column; gap:10px; }
+  .org-link-row{
+    display:flex; align-items:center; gap:12px;
+    padding:12px 16px; border-radius:12px;
+    border:1.5px solid; text-decoration:none;
+    transition:filter .15s;
+  }
+  .org-link-row:hover{ filter:brightness(.97); }
+  .org-link-row.tpso{ background:var(--BL); border-color:#bfdbfe; }
+  .org-link-row.dss { background:var(--GL); border-color:#a7f3d0; }
+  .org-link-row.dhss{ background:var(--AL); border-color:#fbcfe8; }
+
+  .org-dot{
+    width:34px; height:34px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-size:13px; font-weight:800; color:#fff; flex-shrink:0;
+  }
+  .tpso .org-dot{ background:var(--B); }
+  .dss  .org-dot{ background:var(--G); }
+  .dhss .org-dot{ background:var(--A); }
+
+  .org-info{ flex:1; }
+  .org-name-th{ font-size:12px; font-weight:700; }
+  .tpso .org-name-th{ color:var(--B); }
+  .dss  .org-name-th{ color:var(--G); }
+  .dhss .org-name-th{ color:var(--A); }
+  .org-url-text{ font-size:11px; color:var(--tx3); font-family:monospace; margin-top:1px; }
+
+  .org-email-pill{
+    font-size:11px; font-weight:600;
+    background:rgba(255,255,255,.7);
+    border:1px solid rgba(0,0,0,.08);
+    border-radius:8px; padding:4px 10px;
+    color:var(--tx); white-space:nowrap;
+    flex-shrink:0;
+  }
+
+  /* data row grid */
+  .data-rows{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  @media(max-width:520px){ .data-rows{ grid-template-columns:1fr; } }
+
+  .data-item{
+    background:var(--bg); border:1px solid var(--bdr);
+    border-radius:10px; padding:10px 14px;
+    display:flex; flex-direction:column; gap:2px;
+  }
+  .data-label{ font-size:10.5px; color:var(--tx3); font-weight:600; }
+  .data-val{ font-size:13px; font-weight:700; color:var(--tx); }
+
+  /* answer grid */
+  .ans-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  @media(max-width:520px){ .ans-grid{ grid-template-columns:1fr; } }
+
+  .ans-chip{
+    display:flex; align-items:flex-start; gap:10px;
+    padding:12px 14px; border-radius:12px; border:1.5px solid;
+  }
+  .ans-chip.smoke { background:#fafafa;   border-color:#e5e7eb; }
+  .ans-chip.food  { background:var(--OL); border-color:#fde68a; }
+  .ans-chip.move  { background:var(--BL); border-color:#bfdbfe; }
+  .ans-chip.mind  { background:var(--PL); border-color:#c4b5fd; }
+  .ans-chip.safe  { background:var(--GL); border-color:#a7f3d0; }
+  .ans-chip.env   { background:var(--TL); border-color:#67e8f9; }
+
+  .ans-icon{ font-size:18px; flex-shrink:0; margin-top:1px; }
+  .ans-body{}
+  .ans-key{
+    font-size:10.5px; font-weight:700; letter-spacing:.06em;
+    text-transform:uppercase;
+  }
+  .ans-chip.smoke .ans-key{ color:#6b7280; }
+  .ans-chip.food  .ans-key{ color:var(--O); }
+  .ans-chip.move  .ans-key{ color:var(--B); }
+  .ans-chip.mind  .ans-key{ color:var(--P); }
+  .ans-chip.safe  .ans-key{ color:var(--G); }
+  .ans-chip.env   .ans-key{ color:var(--T); }
+
+  .ans-val{ font-size:13px; font-weight:700; color:var(--tx); margin-top:2px; line-height:1.5; }
+  .ans-note{ font-size:11.5px; color:var(--tx2); margin-top:3px; line-height:1.5; }
+
+  /* checklist */
+  .chk-list{ list-style:none; display:flex; flex-direction:column; gap:8px; }
+  .chk-item{
+    display:flex; align-items:flex-start; gap:11px;
+    padding:11px 15px; border-radius:11px;
+    background:var(--bg); border:1px solid var(--bdr);
+    font-size:13px; line-height:1.6;
+  }
+  .chk-box{
+    width:20px; height:20px; border-radius:5px;
+    border:2px solid var(--bdr); flex-shrink:0; margin-top:1px;
+  }
+  .chk-text{ flex:1; }
+  .chk-text strong{ font-weight:700; color:var(--tx); }
+  .chk-text span{ color:var(--tx2); font-size:12px; display:block; margin-top:1px; }
+
+  .tag{
+    display:inline-flex; align-items:center;
+    border-radius:6px; padding:2px 9px;
+    font-size:10.5px; font-weight:700; flex-shrink:0;
+  }
+  .tag.g{ background:var(--GL); color:var(--G); }
+  .tag.b{ background:var(--BL); color:var(--B); }
+  .tag.p{ background:var(--PM); color:var(--PD); }
+  .tag.r{ background:var(--RL); color:var(--R); }
+
+  /* note box */
+  .note{
+    display:flex; gap:10px; align-items:flex-start;
+    padding:13px 16px; border-radius:12px;
+    font-size:13px; line-height:1.65; margin-top:14px;
+  }
+  .note.tip { background:var(--OL); border:1.5px solid #fde68a; color:#92400e; }
+  .note.info{ background:var(--PL); border:1.5px solid #c4b5fd; color:var(--PD); }
+  .note.ok  { background:var(--GL); border:1.5px solid #a7f3d0; color:#166534; }
+  .note-icon{ font-size:15px; flex-shrink:0; margin-top:2px; }
+
+  /* score badges */
+  .score-row{ display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
+  .score-badge{
+    display:inline-flex; align-items:center; gap:6px;
+    border-radius:999px; padding:5px 14px;
+    font-size:12.5px; font-weight:700;
+  }
+  .score-badge.purple{ background:var(--PM); color:var(--PD); }
+  .score-badge.violet{ background:#f5f3ff; color:#6d28d9; }
+
+  /* separator */
+  .sep-title{
+    font-size:10.5px; font-weight:700; letter-spacing:.12em;
+    text-transform:uppercase; color:var(--tx3);
+    display:flex; align-items:center; gap:8px;
+    margin:24px 0 12px;
+  }
+  .sep-title::after{ content:''; flex:1; height:1.5px; background:var(--bdr); }
+
+  /* footer */
+  .footer{
+    margin-top:36px; padding-top:18px;
+    border-top:1.5px dashed var(--bdr);
+    display:flex; justify-content:space-between;
+    font-size:11px; color:var(--tx3);
+  }
+
+  @media print{
+    @page{ size:A4; margin:14mm 16mm; }
+    body{ background:#fff!important; }
+    .wrap{ max-width:100%; padding:0; }
+    .print-bar{ display:none!important; }
+    .hero{ border-radius:10px; page-break-inside:avoid; }
+    .step{ page-break-inside:avoid; break-inside:avoid; box-shadow:none!important; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Print -->
+  <div class="print-bar">
+    <button class="btn-print" onclick="window.print()">🖨 พิมพ์ / PDF</button>
+  </div>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-icon">🧪</div>
+    <div class="hero-text">
+      <div class="hero-kicker">NIDA Well-being Survey · Testing Mission</div>
+      <div class="hero-title">ภารกิจทดสอบ<br>Well-being Survey 3 องค์กร</div>
+      <div class="hero-sub">ตรวจสอบการเก็บข้อมูลใน <strong>survey_responses</strong> ครบ 105 คอลัมน์</div>
+      <div class="hero-chips">
+        <span class="hero-chip">🏢 TPSO · DSS · DHSS</span>
+        <span class="hero-chip">🎯 105 คอลัมน์</span>
+        <span class="hero-chip">📅 March 2026</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 1 -->
+  <div class="sep-title">ขั้นตอนการทดสอบ</div>
+  <div class="steps">
+
+    <div class="step">
+      <div class="step-head" style="background:linear-gradient(90deg,var(--BL),#fafcff); border-color:#bfdbfe;">
+        <div class="step-num" style="background:var(--B);">1</div>
+        <div>
+          <div class="step-head-label">เริ่มต้น</div>
+          <div class="step-head-title" style="color:#1e40af;">เปิดลิงก์ทดสอบ (ทีละองค์กร)</div>
+        </div>
+      </div>
+      <div class="step-body">
+        <div class="org-links">
+          <a class="org-link-row tpso" href="https://nidawellbeing.vercel.app/?org=tpso" target="_blank">
+            <div class="org-dot">T</div>
+            <div class="org-info">
+              <div class="org-name-th">TPSO — สำนักงานนโยบายและยุทธศาสตร์การค้า</div>
+              <div class="org-url-text">nidawellbeing.vercel.app/?org=tpso</div>
+            </div>
+            <div class="org-email-pill">test.tpso.001@example.com</div>
+          </a>
+          <a class="org-link-row dss" href="https://nidawellbeing.vercel.app/?org=dss" target="_blank">
+            <div class="org-dot">D</div>
+            <div class="org-info">
+              <div class="org-name-th">DSS — กรมวิทยาศาสตร์บริการ</div>
+              <div class="org-url-text">nidawellbeing.vercel.app/?org=dss</div>
+            </div>
+            <div class="org-email-pill">test.dss.002@example.com</div>
+          </a>
+          <a class="org-link-row dhss" href="https://nidawellbeing.vercel.app/?org=dhss" target="_blank">
+            <div class="org-dot">H</div>
+            <div class="org-info">
+              <div class="org-name-th">DHSS — กรมสนับสนุนบริการสุขภาพ</div>
+              <div class="org-url-text">nidawellbeing.vercel.app/?org=dhss</div>
+            </div>
+            <div class="org-email-pill">test.dhss.003@example.com</div>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2 -->
+    <div class="step">
+      <div class="step-head" style="background:linear-gradient(90deg,var(--GL),#f7fff9); border-color:#a7f3d0;">
+        <div class="step-num" style="background:var(--G);">2</div>
+        <div>
+          <div class="step-head-label">ข้อมูลส่วนตัว</div>
+          <div class="step-head-title" style="color:#166534;">กรอกข้อมูลผู้ตอบ (ทำตามองค์กร)</div>
+        </div>
+      </div>
+      <div class="step-body">
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; margin-bottom:12px;">
+
+          <!-- TPSO person -->
+          <div style="border-radius:12px; border:1.5px solid #bfdbfe; overflow:hidden;">
+            <div style="background:#dbeafe; padding:9px 14px; font-size:11px; font-weight:700; color:var(--B); letter-spacing:.06em; text-transform:uppercase;">TPSO · องค์กรที่ 1</div>
+            <div style="padding:10px 14px;">
+              <div class="data-rows">
+                <div class="data-item"><span class="data-label">ชื่อ-สกุล</span><span class="data-val">ทดสอบ ทีพีเอสโอ</span></div>
+                <div class="data-item"><span class="data-label">คำนำหน้า/เพศ</span><span class="data-val">นาย · ชาย</span></div>
+                <div class="data-item"><span class="data-label">อายุ</span><span class="data-val">35 ปี</span></div>
+                <div class="data-item"><span class="data-label">ระยะเวลา</span><span class="data-val">8 ปี</span></div>
+                <div class="data-item"><span class="data-label">ส่วนสูง / น้ำหนัก</span><span class="data-val">175 cm / 70 kg</span></div>
+                <div class="data-item"><span class="data-label">เส้นรอบเอว</span><span class="data-val">85 cm</span></div>
+                <div class="data-item"><span class="data-label">ตำแหน่ง</span><span class="data-val">ชำนาญการ</span></div>
+                <div class="data-item"><span class="data-label">โรคประจำตัว</span><span class="data-val">เบาหวาน</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- DSS person -->
+          <div style="border-radius:12px; border:1.5px solid #a7f3d0; overflow:hidden;">
+            <div style="background:#a7f3d0; padding:9px 14px; font-size:11px; font-weight:700; color:#065f46; letter-spacing:.06em; text-transform:uppercase;">DSS · องค์กรที่ 2</div>
+            <div style="padding:10px 14px;">
+              <div class="data-rows">
+                <div class="data-item"><span class="data-label">ชื่อ-สกุล</span><span class="data-val">ทดสอบ ดีเอสเอส</span></div>
+                <div class="data-item"><span class="data-label">คำนำหน้า/เพศ</span><span class="data-val">นางสาว · หญิง</span></div>
+                <div class="data-item"><span class="data-label">อายุ</span><span class="data-val">28 ปี</span></div>
+                <div class="data-item"><span class="data-label">ระยะเวลา</span><span class="data-val">3 ปี</span></div>
+                <div class="data-item"><span class="data-label">ส่วนสูง / น้ำหนัก</span><span class="data-val">165 cm / 55 kg</span></div>
+                <div class="data-item"><span class="data-label">เส้นรอบเอว</span><span class="data-val">70 cm</span></div>
+                <div class="data-item"><span class="data-label">ตำแหน่ง</span><span class="data-val">ปฏิบัติงาน</span></div>
+                <div class="data-item"><span class="data-label">โรคประจำตัว</span><span class="data-val">ไม่มี</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- DHSS person -->
+          <div style="border-radius:12px; border:1.5px solid #fbcfe8; overflow:hidden;">
+            <div style="background:#fbcfe8; padding:9px 14px; font-size:11px; font-weight:700; color:#9d174d; letter-spacing:.06em; text-transform:uppercase;">DHSS · องค์กรที่ 3</div>
+            <div style="padding:10px 14px;">
+              <div class="data-rows">
+                <div class="data-item"><span class="data-label">ชื่อ-สกุล</span><span class="data-val">ทดสอบ ดีเอชเอสเอส</span></div>
+                <div class="data-item"><span class="data-label">คำนำหน้า/เพศ</span><span class="data-val">นาง · หญิง</span></div>
+                <div class="data-item"><span class="data-label">อายุ</span><span class="data-val">42 ปี</span></div>
+                <div class="data-item"><span class="data-label">ระยะเวลา</span><span class="data-val">15 ปี</span></div>
+                <div class="data-item"><span class="data-label">ส่วนสูง / น้ำหนัก</span><span class="data-val">160 cm / 60 kg</span></div>
+                <div class="data-item"><span class="data-label">เส้นรอบเอว</span><span class="data-val">75 cm</span></div>
+                <div class="data-item"><span class="data-label">ตำแหน่ง</span><span class="data-val">หัวหน้า</span></div>
+                <div class="data-item"><span class="data-label">โรคประจำตัว</span><span class="data-val">ความดันโลหิตสูง</span></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <div class="note tip">
+          <div class="note-icon">⚠️</div>
+          <div><strong>สำคัญ:</strong> กรอก<u>ทุกช่อง</u>ให้ครบ — อย่าข้ามช่องใดเด็ดขาด เพราะทดสอบครบ 105 คอลัมน์</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div class="step">
+      <div class="step-head" style="background:linear-gradient(90deg,var(--PL),#fdfcff); border-color:#c4b5fd;">
+        <div class="step-num" style="background:var(--P);">3</div>
+        <div>
+          <div class="step-head-label">คำตอบ</div>
+          <div class="step-head-title" style="color:var(--PD);">เลือกคำตอบเหมือนกันทุกฟอร์ม</div>
+        </div>
+      </div>
+      <div class="step-body">
+        <div class="ans-grid">
+          <div class="ans-chip smoke">
+            <div class="ans-icon">🚬</div>
+            <div class="ans-body">
+              <div class="ans-key">พฤติกรรมเสี่ยง</div>
+              <div class="ans-val">ไม่เคย ทั้งหมด</div>
+              <div class="ans-note">บุหรี่, บุหรี่ไฟฟ้า, ยาเสพติด<br>ยกเว้นสุรา → "ดื่มบางโอกาส"</div>
+            </div>
+          </div>
+          <div class="ans-chip food">
+            <div class="ans-icon">🍽️</div>
+            <div class="ans-body">
+              <div class="ans-key">โภชนาการ</div>
+              <div class="ans-val">ทุกวัน / เกือบทุกวัน</div>
+              <div class="ans-note">หวาน · ไขมัน · โซเดียม<br>ทุกข้อเลือกเหมือนกัน</div>
+            </div>
+          </div>
+          <div class="ans-chip move">
+            <div class="ans-icon">🏃</div>
+            <div class="ans-body">
+              <div class="ans-key">กิจกรรมทางกาย</div>
+              <div class="ans-val">กรอกตัวเลขตามสมควร</div>
+              <div class="ans-note">ทำงาน 5 วัน 2 ชม. · เดินทาง 3 วัน 1 ชม.<br>ออกกำลัง 3 วัน 1 ชม. · นั่ง 8 ชม./วัน</div>
+            </div>
+          </div>
+          <div class="ans-chip mind">
+            <div class="ans-icon">🧠</div>
+            <div class="ans-body">
+              <div class="ans-key">สุขภาพจิต TMHI-15</div>
+              <div class="ans-val">มาก ทุกข้อ</div>
+              <div class="ans-note">= 3 คะแนน ทุกข้อ</div>
+              <div class="score-row">
+                <span class="score-badge purple">🎯 45 / 45</span>
+              </div>
+            </div>
+          </div>
+          <div class="ans-chip mind" style="background:#f5f3ff; border-color:#ddd6fe;">
+            <div class="ans-icon">😔</div>
+            <div class="ans-body">
+              <div class="ans-key" style="color:#6d28d9;">ความเหงา UCLA</div>
+              <div class="ans-val">เลือก 3 ทุกข้อ</div>
+              <div class="ans-note">คะแนนสูงสุด</div>
+              <div class="score-row">
+                <span class="score-badge violet">🎯 60 คะแนน</span>
+              </div>
+            </div>
+          </div>
+          <div class="ans-chip safe">
+            <div class="ans-icon">🪖</div>
+            <div class="ans-body">
+              <div class="ans-key">ความปลอดภัย</div>
+              <div class="ans-val">ใช้ทุกครั้ง ทั้งหมด</div>
+              <div class="ans-note">หมวก · เข็มขัด (คนขับ+ผู้โดยสาร)<br>อุบัติเหตุ/ขับขี่หลังดื่ม → ไม่เคย</div>
+            </div>
+          </div>
+          <div class="ans-chip env" style="grid-column: span 2;">
+            <div class="ans-icon">🌍</div>
+            <div class="ans-body">
+              <div class="ans-key">สิ่งแวดล้อม</div>
+              <div class="ans-val">ดี / ไม่ใช่ สลับกัน</div>
+              <div class="ans-note">ความพึงพอใจ=ดี · สิ่งรบกวน=ไม่ใช่ (ทุกข้อ) · PM2.5=ปานกลาง · อาการ=ไอ/คัดจมูก/แสบคอ · โรคอุบัติใหม่=COVID-19 · โลกร้อน=น้อย · COVID=ไม่เคย</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 4 -->
+    <div class="step">
+      <div class="step-head" style="background:linear-gradient(90deg,var(--GL),#f7fff9); border-color:#a7f3d0;">
+        <div class="step-num" style="background:var(--G);">4</div>
+        <div>
+          <div class="step-head-label">เสร็จสิ้น</div>
+          <div class="step-head-title" style="color:#166534;">ส่งฟอร์ม + แจ้ง Admin ตรวจสอบ</div>
+        </div>
+      </div>
+      <div class="step-body">
+        <ul class="chk-list">
+          <li class="chk-item">
+            <div class="chk-box"></div>
+            <div class="chk-text">
+              <strong>ส่งฟอร์มสำเร็จทั้ง 3 องค์กร</strong>
+              <span>TPSO · DSS · DHSS — ได้รับหน้ายืนยันผลทุกองค์กร</span>
+            </div>
+            <span class="tag b">3 / 3</span>
+          </li>
+          <li class="chk-item">
+            <div class="chk-box"></div>
+            <div class="chk-text">
+              <strong>แจ้ง Admin ตรวจสอบ Supabase</strong>
+              <span>ส่ง LINE/Email แจ้ง Admin เพื่อเปิด Table Editor → survey_responses</span>
+            </div>
+            <span class="tag g">Admin</span>
+          </li>
+          <li class="chk-item">
+            <div class="chk-box"></div>
+            <div class="chk-text">
+              <strong>BMI ถูกต้อง</strong>
+              <span>TPSO = 22.9 · DSS = 20.2 · DHSS = 23.4</span>
+            </div>
+            <span class="tag p">bmi</span>
+          </li>
+          <li class="chk-item">
+            <div class="chk-box"></div>
+            <div class="chk-text">
+              <strong>tmhi_score = 45, ucla_score = 60</strong>
+              <span>ตรวจทั้ง 3 แถวที่ filter โดย email ทดสอบ</span>
+            </div>
+            <span class="tag p">score</span>
+          </li>
+          <li class="chk-item">
+            <div class="chk-box"></div>
+            <div class="chk-text">
+              <strong>ข้อมูลครบ 105 คอลัมน์ · ไม่มี null ผิดปกติ</strong>
+              <span>Array fields เป็น JSON · ภาษาไทยไม่ error</span>
+            </div>
+            <span class="tag g">105 cols</span>
+          </li>
+        </ul>
+
+        <div class="note ok" style="margin-top:16px;">
+          <div class="note-icon">🚀</div>
+          <div>
+            <strong>ทดสอบเสร็จแล้ว!</strong> แจ้ง Admin ว่า "ส่งข้อมูลทดสอบครบ 3 องค์กรแล้ว — TPSO, DSS, DHSS" 
+            เพื่อให้ตรวจสอบข้อมูลใน Supabase
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /steps -->
+
+  <!-- Footer -->
+  <div class="footer">
+    <span>NIDA Well-being Survey Testing Protocol · March 2026</span>
+    <span>nidawellbeing.vercel.app</span>
+  </div>
+
+</div>
+</body>
+</html>

@@ -113,7 +113,10 @@ const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const params = new URLSearchParams(location.search);
 const ORG_PARAM = params.get('org');
 const ID_PARAM  = params.get('id');
+const EXPORT_MODE = (params.get('export') || '').toLowerCase();
+const AUTO_CLOSE_EXPORT = params.get('autoclose') !== '0';
 let userRole = null, userOrgCode = null, responseData = null, schema = null;
+let autoExportTriggered = false;
 
 const ORG_NAME_MAP = {
   'nesdc':'สำนักงานสภาพัฒนาการเศรษฐกิจและสังคมแห่งชาติ',
@@ -373,7 +376,72 @@ function renderPage(orgCode){
   content.innerHTML=html;
   document.getElementById('loading-screen').style.display='none';
   content.style.display='';
+  triggerAutoExportIfNeeded();
 }
+
+function triggerAutoExportIfNeeded(){
+  if (autoExportTriggered) return;
+  if (EXPORT_MODE !== 'pdf' && EXPORT_MODE !== 'docs') return;
+  autoExportTriggered = true;
+
+  if (EXPORT_MODE === 'pdf') {
+    setTimeout(() => window.print(), 220);
+    return;
+  }
+
+  setTimeout(() => {
+    downloadPreviewAsDoc();
+    if (AUTO_CLOSE_EXPORT) setTimeout(() => window.close(), 450);
+  }, 220);
+}
+
+function sanitizeFilePart(value){
+  return String(value || '')
+    .trim()
+    .replace(/[\\/:*?"<>|]+/g, '-')
+    .replace(/\s+/g, '_')
+    .slice(0, 80) || 'ch1-preview';
+}
+
+function downloadPreviewAsDoc(){
+  const styleText = Array.from(document.querySelectorAll('style')).map((node) => node.textContent || '').join('\n');
+  const topbarMain = document.querySelector('.topbar-main')?.outerHTML || '';
+  const pageShell = document.querySelector('.container')?.outerHTML || '';
+  const orgName = document.getElementById('org-name-badge')?.textContent || responseData?.organization || ORG_PARAM || 'org';
+  const datePart = new Date().toISOString().slice(0, 10);
+  const fileName = `${sanitizeFilePart(orgName)}_ch1_preview_${datePart}.doc`;
+
+  const docHtml = `<!DOCTYPE html>
+<html lang="th"><head><meta charset="UTF-8"><title>CH1 Preview</title>
+<style>${styleText}
+/* ── Docs export overrides ── */
+*,body,table,th,td,div,span,p,h1,h2,h3,h4,h5,h6,input,textarea,select,button{
+  font-family:'TH Sarabun New','Cordia New','Angsana New',sans-serif!important;
+}
+.topbar-right{display:none!important}
+.no-print{display:block!important}
+</style>
+</head><body>
+<div class="topbar">${topbarMain}</div>
+${pageShell}
+</body></html>`;
+
+  const blob = new Blob(['\ufeff', docHtml], { type: 'application/msword' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+window.addEventListener('afterprint', () => {
+  if (EXPORT_MODE === 'pdf' && AUTO_CLOSE_EXPORT) {
+    setTimeout(() => window.close(), 350);
+  }
+});
 
 function goEdit(){
   const orgCode=ORG_PARAM||userOrgCode;
