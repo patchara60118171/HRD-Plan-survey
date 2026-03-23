@@ -135,7 +135,8 @@ SELECT
     CASE WHEN fl.id IS NOT NULL THEN '✓' ELSE '✗ MISSING' END AS form_link
 FROM public.organizations o
 LEFT JOIN public.admin_user_roles ur ON ur.org_code = o.org_code
-LEFT JOIN public.org_form_links   fl ON fl.org_id   = o.id
+LEFT JOIN public.survey_forms     wf ON wf.form_key = 'wellbeing'
+LEFT JOIN public.org_form_links   fl ON fl.org_id   = o.id AND fl.form_id = wf.id
 WHERE o.org_code IN (
     'nesdc','tpso','dss','dhss','tmd','dcp','dop','mots',
     'dmh','onep','nrct','acfs','opdc','rid','dcy','test-org'
