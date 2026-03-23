@@ -32,6 +32,14 @@ body{font-family:'Sarabun',sans-serif;background:#f5f7fb;color:#1e293b;font-size
 .field-value.empty{color:#94a3b8;font-style:italic}
 .field-value.file-link a{color:#2563eb;text-decoration:none}
 .field-value.file-link a:hover{text-decoration:underline}
+.turnover-stack{display:grid;gap:22px}
+.turnover-block{display:grid;gap:18px}
+.turnover-item{display:grid;gap:8px}
+.turnover-label{display:inline-flex;align-items:center;width:max-content;background:#2f67d8;color:#fff;font-size:13px;font-weight:700;line-height:1;padding:6px 8px;border-radius:0}
+.turnover-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px}
+.turnover-value{min-height:46px;display:flex;align-items:center;padding:10px 14px;border:1px solid #cfd8e6;border-radius:10px;background:#fff;font-size:15px;font-weight:500;color:#1e293b}
+.turnover-value.empty{color:#94a3b8;font-style:italic}
+.turnover-unit{display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:30px;background:#2f67d8;color:#fff;font-size:12px;font-weight:700;padding:0 8px;border-radius:0}
 .meta-box{background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:16px 20px;margin-bottom:24px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
 .meta-item label{font-size:12px;color:#64748b;display:block;margin-bottom:3px}
 .meta-item .val{font-size:15px;font-weight:600;color:#1e3a5f}
@@ -41,7 +49,7 @@ body{font-family:'Sarabun',sans-serif;background:#f5f7fb;color:#1e293b;font-size
 .alert{border-radius:8px;padding:14px 18px;margin-bottom:20px;font-size:14px}
 .alert-error{background:#fee2e2;border:1px solid #fca5a5;color:#7f1d1d}
 .alert-info{background:#eff6ff;border:1px solid #93c5fd;color:#1e3a8a}
-@media(max-width:640px){.meta-box{grid-template-columns:1fr 1fr}.field-row{grid-template-columns:1fr;gap:3px}}
+@media(max-width:640px){.meta-box{grid-template-columns:1fr 1fr}.field-row{grid-template-columns:1fr;gap:3px}.turnover-row{grid-template-columns:1fr}.turnover-unit{justify-self:start}}
 @media print{
   .topbar,.topbar-right,.no-print{display:none!important}
   body{background:#fff}
@@ -83,6 +91,92 @@ const params = new URLSearchParams(location.search);
 const ORG_PARAM = params.get('org');
 const ID_PARAM  = params.get('id');
 let userRole = null, userOrgCode = null, responseData = null, schema = null;
+
+const WORKFORCE_LAYOUT = {
+  pos_o1: { label: 'ระดับ O1', unit: 'คน' },
+  pos_o2: { label: 'ระดับ O2', unit: 'คน' },
+  pos_o3: { label: 'ระดับ O3', unit: 'คน' },
+  pos_o4: { label: 'ระดับ O4', unit: 'คน' },
+  pos_k1: { label: 'ระดับ K1', unit: 'คน' },
+  pos_k2: { label: 'ระดับ K2', unit: 'คน' },
+  pos_k3: { label: 'ระดับ K3', unit: 'คน' },
+  pos_k4: { label: 'ระดับ K4', unit: 'คน' },
+  pos_k5: { label: 'ระดับ K5', unit: 'คน' },
+  pos_m1: { label: 'ระดับ M1', unit: 'คน' },
+  pos_m2: { label: 'ระดับ M2', unit: 'คน' },
+  pos_s1: { label: 'ระดับ S1', unit: 'คน' },
+  pos_s2: { label: 'ระดับ S2', unit: 'คน' },
+  type_official: { label: 'ข้าราชการ', unit: 'คน' },
+  type_employee: { label: 'พนักงานราชการ', unit: 'คน' },
+  type_contract: { label: 'ลูกจ้างประจำ/ชั่วคราว', unit: 'คน' },
+  type_other: { label: 'อื่นๆ', unit: 'คน' },
+  age_u30: { label: 'อายุไม่เกิน 30 ปี', unit: 'คน' },
+  age_31_40: { label: 'อายุ 31 - 40 ปี', unit: 'คน' },
+  age_41_50: { label: 'อายุ 41 - 50 ปี', unit: 'คน' },
+  age_51_60: { label: 'อายุ 51 - 60 ปี', unit: 'คน' },
+};
+
+function buildWorkforcePreview() {
+  const block = document.createElement('div');
+  block.className = 'turnover-stack';
+
+  const availableKeys = new Set(Object.keys(responseData || {}));
+  const groups = [
+    { heading: 'ข้อมูลโครงสร้างอัตรากำลัง', fields: ['pos_o1','pos_o2','pos_o3','pos_o4','pos_k1','pos_k2','pos_k3','pos_k4','pos_k5','pos_m1','pos_m2','pos_s1','pos_s2'] },
+    { heading: 'ประเภทบุคลากร', fields: ['type_official', 'type_employee', 'type_contract', 'type_other'] },
+    { heading: 'ช่วงอายุของบุคลากร', fields: ['age_u30', 'age_31_40', 'age_41_50', 'age_51_60'] },
+  ].filter((group) => group.fields.some((fieldKey) => availableKeys.has(fieldKey)));
+
+  groups.forEach((group) => {
+    const groupEl = document.createElement('div');
+    groupEl.className = 'turnover-block';
+
+    if (group.heading) {
+      const heading = document.createElement('div');
+      heading.className = 'turnover-label';
+      heading.textContent = group.heading;
+      groupEl.appendChild(heading);
+    }
+
+    group.fields.forEach((fieldKey) => {
+      const meta = WORKFORCE_LAYOUT[fieldKey];
+      if (!meta) return;
+      const itemEl = document.createElement('div');
+      itemEl.className = 'turnover-item';
+
+      const label = document.createElement('div');
+      label.className = 'turnover-label';
+      label.textContent = meta.label;
+      itemEl.appendChild(label);
+
+      const row = document.createElement('div');
+      row.className = 'turnover-row';
+
+      const value = document.createElement('div');
+      value.className = 'turnover-value';
+      const raw = responseData?.[fieldKey];
+      if (raw !== null && raw !== undefined && raw !== '') {
+        value.textContent = raw;
+      } else {
+        value.classList.add('empty');
+        value.textContent = '—';
+      }
+      row.appendChild(value);
+
+      const unit = document.createElement('span');
+      unit.className = 'turnover-unit';
+      unit.textContent = meta.unit;
+      row.appendChild(unit);
+
+      itemEl.appendChild(row);
+      groupEl.appendChild(itemEl);
+    });
+
+    block.appendChild(groupEl);
+  });
+
+  return block;
+}
 
 async function init() {
   const { data: { session } } = await sb.auth.getSession();
@@ -164,6 +258,13 @@ function renderPage(orgCode) {
       card.innerHTML = `<div class="section-header"><h2>📋 ${sec.title_th}</h2></div>`;
       const body = document.createElement('div');
       body.className = 'section-body';
+
+      if (sec.section_key === 'ch1_workforce') {
+        body.appendChild(buildWorkforcePreview());
+        card.appendChild(body);
+        content.appendChild(card);
+        return;
+      }
 
       questions.forEach(q => {
         const val = responseData[q.question_key];
