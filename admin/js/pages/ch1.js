@@ -398,6 +398,7 @@ function showCh1RowDetail(index) {
   const n = (k, d) => fmtNum(parseFloat(v(k)) || 0, d !== undefined ? d : 0);
   const s = (k) => esc(v(k) || '—');
   const yn = (k) => { const val = v(k); if (val === true || val === 1 || val === 'true' || val === '1' || val === 'yes') return '✓ มี'; if (val === false || val === 0 || val === 'false' || val === '0' || val === 'no') return '✗ ไม่มี'; return val ? esc(String(val)) : '—'; };
+  const fmtSupport = (k) => { const val = v(k); if (val === 'full') return '✅ มีตามแผน'; if (val === 'partial') return '⚠️ มีไม่ครบตามแผน'; if (val === 'none') return '❌ ไม่มี'; return val ? esc(String(val)) : '—'; };
 
   const histRows = ['2564','2565','2566','2567','2568'].map((yr) => {
     const bg = v(`begin_count_${yr}`); const end = v(`end_count_${yr}`); const lv = v(`leave_count_${yr}`); const rt = v(`turnover_rate_${yr}`);
@@ -540,10 +541,10 @@ ${histRows !== '<tr><td colspan="5" style="color:#9CA3AF;text-align:center">—<
   <div>
     <h3>ระบบพัฒนาบุคลากร</h3>
     <table>
-      <tr><th>Mentoring System</th><td>${yn('mentoring_system')}</td></tr>
-      <tr><th>Job Rotation</th><td>${yn('job_rotation')}</td></tr>
-      <tr><th>IDP System</th><td>${yn('idp_system')}</td></tr>
-      <tr><th>Career Path System</th><td>${yn('career_path_system')}</td></tr>
+      <tr><th>ระบบพี่เลี้ยง (Mentoring)</th><td>${fmtSupport('mentoring_system')}</td></tr>
+      <tr><th>หมุนเวียนงาน (Job Rotation)</th><td>${fmtSupport('job_rotation')}</td></tr>
+      <tr><th>แผนพัฒนารายบุคคล (IDP)</th><td>${fmtSupport('idp_system')}</td></tr>
+      <tr><th>เส้นทางความก้าวหน้า (Career Path)</th><td>${fmtSupport('career_path_system')}</td></tr>
       <tr><th>ชั่วโมงฝึกอบรมเฉลี่ย/คน/ปี</th><td>${fmtNum(parseFloat(v('training_hours'))||0,1)} ชั่วโมง</td></tr>
       <tr><th>สภาพแวดล้อมการทำงาน (Ergonomics)</th><td>${s('ergonomics_status')}</td></tr>
     </table>
@@ -589,6 +590,7 @@ function showCh1PDF(index) {
   const n = (k, d) => fmtNum(parseFloat(v(k)) || 0, d !== undefined ? d : 0);
   const s = (k) => esc(v(k) || '—');
   const yn = (k) => { const val = v(k); if (val === true || val === 1 || val === 'true' || val === '1' || val === 'yes') return '✓ มี'; if (val === false || val === 0 || val === 'false' || val === '0' || val === 'no') return '✗ ไม่มี'; return val ? esc(String(val)) : '—'; };
+  const fmtSupport = (k) => { const val = v(k); if (val === 'full') return '✅ มีตามแผน'; if (val === 'partial') return '⚠️ มีไม่ครบตามแผน'; if (val === 'none') return '❌ ไม่มี'; return val ? esc(String(val)) : '—'; };
 
   const histRows = ['2564','2565','2566','2567','2568'].map((yr) => {
     const bg = v(`begin_count_${yr}`); const end = v(`end_count_${yr}`); const lv = v(`leave_count_${yr}`); const rt = v(`turnover_rate_${yr}`);
@@ -751,10 +753,10 @@ ${histRows !== '<tr><td colspan="5" style="color:#9CA3AF;text-align:center">—<
   <div>
     <h3>ระบบพัฒนาบุคลากร</h3>
     <table>
-      <tr><th>Mentoring System</th><td>${yn('mentoring_system')}</td></tr>
-      <tr><th>Job Rotation</th><td>${yn('job_rotation')}</td></tr>
-      <tr><th>IDP System</th><td>${yn('idp_system')}</td></tr>
-      <tr><th>Career Path System</th><td>${yn('career_path_system')}</td></tr>
+      <tr><th>ระบบพี่เลี้ยง (Mentoring)</th><td>${fmtSupport('mentoring_system')}</td></tr>
+      <tr><th>หมุนเวียนงาน (Job Rotation)</th><td>${fmtSupport('job_rotation')}</td></tr>
+      <tr><th>แผนพัฒนารายบุคคล (IDP)</th><td>${fmtSupport('idp_system')}</td></tr>
+      <tr><th>เส้นทางความก้าวหน้า (Career Path)</th><td>${fmtSupport('career_path_system')}</td></tr>
       <tr><th>ชั่วโมงฝึกอบรมเฉลี่ย/คน/ปี</th><td>${fmtNum(parseFloat(v('training_hours'))||0,1)} ชั่วโมง</td></tr>
       <tr><th>สภาพแวดล้อมการทำงาน (Ergonomics)</th><td>${s('ergonomics_status')}</td></tr>
     </table>
@@ -1256,10 +1258,10 @@ const CH1_COLUMNS = [
   { key: 'engagement_score_2564', label: 'Engagement 2564', get: (row) => { const v = ch1v(row,'engagement_score_2564'); return v != null ? fmtNum(parseFloat(v),2) : '—'; } },
   { key: 'engagement_low_areas', label: 'ประเด็น Engagement คะแนนต่ำ', get: (row) => esc(ch1v(row,'engagement_low_areas') || '—') },
   { key: 'other_wellbeing_surveys', label: 'ผลสำรวจสุขภาวะอื่นๆ', get: (row) => esc(ch1v(row,'other_wellbeing_surveys') || '—') },
-  { key: 'mentoring_system', label: 'ระบบพี่เลี้ยง (Mentoring)', get: (row) => esc(ch1v(row,'mentoring_system') || '—') },
-  { key: 'job_rotation', label: 'ระบบหมุนเวียนงาน (Job Rotation)', get: (row) => esc(ch1v(row,'job_rotation') || '—') },
-  { key: 'idp_system', label: 'แผนพัฒนารายบุคคล (IDP)', get: (row) => esc(ch1v(row,'idp_system') || '—') },
-  { key: 'career_path_system', label: 'เส้นทางความก้าวหน้า (Career Path)', get: (row) => esc(ch1v(row,'career_path_system') || '—') },
+  { key: 'mentoring_system', label: 'ระบบพี่เลี้ยง (Mentoring)', get: (row) => { const v = ch1v(row,'mentoring_system'); return v === 'full' ? '✅ มีตามแผน' : v === 'partial' ? '⚠️ มีไม่ครบตามแผน' : v === 'none' ? '❌ ไม่มี' : esc(v || '—'); } },
+  { key: 'job_rotation', label: 'ระบบหมุนเวียนงาน (Job Rotation)', get: (row) => { const v = ch1v(row,'job_rotation'); return v === 'full' ? '✅ มีตามแผน' : v === 'partial' ? '⚠️ มีไม่ครบตามแผน' : v === 'none' ? '❌ ไม่มี' : esc(v || '—'); } },
+  { key: 'idp_system', label: 'แผนพัฒนารายบุคคล (IDP)', get: (row) => { const v = ch1v(row,'idp_system'); return v === 'full' ? '✅ มีตามแผน' : v === 'partial' ? '⚠️ มีไม่ครบตามแผน' : v === 'none' ? '❌ ไม่มี' : esc(v || '—'); } },
+  { key: 'career_path_system', label: 'เส้นทางความก้าวหน้า (Career Path)', get: (row) => { const v = ch1v(row,'career_path_system'); return v === 'full' ? '✅ มีตามแผน' : v === 'partial' ? '⚠️ มีไม่ครบตามแผน' : v === 'none' ? '❌ ไม่มี' : esc(v || '—'); } },
   { key: 'training_hours', label: 'ชั่วโมงอบรมเฉลี่ย/คน/ปี', get: (row) => esc(ch1v(row,'training_hours') || '—') },
   { key: 'digital_systems', label: 'ระบบดิจิทัลที่มี', get: (row) => { const v = ch1v(row,'digital_systems'); return v ? esc(Array.isArray(v) ? v.join(', ') : String(v)) : '—'; } },
   { key: 'ergonomics_status', label: 'สถานะ Ergonomics', get: (row) => esc(ch1v(row,'ergonomics_status') || '—') },
