@@ -98,45 +98,110 @@ function scopeRowsForCurrentUser() {
   });
 }
 
-async function loadBackend() {
-  const [surveyRes, ch1Res, linksRes, usersRows, orgRows, orgHrCredRows] = await Promise.all([
-    sb.from('survey_responses').select('id,email,name,title,organization,gender,age,org_type,job,job_duration,bmi,bmi_category,is_draft,submitted_at,timestamp,tmhi_score,raw_responses'),
-    sb.from('hrd_ch1_responses').select('*'),
-    sb.from('org_form_links').select('*'),
-    fetchAdminUserRoles(),
-    fetchOrganizations(),
-    fetchOrgHrCredentials(),
-  ]);
+async function loadBackend(retryCount = 0) {
+  const maxRetries = 2;
+  
+  try {
+    const [surveyRes, ch1Res, linksRes, usersRows, orgRows, orgHrCredRows] = await Promise.all([
+      sb.from('survey_responses').select('id,email,name,title,organization,gender,age,org_type,job,job_duration,bmi,bmi_category,is_draft,submitted_at,timestamp,tmhi_score,raw_responses'),
+      sb.from('hrd_ch1_responses').select('*'),
+      sb.from('org_form_links').select('*'),
+      fetchAdminUserRoles(),
+      fetchOrganizations(),
+      fetchOrgHrCredentials(),
+    ]);
 
-  // Degrade gracefully — RLS may block access for some roles; don't abort the entire init.
-  if (surveyRes.error) console.warn('loadBackend survey_responses:', surveyRes.error.message);
-  if (ch1Res.error) console.warn('loadBackend hrd_ch1_responses:', ch1Res.error.message);
+    // Check for critical errors
+    const criticalErrors = [];
+    if (surveyRes.error && !surveyRes.data?.length) {
+      criticalErrors.push('survey_responses: ' + surveyRes.error.message);
+    }
+    if (ch1Res.error && !ch1Res.data?.length) {
+      criticalErrors.push('hrd_ch1_responses: ' + ch1Res.error.message);
+    }
+    if (usersRows === null || usersRows === undefined) {
+      criticalErrors.push('users: ไม่สามารถโหลดข้อมูลผู้ใช้ได้');
+    }
 
-  // Exclude test/sandbox orgs from all admin calculations and displays
-  const isTestOrgRow = (row) => {
-    const code = (row.org_code || row.form_data?.org_code || '').toLowerCase();
-    const name = (row.organization || row.org_name || row.org_name_th || row.agency_name || row.form_data?.agency_name || row.form_data?.organization || row.form_data?.org_name || '');
-    return code === 'test-org' || name.includes('ทดสอบระบบ');
-  };
+    // If critical errors exist and we haven't exceeded retries, try again
+    if (criticalErrors.length > 0 && retryCount < maxRetries) {
+      console.warn(`loadBackend: พบข้อผิดพลาด (${criticalErrors.join(', ')}), ลองใหม่ครั้งที่ ${retryCount + 1}/${maxRetries}`);
+      await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1))); // Wait 1s, 2s
+      return loadBackend(retryCount + 1);
+    }
 
-  state.surveyRows = (surveyRes.data || [])
-    .filter(row => !isTestOrgRow(row))
-    .map(normalizeSurveyRow)
-    .sort((a, b) => new Date(getRowDate(b) || 0) - new Date(getRowDate(a) || 0));
-  state.ch1Rows = (ch1Res.data || [])
-    .filter(row => !isTestOrgRow(row))
-    .sort((a, b) => new Date(getRowDate(b) || 0) - new Date(getRowDate(a) || 0));
-  state.linkRows = linksRes.error ? [] : (linksRes.data || []);
-  state.userRows = usersRows || [];
-  state.orgHrCredentials = orgHrCredRows || [];
-  state.orgProfiles = (orgRows || []).filter((row) => {
-    const code = String(row.org_code || '').toLowerCase();
-    const name = row.org_name_th || row.display_name || '';
-    return ADMIN_CANONICAL_ORG_CODES.has(code) || ADMIN_CANONICAL_ORG_NAMES.has(name);
-  });
-  refreshOrgDerivedState();
-  scopeRowsForCurrentUser();
-  refreshOrgDerivedState();
+    // Log warnings but don't fail
+    if (surveyRes.error) console.warn('loadBackend survey_responses:', surveyRes.error.message);
+    if (ch1Res.error) console.warn('loadBackend hrd_ch1_responses:', ch1Res.error.message);
+
+    // Exclude test/sandbox orgs from all admin calculations and displays
+    const isTestOrgRow = (row) => {
+      const code = (row.org_code || row.form_data?.org_code || '').toLowerCase();
+      const name = (row.organization || row.org_name || row.org_name_th || row.agency_name || row.form_data?.agency_name || row.form_data?.organization || row.form_data?.org_name || '');
+      return code === 'test-org' || name.includes('ทดสอบระบบ');
+    };
+
+    console.log('🔍 DEBUG surveyRes:', surveyRes);
+    console.log('📊 Raw survey rows count:', (surveyRes.data || []).length);
+    
+    state.surveyRows = (surveyRes.data || [])
+      .filter(row => !isTestOrgRow(row))
+      .map(normalizeSurveyRow)
+      .sort((a, b) => new Date(getRowDate(b) || 0) - new Date(getRowDate(a) || 0));
+    
+    console.log('✅ Filtered survey rows count:', state.surveyRows.length);
+    console.log('📋 state.surveyRows:', state.surveyRows);
+    
+    state.ch1Rows = (ch1Res.data || [])
+      .filter(row => !isTestOrgRow(row))
+      .sort((a, b) => new Date(getRowDate(b) || 0) - new Date(getRowDate(a) || 0));
+    state.linkRows = linksRes.error ? [] : (linksRes.data || []);
+    state.userRows = usersRows || [];
+    state.orgHrCredentials = orgHrCredRows || [];
+    state.orgProfiles = (orgRows || []).filter((row) => {
+      const code = String(row.org_code || '').toLowerCase();
+      const name = row.org_name_th || row.display_name || '';
+      return ADMIN_CANONICAL_ORG_CODES.has(code) || ADMIN_CANONICAL_ORG_NAMES.has(name);
+    });
+    
+    refreshOrgDerivedState();
+    scopeRowsForCurrentUser();
+    refreshOrgDerivedState();
+    
+    // Update status indicator
+    const statusEl = document.getElementById('connection-status');
+    if (statusEl) {
+      statusEl.textContent = 'เชื่อมต่อสำเร็จ';
+      statusEl.style.color = 'var(--A)';
+    }
+    
+  } catch (error) {
+    console.error('loadBackend error:', error);
+    
+    if (retryCount < maxRetries) {
+      console.warn(`loadBackend: ข้อผิดพลาดทั่วไป, ลองใหม่ครั้งที่ ${retryCount + 1}/${maxRetries}`);
+      await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1)));
+      return loadBackend(retryCount + 1);
+    }
+    
+    // Update status indicator
+    const statusEl = document.getElementById('connection-status');
+    if (statusEl) {
+      statusEl.textContent = 'เชื่อมต่อล้มเหลว';
+      statusEl.style.color = 'var(--D)';
+    }
+    
+    // Still populate empty state to prevent crashes
+    state.surveyRows = [];
+    state.ch1Rows = [];
+    state.linkRows = [];
+    state.userRows = [];
+    state.orgHrCredentials = [];
+    state.orgProfiles = [];
+    refreshOrgDerivedState();
+    
+    throw error;
+  }
 }
 
 function summarizeOrgs() {

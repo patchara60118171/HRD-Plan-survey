@@ -18,7 +18,7 @@ function renderDashboard(summary) {
   const respondedCh1 = summary.filter((org) => org.ch1Count > 0).length;
   const welcome = dashboard.querySelector('.welcome');
   welcome.querySelector('.w-title').textContent = `สวัสดีครับ, ${state.session?.user?.email || 'ผู้ดูแลระบบ'}`;
-  welcome.querySelector('.w-sub').textContent = `อัปเดต ${fmtDate(new Date(), true)}`;
+  welcome.querySelector('.w-sub').innerHTML = `โครงการสำรวจสุขภาวะบุคลากรภาครัฐ พ.ศ. 2566–2570 · อัปเดต ${fmtDate(new Date(), true)}`;
   const wVals = welcome.querySelectorAll('.w-val');
   wVals[0].textContent = orgCount;
   wVals[1].textContent = respondedCh1;

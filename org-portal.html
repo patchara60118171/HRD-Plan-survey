@@ -1346,6 +1346,9 @@ async function loadWbData() {
   const orgName = portalState.orgName || '';
   const orgCode = portalState.orgCode || '';
 
+  console.log('[org-portal] Loading WB data for:', { orgName, orgCode });
+
+  // Try exact match by organization name first
   const { data: surveyRows, error: surveyErr } = await sb
     .from('survey_responses')
     .select('id, organization, submitted_at, is_draft, gender, age, tmhi_score, tmhi_level, bmi, bmi_category, name, title, height, weight, waist')
@@ -1360,6 +1363,7 @@ async function loadWbData() {
   if (surveyRows && surveyRows.length > 0) {
     rows = surveyRows;
   } else {
+    // Try ilike match by organization name
     try {
       const { data: wbRows, error: wbErr } = await sb
         .from('survey_responses')
@@ -1376,32 +1380,85 @@ async function loadWbData() {
     } catch (_) {}
   }
 
+  // If still no rows, try matching by org_code in various fields
   if (rows.length === 0 && orgCode) {
     try {
+      // Try matching org_code field directly
       const { data: codeRows, error: codeErr } = await sb
         .from('survey_responses')
         .select('id, organization, submitted_at, is_draft, gender, age, tmhi_score, tmhi_level, bmi, bmi_category, name, title, height, weight, waist')
-        .ilike('organization', `%${orgCode}%`)
+        .eq('org_code', orgCode)
         .eq('is_draft', false)
         .order('submitted_at', { ascending: false });
-      if (codeErr) {
-        console.warn('[org-portal] survey_responses by org_code-like failed:', codeErr.message || codeErr);
+      
+      if (!codeErr && codeRows && codeRows.length > 0) {
+        rows = codeRows;
+        console.log('[org-portal] Found rows by org_code field:', codeRows.length);
+      } else {
+        // Try ilike in organization field with org_code
+        const { data: codeLikeRows, error: codeLikeErr } = await sb
+          .from('survey_responses')
+          .select('id, organization, submitted_at, is_draft, gender, age, tmhi_score, tmhi_level, bmi, bmi_category, name, title, height, weight, waist')
+          .ilike('organization', `%${orgCode}%`)
+          .eq('is_draft', false)
+          .order('submitted_at', { ascending: false });
+        
+        if (!codeLikeErr && codeLikeRows && codeLikeRows.length > 0) {
+          rows = codeLikeRows;
+          console.log('[org-portal] Found rows by org_code in organization:', codeLikeRows.length);
+        }
       }
-      rows = codeRows || [];
-    } catch (_) {}
+    } catch (e) {
+      console.warn('[org-portal] Error querying by org_code:', e);
+    }
   }
 
-  portalState.wbRows = rows;
+  // As a last resort, try to get all non-draft rows and filter client-side
+  if (rows.length === 0 && (orgName || orgCode)) {
+    try {
+      const { data: allRows, error: allErr } = await sb
+        .from('survey_responses')
+        .select('id, organization, submitted_at, is_draft, gender, age, tmhi_score, tmhi_level, bmi, bmi_category, name, title, height, weight, waist, org_code')
+        .eq('is_draft', false)
+        .order('submitted_at', { ascending: false })
+        .limit(500); // Limit to prevent too much data
+
+      if (!allErr && allRows) {
+        rows = allRows.filter(row => {
+          // Check if any field matches orgName or orgCode
+          const rowOrg = (row.organization || '').toLowerCase();
+          const rowCode = (row.org_code || '').toLowerCase();
+          const searchName = orgName.toLowerCase();
+          const searchCode = orgCode.toLowerCase();
+          
+          return rowOrg.includes(searchName) || 
+                 rowOrg.includes(searchCode) || 
+                 rowCode.includes(searchCode) ||
+                 searchName.includes(rowOrg) ||
+                 searchCode.includes(rowOrg);
+        });
+        console.log('[org-portal] Client-side filtered rows:', rows.length);
+      }
+    } catch (e) {
+      console.warn('[org-portal] Error in client-side filtering:', e);
+    }
+  }
+
+  portalState._wbRows = rows;
+  
+  // Get the elements for displaying results
   const homeWb = document.getElementById('home-wb-summary');
   const summaryEl = document.getElementById('wb-summary');
   const summaryGrid = document.getElementById('wb-summary-grid');
   const actionsEl = document.getElementById('wb-actions');
-
+  
+  // If no rows found, show empty state
   if (rows.length === 0) {
-    homeWb.innerHTML = '<div class="info-box yellow">ยังไม่มีผู้ตอบ Well-being Survey จากองค์กรของท่าน</div>';
-    summaryEl.style.display = 'none';
-    actionsEl.innerHTML = '<div class="info-box blue">แชร์ลิงก์แบบสอบถามให้บุคลากรในองค์กรเพื่อเริ่มเก็บข้อมูล</div>';
-    document.getElementById('wb-dashboard-area').innerHTML = '';
+    if (homeWb) homeWb.innerHTML = '<div class="info-box yellow">ยังไม่มีผู้ตอบ Well-being Survey จากองค์กรของท่าน</div>';
+    if (summaryEl) summaryEl.style.display = 'none';
+    if (actionsEl) actionsEl.innerHTML = '<div class="info-box blue">แชร์ลิงก์แบบสอบถามให้บุคลากรในองค์กรเพื่อเริ่มเก็บข้อมูล</div>';
+    const wbArea = document.getElementById('wb-dashboard-area');
+    if (wbArea) wbArea.innerHTML = '';
     return;
   }
 
@@ -1602,25 +1659,86 @@ async function loadWbIndividualPage() {
 
   try {
     let rows = [];
+    const orgName = portalState.orgName || '';
+    const orgCode = portalState.orgCode || '';
+
+    console.log('[org-portal] Loading WB individual data for:', { orgName, orgCode });
+
+    // Try exact match by organization name first
     try {
       const { data: sRows } = await sb
         .from('survey_responses')
-        .select('id, name, title, gender, age, bmi, bmi_category, tmhi_score, tmhi_level, submitted_at, raw_responses')
-        .eq('organization', portalState.orgName)
+        .select('id, name, title, gender, age, bmi, bmi_category, tmhi_score, tmhi_level, submitted_at, raw_responses, organization, org_code')
+        .eq('organization', orgName)
         .eq('is_draft', false)
         .order('submitted_at', { ascending: false });
       if (sRows && sRows.length > 0) rows = sRows;
     } catch (_) {}
 
+    // If no rows, try ilike match
     if (rows.length === 0) {
       try {
         const { data: wRows } = await sb
           .from('survey_responses')
-          .select('id, name, title, gender, age, bmi, bmi_category, tmhi_score, tmhi_level, submitted_at, raw_responses')
-          .eq('organization', portalState.orgName)
+          .select('id, name, title, gender, age, bmi, bmi_category, tmhi_score, tmhi_level, submitted_at, raw_responses, organization, org_code')
+          .ilike('organization', orgName)
           .eq('is_draft', false)
           .order('submitted_at', { ascending: false });
         rows = wRows || [];
+      } catch (_) {}
+    }
+
+    // If still no rows, try matching by org_code
+    if (rows.length === 0 && orgCode) {
+      try {
+        const { data: codeRows } = await sb
+          .from('survey_responses')
+          .select('id, name, title, gender, age, bmi, bmi_category, tmhi_score, tmhi_level, submitted_at, raw_responses, organization, org_code')
+          .eq('org_code', orgCode)
+          .eq('is_draft', false)
+          .order('submitted_at', { ascending: false });
+        if (codeRows && codeRows.length > 0) rows = codeRows;
+      } catch (_) {}
+    }
+
+    // If still no rows, try ilike with org_code in organization field
+    if (rows.length === 0 && orgCode) {
+      try {
+        const { data: codeLikeRows } = await sb
+          .from('survey_responses')
+          .select('id, name, title, gender, age, bmi, bmi_category, tmhi_score, tmhi_level, submitted_at, raw_responses, organization, org_code')
+          .ilike('organization', `%${orgCode}%`)
+          .eq('is_draft', false)
+          .order('submitted_at', { ascending: false });
+        if (codeLikeRows && codeLikeRows.length > 0) rows = codeLikeRows;
+      } catch (_) {}
+    }
+
+    // As a last resort, client-side filtering
+    if (rows.length === 0 && (orgName || orgCode)) {
+      try {
+        const { data: allRows } = await sb
+          .from('survey_responses')
+          .select('id, name, title, gender, age, bmi, bmi_category, tmhi_score, tmhi_level, submitted_at, raw_responses, organization, org_code')
+          .eq('is_draft', false)
+          .order('submitted_at', { ascending: false })
+          .limit(500);
+
+        if (allRows) {
+          rows = allRows.filter(row => {
+            const rowOrg = (row.organization || '').toLowerCase();
+            const rowCode = (row.org_code || '').toLowerCase();
+            const searchName = orgName.toLowerCase();
+            const searchCode = orgCode.toLowerCase();
+            
+            return rowOrg.includes(searchName) || 
+                   rowOrg.includes(searchCode) || 
+                   rowCode.includes(searchCode) ||
+                   searchName.includes(rowOrg) ||
+                   searchCode.includes(rowOrg);
+          });
+          console.log('[org-portal] Client-side filtered individual rows:', rows.length);
+        }
       } catch (_) {}
     }
 
