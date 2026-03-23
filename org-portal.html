@@ -3,244 +3,214 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Org HR Portal — NIDA Wellbeing</title>
+<title>Org HR Portal - NIDA Wellbeing</title>
 <meta name="description" content="ระบบสำหรับ HR ประจำองค์กร ดูข้อมูล CH1 ผลสำรวจ Well-being และแชร์ลิงก์แบบสอบถาม">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai+Looped:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase-config.js"></script>
+<script src="js/form-schema.js"></script>
 <style>
-/* ── Reset & Base ── */
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --P:#7c3aed;
-  --PD:#4c1d95;
-  --PL:#f3e8ff;
+  --P:#5b2aa8;
+  --PD:#4b1f95;
+  --PL:#f3edff;
   --A:#ec4899;
-  --AL:#fce7f3;
-  --W:#92681A;
-  --WL:#FEF3CD;
-  --D:#DC2626;
-  --DL:#FEE2E2;
-  --bg:#faf8ff;
-  --card:#FFFFFF;
-  --bdr:#D8DCE3;
-  --tx:#1A2433;
-  --tx2:#4A5568;
-  --tx3:#8896A5;
-  --shadow:0 1px 3px rgba(0,0,0,.08);
-  --sidebar-w:240px;
+  --AL:#fdf2f8;
+  --G:#16a34a;
+  --GL:#ecfdf3;
+  --W:#b45309;
+  --WL:#fef3c7;
+  --D:#dc2626;
+  --DL:#fee2e2;
+  --bg:#f7f5fc;
+  --card:#ffffff;
+  --bdr:#e3def3;
+  --tx:#1f2937;
+  --tx2:#4b5563;
+  --tx3:#8b94a7;
+  --shadow:0 1px 3px rgba(15,23,42,.06),0 10px 28px rgba(91,42,168,.06);
+  --sidebar-w:244px;
 }
 body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh}
 
-/* ── Login Gate ── */
-.login-gate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:linear-gradient(135deg,#581c87,#7c3aed,#be185d)}
-
-@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
-.fade-up{animation:fadeUp .5s ease}
-
-.login-card{
-  background:#fff;border:1px solid var(--bdr);border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,.08);
-  padding:40px;max-width:420px;width:100%;text-align:center;position:relative}
-.login-card .icon{width:52px;height:52px;background:linear-gradient(135deg,#9333ea,#ec4899);
-  border-radius:10px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;
-  font-size:24px;color:#fff}
-.login-card h1{font-size:20px;font-weight:700;color:var(--tx);margin-bottom:4px}
-.login-card h2{font-size:15px;font-weight:600;color:var(--tx2);margin-bottom:4px}
-.login-card .sub{font-size:13px;color:var(--tx3);margin-bottom:28px}
-.login-card .fg{margin-bottom:14px;text-align:left}
-.login-card label{font-size:11px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px}
-.login-card input{width:100%;padding:10px 13px;border:1.5px solid var(--bdr);border-radius:7px;font-size:14px;font-family:inherit;
-  background:#fafbfc;transition:border-color .15s,box-shadow .15s;outline:none}
-.login-card input:focus{border-color:rgba(147,51,234,.5);box-shadow:0 0 0 3px rgba(147,51,234,.1)}
-.login-card input::placeholder{color:var(--tx3)}
-.login-btn{width:100%;padding:13px;background:linear-gradient(to right,#9333ea,#ec4899);color:#fff;border:none;
-  border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;transition:opacity .15s}
-.login-btn:hover{opacity:.9}
-.login-btn:disabled{opacity:.5;cursor:not-allowed}
-.login-msg{font-size:12px;margin-top:12px;min-height:18px;text-align:center}
+.login-gate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:linear-gradient(135deg,#6025ac,#7c3aed,#c0267f)}
+.login-shell{width:100%;max-width:420px}
+.login-card{background:#fff;border:1px solid rgba(255,255,255,.35);border-radius:12px;box-shadow:0 20px 60px rgba(46,16,101,.22);padding:36px 30px;text-align:center;position:relative}
+.login-icon{width:52px;height:52px;border-radius:12px;background:linear-gradient(135deg,#9333ea,#ec4899);display:flex;align-items:center;justify-content:center;color:#fff;font-size:24px;margin:0 auto 14px}
+.login-card h1{font-size:20px;color:var(--tx);margin-bottom:4px}
+.login-card h2{font-size:15px;color:var(--tx2);margin-bottom:4px}
+.login-sub{font-size:12px;color:var(--tx3);margin-bottom:24px}
+.fg{margin-bottom:14px;text-align:left}
+.fg label{font-size:11px;font-weight:600;color:var(--tx2);display:block;margin-bottom:6px}
+.fg input{width:100%;padding:10px 12px;border:1.5px solid var(--bdr);border-radius:8px;font-size:14px;font-family:inherit;background:#fbfbfe}
+.fg input:focus{outline:none;border-color:#a78bfa;box-shadow:0 0 0 3px rgba(167,139,250,.16)}
+.login-btn{width:100%;padding:12px 14px;background:linear-gradient(90deg,#9333ea,#ec4899);color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit}
+.login-btn:disabled{opacity:.65;cursor:not-allowed}
+.login-msg{font-size:12px;margin-top:12px;min-height:18px}
 .login-msg.err{color:#fecdd3}
-.login-footer{text-align:center;margin-top:16px;font-size:11px;color:rgba(255,255,255,.4)}
-
+.login-footer{text-align:center;margin-top:14px;color:rgba(255,255,255,.58);font-size:11px}
 .pw-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:14px;color:var(--tx3);padding:4px}
 .pw-toggle:hover{color:var(--tx2)}
-
-.err-box{background:#fef2f2;border:1px solid #fecaca;border-radius:7px;padding:10px 14px;font-size:13px;color:#dc2626;display:none;margin-bottom:12px}
-
-/* ── spinner (login) ── */
+.err-box{background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:10px 14px;font-size:13px;color:var(--D);display:none;margin-bottom:12px;text-align:left}
 .spinner-sm{border:3px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;width:18px;height:18px;animation:spin .6s linear infinite;display:inline-block;vertical-align:middle;margin-right:8px}
-@keyframes spin{to{transform:rotate(360deg)}}
 
-/* ── Portal App Layout ── */
 #portal-app{display:flex;min-height:100vh}
+.sidebar{width:var(--sidebar-w);background:linear-gradient(180deg,#5f28ab 0%,#58239d 52%,#501f8d 100%);color:#fff;display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:20;box-shadow:4px 0 30px rgba(46,16,101,.16)}
+.sidebar-logo{padding:16px 14px;border-bottom:1px solid rgba(255,255,255,.08)}
+.logo-row{display:flex;align-items:center;gap:10px}
+.logo-icon{width:28px;height:28px;border-radius:8px;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;font-size:15px}
+.logo-title{font-size:12.5px;font-weight:700}
+.logo-sub{font-size:10px;color:rgba(255,255,255,.48);padding-left:38px;margin-top:4px}
+.sidebar-org{margin:12px 10px 8px;padding:12px;border-radius:8px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.06)}
+.o-label{font-size:9px;color:rgba(255,255,255,.42);margin-bottom:4px;letter-spacing:.06em;text-transform:uppercase}
+.o-name{font-size:12px;font-weight:700;line-height:1.45;word-break:break-word}
+.o-email{font-size:10px;color:rgba(255,255,255,.48);margin-top:4px;word-break:break-all}
+.portal-nav{flex:1;padding:8px 0 10px}
+.nav-group{padding:12px 14px 6px;font-size:9px;font-weight:700;letter-spacing:.08em;color:rgba(255,255,255,.34);text-transform:uppercase}
+.nav-item,.nav-subitem{display:flex;align-items:center;gap:9px;width:100%;background:none;border:none;color:rgba(255,255,255,.72);font-family:inherit;text-align:left;cursor:pointer}
+.nav-item{padding:11px 14px;font-size:13px;border-left:3px solid transparent}
+.nav-subitem{padding:9px 14px 9px 28px;font-size:12.5px;border-left:3px solid transparent}
+.nav-item:hover,.nav-subitem:hover{background:rgba(255,255,255,.06);color:#fff}
+.nav-item.active,.nav-subitem.active{background:rgba(255,255,255,.12);color:#fff}
+.nav-item.active{border-left-color:#f59e0b}
+.nav-subitem.active{border-left-color:#fbbf24}
+.ni{width:16px;text-align:center;flex-shrink:0}
+.sidebar-foot{border-top:1px solid rgba(255,255,255,.08);padding:10px}
+.sidebar-foot .nav-item{padding:8px 6px;border-left:none;font-size:12px}
 
-/* ── Sidebar ── */
-.sidebar{width:var(--sidebar-w);background:var(--PD);color:#fff;display:flex;flex-direction:column;flex-shrink:0;position:fixed;top:0;left:0;height:100vh;z-index:100;overflow-y:auto}
-.sidebar-logo{padding:18px 16px 14px;border-bottom:1px solid rgba(255,255,255,.1)}
-.sidebar-logo .logo-row{display:flex;align-items:center;gap:10px}
-.sidebar-logo .logo-icon{width:30px;height:30px;background:rgba(255,255,255,.15);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
-.sidebar-logo .logo-title{font-size:13px;font-weight:700;color:#fff;line-height:1.25}
-.sidebar-logo .logo-sub{font-size:10px;color:rgba(255,255,255,.4);margin-top:2px;padding-left:40px}
-.sidebar-org{margin:10px 12px;background:rgba(255,255,255,.07);border-radius:6px;padding:8px 10px;border:1px solid rgba(255,255,255,.06)}
-.sidebar-org .o-label{font-size:9px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px}
-.sidebar-org .o-name{font-size:12px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.sidebar-org .o-email{font-size:10px;color:rgba(255,255,255,.4);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
-nav.portal-nav{flex:1;padding:6px 0 12px}
-.nav-group{padding:14px 14px 4px;font-size:9px;font-weight:700;letter-spacing:.08em;color:rgba(255,255,255,.3);text-transform:uppercase}
-.nav-item{display:flex;align-items:center;gap:9px;padding:9px 14px;cursor:pointer;color:rgba(255,255,255,.65);transition:background .12s,color .12s;border-left:2px solid transparent;font-size:13px;user-select:none;font-family:inherit;background:none;border-right:none;border-top:none;border-bottom:none;width:100%;text-align:left}
-.nav-item:hover{background:rgba(255,255,255,.06);color:rgba(255,255,255,.9)}
-.nav-item.active{background:rgba(255,255,255,.1);color:#fff;border-left-color:var(--A)}
-.nav-item .ni{width:17px;font-size:14px;text-align:center;flex-shrink:0}
-.sidebar-foot{border-top:1px solid rgba(255,255,255,.08);padding:8px 12px}
-.sidebar-foot .nav-item{padding:7px 6px;font-size:12px;border-left:none}
-
-/* ── Main Content ── */
 .portal-main-wrap{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-width:0}
-.topbar{background:var(--card);border-bottom:1px solid var(--bdr);padding:0 22px;height:52px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:50}
+.topbar{background:#fff;border-bottom:1px solid var(--bdr);padding:10px 24px;display:flex;align-items:center;gap:12px;min-height:58px}
+.tb-head{display:flex;flex-direction:column;gap:2px}
 .tb-title{font-size:14px;font-weight:700;color:var(--P)}
-.tb-bc{font-size:12px;color:var(--tx3)}
+.tb-sub{font-size:11.5px;color:var(--tx2);line-height:1.35}
 .tb-space{flex:1}
-.tb-user{font-size:11.5px;color:var(--tx3)}
-
-/* ── Content Area ── */
-.portal-content{padding:22px;max-width:960px;width:100%}
+.tb-user{font-size:11px;color:var(--tx3)}
+.portal-content{padding:24px;max-width:1120px}
 .tab-page{display:none}
 .tab-page.active{display:block}
 
-/* ── Welcome Bar ── */
-.welcome-bar{background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:16px 20px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between}
-.welcome-bar h2{font-size:16px;font-weight:700;color:var(--P)}
-.welcome-bar .sub{font-size:12px;color:var(--tx3);margin-top:2px}
-.status-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:5px;font-size:11px;font-weight:600}
+.welcome-bar{background:#fff;border:1px solid var(--bdr);border-radius:12px;padding:18px 20px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow)}
+.welcome-bar h2{font-size:18px;color:var(--P)}
+.welcome-bar .sub{font-size:12px;color:var(--tx3);margin-top:4px}
+.status-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:700}
 .status-badge.submitted{background:var(--AL);color:#be185d}
 .status-badge.draft{background:var(--WL);color:var(--W)}
-.status-badge.reopened{background:#FEF3CD;color:#92400E}
-.status-badge.none{background:#f0f1f3;color:var(--tx3)}
+.status-badge.reopened{background:#eff6ff;color:#2563eb}
+.status-badge.none{background:#eef2f7;color:var(--tx3)}
 
-/* ── Cards ── */
-.section-card{background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:20px;margin-bottom:16px;border-left:3px solid var(--P)}
-.section-card.wb{border-left-color:var(--A);}
-.section-card.share{border-left-color:var(--P)}
-.section-card h3{font-size:14px;font-weight:700;color:var(--tx);margin-bottom:4px;display:flex;align-items:center;gap:7px}
-.section-card .desc{font-size:12.5px;color:var(--tx2);margin-bottom:12px;line-height:1.6}
+.section-card{background:#fff;border:1px solid var(--bdr);border-radius:14px;padding:20px 22px;margin-bottom:16px;box-shadow:var(--shadow);position:relative}
+.section-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:#8b5cf6;border-radius:14px 0 0 14px}
+.section-card.wb::before{background:#ec4899}
+.section-card.share::before{background:#8b5cf6}
+.section-card h3{font-size:15px;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.desc{font-size:12.5px;color:var(--tx2);margin-bottom:14px;line-height:1.6}
 
-/* ── Summary Grid ── */
-.summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:12px}
-.summary-item{background:var(--bg);border:1px solid var(--bdr);border-radius:8px;padding:12px;text-align:center}
-.summary-item .val{font-size:20px;font-weight:700;color:var(--P)}
-.summary-item .val.green{color:var(--A)}
-.summary-item .val.pink{color:var(--P)}
-.summary-item .lbl{font-size:11px;color:var(--tx3);margin-top:3px}
+.summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.summary-item{background:#fcfbff;border:1px solid var(--bdr);border-radius:10px;padding:14px 10px;text-align:center}
+.summary-item .val{font-size:20px;font-weight:700;color:#7c3aed;line-height:1.2}
+.summary-item .lbl{font-size:11px;color:var(--tx3);margin-top:6px}
 
-/* ── Progress Bar ── */
-.progress-wrap{margin:14px 0}
-.progress-label{display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px}
+.ch1-strip{margin-top:12px;padding:10px 14px;border-radius:8px;font-size:13px;font-weight:600}
+.ch1-strip.ok{background:#fdf2f8;color:#be185d}
+.ch1-strip.blue{background:#eff6ff;color:#2563eb}
+.ch1-strip.yellow{background:#fefce8;color:#a16207}
+.section-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 16px;border-radius:10px;font-size:13px;font-weight:600;border:none;cursor:pointer;font-family:inherit;transition:all .15s}
+.btn-primary{background:#7c3aed;color:#fff}
+.btn-primary:hover{background:#6d28d9}
+.btn-green{background:#ec4899;color:#fff}
+.btn-green:hover{background:#db2777}
+.btn-outline{background:#fff;border:1.5px solid #d7dce5;color:var(--tx2)}
+.btn-outline:hover{border-color:#c4b5fd;color:#6d28d9}
+.btn-soft{background:#fff;border:1px solid #dde3ee;color:var(--tx);box-shadow:0 1px 2px rgba(15,23,42,.04)}
+.btn-soft:hover{border-color:#c4b5fd;color:#6d28d9}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+
+.progress-wrap{margin-top:12px}
+.progress-label{display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:8px}
 .progress-label .left{color:var(--tx2);font-weight:600}
-.progress-label .right{color:var(--P);font-weight:700}
-.progress-track{width:100%;height:12px;background:var(--PL);border-radius:99px;overflow:hidden}
-.progress-fill{height:100%;background:var(--P);border-radius:99px;transition:width .6s ease;min-width:2px}
-.progress-text{font-size:13px;color:var(--tx2);margin-top:8px;text-align:center;line-height:1.6}
-.progress-text strong{color:var(--P)}
+.progress-label .right{color:#7c3aed;font-weight:700}
+.progress-track{height:10px;background:var(--PL);border-radius:999px;overflow:hidden}
+.progress-fill{height:100%;background:#d8b4fe;border-radius:999px;transition:width .4s ease}
+.progress-text{margin-top:8px;text-align:center;font-size:12.5px;color:var(--tx2)}
+.progress-text strong{color:#7c3aed}
 
-/* ── Buttons ── */
-.section-actions{display:flex;gap:8px;flex-wrap:wrap}
-.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:7px;font-size:13px;font-weight:600;border:none;cursor:pointer;font-family:inherit;transition:all .15s}
-.btn-primary{background:var(--P);color:#fff}.btn-primary:hover{background:var(--PD)}
-.btn-green{background:var(--A);color:#fff}.btn-green:hover{background:#db2777}
-.btn-pink{background:var(--P);color:#fff}.btn-pink:hover{background:var(--PD)}
-.btn-outline{background:transparent;border:1.5px solid var(--bdr);color:var(--tx2)}.btn-outline:hover{border-color:var(--P);color:var(--P)}
-.btn:disabled{opacity:.5;cursor:not-allowed}
+.info-box{padding:10px 14px;border-radius:8px;font-size:13px;line-height:1.6}
+.info-box.blue{background:var(--PL);color:#6d28d9}
+.info-box.yellow{background:var(--WL);color:#92400e}
 
-/* ── Embedded CH1 Form ── */
-.embed-wrap{margin-top:14px;border:1px solid var(--bdr);border-radius:10px;overflow:hidden;background:#fff}
-.embed-head{padding:10px 14px;background:#f8fafc;border-bottom:1px solid var(--bdr);font-size:12px;color:var(--tx2)}
+.embed-wrap{margin-top:14px;border:1px solid var(--bdr);border-radius:12px;overflow:hidden;background:#fff}
+.embed-head{padding:10px 14px;background:#faf8ff;border-bottom:1px solid var(--bdr);font-size:12px;color:var(--tx2)}
 .embed-frame{width:100%;height:1200px;border:0;background:#fff}
 
-/* ── Info boxes ── */
-.info-box{padding:10px 14px;border-radius:7px;font-size:13px;margin-bottom:12px;line-height:1.6}
-.info-box.blue{background:var(--PL);color:var(--P)}
-.info-box.yellow{background:var(--WL);color:#92400E}
-.info-box.green{background:var(--AL);color:#9d174d}
-.info-box.red{background:#FEE2E2;color:var(--D)}
-
-/* ── QR Section ── */
-.qr-section{display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap}
-.qr-box{background:var(--bg);border:1px solid var(--bdr);border-radius:10px;padding:18px;text-align:center;min-width:200px}
-.qr-box img{border-radius:6px;margin:8px 0}
-.link-box{flex:1;min-width:260px}
+.qr-section{display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap}
+.qr-box{min-width:220px;background:#faf8ff;border:1px solid var(--bdr);border-radius:12px;padding:18px;text-align:center}
+.qr-box img{background:#fff;border-radius:10px;border:1px solid var(--bdr)}
+.link-box{flex:1;min-width:300px}
 .link-input-wrap{display:flex;gap:8px;margin-bottom:12px}
-.link-input{flex:1;padding:9px 12px;border:1.5px solid var(--bdr);border-radius:7px;font-size:13px;font-family:inherit;background:var(--bg);color:var(--tx)}
-.copy-btn{padding:9px 16px;background:var(--P);color:#fff;border:none;border-radius:7px;font-weight:600;cursor:pointer;font-family:inherit;font-size:13px;transition:background .15s;white-space:nowrap}
-.copy-btn:hover{background:var(--PD)}
-.copy-btn.copied{background:var(--A)}
+.link-input{flex:1;padding:10px 12px;border:1.5px solid var(--bdr);border-radius:10px;background:#fbfbfe;color:var(--tx);font-family:inherit}
+.copy-btn{padding:10px 16px;border:none;border-radius:10px;background:#7c3aed;color:#fff;font-weight:700;cursor:pointer;font-family:inherit}
+.copy-btn.copied{background:#ec4899}
 
-/* ── Loading & Toast ── */
-.loading-overlay{position:fixed;inset:0;background:rgba(255,255,255,.85);display:flex;align-items:center;justify-content:center;z-index:9999;flex-direction:column;gap:12px}
-.spinner{width:32px;height:32px;border:3px solid var(--PL);border-top-color:var(--P);border-radius:50%;animation:spin .8s linear infinite}
-.toast{position:fixed;bottom:20px;right:20px;padding:11px 18px;border-radius:7px;font-size:13px;font-weight:600;color:#fff;z-index:99999;transform:translateY(100px);opacity:0;transition:all .3s}
+.loading-overlay{position:fixed;inset:0;background:rgba(255,255,255,.84);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;z-index:9999}
+.spinner{width:34px;height:34px;border:3px solid #e9ddff;border-top-color:#7c3aed;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.toast{position:fixed;bottom:18px;right:18px;padding:11px 18px;border-radius:9px;color:#fff;font-size:13px;font-weight:600;transform:translateY(100px);opacity:0;transition:all .25s;z-index:10000}
 .toast.show{transform:translateY(0);opacity:1}
-.toast.success{background:var(--A)}
-.toast.error{background:var(--D)}
-.toast.warn{background:var(--W)}
-.toast.info{background:var(--P)}
+.toast.success{background:#16a34a}
+.toast.error{background:#dc2626}
+.toast.warn{background:#b45309}
+.toast.info{background:#7c3aed}
 
-/* ── Responsive ── */
-@media(max-width:768px){
-  .sidebar{width:0;overflow:hidden}
+@media(max-width:900px){
+  .sidebar{position:static;width:100%;height:auto}
+  #portal-app{flex-direction:column}
   .portal-main-wrap{margin-left:0}
-  .qr-section{flex-direction:column;align-items:center}
-  .summary-grid{grid-template-columns:repeat(2,1fr)}
+  .portal-content{padding:18px}
+  .summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 </style>
 </head>
 <body>
 
-<!-- ===== LOGIN GATE ===== -->
 <div id="login-gate" class="login-gate">
-  <div style="width:100%;max-width:420px" class="fade-up">
+  <div class="login-shell">
     <div class="login-card">
-      <div class="icon">🏛️</div>
+      <div class="login-icon">🏛️</div>
       <h1>NIDA WELLBEING</h1>
       <h2>Org HR Portal</h2>
-      <p class="sub">ระบบสำหรับ HR ประจำองค์กร</p>
-
-      <form id="login-form" onsubmit="handleLogin(event)">
+      <p class="login-sub">ระบบสำหรับ HR ประจำองค์กร</p>
+      <form onsubmit="handleLogin(event)">
         <div class="fg">
           <label>อีเมล</label>
-          <input type="email" id="login-email" required placeholder="hr@example.go.th" autocomplete="email">
+          <input type="email" id="login-email" placeholder="hr@example.go.th" autocomplete="email" required>
         </div>
         <div class="fg" style="position:relative">
           <label>รหัสผ่าน</label>
           <div style="position:relative">
-            <input type="password" id="login-pwd" required placeholder="••••••••" autocomplete="current-password" style="padding-right:40px">
+            <input type="password" id="login-pwd" placeholder="••••••••" autocomplete="current-password" required style="padding-right:40px">
             <button type="button" class="pw-toggle" onclick="togglePw()">👁️</button>
           </div>
         </div>
-
         <div class="err-box" id="error-box"><span id="error-text"></span></div>
-
-        <button type="submit" class="login-btn" id="btn-login">เข้าสู่ระบบ</button>
+        <button class="login-btn" id="login-btn" type="submit">เข้าสู่ระบบ</button>
       </form>
-
       <div class="login-msg" id="login-msg"></div>
     </div>
-
-    <p class="login-footer">ระบบสำรวจสุขภาวะบุคลากรภาครัฐ · NIDA</p>
+    <div class="login-footer">ระบบสำรวจสุขภาวะบุคลากรภาครัฐ · NIDA</div>
   </div>
 </div>
 
-<!-- ===== PORTAL APP ===== -->
 <div id="portal-app" style="display:none">
-
-  <!-- Sidebar -->
-  <div class="sidebar">
+  <aside class="sidebar">
     <div class="sidebar-logo">
       <div class="logo-row">
         <div class="logo-icon">🏛️</div>
-        <div>
-          <div class="logo-title">NIDA Wellbeing</div>
-        </div>
+        <div class="logo-title">NIDA Wellbeing</div>
       </div>
       <div class="logo-sub">Org HR Portal</div>
     </div>
@@ -255,190 +225,140 @@ nav.portal-nav{flex:1;padding:6px 0 12px}
       <div class="nav-group">เมนูหลัก</div>
       <button class="nav-item active" data-tab="home" onclick="switchTab('home')"><span class="ni">🏠</span> หน้าหลัก</button>
       <button class="nav-item" data-tab="ch1" onclick="switchTab('ch1')"><span class="ni">📝</span> CH1 ข้อมูลองค์กร</button>
+      <button class="nav-subitem" id="nav-ch1-edit" onclick="openCh1Editor()"><span class="ni">✏️</span> แก้ไขฟอร์ม</button>
       <button class="nav-item" data-tab="wb" onclick="switchTab('wb')"><span class="ni">💚</span> Well-being ผลสำรวจ</button>
-      <button class="nav-item" data-tab="share" onclick="switchTab('share')"><span class="ni">🔗</span> แชร์ลิงก์</button>
+      <button class="nav-item" data-tab="share" onclick="switchTab('share')"><span class="ni">🔗</span> แชร์ลิงก์ Well-being</button>
     </nav>
 
     <div class="sidebar-foot">
       <button class="nav-item" onclick="doLogout()"><span class="ni">↩</span> ออกจากระบบ</button>
     </div>
-  </div>
+  </aside>
 
-  <!-- Main Wrap -->
   <div class="portal-main-wrap">
-
-    <!-- Topbar -->
     <div class="topbar">
-      <div class="tb-title" id="topbar-title">หน้าหลัก</div>
+      <div class="tb-head">
+        <div class="tb-title" id="topbar-title">หน้าหลัก</div>
+        <div class="tb-sub" id="topbar-subtitle">ภาพรวมข้อมูลขององค์กรและสถานะการส่งแบบสำรวจ</div>
+      </div>
       <div class="tb-space"></div>
-      <span class="tb-user" id="topbar-org-name">—</span>
+      <div class="tb-user" id="topbar-org-name">—</div>
     </div>
 
-  <!-- Content -->
-  <div class="portal-content">
-
-    <!-- ───── TAB: HOME ───── -->
-    <div class="tab-page active" id="page-home">
-      <!-- Welcome -->
-      <div class="welcome-bar">
-        <div>
-          <h2 id="org-name-display">—</h2>
-          <div class="sub" id="org-code-display">—</div>
+    <main class="portal-content">
+      <div class="tab-page active" id="page-home">
+        <div class="welcome-bar">
+          <div>
+            <h2 id="org-name-display">—</h2>
+            <div class="sub" id="org-code-display">—</div>
+          </div>
+          <div id="ch1-status-badge"></div>
         </div>
-        <div id="ch1-status-badge"></div>
-      </div>
 
-      <!-- Overview Cards -->
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-bottom:20px">
-        <!-- CH1 Overview -->
-        <div class="section-card">
-          <h3>📝 สถานะ CH1</h3>
-          <div id="home-ch1-summary">
-            <div class="info-box blue">กำลังโหลด...</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-bottom:16px">
+          <div class="section-card">
+            <h3>📝 สถานะ CH1</h3>
+            <div class="desc">ภาพรวมข้อมูลบทที่ 1 ขององค์กร</div>
+            <div id="home-ch1-summary"><div class="info-box blue">กำลังโหลด...</div></div>
+          </div>
+          <div class="section-card wb">
+            <h3>💚 สถานะ Well-being</h3>
+            <div class="desc">สรุปจำนวนผู้ตอบแบบสำรวจในองค์กร</div>
+            <div id="home-wb-summary"><div class="info-box blue">กำลังโหลด...</div></div>
           </div>
         </div>
-        <!-- WB Overview -->
+
         <div class="section-card wb">
-          <h3>💚 สถานะ Well-being</h3>
-          <div id="home-wb-summary">
-            <div class="info-box blue">กำลังโหลด...</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Progress Section -->
-      <div class="section-card" style="border-left-color:var(--A)">
-        <h3>📊 ความคืบหน้าการกรอก Well-being Survey</h3>
-        <div class="desc">ติดตามจำนวนบุคลากรที่ตอบแบบสอบถาม Well-being เทียบกับจำนวนบุคลากรทั้งหมดขององค์กร</div>
-        <div class="progress-wrap" id="wb-progress-wrap">
-          <div class="progress-label">
-            <span class="left" id="progress-label-text">ผู้ตอบ Well-being</span>
-            <span class="right" id="progress-pct-text">—</span>
-          </div>
-          <div class="progress-track">
-            <div class="progress-fill" id="progress-fill" style="width:0%" data-pct="0%"></div>
-          </div>
-          <div class="progress-text" id="progress-detail-text">กำลังโหลด...</div>
-        </div>
-      </div>
-
-      <!-- Quick Actions -->
-      <div class="section-card share">
-        <h3>🚀 การดำเนินการ</h3>
-        <div class="section-actions">
-          <button class="btn btn-primary" onclick="switchTab('ch1')">📝 ดูข้อมูล CH1</button>
-          <button class="btn btn-green" onclick="switchTab('wb')">💚 ดู Well-being Dashboard</button>
-          <button class="btn btn-pink" onclick="switchTab('share')">🔗 แชร์ลิงก์ให้บุคลากร</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- ───── TAB: CH1 ───── -->
-    <div class="tab-page" id="page-ch1">
-      <div class="section-card">
-        <h3>📝 แบบสอบถาม บทที่ 1 (CH1) — ข้อมูลสุขภาวะองค์กร</h3>
-        <div class="desc">แบบสอบถามข้อมูลบุคลากร โครงสร้างองค์กร NCD และนโยบาย HRD</div>
-
-        <!-- CH1 Summary -->
-        <div id="ch1-summary" style="display:none">
-          <div class="summary-grid" id="ch1-summary-grid"></div>
-        </div>
-
-        <!-- CH1 Window Info -->
-        <div id="ch1-window-info"></div>
-
-        <!-- CH1 Actions -->
-        <div class="section-actions" id="ch1-actions"></div>
-
-        <!-- CH1 Inline Form -->
-        <div class="embed-wrap" id="ch1-inline-wrap" style="display:none">
-          <div class="embed-head">ฟอร์ม CH1 ในหน้า Portal (หากมีข้อมูลเดิม ระบบจะโหลดมาให้แก้ไขอัตโนมัติ)</div>
-          <iframe id="ch1-inline-frame" class="embed-frame" title="CH1 Form"></iframe>
-        </div>
-      </div>
-    </div>
-
-    <!-- ───── TAB: WELLBEING ───── -->
-    <div class="tab-page" id="page-wb">
-      <div class="section-card wb">
-        <h3>💚 Well-being Survey — ผลสำรวจสุขภาวะรายบุคคล</h3>
-        <div class="desc">ผลการสำรวจ Well-being ของบุคลากรในองค์กร · PHQ-9, กิจกรรมทางกาย, Engagement และอื่นๆ</div>
-
-        <!-- WB Progress -->
-        <div class="progress-wrap" id="wb-progress-wrap-2">
-          <div class="progress-label">
-            <span class="left">ผู้ตอบ Well-being Survey</span>
-            <span class="right" id="wb-pct-text-2">—</span>
-          </div>
-          <div class="progress-track">
-            <div class="progress-fill" id="wb-progress-fill-2" style="width:0%" data-pct="0%"></div>
-          </div>
-          <div class="progress-text" id="wb-progress-detail-2">กำลังโหลด...</div>
-        </div>
-
-        <!-- WB Summary -->
-        <div id="wb-summary" style="display:none;margin-top:16px">
-          <div class="summary-grid" id="wb-summary-grid"></div>
-        </div>
-
-        <!-- WB Actions -->
-        <div class="section-actions" id="wb-actions" style="margin-top:14px"></div>
-      </div>
-    </div>
-
-    <!-- ───── TAB: SHARE ───── -->
-    <div class="tab-page" id="page-share">
-      <div class="section-card share">
-        <h3>🔗 แชร์ลิงก์แบบสอบถาม Well-being ขององค์กร</h3>
-        <div class="desc">ส่งลิงก์หรือ QR Code ให้บุคลากรในองค์กรกรอกแบบสอบถาม Well-being Survey</div>
-
-        <div class="qr-section">
-          <!-- QR Code -->
-          <div class="qr-box">
-            <div style="font-size:13px;font-weight:600;color:var(--P);margin-bottom:8px">QR Code</div>
-            <img id="qr-img" width="200" height="200" alt="QR Code" style="background:#f3f4f6;min-height:200px">
-            <div style="margin-top:10px">
-              <button class="btn btn-outline" onclick="downloadQR()" style="font-size:12px">📥 ดาวน์โหลด QR</button>
+          <h3>📊 ความคืบหน้าการกรอก Well-being Survey</h3>
+          <div class="desc">ติดตามจำนวนผู้ตอบเทียบกับจำนวนบุคลากรทั้งหมดขององค์กร</div>
+          <div class="progress-wrap">
+            <div class="progress-label">
+              <span class="left">ผู้ตอบ Well-being</span>
+              <span class="right" id="progress-pct-text">—</span>
             </div>
+            <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+            <div class="progress-text" id="progress-detail-text">กำลังโหลด...</div>
           </div>
+        </div>
 
-          <!-- Link -->
-          <div class="link-box">
-            <div style="font-size:13px;font-weight:600;color:var(--tx);margin-bottom:8px">ลิงก์แบบสอบถาม</div>
-            <div class="link-input-wrap">
-              <input type="text" class="link-input" id="survey-link" readonly value="กำลังสร้างลิงก์…">
-              <button class="copy-btn" id="copy-btn" onclick="copyLink()">📋 คัดลอก</button>
-            </div>
-            <div class="info-box blue" style="margin-bottom:14px">
-              💡 แชร์ลิงก์นี้ให้บุคลากรในองค์กรเพื่อกรอกแบบสอบถาม Well-being Survey<br>
-              ระบบจะระบุชื่อองค์กรให้อัตโนมัติเมื่อเปิดลิงก์
-            </div>
+        <div class="section-card share">
+          <h3>🚀 การดำเนินการ</h3>
+          <div class="section-actions">
+            <button class="btn btn-primary" onclick="switchTab('ch1')">📝 ดูข้อมูล CH1</button>
+            <button class="btn btn-green" onclick="switchTab('wb')">💚 ดู Well-being Dashboard</button>
+            <button class="btn btn-primary" onclick="switchTab('share')">🔗 แชร์ลิงก์ให้บุคลากร</button>
+          </div>
+        </div>
+      </div>
 
-            <!-- Progress Summary -->
-            <div style="background:var(--bg);border-radius:8px;padding:16px;border:1px solid var(--bdr)">
-              <div style="font-size:13px;font-weight:600;color:var(--P);margin-bottom:6px">📊 สถานะการตอบ</div>
-              <div id="share-progress-text" style="font-size:14px;color:var(--tx2);line-height:1.6">กำลังโหลด...</div>
+      <div class="tab-page" id="page-ch1">
+        <div class="section-card">
+          <h3>📝 แบบสอบถาม - ข้อมูลสุขภาวะองค์กร</h3>
+          <div class="desc">แบบสอบถามข้อมูลบุคลากร โครงสร้างองค์กร NCD และนโยบาย HRD</div>
+          <div id="ch1-summary" style="display:none"><div class="summary-grid" id="ch1-summary-grid"></div></div>
+          <div id="ch1-window-info"></div>
+          <div class="section-actions" id="ch1-actions"></div>
+          <div class="embed-wrap" id="ch1-inline-wrap" style="display:none">
+            <div class="embed-head">ฟอร์ม CH1 ในหน้า Portal หากมีข้อมูลเดิม ระบบจะโหลดมาให้แก้ไขอัตโนมัติ</div>
+            <iframe id="ch1-inline-frame" class="embed-frame" title="CH1 Form"></iframe>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-page" id="page-wb">
+        <div class="section-card wb">
+          <h3>💚 Well-being ผลสำรวจ</h3>
+          <div class="desc">ผลการสำรวจสุขภาวะรายบุคคลของบุคลากรในองค์กร</div>
+          <div class="progress-wrap">
+            <div class="progress-label">
+              <span class="left">ผู้ตอบ Well-being Survey</span>
+              <span class="right" id="wb-pct-text">—</span>
+            </div>
+            <div class="progress-track"><div class="progress-fill" id="wb-progress-fill" style="width:0%"></div></div>
+            <div class="progress-text" id="wb-progress-detail">กำลังโหลด...</div>
+          </div>
+          <div id="wb-summary" style="display:none;margin-top:16px"><div class="summary-grid" id="wb-summary-grid"></div></div>
+          <div class="section-actions" id="wb-actions"></div>
+        </div>
+      </div>
+
+      <div class="tab-page" id="page-share">
+        <div class="section-card share">
+          <h3>🔗 แชร์ลิงก์ Well-being</h3>
+          <div class="desc">ส่งลิงก์หรือ QR Code ให้บุคลากรในองค์กรกรอกแบบสอบถาม Well-being Survey</div>
+          <div class="qr-section">
+            <div class="qr-box">
+              <div style="font-size:13px;font-weight:700;color:var(--P);margin-bottom:10px">QR Code</div>
+              <img id="qr-img" width="200" height="200" alt="QR Code">
+              <div style="margin-top:10px"><button class="btn btn-outline" onclick="downloadQR()">📥 ดาวน์โหลด QR</button></div>
+            </div>
+            <div class="link-box">
+              <div style="font-size:13px;font-weight:700;margin-bottom:8px">ลิงก์แบบสอบถาม</div>
+              <div class="link-input-wrap">
+                <input class="link-input" id="survey-link" readonly value="กำลังสร้างลิงก์...">
+                <button class="copy-btn" id="copy-btn" onclick="copyLink()">📋 คัดลอก</button>
+              </div>
+              <div class="info-box blue" style="margin-bottom:14px">แชร์ลิงก์นี้ให้บุคลากรในองค์กรเพื่อกรอกแบบสอบถาม Well-being โดยระบบจะระบุชื่อองค์กรให้อัตโนมัติ</div>
+              <div style="background:#faf8ff;border:1px solid var(--bdr);border-radius:12px;padding:16px">
+                <div style="font-size:13px;font-weight:700;color:var(--P);margin-bottom:6px">สถานะการตอบ</div>
+                <div id="share-progress-text" style="font-size:13px;color:var(--tx2);line-height:1.7">กำลังโหลด...</div>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </main>
+  </div>
+</div>
 
-  </div><!-- /portal-content -->
-  </div><!-- /portal-main-wrap -->
-</div><!-- /portal-app -->
-
-<!-- Toast -->
 <div class="toast" id="toast-el"></div>
 
-<!-- Loading -->
 <div class="loading-overlay" id="loading" style="display:none">
   <div class="spinner"></div>
   <div style="font-size:13px;color:var(--tx2)">กำลังโหลด...</div>
 </div>
 
 <script>
-// ── Globals ──
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let portalState = {
   session: null,
@@ -450,7 +370,13 @@ let portalState = {
   totalStaff: 0,
 };
 
-// ── Helpers ──
+const TAB_META = {
+  home: { title: 'หน้าหลัก', subtitle: 'ภาพรวมข้อมูลขององค์กรและสถานะการส่งแบบสำรวจ' },
+  ch1: { title: 'ข้อมูลองค์กร', subtitle: 'แบบสำรวจข้อมูลเพื่อจัดทำแผนการพัฒนาขององค์กรสุขภาวะข้าราชการพลเรือน' },
+  wb: { title: 'Well-being ผลสำรวจ', subtitle: 'ภาพรวมผลสำรวจสุขภาวะรายบุคคลของบุคลากรในองค์กร' },
+  share: { title: 'แชร์ลิงก์ Well-being', subtitle: 'ส่งต่อแบบสำรวจให้บุคลากรในองค์กร' },
+};
+
 function showToast(msg, type = 'info', duration = 4000) {
   const el = document.getElementById('toast-el');
   el.textContent = msg;
@@ -458,58 +384,74 @@ function showToast(msg, type = 'info', duration = 4000) {
   clearTimeout(el._tid);
   el._tid = setTimeout(() => el.classList.remove('show'), duration);
 }
-function showLoading(show = true) { document.getElementById('loading').style.display = show ? 'flex' : 'none'; }
-function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
-function fmtNum(n) { return n != null && n !== '' ? Number(n).toLocaleString('th-TH') : '—'; }
 
-// ── Toggle Password ──
-function togglePw() {
-  const pw = document.getElementById('login-pwd');
-  const btn = document.querySelector('.pw-toggle');
-  if (pw.type === 'password') { pw.type = 'text'; btn.textContent = '🙈'; }
-  else { pw.type = 'password'; btn.textContent = '👁️'; }
+function showLoading(show = true) {
+  document.getElementById('loading').style.display = show ? 'flex' : 'none';
 }
 
-// ── Tab Switching ──
-const TAB_TITLES = {home:'หน้าหลัก',ch1:'CH1 ข้อมูลองค์กร',wb:'Well-being ผลสำรวจ',share:'แชร์ลิงก์'};
-function switchTab(tab) {
-  document.querySelectorAll('.nav-item[data-tab]').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
-  document.querySelectorAll('.tab-page').forEach(p => p.classList.toggle('active', p.id === `page-${tab}`));
-  const titleEl = document.getElementById('topbar-title');
-  if (titleEl) titleEl.textContent = TAB_TITLES[tab] || tab;
+function esc(value) {
+  const div = document.createElement('div');
+  div.textContent = value;
+  return div.innerHTML;
+}
 
-  // Lazy-load embedded CH1 form only when tab is opened
-  if (tab === 'ch1') {
-    mountInlineCh1Form();
+function fmtNum(value, digits = 0) {
+  if (value === null || value === undefined || value === '') return '—';
+  const num = Number(value);
+  if (Number.isNaN(num)) return esc(String(value));
+  return num.toLocaleString('th-TH', { minimumFractionDigits: digits, maximumFractionDigits: digits });
+}
+
+function togglePw() {
+  const input = document.getElementById('login-pwd');
+  const btn = document.querySelector('.pw-toggle');
+  if (!input || !btn) return;
+  if (input.type === 'password') {
+    input.type = 'text';
+    btn.textContent = '🙈';
+  } else {
+    input.type = 'password';
+    btn.textContent = '👁️';
   }
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.nav-item[data-tab]').forEach((btn) => btn.classList.toggle('active', btn.dataset.tab === tab));
+  document.querySelectorAll('.tab-page').forEach((page) => page.classList.toggle('active', page.id === `page-${tab}`));
+  document.getElementById('nav-ch1-edit').classList.toggle('active', tab === 'ch1');
+  const meta = TAB_META[tab] || { title: tab, subtitle: '' };
+  document.getElementById('topbar-title').textContent = meta.title;
+  document.getElementById('topbar-subtitle').textContent = meta.subtitle;
+  if (tab === 'ch1') mountInlineCh1Form();
 }
 
 function mountInlineCh1Form() {
   const wrap = document.getElementById('ch1-inline-wrap');
   const frame = document.getElementById('ch1-inline-frame');
   if (!wrap || !frame || !portalState.orgCode) return;
-
   wrap.style.display = '';
-  if (!frame.src || frame.src === 'about:blank') {
-    const url = `${window.location.origin}/ch1.html?org=${encodeURIComponent(portalState.orgCode)}&from=org_portal`;
-    frame.src = url;
-  }
+  const baseUrl = window.location.origin;
+  const ch1Id = portalState.ch1Row?.id;
+  const target = `${baseUrl}/ch1-form?org=${encodeURIComponent(portalState.orgCode)}${ch1Id ? `&id=${encodeURIComponent(ch1Id)}` : ''}&from=org_portal`;
+  if (frame.src !== target) frame.src = target;
 }
 
-// ── Login ──
-async function handleLogin(e) {
-  e.preventDefault();
-  const btn = document.getElementById('btn-login');
+async function handleLogin(event) {
+  event.preventDefault();
+  const btn = document.getElementById('login-btn');
+  const msg = document.getElementById('login-msg');
   const errBox = document.getElementById('error-box');
   const errText = document.getElementById('error-text');
-  errBox.style.display = 'none';
-
   const email = document.getElementById('login-email').value.trim();
   const pwd = document.getElementById('login-pwd').value;
 
+  msg.textContent = '';
+  msg.className = 'login-msg';
+  errBox.style.display = 'none';
+
   if (!email || !pwd) {
-    errText.textContent = 'กรุณากรอกอีเมลและรหัสผ่าน';
-    errBox.style.display = 'block';
+    msg.className = 'login-msg err';
+    msg.textContent = 'กรุณากรอกอีเมลและรหัสผ่าน';
     return;
   }
 
@@ -524,45 +466,57 @@ async function handleLogin(e) {
   } catch (err) {
     btn.disabled = false;
     btn.textContent = 'เข้าสู่ระบบ';
-    errText.textContent = err.message === 'Invalid login credentials'
-      ? 'อีเมลหรือรหัสผ่านไม่ถูกต้อง'
-      : (err.message || 'เกิดข้อผิดพลาด กรุณาลองใหม่');
+    errText.textContent = err.message === 'Invalid login credentials' ? 'อีเมลหรือรหัสผ่านไม่ถูกต้อง' : (err.message || 'เข้าสู่ระบบไม่สำเร็จ');
     errBox.style.display = 'block';
   }
 }
 
-// Enter on password
-document.getElementById('login-pwd')?.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleLogin(e); });
+document.getElementById('login-pwd')?.addEventListener('keydown', (event) => {
+  if (event.key === 'Enter') {
+    event.preventDefault();
+    document.querySelector('.login-card form')?.requestSubmit();
+  }
+});
 
 async function doLogout() {
   await sb.auth.signOut();
   portalState = { session: null, userRole: null, orgCode: null, orgName: null, ch1Row: null, wbRows: [], totalStaff: 0 };
   document.getElementById('portal-app').style.display = 'none';
   document.getElementById('login-gate').style.display = 'flex';
+  document.getElementById('login-btn').disabled = false;
+  document.getElementById('login-btn').textContent = 'เข้าสู่ระบบ';
+  document.getElementById('login-msg').textContent = '';
+  document.getElementById('error-box').style.display = 'none';
   switchTab('home');
 }
 
-// ── Init Portal ──
 async function initPortal() {
   showLoading(true);
 
   const email = portalState.session?.user?.email;
-  if (!email) { showToast('ไม่พบ session', 'error'); showLoading(false); return; }
+  if (!email) {
+    showLoading(false);
+    showToast('ไม่พบ session', 'error');
+    return;
+  }
 
-  // 1. Get user role
   const { data: roleRow, error: roleErr } = await sb
     .from('admin_user_roles')
     .select('*')
     .eq('email', email)
     .maybeSingle();
 
-  if (roleErr || !roleRow) {
-    showToast('❌ ไม่พบข้อมูลผู้ใช้ในระบบ — ติดต่อ Admin', 'error');
-    showLoading(false);
-    return;
-  }
-  if (!roleRow.is_active) {
-    showToast('❌ บัญชีถูกระงับ — ติดต่อ Admin', 'error');
+  if (roleErr || !roleRow || !roleRow.is_active || roleRow.role !== 'org_hr') {
+    await sb.auth.signOut();
+    portalState.session = null;
+    document.getElementById('login-gate').style.display = 'flex';
+    document.getElementById('portal-app').style.display = 'none';
+    document.getElementById('login-btn').disabled = false;
+    document.getElementById('login-btn').textContent = 'เข้าสู่ระบบ';
+    const errBox = document.getElementById('error-box');
+    const errText = document.getElementById('error-text');
+    errText.textContent = 'อีเมลหรือรหัสผ่านไม่ถูกต้อง';
+    errBox.style.display = 'block';
     showLoading(false);
     return;
   }
@@ -570,75 +524,51 @@ async function initPortal() {
   portalState.userRole = roleRow.role;
   portalState.orgCode = roleRow.org_code;
 
-  // Try to get org name from organizations table
-  if (roleRow.org_code) {
-    const { data: orgRow } = await sb
-      .from('organizations')
-      .select('org_name_th')
-      .eq('org_code', roleRow.org_code)
-      .maybeSingle();
-    portalState.orgName = orgRow?.org_name_th || roleRow.display_name || roleRow.org_code;
-  } else {
-    portalState.orgName = roleRow.display_name || roleRow.org_code;
-  }
-
-  // Only org_hr can use this portal.
-  // Show generic credentials error — do not reveal role mismatch for security.
-  if (roleRow.role !== 'org_hr') {
-    await sb.auth.signOut();
-    portalState.session = null;
-    showLoading(false);
-    const errBox = document.getElementById('error-box');
-    const errText = document.getElementById('error-text');
-    if (errBox && errText) {
-      errText.textContent = 'อีเมลหรือรหัสผ่านไม่ถูกต้อง';
-      errBox.style.display = 'block';
-    }
-    document.getElementById('login-gate').style.display = 'flex';
-    return;
-  }
-
   if (!portalState.orgCode) {
-    showToast('❌ ยังไม่ได้ผูกองค์กร — ติดต่อ Admin', 'error');
     showLoading(false);
+    showToast('ยังไม่ได้ผูกองค์กรกับบัญชีนี้', 'error');
     return;
   }
 
-  // 2. Update last_login_at
-  sb.from('admin_user_roles').update({ last_login_at: new Date().toISOString() }).eq('email', email).then(() => {});
+  const { data: orgRow } = await sb
+    .from('organizations')
+    .select('org_name_th')
+    .eq('org_code', roleRow.org_code)
+    .maybeSingle();
 
-  // 3. Show portal UI
+  portalState.orgName = orgRow?.org_name_th || roleRow.display_name || roleRow.org_code;
+
   document.getElementById('login-gate').style.display = 'none';
-  document.getElementById('portal-app').style.display = '';
+  document.getElementById('portal-app').style.display = 'flex';
   document.getElementById('user-email-display').textContent = email;
   document.getElementById('user-org-badge').textContent = portalState.orgName || portalState.orgCode;
-  const topbarOrg = document.getElementById('topbar-org-name');
-  if (topbarOrg) topbarOrg.textContent = portalState.orgName || portalState.orgCode;
+  document.getElementById('topbar-org-name').textContent = portalState.orgName || portalState.orgCode;
   document.getElementById('org-name-display').textContent = portalState.orgName || '—';
   document.getElementById('org-code-display').textContent = `รหัสองค์กร: ${portalState.orgCode}`;
 
-  // 4. Load data
   await Promise.all([loadCh1Data(), loadWbData()]);
-
-  // 5. Update progress & QR
   updateProgress();
   generateOrgQR();
-
   showLoading(false);
 }
 
-// ── Load CH1 ──
-async function loadCh1Data() {
-  const orgCode = portalState.orgCode;
+async function getCh1WindowStatus(orgCode) {
+  try {
+    if (typeof FormSchema !== 'undefined' && typeof FormSchema.checkFormWindow === 'function') {
+      return await FormSchema.checkFormWindow('ch1', orgCode);
+    }
+  } catch (_) {}
+  return { open: true, reason: 'unknown' };
+}
 
+async function loadCh1Data() {
   let { data: rows } = await sb
     .from('hrd_ch1_responses')
     .select('*')
-    .eq('org_code', orgCode)
+    .eq('org_code', portalState.orgCode)
     .order('created_at', { ascending: false })
     .limit(1);
 
-  // Fallback by org name
   if ((!rows || rows.length === 0) && portalState.orgName) {
     ({ data: rows } = await sb
       .from('hrd_ch1_responses')
@@ -649,256 +579,194 @@ async function loadCh1Data() {
   }
 
   const ch1Row = rows?.[0] || null;
+  const fd = ch1Row?.form_data || ch1Row || {};
   portalState.ch1Row = ch1Row;
-  portalState.totalStaff = ch1Row?.total_staff || ch1Row?.total_personnel || ch1Row?.form_data?.total_personnel || 0;
+  portalState.totalStaff = fd.total_staff || fd.total_personnel || 0;
 
-  // ── Status Badge ──
   const badgeEl = document.getElementById('ch1-status-badge');
   if (!ch1Row) {
     badgeEl.innerHTML = '<span class="status-badge none">⬜ ยังไม่มีข้อมูล</span>';
   } else {
     const status = ch1Row.status || 'submitted';
-    const cls = status === 'submitted' ? 'submitted' : status === 'draft' ? 'draft' : status === 'reopened' ? 'reopened' : 'submitted';
-    const label = status === 'submitted' ? '✅ ส่งแล้ว' : status === 'draft' ? '📝 ร่างอยู่' : status === 'reopened' ? '🔄 เปิดแก้ไข' : '✅ ส่งแล้ว';
-    badgeEl.innerHTML = `<span class="status-badge ${cls}">${label}</span>`;
+    const label = status === 'submitted' ? '✅ ส่งแล้ว' : status === 'draft' ? '📝 ร่างอยู่' : '🔄 เปิดแก้ไข';
+    badgeEl.innerHTML = `<span class="status-badge ${status === 'submitted' ? 'submitted' : status === 'draft' ? 'draft' : 'reopened'}">${label}</span>`;
   }
 
-  // ── Home CH1 Summary ──
   const homeCh1 = document.getElementById('home-ch1-summary');
-  if (ch1Row) {
-    const fd = ch1Row.form_data || ch1Row;
-    const status = ch1Row.status || 'submitted';
-    const statusLabel = status === 'submitted' ? '✅ ส่งข้อมูลแล้ว' : status === 'draft' ? '📝 บันทึกร่างอยู่' : '🔄 เปิดแก้ไข';
+  if (!ch1Row) {
+    homeCh1.innerHTML = '<div class="info-box blue">ยังไม่มีการกรอกข้อมูล CH1 ขององค์กร</div>';
+  } else {
     homeCh1.innerHTML = `
-      <div style="font-size:13px;color:var(--tx2);margin-bottom:8px">${statusLabel}</div>
-      <div class="summary-grid" style="grid-template-columns:repeat(2,1fr)">
+      <div class="summary-grid" style="grid-template-columns:repeat(2,minmax(0,1fr))">
         <div class="summary-item"><div class="val">${fmtNum(portalState.totalStaff)}</div><div class="lbl">บุคลากรรวม</div></div>
         <div class="summary-item"><div class="val">${fmtNum(fd.ncd_count || fd.ncd_total)}</div><div class="lbl">NCD รวม</div></div>
       </div>`;
-  } else {
-    homeCh1.innerHTML = '<div class="info-box yellow">⬜ ยังไม่ได้กรอกแบบสอบถาม CH1</div>';
   }
 
-  // ── CH1 Tab Summary Grid ──
   const summaryEl = document.getElementById('ch1-summary');
   const summaryGrid = document.getElementById('ch1-summary-grid');
-  if (ch1Row) {
-    const fd = ch1Row.form_data || ch1Row;
+  if (!ch1Row) {
+    summaryEl.style.display = 'none';
+  } else {
     summaryEl.style.display = '';
     summaryGrid.innerHTML = [
-      { val: fd.total_staff || fd.total_personnel || '—', lbl: 'บุคลากรรวม' },
-      { val: fd.turnover_rate ? fd.turnover_rate + '%' : '—', lbl: 'อัตราลาออก' },
-      { val: fd.ncd_count || '—', lbl: 'NCD รวม' },
-      { val: fd.engagement_score || '—', lbl: 'Engagement' },
-      { val: fd.training_hours || '—', lbl: 'ชม.อบรม/คน/ปี' },
-      { val: fd.sick_leave_avg || '—', lbl: 'ลาป่วยเฉลี่ย/คน' },
-    ].map(i => `<div class="summary-item"><div class="val">${esc(String(i.val))}</div><div class="lbl">${i.lbl}</div></div>`).join('');
-  } else {
-    summaryEl.style.display = 'none';
+      { val: fmtNum(fd.total_staff || fd.total_personnel), lbl: 'บุคลากรรวม' },
+      { val: fd.turnover_rate ? `${fd.turnover_rate}%` : '−', lbl: 'อัตราลาออก' },
+      { val: fmtNum(fd.ncd_count || fd.ncd_total), lbl: 'NCD รวม' },
+      { val: fmtNum(fd.engagement_score, 2), lbl: 'Engagement' },
+      { val: fmtNum(fd.training_hours, 2), lbl: 'ชม.อบรม/คน/ปี' },
+      { val: fmtNum(fd.sick_leave_avg, 2), lbl: 'ลาป่วยเฉลี่ย/คน' },
+    ].map((item) => `<div class="summary-item"><div class="val">${item.val}</div><div class="lbl">${item.lbl}</div></div>`).join('');
   }
 
-  // ── CH1 Actions ──
-  const actionsEl = document.getElementById('ch1-actions');
+  const windowStatus = await getCh1WindowStatus(portalState.orgCode);
   const windowInfo = document.getElementById('ch1-window-info');
-  let actionsHtml = '';
+  const actionsEl = document.getElementById('ch1-actions');
 
-  // Simplified window check (avoid dependency on FormSchema if not loaded)
   if (!ch1Row) {
-    windowInfo.innerHTML = '<div class="info-box green">✅ สามารถเริ่มกรอก CH1 ได้</div>';
-    actionsHtml = `<button class="btn btn-primary" onclick="navigateCh1('new')">📝 เริ่มกรอก CH1</button>`;
-  } else {
-    const status = ch1Row.status || 'submitted';
-    const canEdit = (status === 'draft' || status === 'reopened');
-
-    if (canEdit) {
-      windowInfo.innerHTML = '<div class="info-box blue">📝 สามารถแก้ไขข้อมูลได้</div>';
-      actionsHtml = `
-        <button class="btn btn-primary" onclick="navigateCh1('edit')">✏️ แก้ไข CH1</button>
-        <button class="btn btn-outline" onclick="navigateCh1('preview')">👁 ดูข้อมูล</button>
-        <button class="btn btn-outline" onclick="navigateCh1('pdf')">📄 PDF</button>`;
-    } else if (status === 'submitted') {
-      windowInfo.innerHTML = '<div class="info-box green">✅ ส่งข้อมูลแล้ว — หากต้องการแก้ไข กรุณาติดต่อ Admin</div>';
-      actionsHtml = `
-        <button class="btn btn-outline" onclick="navigateCh1('preview')">👁 ดูข้อมูล</button>
-        <button class="btn btn-outline" onclick="navigateCh1('pdf')">📄 ดาวน์โหลด PDF</button>`;
-    } else {
-      windowInfo.innerHTML = '<div class="info-box yellow">⏰ ฟอร์มปิดรับแล้ว — ดูข้อมูลได้อย่างเดียว</div>';
-      actionsHtml = `
-        <button class="btn btn-outline" onclick="navigateCh1('preview')">👁 ดูข้อมูล</button>
-        <button class="btn btn-outline" onclick="navigateCh1('pdf')">📄 PDF</button>`;
-    }
+    windowInfo.innerHTML = `<div class="ch1-strip ${windowStatus.open ? 'blue' : 'yellow'}">${windowStatus.open ? '📝 สามารถเริ่มกรอกแบบสอบถาม CH1 ได้' : '⏰ ฟอร์ม CH1 ยังไม่เปิดรับข้อมูล'}</div>`;
+    actionsEl.innerHTML = `<button class="btn btn-primary" ${windowStatus.open ? '' : 'disabled'} onclick="navigateCh1('new')">✏️ เริ่มกรอกฟอร์ม</button>`;
+    document.getElementById('ch1-inline-wrap').style.display = 'none';
+    return;
   }
-  actionsEl.innerHTML = actionsHtml;
 
-  // Prepare inline CH1 form for this org.
+  const status = ch1Row.status || 'submitted';
+  if (status === 'submitted') {
+    windowInfo.innerHTML = '<div class="ch1-strip ok">✅ ส่งข้อมูลแล้ว</div>';
+  } else if (status === 'draft' || status === 'reopened') {
+    windowInfo.innerHTML = '<div class="ch1-strip blue">✏️ มีข้อมูลฉบับร่างหรือฉบับเปิดแก้ไข สามารถปรับปรุงข้อมูลต่อได้</div>';
+  } else {
+    windowInfo.innerHTML = '<div class="ch1-strip yellow">⏰ ฟอร์มอยู่ในสถานะที่ดูข้อมูลได้อย่างเดียว</div>';
+  }
+
+  actionsEl.innerHTML = `
+    <button class="btn btn-soft" onclick="navigateCh1('preview')">👁 ดูข้อมูล</button>
+    <button class="btn btn-soft" onclick="navigateCh1('pdf')">📄 ดาวน์โหลด PDF</button>
+    <button class="btn btn-outline" onclick="navigateCh1('edit')">แก้ไขฟอร์ม</button>`;
+
   mountInlineCh1Form();
 }
 
-// ── Load Wellbeing ──
 async function loadWbData() {
-  const orgCode = portalState.orgCode;
-  const orgName = portalState.orgName;
-
-  // Try both survey_responses and wellbeing_responses tables
   let rows = [];
 
-  // First try survey_responses
-  const { data: sRows } = await sb
+  const { data: surveyRows } = await sb
     .from('survey_responses')
     .select('id, organization, submitted_at, is_draft, gender, age, tmhi_score')
-    .eq('organization', orgName)
+    .eq('organization', portalState.orgName)
     .eq('is_draft', false)
     .order('submitted_at', { ascending: false });
 
-  if (sRows && sRows.length > 0) {
-    rows = sRows;
+  if (surveyRows && surveyRows.length > 0) {
+    rows = surveyRows;
   } else {
-    // Fallback: try wellbeing_responses
     try {
-      const { data: wRows } = await sb
+      const { data: wbRows } = await sb
         .from('wellbeing_responses')
         .select('id, organization, submitted_at, is_draft, gender, age')
-        .eq('organization', orgName)
+        .eq('organization', portalState.orgName)
         .eq('is_draft', false)
         .order('submitted_at', { ascending: false });
-      rows = wRows || [];
-    } catch(e) { /* table may not exist */ }
+      rows = wbRows || [];
+    } catch (_) {}
   }
 
   portalState.wbRows = rows;
-
-  // ── Home WB Summary ──
   const homeWb = document.getElementById('home-wb-summary');
-  if (rows.length > 0) {
-    homeWb.innerHTML = `
-      <div style="font-size:13px;color:var(--tx2);margin-bottom:8px">💚 มีผู้ตอบแล้ว</div>
-      <div class="summary-grid" style="grid-template-columns:repeat(2,1fr)">
-        <div class="summary-item"><div class="val green">${rows.length}</div><div class="lbl">ผู้ตอบทั้งหมด</div></div>
-        <div class="summary-item"><div class="val pink">${rows.filter(r => !r.is_draft).length}</div><div class="lbl">ส่งแล้ว</div></div>
-      </div>`;
-  } else {
-    homeWb.innerHTML = '<div class="info-box yellow">ℹ️ ยังไม่มีผู้ตอบ Well-being Survey จากองค์กรของท่าน</div>';
-  }
-
-  // ── WB Tab Summary Grid ──
   const summaryEl = document.getElementById('wb-summary');
   const summaryGrid = document.getElementById('wb-summary-grid');
   const actionsEl = document.getElementById('wb-actions');
 
-  if (rows.length > 0) {
-    summaryEl.style.display = '';
-    const total = rows.length;
-    const male = rows.filter(r => r.gender === 'ชาย').length;
-    const female = rows.filter(r => r.gender === 'หญิง').length;
-    const other = total - male - female;
-
-    // avg tmhi_score if available
-    const tmhiRows = rows.filter(r => r.tmhi_score != null);
-    const avgTmhi = tmhiRows.length > 0
-      ? (tmhiRows.reduce((s, r) => s + Number(r.tmhi_score), 0) / tmhiRows.length).toFixed(1)
-      : null;
-
-    let items = [
-      { val: total, lbl: 'ผู้ตอบทั้งหมด' },
-      { val: male, lbl: 'ชาย' },
-      { val: female, lbl: 'หญิง' },
-      { val: other, lbl: 'อื่นๆ' },
-    ];
-    if (avgTmhi) items.push({ val: avgTmhi, lbl: 'TMHI เฉลี่ย' });
-
-    summaryGrid.innerHTML = items
-      .map(i => `<div class="summary-item"><div class="val">${i.val}</div><div class="lbl">${i.lbl}</div></div>`)
-      .join('');
-
-    actionsEl.innerHTML = `
-      <button class="btn btn-green" onclick="showToast('📊 ฟีเจอร์ Dashboard กำลังพัฒนา','info')">📊 ดู Dashboard</button>
-      <button class="btn btn-outline" onclick="showToast('📤 ฟีเจอร์ Export กำลังพัฒนา','info')">📤 Export Excel</button>`;
-  } else {
+  if (rows.length === 0) {
+    homeWb.innerHTML = '<div class="info-box yellow">ยังไม่มีผู้ตอบ Well-being Survey จากองค์กรของท่าน</div>';
     summaryEl.style.display = 'none';
-    actionsEl.innerHTML = `
-      <div class="info-box blue" style="margin:0">ℹ️ ยังไม่มีผู้ตอบ — แชร์ลิงก์แบบสอบถามให้บุคลากรในองค์กร</div>
-      <button class="btn btn-pink" onclick="switchTab('share')" style="margin-top:10px">🔗 ไปแชร์ลิงก์</button>`;
+    actionsEl.innerHTML = '<div class="info-box blue">แชร์ลิงก์แบบสอบถามให้บุคลากรในองค์กรเพื่อเริ่มเก็บข้อมูล</div>';
+    return;
   }
+
+  const male = rows.filter((row) => row.gender === 'ชาย').length;
+  const female = rows.filter((row) => row.gender === 'หญิง').length;
+  const other = rows.length - male - female;
+  const tmhiRows = rows.filter((row) => row.tmhi_score !== null && row.tmhi_score !== undefined);
+  const avgTmhi = tmhiRows.length ? (tmhiRows.reduce((sum, row) => sum + Number(row.tmhi_score), 0) / tmhiRows.length) : null;
+
+  homeWb.innerHTML = `
+    <div class="summary-grid" style="grid-template-columns:repeat(2,minmax(0,1fr))">
+      <div class="summary-item"><div class="val">${fmtNum(rows.length)}</div><div class="lbl">ผู้ตอบทั้งหมด</div></div>
+      <div class="summary-item"><div class="val">${fmtNum(avgTmhi, 1)}</div><div class="lbl">TMHI เฉลี่ย</div></div>
+    </div>`;
+
+  summaryEl.style.display = '';
+  summaryGrid.innerHTML = [
+    { val: fmtNum(rows.length), lbl: 'ผู้ตอบทั้งหมด' },
+    { val: fmtNum(male), lbl: 'ชาย' },
+    { val: fmtNum(female), lbl: 'หญิง' },
+    { val: fmtNum(other), lbl: 'อื่นๆ' },
+    { val: fmtNum(avgTmhi, 1), lbl: 'TMHI เฉลี่ย' },
+  ].map((item) => `<div class="summary-item"><div class="val">${item.val}</div><div class="lbl">${item.lbl}</div></div>`).join('');
+
+  actionsEl.innerHTML = `
+    <button class="btn btn-green" onclick="showToast('📊 ฟีเจอร์ Dashboard กำลังพัฒนา','info')">💚 ดู Well-being Dashboard</button>
+    <button class="btn btn-outline" onclick="showToast('📤 ฟีเจอร์ Export กำลังพัฒนา','info')">📤 Export Excel</button>`;
 }
 
-// ── Update Progress ──
 function updateProgress() {
-  const totalStaff = portalState.totalStaff;
+  const totalStaff = Number(portalState.totalStaff || 0);
   const wbCount = portalState.wbRows.length;
-  const pct = totalStaff > 0 ? Math.min(((wbCount / totalStaff) * 100), 100).toFixed(1) : 0;
+  const pct = totalStaff > 0 ? Math.min((wbCount / totalStaff) * 100, 100) : 0;
+  const pctText = `${pct.toFixed(1)}%`;
 
-  // Home page progress
-  const fill = document.getElementById('progress-fill');
-  const pctText = document.getElementById('progress-pct-text');
-  const detailText = document.getElementById('progress-detail-text');
+  document.getElementById('progress-fill').style.width = pctText;
+  document.getElementById('progress-pct-text').textContent = pctText;
+  document.getElementById('progress-detail-text').innerHTML = totalStaff > 0
+    ? `ผู้ที่กรอกแล้ว <strong>${fmtNum(wbCount)}</strong> คน / <strong>${fmtNum(totalStaff)}</strong> คน คิดเป็นร้อยละ <strong>${pct.toFixed(1)}</strong>`
+    : `ผู้ที่กรอกแล้ว <strong>${fmtNum(wbCount)}</strong> คน <span style="color:var(--tx3)">(ไม่พบจำนวนบุคลากรจาก CH1)</span>`;
 
-  fill.style.width = `${pct}%`;
-  fill.dataset.pct = `${pct}%`;
-  pctText.textContent = `${pct}%`;
-
-  if (totalStaff > 0) {
-    detailText.innerHTML = `ผู้ที่กรอกแล้ว <strong>${fmtNum(wbCount)}</strong> คน / <strong>${fmtNum(totalStaff)}</strong> คน คิดเป็นร้อยละ <strong>${pct}</strong>`;
-  } else {
-    detailText.innerHTML = `ผู้ที่กรอกแล้ว <strong>${fmtNum(wbCount)}</strong> คน <span style="color:var(--tx3)">(ไม่พบจำนวนบุคลากร — กรุณากรอก CH1 ก่อน)</span>`;
-  }
-
-  // WB tab progress
-  const fill2 = document.getElementById('wb-progress-fill-2');
-  const pctText2 = document.getElementById('wb-pct-text-2');
-  const detailText2 = document.getElementById('wb-progress-detail-2');
-
-  fill2.style.width = `${pct}%`;
-  fill2.dataset.pct = `${pct}%`;
-  pctText2.textContent = `${pct}%`;
-  detailText2.innerHTML = detailText.innerHTML;
-
-  // Share tab progress
-  const shareText = document.getElementById('share-progress-text');
-  if (totalStaff > 0) {
-    shareText.innerHTML = `ผู้ที่กรอกแล้ว <strong>${fmtNum(wbCount)}</strong> คน / <strong>${fmtNum(totalStaff)}</strong> คน<br>คิดเป็นร้อยละ <strong>${pct}</strong>`;
-  } else {
-    shareText.innerHTML = `ผู้ที่กรอกแล้ว <strong>${fmtNum(wbCount)}</strong> คน`;
-  }
+  document.getElementById('wb-progress-fill').style.width = pctText;
+  document.getElementById('wb-pct-text').textContent = pctText;
+  document.getElementById('wb-progress-detail').innerHTML = document.getElementById('progress-detail-text').innerHTML;
+  document.getElementById('share-progress-text').innerHTML = totalStaff > 0
+    ? `ผู้ที่กรอกแล้ว <strong>${fmtNum(wbCount)}</strong> คน / <strong>${fmtNum(totalStaff)}</strong> คน<br>คิดเป็นร้อยละ <strong>${pct.toFixed(1)}</strong>`
+    : `ผู้ที่กรอกแล้ว <strong>${fmtNum(wbCount)}</strong> คน`;
 }
 
-// ── QR Code ──
 function generateOrgQR() {
-  const orgName = portalState.orgName || '';
-  const surveyUrl = `${window.location.origin}/?org=${encodeURIComponent(orgName)}`;
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(surveyUrl)}&color=0F4C81`;
-
-  document.getElementById('qr-img').src = qrUrl;
-  document.getElementById('survey-link').value = surveyUrl;
+  const url = `${window.location.origin}/?org=${encodeURIComponent(portalState.orgName || portalState.orgCode || '')}`;
+  const qr = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(url)}`;
+  document.getElementById('survey-link').value = url;
+  document.getElementById('qr-img').src = qr;
 }
 
 function copyLink() {
   const input = document.getElementById('survey-link');
   navigator.clipboard.writeText(input.value).then(() => {
     const btn = document.getElementById('copy-btn');
-    btn.textContent = '✅ คัดลอกแล้ว!';
+    btn.textContent = '✅ คัดลอกแล้ว';
     btn.classList.add('copied');
-    setTimeout(() => { btn.textContent = '📋 คัดลอก'; btn.classList.remove('copied'); }, 2000);
-    showToast('📋 คัดลอกลิงก์แล้ว', 'success');
-  }).catch(() => {
-    input.select();
-    document.execCommand('copy');
-    showToast('📋 คัดลอกลิงก์แล้ว', 'success');
+    setTimeout(() => {
+      btn.textContent = '📋 คัดลอก';
+      btn.classList.remove('copied');
+    }, 1800);
+    showToast('คัดลอกลิงก์แล้ว', 'success');
   });
 }
 
 function downloadQR() {
-  const img = document.getElementById('qr-img');
-  const a = document.createElement('a');
-  a.href = img.src;
-  a.download = `qr-wellbeing-${portalState.orgCode || 'org'}.png`;
-  a.target = '_blank';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  showToast('📥 กำลังดาวน์โหลด QR Code', 'success');
+  const image = document.getElementById('qr-img');
+  const anchor = document.createElement('a');
+  anchor.href = image.src;
+  anchor.download = `qr-wellbeing-${portalState.orgCode || 'org'}.png`;
+  anchor.target = '_blank';
+  document.body.appendChild(anchor);
+  anchor.click();
+  document.body.removeChild(anchor);
 }
 
-// ── Navigation ──
+function openCh1Editor() {
+  switchTab('ch1');
+  navigateCh1(portalState.ch1Row ? 'edit' : 'new');
+}
+
 function navigateCh1(action) {
   const orgCode = portalState.orgCode;
   const ch1Id = portalState.ch1Row?.id;
@@ -910,7 +778,7 @@ function navigateCh1(action) {
       break;
     case 'edit':
       if (ch1Id) window.location.href = `${baseUrl}/ch1-form?org=${encodeURIComponent(orgCode)}&id=${ch1Id}`;
-      else showToast('ไม่พบ ID ของข้อมูล', 'warn');
+      else window.location.href = `${baseUrl}/ch1-form?org=${encodeURIComponent(orgCode)}`;
       break;
     case 'preview':
       if (ch1Id) window.location.href = `${baseUrl}/ch1-preview?org=${encodeURIComponent(orgCode)}&id=${ch1Id}`;
@@ -923,7 +791,6 @@ function navigateCh1(action) {
   }
 }
 
-// ── Auto-login if session exists ──
 (async () => {
   const { data: { session } } = await sb.auth.getSession();
   if (session) {
