@@ -1,11 +1,12 @@
 // =============================================
-// Service Worker - Offline Support for Well-being Survey v3.1
+// Service Worker - Offline Support for Well-being Survey v3.2
 // รองรับการทำงานแบบ Offline และ Sync ข้อมูลเมื่อกลับมออนไลน์
+// v3.2: sync orgMap canonical org_codes (dhss, dop, dcy, test-org)
 // =============================================
 
-const CACHE_NAME = 'wellbeing-survey-v3.1';
-const STATIC_CACHE = 'static-v3.1';
-const DATA_CACHE = 'data-v3.1';
+const CACHE_NAME = 'wellbeing-survey-v3.2';
+const STATIC_CACHE = 'static-v3.2';
+const DATA_CACHE = 'data-v3.2';
 
 // ไฟล์ที่ต้อง Cache สำหรับ Offline
 const STATIC_ASSETS = [
