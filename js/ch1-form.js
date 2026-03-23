@@ -9,6 +9,9 @@ const TOTAL_STEPS = 6; // steps 0–5 (0=landing, 1-5=form steps)
 let currentStep = 0;
 let lastPayload = null;
 let respondentEmail = '';
+let existingResponseId = null;
+let currentOrgCode = null;
+let currentOrgName = null;
 const urlParams = new URLSearchParams(window.location.search);
 const IS_TEST_MODE = urlParams.get('test') === '1';
 const TEST_RUN_ID = IS_TEST_MODE
@@ -50,6 +53,9 @@ async function parseUrlParameters() {
         console.warn(`Unknown organization code: ${orgCodeRaw}`);
         return;
     }
+
+    currentOrgCode = orgCode;
+    currentOrgName = orgName;
     
     // 1. Always show badges on landing page
     const badgeContainer = document.getElementById('org-badge-container');
@@ -96,6 +102,55 @@ async function parseUrlParameters() {
     }, 500);
 }
 
+async function loadExistingResponseForOrg() {
+    if (!currentOrgCode) return;
+
+    let row = null;
+    try {
+        const { data, error } = await ch1Sb
+            .from(TARGET_TABLE)
+            .select('*')
+            .eq('org_code', currentOrgCode)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+
+        if (!error && data) row = data;
+    } catch (_) {}
+
+    // Backward-compatible fallback for old rows that may not have org_code populated
+    if (!row && currentOrgName) {
+        try {
+            const { data, error } = await ch1Sb
+                .from(TARGET_TABLE)
+                .select('*')
+                .eq('organization', currentOrgName)
+                .order('created_at', { ascending: false })
+                .limit(1)
+                .maybeSingle();
+            if (!error && data) row = data;
+        } catch (_) {}
+    }
+
+    if (!row) return;
+
+    existingResponseId = row.id || null;
+    restoreFormData(row);
+
+    // Keep landing email box in sync for edit flow.
+    if (row.respondent_email) {
+        const emailInput = document.getElementById('respondent_email');
+        if (emailInput && !emailInput.value) emailInput.value = row.respondent_email;
+        respondentEmail = row.respondent_email;
+    }
+
+    setTimeout(() => {
+        if (typeof showToast === 'function') {
+            showToast('พบข้อมูล CH1 เดิม ระบบโหลดให้แล้ว สามารถแก้ไขและส่งใหม่ได้', 'success');
+        }
+    }, 600);
+}
+
 // =============================================
 // INIT
 // =============================================
@@ -131,6 +186,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Parse URL parameter to auto-select organization (async — fetches from Supabase organizations_public)
     await parseUrlParameters();
+    // If org is known, load latest CH1 row for edit-in-place.
+    await loadExistingResponseForOrg();
     renderTestModeBanner();
 });
 
@@ -584,6 +641,7 @@ function collectAllData() {
     return {
         // Metadata
         respondent_email: respondentEmail || null,
+        org_code: currentOrgCode || null,
         form_version: 'ch1-v4.0',
         submitted_at: new Date().toISOString(),
         is_test: IS_TEST_MODE,
@@ -672,7 +730,19 @@ async function submitForm() {
     document.getElementById('overlay-loading').classList.remove('hidden');
 
     try {
-        const { error } = await ch1Sb.from(TARGET_TABLE).insert([payload]);
+        let error = null;
+
+        if (existingResponseId) {
+            const res = await ch1Sb
+                .from(TARGET_TABLE)
+                .update(payload)
+                .eq('id', existingResponseId);
+            error = res.error;
+        } else {
+            const res = await ch1Sb.from(TARGET_TABLE).insert([payload]).select('id').single();
+            error = res.error;
+            if (!error && res.data?.id) existingResponseId = res.data.id;
+        }
 
         if (error) throw error;
 

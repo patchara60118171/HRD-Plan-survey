@@ -61,9 +61,6 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
 .login-btn:disabled{opacity:.5;cursor:not-allowed}
 .login-msg{font-size:12px;margin-top:12px;min-height:18px;text-align:center}
 .login-msg.err{color:#fecdd3}
-.login-back{margin-top:20px;text-align:center}
-.login-back a{font-size:12px;color:rgba(255,255,255,.6);text-decoration:none;transition:color .15s}
-.login-back a:hover{color:#fff}
 .login-footer{text-align:center;margin-top:16px;font-size:11px;color:rgba(255,255,255,.4)}
 
 .pw-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:14px;color:var(--tx3);padding:4px}
@@ -155,6 +152,11 @@ nav.portal-nav{flex:1;padding:6px 0 12px}
 .btn-outline{background:transparent;border:1.5px solid var(--bdr);color:var(--tx2)}.btn-outline:hover{border-color:var(--P);color:var(--P)}
 .btn:disabled{opacity:.5;cursor:not-allowed}
 
+/* ── Embedded CH1 Form ── */
+.embed-wrap{margin-top:14px;border:1px solid var(--bdr);border-radius:10px;overflow:hidden;background:#fff}
+.embed-head{padding:10px 14px;background:#f8fafc;border-bottom:1px solid var(--bdr);font-size:12px;color:var(--tx2)}
+.embed-frame{width:100%;height:1200px;border:0;background:#fff}
+
 /* ── Info boxes ── */
 .info-box{padding:10px 14px;border-radius:7px;font-size:13px;margin-bottom:12px;line-height:1.6}
 .info-box.blue{background:var(--PL);color:var(--P)}
@@ -224,7 +226,6 @@ nav.portal-nav{flex:1;padding:6px 0 12px}
       <div class="login-msg" id="login-msg"></div>
     </div>
 
-    <div class="login-back"><a href="/">← กลับไปหน้าแบบสอบถาม</a></div>
     <p class="login-footer">ระบบสำรวจสุขภาวะบุคลากรภาครัฐ · NIDA</p>
   </div>
 </div>
@@ -348,6 +349,12 @@ nav.portal-nav{flex:1;padding:6px 0 12px}
 
         <!-- CH1 Actions -->
         <div class="section-actions" id="ch1-actions"></div>
+
+        <!-- CH1 Inline Form -->
+        <div class="embed-wrap" id="ch1-inline-wrap" style="display:none">
+          <div class="embed-head">ฟอร์ม CH1 ในหน้า Portal (หากมีข้อมูลเดิม ระบบจะโหลดมาให้แก้ไขอัตโนมัติ)</div>
+          <iframe id="ch1-inline-frame" class="embed-frame" title="CH1 Form"></iframe>
+        </div>
       </div>
     </div>
 
@@ -470,6 +477,23 @@ function switchTab(tab) {
   document.querySelectorAll('.tab-page').forEach(p => p.classList.toggle('active', p.id === `page-${tab}`));
   const titleEl = document.getElementById('topbar-title');
   if (titleEl) titleEl.textContent = TAB_TITLES[tab] || tab;
+
+  // Lazy-load embedded CH1 form only when tab is opened
+  if (tab === 'ch1') {
+    mountInlineCh1Form();
+  }
+}
+
+function mountInlineCh1Form() {
+  const wrap = document.getElementById('ch1-inline-wrap');
+  const frame = document.getElementById('ch1-inline-frame');
+  if (!wrap || !frame || !portalState.orgCode) return;
+
+  wrap.style.display = '';
+  if (!frame.src || frame.src === 'about:blank') {
+    const url = `${window.location.origin}/ch1.html?org=${encodeURIComponent(portalState.orgCode)}&from=org_portal`;
+    frame.src = url;
+  }
 }
 
 // ── Login ──
@@ -558,15 +582,19 @@ async function initPortal() {
     portalState.orgName = roleRow.display_name || roleRow.org_code;
   }
 
-  // Only org_hr can use this portal — admin/super_admin redirect to admin.html
+  // Only org_hr can use this portal.
+  // Show generic credentials error — do not reveal role mismatch for security.
   if (roleRow.role !== 'org_hr') {
-    if (roleRow.role === 'admin' || roleRow.role === 'super_admin') {
-      showToast('🔀 กำลัง redirect ไปยัง Admin Portal...', 'info', 2000);
-      setTimeout(() => { location.href = 'admin.html'; }, 1200);
-    } else {
-      showToast('⚠️ บัญชีนี้ไม่มีสิทธิ์เข้าใช้งาน Portal นี้', 'warn', 6000);
-    }
+    await sb.auth.signOut();
+    portalState.session = null;
     showLoading(false);
+    const errBox = document.getElementById('error-box');
+    const errText = document.getElementById('error-text');
+    if (errBox && errText) {
+      errText.textContent = 'อีเมลหรือรหัสผ่านไม่ถูกต้อง';
+      errBox.style.display = 'block';
+    }
+    document.getElementById('login-gate').style.display = 'flex';
     return;
   }
 
@@ -701,6 +729,9 @@ async function loadCh1Data() {
     }
   }
   actionsEl.innerHTML = actionsHtml;
+
+  // Prepare inline CH1 form for this org.
+  mountInlineCh1Form();
 }
 
 // ── Load Wellbeing ──
