@@ -399,6 +399,10 @@ function showCh1RowDetail(index) {
   const s = (k) => esc(v(k) || '—');
   const yn = (k) => { const val = v(k); if (val === true || val === 1 || val === 'true' || val === '1' || val === 'yes') return '✓ มี'; if (val === false || val === 0 || val === 'false' || val === '0' || val === 'no') return '✗ ไม่มี'; return val ? esc(String(val)) : '—'; };
   const fmtSupport = (k) => { const val = v(k); if (val === 'full') return 'มีตามแผน'; if (val === 'partial') return 'มีไม่ครบตามแผน'; if (val === 'none') return 'ไม่มี'; return val ? esc(String(val)) : '—'; };
+  const fmtReportType = (k) => { const val = v(k); return val === 'actual' ? 'ข้อมูลจริง' : val === 'estimated' ? 'ประมาณการ' : val === 'none' ? 'ไม่มีข้อมูล' : val === 'official_only' ? 'เฉพาะข้าราชการ' : val ? esc(String(val)) : '—'; };
+  const DIGITAL_LABELS_MAP = { e_doc: 'ระบบเอกสารอิเล็กทรอนิกส์', e_sign: 'ระบบลงนามอิเล็กทรอนิกส์ (E-signature)', cloud: 'ระบบ Cloud', hr_digital: 'ระบบ HR Digital', health_db: 'ระบบฐานข้อมูลสุขภาพ', none: 'ไม่มีระบบดังกล่าว' };
+  const fmtDigital = (k) => { const val = v(k); if (!val) return '—'; const arr = Array.isArray(val) ? val : String(val).split(',').map(x => x.trim()).filter(Boolean); return esc(arr.map(code => DIGITAL_LABELS_MAP[code] || code).join(', ')); };
+  const fmtErgonomics = (k) => { const val = v(k); return val === 'none' ? 'ยังไม่มี' : val === 'planned' ? 'มีแผนแต่ยังไม่ดำเนินการ' : val === 'in_progress' ? 'อยู่ระหว่างดำเนินการ' : val === 'done' ? 'ดำเนินการแล้ว' : val ? esc(String(val)) : '—'; };
 
   const histRows = ['2564','2565','2566','2567','2568'].map((yr) => {
     const bg = v(`begin_count_${yr}`); const end = v(`end_count_${yr}`); const lv = v(`leave_count_${yr}`); const rt = v(`turnover_rate_${yr}`);
@@ -546,7 +550,7 @@ ${histRows !== '<tr><td colspan="5" style="color:#9CA3AF;text-align:center">—<
       <tr><th>แผนพัฒนารายบุคคล (IDP)</th><td>${fmtSupport('idp_system')}</td></tr>
       <tr><th>เส้นทางความก้าวหน้า (Career Path)</th><td>${fmtSupport('career_path_system')}</td></tr>
       <tr><th>ชั่วโมงฝึกอบรมเฉลี่ย/คน/ปี</th><td>${fmtNum(parseFloat(v('training_hours'))||0,1)} ชั่วโมง</td></tr>
-      <tr><th>สภาพแวดล้อมการทำงาน (Ergonomics)</th><td>${s('ergonomics_status')}</td></tr>
+      <tr><th>สภาพแวดล้อมการทำงาน (Ergonomics)</th><td>${fmtErgonomics('ergonomics_status')}</td></tr>
     </table>
   </div>
 </div>
@@ -591,6 +595,10 @@ function showCh1PDF(index) {
   const s = (k) => esc(v(k) || '—');
   const yn = (k) => { const val = v(k); if (val === true || val === 1 || val === 'true' || val === '1' || val === 'yes') return '✓ มี'; if (val === false || val === 0 || val === 'false' || val === '0' || val === 'no') return '✗ ไม่มี'; return val ? esc(String(val)) : '—'; };
   const fmtSupport = (k) => { const val = v(k); if (val === 'full') return 'มีตามแผน'; if (val === 'partial') return 'มีไม่ครบตามแผน'; if (val === 'none') return 'ไม่มี'; return val ? esc(String(val)) : '—'; };
+  const fmtReportType = (k) => { const val = v(k); return val === 'actual' ? 'ข้อมูลจริง' : val === 'estimated' ? 'ประมาณการ' : val === 'none' ? 'ไม่มีข้อมูล' : val === 'official_only' ? 'เฉพาะข้าราชการ' : val ? esc(String(val)) : '—'; };
+  const DIGITAL_LABELS_MAP = { e_doc: 'ระบบเอกสารอิเล็กทรอนิกส์', e_sign: 'ระบบลงนามอิเล็กทรอนิกส์ (E-signature)', cloud: 'ระบบ Cloud', hr_digital: 'ระบบ HR Digital', health_db: 'ระบบฐานข้อมูลสุขภาพ', none: 'ไม่มีระบบดังกล่าว' };
+  const fmtDigital = (k) => { const val = v(k); if (!val) return '—'; const arr = Array.isArray(val) ? val : String(val).split(',').map(x => x.trim()).filter(Boolean); return esc(arr.map(code => DIGITAL_LABELS_MAP[code] || code).join(', ')); };
+  const fmtErgonomics = (k) => { const val = v(k); return val === 'none' ? 'ยังไม่มี' : val === 'planned' ? 'มีแผนแต่ยังไม่ดำเนินการ' : val === 'in_progress' ? 'อยู่ระหว่างดำเนินการ' : val === 'done' ? 'ดำเนินการแล้ว' : val ? esc(String(val)) : '—'; };
 
   const histRows = ['2564','2565','2566','2567','2568'].map((yr) => {
     const bg = v(`begin_count_${yr}`); const end = v(`end_count_${yr}`); const lv = v(`leave_count_${yr}`); const rt = v(`turnover_rate_${yr}`);
@@ -758,7 +766,7 @@ ${histRows !== '<tr><td colspan="5" style="color:#9CA3AF;text-align:center">—<
       <tr><th>แผนพัฒนารายบุคคล (IDP)</th><td>${fmtSupport('idp_system')}</td></tr>
       <tr><th>เส้นทางความก้าวหน้า (Career Path)</th><td>${fmtSupport('career_path_system')}</td></tr>
       <tr><th>ชั่วโมงฝึกอบรมเฉลี่ย/คน/ปี</th><td>${fmtNum(parseFloat(v('training_hours'))||0,1)} ชั่วโมง</td></tr>
-      <tr><th>สภาพแวดล้อมการทำงาน (Ergonomics)</th><td>${s('ergonomics_status')}</td></tr>
+      <tr><th>สภาพแวดล้อมการทำงาน (Ergonomics)</th><td>${fmtErgonomics('ergonomics_status')}</td></tr>
     </table>
   </div>
 </div>
@@ -1226,7 +1234,7 @@ const CH1_COLUMNS = [
   { key: 'rate_2568', label: 'อัตราลาออก 2568 (%)', get: (row) => ch1Rate(row,'2568') },
   { key: 'related_policies', label: 'นโยบายที่เกี่ยวข้อง', get: (row) => esc(ch1v(row,'related_policies') || '—') },
   { key: 'context_challenges', label: 'บริบทภายนอก/ความท้าทาย', get: (row) => esc(ch1v(row,'context_challenges') || '—') },
-  { key: 'disease_report_type', label: 'ประเภทรายงานโรค', get: (row) => esc(ch1v(row,'disease_report_type') || '—') },
+  { key: 'disease_report_type', label: 'ประเภทรายงานโรค', get: (row) => { const v = ch1v(row,'disease_report_type'); return v === 'actual' ? 'ข้อมูลจริง' : v === 'estimated' ? 'ประมาณการ' : v === 'none' ? 'ไม่มีข้อมูล' : v === 'official_only' ? 'เฉพาะข้าราชการ' : esc(v || '—'); } },
   { key: 'disease_diabetes', label: 'เบาหวาน (คน)', get: (row) => fmtNum(ch1v(row,'disease_diabetes')) },
   { key: 'disease_hypertension', label: 'ความดันโลหิตสูง (คน)', get: (row) => fmtNum(ch1v(row,'disease_hypertension')) },
   { key: 'disease_cardiovascular', label: 'โรคหัวใจและหลอดเลือด (คน)', get: (row) => fmtNum(ch1v(row,'disease_cardiovascular')) },
@@ -1238,14 +1246,14 @@ const CH1_COLUMNS = [
   { key: 'disease_other_detail', label: 'โรคอื่นๆ (ระบุ)', get: (row) => esc(ch1v(row,'disease_other_detail') || '—') },
   { key: 'ncd_count', label: 'NCD รวม (คน)', get: (row) => fmtNum(ch1v(row,'ncd_count')) },
   { key: 'ncd_ratio_pct', label: 'NCD ต่อบุคลากร (%)', get: (row) => { const v = ch1v(row,'ncd_ratio_pct'); return v != null ? fmtNum(parseFloat(v),2)+'%' : '—'; } },
-  { key: 'sick_leave_report_type', label: 'ประเภทรายงานลาป่วย', get: (row) => esc(ch1v(row,'sick_leave_report_type') || '—') },
+  { key: 'sick_leave_report_type', label: 'ประเภทรายงานลาป่วย', get: (row) => { const v = ch1v(row,'sick_leave_report_type'); return v === 'actual' ? 'ข้อมูลจริง' : v === 'estimated' ? 'ประมาณการ' : v === 'none' ? 'ไม่มีข้อมูล' : v === 'official_only' ? 'เฉพาะข้าราชการ' : esc(v || '—'); } },
   { key: 'sick_leave_days', label: 'วันลาป่วยรวม/ปี', get: (row) => fmtNum(ch1v(row,'sick_leave_days')) },
   { key: 'sick_leave_avg', label: 'วันลาป่วยเฉลี่ย/คน/ปี', get: (row) => { const v = ch1v(row,'sick_leave_avg'); return v != null ? fmtNum(parseFloat(v),2) : '—'; } },
-  { key: 'clinic_report_type', label: 'ประเภทรายงานคลินิก', get: (row) => esc(ch1v(row,'clinic_report_type') || '—') },
+  { key: 'clinic_report_type', label: 'ประเภทรายงานคลินิก', get: (row) => { const v = ch1v(row,'clinic_report_type'); return v === 'actual' ? 'ข้อมูลจริง' : v === 'estimated' ? 'ประมาณการ' : v === 'none' ? 'ไม่มีข้อมูล' : v === 'official_only' ? 'เฉพาะข้าราชการ' : esc(v || '—'); } },
   { key: 'clinic_users_per_year', label: 'ผู้ใช้คลินิก/ปี (คน)', get: (row) => fmtNum(ch1v(row,'clinic_users_per_year')) },
   { key: 'clinic_top_symptoms', label: 'อาการที่พบมากสุด', get: (row) => esc(ch1v(row,'clinic_top_symptoms') || '—') },
   { key: 'clinic_top_medications', label: 'ยาที่ใช้มากสุด', get: (row) => esc(ch1v(row,'clinic_top_medications') || '—') },
-  { key: 'mental_health_report_type', label: 'ประเภทรายงานสุขภาพจิต', get: (row) => esc(ch1v(row,'mental_health_report_type') || '—') },
+  { key: 'mental_health_report_type', label: 'ประเภทรายงานสุขภาพจิต', get: (row) => { const v = ch1v(row,'mental_health_report_type'); return v === 'actual' ? 'ข้อมูลจริง' : v === 'estimated' ? 'ประมาณการ' : v === 'none' ? 'ไม่มีข้อมูล' : v === 'official_only' ? 'เฉพาะข้าราชการ' : esc(v || '—'); } },
   { key: 'mental_stress', label: 'ภาวะเครียดเรื้อรัง', get: (row) => esc(ch1v(row,'mental_stress') || '—') },
   { key: 'mental_anxiety', label: 'ภาวะวิตกกังวล', get: (row) => esc(ch1v(row,'mental_anxiety') || '—') },
   { key: 'mental_sleep', label: 'ปัญหาการนอนหลับ', get: (row) => esc(ch1v(row,'mental_sleep') || '—') },
@@ -1263,8 +1271,8 @@ const CH1_COLUMNS = [
   { key: 'idp_system', label: 'แผนพัฒนารายบุคคล (IDP)', get: (row) => { const v = ch1v(row,'idp_system'); return v === 'full' ? 'มีตามแผน' : v === 'partial' ? 'มีไม่ครบตามแผน' : v === 'none' ? 'ไม่มี' : esc(v || '—'); } },
   { key: 'career_path_system', label: 'เส้นทางความก้าวหน้า (Career Path)', get: (row) => { const v = ch1v(row,'career_path_system'); return v === 'full' ? 'มีตามแผน' : v === 'partial' ? 'มีไม่ครบตามแผน' : v === 'none' ? 'ไม่มี' : esc(v || '—'); } },
   { key: 'training_hours', label: 'ชั่วโมงอบรมเฉลี่ย/คน/ปี', get: (row) => esc(ch1v(row,'training_hours') || '—') },
-  { key: 'digital_systems', label: 'ระบบดิจิทัลที่มี', get: (row) => { const v = ch1v(row,'digital_systems'); return v ? esc(Array.isArray(v) ? v.join(', ') : String(v)) : '—'; } },
-  { key: 'ergonomics_status', label: 'สถานะ Ergonomics', get: (row) => esc(ch1v(row,'ergonomics_status') || '—') },
+  { key: 'digital_systems', label: 'ระบบดิจิทัลที่มี', get: (row) => { const DL = { e_doc: 'ระบบเอกสารอิเล็กทรอนิกส์', e_sign: 'ระบบลงนามอิเล็กทรอนิกส์ (E-signature)', cloud: 'ระบบ Cloud', hr_digital: 'ระบบ HR Digital', health_db: 'ระบบฐานข้อมูลสุขภาพ', none: 'ไม่มีระบบดังกล่าว' }; const v = ch1v(row,'digital_systems'); if (!v) return '—'; const arr = Array.isArray(v) ? v : String(v).split(',').map(x => x.trim()).filter(Boolean); return esc(arr.map(code => DL[code] || code).join(', ')); } },
+  { key: 'ergonomics_status', label: 'สถานะ Ergonomics', get: (row) => { const v = ch1v(row,'ergonomics_status'); return v === 'none' ? 'ยังไม่มี' : v === 'planned' ? 'มีแผนแต่ยังไม่ดำเนินการ' : v === 'in_progress' ? 'อยู่ระหว่างดำเนินการ' : v === 'done' ? 'ดำเนินการแล้ว' : esc(v || '—'); } },
   { key: 'ergonomics_detail', label: 'รายละเอียด Ergonomics', get: (row) => esc(ch1v(row,'ergonomics_detail') || '—') },
   { key: 'strategic_priority_rank1', label: 'จุดเน้น อันดับ 1', get: (row) => esc(ch1v(row,'strategic_priority_rank1') || '—') },
   { key: 'strategic_priority_rank2', label: 'จุดเน้น อันดับ 2', get: (row) => esc(ch1v(row,'strategic_priority_rank2') || '—') },

@@ -30,6 +30,13 @@ const FormSchema = (() => {
         sessionStorage.removeItem(CACHE_PREFIX + formCode);
         return null;
       }
+      if (data?.questionsMap && !(data.questionsMap instanceof Map)) {
+        if (Array.isArray(data.questions)) {
+          data.questionsMap = new Map(data.questions.map(q => [q.question_key, q]));
+        } else {
+          data.questionsMap = new Map();
+        }
+      }
       return data;
     } catch { return null; }
   }

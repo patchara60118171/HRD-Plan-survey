@@ -15,39 +15,89 @@
  *   exportCurrentPage()              → TODO: move from admin.html ~line 3149
  */
 
+ const WELLBEING_LINK_MAP = [
+  { code: 'nesdc', label: 'NESDC', organization: 'สำนักงานสภาพัฒนาการเศรษฐกิจและสังคมแห่งชาติ' },
+  { code: 'tpso', label: 'TPSO', organization: 'สำนักงานนโยบายและยุทธศาสตร์การค้า' },
+  { code: 'dss', label: 'DSS', organization: 'กรมวิทยาศาสตร์บริการ' },
+  { code: 'dhss', label: 'DHSS', organization: 'กรมสนับสนุนบริการสุขภาพ' },
+  { code: 'tmd', label: 'TMD', organization: 'กรมอุตุนิยมวิทยา' },
+  { code: 'dcp', label: 'DCP', organization: 'กรมส่งเสริมวัฒนธรรม' },
+  { code: 'dop', label: 'DOP', organization: 'กรมคุมประพฤติ' },
+  { code: 'mots', label: 'MOTS', organization: 'สำนักงานปลัดกระทรวงการท่องเที่ยวและกีฬา' },
+  { code: 'dmh', label: 'DMH', organization: 'กรมสุขภาพจิต' },
+  { code: 'onep', label: 'ONEP', organization: 'สำนักงานนโยบายและแผนทรัพยากรธรรมชาติและสิ่งแวดล้อม' },
+  { code: 'nrct', label: 'NRCT', organization: 'สำนักงานการวิจัยแห่งชาติ' },
+  { code: 'acfs', label: 'ACFS', organization: 'สำนักงานมาตรฐานสินค้าเกษตรและอาหารแห่งชาติ' },
+  { code: 'opdc', label: 'OPDC', organization: 'สำนักงานคณะกรรมการพัฒนาระบบราชการ' },
+  { code: 'rid', label: 'RID', organization: 'กรมชลประทาน' },
+  { code: 'dcy', label: 'DCY', organization: 'กรมกิจการเด็กและเยาวชน' },
+ ];
+
 // ─── Build Link URL ──────────────────────────────────────────────────────────
 
 function buildLinkUrl(org) {
-  const code = org.org_code || org.code || encodeURIComponent(org.name);
-  return `${SURVEY_BASE_URL}/index.html?org=${code}`;
+  const code = String(org.org_code || org.code || '').toLowerCase();
+  return `${SURVEY_BASE_URL}/?org=${code}`;
 }
+
+ function getWellbeingLinkSeed() {
+  return WELLBEING_LINK_MAP.map((item) => {
+    const orgProfile = state.orgProfiles.find((org) => {
+      const orgName = org.org_name_th || org.organization_name || org.display_name || '';
+      const orgCode = String(org.org_code || '').toLowerCase();
+      return orgName === item.organization || orgCode === item.code;
+    });
+    return {
+      id: orgProfile?.id || item.code,
+      org_id: orgProfile?.id || null,
+      org_code: item.code,
+      org_name_th: item.organization,
+      organization: item.organization,
+      full_url: buildLinkUrl({ org_code: item.code }),
+      is_active: true,
+      created_at: null,
+      short_label: item.label,
+    };
+  });
+ }
 
 // ─── Render Links Table ──────────────────────────────────────────────────────
 
 function renderLinks(summary) {
   const page = document.getElementById('page-links');
   const tbody = document.getElementById('links-tbody') || page.querySelector('tbody');
-  const links = state.linkRows.length
-    ? state.linkRows
-    : getOrgCatalog().map((org) => ({ org_id: org.id, full_url: buildLinkUrl(org), is_active: true }));
+  const seedMap = new Map(getWellbeingLinkSeed().map((row) => [row.org_code, row]));
+  const dbRows = state.linkRows
+    .map((row) => {
+      const orgProfile = state.orgProfiles.find((org) => org.id === row.org_id);
+      const orgName = orgProfile?.org_name_th || row.org_name_th || row.organization || '';
+      const orgCode = String(row.org_code || orgProfile?.org_code || '').toLowerCase();
+      return {
+        ...row,
+        org_name_th: orgName,
+        organization: orgName,
+        org_code: orgCode,
+        full_url: row.full_url || row.form_url || row.url || (orgCode ? buildLinkUrl({ org_code: orgCode }) : ''),
+      };
+    })
+    .filter((row) => seedMap.has(row.org_code));
+  const merged = new Map(getWellbeingLinkSeed().map((row) => [row.org_code, row]));
+  dbRows.forEach((row) => merged.set(row.org_code, { ...merged.get(row.org_code), ...row }));
+  const links = WELLBEING_LINK_MAP.map((item) => merged.get(item.code)).filter(Boolean);
 
   function getFormType(url) {
     if (!url) return '—';
-    if (url.includes('ch1.html')) return '<span style="font-size:11px;background:var(--PL);color:var(--P);padding:2px 8px;border-radius:99px;font-weight:600">📝 Ch1</span>';
-    return '<span style="font-size:11px;background:var(--AL);color:var(--A);padding:2px 8px;border-radius:99px;font-weight:600">💚 Wellbeing</span>';
+    return '<span style="font-size:11px;background:var(--AL);color:var(--A);padding:2px 8px;border-radius:99px;font-weight:600">💚 Wellbeing Survey</span>';
   }
 
   tbody.innerHTML = links.map((row) => {
-    const orgProfile = state.orgProfiles.find((o) => o.id === row.org_id);
-    const organization = orgProfile?.org_name_th || row.org_name_th || row.organization || '—';
+    const organization = row.org_name_th || row.organization || '—';
     const summaryRow = summary.find((item) => item.name === organization);
-    const url = row.full_url || row.form_url || row.url || buildLinkUrl(orgProfile || { name: organization });
+    const url = row.full_url || buildLinkUrl({ org_code: row.org_code });
     const active = row.is_active !== false;
     const formType = getFormType(url);
-    const respondents = url.includes('ch1.html')
-      ? fmtNum(summaryRow?.ch1Count || 0)
-      : fmtNum(summaryRow?.wellbeingSubmitted || 0);
-    return `<tr data-org="${esc(organization)}" data-form="${url.includes('ch1.html') ? 'Ch1' : 'Wellbeing'}" data-status="${active ? 'เปิดอยู่' : 'ปิด'}">
+    const respondents = fmtNum(summaryRow?.wellbeingSubmitted || 0);
+    return `<tr data-org="${esc(organization)}" data-status="${active ? 'เปิดอยู่' : 'ปิด'}">
       <td>${esc(organization)}</td>
       <td>${formType}</td>
       <td><code style="font-size:10.5px;background:var(--bg);padding:3px 6px;border-radius:4px;color:var(--P)">${esc(url)}</code></td>
@@ -64,12 +114,12 @@ function renderLinks(summary) {
 
   const createOrgSelect = document.getElementById('create-link-org');
   if (createOrgSelect) {
-    createOrgSelect.innerHTML = `<option value="">— เลือก —</option>${ORG_NAMES.map((name) => `<option>${esc(name)}</option>`).join('')}`;
+    createOrgSelect.innerHTML = `<option value="">— เลือก —</option>${WELLBEING_LINK_MAP.map((item) => `<option>${esc(item.organization)}</option>`).join('')}`;
   }
   const orgFilter = document.getElementById('links-org-filter');
   if (orgFilter) {
     const cur = orgFilter.value;
-    orgFilter.innerHTML = `<option value="">ทุกองค์กร</option>${ORG_NAMES.map((n) => `<option${n === cur ? ' selected' : ''}>${esc(n)}</option>`).join('')}`;
+    orgFilter.innerHTML = `<option value="">ทุกองค์กร</option>${WELLBEING_LINK_MAP.map((item) => item.organization).map((n) => `<option${n === cur ? ' selected' : ''}>${esc(n)}</option>`).join('')}`;
   }
 }
 
@@ -78,12 +128,12 @@ function renderLinks(summary) {
 function filterLinksTable() {
   const q = (document.getElementById('links-search')?.value || '').toLowerCase();
   const org = (document.getElementById('links-org-filter')?.value || '').toLowerCase();
-  const form = (document.getElementById('links-form-filter')?.value || '').toLowerCase();
+  const status = (document.getElementById('links-status-filter')?.value || '').toLowerCase();
   document.querySelectorAll('#links-tbody tr').forEach((tr) => {
     const text = tr.textContent.toLowerCase();
     const trOrg = (tr.dataset.org || '').toLowerCase();
-    const trForm = (tr.dataset.form || '').toLowerCase();
-    const visible = (!q || text.includes(q)) && (!org || trOrg.includes(org)) && (!form || trForm.includes(form));
+    const trStatus = (tr.dataset.status || '').toLowerCase();
+    const visible = (!q || text.includes(q)) && (!org || trOrg.includes(org)) && (!status || trStatus.includes(status));
     tr.style.display = visible ? '' : 'none';
   });
 }
@@ -292,19 +342,19 @@ async function toggleLink(id, orgName, newActive) {
 
 async function createNewLink() {
   const orgName = document.getElementById('create-link-org')?.value;
-  const form = document.getElementById('create-link-form')?.value || 'wb';
   const expires = document.getElementById('create-link-expires')?.value || null;
   const msg = document.getElementById('create-link-msg');
   if (!orgName) { if (msg) { msg.style.color = 'var(--D)'; msg.textContent = 'กรุณาเลือกองค์กร'; } return; }
   const orgProfile = state.orgProfiles.find((o) => o.org_name_th === orgName) || ORG_LOOKUP.get(orgName);
-  const orgCode = orgProfile?.org_code || orgProfile?.code || orgName.replace(/[^A-Za-z0-9]/g, '').slice(0, 12).toLowerCase();
+  const mapped = WELLBEING_LINK_MAP.find((item) => item.organization === orgName);
+  const orgCode = mapped?.code || String(orgProfile?.org_code || orgProfile?.code || '').toLowerCase();
+  if (!orgCode) { if (msg) { msg.style.color = 'var(--D)'; msg.textContent = 'ไม่พบ org_code ขององค์กรนี้ในชุดลิงก์ Well-being'; } return; }
   const orgId = orgProfile?.id || null;
-  const base = form === 'ch1' ? 'ch1.html' : 'index.html';
-  const url = `${SURVEY_BASE_URL}/${base}?org=${orgCode}`;
+  const url = `${SURVEY_BASE_URL}/?org=${orgCode}`;
   if (msg) { msg.style.color = 'var(--tx2)'; msg.textContent = 'กำลังสร้างลิงก์...'; }
 
   // Look up form_id from survey_forms (required FK)
-  const formKey = form === 'ch1' ? 'ch1' : 'wellbeing';
+  const formKey = 'wellbeing';
   const { data: formRows } = await sb.from('survey_forms').select('id').eq('form_key', formKey).limit(1);
   const formId = formRows?.[0]?.id || null;
 
@@ -313,7 +363,7 @@ async function createNewLink() {
   const { data } = await sb.from('org_form_links').select('*');
   state.linkRows = data || [];
   renderLinks(summarizeOrgs());
-  if (msg) { msg.style.color = 'var(--G)'; msg.textContent = `✅ สร้างลิงก์ ${orgName} (${form.toUpperCase()}) เรียบร้อย`; }
+  if (msg) { msg.style.color = 'var(--G)'; msg.textContent = `✅ สร้างลิงก์ Well-being สำหรับ ${orgName} เรียบร้อย`; }
 }
 
 // ─── QR Code Modal ───────────────────────────────────────────────────────────

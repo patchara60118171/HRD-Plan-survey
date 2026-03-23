@@ -6,62 +6,114 @@
 <title>แก้ไข CH1 — HRD Plan Survey</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Sarabun',sans-serif;background:#f5f7fb;color:#1e293b;font-size:15px}
-.topbar{background:#1e3a5f;color:#fff;padding:14px 24px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100}
-.topbar h1{font-size:17px;font-weight:600}
-.topbar .org-badge{background:rgba(255,255,255,.15);border-radius:6px;padding:3px 10px;font-size:13px}
-.topbar .status-badge{border-radius:6px;padding:3px 10px;font-size:12px;font-weight:600}
+body{font-family:'IBM Plex Sans Thai Looped','Sarabun',sans-serif;background:#F8FAFC;color:#1e293b;font-size:15px}
+.topbar{background:#fff;color:#1e293b;padding:14px 24px;display:flex;align-items:flex-start;gap:16px;position:sticky;top:0;z-index:100;border-bottom:1px solid #e2e8f0;box-shadow:0 1px 2px rgba(15,23,42,.04)}
+.topbar-main{display:flex;flex-direction:column;gap:8px;min-width:0}
+.topbar h1{font-size:17px;font-weight:700;line-height:1.35;color:#0F4C81}
+.topbar-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.topbar .org-badge{background:#E8F1FB;color:#0F4C81;border-radius:999px;padding:5px 12px;font-size:13px;border:1px solid #cfe0f5}
+.topbar .status-badge{border-radius:999px;padding:5px 12px;font-size:12px;font-weight:600}
 .status-draft{background:#fef3c7;color:#92400e}
 .status-submitted{background:#dcfce7;color:#166534}
 .status-reopened{background:#fce7f3;color:#9d174d}
-.topbar-right{margin-left:auto;display:flex;gap:8px;align-items:center}
-.btn{padding:7px 16px;border-radius:7px;border:none;cursor:pointer;font-size:14px;font-weight:500;transition:.15s}
-.btn-primary{background:#2563eb;color:#fff}
-.btn-primary:hover{background:#1d4ed8}
-.btn-secondary{background:#fff;color:#374151;border:1px solid #d1d5db}
-.btn-secondary:hover{background:#f9fafb}
+.topbar-note{font-size:12px;line-height:1.5;color:#64748b}
+.topbar-right{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.btn{padding:8px 16px;border-radius:10px;border:none;cursor:pointer;font-size:13px;font-weight:600;transition:.15s}
+.btn-primary{background:#0F4C81;color:#fff}
+.btn-primary:hover{background:#0A3560}
+.btn-secondary{background:#fff;color:#475569;border:1px solid #d1d5db}
+.btn-secondary:hover{background:#f8fafc}
 .btn-danger{background:#ef4444;color:#fff}
 .btn-danger:hover{background:#dc2626}
 .btn:disabled{opacity:.5;cursor:not-allowed}
-.container{max-width:860px;margin:0 auto;padding:28px 20px 60px}
+.container{max-width:768px;margin:0 auto;padding:20px 16px 110px}
+.page-shell{background:#fff;border-radius:24px;box-shadow:0 1px 3px rgba(15,23,42,.06);border:1px solid #f1f5f9;padding:24px 24px 8px}
+.page-intro{margin-bottom:18px}
+.page-intro h2{font-size:20px;color:#0F4C81;margin-bottom:6px;font-weight:700}
+.page-intro p{font-size:13px;color:#64748b;line-height:1.7}
 .alert{border-radius:8px;padding:14px 18px;margin-bottom:20px;font-size:14px}
 .alert-warning{background:#fef9c3;border:1px solid #fde047;color:#713f12}
 .alert-error{background:#fee2e2;border:1px solid #fca5a5;color:#7f1d1d}
 .alert-info{background:#eff6ff;border:1px solid #93c5fd;color:#1e3a8a}
-.section-card{background:#fff;border-radius:12px;border:1px solid #e2e8f0;margin-bottom:24px;overflow:hidden}
-.section-header{background:#f8fafc;border-bottom:1px solid #e2e8f0;padding:14px 20px;display:flex;align-items:center;gap:10px}
-.section-header h2{font-size:15px;font-weight:600;color:#1e3a5f}
-.section-body{padding:20px}
-.fq-item{margin-bottom:18px}
-.fq-label{display:block;font-weight:500;margin-bottom:6px;font-size:14px;color:#374151}
-.fq-help{display:block;font-size:12px;color:#6b7280;font-weight:400;margin-top:2px}
+.section-card{margin-bottom:28px;overflow:visible;padding:0;background:transparent;border:none}
+.section-header{padding:0;margin-bottom:14px;display:block;background:transparent;border-bottom:none}
+.section-header h2{font-size:20px;font-weight:700;color:#0F4C81;line-height:1.35}
+.section-header span{font-size:13px;color:#94a3b8;line-height:1.6}
+.section-index{display:none}
+.section-head-copy{display:flex;flex-direction:column;gap:4px;min-width:0}
+.section-desc{font-size:13px;color:#64748b;line-height:1.7}
+.section-body{padding:0}
+.fq-item{margin-bottom:20px;background:transparent;border:none;border-radius:0;padding:0}
+.fq-label{display:block;font-weight:600;margin-bottom:6px;font-size:14px;color:#334155;line-height:1.55}
+.fq-help{display:block;font-size:12px;color:#64748b;font-weight:400;margin-top:2px;line-height:1.6}
 .fq-options{display:flex;flex-direction:column;gap:6px}
-.fq-opt{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;padding:5px 8px;border-radius:5px;transition:.1s}
-.fq-opt:hover{background:#f1f5f9}
-.fq-opt input[type=radio],.fq-opt input[type=checkbox]{width:16px;height:16px;cursor:pointer}
-input.si,textarea.si,select.si{width:100%;padding:9px 12px;border:1px solid #d1d5db;border-radius:7px;font-size:14px;background:#fff;font-family:inherit;transition:.15s}
-input.si:focus,textarea.si:focus,select.si:focus{outline:none;border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.1)}
-textarea.si{resize:vertical;min-height:80px}
-.fq-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.fq-opt{display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:14px;padding:4px 0;border-radius:10px;transition:.1s;color:#334155;line-height:1.5}
+.fq-opt:hover{background:transparent}
+.fq-opt input[type=radio],.fq-opt input[type=checkbox]{width:18px;height:18px;cursor:pointer;transform:translateY(2px)}
+input.si,textarea.si,select.si{width:100%;padding:12px 16px;border:1.5px solid #D1D5DB;border-radius:14px;font-size:14px;background:#fff;font-family:inherit;transition:.15s;color:#334155}
+input.si:focus,textarea.si:focus,select.si:focus{outline:none;border-color:#0F4C81;box-shadow:0 0 0 3px rgba(15,76,129,.08)}
+textarea.si{resize:vertical;min-height:96px;line-height:1.7}
+.fq-row{display:grid;grid-template-columns:1fr 1fr;gap:18px}
 .readonly-overlay{pointer-events:none;opacity:.7}
+.turnover-stack{display:grid;gap:16px}
+.compact-panel{background:#F8FAFC;border-radius:16px;padding:16px;border:1px solid #eef2f7}
+.compact-panel-title{font-size:14px;font-weight:700;color:#334155;margin-bottom:12px}
+.compact-subtitle{font-size:12px;font-weight:600;color:#475569;margin:0 0 8px}
+.compact-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.compact-grid.compact-grid-5{grid-template-columns:repeat(5,minmax(0,1fr))}
+.compact-grid.compact-grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.compact-field{display:grid;gap:4px}
+.compact-field label{display:block;font-size:12px;color:#64748b;line-height:1.4}
+.compact-field input{width:100%;border:1px solid #E2E8F0;border-radius:10px;padding:9px 10px;font-size:14px;text-align:center;background:#fff;color:#1e293b}
+.compact-field input:focus{outline:none;border-color:#0F4C81;box-shadow:0 0 0 3px rgba(15,76,129,.08)}
+.compact-total{margin-top:8px;text-align:right;font-size:12px;color:#94a3b8}
+.compact-total strong{color:#475569}
+.compact-section{display:grid;gap:14px}
+.turnover-table-wrap{overflow-x:auto;background:#F8FAFC;border-radius:16px;padding:16px;border:1px solid #eef2f7}
+.turnover-table{width:100%;min-width:640px;border-collapse:separate;border-spacing:0 8px}
+.turnover-table th{font-size:13px;font-weight:700;color:#334155;padding-bottom:6px;text-align:center}
+.turnover-table th:first-child{text-align:left;width:180px}
+.turnover-table td{vertical-align:middle}
+.turnover-row-label{padding-right:12px;color:#475569;font-weight:600;font-size:14px;line-height:1.5}
+.turnover-row-label small{display:block;font-size:12px;color:#94a3b8;font-weight:400;margin-top:2px}
+.turnover-table input{width:100%;border:1px solid #cbd5e1;border-radius:10px;padding:9px 10px;font-size:13px;text-align:center;background:#fff;outline:none}
+.turnover-table input:focus{border-color:#0F4C81;box-shadow:0 0 0 3px rgba(15,76,129,.08)}
+.turnover-rate-box{width:100%;border:1px solid #e2e8f0;border-radius:10px;padding:9px 10px;font-size:13px;text-align:center;background:#f8fafc;color:#64748b;font-weight:600}
+.turnover-divider td{padding:0}
+.turnover-divider-line{height:1px;background:#e2e8f0}
+.turnover-item{display:grid;gap:8px}
+.turnover-label{display:block;width:max-content;background:transparent;color:#334155;font-size:14px;font-weight:600;line-height:1.4;padding:0;border-radius:0}
+.turnover-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px}
+.turnover-row .si{height:48px;border-radius:12px;border:1.5px solid #D1D5DB;padding:10px 14px;font-size:14px}
+.turnover-unit{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:34px;background:#F1F5F9;color:#475569;font-size:12px;font-weight:700;padding:0 10px;border-radius:10px}
+.fq-unit{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:34px;padding:0 10px;border-radius:10px;background:#F1F5F9;color:#475569;font-size:12px;font-weight:700}
+.section-divider{height:1px;background:#e8eef5;margin:20px 0}
 .spinner{display:inline-block;width:20px;height:20px;border:2px solid #e2e8f0;border-top-color:#2563eb;border-radius:50%;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .loading-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:16px;color:#64748b}
-.action-bar{background:#fff;border-top:1px solid #e2e8f0;position:fixed;bottom:0;left:0;right:0;padding:14px 24px;display:flex;justify-content:flex-end;gap:10px;z-index:90}
+.action-bar{background:rgba(255,255,255,.96);backdrop-filter:blur(10px);border-top:1px solid #e2e8f0;position:fixed;bottom:0;left:0;right:0;padding:14px 24px;display:flex;justify-content:center;gap:10px;z-index:90;box-shadow:0 -8px 24px rgba(15,23,42,.06)}
 .required-star{color:#ef4444}
-@media(max-width:640px){.fq-row{grid-template-columns:1fr}}
+.hidden{display:none!important}
+@media(max-width:900px){.topbar{flex-direction:column;align-items:stretch}.topbar-right{margin-left:0;justify-content:flex-start}.container{padding:16px 12px 120px}.page-shell{padding:18px 16px 8px}.section-header h2{font-size:18px}}
+@media(max-width:640px){.fq-row{grid-template-columns:1fr}.turnover-row{grid-template-columns:1fr}.turnover-unit{justify-self:start}.fq-label{font-size:15px}.fq-item{margin-bottom:16px}.compact-grid,.compact-grid.compact-grid-5,.compact-grid.compact-grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style>
 </head>
 <body>
 
 <!-- Topbar -->
 <div class="topbar">
-  <h1>✏️ แก้ไขข้อมูล CH1</h1>
-  <span class="org-badge" id="org-name-badge">กำลังโหลด...</span>
-  <span class="status-badge" id="status-badge" style="display:none"></span>
+  <div class="topbar-main">
+    <h1>✏️ แก้ไขข้อมูล CH1</h1>
+    <div class="topbar-meta">
+      <span class="org-badge" id="org-name-badge">กำลังโหลด...</span>
+      <span class="status-badge" id="status-badge" style="display:none"></span>
+    </div>
+    <div class="topbar-note">กรอกข้อมูลต่อเนื่องในหน้าเดียวได้เลย โดยระบบจะโหลดข้อมูลเดิมให้อัตโนมัติเมื่อมีข้อมูลในฐานแล้ว</div>
+  </div>
   <div class="topbar-right">
-    <button class="btn btn-secondary" onclick="history.back()">← กลับ</button>
+    <button class="btn btn-secondary" onclick="goBackToPortal()">← กลับ</button>
     <button class="btn btn-secondary" id="btn-preview" onclick="goPreview()" style="display:none">👁️ Preview</button>
+    <button class="btn btn-danger" id="btn-delete" onclick="deleteForm()" style="display:none">🗑️ ลบข้อมูล</button>
     <button class="btn btn-primary" id="btn-save" onclick="saveForm('draft')" style="display:none" disabled>💾 บันทึก Draft</button>
     <button class="btn btn-primary" id="btn-submit" onclick="saveForm('submitted')" style="display:none" disabled>📤 ส่งข้อมูล</button>
   </div>
@@ -69,15 +121,22 @@ textarea.si{resize:vertical;min-height:80px}
 
 <!-- Main content -->
 <div class="container" id="main-container">
-  <div class="loading-screen" id="loading-screen">
-    <div class="spinner"></div>
-    <div>กำลังโหลดข้อมูล...</div>
+  <div class="page-shell">
+    <div class="page-intro">
+      <h2>แบบสอบถาม - ข้อมูลสุขภาวะองค์กร</h2>
+      <p>แบบฟอร์มนี้ใช้ layout เดียวกับหน้า CH1 หลัก แต่เปิดให้แก้ไขแบบต่อเนื่องในหน้าเดียวโดยไม่ตัดเป็น step</p>
+    </div>
+    <div class="loading-screen" id="loading-screen">
+      <div class="spinner"></div>
+      <div>กำลังโหลดข้อมูล...</div>
+    </div>
+    <div id="content-area" style="display:none"></div>
   </div>
-  <div id="content-area" style="display:none"></div>
 </div>
 
 <!-- Fixed action bar -->
 <div class="action-bar" id="action-bar" style="display:none">
+  <button class="btn btn-danger" onclick="deleteForm()" id="ab-delete" style="display:none">🗑️ ลบข้อมูล</button>
   <button class="btn btn-secondary" onclick="saveForm('draft')" id="ab-save">💾 บันทึก Draft</button>
   <button class="btn btn-primary" onclick="saveForm('submitted')" id="ab-submit">📤 ส่งข้อมูล</button>
 </div>
@@ -95,8 +154,285 @@ const params   = new URLSearchParams(location.search);
 const ORG_PARAM = params.get('org');
 const ID_PARAM  = params.get('id');
 const MODE      = params.get('mode') || 'edit'; // edit | view
+const IS_INLINE_PORTAL = window.parent && window.parent !== window;
 
 let userRole = null, userOrgCode = null, responseData = null, schema = null;
+
+const WORKFORCE_LAYOUT = {
+  total_staff: { label: 'จำนวนข้าราชการรวม', placeholder: 'จำนวนข้าราชการรวม (เช่น 500)' },
+  type_official: { label: 'ข้าราชการ' },
+  type_employee: { label: 'พนักงานราชการ' },
+  type_contract: { label: 'ลูกจ้าง' },
+  type_other: { label: 'อื่น ๆ' },
+  age_u30: { label: 'ไม่เกิน 30 ปี' },
+  age_31_40: { label: '31–40 ปี' },
+  age_41_50: { label: '41–50 ปี' },
+  age_51_60: { label: '51–60 ปี' },
+  service_u1: { label: 'ไม่เกิน 1 ปี' },
+  service_1_5: { label: '1-5 ปี' },
+  service_6_10: { label: '6-10 ปี' },
+  service_11_15: { label: '11-15 ปี' },
+  service_16_20: { label: '16-20 ปี' },
+  service_21_25: { label: '21-25 ปี' },
+  service_26_30: { label: '26-30 ปี' },
+  service_over30: { label: '31 ปีขึ้นไป' },
+  pos_o1: { label: 'ปฏิบัติงาน (O1)' },
+  pos_o2: { label: 'ชำนาญงาน (O2)' },
+  pos_o3: { label: 'อาวุโส (O3)' },
+  pos_o4: { label: 'ทักษะพิเศษ (O4)' },
+  pos_k1: { label: 'ปฏิบัติการ (K1)' },
+  pos_k2: { label: 'ชำนาญการ (K2)' },
+  pos_k3: { label: 'ชำนาญการพิเศษ (K3)' },
+  pos_k4: { label: 'เชี่ยวชาญ (K4)' },
+  pos_k5: { label: 'ทรงคุณวุฒิ (K5)' },
+  pos_m1: { label: 'ระดับต้น (M1)' },
+  pos_m2: { label: 'ระดับสูง (M2)' },
+  pos_s1: { label: 'ระดับต้น (S1)' },
+  pos_s2: { label: 'ระดับสูง (S2)' },
+};
+
+function getWorkforceQuestion(questionMap, key) {
+  return questionMap.get(key) || {
+    question_key: key,
+    label_th: WORKFORCE_LAYOUT[key]?.label || key,
+    is_required: key === 'total_staff',
+    validation_json: { min: 0 },
+  };
+}
+
+function renderCompactField(question, value, isReadOnly) {
+  const meta = WORKFORCE_LAYOUT[question.question_key] || { label: question.label_th };
+  const wrap = document.createElement('div');
+  wrap.className = 'compact-field';
+
+  const label = document.createElement('label');
+  label.textContent = meta.label;
+  wrap.appendChild(label);
+
+  const input = document.createElement('input');
+  input.type = 'number';
+  input.name = question.question_key;
+  input.value = value ?? '';
+  input.placeholder = meta.placeholder || '';
+  input.min = '0';
+  if (question.is_required) input.required = true;
+  if (question.validation_json) {
+    const v = typeof question.validation_json === 'string' ? JSON.parse(question.validation_json) : question.validation_json;
+    if (v.min !== undefined) input.min = v.min;
+    if (v.max !== undefined) input.max = v.max;
+    if (v.step !== undefined) input.step = v.step;
+  }
+  if (isReadOnly) input.disabled = true;
+  input.className = question.question_key.startsWith('age_') ? 'age-field' : '';
+  wrap.appendChild(input);
+
+  return wrap;
+}
+
+function sumFieldValues(keys) {
+  return keys.reduce((sum, key) => sum + (Number(responseData?.[key] || 0) || 0), 0);
+}
+
+function getNumericFieldValue(key) {
+  const el = document.querySelector(`[name="${key}"]`);
+  if (!el) return Number(responseData?.[key] || 0) || 0;
+  return Number(el.value || 0) || 0;
+}
+
+function updateTurnoverRateRow() {
+  [2564, 2565, 2566, 2567, 2568].forEach((year) => {
+    const begin = getNumericFieldValue(`begin_${year}`);
+    const end = getNumericFieldValue(`end_${year}`);
+    const leave = getNumericFieldValue(`leave_${year}`);
+    const denominator = (begin + end) / 2;
+    const rate = denominator > 0 ? ((leave / denominator) * 100) : null;
+    const box = document.getElementById(`rate_${year}`);
+    if (box) box.textContent = rate === null ? '-' : rate.toFixed(2);
+  });
+}
+
+function renderTurnoverTable(isReadOnly) {
+  const years = [2564, 2565, 2566, 2567, 2568];
+  const wrap = document.createElement('div');
+  wrap.className = 'turnover-table-wrap' + (isReadOnly ? ' readonly-overlay' : '');
+
+  const table = document.createElement('table');
+  table.className = 'turnover-table';
+
+  const thead = document.createElement('thead');
+  thead.innerHTML = `<tr><th></th>${years.map((year) => `<th>${year}</th>`).join('')}</tr>`;
+  table.appendChild(thead);
+
+  const tbody = document.createElement('tbody');
+  const rowConfigs = [
+    { key: 'begin', title: 'จำนวนข้าราชการ', subtitle: 'ต้นปี (1 ต.ค.)' },
+    { key: 'end', title: 'จำนวนข้าราชการ', subtitle: 'ปลายปี (30 ก.ย.)' },
+    { key: 'leave', title: 'จำนวนข้าราชการ', subtitle: 'ลาออกและโอนย้าย' },
+  ];
+
+  rowConfigs.forEach((row) => {
+    const tr = document.createElement('tr');
+    const labelCell = document.createElement('td');
+    labelCell.className = 'turnover-row-label';
+    labelCell.innerHTML = `${row.title}<small>${row.subtitle}</small>`;
+    tr.appendChild(labelCell);
+
+    years.forEach((year) => {
+      const td = document.createElement('td');
+      const input = document.createElement('input');
+      input.type = 'number';
+      input.name = `${row.key}_${year}`;
+      input.min = '0';
+      input.placeholder = '0';
+      input.value = responseData ? (responseData[`${row.key}_${year}`] ?? '') : '';
+      if (isReadOnly) input.disabled = true;
+      input.addEventListener('input', updateTurnoverRateRow);
+      td.appendChild(input);
+      tr.appendChild(td);
+    });
+
+    tbody.appendChild(tr);
+  });
+
+  const divider = document.createElement('tr');
+  divider.className = 'turnover-divider';
+  divider.innerHTML = '<td colspan="6"><div class="turnover-divider-line"></div></td>';
+  tbody.appendChild(divider);
+
+  const rateRow = document.createElement('tr');
+  const rateLabel = document.createElement('td');
+  rateLabel.className = 'turnover-row-label';
+  rateLabel.innerHTML = 'ร้อยละ<small>(อัตโนมัติ)</small>';
+  rateRow.appendChild(rateLabel);
+
+  years.forEach((year) => {
+    const td = document.createElement('td');
+    const box = document.createElement('div');
+    box.id = `rate_${year}`;
+    box.className = 'turnover-rate-box';
+    box.textContent = '-';
+    td.appendChild(box);
+    rateRow.appendChild(td);
+  });
+
+  tbody.appendChild(rateRow);
+  table.appendChild(tbody);
+  wrap.appendChild(table);
+
+  setTimeout(updateTurnoverRateRow, 0);
+  return wrap;
+}
+
+function buildWorkforceLayout(questions, isReadOnly) {
+  const block = document.createElement('div');
+  block.className = 'turnover-stack' + (isReadOnly ? ' readonly-overlay' : '');
+
+  const questionMap = new Map((questions || []).map((item) => [item.question_key, item]));
+
+  const totalQuestion = getWorkforceQuestion(questionMap, 'total_staff');
+  const totalWrap = document.createElement('div');
+  totalWrap.className = 'fq-item';
+
+  const totalLabel = document.createElement('label');
+  totalLabel.className = 'fq-label';
+  totalLabel.textContent = '3. ข้อมูลโครงสร้างอัตรากำลัง';
+  totalWrap.appendChild(totalLabel);
+
+  const totalInput = document.createElement('input');
+  totalInput.type = 'number';
+  totalInput.className = 'si';
+  totalInput.name = totalQuestion.question_key;
+  totalInput.value = responseData ? (responseData.total_staff ?? '') : '';
+  totalInput.placeholder = WORKFORCE_LAYOUT.total_staff.placeholder;
+  totalInput.min = '1';
+  totalInput.required = true;
+  if (isReadOnly) totalInput.disabled = true;
+  totalWrap.appendChild(totalInput);
+  block.appendChild(totalWrap);
+
+  function buildPanel(title, keys, gridClass = 'compact-grid') {
+    const available = keys.filter((key) => WORKFORCE_LAYOUT[key]);
+    if (!available.length) return null;
+
+    const panel = document.createElement('div');
+    panel.className = 'compact-panel';
+
+    const head = document.createElement('h3');
+    head.className = 'compact-panel-title';
+    head.textContent = title;
+    panel.appendChild(head);
+
+    const grid = document.createElement('div');
+    grid.className = gridClass;
+
+    available.forEach((key) => {
+      const q = getWorkforceQuestion(questionMap, key);
+      const currentVal = responseData ? (responseData[key] ?? '') : '';
+      grid.appendChild(renderCompactField(q, currentVal, isReadOnly));
+    });
+
+    panel.appendChild(grid);
+
+    const total = document.createElement('div');
+    total.className = 'compact-total';
+    total.innerHTML = `ผลรวม: <strong>${sumFieldValues(available)}</strong> คน`;
+    panel.appendChild(total);
+    return panel;
+  }
+
+  const typePanel = buildPanel('จำนวนอัตรากำลังจำแนกตามประเภท', ['type_official', 'type_employee', 'type_contract', 'type_other']);
+  if (typePanel) block.appendChild(typePanel);
+
+  const agePanel = buildPanel('จำแนกตามช่วงอายุ(เฉพาะข้าราชการ)', ['age_u30', 'age_31_40', 'age_41_50', 'age_51_60']);
+  if (agePanel) block.appendChild(agePanel);
+
+  const servicePanel = buildPanel('จำแนกตามอายุราชการ', ['service_u1', 'service_1_5', 'service_6_10', 'service_11_15', 'service_16_20', 'service_21_25', 'service_26_30', 'service_over30']);
+  if (servicePanel) block.appendChild(servicePanel);
+
+  const positionKeys = ['pos_o1','pos_o2','pos_o3','pos_o4','pos_k1','pos_k2','pos_k3','pos_k4','pos_k5','pos_m1','pos_m2','pos_s1','pos_s2'];
+  if (positionKeys.some((key) => WORKFORCE_LAYOUT[key])) {
+    const panel = document.createElement('div');
+    panel.className = 'compact-panel compact-section';
+
+    const title = document.createElement('h3');
+    title.className = 'compact-panel-title';
+    title.textContent = 'จำแนกตามประเภทและระดับตำแหน่ง';
+    panel.appendChild(title);
+
+    const subGroups = [
+      { title: 'ประเภททั่วไป', keys: ['pos_o1','pos_o2','pos_o3','pos_o4'], gridClass: 'compact-grid' },
+      { title: 'ประเภทวิชาการ', keys: ['pos_k1','pos_k2','pos_k3','pos_k4','pos_k5'], gridClass: 'compact-grid compact-grid-5' },
+      { title: 'ประเภทอำนวยการ', keys: ['pos_m1','pos_m2'], gridClass: 'compact-grid compact-grid-2' },
+      { title: 'ประเภทบริหาร', keys: ['pos_s1','pos_s2'], gridClass: 'compact-grid compact-grid-2' },
+    ];
+
+    subGroups.forEach((group) => {
+      const available = group.keys.filter((key) => WORKFORCE_LAYOUT[key]);
+      if (!available.length) return;
+      const subtitle = document.createElement('h4');
+      subtitle.className = 'compact-subtitle';
+      subtitle.textContent = group.title;
+      panel.appendChild(subtitle);
+
+      const grid = document.createElement('div');
+      grid.className = group.gridClass;
+      available.forEach((key) => {
+        const q = getWorkforceQuestion(questionMap, key);
+        const currentVal = responseData ? (responseData[key] ?? '') : '';
+        grid.appendChild(renderCompactField(q, currentVal, isReadOnly));
+      });
+      panel.appendChild(grid);
+    });
+
+    const total = document.createElement('div');
+    total.className = 'compact-total';
+    total.innerHTML = `ผลรวม: <strong>${sumFieldValues(positionKeys.filter((key) => WORKFORCE_LAYOUT[key]))}</strong> คน`;
+    panel.appendChild(total);
+    block.appendChild(panel);
+  }
+
+  return block;
+}
 
 // ── Auth Gate ──
 async function init() {
@@ -149,12 +485,18 @@ async function loadResponse(orgCode) {
   return data || null;
 }
 
+function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
 function renderPage(orgCode) {
   const status = responseData?.status || 'draft';
   const orgName = responseData?.organization || orgCode;
-  const isReadOnly = (userRole === 'org_hr' && status === 'submitted') || MODE === 'view';
+  const isReadOnly = MODE === 'view';
+  const dis = isReadOnly ? 'disabled' : '';
+  const fd = responseData || {};
+  const v = (k) => fd[k] ?? '';
+  const chk = (n, val) => fd[n] === val ? 'checked' : '';
+  const chkArr = (n, val) => { const a = fd[n]; return Array.isArray(a) && a.includes(val) ? 'checked' : ''; };
 
-  // Update topbar
   document.getElementById('org-name-badge').textContent = orgName;
   const sb2 = document.getElementById('status-badge');
   sb2.style.display = '';
@@ -162,62 +504,271 @@ function renderPage(orgCode) {
   sb2.className = 'status-badge status-' + status;
 
   const contentArea = document.getElementById('content-area');
-  contentArea.innerHTML = '';
+  let html = '';
 
   if (isReadOnly && status === 'submitted') {
-    const alert = document.createElement('div');
-    alert.className = 'alert alert-warning';
-    alert.innerHTML = `⚠️ ข้อมูลถูกส่งแล้ว (submitted) — อยู่ในโหมดอ่านอย่างเดียว<br>
-      <small>หากต้องการแก้ไข กรุณาติดต่อ Admin เพื่อขอเปิดแก้ไข</small>`;
-    contentArea.appendChild(alert);
+    html += `<div class="alert alert-warning">⚠️ ข้อมูลถูกส่งแล้ว — อยู่ในโหมดอ่านอย่างเดียว<br><small>หากต้องการแก้ไข กรุณาติดต่อ Admin เพื่อขอเปิดแก้ไข</small></div>`;
   }
 
-  // Render sections from schema
-  const totalQuestions = schema ? schema.sections.reduce((n, s) => n + (s.questions||[]).length, 0) : 0;
-  if (schema && schema.sections.length > 0 && totalQuestions > 0) {
-    schema.sections.forEach(sec => {
-      const card = document.createElement('div');
-      card.className = 'section-card';
-      card.innerHTML = `<div class="section-header"><h2>📋 ${sec.title_th}</h2>${sec.description ? `<span style="font-size:12px;color:#64748b">${sec.description}</span>` : ''}</div>`;
-      const body = document.createElement('div');
-      body.className = 'section-body' + (isReadOnly ? ' readonly-overlay' : '');
+  // hidden org_code
+  html += `<input type="hidden" name="org_code" value="${esc(ORG_PARAM || userOrgCode)}">`;
 
-      (sec.questions || []).forEach(q => {
-        // org_code ต้องมาจาก session — auto-fill + lock ไม่ให้ user แก้
-        const autoFillKeys = { org_code: ORG_PARAM || userOrgCode };
-        const currentVal = autoFillKeys[q.question_key] !== undefined
-          ? autoFillKeys[q.question_key]
-          : (responseData ? (responseData[q.question_key] ?? '') : '');
-        const wrapper = FormSchema.renderQuestion(q, body, currentVal);
-        // Lock org_code ไม่ว่า mode ใดก็ตาม
-        if (q.question_key === 'org_code') {
-          wrapper.querySelectorAll('input,textarea,select').forEach(el => {
-            el.readOnly = true;
-            el.style.background = '#f1f5f9';
-            el.style.color = '#64748b';
-          });
-        }
-        if (isReadOnly) {
-          wrapper.querySelectorAll('input,textarea,select').forEach(el => el.disabled = true);
-        }
-      });
-
-      card.appendChild(body);
-      contentArea.appendChild(card);
-    });
-  } else {
-    // Schema not available or has no questions — show diagnostics
-    contentArea.innerHTML = `
-      <div class="alert alert-warning">
-        ⚠️ ไม่สามารถโหลดคำถาม CH1 ได้จาก Database<br>
-        <small>กรุณาตรวจสอบ: ตาราง <code>form_questions</code> ใน Supabase ต้องมีข้อมูล <code>form_code = 'ch1'</code>
-        หรือติดต่อ Admin เพื่อ seed คำถาม</small>
+  // ═══ ส่วนที่ 1: ข้อมูลทั่วไปขององค์กร ═══
+  html += `
+  <div class="section-card">
+    <div class="section-header"><h2>📋 ส่วนที่ 1: ข้อมูลทั่วไปขององค์กร</h2>
+      <div class="section-desc">ข้อมูลพื้นฐาน โครงสร้าง และอัตรากำลัง</div></div>
+    <div class="section-body">
+      <div class="fq-item">
+        <label class="fq-label">ชื่อหน่วยงาน <span class="required-star">*</span></label>
+        <input class="si" name="organization" value="${esc(v('organization') || orgName)}" readonly style="background:#f1f5f9;color:#64748b">
       </div>
-      <div class="alert alert-info" style="font-size:12px">
-        🔍 Debug: schema=${schema ? 'loaded' : 'null'}, sections=${schema?.sections?.length||0}, questions=${totalQuestions}
-        (source: ${schema?.source || 'none'})
-      </div>`;
+      <div class="fq-item">
+        <label class="fq-label">1. ภาพรวมยุทธศาสตร์และทิศทางของส่วนราชการ <span class="fq-help">(โปรดแนบข้อมูลหรืออธิบายโดยสังเขป)</span></label>
+        <textarea class="si" name="strategic_overview" rows="3" placeholder="อธิบายภาพรวมยุทธศาสตร์และทิศทางของหน่วยงาน" ${dis}>${esc(v('strategic_overview'))}</textarea>
+      </div>
+      <div class="fq-item">
+        <label class="fq-label">2. โครงสร้างองค์กรและบทบาทหน้าที่หลัก <span class="fq-help">(โปรดแนบข้อมูล)</span></label>
+        <textarea class="si" name="org_structure" rows="3" placeholder="อธิบายโครงสร้างองค์กรและบทบาทหน้าที่หลัก" ${dis}>${esc(v('org_structure'))}</textarea>
+      </div>
+      <div id="workforce-mount"></div>
+      <div class="fq-item" style="margin-top:8px">
+        <label class="fq-label">4. การลาออกและโอนย้าย <span class="fq-help">(ย้อนหลัง 5 ปี ถ้ามี)</span></label>
+        <div id="turnover-mount"></div>
+      </div>
+    </div>
+  </div>`;
+
+  // ═══ ส่วนที่ 2: นโยบายและบริบทภายนอก ═══
+  html += `
+  <div class="section-card">
+    <div class="section-header"><h2>📋 ส่วนที่ 2: นโยบายและบริบทภายนอกองค์กร</h2>
+      <div class="section-desc">นโยบายที่เกี่ยวข้องและบริบทที่ส่วนราชการต้องเผชิญ</div></div>
+    <div class="section-body">
+      <div class="fq-item">
+        <label class="fq-label">5. นโยบายและยุทธศาสตร์ที่เกี่ยวข้อง <span class="fq-help">โปรดระบุนโยบายที่หน่วยงานเลือกใช้ในการพัฒนาสุขภาวะข้าราชการ</span></label>
+        <textarea class="si" name="related_policies" rows="4" placeholder="ระบุนโยบายที่เกี่ยวข้อง..." ${dis}>${esc(v('related_policies'))}</textarea>
+      </div>
+      <div class="fq-item">
+        <label class="fq-label">6. ข้อมูลบริบทและความท้าทาย (Context & Challenges) <span class="fq-help">โปรดระบุบริบทที่ส่วนราชการต้องเผชิญ เช่น นโยบายระดับชาติ, การเปลี่ยนแปลงด้านกฎหมาย/เทคโนโลยี</span></label>
+        <textarea class="si" name="context_challenges" rows="4" placeholder="ระบุบริบทและความท้าทาย..." ${dis}>${esc(v('context_challenges'))}</textarea>
+      </div>
+    </div>
+  </div>`;
+
+  // ═══ ส่วนที่ 3: ข้อมูลสุขภาวะของข้าราชการ ═══
+  const diseaseFields = [
+    ['diabetes','เบาหวาน'],['hypertension','ความดันโลหิตสูง'],
+    ['cardiovascular','โรคหัวใจและหลอดเลือด'],['kidney','โรคไต'],
+    ['liver','โรคตับ'],['cancer','โรคมะเร็ง'],['obesity','ภาวะอ้วน/น้ำหนักเกิน']
+  ];
+  const mentalFields = [
+    ['stress','ภาวะเครียดเรื้อรัง'],['anxiety','ภาวะวิตกกังวล'],
+    ['sleep','ปัญหาการนอนหลับ'],['burnout','ภาวะหมดไฟ (Burnout)'],['depression','ภาวะซึมเศร้า']
+  ];
+
+  function radioGroup(name, opts) {
+    return `<div style="margin-bottom:14px">
+      <label style="font-size:13px;font-weight:600;color:#334155;display:block;margin-bottom:8px">ประเภทข้อมูลที่รายงาน</label>
+      <div class="fq-options">
+        ${opts.map(([val,lbl]) => `<label class="fq-opt"><input type="radio" name="${name}" value="${val}" ${chk(name,val)} ${dis}> ${lbl}</label>`).join('')}
+      </div></div>`;
   }
+  const reportRadio = (name) => radioGroup(name, [['actual','ข้อมูลจริง'],['estimated','ประมาณการ'],['none','ไม่มีข้อมูล']]);
+
+  html += `
+  <div class="section-card">
+    <div class="section-header"><h2>🩺 ส่วนที่ 3: ข้อมูลสุขภาวะของข้าราชการในปีที่ผ่านมา</h2>
+      <div class="section-desc">ข้อมูลสุขภาพกาย สุขภาพจิต และการลาป่วย (หากไม่สามารถแยกเฉพาะข้าราชการได้ ให้ระบุข้อมูลรวมแทน)</div></div>
+    <div class="section-body">
+
+      <!-- 7. สุขภาวะทางกาย -->
+      <div class="compact-panel">
+        <h3 class="compact-panel-title">7. สุขภาวะทางกาย <span style="font-weight:400;color:#94a3b8">(ข้อมูลปีล่าสุด หรือย้อนหลังไม่เกิน 5 ปี)</span></h3>
+        <p style="font-size:12px;color:#64748b;margin-bottom:12px">กรุณาระบุจำนวนข้าราชการที่มีภาวะดังต่อไปนี้</p>
+        ${reportRadio('disease_report_type')}
+        <div class="compact-grid compact-grid-2">
+          ${diseaseFields.map(([k,l]) => `<div class="compact-field"><label>${l}</label><input type="number" name="disease_${k}" min="0" value="${v('disease_'+k)}" placeholder="0" ${dis}></div>`).join('')}
+        </div>
+        <div class="fq-row" style="margin-top:12px">
+          <div class="fq-item"><label class="fq-label" style="font-size:12px">อื่น ๆ (ระบุ)</label>
+            <input class="si" name="disease_other_detail" value="${esc(v('disease_other_detail'))}" placeholder="ระบุโรคอื่นๆ" ${dis}></div>
+          <div class="fq-item"><label class="fq-label" style="font-size:12px">อื่น ๆ (จำนวน)</label>
+            <input class="si" type="number" name="disease_other_count" min="0" value="${v('disease_other_count')}" placeholder="0" ${dis}></div>
+        </div>
+      </div>
+
+      <!-- 8. การลาป่วย -->
+      <div class="compact-panel" style="margin-top:16px">
+        <h3 class="compact-panel-title">8. ข้อมูลการลาป่วย <span style="font-weight:400;color:#94a3b8">(ข้อมูลปีล่าสุด หรือย้อนหลังไม่เกิน 5 ปี)</span></h3>
+        <p style="font-size:12px;color:#64748b;margin-bottom:12px">กรุณาระบุข้อมูลการลาป่วยของข้าราชการภายในหน่วยงาน</p>
+        ${reportRadio('sick_leave_report_type')}
+        <div class="fq-row">
+          <div class="fq-item"><label class="fq-label" style="font-size:13px">จำนวนวันลาป่วยรวมต่อปี</label>
+            <input class="si" type="number" name="sick_leave_days" min="0" value="${v('sick_leave_days')}" placeholder="0" ${dis}></div>
+          <div class="fq-item"><label class="fq-label" style="font-size:13px">จำนวนวันลาป่วยเฉลี่ยต่อคนต่อปี</label>
+            <input class="si" type="number" name="sick_leave_avg" min="0" step="0.01" value="${v('sick_leave_avg')}" placeholder="0.00" ${dis}></div>
+        </div>
+      </div>
+
+      <!-- 9. สถิติห้องพยาบาล -->
+      <div class="compact-panel" style="margin-top:16px">
+        <h3 class="compact-panel-title">9. สถิติผู้ใช้บริการห้องพยาบาล <span style="font-weight:400;color:#94a3b8">(ถ้ามี)</span></h3>
+        ${reportRadio('clinic_report_type')}
+        <div class="fq-item"><label class="fq-label" style="font-size:13px">จำนวนผู้ใช้บริการต่อปี (คน)</label>
+          <input class="si" type="number" name="clinic_users_per_year" min="0" value="${v('clinic_users_per_year')}" placeholder="0" ${dis}></div>
+        <div class="fq-item"><label class="fq-label" style="font-size:13px">อาการที่พบบ่อยที่สุด</label>
+          <textarea class="si" name="clinic_top_symptoms" rows="2" placeholder="ระบุอาการที่พบบ่อยในห้องพยาบาล..." ${dis}>${esc(v('clinic_top_symptoms'))}</textarea></div>
+        <div class="fq-item"><label class="fq-label" style="font-size:13px">ยาที่ใช้บ่อยที่สุด</label>
+          <textarea class="si" name="clinic_top_medications" rows="2" placeholder="ระบุยาหรือวิธีรักษาที่ใช้บ่อย..." ${dis}>${esc(v('clinic_top_medications'))}</textarea></div>
+      </div>
+
+      <!-- 10. สุขภาพจิต -->
+      <div class="compact-panel" style="margin-top:16px">
+        <h3 class="compact-panel-title">10. ผลสำรวจสุขภาพจิต <span style="font-weight:400;color:#94a3b8">(ถ้ามี)</span></h3>
+        ${reportRadio('mental_health_report_type')}
+        ${mentalFields.map(([k,l]) => `<div class="fq-item"><label class="fq-label" style="font-size:13px">${l}</label>
+          <textarea class="si" name="mental_${k}" rows="2" placeholder="ระบุจำนวนหรือรายละเอียด" ${dis}>${esc(v('mental_'+k))}</textarea></div>`).join('')}
+      </div>
+
+      <!-- 11. Engagement -->
+      <div class="compact-panel" style="margin-top:16px">
+        <h3 class="compact-panel-title">11. ผลสำรวจความผูกพันองค์กร (Employee Engagement) <span style="font-weight:400;color:#94a3b8">(ย้อนหลังไม่เกิน 5 ปี ถ้ามี)</span></h3>
+        <label class="fq-label" style="font-size:13px;margin-bottom:8px">คะแนนภาพรวมรายปี</label>
+        <div class="compact-grid compact-grid-5">
+          ${[2568,2567,2566,2565,2564].map(y => `<div class="compact-field"><label>${y}</label><input type="number" name="engagement_score_${y}" min="0" max="100" step="0.01" value="${v('engagement_score_'+y)}" placeholder="0.00" ${dis}></div>`).join('')}
+        </div>
+        <p style="font-size:11px;color:#94a3b8;margin:6px 0 14px">ระบุคะแนน 0-100 (เช่น 75.25)</p>
+        <div class="fq-item"><label class="fq-label" style="font-size:13px">ประเด็นที่ได้คะแนนต่ำ</label>
+          <textarea class="si" name="engagement_low_areas" rows="2" placeholder="ระบุประเด็นที่ได้คะแนนต่ำ" ${dis}>${esc(v('engagement_low_areas'))}</textarea></div>
+      </div>
+
+      <!-- 12. ผลสำรวจสุขภาวะอื่น -->
+      <div class="compact-panel" style="margin-top:16px">
+        <h3 class="compact-panel-title">12. ผลการสำรวจสุขภาวะด้วยเครื่องมืออื่น ๆ <span style="font-weight:400;color:#94a3b8">(ถ้ามี)</span></h3>
+        <textarea class="si" name="other_wellbeing_surveys" rows="3" placeholder="ระบุเครื่องมือและผลสำรวจอื่นๆ..." ${dis}>${esc(v('other_wellbeing_surveys'))}</textarea>
+      </div>
+
+    </div>
+  </div>`;
+
+  // ═══ ส่วนที่ 4: ระบบการบริหาร ═══
+  const digitalSystems = [
+    ['e_doc','ระบบเอกสารอิเล็กทรอนิกส์'],['e_sign','ระบบลงนามอิเล็กทรอนิกส์ (E-signature)'],
+    ['cloud','ระบบ Cloud'],['hr_digital','ระบบ HR Digital'],
+    ['health_db','ระบบฐานข้อมูลสุขภาพ'],['none','ไม่มีระบบดังกล่าว']
+  ];
+
+  html += `
+  <div class="section-card">
+    <div class="section-header"><h2>⚙️ ส่วนที่ 4: ระบบการบริหารและสภาพแวดล้อมที่เอื้อต่อสุขภาวะ</h2>
+      <div class="section-desc">สถานะระบบสนับสนุน การอบรม และสภาพแวดล้อม</div></div>
+    <div class="section-body">
+
+      <!-- 13. สถานะระบบบริหารบุคลากร -->
+      <div class="compact-panel">
+        <h3 class="compact-panel-title">13. สถานะระบบการบริหารบุคลากร (เฉพาะข้าราชการ)</h3>
+        <p style="font-size:12px;color:#64748b;margin-bottom:12px">โปรดระบุว่า มีตามแผน / มีไม่ครบตามแผน / ไม่มี</p>
+        <div id="support-systems-mount"></div>
+      </div>
+
+      <!-- 14. ชั่วโมงอบรม -->
+      <div class="compact-panel" style="margin-top:16px">
+        <h3 class="compact-panel-title">14. ชั่วโมงการอบรมเฉลี่ยต่อคนต่อปี</h3>
+        <p style="font-size:12px;color:#64748b;margin-bottom:12px">ปีล่าสุดและ 5 ปีย้อนหลัง (ถ้ามี)</p>
+        <div class="compact-grid compact-grid-5">
+          ${[2568,2567,2566,2565,2564].map(y => `<div class="compact-field"><label>${y}</label><input type="number" name="training_hours_${y}" min="0" step="0.5" value="${v('training_hours_'+y)}" placeholder="0.0" ${dis}><span style="font-size:11px;color:#94a3b8">ชม.</span></div>`).join('')}
+        </div>
+        <p style="font-size:11px;color:#94a3b8;margin-top:6px">ระบุจำนวนชั่วโมงเฉลี่ยต่อคนต่อปี (เช่น 40.5)</p>
+      </div>
+
+      <!-- 15. ระบบดิจิทัล -->
+      <div class="compact-panel" style="margin-top:16px">
+        <h3 class="compact-panel-title">15. ระบบสนับสนุนดิจิทัล <span style="font-weight:400;color:#94a3b8">(เลือกได้มากกว่า 1 ข้อ)</span></h3>
+        <div class="fq-options">
+          ${digitalSystems.map(([val,lbl]) => `<label class="fq-opt"><input type="checkbox" name="digital_systems" value="${val}" ${chkArr('digital_systems',val)} ${dis}> ${lbl}</label>`).join('')}
+        </div>
+      </div>
+
+      <!-- 16. Ergonomics -->
+      <div class="compact-panel" style="margin-top:16px">
+        <h3 class="compact-panel-title">16. การจัดสภาพแวดล้อมตามหลักการยศาสตร์ (Ergonomics)</h3>
+        <div class="fq-options">
+          <label class="fq-opt"><input type="radio" name="ergonomics_status" value="none" ${chk('ergonomics_status','none')} ${dis}> ยังไม่มี</label>
+          <label class="fq-opt" style="align-items:flex-start"><input type="radio" name="ergonomics_status" value="planned" ${chk('ergonomics_status','planned')} ${dis}>
+            <div>มีแผนแต่ยังไม่ดำเนินการ<input class="si" style="margin-top:6px" name="ergonomics_planned_detail" value="${esc(v('ergonomics_planned_detail'))}" placeholder="โปรดระบุ" ${dis}></div></label>
+          <label class="fq-opt" style="align-items:flex-start"><input type="radio" name="ergonomics_status" value="in_progress" ${chk('ergonomics_status','in_progress')} ${dis}>
+            <div>อยู่ระหว่างดำเนินการ<input class="si" style="margin-top:6px" name="ergonomics_in_progress_detail" value="${esc(v('ergonomics_in_progress_detail'))}" placeholder="โปรดระบุ" ${dis}></div></label>
+          <label class="fq-opt" style="align-items:flex-start"><input type="radio" name="ergonomics_status" value="done" ${chk('ergonomics_status','done')} ${dis}>
+            <div>ดำเนินการแล้ว<input class="si" style="margin-top:6px" name="ergonomics_done_detail" value="${esc(v('ergonomics_done_detail'))}" placeholder="โปรดระบุผลลัพธ์" ${dis}></div></label>
+        </div>
+      </div>
+
+    </div>
+  </div>`;
+
+  // ═══ ส่วนที่ 5: ทิศทาง เป้าหมาย ═══
+  html += `
+  <div class="section-card">
+    <div class="section-header"><h2>🎯 ส่วนที่ 5: ทิศทาง เป้าหมาย และข้อเสนอแนะ</h2>
+      <div class="section-desc">จุดเน้นการพัฒนาและข้อเสนอแนะ</div></div>
+    <div class="section-body">
+
+      <!-- 17. จุดเน้นการพัฒนา -->
+      <div class="compact-panel">
+        <h3 class="compact-panel-title">17. จุดเน้นการพัฒนา</h3>
+        <p style="font-size:12px;color:#3b82f6;margin-bottom:4px">โปรดเลือกไม่เกิน 3 ประเด็นสำคัญที่ประสงค์ให้แผน HRD สนับสนุนโดยตรง และจัดลำดับ 1-3</p>
+        <p style="font-size:11px;color:#94a3b8;margin-bottom:12px">คลิกเลือก → ระบบจัดอันดับให้อัตโนมัติ · คลิกซ้ำเพื่อยกเลิก</p>
+        <div id="rank-list-mount"></div>
+        <div id="rankSummaryWrap" class="hidden" style="margin-top:12px">
+          <div style="background:#eff6ff;border:1px solid #dbeafe;border-radius:10px;padding:10px 14px">
+            <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+              <span style="font-size:12px;font-weight:600;color:#2563eb">ลำดับที่เลือก</span>
+              <span id="rankCounter" style="font-size:12px;font-weight:700;background:#3b82f6;color:#fff;padding:2px 8px;border-radius:999px">0/3</span>
+            </div>
+            <div id="rankSummaryChips" style="display:grid;gap:6px"></div>
+          </div>
+          <button type="button" onclick="clearRankAll()" style="margin-top:8px;width:100%;padding:6px;font-size:12px;color:#94a3b8;background:transparent;border:1px dashed #e2e8f0;border-radius:8px;cursor:pointer">ล้างการเลือกทั้งหมด</button>
+        </div>
+        <input type="hidden" name="strategic_priority_rank1" id="rank_priority_1" value="${esc(v('strategic_priority_rank1'))}">
+        <input type="hidden" name="strategic_priority_rank2" id="rank_priority_2" value="${esc(v('strategic_priority_rank2'))}">
+        <input type="hidden" name="strategic_priority_rank3" id="rank_priority_3" value="${esc(v('strategic_priority_rank3'))}">
+      </div>
+
+      <!-- 18. ข้อเสนอแนะ -->
+      <div class="compact-panel" style="margin-top:16px">
+        <h3 class="compact-panel-title">18. ข้อเสนอแนะเกี่ยวกับ Intervention Packages เพิ่มเติม <span style="font-weight:400;color:#94a3b8">(ถ้ามี)</span></h3>
+        <textarea class="si" name="intervention_packages_feedback" rows="4" placeholder="โปรดระบุข้อเสนอแนะเกี่ยวกับฐานข้อมูล Intervention Packages..." ${dis}>${esc(v('intervention_packages_feedback'))}</textarea>
+      </div>
+
+      <!-- 19. ไฟล์ HRD Plan -->
+      <div class="compact-panel" style="margin-top:16px">
+        <h3 class="compact-panel-title">19. ไฟล์ HRD PLAN ปี 2567-2570 <span style="font-weight:400;color:#94a3b8">(ถ้ามี)</span></h3>
+        <div class="fq-item"><label class="fq-label" style="font-size:13px">ผลการปฏิบัติงานตามแผนปีล่าสุด</label>
+          <textarea class="si" name="hrd_plan_results" rows="3" placeholder="สรุปผลการปฏิบัติงาน..." ${dis}>${esc(v('hrd_plan_results'))}</textarea></div>
+      </div>
+
+    </div>
+  </div>`;
+
+  contentArea.innerHTML = html;
+
+  // Mount workforce layout (DOM)
+  const wfMount = document.getElementById('workforce-mount');
+  if (wfMount) {
+    const wfQuestions = schema?.sections?.find(s => s.section_key === 'ch1_workforce')?.questions || [];
+    wfMount.appendChild(buildWorkforceLayout(wfQuestions, isReadOnly));
+  }
+
+  // Mount turnover table (DOM)
+  const toMount = document.getElementById('turnover-mount');
+  if (toMount) toMount.appendChild(renderTurnoverTable(isReadOnly));
+
+  // Mount support systems (Q13)
+  buildSupportSystems(fd, dis);
+
+  // Mount rank list (Q17)
+  buildRankList(fd, isReadOnly);
 
   // Show buttons
   if (!isReadOnly) {
@@ -226,11 +777,154 @@ function renderPage(orgCode) {
     document.getElementById('btn-save').disabled = false;
     document.getElementById('btn-submit').disabled = false;
     document.getElementById('action-bar').style.display = '';
+    if (responseData?.id) {
+      document.getElementById('btn-delete').style.display = '';
+      document.getElementById('ab-delete').style.display = '';
+    }
   }
   document.getElementById('btn-preview').style.display = '';
-
   document.getElementById('loading-screen').style.display = 'none';
   document.getElementById('content-area').style.display = '';
+}
+
+// ── Q13: Support Systems ──
+function buildSupportSystems(fd, dis) {
+  const mount = document.getElementById('support-systems-mount');
+  if (!mount) return;
+  const systems = (typeof PROJECT_SSOT !== 'undefined' && PROJECT_SSOT.ch1?.supportSystems) || [
+    { id: 'mentoring_system', label: 'ระบบพี่เลี้ยง (Mentoring)' },
+    { id: 'job_rotation', label: 'ระบบหมุนเวียนงาน (Job Rotation)' },
+    { id: 'idp_system', label: 'การจัดทำแผนพัฒนารายบุคคล (IDP)' },
+    { id: 'career_path_system', label: 'เส้นทางความก้าวหน้า (Career Path)' },
+  ];
+  const opts = (typeof PROJECT_SSOT !== 'undefined' && PROJECT_SSOT.ch1?.supportOptions) || [
+    { v: 'full', l: 'มีตามแผน' }, { v: 'partial', l: 'มีไม่ครบตามแผน' }, { v: 'none', l: 'ไม่มี' },
+  ];
+  mount.innerHTML = systems.map(sys => {
+    const cur = fd[sys.id] || '';
+    return `<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:12px 14px;margin-bottom:10px">
+      <div style="font-size:13px;font-weight:600;color:#334155;margin-bottom:8px">${sys.label}</div>
+      <div class="fq-options" style="flex-direction:row;flex-wrap:wrap;gap:12px">
+        ${opts.map(o => `<label class="fq-opt" style="padding:0"><input type="radio" name="${sys.id}" value="${o.v}" ${cur===o.v?'checked':''} ${dis}> ${o.l}</label>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── Q17: Rank System ──
+let rankOrder = [];
+
+function buildRankList(fd, isReadOnly) {
+  const mount = document.getElementById('rank-list-mount');
+  if (!mount) return;
+  const topics = (typeof PROJECT_SSOT !== 'undefined' && PROJECT_SSOT.ch1?.strategicTopics) || [
+    { id: 'service_efficiency', label: 'การเพิ่มประสิทธิภาพการให้บริการประชาชน' },
+    { id: 'digital_capability', label: 'การพัฒนาศักยภาพด้านดิจิทัล' },
+    { id: 'new_leaders', label: 'การพัฒนาผู้นำรุ่นใหม่' },
+    { id: 'reduce_sick_leave', label: 'การลดอัตราการลาป่วย' },
+    { id: 'reduce_turnover', label: 'การลดอัตราการลาออก' },
+    { id: 'other', label: 'อื่น ๆ' },
+  ];
+
+  // Restore saved ranks
+  rankOrder = [];
+  for (let i = 1; i <= 3; i++) {
+    const val = fd[`strategic_priority_rank${i}`];
+    if (val) rankOrder.push(val);
+  }
+
+  mount.innerHTML = `<div style="display:grid;gap:8px">${topics.map(t => {
+    const isOther = t.id === 'other';
+    const borderStyle = isOther ? 'border-style:dashed' : '';
+    return `<div class="rank-item" data-value="${t.id}" style="display:flex;align-items:${isOther?'flex-start':'center'};gap:12px;padding:10px 14px;border-radius:12px;border:1px solid #e2e8f0;${borderStyle};background:#fff;cursor:pointer;user-select:none;transition:.15s" onclick="toggleRank('${t.id}')">
+      <div class="rank-badge" style="width:28px;height:28px;border-radius:50%;border:2px solid #cbd5e1;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0${isOther?';margin-top:2px':''}">
+        <span class="rank-icon" style="font-size:12px;font-weight:700;color:#cbd5e1">—</span>
+      </div>
+      <div style="flex:1">
+        <span style="font-size:14px;color:${isOther?'#94a3b8':'#334155'}">${isOther?'อื่น ๆ (โปรดระบุ)':t.label}</span>
+        ${isOther ? `<input type="text" name="strategic_priority_other" value="${esc(fd.strategic_priority_other||'')}" placeholder="ระบุประเด็นอื่นๆ" style="display:${rankOrder.includes('other')?'block':'none'};margin-top:6px;width:100%;border:1px solid #e2e8f0;border-radius:10px;padding:8px 12px;font-size:13px" onclick="event.stopPropagation()" ${isReadOnly?'disabled':''}>`:''}
+      </div>
+    </div>`;
+  }).join('')}</div>`;
+
+  if (isReadOnly) {
+    mount.querySelectorAll('.rank-item').forEach(el => { el.style.pointerEvents = 'none'; el.style.opacity = '0.7'; });
+  }
+  updateRankUI();
+}
+
+function toggleRank(value) {
+  const idx = rankOrder.indexOf(value);
+  if (idx >= 0) {
+    rankOrder.splice(idx, 1);
+  } else if (rankOrder.length < 3) {
+    rankOrder.push(value);
+  }
+  updateRankUI();
+}
+
+function clearRankAll() {
+  rankOrder = [];
+  updateRankUI();
+}
+
+function updateRankUI() {
+  const colors = ['#2563eb', '#7c3aed', '#059669'];
+  const colorsBg = ['#dbeafe', '#ede9fe', '#d1fae5'];
+
+  document.querySelectorAll('.rank-item').forEach(el => {
+    const val = el.dataset.value;
+    const pos = rankOrder.indexOf(val);
+    const badge = el.querySelector('.rank-badge');
+    const icon = el.querySelector('.rank-icon');
+    const otherInput = el.querySelector('input[name="strategic_priority_other"]');
+
+    if (pos >= 0) {
+      el.style.borderColor = colors[pos];
+      el.style.background = colorsBg[pos];
+      badge.style.borderColor = colors[pos];
+      badge.style.background = colors[pos];
+      icon.style.color = '#fff';
+      icon.textContent = String(pos + 1);
+      if (otherInput) otherInput.style.display = 'block';
+    } else {
+      el.style.borderColor = '#e2e8f0';
+      el.style.background = '#fff';
+      badge.style.borderColor = '#cbd5e1';
+      badge.style.background = '#fff';
+      icon.style.color = '#cbd5e1';
+      icon.textContent = '—';
+      if (otherInput && val === 'other') otherInput.style.display = 'none';
+    }
+  });
+
+  // Update hidden fields
+  for (let i = 1; i <= 3; i++) {
+    const el = document.getElementById(`rank_priority_${i}`);
+    if (el) el.value = rankOrder[i - 1] || '';
+  }
+
+  // Update summary
+  const wrap = document.getElementById('rankSummaryWrap');
+  const counter = document.getElementById('rankCounter');
+  const chips = document.getElementById('rankSummaryChips');
+  if (!wrap) return;
+
+  if (rankOrder.length > 0) {
+    wrap.classList.remove('hidden');
+    counter.textContent = `${rankOrder.length}/3`;
+    const topics = (typeof PROJECT_SSOT !== 'undefined' && PROJECT_SSOT.ch1?.strategicTopics) || [];
+    chips.innerHTML = rankOrder.map((val, i) => {
+      const t = topics.find(t => t.id === val);
+      const label = t ? (val === 'other' ? 'อื่น ๆ' : t.label) : val;
+      return `<div style="display:flex;align-items:center;gap:8px;font-size:13px">
+        <span style="width:22px;height:22px;border-radius:50%;background:${colors[i]};color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">${i+1}</span>
+        <span style="color:#334155">${label}</span>
+      </div>`;
+    }).join('');
+  } else {
+    wrap.classList.add('hidden');
+  }
 }
 
 function collectFormData() {
@@ -275,12 +969,15 @@ async function saveForm(newStatus) {
     if (responseData?.id) {
       const { error } = await sb.from('hrd_ch1_responses').update(formData).eq('id', responseData.id);
       if (error) throw error;
+      responseData = { ...responseData, ...formData, status: newStatus };
     } else {
       formData.round_code = 'round_2569';
       formData.created_at = new Date().toISOString();
       const { data, error } = await sb.from('hrd_ch1_responses').insert(formData).select().single();
       if (error) throw error;
       responseData = data;
+      document.getElementById('btn-delete').style.display = '';
+      document.getElementById('ab-delete').style.display = '';
     }
 
     // Update status badge
@@ -288,9 +985,15 @@ async function saveForm(newStatus) {
     sb2.textContent = { draft:'Draft', submitted:'ส่งแล้ว', reopened:'เปิดแก้ไข' }[newStatus] || newStatus;
     sb2.className = 'status-badge status-' + newStatus;
 
+    notifyParent('saved', newStatus === 'submitted' ? 'ส่งข้อมูล CH1 เรียบร้อยแล้ว' : 'บันทึกข้อมูล CH1 เรียบร้อยแล้ว');
+
     if (newStatus === 'submitted') {
-      showAlert('✅ ส่งข้อมูลเรียบร้อยแล้ว — กำลังกลับหน้า portal...', 'info');
-      setTimeout(() => { location.href = 'org-portal.html'; }, 1800);
+      showAlert('✅ ส่งข้อมูลเรียบร้อยแล้ว', 'info');
+      if (IS_INLINE_PORTAL) {
+        setTimeout(() => { goBackToPortal(); }, 1200);
+      } else {
+        setTimeout(() => { location.href = 'org-portal.html'; }, 1800);
+      }
     } else {
       showAlert('✅ บันทึก Draft เรียบร้อยแล้ว', 'info');
     }
@@ -306,6 +1009,57 @@ function goPreview() {
   const orgCode = ORG_PARAM || userOrgCode;
   const id = responseData?.id || ID_PARAM || '';
   location.href = `ch1-preview.html?org=${encodeURIComponent(orgCode)}&id=${id}`;
+}
+
+async function deleteForm() {
+  if (!responseData?.id) {
+    showAlert('ไม่พบข้อมูลสำหรับลบ', 'error');
+    return;
+  }
+
+  const confirmed = window.confirm('ยืนยันการลบข้อมูล CH1 นี้ใช่หรือไม่? การกระทำนี้ไม่สามารถย้อนกลับได้');
+  if (!confirmed) return;
+
+  const deleteBtn = document.getElementById('btn-delete');
+  const deleteBarBtn = document.getElementById('ab-delete');
+  const originalTop = deleteBtn ? deleteBtn.textContent : '';
+  const originalBottom = deleteBarBtn ? deleteBarBtn.textContent : '';
+
+  if (deleteBtn) {
+    deleteBtn.disabled = true;
+    deleteBtn.textContent = 'กำลังลบ...';
+  }
+  if (deleteBarBtn) {
+    deleteBarBtn.disabled = true;
+    deleteBarBtn.textContent = 'กำลังลบ...';
+  }
+
+  try {
+    const { error } = await sb.from('hrd_ch1_responses').delete().eq('id', responseData.id);
+    if (error) throw error;
+
+    showAlert('✅ ลบข้อมูล CH1 เรียบร้อยแล้ว — กำลังกลับหน้า Portal...', 'info');
+    setTimeout(() => { location.href = 'org-portal.html'; }, 1200);
+  } catch (e) {
+    showAlert('❌ ลบข้อมูลไม่สำเร็จ: ' + e.message, 'error');
+    if (deleteBtn) {
+      deleteBtn.disabled = false;
+      deleteBtn.textContent = originalTop;
+    }
+    if (deleteBarBtn) {
+      deleteBarBtn.disabled = false;
+      deleteBarBtn.textContent = originalBottom;
+    }
+  }
+}
+
+function notifyParent(type, message) {
+  if (!IS_INLINE_PORTAL) return;
+  window.parent.postMessage({ source: 'ch1-inline-editor', type, message }, window.location.origin);
+}
+
+function goBackToPortal() {
+  location.href = 'org-portal.html';
 }
 
 function showAlert(msg, type = 'info') {

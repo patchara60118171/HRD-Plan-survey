@@ -440,6 +440,12 @@
 
                             style="width:100%; padding:0.875rem 1rem; border:1.5px solid #D1D5DB; border-radius:10px; font-size:0.95rem; outline:none; margin-bottom:0.5rem">
 
+                        <p id="portal-email-help"
+
+                            class="hidden"
+
+                            style="color:#6B7280; font-size:0.82rem; text-align:left; margin-bottom:0.5rem">กรุณากรอกอีเมลองค์กรหรืออีเมลผู้ประสานงานสำหรับการแก้ไขข้อมูลครั้งนี้</p>
+
                         <div id="email-error-msg"
 
                             style="color:#EF4444; font-size:0.82rem; min-height:1.2rem; text-align:left; margin-bottom:0.5rem">
@@ -498,11 +504,15 @@
 
                                 class="text-red-500">*</span></label>
 
-                        <select id="organization"
+                        <input id="organization"
 
-                            class="w-full border-2 border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-primary focus:outline-none transition">
+                            type="text"
 
-                            <option value="">-- เลือกหน่วยงาน --</option></select>
+                            readonly
+
+                            placeholder="ระบบจะระบุหน่วยงานให้อัตโนมัติ"
+
+                            class="w-full border-2 border-slate-200 rounded-xl px-4 py-3 text-sm bg-slate-50 text-slate-600 focus:border-primary focus:outline-none transition" />
 
                         <p class="text-red-500 text-xs mt-1 hidden" id="err-org">กรุณาเลือกหน่วยงาน</p>
 
@@ -2969,47 +2979,6 @@
     <script src="js/ch1-form.js"></script>
 
     <script src="js/pdf-upload.js?v=2"></script>
-
-    <!-- Dynamic org dropdown loader -->
-    <script>
-    (async function loadOrgDropdown() {
-      const sel = document.getElementById('organization');
-      if (!sel) return;
-      // Fallback list in case Supabase is unavailable
-      const FALLBACK_ORGS = [
-        'สำนักงานสภาพัฒนาการเศรษฐกิจและสังคมแห่งชาติ','สำนักงานนโยบายและยุทธศาสตร์การค้า',
-        'กรมวิทยาศาสตร์บริการ','กรมสนับสนุนบริการสุขภาพ','กรมอุตุนิยมวิทยา',
-        'กรมส่งเสริมวัฒนธรรม','กรมคุมประพฤติ','สำนักงานปลัดกระทรวงการท่องเที่ยวและกีฬา',
-        'กรมสุขภาพจิต','สำนักงานนโยบายและแผนทรัพยากรธรรมชาติและสิ่งแวดล้อม',
-        'สำนักงานการวิจัยแห่งชาติ','สำนักงานมาตรฐานสินค้าเกษตรและอาหารแห่งชาติ',
-        'สำนักงาน กพร.','กรมชลประทาน','กรมกิจการเด็กและเยาวชน'
-      ];
-      function populateOrgs(names) {
-        sel.innerHTML = '<option value="">-- เลือกหน่วยงาน --</option>' +
-          names.map(n => `<option value="${n}">${n}</option>`).join('');
-      }
-      try {
-        const sbClient = typeof supabase !== 'undefined' && supabase.createClient
-          ? supabase.createClient(
-              'https://fgdommhiqhzvsedfzyrr.supabase.co',
-              'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZnZG9tbWhpcWh6dnNlZGZ6eXJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkzMzY2MzUsImV4cCI6MjA4NDkxMjYzNX0.GFMOeDArhq-9lPt39OizkBOFFgK4TDpVDJrk_HRQ6Xc'
-            )
-          : null;
-        if (!sbClient) { populateOrgs(FALLBACK_ORGS); return; }
-        const { data, error } = await sbClient
-          .from('organizations')
-          .select('org_name_th')
-          .eq('is_active', true)
-          .eq('show_in_dashboard', true)
-          .order('sort_order', { ascending: true })
-          .order('org_name_th', { ascending: true });
-        if (error || !data?.length) { populateOrgs(FALLBACK_ORGS); return; }
-        populateOrgs(data.map(r => r.org_name_th));
-      } catch (_) {
-        populateOrgs(FALLBACK_ORGS);
-      }
-    })();
-    </script>
 
 
 

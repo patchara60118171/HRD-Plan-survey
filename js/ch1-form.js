@@ -13,6 +13,8 @@ let existingResponseId = null;
 let currentOrgCode = null;
 let currentOrgName = null;
 const urlParams = new URLSearchParams(window.location.search);
+const RESPONSE_ID_PARAM = urlParams.get('id');
+const FROM_ORG_PORTAL = urlParams.get('from') === 'org_portal';
 const IS_TEST_MODE = urlParams.get('test') === '1';
 const TEST_RUN_ID = IS_TEST_MODE
     ? (urlParams.get('test_run_id') || `browser-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`)
@@ -62,34 +64,27 @@ async function parseUrlParameters() {
     const badgeName = document.getElementById('org-badge-name');
     const welcomeAlert = document.getElementById('org-welcome-alert');
     const welcomeName = document.getElementById('org-welcome-name');
+    const portalEmailHelp = document.getElementById('portal-email-help');
     
     if (badgeContainer && badgeName) {
         badgeName.textContent = orgName;
         badgeContainer.classList.remove('hidden');
     }
+    
     if (welcomeAlert && welcomeName) {
         welcomeName.textContent = orgName;
         welcomeAlert.classList.remove('hidden');
     }
+    if (portalEmailHelp && FROM_ORG_PORTAL) {
+        portalEmailHelp.classList.remove('hidden');
+    }
     
-    // 2. Auto-select the organization in the dropdown (Step 1)
-    const orgSelect = document.getElementById('organization');
-    if (orgSelect) {
-        let optionExists = false;
-        for (let i = 0; i < orgSelect.options.length; i++) {
-            if (orgSelect.options[i].value === orgName || orgSelect.options[i].text === orgName) {
-                optionExists = true;
-                break;
-            }
-        }
-        if (!optionExists) {
-            const newOption = document.createElement('option');
-            newOption.value = orgName;
-            newOption.text = orgName;
-            orgSelect.appendChild(newOption);
-        }
-        orgSelect.value = orgName;
-        orgSelect.disabled = true;
+    // 2. Fix the organization input from org context
+    const orgInput = document.getElementById('organization');
+    if (orgInput) {
+        orgInput.value = orgName;
+        orgInput.readOnly = true;
+        orgInput.disabled = false;
     }
     
     console.log(`Organization auto-selected: ${orgName} (${orgCode})`);
@@ -107,19 +102,26 @@ async function loadExistingResponseForOrg() {
 
     let row = null;
     try {
-        const { data, error } = await ch1Sb
+        let query = ch1Sb
             .from(TARGET_TABLE)
-            .select('*')
-            .eq('org_code', currentOrgCode)
-            .order('created_at', { ascending: false })
-            .limit(1)
-            .maybeSingle();
+            .select('*');
+
+        if (RESPONSE_ID_PARAM) {
+            query = query.eq('id', RESPONSE_ID_PARAM);
+        } else {
+            query = query
+                .eq('org_code', currentOrgCode)
+                .order('created_at', { ascending: false })
+                .limit(1);
+        }
+
+        const { data, error } = await query.maybeSingle();
 
         if (!error && data) row = data;
     } catch (_) {}
 
     // Backward-compatible fallback for old rows that may not have org_code populated
-    if (!row && currentOrgName) {
+    if (!row && currentOrgName && !RESPONSE_ID_PARAM) {
         try {
             const { data, error } = await ch1Sb
                 .from(TARGET_TABLE)
@@ -250,6 +252,13 @@ function confirmEmailAndStart() {
     currentStep = 1;
     updateUI();
     showToast('เริ่มกรอกแบบสอบถาม');
+}
+
+function goBackToPortal() {
+    const target = currentOrgCode
+        ? `org-portal.html?org=${encodeURIComponent(currentOrgCode)}`
+        : 'org-portal.html';
+    window.location.href = target;
 }
 
 function nextStep() {
@@ -766,6 +775,12 @@ async function submitForm() {
         // Clear draft
         localStorage.removeItem('wellbeing_ch1_draft_v3');
 
+        if (FROM_ORG_PORTAL) {
+            setTimeout(() => {
+                goBackToPortal();
+            }, 1200);
+        }
+
     } catch (err) {
         console.error('Submit error:', err);
         document.getElementById('overlay-loading').classList.add('hidden');
@@ -822,6 +837,15 @@ function restoreFormData(data) {
     // Bug fix: restore respondentEmail variable (not just DOM) to prevent null on submit
     if (data.respondent_email) {
         respondentEmail = data.respondent_email;
+        const emailInput = document.getElementById('respondent_email');
+        if (emailInput) emailInput.value = data.respondent_email;
+    }
+
+    if (data.id) existingResponseId = data.id;
+
+    if (data.organization) {
+        const orgInput = document.getElementById('organization');
+        if (orgInput) orgInput.value = data.organization;
     }
 
     // Restore all fields
@@ -1041,6 +1065,7 @@ window.saveDraft = saveDraft;
 window.loadDraft = loadDraft;
 window.retrySubmit = retrySubmit;
 window.hideOverlay = hideOverlay;
+window.goBackToPortal = goBackToPortal;
 
 // Export for pdf-upload.js
 window.ch1Sb = ch1Sb;

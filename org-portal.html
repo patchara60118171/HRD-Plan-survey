@@ -105,8 +105,42 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
 .section-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:#8b5cf6;border-radius:14px 0 0 14px}
 .section-card.wb::before{background:#ec4899}
 .section-card.share::before{background:#8b5cf6}
+.section-card.org::before{background:linear-gradient(180deg,#7c3aed,#ec4899)}
 .section-card h3{font-size:15px;margin-bottom:4px;display:flex;align-items:center;gap:8px}
 .desc{font-size:12.5px;color:var(--tx2);margin-bottom:14px;line-height:1.6}
+
+.org-profile-shell{display:grid;gap:14px;max-width:980px}
+.org-hero-card{background:linear-gradient(180deg,#ffffff 0%,#fffafd 100%);border:1px solid #f3d9e8;border-radius:18px;padding:18px 20px 60px;box-shadow:0 10px 25px rgba(109,40,217,.05);min-height:178px}
+.org-kicker{font-size:14px;font-weight:700;color:#6d28d9;margin-bottom:6px}
+.org-title{font-size:21px;font-weight:700;color:#5b21b6;line-height:1.32;margin-bottom:2px}
+.org-subtitle{font-size:12px;color:#8b8798;line-height:1.55;margin-bottom:16px}
+.org-pill-row{display:flex;gap:10px;flex-wrap:wrap}
+.org-pill{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:999px;background:#fff;border:1px solid #ece8f7;font-size:11.5px;font-weight:600;color:#4b5563}
+.org-toolbar{display:flex;justify-content:flex-end;align-items:center;gap:10px;margin-top:-6px;margin-bottom:-2px}
+.org-layout{display:grid;grid-template-columns:minmax(250px,.9fr) minmax(320px,1.7fr);gap:14px;align-items:stretch}
+.org-right-col{display:grid;gap:14px}
+.detail-card{background:#fff;border:1px solid #f3d9e8;border-radius:18px;padding:16px;box-shadow:0 8px 22px rgba(109,40,217,.04);height:100%}
+.detail-card-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:14px}
+.detail-card-icon{width:30px;height:30px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:#f3e8ff;color:#7c3aed;font-size:14px;flex-shrink:0}
+.detail-card h4{font-size:14px;color:#6d28d9;line-height:1.4}
+.detail-card p{font-size:11px;color:#9ca3af;margin-top:2px;line-height:1.5}
+.detail-list{display:grid;gap:10px}
+.detail-list.two-col{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.detail-item{background:#fcfbff;border:1px solid #f1edf8;border-radius:10px;padding:11px 12px;min-height:56px}
+.detail-label{font-size:10px;font-weight:700;color:#9ca3af;letter-spacing:.01em;margin-bottom:5px}
+.detail-value{font-size:13px;color:#374151;line-height:1.55;word-break:break-word}
+.detail-empty{color:var(--tx3)}
+.detail-card.stretch-card{display:flex;flex-direction:column}
+.detail-card.stretch-card .detail-list{flex:1;align-content:start}
+.org-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.btn.btn-muted{background:#fff;color:#6b7280;border:1px solid #d8dce8}
+.org-edit-note{margin-top:10px;padding:10px 12px;border-radius:12px;background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;font-size:12px;line-height:1.6}
+.org-input,.org-textarea{width:100%;border:1px solid #d9dceb;border-radius:10px;padding:9px 11px;font:inherit;color:#374151;background:#fff;outline:none}
+.org-input:focus,.org-textarea:focus{border-color:#8b5cf6;box-shadow:0 0 0 3px rgba(139,92,246,.12)}
+.org-input[readonly]{background:#f8fafc;color:#6b7280}
+.org-textarea{min-height:92px;resize:vertical}
+.detail-item.editing{background:#fff;border-style:dashed}
+.detail-item.editing .detail-label{margin-bottom:8px}
 
 .summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
 .summary-item{background:#fcfbff;border:1px solid var(--bdr);border-radius:10px;padding:14px 10px;text-align:center}
@@ -144,19 +178,15 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
 
 .embed-wrap{margin-top:14px;border:1px solid var(--bdr);border-radius:12px;overflow:hidden;background:#fff}
 .embed-head{padding:10px 14px;background:#faf8ff;border-bottom:1px solid var(--bdr);font-size:12px;color:var(--tx2)}
+.embed-head-row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.embed-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.embed-note{font-size:11px;color:var(--tx3)}
 .embed-frame{width:100%;height:1200px;border:0;background:#fff}
 
 .qr-section{display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap}
 .qr-box{min-width:220px;background:#faf8ff;border:1px solid var(--bdr);border-radius:12px;padding:18px;text-align:center}
 .qr-box img{background:#fff;border-radius:10px;border:1px solid var(--bdr)}
-.link-box{flex:1;min-width:300px}
-.link-input-wrap{display:flex;gap:8px;margin-bottom:12px}
-.link-input{flex:1;padding:10px 12px;border:1.5px solid var(--bdr);border-radius:10px;background:#fbfbfe;color:var(--tx);font-family:inherit}
-.copy-btn{padding:10px 16px;border:none;border-radius:10px;background:#7c3aed;color:#fff;font-weight:700;cursor:pointer;font-family:inherit}
-.copy-btn.copied{background:#ec4899}
 
-.loading-overlay{position:fixed;inset:0;background:rgba(255,255,255,.84);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;z-index:9999}
-.spinner{width:34px;height:34px;border:3px solid #e9ddff;border-top-color:#7c3aed;border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 
 .toast{position:fixed;bottom:18px;right:18px;padding:11px 18px;border-radius:9px;color:#fff;font-size:13px;font-weight:600;transform:translateY(100px);opacity:0;transition:all .25s;z-index:10000}
@@ -172,6 +202,9 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
   .portal-main-wrap{margin-left:0}
   .portal-content{padding:18px}
   .summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .org-toolbar{justify-content:flex-start;margin-top:0}
+  .org-layout{grid-template-columns:1fr}
+  .detail-list.two-col{grid-template-columns:1fr}
 }
 </style>
 </head>
@@ -224,6 +257,7 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
     <nav class="portal-nav">
       <div class="nav-group">เมนูหลัก</div>
       <button class="nav-item active" data-tab="home" onclick="switchTab('home')"><span class="ni">🏠</span> หน้าหลัก</button>
+      <button class="nav-item" data-tab="org-profile" onclick="switchTab('org-profile')"><span class="ni">🏢</span> รายละเอียดองค์กร</button>
       <button class="nav-item" data-tab="ch1" onclick="switchTab('ch1')"><span class="ni">📝</span> CH1 ข้อมูลองค์กร</button>
       <button class="nav-subitem" id="nav-ch1-edit" onclick="openCh1Editor()"><span class="ni">✏️</span> แก้ไขฟอร์ม</button>
       <button class="nav-item" data-tab="wb" onclick="switchTab('wb')"><span class="ni">💚</span> Well-being ผลสำรวจ</button>
@@ -291,6 +325,12 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
         </div>
       </div>
 
+      <div class="tab-page" id="page-org-profile">
+        <div id="org-profile-content">
+          <div class="info-box blue">กำลังโหลดรายละเอียดองค์กร...</div>
+        </div>
+      </div>
+
       <div class="tab-page" id="page-ch1">
         <div class="section-card">
           <h3>📝 แบบสอบถาม - ข้อมูลสุขภาวะองค์กร</h3>
@@ -299,7 +339,15 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
           <div id="ch1-window-info"></div>
           <div class="section-actions" id="ch1-actions"></div>
           <div class="embed-wrap" id="ch1-inline-wrap" style="display:none">
-            <div class="embed-head">ฟอร์ม CH1 ในหน้า Portal หากมีข้อมูลเดิม ระบบจะโหลดมาให้แก้ไขอัตโนมัติ</div>
+            <div class="embed-head">
+              <div class="embed-head-row">
+                <div>ฟอร์ม CH1 ในหน้า Portal หากมีข้อมูลเดิม ระบบจะโหลดมาให้แก้ไขอัตโนมัติ</div>
+                <div class="embed-tools">
+                  <span class="embed-note" id="ch1-inline-mode-label">โหมดแก้ไขในหน้าเดียว</span>
+                  <button class="btn btn-outline" type="button" onclick="closeInlineCh1Form()">ซ่อนฟอร์ม</button>
+                </div>
+              </div>
+            </div>
             <iframe id="ch1-inline-frame" class="embed-frame" title="CH1 Form"></iframe>
           </div>
         </div>
@@ -365,6 +413,10 @@ let portalState = {
   userRole: null,
   orgCode: null,
   orgName: null,
+  orgProfile: null,
+  orgProfileDraft: null,
+  orgProfileEditing: false,
+  orgProfileSaving: false,
   ch1Row: null,
   wbRows: [],
   totalStaff: 0,
@@ -372,6 +424,7 @@ let portalState = {
 
 const TAB_META = {
   home: { title: 'หน้าหลัก', subtitle: 'ภาพรวมข้อมูลขององค์กรและสถานะการส่งแบบสำรวจ' },
+  'org-profile': { title: 'รายละเอียดองค์กร', subtitle: 'ข้อมูลโปรไฟล์และช่องทางติดต่อของหน่วยงานจากฐานข้อมูลกลาง' },
   ch1: { title: 'ข้อมูลองค์กร', subtitle: 'แบบสำรวจข้อมูลเพื่อจัดทำแผนการพัฒนาขององค์กรสุขภาวะข้าราชการพลเรือน' },
   wb: { title: 'Well-being ผลสำรวจ', subtitle: 'ภาพรวมผลสำรวจสุขภาวะรายบุคคลของบุคลากรในองค์กร' },
   share: { title: 'แชร์ลิงก์ Well-being', subtitle: 'ส่งต่อแบบสำรวจให้บุคลากรในองค์กร' },
@@ -402,6 +455,217 @@ function fmtNum(value, digits = 0) {
   return num.toLocaleString('th-TH', { minimumFractionDigits: digits, maximumFractionDigits: digits });
 }
 
+function fmtText(value) {
+  if (value === null || value === undefined || value === '') return '<span class="detail-empty">—</span>';
+  return esc(String(value));
+}
+
+function renderDetailItem(label, value) {
+  return `<div class="detail-item"><div class="detail-label">${esc(label)}</div><div class="detail-value">${fmtText(value)}</div></div>`;
+}
+
+function renderEditableDetailItem(label, field, value, options = {}) {
+  const { type = 'text', readonly = false, placeholder = 'กรอกข้อมูล', rows = 3 } = options;
+  const safeValue = value === null || value === undefined ? '' : String(value);
+  if (type === 'textarea') {
+    return `<div class="detail-item editing"><div class="detail-label">${esc(label)}</div><textarea class="org-textarea" data-org-field="${esc(field)}" placeholder="${esc(placeholder)}" ${readonly ? 'readonly' : ''} rows="${rows}">${esc(safeValue)}</textarea></div>`;
+  }
+  return `<div class="detail-item editing"><div class="detail-label">${esc(label)}</div><input class="org-input" data-org-field="${esc(field)}" type="${esc(type)}" value="${esc(safeValue)}" placeholder="${esc(placeholder)}" ${readonly ? 'readonly' : ''}></div>`;
+}
+
+function beginOrgProfileEdit() {
+  if (!portalState.orgProfile) return;
+  portalState.orgProfileEditing = true;
+  portalState.orgProfileDraft = {
+    salutation: portalState.orgProfile.salutation || '',
+    saraban_email: portalState.orgProfile.saraban_email || '',
+    contact_email: portalState.orgProfile.contact_email || '',
+    coordinator_name: portalState.orgProfile.coordinator_name || '',
+    coordinator_position: portalState.orgProfile.coordinator_position || '',
+    coordinator_email: portalState.orgProfile.coordinator_email || '',
+    coordinator_contact_line: portalState.orgProfile.coordinator_contact_line || '',
+  };
+  renderOrgProfile();
+}
+
+function cancelOrgProfileEdit() {
+  portalState.orgProfileEditing = false;
+  portalState.orgProfileDraft = null;
+  portalState.orgProfileSaving = false;
+  renderOrgProfile();
+}
+
+function syncOrgProfileDraftFromForm() {
+  const draft = { ...(portalState.orgProfileDraft || {}) };
+  document.querySelectorAll('[data-org-field]').forEach((el) => {
+    draft[el.dataset.orgField] = el.value.trim();
+  });
+  portalState.orgProfileDraft = draft;
+  return draft;
+}
+
+async function saveOrgProfile() {
+  if (!portalState.orgProfile || portalState.orgProfileSaving) return;
+  const draft = syncOrgProfileDraftFromForm();
+
+  if (draft.saraban_email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(draft.saraban_email)) {
+    showToast('อีเมลสารบรรณไม่ถูกต้อง', 'warn');
+    return;
+  }
+  if (draft.contact_email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(draft.contact_email)) {
+    showToast('อีเมลติดต่อทั่วไปไม่ถูกต้อง', 'warn');
+    return;
+  }
+  if (draft.coordinator_email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(draft.coordinator_email)) {
+    showToast('อีเมลผู้ประสานงานไม่ถูกต้อง', 'warn');
+    return;
+  }
+
+  portalState.orgProfileSaving = true;
+  renderOrgProfile();
+
+  const payload = {
+    salutation: draft.salutation || null,
+    saraban_email: draft.saraban_email || null,
+    contact_email: draft.contact_email || null,
+    coordinator_name: draft.coordinator_name || null,
+    coordinator_position: draft.coordinator_position || null,
+    coordinator_email: draft.coordinator_email || null,
+    coordinator_contact_line: draft.coordinator_contact_line || null,
+  };
+
+  const { data, error } = await sb
+    .from('organizations')
+    .update(payload)
+    .eq('org_code', portalState.orgCode)
+    .select('org_code, org_name_th, org_name_en, ministry, salutation, org_type, saraban_email, contact_email, coordinator_name, coordinator_position, coordinator_email, coordinator_contact_line, abbr_th, abbr_en')
+    .single();
+
+  portalState.orgProfileSaving = false;
+
+  if (error) {
+    const msg = /row-level security|permission|policy|forbidden|not allowed/i.test(error.message || '')
+      ? 'ยังบันทึกไม่ได้ เนื่องจากสิทธิ์ org_hr สำหรับแก้ตาราง organizations ยังไม่ได้เปิดใน Supabase (ต้องให้ cowork เพิ่ม RLS policy ก่อน)'
+      : `บันทึกข้อมูลไม่สำเร็จ: ${error.message || 'unknown error'}`;
+    showToast(msg, 'error', 6500);
+    renderOrgProfile();
+    return;
+  }
+
+  portalState.orgProfile = data || { ...portalState.orgProfile, ...payload };
+  portalState.orgName = portalState.orgProfile?.org_name_th || portalState.orgName;
+  portalState.orgProfileEditing = false;
+  portalState.orgProfileDraft = null;
+  document.getElementById('user-org-badge').textContent = portalState.orgName || portalState.orgCode;
+  document.getElementById('topbar-org-name').textContent = portalState.orgName || portalState.orgCode;
+  document.getElementById('org-name-display').textContent = portalState.orgName || '—';
+  renderOrgProfile();
+  showToast('บันทึกข้อมูลรายละเอียดองค์กรเรียบร้อยแล้ว', 'success');
+}
+
+function renderOrgProfile() {
+  const wrap = document.getElementById('org-profile-content');
+  if (!wrap) return;
+
+  const org = portalState.orgProfile;
+  const isEditing = !!portalState.orgProfileEditing;
+  const draft = portalState.orgProfileDraft || {};
+  const orgTypeMap = {
+    government: 'หน่วยงานภาครัฐ',
+    ministry: 'กระทรวง',
+    department: 'กรม',
+    agency: 'หน่วยงาน',
+    state_enterprise: 'รัฐวิสาหกิจ',
+    public_organization: 'องค์การมหาชน',
+  };
+  const orgTypeText = org?.org_type ? (orgTypeMap[String(org.org_type).toLowerCase()] || org.org_type) : null;
+  const salutationValue = isEditing ? draft.salutation : org?.salutation;
+  const salutationText = salutationValue
+    ? `${salutationValue} ${org.org_name_th || ''}`.trim()
+    : null;
+  if (!org) {
+    wrap.innerHTML = '<div class="section-card org"><h3>🏢 รายละเอียดองค์กร</h3><div class="desc">ยังไม่พบข้อมูลรายละเอียดองค์กรในฐานข้อมูล</div><div class="info-box yellow">กรุณาตรวจสอบข้อมูลในตาราง organizations ว่ามี org_code ของบัญชีนี้หรือไม่</div></div>';
+    return;
+  }
+
+  wrap.innerHTML = `
+    <div class="org-profile-shell">
+      <div class="org-hero-card">
+        <div class="org-kicker">รายละเอียดองค์กร</div>
+        <div class="org-title">${esc(org.org_name_th || portalState.orgName || portalState.orgCode || '—')}</div>
+        <div class="org-subtitle">${esc(org.org_name_en || 'ไม่พบชื่อหน่วยงานภาษาอังกฤษ')}</div>
+        <div class="org-pill-row">
+          <span class="org-pill">🏷️ รหัสหน่วยงาน: ${esc(org.org_code || portalState.orgCode || '—')}</span>
+          <span class="org-pill">🏛️ ประเภทหน่วยงาน: ${esc(orgTypeText || '—')}</span>
+          <span class="org-pill">🪪 ตัวย่อ: ${esc(org.abbr_th || '—')} / ${esc(org.abbr_en || '—')}</span>
+        </div>
+      </div>
+
+      <div class="org-toolbar">
+        <div class="org-actions">
+          ${isEditing
+            ? `<button class="btn btn-primary" onclick="saveOrgProfile()" ${portalState.orgProfileSaving ? 'disabled' : ''}>${portalState.orgProfileSaving ? 'กำลังบันทึก...' : '💾 บันทึกข้อมูล'}</button>
+               <button class="btn btn-muted" onclick="cancelOrgProfileEdit()" ${portalState.orgProfileSaving ? 'disabled' : ''}>ยกเลิก</button>`
+            : `<button class="btn btn-primary" onclick="beginOrgProfileEdit()">✏️ แก้ไขข้อมูล</button>`}
+        </div>
+      </div>
+
+      <div class="org-layout">
+        <section class="detail-card stretch-card">
+          <div class="detail-card-head">
+            <div class="detail-card-icon">🏛️</div>
+            <div><h4>ข้อมูลโครงสร้างองค์กร</h4><p>ข้อมูลการจัดประเภทและหน่วยงานต้นสังกัด</p></div>
+          </div>
+          <div class="detail-list">
+            ${renderDetailItem('กระทรวงหรือหน่วยงานต้นสังกัด', org.ministry)}
+            ${isEditing
+              ? renderEditableDetailItem('คำขึ้นต้นหนังสือ', 'salutation', draft.salutation, { placeholder: 'เช่น เรียน' })
+              : renderDetailItem('คำขึ้นต้นหนังสือ', salutationText)}
+            ${renderDetailItem('ประเภทหน่วยงาน', orgTypeText)}
+          </div>
+        </section>
+
+        <div class="org-right-col">
+          <section class="detail-card">
+            <div class="detail-card-head">
+              <div class="detail-card-icon">📮</div>
+              <div><h4>ข้อมูลติดต่อ</h4><p>ช่องทางอีเมลสำหรับงานสารบรรณและการประสานงานทั่วไป</p></div>
+            </div>
+            <div class="detail-list">
+              ${isEditing
+                ? renderEditableDetailItem('อีเมลสารบรรณ', 'saraban_email', draft.saraban_email, { type: 'email', placeholder: 'name@agency.go.th' })
+                : renderDetailItem('อีเมลสารบรรณ', org.saraban_email)}
+              ${isEditing
+                ? renderEditableDetailItem('อีเมลสำหรับติดต่อทั่วไป', 'contact_email', draft.contact_email, { type: 'email', placeholder: 'contact@agency.go.th' })
+                : renderDetailItem('อีเมลสำหรับติดต่อทั่วไป', org.contact_email)}
+            </div>
+          </section>
+
+          <section class="detail-card">
+            <div class="detail-card-head">
+              <div class="detail-card-icon">👤</div>
+              <div><h4>ข้อมูลผู้ประสานงาน</h4><p>รายละเอียดผู้ประสานงานหลักของหน่วยงาน</p></div>
+            </div>
+            <div class="detail-list two-col">
+              ${isEditing
+                ? renderEditableDetailItem('ชื่อผู้ประสานงาน', 'coordinator_name', draft.coordinator_name, { placeholder: 'กรอกชื่อผู้ประสานงาน' })
+                : renderDetailItem('ชื่อผู้ประสานงาน', org.coordinator_name)}
+              ${isEditing
+                ? renderEditableDetailItem('ตำแหน่งผู้ประสานงาน', 'coordinator_position', draft.coordinator_position, { placeholder: 'กรอกตำแหน่งผู้ประสานงาน' })
+                : renderDetailItem('ตำแหน่งผู้ประสานงาน', org.coordinator_position)}
+              ${isEditing
+                ? renderEditableDetailItem('อีเมลผู้ประสานงาน', 'coordinator_email', draft.coordinator_email, { type: 'email', placeholder: 'coordinator@agency.go.th' })
+                : renderDetailItem('อีเมลผู้ประสานงาน', org.coordinator_email)}
+              ${isEditing
+                ? renderEditableDetailItem('Line หรือช่องทางติดต่อ', 'coordinator_contact_line', draft.coordinator_contact_line, { placeholder: 'เช่น LINE / โทรศัพท์ / ช่องทางอื่น' })
+                : renderDetailItem('Line หรือช่องทางติดต่อ', org.coordinator_contact_line)}
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>`;
+}
+
 function togglePw() {
   const input = document.getElementById('login-pwd');
   const btn = document.querySelector('.pw-toggle');
@@ -422,14 +686,42 @@ function switchTab(tab) {
   const meta = TAB_META[tab] || { title: tab, subtitle: '' };
   document.getElementById('topbar-title').textContent = meta.title;
   document.getElementById('topbar-subtitle').textContent = meta.subtitle;
-  if (tab === 'ch1') mountInlineCh1Form();
 }
 
 function buildAppUrl(cleanPath, htmlFile, query = '') {
-  const isLocalhost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
-  const path = isLocalhost ? `/${htmlFile}` : cleanPath;
-  return `${window.location.origin}${path}${query}`;
+  return `${window.location.origin}${cleanPath}${query}`;
 }
+
+function closeInlineCh1Form() {
+  const wrap = document.getElementById('ch1-inline-wrap');
+  if (!wrap) return;
+  wrap.style.display = 'none';
+}
+
+async function refreshCh1Section() {
+  showLoading(true);
+  await loadCh1Data();
+  updateProgress();
+  showLoading(false);
+}
+
+window.addEventListener('message', async (event) => {
+  if (event.origin !== window.location.origin) return;
+  const payload = event.data || {};
+  if (payload.source !== 'ch1-inline-editor') return;
+
+  if (payload.type === 'saved') {
+    await refreshCh1Section();
+    showToast(payload.message || 'บันทึกข้อมูล CH1 แล้ว', 'success');
+  }
+
+  if (payload.type === 'deleted') {
+    const frame = document.getElementById('ch1-inline-frame');
+    if (frame) frame.src = 'about:blank';
+    await refreshCh1Section();
+    showToast(payload.message || 'ลบข้อมูล CH1 แล้ว', 'success');
+  }
+});
 
 function mountInlineCh1Form() {
   const wrap = document.getElementById('ch1-inline-wrap');
@@ -437,9 +729,11 @@ function mountInlineCh1Form() {
   if (!wrap || !frame || !portalState.orgCode) return;
   wrap.style.display = '';
   const ch1Id = portalState.ch1Row?.id;
-  const query = `?org=${encodeURIComponent(portalState.orgCode)}${ch1Id ? `&id=${encodeURIComponent(ch1Id)}` : ''}&from=org_portal`;
-  const target = buildAppUrl('/ch1-form', 'ch1.html', query);
-  if (frame.src !== target) frame.src = target;
+  const modeLabel = document.getElementById('ch1-inline-mode-label');
+  if (modeLabel) modeLabel.textContent = ch1Id ? 'โหลดข้อมูลเดิมจาก hrd_ch1_responses' : 'สร้างฟอร์มใหม่ในหน้าเดียว';
+  const query = `?org=${encodeURIComponent(portalState.orgCode)}${ch1Id ? `&id=${encodeURIComponent(ch1Id)}` : ''}&_ts=${Date.now()}`;
+  const target = buildAppUrl('/ch1-edit', 'ch1-edit.html', query);
+  frame.src = target;
 }
 
 async function handleLogin(event) {
@@ -538,10 +832,11 @@ async function initPortal() {
 
   const { data: orgRow } = await sb
     .from('organizations')
-    .select('org_name_th')
+    .select('org_code, org_name_th, org_name_en, ministry, salutation, org_type, saraban_email, contact_email, coordinator_name, coordinator_position, coordinator_email, coordinator_contact_line, abbr_th, abbr_en')
     .eq('org_code', roleRow.org_code)
     .maybeSingle();
 
+  portalState.orgProfile = orgRow || null;
   portalState.orgName = orgRow?.org_name_th || roleRow.display_name || roleRow.org_code;
 
   document.getElementById('login-gate').style.display = 'none';
@@ -551,6 +846,7 @@ async function initPortal() {
   document.getElementById('topbar-org-name').textContent = portalState.orgName || portalState.orgCode;
   document.getElementById('org-name-display').textContent = portalState.orgName || '—';
   document.getElementById('org-code-display').textContent = `รหัสองค์กร: ${portalState.orgCode}`;
+  renderOrgProfile();
 
   await Promise.all([loadCh1Data(), loadWbData()]);
   updateProgress();
@@ -649,8 +945,6 @@ async function loadCh1Data() {
     <button class="btn btn-soft" onclick="navigateCh1('preview')">👁 ดูข้อมูล</button>
     <button class="btn btn-soft" onclick="navigateCh1('pdf')">📄 ดาวน์โหลด PDF</button>
     <button class="btn btn-outline" onclick="navigateCh1('edit')">แก้ไขฟอร์ม</button>`;
-
-  mountInlineCh1Form();
 }
 
 async function loadWbData() {
@@ -769,8 +1063,10 @@ function downloadQR() {
 }
 
 function openCh1Editor() {
-  switchTab('ch1');
-  navigateCh1(portalState.ch1Row ? 'edit' : 'new');
+  const orgCode = portalState.orgCode;
+  const ch1Id = portalState.ch1Row?.id;
+  const query = `?org=${encodeURIComponent(orgCode)}${ch1Id ? `&id=${encodeURIComponent(ch1Id)}` : ''}`;
+  window.location.href = buildAppUrl('/ch1-edit', 'ch1-edit.html', query);
 }
 
 function navigateCh1(action) {
@@ -779,12 +1075,11 @@ function navigateCh1(action) {
 
   switch (action) {
     case 'new':
-      window.location.href = buildAppUrl('/ch1-form', 'ch1.html', `?org=${encodeURIComponent(orgCode)}&from=org_portal`);
+    case 'edit': {
+      const query = `?org=${encodeURIComponent(orgCode)}${ch1Id ? `&id=${encodeURIComponent(ch1Id)}` : ''}`;
+      window.location.href = buildAppUrl('/ch1-edit', 'ch1-edit.html', query);
       break;
-    case 'edit':
-      if (ch1Id) window.location.href = buildAppUrl('/ch1-form', 'ch1.html', `?org=${encodeURIComponent(orgCode)}&id=${ch1Id}&from=org_portal`);
-      else window.location.href = buildAppUrl('/ch1-form', 'ch1.html', `?org=${encodeURIComponent(orgCode)}&from=org_portal`);
-      break;
+    }
     case 'preview':
       if (ch1Id) window.location.href = buildAppUrl('/ch1-preview', 'ch1-preview.html', `?org=${encodeURIComponent(orgCode)}&id=${ch1Id}`);
       else showToast('ไม่พบข้อมูล', 'warn');

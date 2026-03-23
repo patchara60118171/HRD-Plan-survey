@@ -102,6 +102,12 @@ const ID_PARAM  = params.get('id');
 
 let schema = null, responseData = null, userRole = null, userOrgCode = null;
 
+function getQuestionsMap() {
+  if (schema?.questionsMap instanceof Map) return schema.questionsMap;
+  if (Array.isArray(schema?.questions)) return new Map(schema.questions.map(q => [q.question_key, q]));
+  return new Map();
+}
+
 async function init() {
   const { data: { session } } = await sb.auth.getSession();
   if (!session) { location.href = 'org-portal.html'; return; }
@@ -130,7 +136,12 @@ async function init() {
 
   if (!responseData) { showError('ไม่พบข้อมูล CH1 สำหรับองค์กรนี้'); return; }
 
-  renderPDF();
+  try {
+    renderPDF();
+  } catch (e) {
+    console.error('PDF render failed:', e);
+    showError('สร้างรายงานไม่สำเร็จ: ' + (e.message || 'Unknown error'));
+  }
 }
 
 async function loadResponse(orgCode) {
@@ -142,8 +153,9 @@ async function loadResponse(orgCode) {
 }
 
 function getLabel(key) {
-  if (schema?.questionsMap) {
-    const q = schema.questionsMap.get(key);
+  const questionsMap = getQuestionsMap();
+  if (questionsMap.size) {
+    const q = questionsMap.get(key);
     if (q) return q.label_th || q.label;
   }
   return key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());

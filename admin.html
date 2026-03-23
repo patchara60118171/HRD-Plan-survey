@@ -54,7 +54,7 @@
 
     <div class="nav-group">จัดการระบบ</div>
     <div class="nav-item" onclick="go('users',this)"><span class="ni">👥</span> จัดการผู้ใช้ / Viewer</div>
-    <div class="nav-item" onclick="go('links',this)"><span class="ni">🔗</span> ลิงก์แบบสอบถาม</div>
+    <div class="nav-item" onclick="go('links',this)"><span class="ni">🔗</span> ลิงก์แบบสอบถาม well-being</div>
     <div class="nav-item" onclick="go('notif',this)"><span class="ni">🔔</span> Reminder / แจ้งเตือน <span class="nb">2</span></div>
     <div class="nav-item" data-min-role="superadmin" onclick="go('settings',this)"><span class="ni">⚙️</span> ตั้งค่าระบบ</div>
     <div class="nav-item" data-min-role="admin" onclick="go('audit',this)"><span class="ni">🔍</span> Audit Log</div>
@@ -715,15 +715,14 @@
 
     <!-- ==================== LINKS ==================== -->
     <div class="page" id="page-links">
-      <div class="page-title">ลิงก์เข้าทำแบบสอบถาม</div>
-      <div class="page-sub">สร้างและจัดการ Unique Survey Link สำหรับแต่ละองค์กร</div>
-      <div class="info green">✅ ลิงก์แต่ละองค์กรจะ pre-fill ชื่อองค์กรให้อัตโนมัติ ป้องกันการกรอกข้ามองค์กร</div>
+      <div class="page-title">ลิงก์แบบสอบถาม Well-being</div>
+      <div class="page-sub">รวมลิงก์ Well-being Survey รายองค์กรสำหรับ deploy และคัดลอกไปใช้งาน</div>
+      <div class="info green">✅ ลิงก์ทุกรายการอ้างอิงรูปแบบ https://nidawellbeing.vercel.app/?org=&lt;org_code&gt; และควรตรวจว่า organizations_public มี org_code ครบ 15 รายการก่อน deploy</div>
       <div class="card card-mb">
         <div class="card-head">
-          <h3>ลิงก์แบบสอบถามรายองค์กร</h3>
+          <h3>ลิงก์แบบสอบถาม well-being รายองค์กร</h3>
           <div class="filter-bar">
             <input class="si" id="links-search" placeholder="🔍 ค้นหาองค์กร..." oninput="filterLinksTable()">
-            <select class="sel" id="links-form-filter" onchange="filterLinksTable()"><option value="">ทุกฟอร์ม</option><option value="Wellbeing">💚 Wellbeing Survey</option><option value="Ch1">📝 Ch1</option></select>
             <select class="sel" id="links-org-filter" onchange="filterLinksTable()"><option value="">ทุกองค์กร</option></select>
             <select class="sel" id="links-status-filter" onchange="filterLinksTable()"><option value="">ทุกสถานะ</option><option value="เปิดอยู่">เปิดอยู่</option><option value="ปิด">ปิด</option></select>
           </div>
@@ -736,8 +735,8 @@
         </div>
       </div>
       <div class="panel">
-        <h3>🔗 สร้างลิงก์ใหม่</h3>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+        <h3>🔗 สร้างลิงก์ Well-being</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
           <div class="fg" style="margin:0"><label>เลือกองค์กร *</label>
             <select id="create-link-org">
               <option value="">— เลือก —</option>
@@ -758,12 +757,14 @@
               <option>สำนักงานสภาพัฒนาการเศรษฐกิจและสังคมแห่งชาติ</option>
             </select>
           </div>
-          <div class="fg" style="margin:0"><label>เลือกฟอร์ม *</label><select id="create-link-form"><option value="wb">Wellbeing Survey</option><option value="ch1">Ch1</option></select></div>
           <div class="fg" style="margin:0"><label>วันหมดอายุลิงก์ <span id="create-link-expires-be" style="font-size:11px;color:var(--A);font-weight:600"></span></label><input type="date" id="create-link-expires" value="2026-04-30" oninput="document.getElementById('create-link-expires-be').textContent=isoToBuddhistDisplay(this.value)"></div>
         </div>
         <div style="margin-top:12px;display:flex;gap:8px;align-items:center">
           <button class="btn b-solid" style="padding:8px 16px" onclick="createNewLink()">🔗 สร้างลิงก์</button>
           <div id="create-link-msg" style="font-size:12px;color:var(--A)"></div>
+        </div>
+        <div style="margin-top:12px;font-size:12px;color:var(--tx2);line-height:1.7">
+          ชุดลิงก์อ้างอิง: NESDC, TPSO, DSS, DHSS, TMD, DCP, DOP, MOTS, DMH, ONEP, NRCT, ACFS, OPDC, RID, DCY
         </div>
       </div>
 
