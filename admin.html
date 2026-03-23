@@ -52,13 +52,13 @@
     <div class="nav-item" onclick="go('compare',this)"><span class="ni">⚖️</span> เปรียบเทียบองค์กร</div>
     <div class="nav-item" onclick="go('export',this)"><span class="ni">📤</span> Export รายงาน</div>
 
-    <div class="nav-group">จัดการระบบ</div>
-    <div class="nav-item" onclick="go('users',this)"><span class="ni">👥</span> จัดการผู้ใช้ / Viewer</div>
-    <div class="nav-item" onclick="go('links',this)"><span class="ni">🔗</span> ลิงก์แบบสอบถาม well-being</div>
-    <div class="nav-item" onclick="go('notif',this)"><span class="ni">🔔</span> Reminder / แจ้งเตือน <span class="nb">2</span></div>
+    <div class="nav-group" data-min-role="superadmin">จัดการระบบ</div>
+    <div class="nav-item" data-min-role="superadmin" onclick="go('users',this)"><span class="ni">👥</span> จัดการผู้ใช้ / Viewer</div>
+    <div class="nav-item" data-min-role="superadmin" onclick="go('links',this)"><span class="ni">🔗</span> ลิงก์แบบสอบถาม well-being</div>
+    <div class="nav-item" data-min-role="superadmin" onclick="go('notif',this)"><span class="ni">🔔</span> Reminder / แจ้งเตือน <span class="nb">2</span></div>
     <div class="nav-item" data-min-role="superadmin" onclick="go('settings',this)"><span class="ni">⚙️</span> ตั้งค่าระบบ</div>
-    <div class="nav-item" data-min-role="admin" onclick="go('audit',this)"><span class="ni">🔍</span> Audit Log</div>
-    <div class="nav-item" data-min-role="admin" onclick="go('form-editor',this)"><span class="ni">✏️</span> แก้ไขเนื้อหาฟอร์ม</div>
+    <div class="nav-item" data-min-role="superadmin" onclick="go('audit',this)"><span class="ni">🔍</span> Audit Log</div>
+    <div class="nav-item" data-min-role="superadmin" onclick="go('form-editor',this)"><span class="ni">✏️</span> แก้ไขเนื้อหาฟอร์ม</div>
   </nav>
 
   <div class="sidebar-foot">
