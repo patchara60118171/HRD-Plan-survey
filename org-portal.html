@@ -425,14 +425,20 @@ function switchTab(tab) {
   if (tab === 'ch1') mountInlineCh1Form();
 }
 
+function buildAppUrl(cleanPath, htmlFile, query = '') {
+  const isLocalhost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+  const path = isLocalhost ? `/${htmlFile}` : cleanPath;
+  return `${window.location.origin}${path}${query}`;
+}
+
 function mountInlineCh1Form() {
   const wrap = document.getElementById('ch1-inline-wrap');
   const frame = document.getElementById('ch1-inline-frame');
   if (!wrap || !frame || !portalState.orgCode) return;
   wrap.style.display = '';
-  const baseUrl = window.location.origin;
   const ch1Id = portalState.ch1Row?.id;
-  const target = `${baseUrl}/ch1-form?org=${encodeURIComponent(portalState.orgCode)}${ch1Id ? `&id=${encodeURIComponent(ch1Id)}` : ''}&from=org_portal`;
+  const query = `?org=${encodeURIComponent(portalState.orgCode)}${ch1Id ? `&id=${encodeURIComponent(ch1Id)}` : ''}&from=org_portal`;
+  const target = buildAppUrl('/ch1-form', 'ch1.html', query);
   if (frame.src !== target) frame.src = target;
 }
 
@@ -731,7 +737,7 @@ function updateProgress() {
 }
 
 function generateOrgQR() {
-  const url = `${window.location.origin}/?org=${encodeURIComponent(portalState.orgName || portalState.orgCode || '')}`;
+  const url = `${window.location.origin}/?org=${encodeURIComponent(portalState.orgCode || '')}`;
   const qr = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(url)}`;
   document.getElementById('survey-link').value = url;
   document.getElementById('qr-img').src = qr;
@@ -770,22 +776,21 @@ function openCh1Editor() {
 function navigateCh1(action) {
   const orgCode = portalState.orgCode;
   const ch1Id = portalState.ch1Row?.id;
-  const baseUrl = window.location.origin;
 
   switch (action) {
     case 'new':
-      window.location.href = `${baseUrl}/ch1-form?org=${encodeURIComponent(orgCode)}`;
+      window.location.href = buildAppUrl('/ch1-form', 'ch1.html', `?org=${encodeURIComponent(orgCode)}&from=org_portal`);
       break;
     case 'edit':
-      if (ch1Id) window.location.href = `${baseUrl}/ch1-form?org=${encodeURIComponent(orgCode)}&id=${ch1Id}`;
-      else window.location.href = `${baseUrl}/ch1-form?org=${encodeURIComponent(orgCode)}`;
+      if (ch1Id) window.location.href = buildAppUrl('/ch1-form', 'ch1.html', `?org=${encodeURIComponent(orgCode)}&id=${ch1Id}&from=org_portal`);
+      else window.location.href = buildAppUrl('/ch1-form', 'ch1.html', `?org=${encodeURIComponent(orgCode)}&from=org_portal`);
       break;
     case 'preview':
-      if (ch1Id) window.location.href = `${baseUrl}/ch1-preview?org=${encodeURIComponent(orgCode)}&id=${ch1Id}`;
+      if (ch1Id) window.location.href = buildAppUrl('/ch1-preview', 'ch1-preview.html', `?org=${encodeURIComponent(orgCode)}&id=${ch1Id}`);
       else showToast('ไม่พบข้อมูล', 'warn');
       break;
     case 'pdf':
-      if (ch1Id) window.location.href = `${baseUrl}/ch1-individual-pdf?org=${encodeURIComponent(orgCode)}&id=${ch1Id}`;
+      if (ch1Id) window.location.href = buildAppUrl('/ch1-individual-pdf', 'ch1-individual-pdf.html', `?org=${encodeURIComponent(orgCode)}&id=${ch1Id}`);
       else showToast('ไม่พบข้อมูล', 'warn');
       break;
   }
