@@ -77,10 +77,19 @@ async function loadBackend() {
   if (surveyRes.error) console.warn('loadBackend survey_responses:', surveyRes.error.message);
   if (ch1Res.error) console.warn('loadBackend hrd_ch1_responses:', ch1Res.error.message);
 
+  // Exclude test/sandbox orgs from all admin calculations and displays
+  const isTestOrgRow = (row) => {
+    const code = (row.org_code || row.form_data?.org_code || '').toLowerCase();
+    const name = (row.organization || row.org_name || row.org_name_th || row.agency_name || row.form_data?.agency_name || row.form_data?.organization || row.form_data?.org_name || '');
+    return code === 'test-org' || name.includes('ทดสอบระบบ');
+  };
+
   state.surveyRows = (surveyRes.data || [])
+    .filter(row => !isTestOrgRow(row))
     .map(normalizeSurveyRow)
     .sort((a, b) => new Date(getRowDate(b) || 0) - new Date(getRowDate(a) || 0));
   state.ch1Rows = (ch1Res.data || [])
+    .filter(row => !isTestOrgRow(row))
     .sort((a, b) => new Date(getRowDate(b) || 0) - new Date(getRowDate(a) || 0));
   state.linkRows = linksRes.error ? [] : (linksRes.data || []);
   state.userRows = usersRows || [];
