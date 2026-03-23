@@ -566,7 +566,7 @@ const app = {
     // Parse URL Parameters
     parseUrlParameters() {
         const urlParams = new URLSearchParams(window.location.search);
-        const orgCode = urlParams.get('org');
+        const orgCode = (urlParams.get('org') || '').trim().toLowerCase();
         const testMode = urlParams.get('testmode');
         
         // Check for test mode trigger
@@ -580,6 +580,7 @@ const app = {
             // Initialize or update responses with the mapped organization name
             if (!this.responses) this.responses = {};
             this.responses.organization = this.organization;
+            this.responses.org_code = orgCode;
             console.log(`Organization detected: ${this.organization} (${orgCode})`);
             
             // Cleanup URL to make it look clean (optional, prevents copy-pasting wrong org)
