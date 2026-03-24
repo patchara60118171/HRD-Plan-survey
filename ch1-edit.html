@@ -963,6 +963,10 @@ function collectFormData() {
       if (el.checked) data[key].push(el.value);
     } else if (el.type === 'file') {
       // skip — handled separately
+    } else if (el.type === 'number' || el.inputMode === 'numeric' || el.getAttribute('inputmode') === 'numeric') {
+      // แปลง empty string เป็น null สำหรับตัวเลข (ป้องกัน PostgreSQL integer error)
+      const val = el.value?.trim();
+      data[key] = val === '' || val === undefined || val === null ? null : Number(val);
     } else {
       data[key] = el.value;
     }
@@ -978,6 +982,14 @@ async function saveForm(newStatus) {
 
   try {
     const formData = collectFormData();
+
+    // Sanitize: แปลง "" → null สำหรับทุก key
+    // ป้องกัน PostgreSQL error "invalid input syntax for type integer: ''"
+    // เกิดขึ้นเมื่อ hidden/text input ที่ map กับ INTEGER column ส่งค่าว่างไป (เช่น org ที่ยังไม่มี record → INSERT path)
+    Object.keys(formData).forEach(k => {
+      if (formData[k] === '') formData[k] = null;
+    });
+
     formData.status = newStatus;
     formData.last_saved_at = new Date().toISOString();
     // org_code ต้องมาจาก session เสมอ (ป้องกัน user แก้ field ใน form)
