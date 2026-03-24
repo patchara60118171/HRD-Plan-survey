@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>แบบสอบถามข้อมูลองค์กร (CH1) - PDF</title>
+<style>
+  @page { size: A4; margin: 14mm 12mm; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'IBM Plex Sans Thai Looped','Segoe UI',Tahoma,sans-serif;color:#1F2D3D;font-size:11.5pt;line-height:1.55;padding:0}
+  .no-print{margin:14px auto;max-width:800px;display:flex;justify-content:space-between;align-items:center}
+  .no-print .btn{padding:8px 16px;border:none;border-radius:8px;font-size:14px;cursor:pointer;font-weight:600}
+  .no-print .btn-primary{background:#0F4C81;color:#fff}
+  .no-print .btn-secondary{background:#E5E7EB;color:#374151}
+  @media print{.no-print{display:none!important}}
+  .page-wrap{max-width:780px;margin:0 auto;padding:0 12px}
+  .cover{text-align:center;padding:34px 20px 24px;border-bottom:3px solid #0F4C81;margin-bottom:18px}
+  .cover-icon{font-size:38px;margin-bottom:8px}
+  .cover h1{font-size:20pt;color:#0F4C81;font-weight:700;line-height:1.35}
+  .cover p{color:#4D6078;font-size:10.5pt;margin-top:6px}
+  .step{break-inside:avoid;margin-bottom:20px;border:1px solid #D1DAE5;border-radius:8px;overflow:hidden}
+  .step-head{background:#0F4C81;color:#fff;padding:10px 16px;font-size:13pt;font-weight:700}
+  .section{margin-bottom:16px}
+  .section-title{font-size:12pt;font-weight:700;color:#0F4C81;margin-bottom:12px;border-bottom:2px solid #E2EAF4;padding-bottom:6px}
+  .field{padding:8px 0;display:flex;gap:8px;align-items:flex-start;break-inside:avoid}
+  .field-label{flex:1;font-weight:500;font-size:11pt;min-width:200px}
+  .field-required{color:#B42318}
+  .field-value{flex:2;border-bottom:1px dashed #8896A5;min-width:150px;height:16px;color:#8896A5;font-size:9pt}
+  .field-checkbox{display:flex;align-items:center;gap:6px}
+  .field-checkbox::before{content:'☐';color:#8896A5;font-size:12pt}
+  .field-radio{display:flex;align-items:center;gap:6px}
+  .field-radio::before{content:'○';color:#8896A5;font-size:12pt}
+  .field-select{border:1px solid #D1DAE5;border-radius:4px;padding:4px 8px;font-size:10pt;color:#4D6078}
+  .footer{text-align:center;color:#8896A5;font-size:9pt;margin-top:18px;padding:10px 0;border-top:1px solid #E2EAF4}
+  .loading{text-align:center;padding:60px 20px;color:#8896A5;font-size:14pt}
+</style>
+</head>
+<body>
+
+<div class="no-print">
+  <h2 style="color:#0F4C81;font-size:16px">📄 แบบสอบถามข้อมูลองค์กร (CH1) - PDF</h2>
+  <div style="display:flex;gap:8px">
+    <button class="btn btn-secondary" onclick="history.back()">← กลับ</button>
+    <button class="btn btn-primary" onclick="window.print()">🖨️ พิมพ์ / บันทึก PDF</button>
+  </div>
+</div>
+
+<div class="page-wrap" id="content">
+  <div class="loading" id="loading-msg">กำลังโหลดคำถาม...</div>
+</div>
+
+<script>
+async function init() {
+  try {
+    const resp = await fetch('/data/questions-ch1.json');
+    if (!resp.ok) throw new Error('ไม่สามารถโหลดไฟล์คำถามได้');
+    const data = await resp.json();
+    render(data);
+  } catch (err) {
+    document.getElementById('loading-msg').textContent = '⛔ ' + err.message;
+  }
+}
+
+function render(data) {
+  const wrap = document.getElementById('content');
+  let html = `<div class="cover">
+    <div class="cover-icon">🏢</div>
+    <h1>${esc(data.form_title)}</h1>
+    <p>${esc(data.form_title_en)}</p>
+    <p style="margin-top:10px;font-size:9.5pt;color:#6B7F95">แบบสอบถามนี้จัดทำขึ้นเพื่อรวบรวมข้อมูลองค์กรเพื่อการประเมินรางวัลองค์กรสุขภาวะแห่งชาติ<br>สำนักงานคณะกรรมการส่งเสริมสวัสดิภาพและสิทธิผู้บริโภค</p>
+  </div>`;
+
+  for (const step of data.steps) {
+    html += `<div class="step">
+      <div class="step-head">ขั้นที่ ${step.step}: ${esc(step.title)}</div>`;
+    
+    for (const section of step.sections) {
+      html += `<div class="section">
+        <div class="section-title">${esc(section.title)}</div>`;
+      
+      for (const field of section.fields) {
+        html += renderField(field);
+      }
+      
+      html += `</div>`;
+    }
+    
+    html += `</div>`;
+  }
+
+  html += `<div class="footer">แบบสอบถามข้อมูลองค์กร (CH1) — สำนักงานคณะกรรมการส่งเสริมสวัสดิภาพและสิทธิผู้บริโภค</div>`;
+  wrap.innerHTML = html;
+}
+
+function renderField(field) {
+  const req = field.required ? ' <span class="field-required">*</span>' : '';
+  let html = `<div class="field">
+    <div class="field-label">${esc(field.label)}${req}</div>`;
+
+  if (field.type === 'select') {
+    html += `<div class="field-value">เลือก: ${field.options ? field.options.map(o => esc(o.label || o)).join(', ') : ''}</div>`;
+  } else if (field.type === 'text' || field.type === 'textarea') {
+    html += `<div class="field-value"></div>`;
+  } else if (field.type === 'number') {
+    html += `<div class="field-value" style="width:100px"></div>`;
+  } else if (field.type === 'radio') {
+    html += `<div style="display:flex;flex-direction:column;gap:4px">`;
+    if (field.options) {
+      field.options.forEach(opt => {
+        const label = typeof opt === 'string' ? opt : opt.label;
+        html += `<div class="field-radio">${esc(label)}</div>`;
+      });
+    }
+    html += `</div>`;
+  } else if (field.type === 'checkbox') {
+    html += `<div style="display:flex;flex-direction:column;gap:4px">`;
+    if (field.options) {
+      field.options.forEach(opt => {
+        const label = typeof opt === 'string' ? opt : opt.label;
+        html += `<div class="field-checkbox">${esc(label)}</div>`;
+      });
+    }
+    html += `</div>`;
+  } else {
+    html += `<div class="field-value"></div>`;
+  }
+
+  html += `</div>`;
+  return html;
+}
+
+function esc(s) {
+  if (s == null) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+init();
+</script>
+</body>
+</html>
