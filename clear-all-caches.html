@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Clear All Question Caches</title>
+    <script>
+        // Clear form schema cache
+        ['fschema_wellbeing', 'fschema_ch1'].forEach(key => {
+            sessionStorage.removeItem(key);
+        });
+        
+        // Clear any app-related cache
+        localStorage.clear();
+        sessionStorage.clear();
+        
+        // Clear service worker cache if exists
+        if ('caches' in window) {
+            caches.keys().then(cacheNames => {
+                return Promise.all(cacheNames.map(cacheName => caches.delete(cacheName)));
+            });
+        }
+        
+        alert('✅ All question caches cleared!\n\nThe survey will now load the latest questions from all sources.');
+        window.close();
+    </script>
+</head>
+<body>
+    <h1>🧹 Clearing All Question Caches...</h1>
+    <p>This window should close automatically.</p>
+    <p>If not, please refresh all survey pages manually.</p>
+</body>
+</html>

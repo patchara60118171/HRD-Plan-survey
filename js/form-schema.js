@@ -174,42 +174,54 @@ const FormSchema = (() => {
   }
 
   function buildWellbeingFallback() {
-    // Use questions.js QUESTIONS array if available
-    if (typeof QUESTIONS === 'undefined' || !Array.isArray(QUESTIONS)) {
+    // Use SURVEY_DATA from questions.js if available
+    if (typeof SURVEY_DATA === 'undefined' || !SURVEY_DATA) {
       return { formCode: 'wellbeing', sections: [], questions: [], questionsMap: new Map(), fetchedAt: new Date().toISOString(), source: 'fallback_empty' };
     }
     const questions = [];
     const sections = [];
     let secIdx = 0;
-    QUESTIONS.forEach((section) => {
+    
+    // Convert SURVEY_DATA object to QUESTIONS array format
+    Object.entries(SURVEY_DATA).forEach(([sectionKey, section]) => {
       secIdx++;
-      const secKey = section.id || `section_${secIdx}`;
       const secQuestions = [];
-      (section.questions || []).forEach((q, qIdx) => {
-        const qObj = {
-          id: `fallback_wb_${q.id || secKey + '_' + qIdx}`,
-          form_code: 'wellbeing',
-          section_key: secKey,
-          question_key: q.id || `${secKey}_q${qIdx}`,
-          question_order: qIdx + 1,
-          label_th: q.label || q.text || '',
-          help_text: q.help || null,
-          input_type: q.type || 'radio',
-          options_json: q.options ? JSON.stringify(q.options) : null,
-          is_required: q.required !== false,
-          is_active: true,
-        };
-        secQuestions.push(qObj);
-        questions.push(qObj);
-      });
+      
+      if (section.subsections) {
+        section.subsections.forEach((sub) => {
+          if (sub.questions) {
+            sub.questions.forEach((q, qIdx) => {
+              const qObj = {
+                id: `fallback_wb_${q.id || sectionKey + '_' + qIdx}`,
+                form_code: 'wellbeing',
+                section_key: sectionKey,
+                subsection_key: sub.title || 'main',
+                question_key: q.id || `${sectionKey}_q${qIdx}`,
+                question_order: qIdx + 1,
+                label_th: q.text || '',
+                label_text: q.text || '',
+                question_type: q.type || 'text',
+                options: q.options || [],
+                required: q.required !== false,
+                is_required: q.required !== false,
+                is_active: true,
+              };
+              secQuestions.push(qObj);
+              questions.push(qObj);
+            });
+          }
+        });
+      }
+      
       sections.push({
-        section_key: secKey,
+        section_key: sectionKey,
         section_order: secIdx,
         title_th: section.title || section.label || `ส่วนที่ ${secIdx}`,
         description: section.description || null,
         questions: secQuestions,
       });
     });
+    
     return {
       formCode: 'wellbeing',
       sections,

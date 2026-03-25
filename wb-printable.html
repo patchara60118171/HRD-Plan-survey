@@ -126,11 +126,19 @@ function renderQuestion(num, q) {
 
   if (q.type === 'radio' && q.options) {
     body += `<div class="q-opts">${q.options.map(o => {
+      if (typeof o === 'object' && o.hasInput) {
+        // Handle "other" option with input field
+        return `<span class="q-opt">${esc(o.label)}: _______________</span>`;
+      }
       const label = typeof o === 'string' ? o : o.label;
       return `<span class="q-opt">${esc(label)}</span>`;
     }).join('')}</div>`;
   } else if (q.type === 'checkbox' && q.options) {
     body += `<div class="q-opts">${q.options.map(o => {
+      if (typeof o === 'object' && o.hasInput) {
+        // Handle "other" option with input field
+        return `<span class="q-opt cb">${esc(o.label)}: _______________</span>`;
+      }
       const label = typeof o === 'string' ? o : o.label;
       return `<span class="q-opt cb">${esc(label)}</span>`;
     }).join('')}</div>`;

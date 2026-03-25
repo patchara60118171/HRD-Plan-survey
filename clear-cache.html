@@ -1,0 +1,25 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Clear Cache</title>
+    <script>
+        // Clear form schema cache
+        ['fschema_wellbeing', 'fschema_ch1'].forEach(key => {
+            sessionStorage.removeItem(key);
+        });
+        
+        // Also clear any app-related cache
+        localStorage.clear();
+        sessionStorage.clear();
+        
+        alert('Cache cleared! The survey will now load the latest questions.');
+        window.close();
+    </script>
+</head>
+<body>
+    <h1>Clearing cache...</h1>
+    <p>This window should close automatically.</p>
+</body>
+</html>

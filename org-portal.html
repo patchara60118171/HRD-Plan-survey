@@ -1445,6 +1445,14 @@ async function loadWbData() {
   }
 
   portalState._wbRows = rows;
+  portalState.wbRows = rows; // Keep both for compatibility
+  
+  console.log('[org-portal] loadWbData completed:', {
+    rowsCount: rows.length,
+    orgName,
+    orgCode,
+    totalStaff: portalState.totalStaff
+  });
   
   // Get the elements for displaying results
   const homeWb = document.getElementById('home-wb-summary');
@@ -1587,7 +1595,7 @@ function renderWbDashboard(rows, stats) {
 }
 
 function exportWbExcel() {
-  const rows = portalState.wbRows;
+  const rows = portalState.wbRows || portalState._wbRows || [];
   if (!rows || rows.length === 0) { showToast('ไม่มีข้อมูลให้ส่งออก', 'warn'); return; }
   try {
     const data = rows.map((r, i) => ({
@@ -1966,9 +1974,18 @@ function exportWbIndExcel() {
 
 function updateProgress() {
   const totalStaff = Number(portalState.totalStaff || 0);
-  const wbCount = portalState.wbRows.length;
+  const wbCount = portalState.wbRows?.length || portalState._wbRows?.length || 0;
   const pct = totalStaff > 0 ? Math.min((wbCount / totalStaff) * 100, 100) : 0;
   const pctText = `${pct.toFixed(1)}%`;
+  
+  // Debug logging
+  console.log('[org-portal] updateProgress:', {
+    totalStaff,
+    wbCount,
+    pct,
+    wbRowsLength: portalState.wbRows?.length,
+    _wbRowsLength: portalState._wbRows?.length
+  });
 
   document.getElementById('progress-fill').style.width = pctText;
   document.getElementById('progress-pct-text').textContent = pctText;
