@@ -122,3 +122,4 @@ Organization_Links.csv
 
 # ===== Draft/working folder (Thai name folder at root) =====
 แบบสอบถามบท 1/
+.env*.local

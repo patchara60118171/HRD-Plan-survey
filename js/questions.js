@@ -42,7 +42,7 @@ const SURVEY_DATA = {
                     },
                     {
                         id: 'job',
-                        text: 'ตำแหน่งงานปัจจุบัน',
+                        text: 'ระดับตำแหน่งงานปัจจุบัน',
                         type: 'radio',
                         options: [
                             'บริหาร: ระดับต้น',
