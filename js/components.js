@@ -311,8 +311,9 @@ function renderQuestion(question, value, number) {
         <div class="question-card fade-in" id="card_${question.id}">
             <div>
                 <span class="question-number">${number}</span>
-                <span class="question-text">${question.text}</span>
+                <span class="question-text ${question.tooltip ? 'has-tooltip' : ''}" ${question.tooltip ? `title="${question.tooltip}"` : ''}>${question.text}</span>
                 ${question.required ? '<span class="question-required">*</span>' : ''}
+                ${question.tooltip ? '<span class="tooltip-icon">ⓘ</span>' : ''}
             </div>
             ${question.hint ? `<p style="color: var(--text-secondary); font-size: 0.875rem; margin: 0.5rem 0;">${question.hint}</p>` : ''}
             ${inputHtml}

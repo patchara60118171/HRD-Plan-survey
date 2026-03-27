@@ -763,6 +763,20 @@ body {
     display: inline;
 }
 
+.question-text.has-tooltip {
+    cursor: help;
+    text-decoration: underline dotted 2px #6B7280;
+    text-underline-offset: 4px;
+}
+
+.tooltip-icon {
+    color: #6B7280;
+    font-size: 0.875rem;
+    margin-left: var(--spacing-xs);
+    cursor: help;
+    font-weight: normal;
+}
+
 .question-required {
     color: #EF4444;
     margin-left: var(--spacing-xs);
