@@ -767,6 +767,7 @@ body {
     cursor: help;
     text-decoration: underline dotted 2px #6B7280;
     text-underline-offset: 4px;
+    position: relative;
 }
 
 .tooltip-icon {
@@ -775,6 +776,44 @@ body {
     margin-left: var(--spacing-xs);
     cursor: help;
     font-weight: normal;
+    background: #F3F4F6;
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid #D1D5DB;
+    transition: all 0.2s ease;
+}
+
+.tooltip-icon:hover {
+    background: #E5E7EB;
+    border-color: #9CA3AF;
+}
+
+/* Tooltip Popup */
+.tooltip-popup {
+    position: absolute;
+    display: none;
+    background: #1F2937;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 400;
+    max-width: 300px;
+    z-index: 9999;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    line-height: 1.4;
+}
+
+.tooltip-popup::before {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: 10px;
+    width: 0;
+    height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-bottom: 4px solid #1F2937;
 }
 
 .question-required {
