@@ -430,10 +430,6 @@ function renderResults(responses, userInfo) {
     const bmi = calculateBMI(height, weight);
     const bmiInfo = getBMICategory(bmi);
 
-    // Updated: TMHI-15 instead of Depression
-    const tmhiScore = calculateTMHIScore(responses);
-    const tmhiInfo = getTMHILevel(tmhiScore);
-
     return `
         <div class="results-screen fade-in">
             <div class="results-header">
@@ -468,7 +464,7 @@ function renderResults(responses, userInfo) {
                 </div>
             </div>
             
-            <!-- BMI & Mental Health Results -->
+            <!-- BMI Results Only -->
             <div class="special-results">
                 ${bmi ? `
                 <div class="special-card">
@@ -479,16 +475,6 @@ function renderResults(responses, userInfo) {
                     </div>
                 </div>
                 ` : ''}
-                
-                <div class="special-card">
-                    <div class="special-card-title">คะแนนสุขภาพจิต (TMHI-15)</div>
-                    <div class="score-value" style="font-size: 2.5rem; font-weight: 700; color: #1E293B; margin-bottom: 5px;">
-                        ${tmhiScore}<span class="score-max" style="font-size: 1.25rem; color: #94A3B8; font-weight: 400;"> / 60</span>
-                    </div>
-                    <div class="score-level ${tmhiInfo.class}" style="display: inline-flex; align-items: center; gap: 5px; font-weight: 600;">
-                        ${tmhiInfo.emoji} ${tmhiInfo.level}
-                    </div>
-                </div>
             </div>
         </div>
     `;
