@@ -204,9 +204,9 @@ function renderCheckbox(question, value) {
             checkboxHtml += `
                 <div class="option-input-wrapper" style="margin-left: 24px; margin-top: 8px; display: ${isChecked ? 'block' : 'none'};" id="${question.id}_${i}_input_wrapper">
                     <input type="text" 
-                           class="form-input" 
+                           class="form-input detail-input" 
                            id="${question.id}_${i}_input" 
-                           placeholder="ระบุรายละเอียด"
+                           placeholder="📝 ระบุรายละเอียด..."
                            value="${inputValue}"
                            onchange="app.handleCheckboxInput('${question.id}', '${optValue}', this.value)">
                 </div>
