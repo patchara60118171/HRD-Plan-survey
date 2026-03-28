@@ -18,6 +18,10 @@
             "destination": "/ch1-preview.html"
         },
         {
+            "source": "/ch1-printable",
+            "destination": "/ch1-printable.html"
+        },
+        {
             "source": "/ch1-individual-pdf",
             "destination": "/ch1-individual-pdf.html"
         },
