@@ -781,6 +781,54 @@ body {
     margin-left: var(--spacing-xs);
 }
 
+/* Tooltip Icon */
+.tooltip-icon {
+    color: #6B7280;
+    font-size: 0.875rem;
+    margin-left: var(--spacing-xs);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border: 1px solid #D1D5DB;
+    border-radius: 50%;
+    cursor: help;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.tooltip-icon:hover {
+    background: #E5E7EB;
+    border-color: #9CA3AF;
+}
+
+/* Tooltip Popup */
+.tooltip-popup {
+    position: absolute;
+    display: none;
+    background: #1F2937;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    max-width: 300px;
+    z-index: 1000;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    line-height: 1.4;
+}
+
+.tooltip-popup::before {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-bottom: 4px solid #1F2937;
+}
+
 /* ========================================
    Radio & Checkbox Options
    ======================================== */

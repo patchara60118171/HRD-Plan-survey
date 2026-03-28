@@ -179,14 +179,17 @@ function renderCheckbox(question, value) {
     const selected = Array.isArray(value) ? value : [];
     const options = question.options.map((opt, i) => {
         const optValue = opt.value !== undefined ? opt.value : opt;
-        return `
+        const hasInput = opt.hasInput || false;
+        const isChecked = selected.includes(optValue);
+        
+        let checkboxHtml = `
             <div class="option-item">
                 <input type="checkbox" 
                        class="option-input" 
                        id="${question.id}_${i}" 
                        name="${question.id}" 
                        value="${optValue}"
-                       ${selected.includes(optValue) ? 'checked' : ''}
+                       ${isChecked ? 'checked' : ''}
                        onchange="app.handleCheckbox('${question.id}', '${optValue}', this.checked, ${question.maxSelect || 99})">
                 <label class="option-label" for="${question.id}_${i}">
                     <span class="option-indicator"></span>
@@ -194,6 +197,23 @@ function renderCheckbox(question, value) {
                 </label>
             </div>
         `;
+        
+        // Add input field if hasInput is true
+        if (hasInput) {
+            const inputValue = value && value[optValue + '_input'] ? value[optValue + '_input'] : '';
+            checkboxHtml += `
+                <div class="option-input-wrapper" style="margin-left: 24px; margin-top: 8px; display: ${isChecked ? 'block' : 'none'};" id="${question.id}_${i}_input_wrapper">
+                    <input type="text" 
+                           class="form-input" 
+                           id="${question.id}_${i}_input" 
+                           placeholder="ระบุรายละเอียด"
+                           value="${inputValue}"
+                           onchange="app.handleCheckboxInput('${question.id}', '${optValue}', this.value)">
+                </div>
+            `;
+        }
+        
+        return checkboxHtml;
     }).join('');
 
     const hint = question.maxSelect ? `<small style="color: var(--text-muted);">เลือกได้ไม่เกิน ${question.maxSelect} ข้อ</small>` : '';
@@ -288,7 +308,7 @@ function renderTime(question, value) {
                     onchange="app.handleTimeChange('${question.id}')">
                 ${minuteOptions}
             </select>
-            <span class="time-unit">ชม./นาที</span>
+            <span class="time-unit">ชั่วโมง : นาที</span>
         </div>
         <input type="hidden" id="${question.id}" value="${value || ''}">
     `;
@@ -313,6 +333,7 @@ function renderQuestion(question, value, number) {
                 <span class="question-number">${number}</span>
                 <span class="question-text">${question.text}</span>
                 ${question.required ? '<span class="question-required">*</span>' : ''}
+                ${question.tooltip ? `<span class="tooltip-icon" onmouseover="showTooltip(event, '${question.tooltip.replace(/'/g, '&#39;').replace(/"/g, '&quot;')}')" onmouseout="hideTooltip()">i</span>` : ''}
             </div>
             ${question.hint ? `<p style="color: var(--text-secondary); font-size: 0.875rem; margin: 0.5rem 0;">${question.hint}</p>` : ''}
             ${inputHtml}
@@ -320,28 +341,22 @@ function renderQuestion(question, value, number) {
     `;
 }
 
-// Render BMI Result
+// Render BMI Result (Hidden from user, but calculated for Supabase)
 function renderBMIResult(height, weight) {
     if (!height || !weight) return '';
     const bmi = calculateBMI(height, weight);
     const info = getBMICategory(bmi);
     if (!bmi || !info) return '';
 
-    return `
-        <div class="bmi-result fade-in">
-            <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 0.5rem;">📊 ผลการคำนวณ BMI</div>
-            <div class="bmi-value">${bmi}</div>
-            <div class="bmi-category ${info.class}">${info.emoji} ${info.category}</div>
-            <div style="background: #F1F5F9; padding: 0.75rem; border-radius: 8px; margin-top: 1rem; font-size: 0.8rem; color: var(--text-secondary);">
-                <div style="font-weight: 600; margin-bottom: 0.5rem;">📋 เกณฑ์ที่ใช้ (WHO สากล):</div>
-                <div>• น้ำหนักน้อย: BMI < 18.5</div>
-                <div>• น้ำหนักปกติ: BMI 18.5 - 24.9</div>
-                <div>• น้ำหนักเกิน: BMI 25.0 - 29.9</div>
-                <div>• อ้วน: BMI ≥ 30.0</div>
-                <div style="margin-top: 0.5rem; font-style: italic;">*สูตร: น้ำหนัก(กก.) ÷ ส่วนสูง(ม.)²</div>
-            </div>
-        </div>
-    `;
+    // Store BMI data for submission but don't display to user
+    if (window.app && window.app.responses) {
+        window.app.responses.bmi = bmi;
+        window.app.responses.bmi_category = info.category;
+        window.app.responses.bmi_class = info.class;
+    }
+
+    // Return empty string to hide from user
+    return '';
 }
 
 // Render Depression Score

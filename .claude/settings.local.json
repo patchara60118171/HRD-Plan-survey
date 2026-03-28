@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find . -maxdepth 2 -type d ! -path ./.git* ! -path ./node_modules*)",
+      "Bash(find . -maxdepth 1 -type f ! -name \".*\" -exec ls -lh {})",
+      "Bash(__NEW_LINE_0e10f6e6e4f2f068__ echo:*)",
+      "Bash(__NEW_LINE_0e10f6e6e4f2f068__ du:*)",
+      "Bash(tail -15 __NEW_LINE_0e10f6e6e4f2f068__ echo -e \"\\\\n=== Large files ===\")",
+      "Bash(__NEW_LINE_0e10f6e6e4f2f068__ find:*)",
+      "Bash(__NEW_LINE_fe72c743e00d752e__ echo:*)",
+      "Bash(__NEW_LINE_fe72c743e00d752e__ ls:*)",
+      "Bash(__NEW_LINE_fe72c743e00d752e__ grep:*)",
+      "Bash(__NEW_LINE_fe72c743e00d752e__ cat:*)"
+    ]
+  }
+}

@@ -1200,6 +1200,44 @@ const app = {
 
         const arr = Array.isArray(this.responses[id]) ? this.responses[id] : [];
 
+        // Special handling for diseases question - if "ไม่มี" is selected, unselect all others
+        if (id === 'diseases' && value === 'ไม่มี' && checked) {
+            // Clear all other selections
+            this.responses[id] = ['ไม่มี'];
+            saveResponses(this.responses);
+            if (this.userInfo) this.debouncedSaveCloud();
+            
+            // Uncheck all other checkboxes
+            const allCheckboxes = document.querySelectorAll(`input[name="${id}"]`);
+            allCheckboxes.forEach(checkbox => {
+                if (checkbox.value !== 'ไม่มี') {
+                    checkbox.checked = false;
+                }
+            });
+            
+            // Hide all input fields for other options
+            const inputWrappers = document.querySelectorAll(`[id^="${id}_"][id$="_input_wrapper"]`);
+            inputWrappers.forEach(wrapper => {
+                wrapper.style.display = 'none';
+            });
+            
+            showToast('บันทึกแล้ว', 'success');
+            return;
+        }
+        
+        // Special handling for diseases question - if any disease is selected, uncheck "ไม่มี"
+        if (id === 'diseases' && value !== 'ไม่มี' && checked) {
+            const noneIndex = arr.indexOf('ไม่มี');
+            if (noneIndex > -1) {
+                arr.splice(noneIndex, 1);
+                // Uncheck "ไม่มี" checkbox
+                const noneCheckbox = document.querySelector(`input[name="${id}"][value="ไม่มี"]`);
+                if (noneCheckbox) {
+                    noneCheckbox.checked = false;
+                }
+            }
+        }
+
         if (checked) {
             if (arr.length >= maxSelect) {
                 // Uncheck the checkbox
@@ -1221,12 +1259,35 @@ const app = {
         saveResponses(this.responses);
         if (this.userInfo) this.debouncedSaveCloud(); // Auto-save to cloud
 
+        // Show/hide input field for hasInput options
+        const checkbox = document.querySelector(`input[value="${value}"]`);
+        const index = Array.from(checkbox.parentElement.parentElement.children).indexOf(checkbox.parentElement);
+        const inputWrapper = document.getElementById(`${id}_${index}_input_wrapper`);
+        
+        if (inputWrapper) {
+            inputWrapper.style.display = checked ? 'block' : 'none';
+        }
+
         // Clear error highlight when checkbox is answered
         if (arr.length > 0) {
             const card = document.getElementById(`card_${id}`);
             if (card) card.classList.remove('question-error');
         }
 
+        showToast('บันทึกแล้ว', 'success');
+    },
+
+    // Handle checkbox input field change
+    handleCheckboxInput(id, value, inputValue) {
+        if (!this.responses[id]) {
+            this.responses[id] = [];
+        }
+        
+        // Store the input value
+        this.responses[id][value + '_input'] = inputValue;
+        
+        saveResponses(this.responses);
+        if (this.userInfo) this.debouncedSaveCloud(); // Auto-save to cloud
         showToast('บันทึกแล้ว', 'success');
     },
 

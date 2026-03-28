@@ -160,7 +160,7 @@ function renderQuestion(num, q) {
       body += `</div>`;
     }
   } else if (q.type === 'time') {
-    body += `<div class="q-time"><div class="q-time-box">ชม.</div><span class="q-time-sep">:</span><div class="q-time-box">นาที</div><span style="font-size:9.5pt;color:#4D6078">ชม./นาที</span></div>`;
+    body += `<div class="q-time"><div class="q-time-box">ชม.</div><span class="q-time-sep">:</span><div class="q-time-box">นาที</div><span style="font-size:9.5pt;color:#4D6078">ชั่วโมง : นาที</span></div>`;
   } else if (q.type === 'number') {
     body += `<div class="q-input" style="width:80px"></div> ${esc(q.unit || '')}`;
   } else if (q.type === 'text' || q.type === 'textarea') {
