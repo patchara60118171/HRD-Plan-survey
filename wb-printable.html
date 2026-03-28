@@ -96,7 +96,26 @@ function render(data) {
 
     for (const sub of (sec.subsections || [])) {
       html += `<div class="subsection">`;
-      if (sub.title) html += `<div class="subsection-title">${esc(sub.title)}</div>`;
+      if (sub.title) {
+        // Remove HTML tags and extract clean text for printable version
+        const cleanTitle = sub.title
+          .replace(/<br>/g, ' ')
+          .replace(/<br\/>/g, ' ')
+          .replace(/<strong>/g, '')
+          .replace(/<\/strong>/g, '')
+          .replace(/<span[^>]*>/g, '')
+          .replace(/<\/span>/g, '')
+          .replace(/&lt;br&gt;/g, ' ')
+          .replace(/&lt;strong&gt;/g, '')
+          .replace(/&lt;\/strong&gt;/g, '')
+          .replace(/&lt;span[^&]*&gt;/g, '')
+          .replace(/&lt;\/span&gt;/g, '')
+          .replace(/&quot;/g, '"')
+          .replace(/&#39;/g, "'")
+          .trim();
+        
+        html += `<div class="subsection-title">${esc(cleanTitle)}</div>`;
+      }
       if (sub.hint) html += `<div style="font-size:9.5pt;color:#6B7F95;margin-bottom:6px;font-style:italic">${esc(sub.hint)}</div>`;
 
       for (const q of (sub.questions || [])) {
