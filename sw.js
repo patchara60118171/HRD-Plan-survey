@@ -1,12 +1,13 @@
 // =============================================
 // Service Worker - Offline Support for Well-being Survey v3.2
 // รองรับการทำงานแบบ Offline และ Sync ข้อมูลเมื่อกลับมออนไลน์
+// v3.3: fix collectFormData integer conversion + add ch1-edit to cache
 // v3.2: sync orgMap canonical org_codes (dhss, dop, dcy, test-org)
 // =============================================
 
-const CACHE_NAME = 'wellbeing-survey-v3.2';
-const STATIC_CACHE = 'static-v3.2';
-const DATA_CACHE = 'data-v3.2';
+const CACHE_NAME = 'wellbeing-survey-v3.3';
+const STATIC_CACHE = 'static-v3.3';
+const DATA_CACHE = 'data-v3.3';
 
 // ไฟล์ที่ต้อง Cache สำหรับ Offline
 const STATIC_ASSETS = [
@@ -21,7 +22,7 @@ const STATIC_ASSETS = [
   '/js/ch1-form.js',
   '/js/supabase-config.js',
   '/js/loading-states.js',
-  '/js/rate-limiter.js',
+  '/ch1-edit.html',
   // CDN Resources
   'https://cdn.tailwindcss.com',
   'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2',

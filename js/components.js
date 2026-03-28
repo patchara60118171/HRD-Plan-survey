@@ -467,29 +467,6 @@ function renderResults(responses, userInfo) {
                     <div class="result-status complete">✓ บันทึกแล้ว</div>
                 </div>
             </div>
-            
-            <!-- BMI & Mental Health Results -->
-            <div class="special-results">
-                ${bmi ? `
-                <div class="special-card">
-                    <div class="special-card-title">ดัชนีมวลกาย (BMI)</div>
-                    <div class="bmi-value" style="font-size: 2.5rem; font-weight: 700; color: #1E293B; margin-bottom: 5px;">${bmi}</div>
-                    <div class="bmi-category ${bmiInfo.class}" style="display: inline-flex; align-items: center; gap: 5px; font-weight: 600;">
-                        ${bmiInfo.emoji} ${bmiInfo.category}
-                    </div>
-                </div>
-                ` : ''}
-                
-                <div class="special-card">
-                    <div class="special-card-title">คะแนนสุขภาพจิต (TMHI-15)</div>
-                    <div class="score-value" style="font-size: 2.5rem; font-weight: 700; color: #1E293B; margin-bottom: 5px;">
-                        ${tmhiScore}<span class="score-max" style="font-size: 1.25rem; color: #94A3B8; font-weight: 400;"> / 60</span>
-                    </div>
-                    <div class="score-level ${tmhiInfo.class}" style="display: inline-flex; align-items: center; gap: 5px; font-weight: 600;">
-                        ${tmhiInfo.emoji} ${tmhiInfo.level}
-                    </div>
-                </div>
-            </div>
         </div>
     `;
 }

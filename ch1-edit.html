@@ -68,6 +68,14 @@ textarea.si{resize:vertical;min-height:96px;line-height:1.7}
 .compact-field input:focus{outline:none;border-color:#0F4C81;box-shadow:0 0 0 3px rgba(15,76,129,.08)}
 .compact-total{margin-top:8px;text-align:right;font-size:12px;color:#94a3b8}
 .compact-total strong{color:#475569}
+.upload-inline{margin-top:10px;background:#F8FAFC;border:1px dashed #cbd5e1;border-radius:12px;padding:10px}
+.upload-inline input[type=file]{display:block;width:100%;font-size:13px;color:#334155}
+.upload-inline-hint{font-size:11px;color:#64748b;margin-top:6px}
+.upload-inline-status{margin-top:8px;font-size:12px;color:#0f4c81;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.upload-inline-status.hidden{display:none}
+.upload-inline-remove{border:1px solid #fecaca;background:#fff1f2;color:#be123c;border-radius:8px;font-size:11px;font-weight:600;padding:4px 8px;cursor:pointer}
+.upload-inline-remove:hover{background:#ffe4e6}
+.upload-inline-error{margin-top:6px;font-size:11px;color:#b91c1c}
 .compact-section{display:grid;gap:14px}
 .turnover-table-wrap{overflow-x:auto;background:#F8FAFC;border-radius:16px;padding:16px;border:1px solid #eef2f7}
 .turnover-table{width:100%;min-width:640px;border-collapse:separate;border-spacing:0 8px}
@@ -181,6 +189,14 @@ const ORG_NAME_MAP = {
 };
 
 let userRole = null, userOrgCode = null, responseData = null, schema = null;
+const MAX_UPLOAD_SIZE_BYTES = 1 * 1024 * 1024; // 1 MB
+const UPLOAD_BUCKET = 'hrd-documents';
+
+const ATTACHMENT_CONFIG = {
+  strategy: { inputId: 'file-strategy', prefix: 'strategy', folder: 'strategy' },
+  org: { inputId: 'file-org', prefix: 'org_structure', folder: 'org-structure' },
+  hrd: { inputId: 'file-hrd', prefix: 'hrd_plan', folder: 'hrd-plan' },
+};
 
 const WORKFORCE_LAYOUT = {
   total_staff: { label: 'จำนวนข้าราชการรวม', placeholder: 'จำนวนข้าราชการรวม (เช่น 500)' },
@@ -255,6 +271,13 @@ function renderCompactField(question, value, isReadOnly) {
 
 function sumFieldValues(keys) {
   return keys.reduce((sum, key) => sum + (Number(responseData?.[key] || 0) || 0), 0);
+}
+
+function formatFileSize(bytes) {
+  if (!Number.isFinite(bytes) || bytes <= 0) return '-';
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 }
 
 function getNumericFieldValue(key) {
@@ -399,7 +422,17 @@ function buildWorkforceLayout(questions, isReadOnly) {
 
     const total = document.createElement('div');
     total.className = 'compact-total';
-    total.innerHTML = `ผลรวม: <strong>${sumFieldValues(available)}</strong> คน`;
+    const updatePanelTotal = () => {
+      const sum = available.reduce((acc, key) => acc + getNumericFieldValue(key), 0);
+      total.innerHTML = `ผลรวม: <strong>${sum}</strong> คน`;
+    };
+    updatePanelTotal();
+    if (!isReadOnly) {
+      available.forEach((key) => {
+        const input = grid.querySelector(`[name="${key}"]`);
+        if (input) input.addEventListener('input', updatePanelTotal);
+      });
+    }
     panel.appendChild(total);
     return panel;
   }
@@ -450,7 +483,18 @@ function buildWorkforceLayout(questions, isReadOnly) {
 
     const total = document.createElement('div');
     total.className = 'compact-total';
-    total.innerHTML = `ผลรวม: <strong>${sumFieldValues(positionKeys.filter((key) => WORKFORCE_LAYOUT[key]))}</strong> คน`;
+    const availablePositionKeys = positionKeys.filter((key) => WORKFORCE_LAYOUT[key]);
+    const updatePositionTotal = () => {
+      const sum = availablePositionKeys.reduce((acc, key) => acc + getNumericFieldValue(key), 0);
+      total.innerHTML = `ผลรวม: <strong>${sum}</strong> คน`;
+    };
+    updatePositionTotal();
+    if (!isReadOnly) {
+      availablePositionKeys.forEach((key) => {
+        const input = panel.querySelector(`[name="${key}"]`);
+        if (input) input.addEventListener('input', updatePositionTotal);
+      });
+    }
     panel.appendChild(total);
     block.appendChild(panel);
   }
@@ -511,6 +555,166 @@ async function loadResponse(orgCode) {
 
 function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
+function getAttachmentState(prefix) {
+  return {
+    path: responseData?.[`${prefix}_file_path`] || '',
+    url: responseData?.[`${prefix}_file_url`] || '',
+    name: responseData?.[`${prefix}_file_name`] || '',
+  };
+}
+
+function renderAttachmentUploadBlock(type, label, isReadOnly, prefix) {
+  const state = getAttachmentState(prefix);
+  const disabledAttr = isReadOnly ? 'disabled' : '';
+  const statusHidden = state.url ? '' : 'hidden';
+  const fileName = esc(state.name || (state.url ? state.url.split('/').pop() : 'ไฟล์แนบ'));
+
+  return `
+    <div class="upload-inline">
+      <label class="fq-label" style="font-size:12px;margin-bottom:6px">ไฟล์แนบ: ${label}</label>
+      <input type="file" id="file-${type}" accept="application/pdf" data-attachment="${type}" ${disabledAttr}>
+      <div class="upload-inline-hint">ไฟล์ PDF เท่านั้น | ขนาดไม่เกิน 1 MB</div>
+      <div id="upload-error-${type}" class="upload-inline-error"></div>
+      <div id="upload-status-${type}" class="upload-inline-status ${statusHidden}">
+        <a id="upload-link-${type}" href="${esc(state.url)}" target="_blank" rel="noopener">📎 ${fileName}</a>
+        <button type="button" class="upload-inline-remove" id="upload-remove-${type}" ${disabledAttr}>ลบไฟล์</button>
+      </div>
+      <input type="hidden" name="${prefix}_file_path" id="${prefix}_file_path" value="${esc(state.path)}">
+      <input type="hidden" name="${prefix}_file_url" id="${prefix}_file_url" value="${esc(state.url)}">
+      <input type="hidden" name="${prefix}_file_name" id="${prefix}_file_name" value="${esc(state.name)}">
+    </div>
+  `;
+}
+
+function setAttachmentStatus(type, { url = '', name = '' } = {}) {
+  const status = document.getElementById(`upload-status-${type}`);
+  const link = document.getElementById(`upload-link-${type}`);
+  if (!status || !link) return;
+
+  if (url) {
+    link.href = url;
+    const displayName = name || url.split('/').pop() || 'ไฟล์แนบ';
+    link.textContent = `📎 ${displayName}`;
+    status.classList.remove('hidden');
+  } else {
+    link.removeAttribute('href');
+    link.textContent = 'ยังไม่มีไฟล์แนบ';
+    status.classList.add('hidden');
+  }
+}
+
+function setAttachmentError(type, message = '') {
+  const err = document.getElementById(`upload-error-${type}`);
+  if (err) err.textContent = message;
+}
+
+function setAttachmentFields(prefix, { path = '', url = '', name = '' } = {}) {
+  const pathInput = document.getElementById(`${prefix}_file_path`);
+  const urlInput = document.getElementById(`${prefix}_file_url`);
+  const nameInput = document.getElementById(`${prefix}_file_name`);
+  if (pathInput) pathInput.value = path;
+  if (urlInput) urlInput.value = url;
+  if (nameInput) nameInput.value = name;
+}
+
+function getStoredAttachmentPath(prefix) {
+  return document.getElementById(`${prefix}_file_path`)?.value || '';
+}
+
+async function uploadAttachmentFile(type, file, orgCode) {
+  const config = ATTACHMENT_CONFIG[type];
+  if (!config) throw new Error('Attachment config not found');
+
+  const orgRaw = String(orgCode || ORG_PARAM || userOrgCode || 'unknown').trim();
+  const safeOrg = orgRaw.replace(/[^a-zA-Z0-9_-]/g, '_').replace(/_+/g, '_').slice(0, 30) || 'org';
+  const safeName = String(file.name || 'document.pdf').replace(/[^a-zA-Z0-9._-]/g, '_');
+  const filePath = `ch1-uploads/edit/${config.folder}/${safeOrg}_${Date.now()}_${safeName}`;
+
+  const { error } = await sb.storage.from(UPLOAD_BUCKET).upload(filePath, file, {
+    contentType: file.type || 'application/pdf',
+    upsert: false,
+  });
+  if (error) throw error;
+
+  const { data: publicData } = sb.storage.from(UPLOAD_BUCKET).getPublicUrl(filePath);
+  return {
+    path: filePath,
+    url: publicData?.publicUrl || '',
+    name: file.name || safeName,
+  };
+}
+
+async function deleteAttachmentIfExists(prefix) {
+  const existingPath = getStoredAttachmentPath(prefix);
+  if (!existingPath) return;
+  const { error } = await sb.storage.from(UPLOAD_BUCKET).remove([existingPath]);
+  if (error) throw error;
+}
+
+function initAttachmentUploadHandlers(isReadOnly, orgCode) {
+  if (isReadOnly) return;
+
+  Object.entries(ATTACHMENT_CONFIG).forEach(([type, config]) => {
+    const fileInput = document.getElementById(config.inputId);
+    const removeBtn = document.getElementById(`upload-remove-${type}`);
+
+    if (fileInput) {
+      fileInput.addEventListener('change', async (event) => {
+        const file = event.target.files?.[0];
+        setAttachmentError(type, '');
+        if (!file) return;
+
+        if (file.type !== 'application/pdf') {
+          setAttachmentError(type, 'กรุณาอัปโหลดไฟล์ PDF เท่านั้น');
+          event.target.value = '';
+          return;
+        }
+
+        if (file.size > MAX_UPLOAD_SIZE_BYTES) {
+          setAttachmentError(type, `ขนาดไฟล์เกิน 1 MB (ไฟล์ปัจจุบัน ${formatFileSize(file.size)})`);
+          event.target.value = '';
+          return;
+        }
+
+        fileInput.disabled = true;
+        if (removeBtn) removeBtn.disabled = true;
+        try {
+          await deleteAttachmentIfExists(config.prefix).catch(() => {});
+          const uploaded = await uploadAttachmentFile(type, file, orgCode);
+          setAttachmentFields(config.prefix, uploaded);
+          setAttachmentStatus(type, { url: uploaded.url, name: uploaded.name });
+          setAttachmentError(type, 'อัปโหลดสำเร็จ');
+          setTimeout(() => setAttachmentError(type, ''), 2500);
+        } catch (error) {
+          setAttachmentError(type, `อัปโหลดไม่สำเร็จ: ${error.message || 'กรุณาลองใหม่'}`);
+        } finally {
+          fileInput.disabled = false;
+          if (removeBtn) removeBtn.disabled = false;
+          event.target.value = '';
+        }
+      });
+    }
+
+    if (removeBtn) {
+      removeBtn.addEventListener('click', async () => {
+        setAttachmentError(type, '');
+        removeBtn.disabled = true;
+        try {
+          await deleteAttachmentIfExists(config.prefix).catch(() => {});
+          setAttachmentFields(config.prefix, { path: '', url: '', name: '' });
+          setAttachmentStatus(type, { url: '', name: '' });
+          setAttachmentError(type, 'ลบไฟล์เรียบร้อย');
+          setTimeout(() => setAttachmentError(type, ''), 2500);
+        } catch (error) {
+          setAttachmentError(type, `ลบไฟล์ไม่สำเร็จ: ${error.message || 'กรุณาลองใหม่'}`);
+        } finally {
+          removeBtn.disabled = false;
+        }
+      });
+    }
+  });
+}
+
 function renderPage(orgCode) {
   const status = responseData?.status || 'draft';
   const orgName = responseData?.organization || ORG_NAME_MAP[orgCode] || orgCode;
@@ -550,10 +754,12 @@ function renderPage(orgCode) {
       <div class="fq-item">
         <label class="fq-label">1. ภาพรวมยุทธศาสตร์และทิศทางของส่วนราชการ <span class="fq-help">(โปรดแนบข้อมูลหรืออธิบายโดยสังเขป)</span></label>
         <textarea class="si" name="strategic_overview" rows="3" placeholder="อธิบายภาพรวมยุทธศาสตร์และทิศทางของหน่วยงาน" ${dis}>${esc(v('strategic_overview'))}</textarea>
+        ${renderAttachmentUploadBlock('strategy', 'ภาพรวมยุทธศาสตร์', isReadOnly, 'strategy')}
       </div>
       <div class="fq-item">
         <label class="fq-label">2. โครงสร้างองค์กรและบทบาทหน้าที่หลัก <span class="fq-help">(โปรดแนบข้อมูล)</span></label>
         <textarea class="si" name="org_structure" rows="3" placeholder="อธิบายโครงสร้างองค์กรและบทบาทหน้าที่หลัก" ${dis}>${esc(v('org_structure'))}</textarea>
+        ${renderAttachmentUploadBlock('org', 'โครงสร้างองค์กร', isReadOnly, 'org_structure')}
       </div>
       <div id="workforce-mount"></div>
       <div class="fq-item" style="margin-top:8px">
@@ -769,7 +975,8 @@ function renderPage(orgCode) {
       <div class="compact-panel" style="margin-top:16px">
         <h3 class="compact-panel-title">19. ไฟล์ HRD PLAN ปี 2567-2570 <span style="font-weight:400;color:#94a3b8">(ถ้ามี)</span></h3>
         <div class="fq-item"><label class="fq-label" style="font-size:13px">ผลการปฏิบัติงานตามแผนปีล่าสุด</label>
-          <textarea class="si" name="hrd_plan_results" rows="3" placeholder="สรุปผลการปฏิบัติงาน..." ${dis}>${esc(v('hrd_plan_results'))}</textarea></div>
+          <textarea class="si" name="hrd_plan_results" rows="3" placeholder="สรุปผลการปฏิบัติงาน..." ${dis}>${esc(v('hrd_plan_results'))}</textarea>
+          ${renderAttachmentUploadBlock('hrd', 'HRD PLAN ปี 2567-2570', isReadOnly, 'hrd_plan')}</div>
       </div>
 
     </div>
@@ -793,6 +1000,9 @@ function renderPage(orgCode) {
 
   // Mount rank list (Q17)
   buildRankList(fd, isReadOnly);
+
+  // File attachment upload (Q1/Q2/Q19)
+  initAttachmentUploadHandlers(isReadOnly, orgCode);
 
   // Show buttons
   if (!isReadOnly) {
@@ -963,6 +1173,10 @@ function collectFormData() {
       if (el.checked) data[key].push(el.value);
     } else if (el.type === 'file') {
       // skip — handled separately
+    } else if (el.type === 'number' || el.inputMode === 'numeric' || el.getAttribute('inputmode') === 'numeric') {
+      // แปลง empty string เป็น null สำหรับตัวเลข (ป้องกัน PostgreSQL integer error)
+      const val = el.value?.trim();
+      data[key] = val === '' || val === undefined || val === null ? null : Number(val);
     } else {
       data[key] = el.value;
     }
@@ -978,6 +1192,14 @@ async function saveForm(newStatus) {
 
   try {
     const formData = collectFormData();
+
+    // Sanitize: แปลง "" → null สำหรับทุก key
+    // ป้องกัน PostgreSQL error "invalid input syntax for type integer: ''"
+    // เกิดขึ้นเมื่อ hidden/text input ที่ map กับ INTEGER column ส่งค่าว่างไป (เช่น org ที่ยังไม่มี record → INSERT path)
+    Object.keys(formData).forEach(k => {
+      if (formData[k] === '') formData[k] = null;
+    });
+
     formData.status = newStatus;
     formData.last_saved_at = new Date().toISOString();
     // org_code ต้องมาจาก session เสมอ (ป้องกัน user แก้ field ใน form)

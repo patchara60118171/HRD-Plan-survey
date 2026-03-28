@@ -97,7 +97,6 @@ backup/
 # ===== Duplicate/draft HTML at root (working copies) =====
 admin-wireframe.html
 ch1-plain-form.tex
-ch1-printable.html
 ch1-printable-simple.html
 
 # ===== Analysis/setup docs (working notes, not for repo) =====
@@ -123,3 +122,4 @@ Organization_Links.csv
 
 # ===== Draft/working folder (Thai name folder at root) =====
 แบบสอบถามบท 1/
+.env*.local
