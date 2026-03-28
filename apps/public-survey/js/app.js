@@ -1238,6 +1238,54 @@ const app = {
             }
         }
 
+        // Special handling for accident_hist question - if "ไม่เคย" is selected, unselect all others
+        if (id === 'accident_hist' && value === 'ไม่เคย' && checked) {
+            // Clear all other selections
+            this.responses[id] = ['ไม่เคย'];
+            saveResponses(this.responses);
+            if (this.userInfo) this.debouncedSaveCloud();
+            
+            // Uncheck all other checkboxes
+            const allCheckboxes = document.querySelectorAll(`input[name="${id}"]`);
+            allCheckboxes.forEach(checkbox => {
+                if (checkbox.value !== 'ไม่เคย') {
+                    checkbox.checked = false;
+                }
+            });
+            
+            // Hide all input fields for other options
+            const inputWrappers = document.querySelectorAll(`[id^="${id}_"][id$="_input_wrapper"]`);
+            inputWrappers.forEach(wrapper => {
+                wrapper.style.display = 'none';
+            });
+            
+            showToast('บันทึกแล้ว', 'success');
+            return;
+        }
+        
+        // Special handling for accident_hist question - if any accident is selected, uncheck "ไม่เคย"
+        if (id === 'accident_hist' && value !== 'ไม่เคย' && checked) {
+            const noneIndex = arr.indexOf('ไม่เคย');
+            if (noneIndex > -1) {
+                arr.splice(noneIndex, 1);
+                // Uncheck "ไม่เคย" checkbox
+                const noneCheckbox = document.querySelector(`input[name="${id}"][value="ไม่เคย"]`);
+                if (noneCheckbox) {
+                    noneCheckbox.checked = false;
+                }
+            }
+        }
+
+        // Special handling for drunk_drive question - if "ไม่เคย" is selected, clear other selections
+        if (id === 'drunk_drive' && value === 'ไม่เคย' && checked) {
+            // For radio questions, the value is already set by the normal flow
+            // Just save and show toast
+            saveResponses(this.responses);
+            if (this.userInfo) this.debouncedSaveCloud();
+            showToast('บันทึกแล้ว', 'success');
+            return;
+        }
+
         if (checked) {
             if (arr.length >= maxSelect) {
                 // Uncheck the checkbox
