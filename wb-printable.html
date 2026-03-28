@@ -127,6 +127,25 @@ function render(data) {
           const parsed = parseHintLabels(sub.hint, qWithDefaults.labels.length);
           if (parsed) qWithDefaults.labels = parsed;
         }
+        
+        // Clean HTML tags from question text for printable version
+        const cleanText = qWithDefaults.text
+          .replace(/<br>/g, ' ')
+          .replace(/<br\/>/g, ' ')
+          .replace(/<strong>/g, '')
+          .replace(/<\/strong>/g, '')
+          .replace(/<span[^>]*>/g, '')
+          .replace(/<\/span>/g, '')
+          .replace(/&lt;br&gt;/g, ' ')
+          .replace(/&lt;strong&gt;/g, '')
+          .replace(/&lt;\/strong&gt;/g, '')
+          .replace(/&lt;span[^&]*&gt;/g, '')
+          .replace(/&lt;\/span&gt;/g, '')
+          .replace(/&quot;/g, '"')
+          .replace(/&#39;/g, "'")
+          .trim();
+        
+        qWithDefaults.text = cleanText;
         html += renderQuestion(qNum, qWithDefaults);
       }
       html += `</div>`;
