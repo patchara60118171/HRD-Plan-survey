@@ -3,10 +3,11 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>CH1 ข้อมูลองค์กร — Mockup Redesign</title>
+<title>CH1 ข้อมูลองค์กร — HR Portal</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai+Looped:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -52,61 +53,70 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
 .tb-sub{font-size:11.5px;color:var(--tx2)}
 .tb-space{flex:1}
 .tb-chips{display:flex;gap:8px;align-items:center}
-.tb-chip{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:600;border:1px solid var(--bdr);background:#faf8ff;color:var(--tx2);cursor:pointer}
-.tb-chip:hover{border-color:#c4b5fd;color:var(--P)}
+.tb-chip{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:600;border:1px solid var(--bdr);background:#faf8ff;color:var(--tx2)}
 .portal-content{padding:24px;max-width:1060px}
 
-/* ── FORM CARD ── */
+/* ── Org Selector ── */
+.org-selector-bar{background:#fff;border:1px solid var(--bdr);border-radius:12px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;box-shadow:var(--shadow)}
+.org-selector-bar span.lbl{font-size:13px;font-weight:600;color:var(--tx2)}
+.org-selector-bar input{padding:7px 12px;border:1.5px solid var(--bdr);border-radius:8px;font-family:inherit;font-size:13px;color:var(--tx);background:#faf8ff;min-width:160px}
+.org-selector-bar input:focus{outline:none;border-color:#a78bfa}
+.org-selector-bar button{padding:7px 16px;border-radius:8px;background:var(--P);color:#fff;border:none;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer}
+.org-selector-bar button:hover{background:var(--PD)}
+.org-name-display{font-size:13px;font-weight:700;color:var(--P)}
+
+/* ── Skeleton ── */
+.skeleton{background:linear-gradient(90deg,#f0ebff 25%,#e4d9ff 50%,#f0ebff 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:8px;height:60px}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* ── Error ── */
+.error-box{background:#fef2f2;border:1.5px solid #fecaca;border-radius:10px;padding:12px 16px;color:#dc2626;font-size:13px;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+
+/* ── Form card (submission info) ── */
 .form-card{background:#fff;border:1px solid var(--bdr);border-radius:14px;padding:16px 20px;margin-bottom:20px;box-shadow:var(--shadow);display:flex;align-items:center;gap:16px;flex-wrap:wrap}
 .form-card-icon{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#7c3aed,#ec4899);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
 .form-card-info{flex:1;min-width:0}
 .form-card-info h2{font-size:15px;font-weight:700;color:var(--P)}
 .form-card-info p{font-size:12px;color:var(--tx2);margin-top:2px}
-.badge-submitted{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:999px;background:var(--AL);color:#be185d;font-size:11px;font-weight:700}
-.badge-dot{width:6px;height:6px;border-radius:50%;background:#ec4899}
+.badge-submitted{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:999px;background:var(--GL);color:#15803d;font-size:11px;font-weight:700;border:1px solid #bbf7d0}
+.badge-nosend{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:999px;background:#fef2f2;color:#dc2626;font-size:11px;font-weight:700;border:1px solid #fecaca}
+.badge-dot{width:6px;height:6px;border-radius:50%;background:#16a34a}
+.badge-dot-red{width:6px;height:6px;border-radius:50%;background:#dc2626}
+.fiscal-badge{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:8px;background:var(--PL);color:var(--P);font-size:11.5px;font-weight:700;border:1px solid #c4b5fd}
 
-/* ── YEAR SELECTOR ── */
-.year-row{display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap}
-.year-label{font-size:13px;font-weight:600;color:var(--tx2)}
-.year-select{padding:7px 12px;border:1.5px solid var(--bdr);border-radius:8px;font-family:inherit;font-size:13px;color:var(--tx);background:#fff;cursor:pointer}
-.year-select:focus{outline:none;border-color:#a78bfa}
-.compare-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;font-size:12.5px;font-weight:600;border:1.5px solid var(--bdr);background:#fff;color:var(--tx2);cursor:pointer}
-.compare-btn:hover{border-color:#c4b5fd;color:var(--P)}
-
-/* ── STATS GRID ── */
+/* ── Stats grid ── */
 .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:12px;margin-bottom:20px}
 .stat-card{background:#fff;border:1px solid var(--bdr);border-radius:12px;padding:16px 14px;box-shadow:var(--shadow);position:relative}
 .stat-card-val{font-size:22px;font-weight:700;color:#7c3aed;line-height:1.15}
-.stat-card-lbl{font-size:11px;color:var(--tx3);margin-top:6px;line-height:1.45}
+.stat-card-lbl{font-size:11px;color:var(--tx3);margin-top:6px;line-height:1.45;font-weight:500}
+.stat-card-unit{font-size:14px;font-weight:500;color:#9ca3af}
+
+/* tooltip */
 .info-tip{position:relative;display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:999px;background:#ede9fe;color:#6d28d9;font-size:9px;font-weight:800;cursor:help;vertical-align:middle;margin-left:4px}
 .info-tip::after{content:attr(data-tip);position:absolute;left:50%;bottom:calc(100% + 8px);transform:translateX(-50%);min-width:200px;max-width:260px;padding:8px 10px;border-radius:8px;background:#1f2937;color:#fff;font-size:11px;font-weight:500;line-height:1.5;white-space:normal;text-align:left;box-shadow:0 10px 25px rgba(15,23,42,.22);opacity:0;pointer-events:none;transition:opacity .15s;z-index:50}
 .info-tip::before{content:'';position:absolute;left:50%;bottom:calc(100% + 2px);transform:translateX(-50%);border:5px solid transparent;border-top-color:#1f2937;opacity:0;pointer-events:none;transition:opacity .15s;z-index:50}
 .info-tip:hover::after,.info-tip:hover::before{opacity:1}
-.stat-card-trend{margin-top:8px;font-size:10.5px;display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:999px;font-weight:600}
-.trend-up{background:#ecfdf3;color:#15803d}
-.trend-down{background:#fee2e2;color:#b91c1c}
-.trend-flat{background:#f3f4f6;color:#6b7280}
 
-/* ── WARNING NOTE ── */
+/* annotation badges */
+.ann-edit{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:5px;font-size:9.5px;font-weight:700;background:#f59e0b;color:#fff;margin-left:4px;vertical-align:middle}
+.ann-del{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:5px;font-size:9.5px;font-weight:700;background:#ef4444;color:#fff;margin-left:4px;vertical-align:middle}
+
+/* ── Warning note ── */
 .warning-note{background:var(--WL);border:1px solid #fcd34d;border-radius:12px;padding:14px 18px;margin-bottom:20px;display:flex;gap:12px;align-items:flex-start}
 .warning-note-icon{font-size:18px;flex-shrink:0;margin-top:1px}
 .warning-note-body{flex:1}
 .warning-note-title{font-size:13.5px;font-weight:700;color:#78350f;margin-bottom:4px}
 .warning-note-text{font-size:12.5px;color:#92400e;line-height:1.6}
 
-/* ── TREND CHART PLACEHOLDER ── */
-.trend-card{background:#fff;border:1px solid var(--bdr);border-radius:14px;padding:18px 20px;margin-bottom:20px;box-shadow:var(--shadow)}
-.trend-card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
-.trend-card-head h3{font-size:14px;font-weight:700;color:var(--P);display:flex;align-items:center;gap:8px}
-.chart-placeholder{height:130px;background:linear-gradient(180deg,var(--PL) 0%,#fff 100%);border-radius:10px;border:1px dashed #c4b5fd;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:#a78bfa;position:relative;overflow:hidden}
-.chart-bars{display:flex;align-items:flex-end;gap:8px;height:80px;padding:0 16px;position:absolute;bottom:16px;left:0;right:0;justify-content:center}
-.chart-bar{border-radius:4px 4px 0 0;background:linear-gradient(180deg,#8b5cf6,#c4b5fd);min-width:28px;flex:1;max-width:44px;transition:height .3s}
-.chart-label-row{display:flex;gap:8px;margin-top:4px;justify-content:center}
-.chart-lbl{font-size:10px;color:var(--tx3);flex:1;max-width:44px;text-align:center}
-.chart-year-row{display:flex;gap:8px;margin-top:2px;justify-content:center}
-.chart-yr{font-size:9.5px;color:var(--tx3);flex:1;max-width:44px;text-align:center}
+/* ── Org info detail card ── */
+.org-detail-card{background:#fff;border:1px solid var(--bdr);border-radius:14px;padding:18px 20px;margin-bottom:20px;box-shadow:var(--shadow)}
+.org-detail-card h3{font-size:14px;font-weight:700;color:var(--P);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.org-detail-row{display:flex;gap:8px;padding:9px 0;border-bottom:1px solid #f3f0fa}
+.org-detail-row:last-child{border-bottom:none}
+.org-detail-label{font-size:12px;font-weight:600;color:var(--tx3);width:140px;flex-shrink:0}
+.org-detail-val{font-size:12.5px;color:var(--tx);font-weight:500}
 
-/* ── ACTION BUTTONS ── */
+/* ── Action buttons ── */
 .action-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:24px}
 .btn{display:inline-flex;align-items:center;gap:7px;padding:10px 18px;border-radius:10px;font-size:13px;font-weight:600;border:none;cursor:pointer;font-family:inherit;transition:all .15s;text-decoration:none}
 .btn-primary{background:var(--P);color:#fff}
@@ -114,32 +124,14 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
 .btn-outline{background:#fff;border:1.5px solid var(--bdr);color:var(--tx2)}
 .btn-outline:hover{border-color:#c4b5fd;color:var(--P)}
 
-/* ── ANNOTATION CALLOUTS ── */
-.ann{position:absolute;display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:6px;font-size:10.5px;font-weight:700;white-space:nowrap;z-index:10;pointer-events:none;box-shadow:0 2px 8px rgba(0,0,0,.15)}
-.ann-del{background:#ef4444;color:#fff}
-.ann-edit{background:#f59e0b;color:#fff}
-.ann-keep{background:#10b981;color:#fff}
-.ann-wrap{position:relative}
-
-/* annotation line connector */
-.ann-line{position:absolute;border-left:2px dashed;z-index:9;pointer-events:none}
-.ann-line-del{border-color:#ef4444}
-.ann-line-edit{border-color:#f59e0b}
-
-/* ── REMOVED SECTION PLACEHOLDER ── */
-.removed-placeholder{background:#f8f8f8;border:2px dashed #d1d5db;border-radius:12px;padding:16px 20px;margin-bottom:16px;display:flex;align-items:center;gap:12px;color:#9ca3af}
-.removed-icon{font-size:20px;opacity:.5}
-.removed-text{font-size:13px;font-style:italic}
-
-/* ── MOCKUP BANNER ── */
-.mockup-banner{background:linear-gradient(90deg,#fef3c7,#fff7ed);border:1px solid #fcd34d;border-radius:10px;padding:10px 16px;margin-bottom:20px;display:flex;align-items:center;gap:10px;font-size:12.5px;color:#78350f}
-
-/* ── FOOTNOTE NAV ── */
+/* ── Page nav ── */
 .page-nav{background:#fff;border-top:1px solid var(--bdr);padding:14px 24px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .page-nav-label{font-size:12px;color:var(--tx3);margin-right:4px}
 .page-nav a{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;border:1px solid var(--bdr);color:var(--tx2);background:#fff}
 .page-nav a:hover{border-color:#c4b5fd;color:var(--P)}
 .page-nav a.current{background:var(--PL);border-color:#c4b5fd;color:var(--P)}
+
+@media(max-width:860px){.sidebar{display:none}.portal-main-wrap{margin-left:0}}
 </style>
 </head>
 <body>
@@ -157,15 +149,13 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
     </div>
     <div class="sidebar-org">
       <div class="o-label">องค์กรปัจจุบัน</div>
-      <div class="o-name">สำนักงานทดสอบ NIDA</div>
-      <div class="o-email">hr@nida-test.ac.th</div>
+      <div class="o-name" id="sb-org-name">กำลังโหลด…</div>
+      <div class="o-email" id="sb-org-email">—</div>
     </div>
     <div class="portal-nav">
       <div class="nav-group">เมนูหลัก</div>
-      <a href="#" class="nav-item"><span class="ni">🏠</span> หน้าหลัก</a>
-      <a href="#" class="nav-item dim"><span class="ni">🗂️</span> รายละเอียดองค์กร</a>
+      <a href="home-dashboard.html" class="nav-item"><span class="ni">🏠</span> หน้าหลัก</a>
       <a href="ch1-org-info.html" class="nav-item active"><span class="ni">📊</span> CH1 ข้อมูลองค์กร</a>
-      <a href="#" class="nav-item dim"><span class="ni">✏️</span> แก้ไขฟอร์ม</a>
       <div class="nav-group">Well-being</div>
       <a href="wb-dashboard.html" class="nav-item"><span class="ni">📈</span> Well-being ผลสำรวจ</a>
       <a href="wb-individual.html" class="nav-item"><span class="ni">👤</span> Well-being รายบุคคล</a>
@@ -181,161 +171,40 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
     <div class="topbar">
       <div class="tb-head">
         <div class="tb-title">CH1 ข้อมูลองค์กร</div>
-        <div class="tb-sub">ข้อมูลสุขภาวะและสถิติบุคลากรขององค์กร — ปีงบประมาณ 2567</div>
+        <div class="tb-sub" id="topbar-sub">ข้อมูลสุขภาวะและสถิติบุคลากรขององค์กร</div>
       </div>
       <div class="tb-space"></div>
       <div class="tb-chips">
-        <span class="tb-chip">📅 2567</span>
-        <span class="tb-chip">👤 สำนักงานทดสอบ</span>
+        <span class="tb-chip" id="chip-year">📅 —</span>
+        <span class="tb-chip" id="chip-org">👤 —</span>
       </div>
     </div>
 
     <div class="portal-content">
 
-      <!-- MOCKUP BANNER -->
-      <div class="mockup-banner">
-        <span style="font-size:16px">🎨</span>
-        <strong>Mockup Redesign</strong> — หน้านี้แสดงการออกแบบใหม่พร้อม annotation ระบุสิ่งที่เปลี่ยนแปลง
-        &nbsp;·&nbsp; <a href="report.html" style="color:var(--W);font-weight:700">ดูรายงานฉบับเต็ม →</a>
+      <!-- Org Selector -->
+      <div class="org-selector-bar">
+        <span class="lbl">องค์กร:</span>
+        <input id="org-input" value="test-org" placeholder="org_code...">
+        <button onclick="changeOrg()">โหลด</button>
+        <span class="org-name-display" id="org-name-display">—</span>
       </div>
 
-      <!-- FORM CARD -->
-      <div class="ann-wrap">
-        <div class="form-card">
-          <div class="form-card-icon">📋</div>
-          <div class="form-card-info">
-            <h2>แบบสอบถาม — ข้อมูลสุขภาวะขององค์กร (CH1)</h2>
-            <p>ปีงบประมาณ 2567 &nbsp;·&nbsp; ส่งข้อมูลเมื่อ 15 ม.ค. 2568 &nbsp;·&nbsp;
-              <span style="color:#7c3aed;font-weight:600;cursor:pointer">ดูรายละเอียดโครงการ →</span>
-              <span class="info-tip" data-tip="⚠ คำแนะนำ: ควรเชื่อมลิงก์นี้ไปยังโครงการที่เกี่ยวข้องแทนการเปิดฟอร์ม">i</span>
-            </p>
-          </div>
-          <span class="badge-submitted"><span class="badge-dot"></span> ส่งข้อมูลแล้ว</span>
-        </div>
-        <div class="ann ann-edit" style="top:-10px;right:12px">⚠ แก้ไข — เชื่อมไปโครงการ</div>
-      </div>
+      <!-- Error -->
+      <div id="error-box" class="error-box" style="display:none">⚠ ไม่สามารถโหลดข้อมูลได้: <span id="error-msg"></span></div>
 
-      <!-- WARNING NOTE -->
-      <div class="ann-wrap">
-        <div class="warning-note">
-          <div class="warning-note-icon">⚠️</div>
-          <div class="warning-note-body">
-            <div class="warning-note-title">แจ้งเตือน: ค่า NCD รวม ยังรอการตรวจสอบ</div>
-            <div class="warning-note-text">
-              ค่า <strong>NCD รวม</strong> ในหน้านี้ยังคำนวณไม่ถูกต้อง (logic เดิมคำนวณจากเจ้าหน้าที่ที่ลาป่วยและมี NCDs แต่ค่าที่ได้ไม่ตรงกับข้อมูลจริง)
-              กำลังดำเนินการ rewrite calculation — ข้อมูลนี้จะอัปเดตอัตโนมัติเมื่อพร้อม
-            </div>
-          </div>
+      <!-- Dynamic area -->
+      <div id="main-area">
+        <div style="background:#fff;border:1px solid var(--bdr);border-radius:14px;padding:20px;margin-bottom:16px">
+          <div class="skeleton" style="height:40px;margin-bottom:12px"></div>
+          <div class="skeleton" style="height:20px;width:60%"></div>
         </div>
-        <div class="ann ann-edit" style="top:-10px;right:12px">⚠ แก้ไข — รอ calculation ใหม่</div>
-      </div>
-
-      <!-- YEAR SELECTOR -->
-      <div class="year-row">
-        <span class="year-label">📅 แสดงข้อมูลปี:</span>
-        <select class="year-select">
-          <option selected>2567 (ล่าสุด)</option>
-          <option>2566</option>
-          <option>2565</option>
-          <option>2564</option>
-          <option>2563</option>
-        </select>
-        <button class="compare-btn">📊 เปรียบเทียบ 5 ปี</button>
-        <span class="info-tip" data-tip="⚠ แก้ไข: เพิ่ม dropdown ปีและตัวเลือกเปรียบเทียบ 5 ปี เพื่อให้ผู้ใช้เข้าใจบริบทของข้อมูล">i</span>
-      </div>
-
-      <!-- STATS GRID (REDESIGNED) -->
-      <div class="ann-wrap" style="margin-bottom:20px">
-        <div style="font-size:12px;font-weight:700;color:var(--tx2);margin-bottom:10px;display:flex;align-items:center;gap:8px">
-          สถิติสำคัญ — ปี 2567
-          <span class="ann ann-keep" style="position:static;transform:none">✓ เก็บไว้ (ปรับ label)</span>
-        </div>
-        <div class="stats-grid">
-          <div class="stat-card">
-            <div class="stat-card-val">50</div>
-            <div class="stat-card-lbl">บุคลากรรวม (คน)</div>
-            <div class="stat-card-trend trend-flat">→ เท่าเดิม</div>
-          </div>
-          <div class="stat-card ann-wrap">
-            <div class="stat-card-val">3.85<span style="font-size:14px;font-weight:500">%</span></div>
-            <div class="stat-card-lbl">
-              อัตราลาออก
-              <span class="info-tip" data-tip="อัตราส่วนพนักงานที่ลาออกต่อจำนวนพนักงานทั้งหมดในปีนั้น">i</span>
-            </div>
-            <div class="stat-card-trend trend-down">↓ ลดลง 0.5%</div>
-          </div>
-          <div class="stat-card ann-wrap">
-            <div class="stat-card-val">5.00<span style="font-size:14px;font-weight:500"> วัน</span></div>
-            <div class="stat-card-lbl" style="font-weight:700;color:var(--tx)">
-              วันลาป่วยเฉลี่ย/คน/ปี
-              <span class="ann ann-edit" style="position:static;display:inline-flex;margin-top:4px;font-size:9.5px">⚠ แก้ label</span>
-            </div>
-            <div class="stat-card-trend trend-flat">→ เท่าเดิม</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-card-val">30.00<span style="font-size:14px;font-weight:500"> ชม.</span></div>
-            <div class="stat-card-lbl">ชั่วโมงอบรม/คน/ปี</div>
-            <div class="stat-card-trend trend-up">↑ เพิ่มขึ้น 5 ชม.</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-card-val">50.00</div>
-            <div class="stat-card-lbl">คะแนนความผูกพัน</div>
-            <div class="stat-card-trend trend-up">↑ เพิ่มขึ้น 2.3</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- REMOVED: BMI/TMHI CARDS -->
-      <div class="ann-wrap" style="margin-bottom:20px">
-        <div class="removed-placeholder">
-          <span class="removed-icon">🚫</span>
-          <div>
-            <div style="font-size:12.5px;font-weight:700;color:#6b7280">ส่วนที่ถูกลบออก</div>
-            <div class="removed-text">Card "BMI เฉลี่ย" และ Card "TMHI เฉลี่ย" — ถูกซ่อนตามคำแนะนำ ไม่แสดงในหน้าสรุปนี้</div>
-          </div>
-        </div>
-        <div class="ann ann-del" style="top:-10px;right:12px">✗ ลบออก — BMI + TMHI cards</div>
-      </div>
-
-      <!-- TREND CHART -->
-      <div class="trend-card">
-        <div class="trend-card-head">
-          <h3>📈 แนวโน้ม 5 ปีที่ผ่านมา
-            <span class="ann ann-edit" style="position:static;display:inline-flex">⚠ เพิ่มใหม่</span>
-          </h3>
-          <span style="font-size:12px;color:var(--tx3)">วันลาป่วยเฉลี่ย/คน/ปี</span>
-        </div>
-        <div style="display:flex;flex-direction:column;align-items:stretch">
-          <div class="chart-bars">
-            <div class="chart-bar" style="height:44%"></div>
-            <div class="chart-bar" style="height:56%"></div>
-            <div class="chart-bar" style="height:48%"></div>
-            <div class="chart-bar" style="height:62%"></div>
-            <div class="chart-bar" style="height:76%;background:linear-gradient(180deg,#5b2aa8,#8b5cf6)"></div>
-          </div>
-          <div class="chart-year-row" style="padding:0 16px;display:flex;gap:8px;justify-content:center;margin-top:8px">
-            <span class="chart-yr" style="flex:1;max-width:44px;text-align:center">2563</span>
-            <span class="chart-yr" style="flex:1;max-width:44px;text-align:center">2564</span>
-            <span class="chart-yr" style="flex:1;max-width:44px;text-align:center">2565</span>
-            <span class="chart-yr" style="flex:1;max-width:44px;text-align:center">2566</span>
-            <span class="chart-yr" style="flex:1;max-width:44px;text-align:center;font-weight:700;color:var(--P)">2567</span>
-          </div>
-        </div>
-        <div style="margin-top:12px;font-size:11.5px;color:var(--tx3);text-align:center">
-          แถบสีเข้ม = ปีปัจจุบัน &nbsp;|&nbsp; Placeholder chart — จะใช้ Chart.js จริงในการ implement
-        </div>
-      </div>
-
-      <!-- ACTION BUTTONS (REDESIGNED) -->
-      <div class="ann-wrap">
-        <div class="action-row">
-          <button class="btn btn-primary">👁 ดูข้อมูล</button>
-          <button class="btn btn-outline">📥 ดาวน์โหลด PDF</button>
-        </div>
-        <div class="ann ann-del" style="top:-10px;right:0">✗ ลบออก — ปุ่ม "แก้ไขฟอร์ม"</div>
-        <div style="margin-top:-10px;font-size:11.5px;color:var(--tx3);display:flex;align-items:center;gap:6px">
-          <span style="color:#b91c1c;font-weight:700">✗</span>
-          ลบปุ่ม "แก้ไขฟอร์ม" ออกจากหน้านี้ — ย้ายไปอยู่ใน nav item "แก้ไขฟอร์ม" แทน
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:12px;margin-bottom:20px">
+          <div class="skeleton" style="height:80px"></div>
+          <div class="skeleton" style="height:80px"></div>
+          <div class="skeleton" style="height:80px"></div>
+          <div class="skeleton" style="height:80px"></div>
+          <div class="skeleton" style="height:80px"></div>
         </div>
       </div>
 
@@ -343,7 +212,8 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
 
     <!-- PAGE NAV -->
     <div class="page-nav">
-      <span class="page-nav-label">Mockup pages:</span>
+      <span class="page-nav-label">หน้า:</span>
+      <a href="home-dashboard.html">🏠 หน้าหลัก</a>
       <a href="report.html">📋 รายงาน</a>
       <a href="ch1-org-info.html" class="current">📊 CH1 ข้อมูลองค์กร</a>
       <a href="wb-dashboard.html">📈 WB ผลสำรวจ</a>
@@ -352,5 +222,245 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
   </div><!-- /portal-main-wrap -->
 
 </div><!-- /portal-app -->
+
+<script>
+const SUPABASE_URL = 'https://fgdommhiqhzvsedfzyrr.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZnZG9tbWhpcWh6dnNlZGZ6eXJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkzMzY2MzUsImV4cCI6MjA4NDkxMjYzNX0.GFMOeDArhq-9lPt39OizkBOFFgK4TDpVDJrk_HRQ6Xc';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+function formatThaiDate(iso) {
+  if (!iso) return '—';
+  try {
+    const d = new Date(iso);
+    const day = d.getDate();
+    const monthsTh = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+    const month = monthsTh[d.getMonth()];
+    const year = d.getFullYear() + 543;
+    return `${day} ${month} ${year}`;
+  } catch(e) { return '—'; }
+}
+
+function fmtNum(v, dec = 2) {
+  if (v == null || v === '') return '—';
+  return parseFloat(v).toFixed(dec);
+}
+
+function changeOrg() {
+  const code = document.getElementById('org-input').value.trim();
+  if (!code) return;
+  const url = new URL(window.location.href);
+  url.searchParams.set('org', code);
+  window.history.pushState({}, '', url);
+  loadAll(code);
+}
+
+function showError(msg) {
+  const b = document.getElementById('error-box');
+  b.style.display = 'flex';
+  document.getElementById('error-msg').textContent = msg;
+}
+
+function hideError() {
+  document.getElementById('error-box').style.display = 'none';
+}
+
+async function loadAll(orgCode) {
+  hideError();
+  document.getElementById('main-area').innerHTML = `
+    <div style="background:#fff;border:1px solid var(--bdr);border-radius:14px;padding:20px;margin-bottom:16px">
+      <div class="skeleton" style="height:40px;margin-bottom:12px"></div>
+      <div class="skeleton" style="height:20px;width:60%"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:12px;margin-bottom:20px">
+      <div class="skeleton" style="height:80px"></div>
+      <div class="skeleton" style="height:80px"></div>
+      <div class="skeleton" style="height:80px"></div>
+      <div class="skeleton" style="height:80px"></div>
+      <div class="skeleton" style="height:80px"></div>
+    </div>`;
+
+  try {
+    // 1. Organizations
+    const { data: orgData, error: orgErr } = await sb
+      .from('organizations')
+      .select('org_name_th, org_name_en, ministry, org_type, total_staff, saraban_email, contact_email, coordinator_name, coordinator_position')
+      .eq('org_code', orgCode)
+      .maybeSingle();
+    if (orgErr) throw orgErr;
+
+    const orgName = orgData?.org_name_th || orgData?.org_name_en || orgCode;
+    document.getElementById('sb-org-name').textContent = orgName;
+    document.getElementById('sb-org-email').textContent = orgData?.saraban_email || orgData?.contact_email || '—';
+    document.getElementById('org-name-display').textContent = orgName;
+    document.getElementById('chip-org').textContent = `👤 ${orgName.substring(0,20)}${orgName.length > 20 ? '…' : ''}`;
+
+    // 2. hrd_ch1_responses latest row
+    const { data: ch1Rows, error: ch1Err } = await sb
+      .from('hrd_ch1_responses')
+      .select('total_staff, type_official, type_employee, type_contract, type_other, sick_leave_days, sick_leave_avg, training_hours, turnover_count, engagement_score, ncd_total, status, fiscal_year, submitted_at')
+      .eq('org_code', orgCode)
+      .order('submitted_at', { ascending: false })
+      .limit(1);
+    if (ch1Err) throw ch1Err;
+    const ch1 = ch1Rows && ch1Rows.length > 0 ? ch1Rows[0] : null;
+
+    const fiscalYear = ch1?.fiscal_year || '—';
+    const submittedAt = ch1?.submitted_at;
+    const ch1Status = ch1?.status;
+    const totalStaff = ch1?.total_staff || orgData?.total_staff || 0;
+
+    document.getElementById('chip-year').textContent = `📅 ปี ${fiscalYear}`;
+    document.getElementById('topbar-sub').textContent = `ข้อมูลสุขภาวะและสถิติบุคลากรขององค์กร — ปีงบประมาณ ${fiscalYear}`;
+
+    // Calculate turnover rate
+    const turnoverCount = ch1?.turnover_count;
+    let turnoverRate = '—';
+    if (turnoverCount != null && totalStaff > 0) {
+      turnoverRate = ((turnoverCount / totalStaff) * 100).toFixed(2);
+    }
+
+    const sickLeaveAvg = fmtNum(ch1?.sick_leave_avg);
+    const trainingHours = fmtNum(ch1?.training_hours);
+    const engagementScore = fmtNum(ch1?.engagement_score);
+
+    // Status badge
+    let statusBadge = '';
+    if (ch1Status === 'submitted' || ch1Status === 'ส่งแล้ว') {
+      statusBadge = `<span class="badge-submitted"><span class="badge-dot"></span> ส่งข้อมูลแล้ว</span>`;
+    } else if (ch1) {
+      statusBadge = `<span class="badge-submitted"><span class="badge-dot"></span> มีข้อมูล</span>`;
+    } else {
+      statusBadge = `<span class="badge-nosend"><span class="badge-dot-red"></span> ยังไม่ส่ง</span>`;
+    }
+
+    const html = `
+      <!-- Form card — no แก้ไขฟอร์ม button (removed per spec) -->
+      <div class="form-card">
+        <div class="form-card-icon">📋</div>
+        <div class="form-card-info">
+          <h2>แบบสอบถาม — ข้อมูลสุขภาวะขององค์กร (CH1)</h2>
+          <p>
+            <span class="fiscal-badge">📅 ปีงบประมาณ ${fiscalYear}</span>
+            ${submittedAt ? `&nbsp;·&nbsp; ส่งข้อมูลเมื่อ ${formatThaiDate(submittedAt)}` : ''}
+          </p>
+          <!-- NOTE: ปุ่ม "แก้ไขฟอร์ม" ถูกลบออกจากหน้านี้แล้ว — ย้ายไปอยู่ใน nav item แทน -->
+        </div>
+        ${statusBadge}
+      </div>
+
+      ${!ch1 ? `
+      <div class="warning-note">
+        <div class="warning-note-icon">⚠️</div>
+        <div class="warning-note-body">
+          <div class="warning-note-title">ไม่พบข้อมูล CH1 สำหรับองค์กรนี้</div>
+          <div class="warning-note-text">รหัสองค์กร <strong>${orgCode}</strong> ยังไม่มีข้อมูล CH1 ในระบบ กรุณาตรวจสอบรหัสองค์กรหรือส่งข้อมูลก่อน</div>
+        </div>
+      </div>` : ''}
+
+      <!-- Org detail card -->
+      <div class="org-detail-card">
+        <h3>🏛️ ข้อมูลองค์กร</h3>
+        <div class="org-detail-row">
+          <span class="org-detail-label">ชื่อองค์กร (ไทย)</span>
+          <span class="org-detail-val">${orgData?.org_name_th || '—'}</span>
+        </div>
+        <div class="org-detail-row">
+          <span class="org-detail-label">ชื่อองค์กร (อังกฤษ)</span>
+          <span class="org-detail-val">${orgData?.org_name_en || '—'}</span>
+        </div>
+        <div class="org-detail-row">
+          <span class="org-detail-label">กระทรวง/สังกัด</span>
+          <span class="org-detail-val">${orgData?.ministry || '—'}</span>
+        </div>
+        <div class="org-detail-row">
+          <span class="org-detail-label">ประเภทองค์กร</span>
+          <span class="org-detail-val">${orgData?.org_type || '—'}</span>
+        </div>
+        <div class="org-detail-row">
+          <span class="org-detail-label">อีเมลสารบรรณ</span>
+          <span class="org-detail-val">${orgData?.saraban_email || orgData?.contact_email || '—'}</span>
+        </div>
+        <div class="org-detail-row">
+          <span class="org-detail-label">ผู้ประสานงาน</span>
+          <span class="org-detail-val">${orgData?.coordinator_name || '—'} ${orgData?.coordinator_position ? `(${orgData.coordinator_position})` : ''}</span>
+        </div>
+      </div>
+
+      <!-- Stats grid -->
+      <div style="font-size:12px;font-weight:700;color:var(--tx2);margin-bottom:10px;display:flex;align-items:center;gap:8px">
+        สถิติสำคัญ — ปี ${fiscalYear}
+        <span style="display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:6px;font-size:10px;font-weight:700;background:#10b981;color:#fff">✓ ข้อมูลจริง</span>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-card-val">${totalStaff.toLocaleString()}</div>
+          <div class="stat-card-lbl">บุคลากรรวม (คน)
+            <span class="info-tip" data-tip="จำนวนบุคลากรทั้งหมดในองค์กร ณ ปีงบประมาณนั้น">i</span>
+          </div>
+          ${ch1 ? `
+          <div style="margin-top:8px;font-size:10.5px;color:var(--tx3);line-height:1.6">
+            ข้าราชการ: ${ch1.type_official ?? '—'}<br>
+            พนักงาน: ${ch1.type_employee ?? '—'}<br>
+            จ้างเหมา: ${ch1.type_contract ?? '—'}<br>
+            อื่นๆ: ${ch1.type_other ?? '—'}
+          </div>` : ''}
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-card-val">${turnoverRate}<span class="stat-card-unit">%</span></div>
+          <div class="stat-card-lbl">อัตราลาออก
+            <span class="info-tip" data-tip="อัตราส่วนพนักงานที่ลาออกต่อจำนวนพนักงานทั้งหมด = turnover_count / total_staff × 100">i</span>
+          </div>
+          ${turnoverCount != null ? `<div style="margin-top:8px;font-size:10.5px;color:var(--tx3)">จำนวนลาออก: ${turnoverCount} คน</div>` : ''}
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-card-val">${sickLeaveAvg}<span class="stat-card-unit"> วัน</span></div>
+          <div class="stat-card-lbl">
+            วันลาป่วยเฉลี่ย/คน/ปี
+            <span class="ann-edit">⚠ เปลี่ยน label</span>
+            <span class="info-tip" data-tip="จำนวนวันลาป่วยเฉลี่ยต่อคนต่อปี — ดึงจากฟิลด์ sick_leave_avg">i</span>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-card-val">${trainingHours}<span class="stat-card-unit"> ชม.</span></div>
+          <div class="stat-card-lbl">ชั่วโมงอบรม/คน/ปี
+            <span class="info-tip" data-tip="ชั่วโมงการฝึกอบรมเฉลี่ยต่อคนต่อปี">i</span>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-card-val">${engagementScore}</div>
+          <div class="stat-card-lbl">คะแนนความผูกพัน
+            <span class="info-tip" data-tip="คะแนน Employee Engagement — ยิ่งสูงยิ่งดี">i</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action buttons — ไม่มีปุ่ม แก้ไขฟอร์ม -->
+      <div class="action-row">
+        <a class="btn btn-primary" href="wb-dashboard.html?org=${encodeURIComponent(orgCode)}">💚 ดู Well-being Dashboard</a>
+        <button class="btn btn-outline">📥 ดาวน์โหลด PDF</button>
+      </div>
+      <div style="margin-top:-12px;margin-bottom:16px;font-size:11.5px;color:var(--tx3);display:flex;align-items:center;gap:6px">
+        <span style="color:#b91c1c;font-weight:700">✗</span>
+        ลบปุ่ม "แก้ไขฟอร์ม" ออกจากหน้านี้แล้ว — ย้ายไปอยู่ใน nav item แทน
+      </div>`;
+
+    document.getElementById('main-area').innerHTML = html;
+
+  } catch(err) {
+    console.error(err);
+    showError(err.message || String(err));
+    document.getElementById('main-area').innerHTML = '<div style="padding:20px;text-align:center;color:var(--tx3)">ไม่สามารถโหลดข้อมูลได้</div>';
+  }
+}
+
+const initOrg = new URLSearchParams(window.location.search).get('org') || 'test-org';
+document.getElementById('org-input').value = initOrg;
+loadAll(initOrg);
+</script>
 </body>
 </html>

@@ -26,9 +26,28 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
 .sidebar{width:var(--sidebar-w);background:linear-gradient(180deg,#5f28ab 0%,#58239d 52%,#501f8d 100%);color:#fff;display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:20;box-shadow:4px 0 30px rgba(46,16,101,.16)}
 .sidebar-logo{padding:16px 14px;border-bottom:1px solid rgba(255,255,255,.08)}
 .logo-row{display:flex;align-items:center;gap:10px}
-.logo-icon{width:28px;height:28px;border-radius:8px;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;font-size:15px}
-.logo-title{font-size:12.5px;font-weight:700}
-.logo-sub{font-size:10px;color:rgba(255,255,255,.48);padding-left:38px;margin-top:4px}
+.logo-icon{width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;font-size:18px;overflow:hidden;flex-shrink:0}
+.logo-icon img{width:100%;height:100%;object-fit:cover;border-radius:10px}
+.logo-title{font-size:12.5px;font-weight:700;line-height:1.35}
+.logo-org-name{font-size:11px;color:rgba(255,255,255,.7);font-weight:600;margin-top:1px;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.logo-sub{font-size:10px;color:rgba(255,255,255,.38);margin-top:3px}
+
+/* Logo upload dropzone */
+.logo-upload-zone{border:2px dashed #d8b4fe;border-radius:14px;padding:28px 20px;text-align:center;cursor:pointer;transition:all .2s;background:#fdfaff;position:relative}
+.logo-upload-zone:hover,.logo-upload-zone.drag-over{border-color:#7c3aed;background:#f5f0ff}
+.logo-upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.logo-upload-zone .luz-icon{font-size:36px;margin-bottom:8px}
+.logo-upload-zone .luz-title{font-size:14px;font-weight:700;color:#5b2aa8;margin-bottom:4px}
+.logo-upload-zone .luz-sub{font-size:12px;color:#8b94a7}
+.logo-preview-wrap{display:flex;align-items:center;gap:16px;padding:16px;background:#fdfaff;border:1.5px solid #e3def3;border-radius:12px;margin-top:12px}
+.logo-preview-img{width:72px;height:72px;border-radius:12px;object-fit:contain;background:#fff;border:1px solid #e3def3;padding:4px}
+.logo-preview-info{flex:1}
+.logo-preview-name{font-size:13px;font-weight:700;color:#374151;margin-bottom:4px}
+.logo-preview-size{font-size:11px;color:#8b94a7}
+.btn-remove-logo{padding:5px 12px;border-radius:8px;background:#fef2f2;color:#dc2626;border:1px solid #fecaca;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit}
+.btn-save-logo{padding:8px 18px;border-radius:10px;background:#5b2aa8;color:#fff;border:none;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:12px}
+.btn-save-logo:hover{background:#4b1f95}
+.logo-saved-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;background:#ecfdf3;color:#15803d;font-size:11px;font-weight:700;margin-left:8px}
 .sidebar-org{margin:12px 10px 8px;padding:12px;border-radius:8px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.06)}
 .o-label{font-size:9px;color:rgba(255,255,255,.42);margin-bottom:4px;letter-spacing:.06em;text-transform:uppercase}
 .o-name{font-size:12px;font-weight:700;line-height:1.45}
@@ -164,8 +183,11 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
   <aside class="sidebar">
     <div class="sidebar-logo">
       <div class="logo-row">
-        <div class="logo-icon">🏛️</div>
-        <div class="logo-title">NIDA Wellbeing</div>
+        <div class="logo-icon" id="sidebar-logo-icon">🏛️</div>
+        <div>
+          <div class="logo-title">NIDA Wellbeing</div>
+          <div class="logo-org-name" id="sidebar-org-name">ทดสอบระบบ</div>
+        </div>
       </div>
       <div class="logo-sub">Org HR Portal</div>
     </div>
@@ -339,19 +361,19 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
           <!-- BMI REMOVED -->
           <div class="dash-card" style="border:2px dashed #fecaca;background:#fefefe;opacity:.45;pointer-events:none">
             <h4 style="color:#dc2626;text-decoration:line-through">🏋 BMI <span class="change-badge removed">REMOVED</span></h4>
-            <p style="color:#dc2626;font-size:12px;text-align:center;padding:20px 0">ลูกค้าต้องการเอาออก</p>
+            <p style="color:#dc2626;font-size:12px;text-align:center;padding:20px 0">เอาออกไป๊</p>
           </div>
 
           <!-- TMHI REMOVED -->
           <div class="dash-card" style="border:2px dashed #fecaca;background:#fefefe;opacity:.45;pointer-events:none">
             <h4 style="color:#dc2626;text-decoration:line-through">🧠 TMHI-15 สุขภาพจิต <span class="change-badge removed">REMOVED</span></h4>
-            <p style="color:#dc2626;font-size:12px;text-align:center;padding:20px 0">ลูกค้าต้องการเอาออก</p>
+            <p style="color:#dc2626;font-size:12px;text-align:center;padding:20px 0">เอาออกไป๊</p>
           </div>
 
           <!-- Recent respondents REMOVED -->
           <div class="dash-card dash-full" style="border:2px dashed #fecaca;background:#fefefe;opacity:.45;pointer-events:none">
             <h4 style="color:#dc2626;text-decoration:line-through">👥 ผู้ตอบล่าสุด <span class="change-badge removed">REMOVED</span></h4>
-            <p style="color:#dc2626;font-size:12px;text-align:center;padding:20px 0">ลูกค้าต้องการเอาออก — ข้อมูลซ้ำกับหน้า "ข้อมูลรายบุคคล"</p>
+            <p style="color:#dc2626;font-size:12px;text-align:center;padding:20px 0">เอาออกไป๊ — ข้อมูลซ้ำกับหน้า "ข้อมูลรายบุคคล"</p>
           </div>
         </div>
       </div>
@@ -547,6 +569,40 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
           </div>
         </div>
 
+        <!-- ── Logo Upload Card ── -->
+        <div class="section-card" style="margin-bottom:16px">
+          <h3>🖼️ โลโก้องค์กร
+            <span id="logo-saved-indicator" style="display:none" class="logo-saved-badge">✓ บันทึกแล้ว</span>
+          </h3>
+          <p class="desc">อัปโหลดโลโก้องค์กรเพื่อแสดงใน sidebar และเอกสารต่างๆ รองรับ JPG, PNG, SVG ขนาดไม่เกิน 2MB</p>
+
+          <!-- Preview (hidden until uploaded) -->
+          <div id="logo-preview-wrap" class="logo-preview-wrap" style="display:none">
+            <img id="logo-preview-img" class="logo-preview-img" src="" alt="logo preview">
+            <div class="logo-preview-info">
+              <div class="logo-preview-name" id="logo-preview-name">—</div>
+              <div class="logo-preview-size" id="logo-preview-size">—</div>
+            </div>
+            <button class="btn-remove-logo" onclick="removeLogo()">✕ ลบ</button>
+          </div>
+
+          <!-- Dropzone (hidden after upload) -->
+          <div class="logo-upload-zone" id="logo-upload-zone">
+            <input type="file" id="logo-file-input" accept="image/png,image/jpeg,image/svg+xml,image/webp"
+              onchange="handleLogoUpload(this)">
+            <div class="luz-icon">📁</div>
+            <div class="luz-title">คลิกเพื่อเลือกไฟล์ หรือลากมาวางที่นี่</div>
+            <div class="luz-sub">PNG, JPG, SVG · ขนาดสูงสุด 2MB</div>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:10px;margin-top:12px" id="logo-action-row" style="display:none">
+            <button class="btn-save-logo" id="logo-save-btn" onclick="saveLogo()" style="display:none">
+              💾 บันทึกโลโก้
+            </button>
+            <span style="font-size:11.5px;color:#8b94a7">โลโก้จะอัพเดตใน sidebar ด้านซ้ายทันที</span>
+          </div>
+        </div>
+
         <div class="org-hero-card">
           <div class="org-kicker">ข้อมูลภาพรวมองค์กร <span class="change-badge renamed">RENAMED</span></div>
           <div class="org-title">ทดสอบระบบ</div>
@@ -653,6 +709,129 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
 </div>
 
 <script>
+/* ══════════════════════════════════════════
+   Logo Upload Logic
+══════════════════════════════════════════ */
+const LOGO_KEY = 'org_logo_b64';
+const LOGO_NAME_KEY = 'org_logo_name';
+
+function handleLogoUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  if (file.size > 2 * 1024 * 1024) {
+    alert('ไฟล์ใหญ่เกินไป — กรุณาเลือกไฟล์ขนาดไม่เกิน 2MB');
+    input.value = '';
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const b64 = e.target.result;
+    showLogoPreview(b64, file.name, file.size);
+    // Show save button
+    document.getElementById('logo-save-btn').style.display = 'inline-flex';
+    // Store temporarily
+    window._pendingLogo = { b64, name: file.name };
+  };
+  reader.readAsDataURL(file);
+}
+
+function showLogoPreview(b64, name, size) {
+  const previewWrap = document.getElementById('logo-preview-wrap');
+  const previewImg  = document.getElementById('logo-preview-img');
+  const previewName = document.getElementById('logo-preview-name');
+  const previewSize = document.getElementById('logo-preview-size');
+  const zone        = document.getElementById('logo-upload-zone');
+
+  previewImg.src = b64;
+  previewName.textContent = name || 'โลโก้องค์กร';
+  previewSize.textContent = size ? `${(size / 1024).toFixed(1)} KB` : '';
+  previewWrap.style.display = 'flex';
+  zone.style.display = 'none';
+}
+
+function saveLogo() {
+  if (!window._pendingLogo) return;
+  const { b64, name } = window._pendingLogo;
+
+  // Persist
+  try {
+    localStorage.setItem(LOGO_KEY, b64);
+    localStorage.setItem(LOGO_NAME_KEY, name);
+  } catch(e) {
+    alert('ไม่สามารถบันทึกได้ — ไฟล์อาจใหญ่เกินไปสำหรับ localStorage');
+    return;
+  }
+
+  // Update sidebar
+  applySidebarLogo(b64);
+
+  // Show saved badge
+  document.getElementById('logo-saved-indicator').style.display = 'inline-flex';
+  document.getElementById('logo-save-btn').style.display = 'none';
+  window._pendingLogo = null;
+}
+
+function removeLogo() {
+  localStorage.removeItem(LOGO_KEY);
+  localStorage.removeItem(LOGO_NAME_KEY);
+  document.getElementById('logo-preview-wrap').style.display = 'none';
+  document.getElementById('logo-upload-zone').style.display = 'block';
+  document.getElementById('logo-save-btn').style.display = 'none';
+  document.getElementById('logo-saved-indicator').style.display = 'none';
+  document.getElementById('logo-file-input').value = '';
+  window._pendingLogo = null;
+
+  // Reset sidebar to default
+  const icon = document.getElementById('sidebar-logo-icon');
+  icon.innerHTML = '🏛️';
+  icon.style.background = 'rgba(255,255,255,.14)';
+}
+
+function applySidebarLogo(b64) {
+  const icon = document.getElementById('sidebar-logo-icon');
+  icon.innerHTML = `<img src="${b64}" alt="org logo">`;
+  icon.style.background = '#fff';
+  icon.style.padding = '2px';
+}
+
+function loadSavedLogo() {
+  const saved = localStorage.getItem(LOGO_KEY);
+  const name  = localStorage.getItem(LOGO_NAME_KEY);
+  if (saved) {
+    showLogoPreview(saved, name, null);
+    applySidebarLogo(saved);
+    document.getElementById('logo-saved-indicator').style.display = 'inline-flex';
+  }
+}
+
+// Drag & drop support
+document.addEventListener('DOMContentLoaded', () => {
+  loadSavedLogo();
+
+  const zone = document.getElementById('logo-upload-zone');
+  if (zone) {
+    zone.addEventListener('dragover', (e) => { e.preventDefault(); zone.classList.add('drag-over'); });
+    zone.addEventListener('dragleave', ()  => zone.classList.remove('drag-over'));
+    zone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      zone.classList.remove('drag-over');
+      const file = e.dataTransfer.files[0];
+      if (file && file.type.startsWith('image/')) {
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        const input = document.getElementById('logo-file-input');
+        input.files = dt.files;
+        handleLogoUpload(input);
+      }
+    });
+  }
+});
+
+/* ══════════════════════════════════════════
+   Tab switching
+══════════════════════════════════════════ */
 function switchTab(tabId) {
   document.querySelectorAll('.tab-page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item, .nav-subitem').forEach(b => b.classList.remove('active'));

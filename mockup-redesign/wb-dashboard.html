@@ -3,10 +3,11 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Well-being ผลสำรวจ — Mockup Redesign</title>
+<title>Well-being ผลสำรวจ — HR Portal</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai+Looped:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -55,42 +56,60 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
 .tb-chip{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:600;border:1px solid var(--bdr);background:#faf8ff;color:var(--tx2)}
 .portal-content{padding:24px;max-width:1060px}
 
-/* ── MOCKUP BANNER ── */
-.mockup-banner{background:linear-gradient(90deg,#fef3c7,#fff7ed);border:1px solid #fcd34d;border-radius:10px;padding:10px 16px;margin-bottom:20px;display:flex;align-items:center;gap:10px;font-size:12.5px;color:#78350f}
+/* ── Org Selector ── */
+.org-selector-bar{background:#fff;border:1px solid var(--bdr);border-radius:12px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;box-shadow:var(--shadow)}
+.org-selector-bar span.lbl{font-size:13px;font-weight:600;color:var(--tx2)}
+.org-selector-bar input{padding:7px 12px;border:1.5px solid var(--bdr);border-radius:8px;font-family:inherit;font-size:13px;color:var(--tx);background:#faf8ff;min-width:160px}
+.org-selector-bar input:focus{outline:none;border-color:#a78bfa}
+.org-selector-bar button{padding:7px 16px;border-radius:8px;background:var(--P);color:#fff;border:none;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer}
+.org-selector-bar button:hover{background:var(--PD)}
+.org-name-display{font-size:13px;font-weight:700;color:var(--P)}
 
-/* ── SECTION CARD ── */
+/* ── Skeleton ── */
+.skeleton{background:linear-gradient(90deg,#f0ebff 25%,#e4d9ff 50%,#f0ebff 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:8px;height:60px}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* ── Error ── */
+.error-box{background:#fef2f2;border:1.5px solid #fecaca;border-radius:10px;padding:12px 16px;color:#dc2626;font-size:13px;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+
+/* ── Section card ── */
 .section-card{background:#fff;border:1px solid var(--bdr);border-radius:14px;padding:20px 22px;margin-bottom:16px;box-shadow:var(--shadow);position:relative}
 .section-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:#8b5cf6;border-radius:14px 0 0 14px}
 .section-card.pink::before{background:#ec4899}
 .section-card h3{font-size:15px;font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:8px;color:var(--tx)}
 
-/* ── PROGRESS ── */
+/* ── Progress ── */
 .progress-wrap{margin-top:10px}
 .progress-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
 .progress-header .left{font-size:13px;font-weight:600;color:var(--tx2)}
 .progress-header .right{font-size:13px;font-weight:700;color:#7c3aed}
 .progress-track{height:12px;background:var(--PL);border-radius:999px;overflow:hidden}
-.progress-fill{height:100%;width:4%;background:linear-gradient(90deg,#7c3aed,#ec4899);border-radius:999px}
+.progress-fill{height:100%;width:0%;background:linear-gradient(90deg,#7c3aed,#ec4899);border-radius:999px;transition:width .6s ease}
 .progress-meta{margin-top:10px;font-size:12px;color:var(--tx2);display:flex;gap:16px;flex-wrap:wrap}
 .progress-meta strong{color:var(--tx);font-weight:700}
 
-/* ── MINI STATS ── */
+/* ── Mini stats ── */
 .mini-stats{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
 .mini-stat{background:#faf8ff;border:1px solid var(--bdr);border-radius:10px;padding:10px 14px;text-align:center;flex:1;min-width:80px}
 .mini-stat .val{font-size:18px;font-weight:700;color:#7c3aed}
 .mini-stat .lbl{font-size:10.5px;color:var(--tx3);margin-top:3px}
 
-/* ── BUTTONS ── */
+/* ── TMHI tooltip ── */
+.tmhi-wrap{position:relative;display:inline-flex;align-items:center;gap:4px;cursor:help}
+.tmhi-info{width:15px;height:15px;border-radius:999px;background:#ede9fe;color:#6d28d9;font-size:9px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;vertical-align:middle}
+.tmhi-tooltip{display:none;position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:#1f2937;color:#fff;font-size:11px;padding:8px 12px;border-radius:8px;width:240px;line-height:1.6;z-index:50;white-space:normal;font-weight:400}
+.tmhi-tooltip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:6px solid transparent;border-top-color:#1f2937}
+.tmhi-wrap:hover .tmhi-tooltip{display:block}
+
+/* ── Buttons ── */
 .btn{display:inline-flex;align-items:center;gap:7px;padding:10px 18px;border-radius:10px;font-size:13px;font-weight:600;border:none;cursor:pointer;font-family:inherit;transition:all .15s;text-decoration:none}
 .btn-primary{background:var(--P);color:#fff}
 .btn-primary:hover{background:var(--PD)}
 .btn-outline{background:#fff;border:1.5px solid var(--bdr);color:var(--tx2)}
 .btn-outline:hover{border-color:#c4b5fd;color:var(--P)}
-.btn-pink{background:#ec4899;color:#fff}
-.btn-pink:hover{background:#db2777}
 .btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
 
-/* ── CHART BARS (CSS only) ── */
+/* ── Charts ── */
 .chart-section{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
 @media(max-width:680px){.chart-section{grid-template-columns:1fr}}
 .chart-card{background:#fff;border:1px solid var(--bdr);border-radius:14px;padding:18px 20px;box-shadow:var(--shadow);position:relative}
@@ -98,9 +117,9 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
 .chart-card h4{font-size:14px;font-weight:700;color:var(--tx);margin-bottom:14px;display:flex;align-items:center;gap:8px}
 .bar-chart{display:flex;flex-direction:column;gap:10px}
 .bar-row{display:flex;align-items:center;gap:10px}
-.bar-label{font-size:12px;color:var(--tx2);width:68px;flex-shrink:0;text-align:right}
+.bar-label{font-size:12px;color:var(--tx2);width:80px;flex-shrink:0;text-align:right}
 .bar-track{flex:1;height:20px;background:#f3f0fa;border-radius:6px;overflow:hidden}
-.bar-fill{height:100%;border-radius:6px;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;font-size:10.5px;font-weight:700;color:#fff;min-width:28px}
+.bar-fill{height:100%;border-radius:6px;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;font-size:10.5px;font-weight:700;color:#fff;min-width:0;transition:width .6s ease}
 .bar-fill.male{background:linear-gradient(90deg,#5b2aa8,#8b5cf6)}
 .bar-fill.female{background:linear-gradient(90deg,#be185d,#ec4899)}
 .bar-fill.other{background:linear-gradient(90deg,#0369a1,#38bdf8)}
@@ -109,25 +128,17 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
 .bar-fill.age3{background:linear-gradient(90deg,#b45309,#fbbf24)}
 .bar-fill.age4{background:linear-gradient(90deg,#9f1239,#fb7185)}
 .bar-fill.age5{background:linear-gradient(90deg,#374151,#9ca3af)}
-.bar-num{font-size:11.5px;color:var(--tx2);width:28px;flex-shrink:0}
+.bar-num{font-size:11.5px;color:var(--tx2);width:40px;flex-shrink:0;text-align:right}
 
-/* ── ANNOTATION ── */
-.ann{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:6px;font-size:10.5px;font-weight:700;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.15)}
-.ann-del{background:#ef4444;color:#fff}
-.ann-edit{background:#f59e0b;color:#fff}
-.ann-keep{background:#10b981;color:#fff}
-.ann-wrap{position:relative}
-.ann-abs{position:absolute}
-
-/* ── REMOVED PLACEHOLDER ── */
+/* ── Removed section placeholder ── */
 .removed-section{background:#f3f4f6;border:2px dashed #d1d5db;border-radius:14px;padding:24px 20px;margin-bottom:16px;position:relative}
 .removed-section-inner{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;color:#9ca3af}
 .removed-section-icon{font-size:28px;opacity:.45}
 .removed-section-title{font-size:14px;font-weight:700;color:#9ca3af}
 .removed-section-desc{font-size:12.5px;line-height:1.6;max-width:400px}
-.removed-section-sample{width:100%;max-width:360px;height:60px;background:#e5e7eb;border-radius:8px;margin-top:4px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#d1d5db;font-weight:600;letter-spacing:.04em}
+.removed-section-tag{position:absolute;top:-10px;right:12px;background:#ef4444;color:#fff;font-size:10px;font-weight:700;padding:3px 9px;border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,.15)}
 
-/* ── LINK CARD ── */
+/* ── Individual link ── */
 .individual-link{background:linear-gradient(135deg,#f3edff,#fff);border:1.5px solid #c4b5fd;border-radius:14px;padding:20px 22px;margin-bottom:16px;display:flex;align-items:center;gap:16px;text-decoration:none;color:var(--tx);transition:all .2s;box-shadow:var(--shadow)}
 .individual-link:hover{border-color:#8b5cf6;transform:translateY(-1px);box-shadow:0 8px 24px rgba(91,42,168,.12)}
 .individual-link-icon{width:44px;height:44px;border-radius:12px;background:var(--P);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
@@ -135,15 +146,14 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
 .individual-link-text p{font-size:12px;color:var(--tx2)}
 .individual-link-arrow{margin-left:auto;font-size:20px;color:#a78bfa}
 
-/* ── REMOVED SUBTITLE NOTE ── */
-.subtitle-removed{background:#fff0f0;border:1px solid #fecaca;border-radius:8px;padding:8px 14px;font-size:12px;color:#b91c1c;display:flex;align-items:center;gap:8px;margin-bottom:16px}
-
-/* ── PAGE NAV ── */
+/* ── Page nav ── */
 .page-nav{background:#fff;border-top:1px solid var(--bdr);padding:14px 24px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .page-nav-label{font-size:12px;color:var(--tx3);margin-right:4px}
 .page-nav a{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;border:1px solid var(--bdr);color:var(--tx2);background:#fff}
 .page-nav a:hover{border-color:#c4b5fd;color:var(--P)}
 .page-nav a.current{background:var(--PL);border-color:#c4b5fd;color:var(--P)}
+
+@media(max-width:860px){.sidebar{display:none}.portal-main-wrap{margin-left:0}}
 </style>
 </head>
 <body>
@@ -161,15 +171,13 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
     </div>
     <div class="sidebar-org">
       <div class="o-label">องค์กรปัจจุบัน</div>
-      <div class="o-name">สำนักงานทดสอบ NIDA</div>
-      <div class="o-email">hr@nida-test.ac.th</div>
+      <div class="o-name" id="sb-org-name">กำลังโหลด…</div>
+      <div class="o-email" id="sb-org-email">—</div>
     </div>
     <div class="portal-nav">
       <div class="nav-group">เมนูหลัก</div>
-      <a href="#" class="nav-item"><span class="ni">🏠</span> หน้าหลัก</a>
-      <a href="#" class="nav-item dim"><span class="ni">🗂️</span> รายละเอียดองค์กร</a>
+      <a href="home-dashboard.html" class="nav-item"><span class="ni">🏠</span> หน้าหลัก</a>
       <a href="ch1-org-info.html" class="nav-item"><span class="ni">📊</span> CH1 ข้อมูลองค์กร</a>
-      <a href="#" class="nav-item dim"><span class="ni">✏️</span> แก้ไขฟอร์ม</a>
       <div class="nav-group">Well-being</div>
       <a href="wb-dashboard.html" class="nav-item active"><span class="ni">📈</span> Well-being ผลสำรวจ</a>
       <a href="wb-individual.html" class="nav-item"><span class="ni">👤</span> Well-being รายบุคคล</a>
@@ -189,166 +197,36 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
       </div>
       <div class="tb-space"></div>
       <div class="tb-chips">
-        <span class="tb-chip">📅 2567</span>
-        <span class="tb-chip">👥 50 คน</span>
+        <span class="tb-chip" id="chip-year">📅 —</span>
+        <span class="tb-chip" id="chip-total">👥 — คน</span>
       </div>
     </div>
 
     <div class="portal-content">
 
-      <!-- MOCKUP BANNER -->
-      <div class="mockup-banner">
-        <span style="font-size:16px">🎨</span>
-        <strong>Mockup Redesign</strong> — ส่วนสีเทาแบบ dashed border = ส่วนที่ถูกซ่อน/ลบออก &nbsp;·&nbsp;
-        <a href="report.html" style="color:var(--W);font-weight:700">ดูรายงานฉบับเต็ม →</a>
+      <!-- Org Selector Bar -->
+      <div class="org-selector-bar">
+        <span class="lbl">องค์กร:</span>
+        <input id="org-input" value="test-org" placeholder="org_code...">
+        <button onclick="changeOrg()">โหลด</button>
+        <span class="org-name-display" id="org-name-display">—</span>
       </div>
 
-      <!-- REMOVED: duplicate subtitle note -->
-      <div class="subtitle-removed">
-        <span>✗</span>
-        <span><strong>ลบออก:</strong> คำอธิบายหน้าที่ซ้ำกับ header — เหลือแค่ subtitle ใน topbar เดียว ไม่ต้องซ้ำในเนื้อหา</span>
-      </div>
+      <!-- Error -->
+      <div id="error-box" class="error-box" style="display:none">⚠ ไม่สามารถโหลดข้อมูลได้: <span id="error-msg"></span></div>
 
-      <!-- SURVEY COMPLETION — KEEP -->
-      <div class="ann-wrap">
-        <div class="section-card">
-          <h3>
-            📋 สถานะการตอบแบบสำรวจ
-            <span class="ann ann-keep" style="position:static">✓ เก็บไว้ (ดี)</span>
-          </h3>
-          <div class="progress-wrap">
-            <div class="progress-header">
-              <span class="left">ผู้ตอบ Well-being Survey 4.0</span>
-              <span class="right">4.0% (2/50 คน)</span>
-            </div>
-            <div class="progress-track">
-              <div class="progress-fill"></div>
-            </div>
-            <div class="progress-meta">
-              <span>ผู้ตอบทั้งหมด: <strong>2</strong></span>
-              <span>ชาย: <strong>1</strong></span>
-              <span>หญิง: <strong>0</strong></span>
-              <span>อื่นๆ: <strong>1</strong></span>
-              <span>TMHI เฉลี่ย: <strong>44.5</strong></span>
-            </div>
-          </div>
-          <div class="btn-row">
-            <button class="btn btn-primary">📊 ดู Well-being Dashboard</button>
-            <button class="btn btn-outline">📥 Export Excel</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- GENDER + AGE CHARTS — KEEP -->
-      <div class="chart-section">
-        <div class="chart-card ann-wrap">
-          <h4>
-            👥 เพศ
-            <span class="ann ann-keep" style="position:static">✓ เก็บไว้</span>
-          </h4>
-          <div class="bar-chart">
-            <div class="bar-row">
-              <span class="bar-label">ชาย</span>
-              <div class="bar-track"><div class="bar-fill male" style="width:50%">1</div></div>
-              <span class="bar-num">1 คน</span>
-            </div>
-            <div class="bar-row">
-              <span class="bar-label">หญิง</span>
-              <div class="bar-track"><div class="bar-fill female" style="width:0%;min-width:0"></div></div>
-              <span class="bar-num">0 คน</span>
-            </div>
-            <div class="bar-row">
-              <span class="bar-label">อื่นๆ / ไม่ระบุ</span>
-              <div class="bar-track"><div class="bar-fill other" style="width:50%">1</div></div>
-              <span class="bar-num">1 คน</span>
-            </div>
-          </div>
-          <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--bdr);font-size:11.5px;color:var(--tx3)">
-            รวม 2 คน จาก 50 คน (4.0%)
-          </div>
-        </div>
-
-        <div class="chart-card ann-wrap">
-          <h4>
-            🎂 ช่วงอายุ
-            <span class="ann ann-keep" style="position:static">✓ เก็บไว้</span>
-          </h4>
-          <div class="bar-chart">
-            <div class="bar-row">
-              <span class="bar-label">น้อยกว่า 25</span>
-              <div class="bar-track"><div class="bar-fill age1" style="width:0%;min-width:0"></div></div>
-              <span class="bar-num">0</span>
-            </div>
-            <div class="bar-row">
-              <span class="bar-label">25–34 ปี</span>
-              <div class="bar-track"><div class="bar-fill age2" style="width:50%">1</div></div>
-              <span class="bar-num">1</span>
-            </div>
-            <div class="bar-row">
-              <span class="bar-label">35–44 ปี</span>
-              <div class="bar-track"><div class="bar-fill age3" style="width:50%">1</div></div>
-              <span class="bar-num">1</span>
-            </div>
-            <div class="bar-row">
-              <span class="bar-label">45–54 ปี</span>
-              <div class="bar-track"><div class="bar-fill age4" style="width:0%;min-width:0"></div></div>
-              <span class="bar-num">0</span>
-            </div>
-            <div class="bar-row">
-              <span class="bar-label">55 ปีขึ้นไป</span>
-              <div class="bar-track"><div class="bar-fill age5" style="width:0%;min-width:0"></div></div>
-              <span class="bar-num">0</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- REMOVED: BMI SECTION -->
-      <div class="removed-section ann-wrap">
-        <div class="ann ann-del ann-abs" style="top:-10px;right:12px;z-index:10">✗ ลบออก — Section BMI ทั้งหมด</div>
-        <div class="removed-section-inner">
-          <div class="removed-section-icon">📏</div>
-          <div class="removed-section-title">Section BMI — ถูกซ่อนตามคำแนะนำ</div>
-          <div class="removed-section-desc">
-            Section นี้เคยแสดงกราฟการกระจาย BMI ของพนักงาน แบ่งตามเกณฑ์
-            (ผอม / ปกติ / น้ำหนักเกิน / อ้วน) ถูกซ่อนทั้งหมดตามนโยบาย
-          </div>
-          <div class="removed-section-sample">[ กราฟ BMI — ซ่อนแล้ว ]</div>
-        </div>
-      </div>
-
-      <!-- REMOVED: TMHI-15 SECTION -->
-      <div class="removed-section ann-wrap">
-        <div class="ann ann-del ann-abs" style="top:-10px;right:12px;z-index:10">✗ ลบออก — Section TMHI-15 ทั้งหมด</div>
-        <div class="removed-section-inner">
-          <div class="removed-section-icon">🧠</div>
-          <div class="removed-section-title">Section TMHI-15 (สุขภาพจิต) — ถูกซ่อนตามคำแนะนำ</div>
-          <div class="removed-section-desc">
-            Section นี้เคยแสดงคะแนน TMHI-15 แบ่งตามระดับสุขภาพจิต (ดีมาก / ดี / เสี่ยง / มีปัญหา)
-            ถูกซ่อนทั้งหมดตามนโยบาย — ข้อมูลนี้ sensitive และอาจก่อให้เกิดการตีความผิด
-          </div>
-          <div class="removed-section-sample">[ กราฟ TMHI-15 — ซ่อนแล้ว ]</div>
-        </div>
-      </div>
-
-      <!-- REPLACED: ผู้ตอบล่าสุด → link -->
-      <div class="ann-wrap">
-        <div class="ann ann-del ann-abs" style="top:-10px;right:12px;z-index:10">✗ ลบออก — ตาราง "ผู้ตอบล่าสุด" (ซ้ำกับหน้า รายบุคคล)</div>
-        <a href="wb-individual.html" class="individual-link">
-          <div class="individual-link-icon">👤</div>
-          <div class="individual-link-text">
-            <h3>ดูข้อมูลรายบุคคลเพิ่มเติม</h3>
-            <p>แทนที่ตาราง "ผู้ตอบล่าสุด" ด้วยลิงก์ไปยังหน้า Well-being รายบุคคล เพื่อหลีกเลี่ยงข้อมูลซ้ำซ้อน — มีข้อมูลครบถ้วนกว่า พร้อมฟังก์ชัน search และ filter</p>
-          </div>
-          <div class="individual-link-arrow">→</div>
-        </a>
+      <!-- Dynamic content area -->
+      <div id="main-area">
+        <div class="section-card"><div class="skeleton" style="height:80px"></div></div>
+        <div class="section-card"><div class="skeleton" style="height:80px"></div></div>
       </div>
 
     </div><!-- /portal-content -->
 
     <!-- PAGE NAV -->
     <div class="page-nav">
-      <span class="page-nav-label">Mockup pages:</span>
+      <span class="page-nav-label">หน้า:</span>
+      <a href="home-dashboard.html">🏠 หน้าหลัก</a>
       <a href="report.html">📋 รายงาน</a>
       <a href="ch1-org-info.html">📊 CH1 ข้อมูลองค์กร</a>
       <a href="wb-dashboard.html" class="current">📈 WB ผลสำรวจ</a>
@@ -357,5 +235,301 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
   </div><!-- /portal-main-wrap -->
 
 </div><!-- /portal-app -->
+
+<script>
+const SUPABASE_URL = 'https://fgdommhiqhzvsedfzyrr.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZnZG9tbWhpcWh6dnNlZGZ6eXJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkzMzY2MzUsImV4cCI6MjA4NDkxMjYzNX0.GFMOeDArhq-9lPt39OizkBOFFgK4TDpVDJrk_HRQ6Xc';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+function esc(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function formatThaiDate(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  if (isNaN(d)) return '—';
+  const day = d.getDate();
+  const months = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  return `${day} ${months[d.getMonth()]} ${d.getFullYear() + 543}`;
+}
+function normalizeGender(g) {
+  if (!g) return 'อื่นๆ';
+  const v = g.toLowerCase();
+  if (v === 'ชาย' || v === 'male') return 'ชาย';
+  if (v === 'หญิง' || v === 'female') return 'หญิง';
+  return 'อื่นๆ';
+}
+
+function getAgeGroup(age) {
+  const a = parseInt(age);
+  if (isNaN(a)) return 'ไม่ระบุ';
+  if (a < 25) return 'น้อยกว่า 25';
+  if (a <= 34) return '25–34 ปี';
+  if (a <= 44) return '35–44 ปี';
+  if (a <= 54) return '45–54 ปี';
+  return '55 ปีขึ้นไป';
+}
+
+function barWidth(count, max) {
+  if (!max || max === 0) return '0%';
+  return Math.max((count / max) * 100, count > 0 ? 4 : 0) + '%';
+}
+
+function changeOrg() {
+  const code = document.getElementById('org-input').value.trim();
+  if (!code) return;
+  const url = new URL(window.location.href);
+  url.searchParams.set('org', code);
+  window.history.pushState({}, '', url);
+  loadAll(code);
+}
+
+function showError(msg) {
+  const b = document.getElementById('error-box');
+  b.style.display = 'flex';
+  document.getElementById('error-msg').textContent = msg;
+}
+
+function hideError() {
+  document.getElementById('error-box').style.display = 'none';
+}
+
+function addOrgParam(href, orgCode) {
+  return `${href}?org=${encodeURIComponent(orgCode)}`;
+}
+
+async function loadAll(orgCode) {
+  hideError();
+  document.getElementById('main-area').innerHTML = `
+    <div class="section-card"><div class="skeleton" style="height:80px"></div></div>
+    <div class="section-card"><div class="skeleton" style="height:80px"></div></div>
+    <div class="section-card"><div class="skeleton" style="height:80px"></div></div>`;
+
+  try {
+    // Org info
+    const { data: orgData, error: orgErr } = await sb
+      .from('organizations')
+      .select('org_name_th, org_name_en, saraban_email, contact_email, total_staff')
+      .eq('org_code', orgCode)
+      .maybeSingle();
+    if (orgErr) throw orgErr;
+
+    const orgName = orgData?.org_name_th || orgData?.org_name_en || orgCode;
+    document.getElementById('sb-org-name').textContent = orgName;
+    document.getElementById('sb-org-email').textContent = orgData?.saraban_email || orgData?.contact_email || '—';
+    document.getElementById('org-name-display').textContent = orgName;
+
+    const orgTotalStaff = orgData?.total_staff || 0;
+
+    // Survey responses — all (for stats)
+    const { data: wbData, error: wbErr } = await sb
+      .from('survey_responses')
+      .select('id, name, title, gender, age, tmhi_score, submitted_at')
+      .eq('org_code', orgCode)
+      .eq('is_draft', false)
+      .order('submitted_at', { ascending: false });
+    if (wbErr) throw wbErr;
+    const responses = wbData || [];
+    // 5 latest for preview table
+    const latestFive = responses.slice(0, 5);
+
+    const totalResp = responses.length;
+    let maleCount = 0, femaleCount = 0, otherCount = 0;
+    let tmhiSum = 0, tmhiN = 0;
+    const ageCounts = {'น้อยกว่า 25':0,'25–34 ปี':0,'35–44 ปี':0,'45–54 ปี':0,'55 ปีขึ้นไป':0};
+
+    responses.forEach(r => {
+      const g = normalizeGender(r.gender);
+      if (g === 'ชาย') maleCount++;
+      else if (g === 'หญิง') femaleCount++;
+      else otherCount++;
+      const ag = getAgeGroup(r.age);
+      if (ageCounts[ag] !== undefined) ageCounts[ag]++;
+      if (r.tmhi_score != null) { tmhiSum += r.tmhi_score; tmhiN++; }
+    });
+
+    const avgTmhi = tmhiN > 0 ? (tmhiSum / tmhiN).toFixed(1) : '—';
+    const pct = orgTotalStaff > 0 ? ((totalResp / orgTotalStaff) * 100).toFixed(1) : '0.0';
+    const fillPct = Math.min(parseFloat(pct), 100);
+
+    document.getElementById('chip-year').textContent = '📅 ' + new Date().getFullYear() + (543 - 2000 + new Date().getFullYear() > 2500 ? '' : '');
+    document.getElementById('chip-total').textContent = `👥 ${totalResp} / ${orgTotalStaff.toLocaleString()} คน`;
+
+    const maxGender = Math.max(maleCount, femaleCount, otherCount, 1);
+    const maxAge = Math.max(...Object.values(ageCounts), 1);
+
+    const html = `
+      <!-- Survey completion -->
+      <div class="section-card">
+        <h3>📋 สถานะการตอบแบบสำรวจ</h3>
+        <div class="progress-wrap">
+          <div class="progress-header">
+            <span class="left">ผู้ตอบ Well-being Survey</span>
+            <span class="right">${pct}% (${totalResp}/${orgTotalStaff.toLocaleString()} คน)</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" style="width:${fillPct}%"></div>
+          </div>
+          <div class="progress-meta">
+            <span>ผู้ตอบทั้งหมด: <strong>${totalResp}</strong></span>
+            <span>ชาย: <strong>${maleCount}</strong></span>
+            <span>หญิง: <strong>${femaleCount}</strong></span>
+            <span>อื่นๆ: <strong>${otherCount}</strong></span>
+            <span><span class="tmhi-wrap">TMHI เฉลี่ย: <strong>${avgTmhi}</strong><span class="tmhi-info">i</span><div class="tmhi-tooltip">TMHI = Thai Mental Health Indicator (ดัชนีชี้วัดสุขภาพจิตไทย) · คะแนน 0–100 · ≥33 ปกติ</div></span></span>
+          </div>
+        </div>
+        <!-- Mini stat cards -->
+        <div class="mini-stats">
+          <div class="mini-stat"><div class="val">${totalResp}</div><div class="lbl">ผู้ตอบทั้งหมด</div></div>
+          <div class="mini-stat"><div class="val">${maleCount}</div><div class="lbl">ชาย</div></div>
+          <div class="mini-stat"><div class="val">${femaleCount}</div><div class="lbl">หญิง</div></div>
+          <div class="mini-stat"><div class="val">${otherCount}</div><div class="lbl">อื่นๆ / LGBTQ+</div></div>
+          <div class="mini-stat"><div class="val"><span class="tmhi-wrap">${avgTmhi}<span class="tmhi-info">i</span><div class="tmhi-tooltip">TMHI = Thai Mental Health Indicator (ดัชนีชี้วัดสุขภาพจิตไทย) · คะแนน 0–100 · ≥33 ปกติ</div></span></div><div class="lbl">TMHI เฉลี่ย</div></div>
+        </div>
+        <div class="btn-row">
+          <a class="btn btn-primary" href="${addOrgParam('wb-individual.html', orgCode)}">👤 ดูข้อมูลรายบุคคล</a>
+          <button class="btn btn-outline">📥 Export Excel</button>
+        </div>
+      </div>
+
+      <!-- Charts -->
+      <div class="chart-section">
+        <div class="chart-card">
+          <h4>👥 เพศ</h4>
+          <div class="bar-chart">
+            <div class="bar-row">
+              <span class="bar-label">ชาย</span>
+              <div class="bar-track"><div class="bar-fill male" style="width:${barWidth(maleCount,maxGender)}">${maleCount > 0 ? maleCount : ''}</div></div>
+              <span class="bar-num">${maleCount} คน</span>
+            </div>
+            <div class="bar-row">
+              <span class="bar-label">หญิง</span>
+              <div class="bar-track"><div class="bar-fill female" style="width:${barWidth(femaleCount,maxGender)}">${femaleCount > 0 ? femaleCount : ''}</div></div>
+              <span class="bar-num">${femaleCount} คน</span>
+            </div>
+            <div class="bar-row">
+              <span class="bar-label">อื่นๆ / ไม่ระบุ</span>
+              <div class="bar-track"><div class="bar-fill other" style="width:${barWidth(otherCount,maxGender)}">${otherCount > 0 ? otherCount : ''}</div></div>
+              <span class="bar-num">${otherCount} คน</span>
+            </div>
+          </div>
+          <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--bdr);font-size:11.5px;color:var(--tx3)">
+            รวม ${totalResp} คน จาก ${orgTotalStaff.toLocaleString()} คน (${pct}%)
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <h4>🎂 ช่วงอายุ</h4>
+          <div class="bar-chart">
+            <div class="bar-row">
+              <span class="bar-label">น้อยกว่า 25</span>
+              <div class="bar-track"><div class="bar-fill age1" style="width:${barWidth(ageCounts['น้อยกว่า 25'],maxAge)}">${ageCounts['น้อยกว่า 25'] > 0 ? ageCounts['น้อยกว่า 25'] : ''}</div></div>
+              <span class="bar-num">${ageCounts['น้อยกว่า 25']}</span>
+            </div>
+            <div class="bar-row">
+              <span class="bar-label">25–34 ปี</span>
+              <div class="bar-track"><div class="bar-fill age2" style="width:${barWidth(ageCounts['25–34 ปี'],maxAge)}">${ageCounts['25–34 ปี'] > 0 ? ageCounts['25–34 ปี'] : ''}</div></div>
+              <span class="bar-num">${ageCounts['25–34 ปี']}</span>
+            </div>
+            <div class="bar-row">
+              <span class="bar-label">35–44 ปี</span>
+              <div class="bar-track"><div class="bar-fill age3" style="width:${barWidth(ageCounts['35–44 ปี'],maxAge)}">${ageCounts['35–44 ปี'] > 0 ? ageCounts['35–44 ปี'] : ''}</div></div>
+              <span class="bar-num">${ageCounts['35–44 ปี']}</span>
+            </div>
+            <div class="bar-row">
+              <span class="bar-label">45–54 ปี</span>
+              <div class="bar-track"><div class="bar-fill age4" style="width:${barWidth(ageCounts['45–54 ปี'],maxAge)}">${ageCounts['45–54 ปี'] > 0 ? ageCounts['45–54 ปี'] : ''}</div></div>
+              <span class="bar-num">${ageCounts['45–54 ปี']}</span>
+            </div>
+            <div class="bar-row">
+              <span class="bar-label">55 ปีขึ้นไป</span>
+              <div class="bar-track"><div class="bar-fill age5" style="width:${barWidth(ageCounts['55 ปีขึ้นไป'],maxAge)}">${ageCounts['55 ปีขึ้นไป'] > 0 ? ageCounts['55 ปีขึ้นไป'] : ''}</div></div>
+              <span class="bar-num">${ageCounts['55 ปีขึ้นไป']}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- REMOVED: BMI section -->
+      <div class="removed-section">
+        <div class="removed-section-tag">✗ ซ่อนตามคำแนะนำ (#10)</div>
+        <div class="removed-section-inner">
+          <div class="removed-section-icon">📏</div>
+          <div class="removed-section-title">ส่วน BMI ถูกซ่อนตามคำแนะนำ (#10)</div>
+          <div class="removed-section-desc">Section นี้เคยแสดงกราฟการกระจาย BMI ของพนักงาน ถูกซ่อนทั้งหมดตามนโยบาย</div>
+        </div>
+      </div>
+
+      <!-- REMOVED: TMHI-15 section -->
+      <div class="removed-section">
+        <div class="removed-section-tag">✗ ซ่อนตามคำแนะนำ (#11)</div>
+        <div class="removed-section-inner">
+          <div class="removed-section-icon">🧠</div>
+          <div class="removed-section-title">ส่วน TMHI-15 ถูกซ่อน (#11)</div>
+          <div class="removed-section-desc">Section นี้เคยแสดงคะแนน TMHI-15 แบ่งตามระดับสุขภาพจิต ถูกซ่อนทั้งหมดตามนโยบาย — ข้อมูลนี้ sensitive</div>
+        </div>
+      </div>
+
+      <!-- ผู้ตอบล่าสุด — mini preview 5 รายการ -->
+      <div class="section-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+          <h3 style="margin:0">🕐 ผู้ตอบล่าสุด <span style="font-size:11px;font-weight:400;color:var(--tx3);margin-left:6px">แสดง 5 รายการล่าสุด</span></h3>
+          <a href="${addOrgParam('wb-individual.html', orgCode)}"
+             style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:10px;background:var(--PL);color:var(--P);font-size:12.5px;font-weight:700;text-decoration:none;border:1px solid var(--bdr)">
+            ดูทั้งหมด ${totalResp} รายการ →
+          </a>
+        </div>
+        ${latestFive.length === 0 ? `
+          <div style="text-align:center;padding:28px;color:var(--tx3);font-size:13px">ยังไม่มีผู้ตอบแบบสำรวจ</div>
+        ` : `
+          <div style="overflow-x:auto">
+            <table style="width:100%;border-collapse:collapse;font-size:13px">
+              <thead>
+                <tr style="background:var(--PL)">
+                  <th style="text-align:left;padding:9px 12px;color:var(--P);font-size:11px;font-weight:700;border-bottom:2px solid var(--bdr)">#</th>
+                  <th style="text-align:left;padding:9px 12px;color:var(--P);font-size:11px;font-weight:700;border-bottom:2px solid var(--bdr)">ชื่อ</th>
+                  <th style="text-align:left;padding:9px 12px;color:var(--P);font-size:11px;font-weight:700;border-bottom:2px solid var(--bdr)">เพศ</th>
+                  <th style="text-align:left;padding:9px 12px;color:var(--P);font-size:11px;font-weight:700;border-bottom:2px solid var(--bdr)">อายุ</th>
+                  <th style="text-align:left;padding:9px 12px;color:var(--P);font-size:11px;font-weight:700;border-bottom:2px solid var(--bdr)">วันที่ส่ง</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${latestFive.map((r, i) => `
+                  <tr style="border-bottom:1px solid #f3f0fa">
+                    <td style="padding:9px 12px;color:var(--tx3);font-size:11px">${i + 1}</td>
+                    <td style="padding:9px 12px;font-weight:600;color:var(--tx)">${r.name ? esc(r.name) : '<span style="color:var(--tx3)">—</span>'}</td>
+                    <td style="padding:9px 12px">
+                      <span style="display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;background:${normalizeGender(r.gender)==='ชาย'?'#eff6ff':normalizeGender(r.gender)==='หญิง'?'#fdf2f8':'#f3edff'};color:${normalizeGender(r.gender)==='ชาย'?'#1d4ed8':normalizeGender(r.gender)==='หญิง'?'#be185d':'#6d28d9'}">
+                        ${normalizeGender(r.gender)}
+                      </span>
+                    </td>
+                    <td style="padding:9px 12px;color:var(--tx2)">${r.age != null ? r.age + ' ปี' : '—'}</td>
+                    <td style="padding:9px 12px;color:var(--tx3);font-size:12px">${formatThaiDate(r.submitted_at)}</td>
+                  </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+          <div style="margin-top:10px;text-align:right">
+            <a href="${addOrgParam('wb-individual.html', orgCode)}"
+               style="font-size:12.5px;color:var(--P);font-weight:600;text-decoration:none">
+              ดูข้อมูลรายบุคคลทั้งหมด ${totalResp} คน →
+            </a>
+          </div>
+        `}
+      </div>`;
+
+    document.getElementById('main-area').innerHTML = html;
+
+  } catch(err) {
+    console.error(err);
+    showError(err.message || String(err));
+    document.getElementById('main-area').innerHTML = '<div style="padding:20px;text-align:center;color:var(--tx3)">ไม่สามารถโหลดข้อมูลได้</div>';
+  }
+}
+
+const initOrg = new URLSearchParams(window.location.search).get('org') || 'test-org';
+document.getElementById('org-input').value = initOrg;
+loadAll(initOrg);
+</script>
 </body>
 </html>

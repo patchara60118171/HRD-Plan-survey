@@ -1,0 +1,23 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "Static Dev Server (serve)",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", ".", "--listen", "3000", "--no-clipboard"],
+      "port": 3000
+    },
+    {
+      "name": "NocoDB Admin (Docker)",
+      "runtimeExecutable": "docker",
+      "runtimeArgs": ["compose", "up", "-d"],
+      "port": 8080
+    },
+    {
+      "name": "Watch Questions Sync",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["watch-questions.js"],
+      "port": 0
+    }
+  ]
+}

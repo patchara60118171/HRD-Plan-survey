@@ -4,6 +4,7 @@
   "description": "Well-being Survey - HRD Chapter 1 Form with enhanced security and performance",
   "scripts": {
     "dev": "npx serve",
+    "test:public-survey": "node survey-e2e-runner.js",
     "build": "echo '✅ Static site build completed - no build process required'",
     "deploy": "vercel --prod",
     "deploy:preview": "vercel",
