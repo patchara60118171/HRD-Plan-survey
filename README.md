@@ -4,34 +4,36 @@
 
 ## ภาพรวมระบบ
 
-โปรเจกต์นี้ไม่ได้มีเฉพาะแบบฟอร์ม CH1 อีกต่อไป แต่เป็นระบบสำรวจครบชุดที่ครอบคลุม
+โปรเจกต์นี้เป็นระบบสำรวจครบชุดที่ครอบคลุมการประเมินสุขภาวะบุคลากร 4 มิติ (กาย ใจ สังคม แวดล้อม)
 
-1. แบบสำรวจสุขภาวะรายบุคคลสำหรับบุคลากรทั่วไป
-2. แบบสำรวจ CH1 สำหรับ HR หรือผู้ดูแลขององค์กร
-3. Admin Portal สำหรับจัดการองค์กร ผู้ใช้ สิทธิ์ และดูรายงาน
-4. Backend บน Supabase สำหรับฐานข้อมูล สิทธิ์ RLS การยืนยันตัวตน และ Edge Functions
-5. Deployment บน Vercel สำหรับ production
+1. **แบบสำรวจสุขภาวะรายบุคคล** (Public Survey) - 97 คำถามครอบคลุม 4 มิติ
+2. **แบบสำรวจ CH1** สำหรับ HR หรือผู้ดูแลขององค์กร
+3. **Admin Portal** สำหรับจัดการองค์กร ผู้ใช้ สิทธิ์ และดูรายงาน
+4. **E2E Automation** สำหรับทดสอบระบบอัตโนมัติ
+5. **Backend** บน Supabase สำหรับฐานข้อมูล สิทธิ์ RLS การยืนยันตัวตน และ Edge Functions
+6. **Deployment** บน Vercel สำหรับ production
 
 ## แอปหลักในระบบ
 
 | ส่วนระบบ | ไฟล์หลัก | เส้นทางใช้งาน | จุดประสงค์ |
 |---|---|---|---|
-| Well-being Survey | `index.html` | `/` | แบบสำรวจสุขภาวะของบุคลากรทั่วไป |
+| Public Well-being Survey | `apps/public-survey/index.html` | `/` | แบบสำรวจสุขภาวะ 4 มิติ (97 คำถาม) |
 | CH1 Survey | `ch1.html` | `/ch1` | แบบฟอร์มสำรวจข้อมูล HRD บทที่ 1 |
 | Admin Portal | `admin.html` | `/admin` | จัดการระบบ ดูข้อมูล และวิเคราะห์ผล |
 
 ## ฟีเจอร์หลัก
 
-### 1. Well-being Survey
+### 1. Public Well-being Survey
 
-- รองรับลิงก์เฉพาะองค์กรผ่าน `?org=`
-- เรนเดอร์คำถามแบบไดนามิก
-- รองรับคำถามหลายประเภท เช่น ตัวเลือก ตัวเลข เวลา และข้อความ
-- บันทึกแบบร่างอัตโนมัติ
+- **97 คำถาม** ครอบคลุม 4 มิติ (กาย ใจ สังคม แวดล้อม)
+- รองรับลิงก์เฉพาะองค์กรผ่าน `?org=test-org`
+- แบ่งเป็น 7 ส่วน: personal, consumption, nutrition, activity, mental, loneliness, safety, environment
+- รองรับคำถามหลายประเภท: radio, text, number, checkbox, time, scale
+- บันทึกแบบร่างอัตโนมัติ (localStorage + Supabase)
 - กลับมากรอกต่อได้
 - ตรวจสอบความถูกต้องของข้อมูลก่อนส่ง
 - รองรับการสร้างไฟล์พิมพ์สำหรับดาวน์โหลด PDF
-- มีโครงสร้างคำถามด้านสุขภาพจิตและ UCLA Loneliness Scale
+- มีโครงสร้างคำถามด้านสุขภาพจิต (TMHI-15) และ UCLA Loneliness Scale (20 ข้อ)
 
 ### 2. CH1 Survey
 
@@ -54,7 +56,16 @@
 - จัดการสิทธิ์ผู้ใช้และบทบาท
 - จำกัดสิทธิ์ตามองค์กรสำหรับ `org_hr`
 
-### 4. Backend และ Security
+### 4. E2E Automation
+
+- **Playwright E2E Testing** สำหรับทดสอบระบบอัตโนมัติ
+- **`survey-e2e-runner.js`** จำลองการกรอกแบบสำรวจจริง
+- กรอกครบทุก 97 คำถามแบบ explicit
+- ตรวจสอบการ submit และการบันทึกลงฐานข้อมูล
+- รองรับการรันหลายรอบ และ headless/headed mode
+- รายงานผลลัพธ์พร้อม coverage และ network verification
+
+### 5. Backend และ Security
 
 - ใช้ Supabase PostgreSQL เป็นฐานข้อมูลหลัก
 - ใช้ Row Level Security (RLS) แยกสิทธิ์ตามบทบาท
@@ -62,7 +73,7 @@
 - มีตาราง `admin_user_roles`, `organizations`, `survey_responses`, `hrd_ch1_responses`, `form_windows`, `form_question_overrides`
 - มี Edge Functions สำหรับงาน integration บางส่วน
 
-### 5. Integration และ Operations
+### 6. Integration และ Operations
 
 - เชื่อม Google Sheets / Apps Script สำหรับงาน sync
 - มีสคริปต์ช่วยตรวจ schema และ readiness
@@ -76,6 +87,7 @@
 | Frontend | HTML5, CSS, Vanilla JavaScript |
 | Backend | Supabase (PostgreSQL, Auth, Storage, Edge Functions) |
 | Deployment | Vercel |
+| Testing | Playwright (E2E Automation) |
 | Integration | Google Sheets, Google Apps Script |
 | Utility Scripts | Node.js |
 
@@ -83,23 +95,29 @@
 
 ```text
 Well-being Survey/
-├── index.html                  # Well-being Survey
-├── ch1.html                    # CH1 Survey
-├── admin.html                  # Admin Portal
-├── admin-login.html            # หน้าเข้าสู่ระบบแอดมิน
-├── wb-printable.html           # หน้าแบบพิมพ์ Well-being
-├── ch1-printable.html          # หน้าแบบพิมพ์ CH1
-├── js/                         # JavaScript หลักของระบบ
-├── css/                        # CSS หลักของระบบ
-├── assets/                     # รูปภาพ ฟอนต์ และไฟล์ประกอบ
-├── scripts/                    # สคริปต์ dev / audit / ops / one-off
-├── supabase/
-│   ├── migrations/             # SQL migrations
-│   └── functions/              # Edge Functions
-├── apps/                       # โครงสร้างอ้างอิงสำหรับการแยกแอป
-├── backend/                    # งานหลังบ้านเชิงโครงสร้าง
-├── docs/                       # เอกสารระบบ
-└── vercel.json                 # การตั้งค่า deployment บน Vercel
+├── apps/
+│   └── public-survey/            # Public Well-being Survey
+│       ├── index.html           # Main entry point
+│       ├── css/                  # Stylesheets
+│       └── js/                   # App logic, components, questions
+├── index.html                    # Legacy entry (redirects to apps/)
+├── ch1.html                      # CH1 Survey
+├── admin.html                    # Admin Portal
+├── admin-login.html              # Admin login page
+├── wb-printable.html             # Well-being printable view
+├── ch1-printable.html            # CH1 printable view
+├── survey-e2e-runner.js          # E2E automation script
+├── js/                          # Legacy/shared JavaScript
+├── css/                         # Main stylesheets
+├── assets/                      # Images, fonts, resources
+├── scripts/                     # Utility scripts
+├── backend/
+│   └── supabase/                # Supabase configuration
+│       ├── migrations/          # Database migrations
+│       ├── functions/           # Edge functions
+│       └── policies/             # Security policies
+├── docs/                        # Documentation
+└── vercel.json                  # Deployment configuration
 ```
 
 ## ตารางหลักในฐานข้อมูล
@@ -166,16 +184,28 @@ npm run supabase:deploy
 ## คำสั่งที่ใช้บ่อย
 
 ```bash
+# Development
 npm run dev
-npm run deploy
-npm run deploy:preview
-npm run supabase:test
-npm run supabase:stats
-npm run supabase:export
-npm run sync:google:pending
-npm run sync:google:all
-npm run db:clear-test
-npm run supabase:deploy
+
+# Testing & Automation
+npm run test:public-survey          # Run E2E automation
+
+# Deployment
+npm run deploy                      # Deploy to production
+npm run deploy:preview              # Deploy preview
+
+# Database Operations
+npm run supabase:test               # Test database connection
+npm run supabase:stats              # Database statistics
+npm run supabase:export             # Export data
+npm run db:clear-test               # Clear test data
+
+# Sync Operations
+npm run sync:google:pending         # Sync pending data to Google
+npm run sync:google:all             # Sync all data to Google
+
+# Supabase Functions
+npm run supabase:deploy             # Deploy edge functions
 ```
 
 ## การ deploy
@@ -188,33 +218,44 @@ Production ใช้ Vercel โดยมีแนวทางดังนี้
 
 ## สถานะปัจจุบันของระบบ
 
+**เวอร์ชัน: 3.1.0** (อัปเดตล่าสุด: 30 มีนาคม 2569)
+
 ภาพรวม ณ ปัจจุบัน
 
-- Supabase schema และ migration หลักพร้อมใช้งาน
-- ระบบบทบาทและ RLS หลักพร้อมใช้งาน
-- Vercel deployment พร้อมใช้งาน
-- Admin Portal ใช้งานได้จริง
-- Well-being Survey และ CH1 Survey ใช้งานได้จริง
-- ยังมีงานปรับปรุงต่อเนื่องในส่วน modularization, automation tests และ admin UI บางฟีเจอร์
+- ✅ **Public Well-being Survey** พร้อมใช้งานจริง (97 คำถาม)
+- ✅ **CH1 Survey** พร้อมใช้งานจริง
+- ✅ **Admin Portal** พร้อมใช้งานจริง
+- ✅ **E2E Automation** พร้อมใช้งาน (Playwright)
+- ✅ **Supabase Backend** พร้อมใช้งานพร้อม RLS และ security policies
+- ✅ **Vercel Deployment** พร้อมใช้งานใน production
+- ✅ **Google Sheets Integration** พร้อมใช้งาน
+
+**การพัฒนาล่าสุด:**
+
+- เพิ่ม E2E automation สำหรับทดสอบระบบอัตโนมัติ
+- ปรับปรุง Public Survey ให้ครอบคลุม 4 มิติ (97 คำถาม)
+- ลบไฟล์ที่ไม่จำเป็นและ mockup ที่ไม่ได้ใช้
+- ปรับปรุงโครงสร้างโปรเจกต์ให้สะอาดขึ้น
+- ย้าย Public Survey ไปยัง `apps/public-survey/`
 
 ## เอกสารที่ควรอ่านต่อ
 
-- `PROJECT_STATUS.md`
-- `SOURCE_OF_TRUTH.md`
-- `docs/architecture/SYSTEM_PLAN.md`
-- `docs/architecture/ROLE_PERMISSION_MATRIX.md`
-- `docs/SUPABASE_SETUP.md`
-- `docs/VERCEL_SETUP.md`
-- `docs/TESTING_GUIDE.md`
+- `docs/ADMIN_GUIDE.md` - คู่มือสำหรับผู้ดูแลระบบ
+- `docs/BACKUP_STRATEGY.md` - กลยุทธ์การ backup
+- `docs/ADMIN_PORTAL_USER_GUIDE_V2_TH.md` - คู่มือผู้ใช้ภาษาไทย
 
 ## หมายเหตุสำคัญ
 
-- Entry points หลักของระบบตอนนี้คือ `index.html`, `ch1.html`, `admin.html`
-- โฟลเดอร์ `apps/` เป็นโครงสร้างอ้างอิงสำหรับการแยกแอปในระยะถัดไป ไม่ใช่ source of truth สำหรับ deployment ปัจจุบัน
-- หากจะแก้ routing หรือ deployment ให้ตรวจ `vercel.json` และเอกสาร deployment ควบคู่กันเสมอ
+- **Entry points หลัก:** `apps/public-survey/index.html`, `ch1.html`, `admin.html`
+- **E2E Testing:** รัน `npm run test:public-survey` เพื่อทดสอบระบบอัตโนมัติ
+- **Public Survey URL:** `https://nidawellbeing.vercel.app/?org=test-org`
+- **โฟลเดอร์ `apps/`** เป็นโครงสร้างหลักสำหรับ Public Survey
+- **การ deploy:** ตรวจสอบ `vercel.json` สำหรับการตั้งค่า routing และ security
 
 ## License
 
 โปรเจกต์นี้เป็นของหน่วยงานภาครัฐ ใช้สำหรับงานสำรวจข้อมูลสุขภาวะบุคลากรและการบริหารข้อมูลที่เกี่ยวข้องเท่านั้น
 
-อัปเดตล่าสุด: 20 มีนาคม 2569
+---
+
+**เวอร์ชัน: 3.1.0** | **อัปเดตล่าสุด: 30 มีนาคม 2569**
