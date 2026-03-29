@@ -207,7 +207,7 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
       <!-- Org Selector Bar -->
       <div class="org-selector-bar">
         <span class="lbl">องค์กร:</span>
-        <input id="org-input" value="test-org" placeholder="org_code...">
+        <input id="org-input" value="test-org" placeholder="org_code หรือชื่อองค์กร...">
         <button onclick="changeOrg()">โหลด</button>
         <span class="org-name-display" id="org-name-display">—</span>
       </div>
@@ -321,15 +321,29 @@ async function loadAll(orgCode) {
 
     const orgTotalStaff = orgData?.total_staff || 0;
 
-    // Survey responses — all (for stats)
-    const { data: wbData, error: wbErr } = await sb
-      .from('survey_responses')
-      .select('id, name, title, gender, age, tmhi_score, submitted_at')
-      .eq('org_code', orgCode)
-      .eq('is_draft', false)
-      .order('submitted_at', { ascending: false });
-    if (wbErr) throw wbErr;
-    const responses = wbData || [];
+    // Survey responses — query by org_code first, fallback to organization name
+    let responses = [];
+    {
+      const { data: d1, error: e1 } = await sb
+        .from('survey_responses')
+        .select('id, name, title, gender, age, tmhi_score, submitted_at')
+        .eq('org_code', orgCode)
+        .eq('is_draft', false)
+        .order('submitted_at', { ascending: false });
+      if (!e1 && d1?.length > 0) {
+        responses = d1;
+      } else {
+        // Fallback: match by organization name (ilike)
+        const searchName = orgName || orgCode;
+        const { data: d2, error: e2 } = await sb
+          .from('survey_responses')
+          .select('id, name, title, gender, age, tmhi_score, submitted_at')
+          .ilike('organization', `%${searchName}%`)
+          .eq('is_draft', false)
+          .order('submitted_at', { ascending: false });
+        if (!e2) responses = d2 || [];
+      }
+    }
     // 5 latest for preview table
     const latestFive = responses.slice(0, 5);
 

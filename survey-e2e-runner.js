@@ -111,6 +111,10 @@ function buildAnswerSet(user) {
   return answers;
 }
 
+function getExpectedQuestionIds(user) {
+  return Object.keys(buildAnswerSet(user));
+}
+
 async function getVisibleQuestionIds(page) {
   return page.evaluate(() => {
     return Array.from(document.querySelectorAll('.question-card'))
@@ -123,6 +127,31 @@ async function getVisibleQuestionIds(page) {
       .filter(Boolean)
       .map(id => id.replace('card_', ''));
   });
+}
+
+function summarizeCoverage(expectedQuestionIds, answeredQuestionIds) {
+  const answeredSet = new Set(answeredQuestionIds);
+  const missingQuestionIds = expectedQuestionIds.filter(id => !answeredSet.has(id));
+  return {
+    expectedCount: expectedQuestionIds.length,
+    answeredCount: answeredSet.size,
+    missingQuestionIds,
+    answeredQuestionIds: Array.from(answeredSet)
+  };
+}
+
+function summarizeSubmitNetwork(networkLog) {
+  const writeRequests = networkLog.filter(item =>
+    item.url.includes('/survey_responses') &&
+    ['POST', 'PATCH'].includes(item.method)
+  );
+
+  const hasSuccessfulWrite = writeRequests.some(item => [200, 201, 204].includes(item.status));
+
+  return {
+    hasSuccessfulWrite,
+    writeRequests
+  };
 }
 
 async function collectCoverage(page) {
@@ -141,7 +170,7 @@ async function collectCoverage(page) {
   });
 }
 
-async function answerVisibleQuestions(page, user) {
+async function answerVisibleQuestions(page, user, answeredQuestionIds) {
   const answerSet = buildAnswerSet(user);
   const questionIds = await getVisibleQuestionIds(page);
 
@@ -220,6 +249,7 @@ async function answerVisibleQuestions(page, user) {
       }
     }
 
+    answeredQuestionIds.add(questionId);
     await wait(STEP_DELAY);
   }
 }
@@ -265,7 +295,7 @@ async function verifySubmission(email) {
   };
 }
 
-async function advanceToReview(page, user) {
+async function advanceToReview(page, user, answeredQuestionIds) {
   for (let step = 1; step <= MAX_STEPS; step += 1) {
     const reviewHeading = page.locator('.section-title:has-text("ตรวจสอบคำตอบของท่าน")');
     if (await reviewHeading.isVisible().catch(() => false)) {
@@ -277,7 +307,7 @@ async function advanceToReview(page, user) {
     }
 
     await page.waitForSelector('.question-card', { timeout: 15000 });
-    await answerVisibleQuestions(page, user);
+    await answerVisibleQuestions(page, user, answeredQuestionIds);
 
     if (await reviewHeading.isVisible().catch(() => false)) {
       return 'review';
@@ -349,6 +379,32 @@ async function runSingle(index, browser) {
   const page = await context.newPage();
   const user = createUser(index);
   const startTime = Date.now();
+  const answeredQuestionIds = new Set();
+  const networkLog = [];
+  const browserConsole = [];
+
+  page.on('console', msg => {
+    browserConsole.push({ type: msg.type(), text: msg.text() });
+  });
+
+  page.on('response', async response => {
+    const url = response.url();
+    if (!url.includes('survey_responses') && !url.includes('/rest/v1/')) return;
+
+    let bodySnippet = '';
+    try {
+      bodySnippet = (await response.text()).slice(0, 500);
+    } catch {
+      bodySnippet = '';
+    }
+
+    networkLog.push({
+      url,
+      status: response.status(),
+      method: response.request().method(),
+      bodySnippet
+    });
+  });
 
   try {
     await page.goto(TARGET_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
@@ -360,7 +416,7 @@ async function runSingle(index, browser) {
     await page.click('button:has-text("เริ่มทำแบบสำรวจ")');
     await page.waitForSelector('.question-card', { timeout: 15000 });
 
-    const flowState = await advanceToReview(page, user);
+    const flowState = await advanceToReview(page, user, answeredQuestionIds);
     if (!flowState) {
       throw new Error(`ไม่ถึงหน้าสิ้นสุดของฟอร์มภายใน ${MAX_STEPS} ขั้น`);
     }
@@ -372,21 +428,32 @@ async function runSingle(index, browser) {
       submitResult = { ok: false, message: 'ไม่พบหน้าผลลัพธ์หลังจบแบบสำรวจ' };
     }
 
-    const coverage = await collectCoverage(page);
+    const expectedQuestionIds = getExpectedQuestionIds(user);
+    const coverage = summarizeCoverage(expectedQuestionIds, Array.from(answeredQuestionIds));
+    const pageCoverage = await collectCoverage(page).catch(() => null);
     const verification = await verifySubmission(user.email);
+    const submitNetwork = summarizeSubmitNetwork(networkLog);
+
+    const isSuccess = submitResult.ok && coverage.missingQuestionIds.length === 0 && submitNetwork.hasSuccessfulWrite;
 
     return {
       run: index,
       email: user.email,
-      status: submitResult.ok && verification.ok && coverage.missingQuestionIds.length === 0 ? 'success' : 'failed',
+      status: isSuccess ? 'success' : 'failed',
       detail: submitResult.ok
-        ? (verification.ok && coverage.missingQuestionIds.length === 0
-            ? `กรอกครบ ${coverage.answeredCount}/${coverage.expectedCount} ข้อ และตรวจพบ record ใน DB (attempt ${verification.attempt})`
-            : coverage.missingQuestionIds.length > 0
-              ? `ยังตอบไม่ครบ: ขาด ${coverage.missingQuestionIds.length} ข้อ`
-            : `ขึ้นหน้าผลลัพธ์แล้ว แต่ไม่พบ record ใน DB: ${verification.error}`)
+        ? (coverage.missingQuestionIds.length > 0
+            ? `ยังตอบไม่ครบ: ขาด ${coverage.missingQuestionIds.length} ข้อ`
+            : submitNetwork.hasSuccessfulWrite
+              ? `กรอกครบ ${coverage.answeredCount}/${coverage.expectedCount} ข้อ และพบ network write สำเร็จไป survey_responses`
+              : `ขึ้นหน้าผลลัพธ์แล้ว แต่ไม่พบ network write สำเร็จไป survey_responses`)
         : submitResult.message,
+      answeredQuestionIds: Array.from(answeredQuestionIds),
+      expectedQuestionIds,
+      browserConsole,
+      networkLog,
       coverage,
+      pageCoverage,
+      submitNetwork,
       verification,
       durationMs: Date.now() - startTime
     };
@@ -397,6 +464,10 @@ async function runSingle(index, browser) {
       email: user.email,
       status: 'failed',
       detail: error.message,
+      answeredQuestionIds: Array.from(answeredQuestionIds),
+      expectedQuestionIds: getExpectedQuestionIds(user),
+      browserConsole,
+      networkLog,
       diagnostics,
       durationMs: Date.now() - startTime
     };

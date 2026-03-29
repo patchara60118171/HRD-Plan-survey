@@ -429,14 +429,26 @@ async function loadAll(orgCode) {
       statusEl.innerHTML = '<span class="badge-nosend">❌ ยังไม่ส่ง</span>';
     }
 
-    // 3. Query survey_responses
-    const { data: wbData, error: wbErr } = await sb
-      .from('survey_responses')
-      .select('id, gender, tmhi_score, submitted_at')
-      .eq('org_code', orgCode)
-      .eq('is_draft', false);
-    if (wbErr) throw wbErr;
-    const responses = wbData || [];
+    // 3. Query survey_responses — org_code first, fallback to organization name
+    let responses = [];
+    {
+      const { data: d1, error: e1 } = await sb
+        .from('survey_responses')
+        .select('id, gender, tmhi_score, submitted_at')
+        .eq('org_code', orgCode)
+        .eq('is_draft', false);
+      if (!e1 && d1?.length > 0) {
+        responses = d1;
+      } else {
+        const searchName = orgName || orgCode;
+        const { data: d2, error: e2 } = await sb
+          .from('survey_responses')
+          .select('id, gender, tmhi_score, submitted_at')
+          .ilike('organization', `%${searchName}%`)
+          .eq('is_draft', false);
+        if (!e2) responses = d2 || [];
+      }
+    }
 
     const totalResp = responses.length;
     let maleCount = 0, femaleCount = 0, otherCount = 0;
