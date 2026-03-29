@@ -282,14 +282,14 @@ function renderTime(question, value) {
         hourOptions += `<option value="${h}" ${selected}>${h}</option>`;
     }
 
-    // Generate Minutes 00, 15, 30, 45 (as requested)
+    // Generate Minutes 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55 (as requested)
     let minuteOptions = '';
-    const minuteSteps = [0, 15, 30, 45];
+    const minuteSteps = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
 
     for (const i of minuteSteps) {
         const m = String(i).padStart(2, '0');
-        // Default to 00 if no saved value, otherwise match saved value
-        const isDefault = !savedMinute && m === '00';
+        // Default to 05 if no saved value, otherwise match saved value
+        const isDefault = !savedMinute && m === '05';
         const isSaved = savedMinute === m;
         const selected = (isSaved || isDefault) ? 'selected' : '';
         minuteOptions += `<option value="${m}" ${selected}>${m}</option>`;

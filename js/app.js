@@ -1542,7 +1542,7 @@ const app = {
             this.currentSubsectionIndex === lastSection.subsections.length - 1);
 
         if (isLast) {
-            nextBtn.innerHTML = 'ตรวจสอบคำตอบ <span class="btn-icon">✓</span>';
+            nextBtn.innerHTML = 'ส่งแบบสำรวจ <span class="btn-icon">✓</span>';
         } else {
             nextBtn.innerHTML = 'ถัดไป <span class="btn-icon">→</span>';
         }
@@ -1565,8 +1565,8 @@ const app = {
             this.currentSubsectionIndex = 0;
             this.renderSurvey();
         } else {
-            // Survey complete -> Go to Review
-            this.renderReview();
+            // Survey complete -> Submit directly
+            this.submitSurvey();
         }
     },
 
