@@ -78,8 +78,22 @@ function render(data) {
       html += `<div class="section">
         <div class="section-title">${esc(section.title)}</div>`;
       
-      for (const field of section.fields) {
-        html += renderField(field);
+      // Handle both regular sections and subsections
+      if (section.fields) {
+        for (const field of section.fields) {
+          html += renderField(field);
+        }
+      } else if (section.subsections) {
+        for (const subsection of section.subsections) {
+          html += `<div style="margin-bottom:12px">
+            <div style="font-weight:600;color:#374151;font-size:10.5pt;margin-bottom:8px">${esc(subsection.subsection_label)}</div>`;
+          if (subsection.fields) {
+            for (const field of subsection.fields) {
+              html += renderField(field);
+            }
+          }
+          html += `</div>`;
+        }
       }
       
       html += `</div>`;

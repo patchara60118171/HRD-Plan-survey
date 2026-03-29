@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Mockup Redesign — NIDA Wellbeing Org Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai+Looped:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --P:#5b2aa8;--PD:#4b1f95;--PL:#f3edff;
+  --A:#ec4899;--AL:#fdf2f8;
+  --G:#16a34a;--GL:#ecfdf3;
+  --W:#b45309;--WL:#fef3c7;
+  --D:#dc2626;--DL:#fee2e2;
+  --bg:#f7f5fc;--card:#ffffff;--bdr:#e3def3;
+  --tx:#1f2937;--tx2:#4b5563;--tx3:#8b94a7;
+  --shadow:0 1px 3px rgba(15,23,42,.06),0 10px 28px rgba(91,42,168,.06);
+  --sidebar-w:244px;
+}
+body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh}
+
+#portal-app{display:flex;min-height:100vh}
+.sidebar{width:var(--sidebar-w);background:linear-gradient(180deg,#5f28ab 0%,#58239d 52%,#501f8d 100%);color:#fff;display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:20;box-shadow:4px 0 30px rgba(46,16,101,.16)}
+.sidebar-logo{padding:16px 14px;border-bottom:1px solid rgba(255,255,255,.08)}
+.logo-row{display:flex;align-items:center;gap:10px}
+.logo-icon{width:28px;height:28px;border-radius:8px;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;font-size:15px}
+.logo-title{font-size:12.5px;font-weight:700}
+.logo-sub{font-size:10px;color:rgba(255,255,255,.48);padding-left:38px;margin-top:4px}
+.sidebar-org{margin:12px 10px 8px;padding:12px;border-radius:8px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.06)}
+.o-label{font-size:9px;color:rgba(255,255,255,.42);margin-bottom:4px;letter-spacing:.06em;text-transform:uppercase}
+.o-name{font-size:12px;font-weight:700;line-height:1.45}
+.o-email{font-size:10px;color:rgba(255,255,255,.48);margin-top:4px}
+.portal-nav{flex:1;padding:8px 0 10px}
+.nav-group{padding:12px 14px 6px;font-size:9px;font-weight:700;letter-spacing:.08em;color:rgba(255,255,255,.34);text-transform:uppercase}
+.nav-item,.nav-subitem{display:flex;align-items:center;gap:9px;width:100%;background:none;border:none;color:rgba(255,255,255,.72);font-family:inherit;text-align:left;cursor:pointer}
+.nav-item{padding:11px 14px;font-size:13px;border-left:3px solid transparent}
+.nav-subitem{padding:9px 14px 9px 28px;font-size:12.5px;border-left:3px solid transparent}
+.nav-item:hover,.nav-subitem:hover{background:rgba(255,255,255,.06);color:#fff}
+.nav-item.active,.nav-subitem.active{background:rgba(255,255,255,.12);color:#fff}
+.nav-item.active{border-left-color:#f59e0b}
+.nav-subitem.active{border-left-color:#fbbf24}
+.ni{width:16px;text-align:center;flex-shrink:0}
+.sidebar-foot{border-top:1px solid rgba(255,255,255,.08);padding:10px}
+.sidebar-foot .nav-item{padding:8px 6px;border-left:none;font-size:12px}
+
+.portal-main-wrap{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{background:#fff;border-bottom:1px solid var(--bdr);padding:10px 24px;display:flex;align-items:center;gap:12px;min-height:58px;position:sticky;top:0;z-index:100}
+.tb-head{display:flex;flex-direction:column;gap:2px}
+.tb-title{font-size:14px;font-weight:700;color:var(--P)}
+.tb-sub{font-size:11.5px;color:var(--tx2);line-height:1.35}
+.tb-space{flex:1}
+.tb-user{font-size:11px;color:var(--tx3)}
+.portal-content{padding:24px;max-width:1120px}
+.tab-page{display:none}
+.tab-page.active{display:block}
+
+.section-card{background:#fff;border:1px solid var(--bdr);border-radius:14px;padding:20px 22px;margin-bottom:16px;box-shadow:var(--shadow);position:relative}
+.section-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:#8b5cf6;border-radius:14px 0 0 14px}
+.section-card.wb::before{background:#ec4899}
+.section-card h3{font-size:15px;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.desc{font-size:12.5px;color:var(--tx2);margin-bottom:14px;line-height:1.6}
+
+.summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.summary-item{background:#fcfbff;border:1px solid var(--bdr);border-radius:10px;padding:14px 10px;text-align:center}
+.summary-item .val{font-size:20px;font-weight:700;color:#7c3aed;line-height:1.2}
+.summary-item .lbl{font-size:11px;color:var(--tx3);margin-top:6px;display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap}
+
+.progress-wrap{margin-top:12px}
+.progress-label{display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:8px}
+.progress-label .left{color:var(--tx2);font-weight:600}
+.progress-label .right{color:#7c3aed;font-weight:700}
+.progress-track{height:10px;background:var(--PL);border-radius:999px;overflow:hidden}
+.progress-fill{height:100%;background:#d8b4fe;border-radius:999px;transition:width .4s ease}
+.progress-text{margin-top:8px;text-align:center;font-size:12.5px;color:var(--tx2)}
+.progress-text strong{color:#7c3aed}
+
+.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 16px;border-radius:10px;font-size:13px;font-weight:600;border:none;cursor:pointer;font-family:inherit;transition:all .15s}
+.btn-primary{background:#7c3aed;color:#fff}
+.btn-green{background:#ec4899;color:#fff}
+.btn-outline{background:#fff;border:1.5px solid #d7dce5;color:var(--tx2)}
+
+.dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+.dash-card{background:#fff;border:1px solid var(--bdr);border-radius:14px;padding:18px 20px;box-shadow:var(--shadow)}
+.dash-card h4{font-size:13px;font-weight:700;color:var(--P);margin-bottom:14px;display:flex;align-items:center;gap:6px}
+.dist-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.dist-label{min-width:80px;font-size:12px;color:var(--tx2);font-weight:600;text-align:right;flex-shrink:0}
+.dist-bar-wrap{flex:1;height:22px;background:#f3edff;border-radius:6px;overflow:hidden}
+.dist-bar{height:100%;border-radius:6px}
+.dist-count{font-size:11px;font-weight:700;color:var(--tx2);min-width:36px;text-align:right;flex-shrink:0}
+.dist-pct{font-size:10px;color:var(--tx3);min-width:36px;text-align:right;flex-shrink:0}
+
+.dash-full{grid-column:1/-1}
+
+/* Individual page */
+.wbi-toolbar{background:#fff;border:1px solid var(--bdr);border-radius:14px 14px 0 0;padding:12px 16px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;box-shadow:var(--shadow)}
+.wbi-toolbar .wbi-si{padding:8px 12px;border:1.5px solid var(--bdr);border-radius:10px;font-size:13px;font-family:inherit;background:#fff;color:var(--tx);min-width:160px}
+.wbi-toolbar .wbi-sel{padding:8px 12px;border:1.5px solid var(--bdr);border-radius:10px;font-size:13px;font-family:inherit;background:#fff;color:var(--tx);cursor:pointer}
+.wbi-toolbar .wbi-count{font-size:12px;color:var(--tx3);font-weight:600;margin-left:auto;white-space:nowrap}
+.wbi-table-wrap{background:#fff;border:1px solid var(--bdr);border-top:none;overflow-x:auto;max-height:calc(100vh - 240px);box-shadow:var(--shadow)}
+.wbi-table-wrap table{width:100%;border-collapse:collapse;font-size:12.5px;white-space:nowrap}
+.wbi-table-wrap thead{position:sticky;top:0;z-index:5}
+.wbi-table-wrap th{text-align:left;padding:10px 12px;background:var(--PL);border-bottom:2px solid var(--bdr);font-weight:700;color:var(--P);font-size:11px}
+.wbi-table-wrap td{padding:9px 12px;border-bottom:1px solid #f3f0fa;color:var(--tx);vertical-align:middle}
+.wbi-table-wrap tr:hover td{background:#fdfbff}
+.wbi-table-wrap .num{text-align:center;color:var(--tx3);font-size:11px}
+.btn-view{padding:5px 12px;border-radius:8px;background:#f3edff;color:#7c3aed;border:1px solid #e3def3;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit}
+.btn-view:hover{background:#ece5ff;border-color:#c4b5fd}
+.wbi-pager{background:#fff;border:1px solid var(--bdr);border-top:none;border-radius:0 0 14px 14px;padding:10px 16px;display:flex;align-items:center;gap:8px;box-shadow:var(--shadow)}
+.wbi-pager .wbi-info{font-size:12px;color:var(--tx3);flex:1}
+.wbi-pager button{padding:5px 10px;border-radius:8px;border:1px solid var(--bdr);background:#fff;font-size:12px;cursor:pointer;font-family:inherit;color:var(--tx2);font-weight:600}
+.wbi-pager button.active{background:var(--P);color:#fff;border-color:var(--P)}
+
+.badge-sm{display:inline-block;padding:3px 8px;border-radius:999px;font-size:10px;font-weight:700}
+.badge-good{background:#ecfdf3;color:#16a34a}
+.badge-avg{background:#fff7ed;color:#b45309}
+
+/* Org profile */
+.org-hero-card{background:linear-gradient(180deg,#ffffff 0%,#fffafd 100%);border:1px solid #f3d9e8;border-radius:18px;padding:18px 20px 22px;box-shadow:0 10px 25px rgba(109,40,217,.05)}
+.org-kicker{font-size:14px;font-weight:700;color:#6d28d9;margin-bottom:6px}
+.org-title{font-size:21px;font-weight:700;color:#5b21b6;line-height:1.32;margin-bottom:2px}
+.org-subtitle{font-size:12px;color:#8b8798;line-height:1.55;margin-bottom:16px}
+.org-pill-row{display:flex;gap:10px;flex-wrap:wrap}
+.org-pill{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:999px;background:#fff;border:1px solid #ece8f7;font-size:11.5px;font-weight:600;color:#4b5563}
+.org-layout{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+.detail-card{background:#fff;border:1px solid #f3d9e8;border-radius:18px;padding:16px;box-shadow:0 8px 22px rgba(109,40,217,.04)}
+.detail-card-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:14px}
+.detail-card-icon{width:30px;height:30px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:#f3e8ff;color:#7c3aed;font-size:14px;flex-shrink:0}
+.detail-card h4{font-size:14px;color:#6d28d9;line-height:1.4}
+.detail-card p{font-size:11px;color:#9ca3af;margin-top:2px;line-height:1.5}
+.detail-list{display:grid;gap:10px}
+.detail-list.two-col{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.detail-item{background:#fcfbff;border:1px solid #f1edf8;border-radius:10px;padding:11px 12px;min-height:56px}
+.detail-label{font-size:10px;font-weight:700;color:#9ca3af;letter-spacing:.01em;margin-bottom:5px}
+.detail-value{font-size:13px;color:#374151;line-height:1.55}
+
+.info-tip{position:relative;display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:999px;background:#ede9fe;color:#6d28d9;font-size:10px;font-weight:700;cursor:help;flex-shrink:0}
+
+/* Change indicator */
+.change-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:6px;font-size:10px;font-weight:700;background:#fef3c7;color:#92400e;margin-left:8px;animation:fadeIn .3s ease}
+.change-badge.removed{background:#fef2f2;color:#dc2626}
+.change-badge.modified{background:#ede9fe;color:#6d28d9}
+.change-badge.renamed{background:#ecfdf5;color:#059669}
+
+/* Mockup banner */
+.mockup-banner{background:linear-gradient(90deg,#fef3c7,#fef9c3);border:2px dashed #f59e0b;border-radius:12px;padding:12px 18px;margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.mockup-banner .icon{font-size:20px}
+.mockup-banner .text{font-size:13px;color:#92400e;font-weight:600}
+.mockup-banner .sub{font-size:11px;color:#a16207;margin-top:2px}
+
+@media(max-width:900px){
+  .sidebar{display:none}
+  .portal-main-wrap{margin-left:0}
+  .dash-grid{grid-template-columns:1fr}
+  .org-layout{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div id="portal-app">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-row">
+        <div class="logo-icon">🏛️</div>
+        <div class="logo-title">NIDA Wellbeing</div>
+      </div>
+      <div class="logo-sub">Org HR Portal</div>
+    </div>
+
+    <div class="sidebar-org">
+      <div class="o-label">องค์กร</div>
+      <div class="o-name">ทดสอบระบบ</div>
+      <div class="o-email">hr-test@tst.go.th</div>
+    </div>
+
+    <nav class="portal-nav">
+      <div class="nav-group">เมนูหลัก</div>
+      <button class="nav-item" onclick="switchTab('home')"><span class="ni">🏠</span> หน้าหลัก</button>
+      <button class="nav-item" onclick="switchTab('org-profile')"><span class="ni">🏢</span> ข้อมูลภาพรวมองค์กร <span class="change-badge renamed">RENAMED</span></button>
+      <button class="nav-item" onclick="switchTab('ch1')"><span class="ni">📝</span> CH1 ข้อมูลองค์กร</button>
+      <button class="nav-subitem"><span class="ni">✏️</span> แก้ไขฟอร์ม</button>
+      <button class="nav-item active" onclick="switchTab('wb')"><span class="ni">💚</span> สถานะการตอบแบบสำรวจ <span class="change-badge renamed">RENAMED</span></button>
+      <button class="nav-item" onclick="switchTab('wb-individual')"><span class="ni">👤</span> ข้อมูลรายบุคคล <span class="change-badge renamed">RENAMED</span></button>
+      <button class="nav-item" onclick="switchTab('share')"><span class="ni">🔗</span> แชร์ลิงก์ Well-being</button>
+    </nav>
+
+    <div class="sidebar-foot">
+      <button class="nav-item"><span class="ni">↩</span> ออกจากระบบ</button>
+    </div>
+  </aside>
+
+  <div class="portal-main-wrap">
+    <div class="topbar">
+      <div class="tb-head">
+        <div class="tb-title" id="topbar-title">สถานะการตอบแบบสำรวจ</div>
+        <div class="tb-sub" id="topbar-subtitle">ภาพรวมผลสำรวจสุขภาวะรายบุคคลของบุคลากรในองค์กร</div>
+      </div>
+      <div class="tb-space"></div>
+      <div class="tb-user">ทดสอบระบบ</div>
+    </div>
+
+    <main class="portal-content">
+
+      <!-- ============ TAB: WB Dashboard (REDESIGNED) ============ -->
+      <div class="tab-page active" id="page-wb">
+
+        <div class="mockup-banner">
+          <div class="icon">🎨</div>
+          <div>
+            <div class="text">MOCKUP — Well-being ผลสำรวจ (หลังแก้ไข)</div>
+            <div class="sub">ตัด BMI card, TMHI-15 card, ผู้ตอบล่าสุด table ออก / เปลี่ยนชื่อเมนูเป็น "สถานะการตอบแบบสำรวจ"</div>
+          </div>
+        </div>
+
+        <div class="section-card wb">
+          <h3>💚 สถานะการตอบแบบสำรวจ <span class="change-badge renamed">RENAMED</span></h3>
+          <div class="desc">ภาพรวมผลสำรวจสุขภาวะรายบุคคลของบุคลากรในองค์กร</div>
+          <div class="progress-wrap">
+            <div class="progress-label">
+              <span class="left">ผู้ตอบ Well-being Survey</span>
+              <span class="right">4.0%</span>
+            </div>
+            <div class="progress-track"><div class="progress-fill" style="width:4%"></div></div>
+            <div class="progress-text">ผู้ที่กรอกแล้ว <strong>2 คน</strong> / 50 คน คิดเป็นร้อยละ 4.0</div>
+          </div>
+          <div style="display:none;margin-top:16px">
+            <div class="summary-grid" id="wb-summary-grid"></div>
+          </div>
+          <div style="margin-top:16px">
+            <div class="summary-grid">
+              <div class="summary-item"><div class="val">2</div><div class="lbl">ผู้ตอบทั้งหมด</div></div>
+              <div class="summary-item"><div class="val">1</div><div class="lbl">ชาย</div></div>
+              <div class="summary-item"><div class="val">0</div><div class="lbl">หญิง</div></div>
+              <div class="summary-item"><div class="val">1</div><div class="lbl">อื่นๆ</div></div>
+              <div class="summary-item"><div class="val">44.5</div><div class="lbl">TMHI เฉลี่ย</div></div>
+            </div>
+          </div>
+          <div style="margin-top:14px;display:flex;gap:10px">
+            <button class="btn btn-green">💚 Well-being Dashboard</button>
+            <button class="btn btn-outline">📊 Export Excel</button>
+          </div>
+        </div>
+
+        <!-- Dashboard — Only Gender + Age remain -->
+        <div class="dash-grid">
+          <div class="dash-card">
+            <h4>👫 เพศ</h4>
+            <div class="dist-row">
+              <div class="dist-label">ชาย</div>
+              <div class="dist-bar-wrap"><div class="dist-bar" style="width:50%;background:#7c3aed"></div></div>
+              <div class="dist-count">1</div>
+              <div class="dist-pct">50%</div>
+            </div>
+            <div class="dist-row">
+              <div class="dist-label">หญิง</div>
+              <div class="dist-bar-wrap"><div class="dist-bar" style="width:0%;background:#ec4899"></div></div>
+              <div class="dist-count">0</div>
+              <div class="dist-pct">0%</div>
+            </div>
+            <div class="dist-row">
+              <div class="dist-label">LGBTQ+ / อื่นๆ</div>
+              <div class="dist-bar-wrap"><div class="dist-bar" style="width:50%;background:#f59e0b"></div></div>
+              <div class="dist-count">1</div>
+              <div class="dist-pct">50%</div>
+            </div>
+          </div>
+
+          <div class="dash-card">
+            <h4>📅 ช่วงอายุ</h4>
+            <div class="dist-row">
+              <div class="dist-label">≤30 ปี</div>
+              <div class="dist-bar-wrap"><div class="dist-bar" style="width:50%;background:#7c3aed"></div></div>
+              <div class="dist-count">1</div>
+              <div class="dist-pct">50%</div>
+            </div>
+            <div class="dist-row">
+              <div class="dist-label">31-40 ปี</div>
+              <div class="dist-bar-wrap"><div class="dist-bar" style="width:0%;background:#8b5cf6"></div></div>
+              <div class="dist-count">0</div>
+              <div class="dist-pct">0%</div>
+            </div>
+            <div class="dist-row">
+              <div class="dist-label">41-50 ปี</div>
+              <div class="dist-bar-wrap"><div class="dist-bar" style="width:0%;background:#a78bfa"></div></div>
+              <div class="dist-count">0</div>
+              <div class="dist-pct">0%</div>
+            </div>
+            <div class="dist-row">
+              <div class="dist-label">51-60 ปี</div>
+              <div class="dist-bar-wrap"><div class="dist-bar" style="width:50%;background:#c4b5fd"></div></div>
+              <div class="dist-count">1</div>
+              <div class="dist-pct">50%</div>
+            </div>
+            <div class="dist-row">
+              <div class="dist-label">60+ ปี</div>
+              <div class="dist-bar-wrap"><div class="dist-bar" style="width:0%;background:#e4d5f9"></div></div>
+              <div class="dist-count">0</div>
+              <div class="dist-pct">0%</div>
+            </div>
+          </div>
+
+          <!-- BMI REMOVED -->
+          <div class="dash-card" style="border:2px dashed #fecaca;background:#fefefe;opacity:.45;pointer-events:none">
+            <h4 style="color:#dc2626;text-decoration:line-through">🏋 BMI <span class="change-badge removed">REMOVED</span></h4>
+            <p style="color:#dc2626;font-size:12px;text-align:center;padding:20px 0">ลูกค้าต้องการเอาออก</p>
+          </div>
+
+          <!-- TMHI REMOVED -->
+          <div class="dash-card" style="border:2px dashed #fecaca;background:#fefefe;opacity:.45;pointer-events:none">
+            <h4 style="color:#dc2626;text-decoration:line-through">🧠 TMHI-15 สุขภาพจิต <span class="change-badge removed">REMOVED</span></h4>
+            <p style="color:#dc2626;font-size:12px;text-align:center;padding:20px 0">ลูกค้าต้องการเอาออก</p>
+          </div>
+
+          <!-- Recent respondents REMOVED -->
+          <div class="dash-card dash-full" style="border:2px dashed #fecaca;background:#fefefe;opacity:.45;pointer-events:none">
+            <h4 style="color:#dc2626;text-decoration:line-through">👥 ผู้ตอบล่าสุด <span class="change-badge removed">REMOVED</span></h4>
+            <p style="color:#dc2626;font-size:12px;text-align:center;padding:20px 0">ลูกค้าต้องการเอาออก — ข้อมูลซ้ำกับหน้า "ข้อมูลรายบุคคล"</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ TAB: WB Individual (REDESIGNED) ============ -->
+      <div class="tab-page" id="page-wb-individual">
+
+        <div class="mockup-banner">
+          <div class="icon">🎨</div>
+          <div>
+            <div class="text">MOCKUP — ข้อมูลรายบุคคล (หลังแก้ไข)</div>
+            <div class="sub">ตัด header card, KPI strip, TMHI filter ออก / เปลี่ยนชื่อเมนูเป็น "ข้อมูลรายบุคคล"</div>
+          </div>
+        </div>
+
+        <!-- Header & KPI REMOVED — show ghost -->
+        <div style="border:2px dashed #fecaca;background:#fefefe;opacity:.4;border-radius:14px;padding:14px 18px;margin-bottom:12px;pointer-events:none">
+          <h3 style="color:#dc2626;text-decoration:line-through;font-size:14px">👤 Well-being รายบุคคล <span class="change-badge removed">REMOVED</span></h3>
+          <p style="color:#dc2626;font-size:11px">Header card + description removed per client request</p>
+        </div>
+
+        <div style="border:2px dashed #fecaca;background:#fefefe;opacity:.4;border-radius:14px;padding:10px 16px;margin-bottom:12px;pointer-events:none;display:flex;gap:10px">
+          <div style="flex:1;padding:10px;background:#fef2f2;border-radius:8px;text-align:center">
+            <div style="color:#dc2626;font-weight:700;font-size:16px;text-decoration:line-through">2</div>
+            <div style="font-size:10px;color:#dc2626">ผู้ตอบทั้งหมด</div>
+          </div>
+          <div style="flex:1;padding:10px;background:#fef2f2;border-radius:8px;text-align:center">
+            <div style="color:#dc2626;font-weight:700;font-size:16px;text-decoration:line-through">1/1</div>
+            <div style="font-size:10px;color:#dc2626">ชาย / หญิง</div>
+          </div>
+          <div style="flex:1;padding:10px;background:#fef2f2;border-radius:8px;text-align:center">
+            <div style="color:#dc2626;font-weight:700;font-size:16px;text-decoration:line-through">44.5</div>
+            <div style="font-size:10px;color:#dc2626">TMHI เฉลี่ย</div>
+          </div>
+          <div style="flex:1;padding:10px;background:#fef2f2;border-radius:8px;text-align:center">
+            <div style="color:#dc2626;font-weight:700;font-size:16px;text-decoration:line-through">22.7</div>
+            <div style="font-size:10px;color:#dc2626">BMI เฉลี่ย</div>
+          </div>
+          <span class="change-badge removed" style="align-self:center">KPI STRIP REMOVED</span>
+        </div>
+
+        <!-- Simplified toolbar (no TMHI filter) -->
+        <div class="wbi-toolbar">
+          <input type="text" class="wbi-si" placeholder="🔍 ค้นหาชื่อ..." value="">
+          <select class="wbi-sel">
+            <option>ทุกเพศ</option>
+            <option>ชาย</option>
+            <option>หญิง</option>
+          </select>
+          <!-- TMHI filter removed -->
+          <span style="border:2px dashed #fecaca;padding:6px 12px;border-radius:10px;font-size:11px;color:#dc2626;font-weight:600;text-decoration:line-through;opacity:.5">TMHI ระดับ ▾</span>
+          <span class="change-badge removed">FILTER REMOVED</span>
+          <div class="wbi-count">2 / 2 รายการ</div>
+          <button class="btn btn-outline" style="padding:7px 14px;font-size:12px">📊 Export ทุกข้อ</button>
+        </div>
+
+        <div class="wbi-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>ชื่อ</th>
+                <th>เพศ</th>
+                <th>อายุ</th>
+                <th>สถานะจิต</th>
+                <th>วันที่ส่ง</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="num">1</td>
+                <td>นายทดสอบ ระบบ</td>
+                <td>ชาย</td>
+                <td>55</td>
+                <td><span class="badge-sm badge-avg">ปกติ</span></td>
+                <td>24/3/2569</td>
+                <td><button class="btn-view">👁 ดูทั้งหมด</button></td>
+              </tr>
+              <tr>
+                <td class="num">2</td>
+                <td>ทดสอบ Cowork Fix</td>
+                <td>female</td>
+                <td>30</td>
+                <td><span class="badge-sm badge-good">ปกติ</span></td>
+                <td>23/3/2569</td>
+                <td><button class="btn-view">👁 ดูทั้งหมด</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="wbi-pager">
+          <div class="wbi-info">1–2 จาก 2</div>
+          <button disabled>◁ ก่อนหน้า</button>
+          <button class="active">1</button>
+          <button disabled>ถัดไป ▷</button>
+        </div>
+      </div>
+
+      <!-- ============ TAB: CH1 Summary (REDESIGNED) ============ -->
+      <div class="tab-page" id="page-ch1">
+
+        <div class="mockup-banner">
+          <div class="icon">🎨</div>
+          <div>
+            <div class="text">MOCKUP — CH1 ข้อมูลองค์กร (หลังแก้ไข)</div>
+            <div class="sub">เปลี่ยน labels + เพิ่มแสดง "ค่าเฉลี่ย 5 ปี" และ "ปีล่าสุด"</div>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <h3>📝 แบบสอบถาม - ข้อมูลสุขภาวะองค์กร</h3>
+          <div class="desc">แบบสอบถามข้อมูลบุคลากร โครงสร้างองค์กร NCD และนโยบาย HRD</div>
+          <div style="margin-top:12px">
+            <div class="summary-grid">
+              <div class="summary-item">
+                <div class="val">50</div>
+                <div class="lbl">บุคลากรรวม</div>
+              </div>
+              <div class="summary-item">
+                <div class="val">3.85%</div>
+                <div class="lbl">อัตราลาออก</div>
+              </div>
+              <div class="summary-item">
+                <div class="val">0</div>
+                <div class="lbl">ผู้ป่วยโรคไม่ติดต่อ (NCDs) <span class="info-tip" title="Non-Communicable Diseases — โรคไม่ติดต่อเรื้อรัง เช่น เบาหวาน ความดัน">i</span> <span class="change-badge modified">CLARIFIED</span></div>
+              </div>
+              <div class="summary-item" style="border-color:#c4b5fd">
+                <div class="val">50.00</div>
+                <div class="lbl">คะแนนความสุขภาพ <span class="change-badge modified">UPDATED</span></div>
+              </div>
+              <div class="summary-item" style="border-color:#c4b5fd">
+                <div class="val">30.00 <span style="font-size:11px;color:var(--tx3)">/ ปี</span></div>
+                <div class="lbl">ชั่วโมงอบรม/คน/ปี <span class="change-badge modified">ปีล่าสุด</span></div>
+              </div>
+              <div class="summary-item" style="border-color:#c4b5fd">
+                <div class="val">5.00</div>
+                <div class="lbl">ลาป่วยเฉลี่ย/คน <span class="change-badge modified">LABEL FIX</span></div>
+              </div>
+            </div>
+
+            <!-- NEW: 5-year average section -->
+            <div style="margin-top:14px;padding:14px 16px;background:#f8f6ff;border:1px solid #ede9fe;border-radius:12px">
+              <div style="font-size:12px;font-weight:700;color:#6d28d9;margin-bottom:10px">📊 เปรียบเทียบ: ค่าเฉลี่ย 5 ปี vs ปีล่าสุด <span class="change-badge modified">NEW</span></div>
+              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+                <div style="background:#fff;border:1px solid #e3def3;border-radius:10px;padding:10px;text-align:center">
+                  <div style="font-size:10px;color:#9ca3af;margin-bottom:4px">คะแนนความสุข</div>
+                  <div style="display:flex;justify-content:center;gap:12px">
+                    <div><div style="font-size:14px;font-weight:700;color:#7c3aed">48.20</div><div style="font-size:9px;color:#9ca3af">5 ปีเฉลี่ย</div></div>
+                    <div style="border-left:1px solid #e3def3"></div>
+                    <div><div style="font-size:14px;font-weight:700;color:#16a34a">50.00</div><div style="font-size:9px;color:#9ca3af">ปีล่าสุด</div></div>
+                  </div>
+                </div>
+                <div style="background:#fff;border:1px solid #e3def3;border-radius:10px;padding:10px;text-align:center">
+                  <div style="font-size:10px;color:#9ca3af;margin-bottom:4px">ชั่วโมงอบรม</div>
+                  <div style="display:flex;justify-content:center;gap:12px">
+                    <div><div style="font-size:14px;font-weight:700;color:#7c3aed">25.00</div><div style="font-size:9px;color:#9ca3af">5 ปีเฉลี่ย</div></div>
+                    <div style="border-left:1px solid #e3def3"></div>
+                    <div><div style="font-size:14px;font-weight:700;color:#16a34a">30.00</div><div style="font-size:9px;color:#9ca3af">ปีล่าสุด</div></div>
+                  </div>
+                </div>
+                <div style="background:#fff;border:1px solid #e3def3;border-radius:10px;padding:10px;text-align:center">
+                  <div style="font-size:10px;color:#9ca3af;margin-bottom:4px">ลาป่วยเฉลี่ย</div>
+                  <div style="display:flex;justify-content:center;gap:12px">
+                    <div><div style="font-size:14px;font-weight:700;color:#7c3aed">6.50</div><div style="font-size:9px;color:#9ca3af">5 ปีเฉลี่ย</div></div>
+                    <div style="border-left:1px solid #e3def3"></div>
+                    <div><div style="font-size:14px;font-weight:700;color:#16a34a">5.00</div><div style="font-size:9px;color:#9ca3af">ปีล่าสุด</div></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top:14px;padding:10px 14px;border-radius:8px;font-size:13px;font-weight:600;background:#fdf2f8;color:#be185d">✅ ส่งข้อมูลแล้ว</div>
+
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
+            <button class="btn btn-primary">👁 ดูข้อมูล</button>
+            <button class="btn btn-outline">📥 ดาวน์โหลด PDF</button>
+            <button class="btn btn-outline">✏️ แก้ไขฟอร์ม</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ TAB: Org Profile (REDESIGNED) ============ -->
+      <div class="tab-page" id="page-org-profile">
+
+        <div class="mockup-banner">
+          <div class="icon">🎨</div>
+          <div>
+            <div class="text">MOCKUP — ข้อมูลภาพรวมองค์กร (หลังแก้ไข)</div>
+            <div class="sub">เปลี่ยนชื่อ tab + รวมข้อมูลโครงสร้าง + ตัดประเภทหน่วยงาน + ลดความซ้ำ</div>
+          </div>
+        </div>
+
+        <div class="org-hero-card">
+          <div class="org-kicker">ข้อมูลภาพรวมองค์กร <span class="change-badge renamed">RENAMED</span></div>
+          <div class="org-title">ทดสอบระบบ</div>
+          <div class="org-subtitle">ข้อมูลที่รวบรวมจากฐานข้อมูลขององค์กรสำหรับการประสานงาน</div>
+          <div class="org-pill-row">
+            <div class="org-pill">🏷 รหัสหน่วยงาน: test-org</div>
+            <!-- ประเภทหน่วยงาน REMOVED -->
+            <div class="org-pill" style="border:2px dashed #fecaca;opacity:.45;text-decoration:line-through;color:#dc2626">📂 ประเภทหน่วยงาน: test <span class="change-badge removed">REMOVED</span></div>
+            <div class="org-pill">📌 ตัวย่อ: ทดสอบ / test</div>
+          </div>
+        </div>
+
+        <div style="display:flex;justify-content:flex-end;margin:10px 0">
+          <button class="btn btn-primary">✏️ แก้ไขข้อมูล</button>
+        </div>
+
+        <div class="org-layout">
+          <!-- Left: Combined structure + contact -->
+          <div>
+            <div class="detail-card">
+              <div class="detail-card-head">
+                <div class="detail-card-icon">🏢</div>
+                <div>
+                  <h4>ข้อมูลองค์กรและโครงสร้าง <span class="change-badge modified">MERGED</span></h4>
+                  <p>ข้อมูลโครงสร้างและสังกัดรวมไว้ในที่เดียว</p>
+                </div>
+              </div>
+              <div class="detail-list">
+                <div class="detail-item">
+                  <div class="detail-label">กระทรวง/หน่วยงานต้นสังกัด</div>
+                  <div class="detail-value">—</div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label">คำขึ้นต้นหนังสือ</div>
+                  <div class="detail-value">เรียนใครก็ได้ โดนแล้ว ทดสอบระบบ</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Contact + Coordinator -->
+          <div style="display:grid;gap:14px">
+            <div class="detail-card">
+              <div class="detail-card-head">
+                <div class="detail-card-icon">📧</div>
+                <div>
+                  <h4>ข้อมูลติดต่อ</h4>
+                  <p>ช่องทางอีเมลสำหรับงานสารบรรณและการประสานงานทั่วไป</p>
+                </div>
+              </div>
+              <div class="detail-list two-col">
+                <div class="detail-item">
+                  <div class="detail-label">อีเมลสารบรรณ</div>
+                  <div class="detail-value">test@gmail.com</div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label">อีเมลสำหรับติดต่อทั่วไป</div>
+                  <div class="detail-value">hr-test@tst.go.th</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="detail-card">
+              <div class="detail-card-head">
+                <div class="detail-card-icon">👤</div>
+                <div>
+                  <h4>ข้อมูลผู้ประสานงาน</h4>
+                  <p>รายละเอียดผู้ประสานงานหลักของหน่วยงาน (ไม่ซ้ำ) <span class="change-badge modified">DEDUPLICATED</span></p>
+                </div>
+              </div>
+              <div class="detail-list two-col">
+                <div class="detail-item">
+                  <div class="detail-label">ชื่อผู้ประสานงาน</div>
+                  <div class="detail-value">ใครก็ได้</div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label">ตำแหน่งผู้ประสานงาน</div>
+                  <div class="detail-value">อะไรก็ได้ ชิวล์ๆ</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ TAB: Home ============ -->
+      <div class="tab-page" id="page-home">
+        <div style="text-align:center;padding:60px 20px;color:var(--tx3)">
+          <div style="font-size:48px;margin-bottom:16px">🏠</div>
+          <p>หน้าหลัก — ไม่มีการเปลี่ยนแปลงในส่วนนี้</p>
+        </div>
+      </div>
+
+      <!-- ============ TAB: Share ============ -->
+      <div class="tab-page" id="page-share">
+        <div style="text-align:center;padding:60px 20px;color:var(--tx3)">
+          <div style="font-size:48px;margin-bottom:16px">🔗</div>
+          <p>แชร์ลิงก์ Well-being — ไม่มีการเปลี่ยนแปลงในส่วนนี้</p>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<script>
+function switchTab(tabId) {
+  document.querySelectorAll('.tab-page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item, .nav-subitem').forEach(b => b.classList.remove('active'));
+
+  const page = document.getElementById('page-' + tabId);
+  if (page) page.classList.add('active');
+
+  const btn = document.querySelector(`[onclick="switchTab('${tabId}')"]`);
+  if (btn) btn.classList.add('active');
+
+  const titles = {
+    home: ['หน้าหลัก', 'ภาพรวมข้อมูลขององค์กร'],
+    'org-profile': ['ข้อมูลภาพรวมองค์กร', 'ข้อมูลขององค์กรจากฐานข้อมูลกลาง'],
+    ch1: ['CH1 ข้อมูลองค์กร', 'แบบสำรวจข้อมูลเพื่อจัดทำแผนการพัฒนาองค์กรสุขภาวะ'],
+    wb: ['สถานะการตอบแบบสำรวจ', 'ภาพรวมผลสำรวจสุขภาวะรายบุคคลของบุคลากรในองค์กร'],
+    'wb-individual': ['ข้อมูลรายบุคคล', 'ข้อมูลผลสำรวจสุขภาวะรายบุคคลทุกข้อ (Raw Data)'],
+    share: ['แชร์ลิงก์ Well-being', 'ส่งต่อแบบสำรวจให้บุคลากร'],
+  };
+  const [t, s] = titles[tabId] || ['—', '—'];
+  document.getElementById('topbar-title').textContent = t;
+  document.getElementById('topbar-subtitle').textContent = s;
+}
+</script>
+</body>
+</html>
