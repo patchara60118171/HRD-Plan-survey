@@ -501,12 +501,6 @@ function renderUserProfile(user) {
                         <div class="dropdown-email">${user.email || ''}</div>
                     </div>
                 </div>
-                <div class="dropdown-divider"></div>
-                <button onclick="app.viewHistory(); toggleProfileMenu();" class="dropdown-item">📜 ประวัติ</button>
-                <button onclick="exportToExcel(app.responses, app.userInfo); toggleProfileMenu();" class="dropdown-item">📊 ดาวน์โหลด Excel</button>
-                <button onclick="app.startNew(); toggleProfileMenu();" class="dropdown-item">🔄 ทำแบบสำรวจใหม่</button>
-                <div class="dropdown-divider"></div>
-                <button onclick="app.logout()" class="dropdown-item logout">🚪 ออกจากระบบ</button>
             </div>
         </div>
     `;
