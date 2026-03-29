@@ -35,25 +35,8 @@ function syncAllQuestions() {
         fs.writeFileSync(jsonPath, JSON.stringify(jsonData, null, 2));
         console.log('✅ Updated data/questions-wellbeing.json');
         
-        // 3. Sync to public-survey app
-        console.log('📱 Syncing to public-survey app...');
-        const publicSurveyPath = path.join(__dirname, 'apps', 'public-survey', 'js', 'questions.js');
-        
-        // Read the public-survey file and replace SURVEY_DATA
-        let publicSurveyContent = fs.readFileSync(publicSurveyPath, 'utf8');
-        const publicSurveyMatch = publicSurveyContent.match(/(const SURVEY_DATA = )({[\s\S]*?});/);
-        
-        if (publicSurveyMatch) {
-            // Keep the const declaration but replace the data
-            publicSurveyContent = publicSurveyContent.replace(
-                publicSurveyMatch[0],
-                publicSurveyMatch[1] + surveyDataMatch[1] + ');'
-            );
-            fs.writeFileSync(publicSurveyPath, publicSurveyContent);
-            console.log('✅ Updated apps/public-survey/js/questions.js');
-        } else {
-            console.log('⚠️  Could not find SURVEY_DATA in public-survey questions.js');
-        }
+        // 3. Skip apps/public-survey sync (deleted)
+        console.log('⚠️  Skipping apps/public-survey sync - folder deleted');
         
         // 4. Create cache clearing HTML
         console.log('🧹 Creating cache clearer...');
@@ -97,8 +80,7 @@ function syncAllQuestions() {
         const report = {
             timestamp: new Date().toISOString(),
             synced_files: [
-                'data/questions-wellbeing.json',
-                'apps/public-survey/js/questions.js'
+                'data/questions-wellbeing.json'
             ],
             sections_updated: Object.keys(SURVEY_DATA).length,
             total_questions: Object.values(SURVEY_DATA).reduce((total, section) => {
