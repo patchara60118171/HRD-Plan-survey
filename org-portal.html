@@ -10,6 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai+Looped:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <script src="js/supabase-config.js"></script>
 <script src="js/form-schema.js"></script>
 <style>
@@ -1183,7 +1184,15 @@ function switchTab(tab) {
   
   // Initialize HR Analytics Charts when switching to CH1 tab
   if (tab === 'ch1') {
-    setTimeout(() => initHRAnalyticsCharts(), 300);
+    document.getElementById('page-ch1')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setTimeout(() => {
+      // Check if Chart.js is loaded
+      if (typeof Chart !== 'undefined') {
+        initHRAnalyticsCharts();
+      } else {
+        console.error('Chart.js not loaded');
+      }
+    }, 1500);
   }
 }
 
