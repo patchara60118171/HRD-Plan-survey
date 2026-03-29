@@ -13,7 +13,8 @@
       "Bash(__NEW_LINE_fe72c743e00d752e__ cat:*)",
       "Bash(cat /c/Users/DELL/Desktop/well-being-survey/supabase/migrations/*.sql)",
       "Bash(grep -E \"total_staff|type_official\" \"/c/Users/DELL/Desktop/well-being-survey/supabase/migrations/\"*.sql)",
-      "Bash(npx serve:*)"
+      "Bash(npx serve:*)",
+      "mcp__Claude_Preview__preview_start"
     ]
   }
 }
