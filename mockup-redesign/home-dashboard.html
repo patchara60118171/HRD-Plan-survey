@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Mockup — หน้าหลัก (Redesigned)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai+Looped:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --P:#5b2aa8;--PD:#4b1f95;--PL:#f3edff;
+  --A:#ec4899;--AL:#fdf2f8;
+  --G:#16a34a;--GL:#ecfdf3;
+  --W:#b45309;--WL:#fef3c7;
+  --D:#dc2626;--DL:#fee2e2;
+  --bg:#f7f5fc;--card:#ffffff;--bdr:#e3def3;
+  --tx:#1f2937;--tx2:#4b5563;--tx3:#8b94a7;
+  --shadow:0 1px 3px rgba(15,23,42,.06),0 10px 28px rgba(91,42,168,.06);
+  --sidebar-w:244px;
+}
+body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh}
+#portal-app{display:flex;min-height:100vh}
+
+/* ── Sidebar ── */
+.sidebar{width:var(--sidebar-w);background:linear-gradient(180deg,#5f28ab 0%,#58239d 52%,#501f8d 100%);color:#fff;display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:20;box-shadow:4px 0 30px rgba(46,16,101,.16)}
+.sidebar-logo{padding:16px 14px;border-bottom:1px solid rgba(255,255,255,.08);position:relative}
+.logo-row{display:flex;align-items:center;gap:10px}
+.logo-icon{width:32px;height:32px;border-radius:9px;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.logo-title{font-size:13px;font-weight:700}
+.logo-sub{font-size:10px;color:rgba(255,255,255,.45);padding-left:42px;margin-top:3px}
+
+/* branding badge */
+.brand-flag{position:absolute;top:8px;right:8px;background:#f59e0b;color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;line-height:1.4}
+
+.sidebar-org{margin:10px 10px 8px;padding:11px 12px;border-radius:10px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.06)}
+.o-label{font-size:9px;color:rgba(255,255,255,.4);margin-bottom:3px;letter-spacing:.06em;text-transform:uppercase}
+.o-name{font-size:12.5px;font-weight:700;line-height:1.45}
+.o-email{font-size:10.5px;color:rgba(255,255,255,.46);margin-top:3px}
+
+.portal-nav{flex:1;padding:6px 0 10px;overflow-y:auto}
+.nav-group{padding:12px 14px 5px;font-size:9px;font-weight:700;letter-spacing:.08em;color:rgba(255,255,255,.32);text-transform:uppercase}
+.nav-item,.nav-sub{display:flex;align-items:center;gap:9px;width:100%;background:none;border:none;font-family:inherit;text-align:left;cursor:pointer;text-decoration:none;color:rgba(255,255,255,.7)}
+.nav-item{padding:10px 14px;font-size:13px;border-left:3px solid transparent}
+.nav-sub{padding:8px 14px 8px 30px;font-size:12.5px;border-left:3px solid transparent}
+.nav-item:hover,.nav-sub:hover{background:rgba(255,255,255,.06);color:#fff}
+.nav-item.active{background:rgba(255,255,255,.13);color:#fff;border-left-color:#f59e0b}
+.nav-sub.active{background:rgba(255,255,255,.08);color:#fff;border-left-color:#fbbf24}
+.ni{width:16px;text-align:center;flex-shrink:0;font-size:13px}
+.sidebar-foot{border-top:1px solid rgba(255,255,255,.08);padding:8px 10px}
+.sidebar-foot .nav-item{padding:8px 6px;border-left:none;font-size:12px;color:rgba(255,255,255,.55)}
+
+/* ── Main ── */
+.portal-main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{background:#fff;border-bottom:1px solid var(--bdr);padding:11px 24px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100}
+.tb-head{display:flex;flex-direction:column;gap:2px}
+.tb-title{font-size:15px;font-weight:700;color:var(--P)}
+.tb-sub{font-size:12px;color:var(--tx2)}
+.tb-space{flex:1}
+.tb-badge{padding:4px 10px;border-radius:999px;background:#fef3c7;color:#92400e;font-size:11px;font-weight:700}
+.tb-user{font-size:11px;color:var(--tx3)}
+
+.main-content{padding:22px 26px;max-width:1080px}
+
+/* mockup banner */
+.mockup-banner{background:linear-gradient(90deg,#fef3c7,#fef9c3);border:2px dashed #f59e0b;border-radius:12px;padding:12px 18px;margin-bottom:20px;display:flex;align-items:center;gap:12px}
+.mockup-banner .ico{font-size:22px}
+.mockup-banner .tx{font-size:13px;color:#92400e;font-weight:700}
+.mockup-banner .txs{font-size:11.5px;color:#a16207;margin-top:2px}
+
+/* ── Org summary bar ── */
+.org-bar{background:#fff;border:1px solid var(--bdr);border-radius:14px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow)}
+.org-bar-left{display:flex;align-items:center;gap:10px}
+.org-bar-icon{width:36px;height:36px;background:var(--PL);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.org-bar-name{font-size:15px;font-weight:700;color:var(--P)}
+.org-bar-code{font-size:11.5px;color:var(--tx3);margin-top:2px}
+.org-bar-right .badge-sent{padding:5px 12px;border-radius:999px;background:#ecfdf3;color:#15803d;font-size:12px;font-weight:700;border:1px solid #bbf7d0}
+
+/* ── Stats row ── */
+.section-title{font-size:13px;font-weight:700;color:var(--tx2);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.section-title .stIcon{font-size:14px}
+
+.cards-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+
+/* CH1 card */
+.stat-card{background:#fff;border:1px solid var(--bdr);border-radius:14px;padding:16px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.stat-card::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:14px 14px 0 0;background:var(--P)}
+.stat-card.wb-card::after{background:#ec4899}
+.stat-card .sc-label{font-size:10.5px;font-weight:700;color:var(--tx3);letter-spacing:.03em;margin-bottom:8px;display:flex;align-items:center;gap:5px}
+.stat-card .sc-val{font-size:26px;font-weight:700;color:var(--P);line-height:1.1}
+.stat-card.wb-card .sc-val{color:#ec4899}
+.stat-card .sc-sub{font-size:11px;color:var(--tx3);margin-top:6px}
+
+/* data note (verification warning) */
+.data-note{position:absolute;bottom:8px;right:10px;font-size:9px;background:#fef3c7;color:#92400e;padding:2px 6px;border-radius:4px;font-weight:700}
+
+/* TMHI tooltip */
+.tmhi-wrap{position:relative;display:inline-flex;align-items:center;gap:4px;cursor:help}
+.tmhi-info{width:15px;height:15px;border-radius:999px;background:#ede9fe;color:#6d28d9;font-size:9px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;vertical-align:middle}
+.tmhi-tooltip{display:none;position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:#1f2937;color:#fff;font-size:11px;padding:8px 12px;border-radius:8px;width:230px;line-height:1.6;z-index:50;white-space:normal;font-weight:400}
+.tmhi-tooltip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:6px solid transparent;border-top-color:#1f2937}
+.tmhi-wrap:hover .tmhi-tooltip{display:block}
+
+/* change callouts */
+.callout{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:6px;font-size:10px;font-weight:700;flex-shrink:0}
+.callout.removed{background:#fef2f2;color:#dc2626;border:1px solid #fecaca}
+.callout.modified{background:#ede9fe;color:#6d28d9;border:1px solid #ddd6fe}
+.callout.added{background:#ecfdf3;color:#15803d;border:1px solid #bbf7d0}
+.callout.check{background:#fef3c7;color:#92400e;border:1px solid #fde68a}
+
+/* ── Progress section ── */
+.progress-card{background:#fff;border:1px solid var(--bdr);border-radius:14px;padding:18px 20px;margin-bottom:16px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.progress-card::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:14px 14px 0 0;background:linear-gradient(90deg,#ec4899,#a855f7)}
+.prog-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px;gap:8px;flex-wrap:wrap}
+.prog-title{font-size:14px;font-weight:700;color:var(--P);display:flex;align-items:center;gap:6px}
+.prog-sub{font-size:12px;color:var(--tx2);margin-top:2px;margin-bottom:14px}
+.prog-bar-row{display:flex;align-items:center;justify-content:space-between;font-size:12.5px;margin-bottom:7px}
+.prog-bar-label{font-weight:600;color:var(--tx2)}
+.prog-pct{font-size:15px;font-weight:700;color:#7c3aed}
+.prog-track{height:11px;background:var(--PL);border-radius:999px;overflow:hidden;margin-bottom:8px}
+.prog-fill{height:100%;background:linear-gradient(90deg,#c084fc,#a855f7);border-radius:999px;width:4%}
+.prog-count{text-align:center;font-size:12.5px;color:var(--tx2)}
+.prog-count strong{color:#7c3aed}
+
+/* mini stats under progress */
+.prog-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
+.prog-stat{text-align:center;padding:10px 8px;background:#fcfaff;border:1px solid var(--bdr);border-radius:10px}
+.prog-stat .psv{font-size:20px;font-weight:700;color:#7c3aed}
+.prog-stat .psl{font-size:11px;color:var(--tx3);margin-top:4px}
+
+/* ── Actions ── */
+.actions-card{background:#fff;border:1px solid var(--bdr);border-radius:14px;padding:16px 20px;box-shadow:var(--shadow)}
+.actions-card h3{font-size:13.5px;font-weight:700;color:var(--tx2);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.actions-row{display:flex;gap:10px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:10px 18px;border-radius:10px;font-size:13px;font-weight:600;border:none;cursor:pointer;font-family:inherit;text-decoration:none;transition:all .15s}
+.btn-purple{background:var(--P);color:#fff}
+.btn-purple:hover{background:var(--PD)}
+.btn-pink{background:#ec4899;color:#fff}
+.btn-pink:hover{background:#db2777}
+.btn-outline{background:#fff;border:1.5px solid var(--bdr);color:var(--tx2)}
+.btn-outline:hover{background:#f9f7ff;border-color:#c4b5fd}
+
+/* ── Change notes panel ── */
+.change-panel{background:#fff;border:1.5px dashed #f59e0b;border-radius:14px;padding:16px 18px;margin-top:16px}
+.change-panel h3{font-size:13px;font-weight:700;color:#92400e;margin-bottom:12px;display:flex;align-items:center;gap:7px}
+.change-list{display:flex;flex-direction:column;gap:8px}
+.change-row{display:flex;align-items:flex-start;gap:10px;padding:9px 12px;border-radius:8px;background:#fffbf0;border:1px solid #fde68a}
+.change-row .cr-num{font-size:11px;font-weight:700;color:#b45309;min-width:22px}
+.change-row .cr-loc{font-size:11px;font-weight:700;color:var(--tx2);min-width:120px}
+.change-row .cr-old{font-size:11.5px;color:#dc2626;text-decoration:line-through;flex:1}
+.change-row .cr-arr{color:var(--tx3);font-size:12px}
+.change-row .cr-new{font-size:11.5px;color:#15803d;flex:1}
+
+.nav-link-bar{display:flex;gap:8px;flex-wrap:wrap;margin-top:24px;padding:14px 16px;background:#fff;border:1px solid var(--bdr);border-radius:12px}
+.nav-link-bar span{font-size:11.5px;color:var(--tx3);font-weight:600;margin-right:4px}
+.nav-link-bar a{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:8px;background:var(--PL);color:var(--P);font-size:12px;font-weight:600;text-decoration:none}
+.nav-link-bar a:hover{background:#ece5ff}
+.nav-link-bar a.active{background:var(--P);color:#fff}
+
+@media(max-width:860px){
+  .sidebar{display:none}
+  .portal-main{margin-left:0}
+  .cards-row{grid-template-columns:repeat(2,1fr)}
+  .prog-stats{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+<div id="portal-app">
+
+  <!-- ════ Sidebar ════ -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-row">
+        <div class="logo-icon">🏛️</div>
+        <div class="logo-title">NIDA Wellbeing</div>
+      </div>
+      <div class="logo-sub">Org HR Portal</div>
+      <!-- callout: branding TBD -->
+      <span class="brand-flag">⚠ ยืนยัน Branding</span>
+    </div>
+
+    <div class="sidebar-org">
+      <div class="o-label">องค์กร</div>
+      <div class="o-name">ทดสอบระบบ</div>
+      <div class="o-email">hr-test@tst.go.th</div>
+    </div>
+
+    <nav class="portal-nav">
+      <div class="nav-group">เมนูหลัก</div>
+      <a class="nav-item active" href="#"><span class="ni">🏠</span> หน้าหลัก</a>
+      <a class="nav-item" href="./index.html"><span class="ni">📋</span> รายละเอียดองค์กร</a>
+      <a class="nav-item" href="./ch1-org-info.html"><span class="ni">📊</span> CH1 ข้อมูลองค์กร</a>
+      <a class="nav-sub" href="#"><span class="ni">✏️</span> แก้ไขฟอร์ม</a>
+      <a class="nav-item" href="./wb-dashboard.html"><span class="ni">💚</span> Well-being ผลสำรวจ</a>
+      <a class="nav-item" href="./wb-individual.html"><span class="ni">👤</span> Well-being รายบุคคล</a>
+      <a class="nav-item" href="#"><span class="ni">🔗</span> แชร์ลิงก์ Well-being</a>
+    </nav>
+
+    <div class="sidebar-foot">
+      <a class="nav-item" href="#"><span class="ni">↩️</span> ออกจากระบบ</a>
+    </div>
+  </aside>
+
+  <!-- ════ Main ════ -->
+  <main class="portal-main">
+    <div class="topbar">
+      <div class="tb-head">
+        <div class="tb-title">หน้าหลัก</div>
+        <div class="tb-sub">ภาพรวมข้อมูลขององค์กรและสถานะการส่งแบบสำรวจ</div>
+      </div>
+      <div class="tb-space"></div>
+      <span class="tb-badge">🎨 Mockup Redesign</span>
+      <span class="tb-user">ทดสอบระบบ</span>
+    </div>
+
+    <div class="main-content">
+
+      <!-- mockup notice -->
+      <div class="mockup-banner">
+        <div class="ico">🖌️</div>
+        <div>
+          <div class="tx">Mockup — หน้าหลัก (รูปที่ 6) — หลังแก้ไขตาม feedback</div>
+          <div class="txs">5 รายการที่แก้ไขในหน้านี้ · ดูรายละเอียดใน change log ด้านล่าง</div>
+        </div>
+      </div>
+
+      <!-- Org bar -->
+      <div class="org-bar">
+        <div class="org-bar-left">
+          <div class="org-bar-icon">🏛️</div>
+          <div>
+            <div class="org-bar-name">ทดสอบระบบ</div>
+            <div class="org-bar-code">รหัสองค์กร: test-org</div>
+          </div>
+        </div>
+        <div class="org-bar-right">
+          <span class="badge-sent">✅ ส่งแล้ว</span>
+        </div>
+      </div>
+
+      <!-- ── Section: สถานะ CH1 + Well-being ── -->
+      <div class="section-title"><span class="stIcon">📊</span> สถานะภาพรวม</div>
+
+      <div class="cards-row">
+
+        <!-- Card 1: บุคลากรรวม -->
+        <div class="stat-card" style="position:relative">
+          <div class="sc-label">📋 สถานะ CH1</div>
+          <div style="font-size:11px;color:var(--tx3);margin-bottom:10px">ภาพรวมข้อมูลที่ 1 ขององค์กร</div>
+          <div style="display:flex;align-items:baseline;gap:6px">
+            <div class="sc-val">50</div>
+            <div style="font-size:12px;color:var(--tx3)">บุคลากรรวม</div>
+          </div>
+          <!-- annotation: data verification -->
+          <div class="data-note">⚠ ยืนยันแหล่งข้อมูล</div>
+          <div style="margin-top:10px;background:#fef3c7;border-radius:8px;padding:8px 10px;font-size:11px;color:#92400e">
+            <strong>หมายเหตุ:</strong> ต้องยืนยันว่าค่านี้ดึงจากฐานข้อมูลจริงถูกต้องหรือไม่
+          </div>
+        </div>
+
+        <!-- Card 2: NCD รวม -->
+        <div class="stat-card" style="position:relative">
+          <div class="sc-label">🏥 NCD รวม</div>
+          <div style="font-size:11px;color:var(--tx3);margin-bottom:10px">จำนวนพนักงานที่มีโรค NCD</div>
+          <div style="display:flex;align-items:baseline;gap:6px">
+            <div class="sc-val">0</div>
+            <div style="font-size:12px;color:var(--tx3)">คน</div>
+          </div>
+          <div style="margin-top:10px;background:#fef2f2;border-radius:8px;padding:8px 10px;font-size:11px;color:#dc2626">
+            <strong>⚠ ต้อง rewrite:</strong> Calculation ปัจจุบันไม่ถูกต้อง — ต้องคำนวณจากพนักงานที่ลาป่วยด้วย NCD จริงๆ
+          </div>
+        </div>
+
+        <!-- Card 3: ผู้ตอบ Well-being -->
+        <div class="stat-card wb-card">
+          <div class="sc-label">💚 สถานะ Well-being</div>
+          <div style="font-size:11px;color:var(--tx3);margin-bottom:10px">สรุปจำนวนผู้ตอบแบบสำรวจในองค์กร</div>
+          <div style="display:flex;align-items:baseline;gap:6px">
+            <div class="sc-val">2</div>
+            <div style="font-size:12px;color:var(--tx3)">ผู้ตอบทั้งหมด</div>
+          </div>
+          <div class="sc-sub">จาก 50 คนทั้งหมด</div>
+        </div>
+
+        <!-- Card 4: TMHI เฉลี่ย (with tooltip) -->
+        <div class="stat-card wb-card">
+          <div class="sc-label">
+            <span class="tmhi-wrap">
+              TMHI เฉลี่ย
+              <span class="tmhi-info">i</span>
+              <div class="tmhi-tooltip">
+                <strong>TMHI</strong> = Thai Mental Health Indicator<br>
+                <strong>ดัชนีชี้วัดสุขภาพจิตไทย</strong><br>
+                คะแนน 0–100 · ยิ่งสูงยิ่งดี<br>
+                เกณฑ์ปกติ ≥ 33 คะแนน
+              </div>
+            </span>
+            <span class="callout added" style="margin-left:4px">✓ เพิ่ม tooltip</span>
+          </div>
+          <div style="font-size:11px;color:var(--tx3);margin-bottom:10px">ดัชนีสุขภาพจิตเฉลี่ยของผู้ตอบ</div>
+          <div style="display:flex;align-items:baseline;gap:6px">
+            <div class="sc-val">44.5</div>
+            <div style="font-size:12px;color:var(--tx3)">คะแนน</div>
+          </div>
+          <div class="sc-sub">จาก 2 ผู้ตอบ · เกณฑ์ปกติ ≥ 33</div>
+        </div>
+
+      </div><!-- /cards-row -->
+
+      <!-- ── Progress section (redesigned) ── -->
+      <div class="progress-card">
+        <div class="prog-head">
+          <div>
+            <!-- BEFORE label: "ความคืบหน้าการกรอก Well-being Survey" -->
+            <!-- AFTER label: "สถานะการตอบแบบสำรวจสุขภาวะ" -->
+            <div class="prog-title">
+              📋 สถานะการตอบแบบสำรวจสุขภาวะ
+              <span class="callout modified">⚠ เปลี่ยน label</span>
+            </div>
+            <div class="prog-sub">ติดตามจำนวนผู้ตอบ Well-being Survey เทียบกับจำนวนบุคลากรทั้งหมดขององค์กร</div>
+          </div>
+        </div>
+
+        <!-- ก่อนแก้: label เดิม (strikethrough for comparison) -->
+        <div style="margin-bottom:10px;padding:8px 12px;background:#fef2f2;border-radius:8px;border:1px dashed #fca5a5;font-size:11.5px">
+          <span style="color:#9ca3af">เดิม:</span>
+          <span style="text-decoration:line-through;color:#dc2626;margin:0 8px">ความคืบหน้าการกรอก Well-being Survey</span>
+          <span style="color:#9ca3af">→</span>
+          <span style="color:#15803d;font-weight:700;margin-left:8px">สถานะการตอบแบบสำรวจสุขภาวะ</span>
+        </div>
+
+        <!-- Progress bar -->
+        <div class="prog-bar-row">
+          <!-- ADDED: label "จำนวนผู้ตอบแบบสำรวจ" ที่ชัดขึ้น -->
+          <span class="prog-bar-label">
+            จำนวนผู้ตอบแบบสำรวจ
+            <span class="callout added" style="margin-left:6px">✓ เพิ่ม label</span>
+          </span>
+          <span class="prog-pct">4.0%</span>
+        </div>
+        <div class="prog-track">
+          <div class="prog-fill"></div>
+        </div>
+        <div class="prog-count">ผู้ที่กรอกแล้ว <strong>2 คน</strong> / <strong>50 คน</strong> คิดเป็นร้อยละ <strong>4.0</strong></div>
+
+        <!-- mini stats -->
+        <div class="prog-stats">
+          <div class="prog-stat">
+            <div class="psv">2</div>
+            <div class="psl">ผู้ตอบทั้งหมด</div>
+          </div>
+          <div class="prog-stat">
+            <div class="psv">1</div>
+            <div class="psl">ชาย</div>
+          </div>
+          <div class="prog-stat">
+            <div class="psv">0</div>
+            <div class="psl">หญิง</div>
+          </div>
+          <div class="prog-stat">
+            <div class="psv" style="font-size:16px">
+              <span class="tmhi-wrap">
+                44.5
+                <span class="tmhi-info">i</span>
+                <div class="tmhi-tooltip">
+                  TMHI = Thai Mental Health Indicator (ดัชนีชี้วัดสุขภาพจิตไทย) · คะแนน 0–100
+                </div>
+              </span>
+            </div>
+            <div class="psl">TMHI เฉลี่ย · <span style="color:#6d28d9;font-weight:700">ดัชนีสุขภาพจิต</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Actions ── -->
+      <div class="actions-card">
+        <h3>🚀 การดำเนินการ</h3>
+        <div class="actions-row">
+          <a class="btn btn-purple" href="./ch1-org-info.html">📊 ดูข้อมูล CH1</a>
+          <a class="btn btn-pink" href="./wb-dashboard.html">💚 ดู Well-being Dashboard</a>
+          <a class="btn btn-outline" href="#">🔗 แชร์ลิงก์ให้บุคลากร</a>
+        </div>
+      </div>
+
+      <!-- ── Change log ── -->
+      <div class="change-panel">
+        <h3>📝 สิ่งที่แก้ไขในหน้านี้ (รูปที่ 6)</h3>
+        <div class="change-list">
+
+          <div class="change-row">
+            <div class="cr-num">#20</div>
+            <div class="cr-loc">UI · Sidebar Logo</div>
+            <div class="cr-old">ชื่อ/โลโก้ "NIDA Wellbeing"</div>
+            <div class="cr-arr">→</div>
+            <div class="cr-new">เพิ่ม badge แจ้งเตือน "⚠ ยืนยัน Branding" — รอยืนยันชื่อและโลโก้จริงจากลูกค้า</div>
+          </div>
+
+          <div class="change-row">
+            <div class="cr-num">#21</div>
+            <div class="cr-loc">ระบบ · บุคลากรรวม</div>
+            <div class="cr-old">"50" — ไม่ชัดว่าดึงข้อมูลจริงถูกต้องไหม</div>
+            <div class="cr-arr">→</div>
+            <div class="cr-new">เพิ่ม warning note "⚠ ยืนยันแหล่งข้อมูล" และคำอธิบายให้ทีมตรวจสอบ</div>
+          </div>
+
+          <div class="change-row">
+            <div class="cr-num">#22</div>
+            <div class="cr-loc">คำ · TMHI เฉลี่ย</div>
+            <div class="cr-old">"TMHI เฉลี่ย: 44.5" — ไม่มีคำอธิบาย</div>
+            <div class="cr-arr">→</div>
+            <div class="cr-new">เพิ่ม tooltip อธิบาย "TMHI = Thai Mental Health Indicator / ดัชนีชี้วัดสุขภาพจิตไทย · คะแนน 0–100 · ≥33 ปกติ"</div>
+          </div>
+
+          <div class="change-row">
+            <div class="cr-num">#23</div>
+            <div class="cr-loc">คำ · Progress หัวข้อ</div>
+            <div class="cr-old">"ความคืบหน้าการกรอก Well-being Survey"</div>
+            <div class="cr-arr">→</div>
+            <div class="cr-new">"สถานะการตอบแบบสำรวจสุขภาวะ"</div>
+          </div>
+
+          <div class="change-row">
+            <div class="cr-num">#24</div>
+            <div class="cr-loc">UI · Progress bar label</div>
+            <div class="cr-old">ไม่มี label บอกว่าแถบนี้คืออะไร</div>
+            <div class="cr-arr">→</div>
+            <div class="cr-new">เพิ่ม label "จำนวนผู้ตอบแบบสำรวจ" ก่อน progress bar ให้ชัดเจน</div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Nav links -->
+      <div class="nav-link-bar">
+        <span>🗂️ ไปหน้าอื่น:</span>
+        <a href="./report.html">📄 รายงานรวม</a>
+        <a href="./home-dashboard.html" class="active">🏠 หน้าหลัก</a>
+        <a href="./ch1-org-info.html">📊 CH1 ข้อมูลองค์กร</a>
+        <a href="./wb-dashboard.html">💚 Well-being ผลสำรวจ</a>
+        <a href="./wb-individual.html">👤 Well-being รายบุคคล</a>
+      </div>
+
+    </div><!-- /main-content -->
+  </main>
+</div>
+</body>
+</html>

@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CH1 ข้อมูลองค์กร — Mockup Redesign</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai+Looped:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --P:#5b2aa8;--PD:#4b1f95;--PL:#f3edff;
+  --A:#ec4899;--AL:#fdf2f8;
+  --G:#16a34a;--GL:#ecfdf3;
+  --W:#b45309;--WL:#fef3c7;
+  --D:#dc2626;--DL:#fee2e2;
+  --bg:#f7f5fc;--card:#ffffff;--bdr:#e3def3;
+  --tx:#1f2937;--tx2:#4b5563;--tx3:#8b94a7;
+  --shadow:0 1px 3px rgba(15,23,42,.06),0 10px 28px rgba(91,42,168,.06);
+  --sidebar-w:244px;
+}
+body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh}
+
+/* ── SIDEBAR ── */
+#portal-app{display:flex;min-height:100vh}
+.sidebar{width:var(--sidebar-w);background:linear-gradient(180deg,#5f28ab 0%,#58239d 52%,#501f8d 100%);color:#fff;display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:20;box-shadow:4px 0 30px rgba(46,16,101,.16)}
+.sidebar-logo{padding:16px 14px;border-bottom:1px solid rgba(255,255,255,.08)}
+.logo-row{display:flex;align-items:center;gap:10px}
+.logo-icon{width:28px;height:28px;border-radius:8px;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.logo-title{font-size:12.5px;font-weight:700}
+.logo-sub{font-size:10px;color:rgba(255,255,255,.48);padding-left:38px;margin-top:4px}
+.sidebar-org{margin:12px 10px 8px;padding:12px;border-radius:8px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.06)}
+.o-label{font-size:9px;color:rgba(255,255,255,.42);margin-bottom:4px;letter-spacing:.06em;text-transform:uppercase}
+.o-name{font-size:12px;font-weight:700;line-height:1.45}
+.o-email{font-size:10px;color:rgba(255,255,255,.48);margin-top:4px}
+.portal-nav{flex:1;padding:8px 0 10px;overflow-y:auto}
+.nav-group{padding:12px 14px 6px;font-size:9px;font-weight:700;letter-spacing:.08em;color:rgba(255,255,255,.34);text-transform:uppercase}
+.nav-item{display:flex;align-items:center;gap:9px;width:100%;background:none;border:none;color:rgba(255,255,255,.72);font-family:inherit;text-align:left;cursor:pointer;padding:11px 14px;font-size:13px;border-left:3px solid transparent;text-decoration:none}
+.nav-item:hover{background:rgba(255,255,255,.06);color:#fff}
+.nav-item.active{background:rgba(255,255,255,.12);color:#fff;border-left-color:#f59e0b}
+.nav-item.dim{color:rgba(255,255,255,.38);cursor:default}
+.ni{width:16px;text-align:center;flex-shrink:0}
+.sidebar-foot{border-top:1px solid rgba(255,255,255,.08);padding:10px}
+.sidebar-foot .nav-item{padding:8px 6px;border-left:none;font-size:12px}
+
+/* ── MAIN ── */
+.portal-main-wrap{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{background:#fff;border-bottom:1px solid var(--bdr);padding:10px 24px;display:flex;align-items:center;gap:12px;min-height:58px;position:sticky;top:0;z-index:100}
+.tb-head{display:flex;flex-direction:column;gap:2px}
+.tb-title{font-size:14px;font-weight:700;color:var(--P)}
+.tb-sub{font-size:11.5px;color:var(--tx2)}
+.tb-space{flex:1}
+.tb-chips{display:flex;gap:8px;align-items:center}
+.tb-chip{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:600;border:1px solid var(--bdr);background:#faf8ff;color:var(--tx2);cursor:pointer}
+.tb-chip:hover{border-color:#c4b5fd;color:var(--P)}
+.portal-content{padding:24px;max-width:1060px}
+
+/* ── FORM CARD ── */
+.form-card{background:#fff;border:1px solid var(--bdr);border-radius:14px;padding:16px 20px;margin-bottom:20px;box-shadow:var(--shadow);display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.form-card-icon{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#7c3aed,#ec4899);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.form-card-info{flex:1;min-width:0}
+.form-card-info h2{font-size:15px;font-weight:700;color:var(--P)}
+.form-card-info p{font-size:12px;color:var(--tx2);margin-top:2px}
+.badge-submitted{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:999px;background:var(--AL);color:#be185d;font-size:11px;font-weight:700}
+.badge-dot{width:6px;height:6px;border-radius:50%;background:#ec4899}
+
+/* ── YEAR SELECTOR ── */
+.year-row{display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+.year-label{font-size:13px;font-weight:600;color:var(--tx2)}
+.year-select{padding:7px 12px;border:1.5px solid var(--bdr);border-radius:8px;font-family:inherit;font-size:13px;color:var(--tx);background:#fff;cursor:pointer}
+.year-select:focus{outline:none;border-color:#a78bfa}
+.compare-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;font-size:12.5px;font-weight:600;border:1.5px solid var(--bdr);background:#fff;color:var(--tx2);cursor:pointer}
+.compare-btn:hover{border-color:#c4b5fd;color:var(--P)}
+
+/* ── STATS GRID ── */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:12px;margin-bottom:20px}
+.stat-card{background:#fff;border:1px solid var(--bdr);border-radius:12px;padding:16px 14px;box-shadow:var(--shadow);position:relative}
+.stat-card-val{font-size:22px;font-weight:700;color:#7c3aed;line-height:1.15}
+.stat-card-lbl{font-size:11px;color:var(--tx3);margin-top:6px;line-height:1.45}
+.info-tip{position:relative;display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:999px;background:#ede9fe;color:#6d28d9;font-size:9px;font-weight:800;cursor:help;vertical-align:middle;margin-left:4px}
+.info-tip::after{content:attr(data-tip);position:absolute;left:50%;bottom:calc(100% + 8px);transform:translateX(-50%);min-width:200px;max-width:260px;padding:8px 10px;border-radius:8px;background:#1f2937;color:#fff;font-size:11px;font-weight:500;line-height:1.5;white-space:normal;text-align:left;box-shadow:0 10px 25px rgba(15,23,42,.22);opacity:0;pointer-events:none;transition:opacity .15s;z-index:50}
+.info-tip::before{content:'';position:absolute;left:50%;bottom:calc(100% + 2px);transform:translateX(-50%);border:5px solid transparent;border-top-color:#1f2937;opacity:0;pointer-events:none;transition:opacity .15s;z-index:50}
+.info-tip:hover::after,.info-tip:hover::before{opacity:1}
+.stat-card-trend{margin-top:8px;font-size:10.5px;display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:999px;font-weight:600}
+.trend-up{background:#ecfdf3;color:#15803d}
+.trend-down{background:#fee2e2;color:#b91c1c}
+.trend-flat{background:#f3f4f6;color:#6b7280}
+
+/* ── WARNING NOTE ── */
+.warning-note{background:var(--WL);border:1px solid #fcd34d;border-radius:12px;padding:14px 18px;margin-bottom:20px;display:flex;gap:12px;align-items:flex-start}
+.warning-note-icon{font-size:18px;flex-shrink:0;margin-top:1px}
+.warning-note-body{flex:1}
+.warning-note-title{font-size:13.5px;font-weight:700;color:#78350f;margin-bottom:4px}
+.warning-note-text{font-size:12.5px;color:#92400e;line-height:1.6}
+
+/* ── TREND CHART PLACEHOLDER ── */
+.trend-card{background:#fff;border:1px solid var(--bdr);border-radius:14px;padding:18px 20px;margin-bottom:20px;box-shadow:var(--shadow)}
+.trend-card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.trend-card-head h3{font-size:14px;font-weight:700;color:var(--P);display:flex;align-items:center;gap:8px}
+.chart-placeholder{height:130px;background:linear-gradient(180deg,var(--PL) 0%,#fff 100%);border-radius:10px;border:1px dashed #c4b5fd;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:#a78bfa;position:relative;overflow:hidden}
+.chart-bars{display:flex;align-items:flex-end;gap:8px;height:80px;padding:0 16px;position:absolute;bottom:16px;left:0;right:0;justify-content:center}
+.chart-bar{border-radius:4px 4px 0 0;background:linear-gradient(180deg,#8b5cf6,#c4b5fd);min-width:28px;flex:1;max-width:44px;transition:height .3s}
+.chart-label-row{display:flex;gap:8px;margin-top:4px;justify-content:center}
+.chart-lbl{font-size:10px;color:var(--tx3);flex:1;max-width:44px;text-align:center}
+.chart-year-row{display:flex;gap:8px;margin-top:2px;justify-content:center}
+.chart-yr{font-size:9.5px;color:var(--tx3);flex:1;max-width:44px;text-align:center}
+
+/* ── ACTION BUTTONS ── */
+.action-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:24px}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:10px 18px;border-radius:10px;font-size:13px;font-weight:600;border:none;cursor:pointer;font-family:inherit;transition:all .15s;text-decoration:none}
+.btn-primary{background:var(--P);color:#fff}
+.btn-primary:hover{background:var(--PD)}
+.btn-outline{background:#fff;border:1.5px solid var(--bdr);color:var(--tx2)}
+.btn-outline:hover{border-color:#c4b5fd;color:var(--P)}
+
+/* ── ANNOTATION CALLOUTS ── */
+.ann{position:absolute;display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:6px;font-size:10.5px;font-weight:700;white-space:nowrap;z-index:10;pointer-events:none;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.ann-del{background:#ef4444;color:#fff}
+.ann-edit{background:#f59e0b;color:#fff}
+.ann-keep{background:#10b981;color:#fff}
+.ann-wrap{position:relative}
+
+/* annotation line connector */
+.ann-line{position:absolute;border-left:2px dashed;z-index:9;pointer-events:none}
+.ann-line-del{border-color:#ef4444}
+.ann-line-edit{border-color:#f59e0b}
+
+/* ── REMOVED SECTION PLACEHOLDER ── */
+.removed-placeholder{background:#f8f8f8;border:2px dashed #d1d5db;border-radius:12px;padding:16px 20px;margin-bottom:16px;display:flex;align-items:center;gap:12px;color:#9ca3af}
+.removed-icon{font-size:20px;opacity:.5}
+.removed-text{font-size:13px;font-style:italic}
+
+/* ── MOCKUP BANNER ── */
+.mockup-banner{background:linear-gradient(90deg,#fef3c7,#fff7ed);border:1px solid #fcd34d;border-radius:10px;padding:10px 16px;margin-bottom:20px;display:flex;align-items:center;gap:10px;font-size:12.5px;color:#78350f}
+
+/* ── FOOTNOTE NAV ── */
+.page-nav{background:#fff;border-top:1px solid var(--bdr);padding:14px 24px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.page-nav-label{font-size:12px;color:var(--tx3);margin-right:4px}
+.page-nav a{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;border:1px solid var(--bdr);color:var(--tx2);background:#fff}
+.page-nav a:hover{border-color:#c4b5fd;color:var(--P)}
+.page-nav a.current{background:var(--PL);border-color:#c4b5fd;color:var(--P)}
+</style>
+</head>
+<body>
+
+<div id="portal-app">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-row">
+        <div class="logo-icon">🏛️</div>
+        <div class="logo-title">NIDA Wellbeing<br>HR Portal</div>
+      </div>
+      <div class="logo-sub">ระบบสำหรับ HR องค์กร</div>
+    </div>
+    <div class="sidebar-org">
+      <div class="o-label">องค์กรปัจจุบัน</div>
+      <div class="o-name">สำนักงานทดสอบ NIDA</div>
+      <div class="o-email">hr@nida-test.ac.th</div>
+    </div>
+    <div class="portal-nav">
+      <div class="nav-group">เมนูหลัก</div>
+      <a href="#" class="nav-item"><span class="ni">🏠</span> หน้าหลัก</a>
+      <a href="#" class="nav-item dim"><span class="ni">🗂️</span> รายละเอียดองค์กร</a>
+      <a href="ch1-org-info.html" class="nav-item active"><span class="ni">📊</span> CH1 ข้อมูลองค์กร</a>
+      <a href="#" class="nav-item dim"><span class="ni">✏️</span> แก้ไขฟอร์ม</a>
+      <div class="nav-group">Well-being</div>
+      <a href="wb-dashboard.html" class="nav-item"><span class="ni">📈</span> Well-being ผลสำรวจ</a>
+      <a href="wb-individual.html" class="nav-item"><span class="ni">👤</span> Well-being รายบุคคล</a>
+      <a href="#" class="nav-item dim"><span class="ni">🔗</span> แชร์ลิงก์ Well-being</a>
+    </div>
+    <div class="sidebar-foot">
+      <a href="report.html" class="nav-item"><span class="ni">📋</span> รายงานการแก้ไข</a>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <div class="portal-main-wrap">
+    <div class="topbar">
+      <div class="tb-head">
+        <div class="tb-title">CH1 ข้อมูลองค์กร</div>
+        <div class="tb-sub">ข้อมูลสุขภาวะและสถิติบุคลากรขององค์กร — ปีงบประมาณ 2567</div>
+      </div>
+      <div class="tb-space"></div>
+      <div class="tb-chips">
+        <span class="tb-chip">📅 2567</span>
+        <span class="tb-chip">👤 สำนักงานทดสอบ</span>
+      </div>
+    </div>
+
+    <div class="portal-content">
+
+      <!-- MOCKUP BANNER -->
+      <div class="mockup-banner">
+        <span style="font-size:16px">🎨</span>
+        <strong>Mockup Redesign</strong> — หน้านี้แสดงการออกแบบใหม่พร้อม annotation ระบุสิ่งที่เปลี่ยนแปลง
+        &nbsp;·&nbsp; <a href="report.html" style="color:var(--W);font-weight:700">ดูรายงานฉบับเต็ม →</a>
+      </div>
+
+      <!-- FORM CARD -->
+      <div class="ann-wrap">
+        <div class="form-card">
+          <div class="form-card-icon">📋</div>
+          <div class="form-card-info">
+            <h2>แบบสอบถาม — ข้อมูลสุขภาวะขององค์กร (CH1)</h2>
+            <p>ปีงบประมาณ 2567 &nbsp;·&nbsp; ส่งข้อมูลเมื่อ 15 ม.ค. 2568 &nbsp;·&nbsp;
+              <span style="color:#7c3aed;font-weight:600;cursor:pointer">ดูรายละเอียดโครงการ →</span>
+              <span class="info-tip" data-tip="⚠ คำแนะนำ: ควรเชื่อมลิงก์นี้ไปยังโครงการที่เกี่ยวข้องแทนการเปิดฟอร์ม">i</span>
+            </p>
+          </div>
+          <span class="badge-submitted"><span class="badge-dot"></span> ส่งข้อมูลแล้ว</span>
+        </div>
+        <div class="ann ann-edit" style="top:-10px;right:12px">⚠ แก้ไข — เชื่อมไปโครงการ</div>
+      </div>
+
+      <!-- WARNING NOTE -->
+      <div class="ann-wrap">
+        <div class="warning-note">
+          <div class="warning-note-icon">⚠️</div>
+          <div class="warning-note-body">
+            <div class="warning-note-title">แจ้งเตือน: ค่า NCD รวม ยังรอการตรวจสอบ</div>
+            <div class="warning-note-text">
+              ค่า <strong>NCD รวม</strong> ในหน้านี้ยังคำนวณไม่ถูกต้อง (logic เดิมคำนวณจากเจ้าหน้าที่ที่ลาป่วยและมี NCDs แต่ค่าที่ได้ไม่ตรงกับข้อมูลจริง)
+              กำลังดำเนินการ rewrite calculation — ข้อมูลนี้จะอัปเดตอัตโนมัติเมื่อพร้อม
+            </div>
+          </div>
+        </div>
+        <div class="ann ann-edit" style="top:-10px;right:12px">⚠ แก้ไข — รอ calculation ใหม่</div>
+      </div>
+
+      <!-- YEAR SELECTOR -->
+      <div class="year-row">
+        <span class="year-label">📅 แสดงข้อมูลปี:</span>
+        <select class="year-select">
+          <option selected>2567 (ล่าสุด)</option>
+          <option>2566</option>
+          <option>2565</option>
+          <option>2564</option>
+          <option>2563</option>
+        </select>
+        <button class="compare-btn">📊 เปรียบเทียบ 5 ปี</button>
+        <span class="info-tip" data-tip="⚠ แก้ไข: เพิ่ม dropdown ปีและตัวเลือกเปรียบเทียบ 5 ปี เพื่อให้ผู้ใช้เข้าใจบริบทของข้อมูล">i</span>
+      </div>
+
+      <!-- STATS GRID (REDESIGNED) -->
+      <div class="ann-wrap" style="margin-bottom:20px">
+        <div style="font-size:12px;font-weight:700;color:var(--tx2);margin-bottom:10px;display:flex;align-items:center;gap:8px">
+          สถิติสำคัญ — ปี 2567
+          <span class="ann ann-keep" style="position:static;transform:none">✓ เก็บไว้ (ปรับ label)</span>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-card-val">50</div>
+            <div class="stat-card-lbl">บุคลากรรวม (คน)</div>
+            <div class="stat-card-trend trend-flat">→ เท่าเดิม</div>
+          </div>
+          <div class="stat-card ann-wrap">
+            <div class="stat-card-val">3.85<span style="font-size:14px;font-weight:500">%</span></div>
+            <div class="stat-card-lbl">
+              อัตราลาออก
+              <span class="info-tip" data-tip="อัตราส่วนพนักงานที่ลาออกต่อจำนวนพนักงานทั้งหมดในปีนั้น">i</span>
+            </div>
+            <div class="stat-card-trend trend-down">↓ ลดลง 0.5%</div>
+          </div>
+          <div class="stat-card ann-wrap">
+            <div class="stat-card-val">5.00<span style="font-size:14px;font-weight:500"> วัน</span></div>
+            <div class="stat-card-lbl" style="font-weight:700;color:var(--tx)">
+              วันลาป่วยเฉลี่ย/คน/ปี
+              <span class="ann ann-edit" style="position:static;display:inline-flex;margin-top:4px;font-size:9.5px">⚠ แก้ label</span>
+            </div>
+            <div class="stat-card-trend trend-flat">→ เท่าเดิม</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-val">30.00<span style="font-size:14px;font-weight:500"> ชม.</span></div>
+            <div class="stat-card-lbl">ชั่วโมงอบรม/คน/ปี</div>
+            <div class="stat-card-trend trend-up">↑ เพิ่มขึ้น 5 ชม.</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-val">50.00</div>
+            <div class="stat-card-lbl">คะแนนความผูกพัน</div>
+            <div class="stat-card-trend trend-up">↑ เพิ่มขึ้น 2.3</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- REMOVED: BMI/TMHI CARDS -->
+      <div class="ann-wrap" style="margin-bottom:20px">
+        <div class="removed-placeholder">
+          <span class="removed-icon">🚫</span>
+          <div>
+            <div style="font-size:12.5px;font-weight:700;color:#6b7280">ส่วนที่ถูกลบออก</div>
+            <div class="removed-text">Card "BMI เฉลี่ย" และ Card "TMHI เฉลี่ย" — ถูกซ่อนตามคำแนะนำ ไม่แสดงในหน้าสรุปนี้</div>
+          </div>
+        </div>
+        <div class="ann ann-del" style="top:-10px;right:12px">✗ ลบออก — BMI + TMHI cards</div>
+      </div>
+
+      <!-- TREND CHART -->
+      <div class="trend-card">
+        <div class="trend-card-head">
+          <h3>📈 แนวโน้ม 5 ปีที่ผ่านมา
+            <span class="ann ann-edit" style="position:static;display:inline-flex">⚠ เพิ่มใหม่</span>
+          </h3>
+          <span style="font-size:12px;color:var(--tx3)">วันลาป่วยเฉลี่ย/คน/ปี</span>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:stretch">
+          <div class="chart-bars">
+            <div class="chart-bar" style="height:44%"></div>
+            <div class="chart-bar" style="height:56%"></div>
+            <div class="chart-bar" style="height:48%"></div>
+            <div class="chart-bar" style="height:62%"></div>
+            <div class="chart-bar" style="height:76%;background:linear-gradient(180deg,#5b2aa8,#8b5cf6)"></div>
+          </div>
+          <div class="chart-year-row" style="padding:0 16px;display:flex;gap:8px;justify-content:center;margin-top:8px">
+            <span class="chart-yr" style="flex:1;max-width:44px;text-align:center">2563</span>
+            <span class="chart-yr" style="flex:1;max-width:44px;text-align:center">2564</span>
+            <span class="chart-yr" style="flex:1;max-width:44px;text-align:center">2565</span>
+            <span class="chart-yr" style="flex:1;max-width:44px;text-align:center">2566</span>
+            <span class="chart-yr" style="flex:1;max-width:44px;text-align:center;font-weight:700;color:var(--P)">2567</span>
+          </div>
+        </div>
+        <div style="margin-top:12px;font-size:11.5px;color:var(--tx3);text-align:center">
+          แถบสีเข้ม = ปีปัจจุบัน &nbsp;|&nbsp; Placeholder chart — จะใช้ Chart.js จริงในการ implement
+        </div>
+      </div>
+
+      <!-- ACTION BUTTONS (REDESIGNED) -->
+      <div class="ann-wrap">
+        <div class="action-row">
+          <button class="btn btn-primary">👁 ดูข้อมูล</button>
+          <button class="btn btn-outline">📥 ดาวน์โหลด PDF</button>
+        </div>
+        <div class="ann ann-del" style="top:-10px;right:0">✗ ลบออก — ปุ่ม "แก้ไขฟอร์ม"</div>
+        <div style="margin-top:-10px;font-size:11.5px;color:var(--tx3);display:flex;align-items:center;gap:6px">
+          <span style="color:#b91c1c;font-weight:700">✗</span>
+          ลบปุ่ม "แก้ไขฟอร์ม" ออกจากหน้านี้ — ย้ายไปอยู่ใน nav item "แก้ไขฟอร์ม" แทน
+        </div>
+      </div>
+
+    </div><!-- /portal-content -->
+
+    <!-- PAGE NAV -->
+    <div class="page-nav">
+      <span class="page-nav-label">Mockup pages:</span>
+      <a href="report.html">📋 รายงาน</a>
+      <a href="ch1-org-info.html" class="current">📊 CH1 ข้อมูลองค์กร</a>
+      <a href="wb-dashboard.html">📈 WB ผลสำรวจ</a>
+      <a href="wb-individual.html">👤 WB รายบุคคล</a>
+    </div>
+  </div><!-- /portal-main-wrap -->
+
+</div><!-- /portal-app -->
+</body>
+</html>

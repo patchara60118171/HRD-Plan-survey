@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>รายงานการแก้ไข — NIDA Wellbeing Org Portal Redesign</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai+Looped:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --P:#5b2aa8;--PD:#4b1f95;--PL:#f3edff;
+  --A:#ec4899;--AL:#fdf2f8;
+  --G:#16a34a;--GL:#ecfdf3;
+  --W:#b45309;--WL:#fef3c7;
+  --D:#dc2626;--DL:#fee2e2;
+  --bg:#f7f5fc;--card:#ffffff;--bdr:#e3def3;
+  --tx:#1f2937;--tx2:#4b5563;--tx3:#8b94a7;
+  --shadow:0 1px 3px rgba(15,23,42,.06),0 10px 28px rgba(91,42,168,.06);
+}
+body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;padding:0}
+
+/* ── HERO ── */
+.hero{background:linear-gradient(135deg,#5b2aa8 0%,#7c3aed 55%,#ec4899 100%);color:#fff;padding:48px 32px 36px;text-align:center}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);border-radius:999px;padding:5px 14px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:18px}
+.hero h1{font-size:28px;font-weight:700;margin-bottom:8px;line-height:1.3}
+.hero .subtitle{font-size:14px;color:rgba(255,255,255,.76);max-width:640px;margin:0 auto 22px;line-height:1.7}
+.hero-nav{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.hero-nav a{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:9px;font-size:13px;font-weight:600;text-decoration:none;transition:all .15s}
+.btn-white{background:#fff;color:var(--P)}
+.btn-white:hover{background:#f3edff}
+.btn-ghost{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.25)}
+.btn-ghost:hover{background:rgba(255,255,255,.2)}
+
+/* ── LAYOUT ── */
+.container{max-width:1060px;margin:0 auto;padding:36px 24px}
+
+/* ── STATS BAR ── */
+.stats-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:36px}
+.stat-card{background:#fff;border:1px solid var(--bdr);border-radius:12px;padding:16px 18px;text-align:center;box-shadow:var(--shadow)}
+.stat-num{font-size:26px;font-weight:700;line-height:1.1}
+.stat-num.red{color:var(--D)}
+.stat-num.amber{color:var(--W)}
+.stat-num.green{color:var(--G)}
+.stat-num.purple{color:var(--P)}
+.stat-lbl{font-size:11.5px;color:var(--tx2);margin-top:5px}
+
+/* ── PRIORITY BADGE ── */
+.p-badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:999px;font-size:10.5px;font-weight:700;white-space:nowrap}
+.p-high{background:#fee2e2;color:#b91c1c}
+.p-med{background:#fef3c7;color:#92400e}
+.p-low{background:#ecfdf3;color:#166534}
+
+/* ── SUMMARY TABLE ── */
+.table-card{background:#fff;border:1px solid var(--bdr);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);margin-bottom:36px}
+.table-card-head{padding:16px 20px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:10px}
+.table-card-head h2{font-size:16px;color:var(--P);font-weight:700}
+.table-card-head .count{background:var(--PL);color:var(--P);font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{padding:10px 14px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.04em;color:var(--tx2);background:#faf8ff;border-bottom:1px solid var(--bdr)}
+tbody tr{border-bottom:1px solid #f1edf8}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:#fdfbff}
+td{padding:11px 14px;vertical-align:top;line-height:1.55}
+td.page-col{font-weight:700;color:var(--P);font-size:12px;white-space:nowrap}
+td.issue-col{color:var(--tx2)}
+td.fix-col{color:var(--tx)}
+.tag{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600;margin:2px 2px 2px 0}
+.tag-del{background:#fee2e2;color:#b91c1c}
+.tag-edit{background:#fef3c7;color:#92400e}
+.tag-keep{background:#ecfdf3;color:#166534}
+
+/* ── SECTION CARDS ── */
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+.section-num{width:32px;height:32px;border-radius:999px;background:var(--P);color:#fff;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.section-header h2{font-size:18px;font-weight:700;color:var(--P)}
+.section-meta{font-size:12px;color:var(--tx3);margin-left:44px;margin-bottom:20px}
+
+.change-card{background:#fff;border:1px solid var(--bdr);border-radius:14px;margin-bottom:14px;overflow:hidden;box-shadow:var(--shadow)}
+.change-card-head{padding:14px 18px;border-bottom:1px solid #f1edf8;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.change-card-title{font-size:13.5px;font-weight:700;display:flex;align-items:center;gap:8px}
+.change-body{padding:16px 18px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:640px){.change-body{grid-template-columns:1fr}}
+.before-box,.after-box{border-radius:10px;padding:14px}
+.before-box{background:#fff5f5;border:1px solid #fecaca}
+.after-box{background:#f0fdf4;border:1px solid #bbf7d0}
+.box-label{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.box-label.before-lbl{color:#b91c1c}
+.box-label.after-lbl{color:#166534}
+.box-content{font-size:12.5px;line-height:1.65;color:var(--tx)}
+.box-content ul{padding-left:16px;margin-top:4px}
+.box-content li{margin-bottom:4px}
+
+.note-box{background:var(--WL);border:1px solid #fcd34d;border-radius:10px;padding:12px 16px;font-size:13px;color:#78350f;line-height:1.65;margin-bottom:16px;display:flex;gap:10px}
+.note-icon{font-size:16px;flex-shrink:0;margin-top:1px}
+
+/* ── MOCKUP LINKS ── */
+.links-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:36px}
+.link-card{background:#fff;border:1px solid var(--bdr);border-radius:14px;padding:20px;box-shadow:var(--shadow);text-decoration:none;color:var(--tx);transition:all .2s;position:relative;overflow:hidden}
+.link-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--P);border-radius:4px 0 0 4px}
+.link-card:hover{border-color:#c4b5fd;transform:translateY(-2px);box-shadow:0 8px 24px rgba(91,42,168,.12)}
+.link-card-icon{width:38px;height:38px;border-radius:10px;background:var(--PL);display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:12px}
+.link-card h3{font-size:14px;font-weight:700;color:var(--P);margin-bottom:4px}
+.link-card p{font-size:11.5px;color:var(--tx2);line-height:1.5}
+.link-card .arrow{position:absolute;right:16px;top:50%;transform:translateY(-50%);color:var(--tx3);font-size:16px}
+
+/* ── FOOTER ── */
+.page-footer{background:#fff;border-top:1px solid var(--bdr);padding:20px 32px;text-align:center;font-size:12px;color:var(--tx3);margin-top:40px}
+.page-footer strong{color:var(--P)}
+
+/* ── MISC ── */
+.section-divider{border:none;border-top:1px solid var(--bdr);margin:32px 0}
+.icon-circle{width:18px;height:18px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0}
+.ic-del{background:#fee2e2;color:#b91c1c}
+.ic-edit{background:#fef3c7;color:#92400e}
+.ic-keep{background:#ecfdf3;color:#166534}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">📋 Redesign Report</div>
+  <h1>รายงานการแก้ไข UI/UX<br>NIDA Wellbeing Org Portal</h1>
+  <p class="subtitle">สรุปปัญหาที่พบจาก annotation และการแก้ไขที่แนะนำในการ redesign ใหม่ทั้งระบบ เพื่อให้ข้อมูลกระชับ ถูกต้อง และใช้งานง่ายขึ้น</p>
+  <div class="hero-nav">
+    <a href="ch1-org-info.html" class="hero-nav btn-white">📊 CH1 ข้อมูลองค์กร</a>
+    <a href="wb-dashboard.html" class="hero-nav btn-ghost">📈 Well-being ผลสำรวจ</a>
+    <a href="wb-individual.html" class="hero-nav btn-ghost">👤 Well-being รายบุคคล</a>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- STATS BAR -->
+  <div class="stats-bar">
+    <div class="stat-card">
+      <div class="stat-num red">12</div>
+      <div class="stat-lbl">รายการที่ต้องลบออก</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num amber">6</div>
+      <div class="stat-lbl">รายการที่ต้องแก้ไข</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num green">4</div>
+      <div class="stat-lbl">รายการที่เก็บไว้ (ดี)</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num purple">4</div>
+      <div class="stat-lbl">หน้าที่ได้รับการ redesign</div>
+    </div>
+  </div>
+
+  <!-- MOCKUP NAVIGATION -->
+  <div class="table-card" style="margin-bottom:28px">
+    <div class="table-card-head">
+      <span style="font-size:18px">🔗</span>
+      <h2>ลิงก์ไปยัง Mockup Pages</h2>
+    </div>
+    <div style="padding:20px">
+      <div class="links-grid">
+        <a href="ch1-org-info.html" class="link-card">
+          <div class="link-card-icon">📊</div>
+          <h3>CH1 ข้อมูลองค์กร</h3>
+          <p>หน้าสรุปข้อมูลองค์กร redesigned — ลบ BMI/TMHI ออก, เพิ่ม label ที่ชัดเจน</p>
+          <span class="arrow">→</span>
+        </a>
+        <a href="wb-dashboard.html" class="link-card">
+          <div class="link-card-icon">📈</div>
+          <h3>Well-being ผลสำรวจ</h3>
+          <p>ลบ BMI section, TMHI-15 section, ตาราง ผู้ตอบล่าสุด</p>
+          <span class="arrow">→</span>
+        </a>
+        <a href="wb-individual.html" class="link-card">
+          <div class="link-card-icon">👤</div>
+          <h3>Well-being รายบุคคล</h3>
+          <p>ลบ card เฉลี่ย, filter TMHI, คอลัมน์ BMI/TMHI/สถานะจิต</p>
+          <span class="arrow">→</span>
+        </a>
+        <a href="#page2" class="link-card">
+          <div class="link-card-icon">🗂️</div>
+          <h3>รายละเอียดองค์กร</h3>
+          <p>พิจารณาตัดหน้านี้ออก หรือรวมกับหน้าอื่น — ดูรายละเอียดด้านล่าง</p>
+          <span class="arrow">↓</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUMMARY TABLE -->
+  <div class="table-card">
+    <div class="table-card-head">
+      <span style="font-size:18px">📋</span>
+      <h2>ตารางสรุปการเปลี่ยนแปลงทั้งหมด</h2>
+      <span class="count">22 รายการ</span>
+    </div>
+    <div style="overflow-x:auto">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:140px">หน้า</th>
+            <th>ปัญหาที่พบ</th>
+            <th>การแก้ไขที่แนะนำ</th>
+            <th style="width:90px">Priority</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Page 1 -->
+          <tr>
+            <td class="page-col">CH1 ข้อมูลองค์กร</td>
+            <td class="issue-col">คำถาม: ควรเชื่อมไปโครงการแทนไหม?</td>
+            <td class="fix-col">เพิ่ม info icon และ link ไปยังโครงการที่เกี่ยวข้อง</td>
+            <td><span class="p-badge p-med">Medium</span></td>
+          </tr>
+          <tr>
+            <td class="page-col">CH1 ข้อมูลองค์กร</td>
+            <td class="issue-col">NCD รวม: calculation ผิด — คำนวณจากเจ้าหน้าที่ลาป่วยที่มี NCDs แต่ค่าไม่ถูกต้อง</td>
+            <td class="fix-col">Rewrite calculation logic + แสดง warning note จนกว่าจะตรวจสอบเสร็จ</td>
+            <td><span class="p-badge p-high">High</span></td>
+          </tr>
+          <tr>
+            <td class="page-col">CH1 ข้อมูลองค์กร</td>
+            <td class="issue-col">ค่าเฉลี่ยวันลาป่วย: label ไม่ชัดเจน ผู้ใช้ไม่รู้ว่าเป็น "ต่อคนต่อปี"</td>
+            <td class="fix-col">เปลี่ยน label เป็น "จำนวนวันลาป่วยเฉลี่ย/คน/ปี" ให้ชัดเจน</td>
+            <td><span class="p-badge p-high">High</span></td>
+          </tr>
+          <tr>
+            <td class="page-col">CH1 ข้อมูลองค์กร</td>
+            <td class="issue-col">ปุ่ม "แก้ไขฟอร์ม" ปรากฏในหน้าสรุปข้อมูล — ทำให้สับสน</td>
+            <td class="fix-col">ลบปุ่มออกจากหน้านี้ ย้ายไปอยู่ในหน้า "แก้ไขฟอร์ม" เท่านั้น</td>
+            <td><span class="p-badge p-med">Medium</span></td>
+          </tr>
+          <tr>
+            <td class="page-col">CH1 ข้อมูลองค์กร</td>
+            <td class="issue-col">การแสดงปี: ไม่ชัดว่าแสดงปีไหน หรือเฉลี่ยกี่ปี</td>
+            <td class="fix-col">เพิ่ม dropdown เลือกปี + option เปรียบเทียบ 5 ปี + mini trend chart</td>
+            <td><span class="p-badge p-med">Medium</span></td>
+          </tr>
+          <!-- Page 2 -->
+          <tr>
+            <td class="page-col" id="page2">รายละเอียดองค์กร</td>
+            <td class="issue-col">หน้านี้อาจซ้ำซ้อนกับหน้าอื่น ข้อมูลบางส่วนไม่จำเป็น</td>
+            <td class="fix-col">พิจารณาตัดหน้านี้ หรือรวมกับ CH1 เป็น collapsible section</td>
+            <td><span class="p-badge p-med">Medium</span></td>
+          </tr>
+          <tr>
+            <td class="page-col">รายละเอียดองค์กร</td>
+            <td class="issue-col">"ประเภทหน่วยงาน" ซ้ำกับที่แสดงใน header ด้านบนแล้ว</td>
+            <td class="fix-col">ตัด field นี้ออกจาก detail section</td>
+            <td><span class="p-badge p-low">Low</span></td>
+          </tr>
+          <tr>
+            <td class="page-col">รายละเอียดองค์กร</td>
+            <td class="issue-col">"กระทรวงหรือหน่วยงานต้นสังกัด" ว่างเปล่า ไม่รู้ว่าจำเป็นไหม</td>
+            <td class="fix-col">ตรวจสอบกับผู้ดูแลระบบ — ถ้าไม่จำเป็นให้ซ่อน หรือ populate ข้อมูล</td>
+            <td><span class="p-badge p-med">Medium</span></td>
+          </tr>
+          <tr>
+            <td class="page-col">รายละเอียดองค์กร</td>
+            <td class="issue-col">ข้อมูลผู้ประสานงาน ชื่อ/ตำแหน่งดูเหมือน placeholder</td>
+            <td class="fix-col">ตรวจสอบ data source — ถ้าเป็น placeholder ให้ซ่อนหรือแสดงค่าจริง</td>
+            <td><span class="p-badge p-med">Medium</span></td>
+          </tr>
+          <!-- Page 3&4 -->
+          <tr>
+            <td class="page-col">Well-being ผลสำรวจ</td>
+            <td class="issue-col">คำอธิบายหน้าซ้ำกับ header ทำให้ดูซ้ำซ้อน</td>
+            <td class="fix-col">ตัดคำอธิบายซ้ำออก เก็บแค่ header เดียว</td>
+            <td><span class="p-badge p-low">Low</span></td>
+          </tr>
+          <tr>
+            <td class="page-col">Well-being ผลสำรวจ</td>
+            <td class="issue-col">Section BMI แสดงข้อมูลที่อาจก่อให้เกิดการตีความผิด</td>
+            <td class="fix-col">ซ่อน Section BMI ทั้งหมด</td>
+            <td><span class="p-badge p-high">High</span></td>
+          </tr>
+          <tr>
+            <td class="page-col">Well-being ผลสำรวจ</td>
+            <td class="issue-col">Section TMHI-15 ควรตัดออกตามคำแนะนำ</td>
+            <td class="fix-col">ซ่อน Section TMHI-15 ทั้งหมด</td>
+            <td><span class="p-badge p-high">High</span></td>
+          </tr>
+          <tr>
+            <td class="page-col">Well-being ผลสำรวจ</td>
+            <td class="issue-col">ตาราง "ผู้ตอบล่าสุด" ซ้ำซ้อนกับหน้า รายบุคคล</td>
+            <td class="fix-col">ตัดตารางออก แทนด้วยลิงก์ "ดูข้อมูลรายบุคคล →"</td>
+            <td><span class="p-badge p-med">Medium</span></td>
+          </tr>
+          <tr>
+            <td class="page-col">Well-being ผลสำรวจ</td>
+            <td class="issue-col">สถานะการตอบแบบสำรวจ: ข้อมูลดีแต่อาจยังขาดบริบท</td>
+            <td class="fix-col">เก็บไว้ (ดี) — แต่เพิ่ม gender/age chart ให้สมบูรณ์</td>
+            <td><span class="p-badge p-low">Low</span></td>
+          </tr>
+          <!-- Page 5 -->
+          <tr>
+            <td class="page-col">Well-being รายบุคคล</td>
+            <td class="issue-col">คำอธิบายซ้ำซ้อนกับ header</td>
+            <td class="fix-col">ตัดคำอธิบายซ้ำออก</td>
+            <td><span class="p-badge p-low">Low</span></td>
+          </tr>
+          <tr>
+            <td class="page-col">Well-being รายบุคคล</td>
+            <td class="issue-col">Card "สรุป TMHI เฉลี่ย" ไม่ควรแสดง</td>
+            <td class="fix-col">ลบ card นี้ออก</td>
+            <td><span class="p-badge p-high">High</span></td>
+          </tr>
+          <tr>
+            <td class="page-col">Well-being รายบุคคล</td>
+            <td class="issue-col">Card "สรุป BMI เฉลี่ย" ไม่ควรแสดง</td>
+            <td class="fix-col">ลบ card นี้ออก</td>
+            <td><span class="p-badge p-high">High</span></td>
+          </tr>
+          <tr>
+            <td class="page-col">Well-being รายบุคคล</td>
+            <td class="issue-col">Filter "TMHI ทุกระดับ" ไม่ควรแสดง เมื่อซ่อน TMHI แล้ว</td>
+            <td class="fix-col">ลบ filter TMHI ออกจาก filter bar</td>
+            <td><span class="p-badge p-high">High</span></td>
+          </tr>
+          <tr>
+            <td class="page-col">Well-being รายบุคคล</td>
+            <td class="issue-col">คอลัมน์ BMI ในตาราง — ไม่ควรแสดง</td>
+            <td class="fix-col">ลบคอลัมน์ออก</td>
+            <td><span class="p-badge p-high">High</span></td>
+          </tr>
+          <tr>
+            <td class="page-col">Well-being รายบุคคล</td>
+            <td class="issue-col">คอลัมน์ ระดับ BMI — ไม่ควรแสดง</td>
+            <td class="fix-col">ลบคอลัมน์ออก</td>
+            <td><span class="p-badge p-high">High</span></td>
+          </tr>
+          <tr>
+            <td class="page-col">Well-being รายบุคคล</td>
+            <td class="issue-col">คอลัมน์ TMHI — ไม่ควรแสดง</td>
+            <td class="fix-col">ลบคอลัมน์ออก</td>
+            <td><span class="p-badge p-high">High</span></td>
+          </tr>
+          <tr>
+            <td class="page-col">Well-being รายบุคคล</td>
+            <td class="issue-col">คอลัมน์ สถานะจิต — ไม่ควรแสดง</td>
+            <td class="fix-col">ลบคอลัมน์ออก</td>
+            <td><span class="p-badge p-high">High</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 1 -->
+  <div class="section-header">
+    <div class="section-num">1</div>
+    <h2>CH1 ข้อมูลองค์กร</h2>
+  </div>
+  <div class="section-meta">หน้าแสดงข้อมูลสุขภาวะองค์กร รวมถึงสถิติบุคลากร</div>
+
+  <div class="note-box">
+    <span class="note-icon">⚠️</span>
+    <div><strong>ประเด็นสำคัญ:</strong> การคำนวณค่า NCD รวม ยังคงมีข้อผิดพลาด — ต้องทำการ rewrite calculation ก่อนที่จะแสดงให้ผู้ใช้เห็น ในระหว่างนี้ให้แสดง warning note แจ้งผู้ใช้</div>
+  </div>
+
+  <div class="change-card">
+    <div class="change-card-head">
+      <div class="change-card-title"><span class="icon-circle ic-del">✗</span> ปุ่ม "แก้ไขฟอร์ม" ในหน้าสรุป</div>
+      <span class="p-badge p-med">Medium</span>
+    </div>
+    <div class="change-body">
+      <div class="before-box">
+        <div class="box-label before-lbl">✗ ก่อน (ปัญหา)</div>
+        <div class="box-content">มีปุ่ม "แก้ไขฟอร์ม" ปรากฏใน action bar ของหน้าสรุปข้อมูลองค์กร ซึ่งทำให้ผู้ใช้สับสน — หน้านี้ควรเป็น read-only view</div>
+      </div>
+      <div class="after-box">
+        <div class="box-label after-lbl">✓ หลัง (แก้ไข)</div>
+        <div class="box-content">ลบปุ่ม "แก้ไขฟอร์ม" ออกจากหน้านี้ เหลือแค่ปุ่ม "ดูข้อมูล" และ "ดาวน์โหลด PDF" เท่านั้น — หน้า "แก้ไขฟอร์ม" จะเป็น nav item แยกต่างหาก</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="change-card">
+    <div class="change-card-head">
+      <div class="change-card-title"><span class="icon-circle ic-edit">⚠</span> Label "วันลาป่วยเฉลี่ย" ไม่ชัดเจน</div>
+      <span class="p-badge p-high">High</span>
+    </div>
+    <div class="change-body">
+      <div class="before-box">
+        <div class="box-label before-lbl">✗ ก่อน (ปัญหา)</div>
+        <div class="box-content">แสดงเป็น "วันลาป่วยเฉลี่ย: 5.00" — ไม่ระบุว่าเป็นต่อคนต่อปี ผู้ใช้ตีความได้หลายแบบ</div>
+      </div>
+      <div class="after-box">
+        <div class="box-label after-lbl">✓ หลัง (แก้ไข)</div>
+        <div class="box-content">เปลี่ยนเป็น "วันลาป่วยเฉลี่ย/คน/ปี: 5.00 วัน" — ชัดเจน ไม่ต้องตีความ</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="change-card">
+    <div class="change-card-head">
+      <div class="change-card-title"><span class="icon-circle ic-edit">⚠</span> การแสดงข้อมูลปี และ trend</div>
+      <span class="p-badge p-med">Medium</span>
+    </div>
+    <div class="change-body">
+      <div class="before-box">
+        <div class="box-label before-lbl">✗ ก่อน (ปัญหา)</div>
+        <div class="box-content">แสดงค่าตายตัว ไม่ชัดว่าเป็นปีไหน และไม่มี trend / การเปรียบเทียบข้ามปี</div>
+      </div>
+      <div class="after-box">
+        <div class="box-label after-lbl">✓ หลัง (แก้ไข)</div>
+        <div class="box-content">
+          <ul>
+            <li>เพิ่ม dropdown เลือกปีล่าสุด (2567)</li>
+            <li>มี option "เปรียบเทียบ 5 ปี"</li>
+            <li>Mini trend chart แสดงแนวโน้ม 5 ปี</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- SECTION 2 -->
+  <div class="section-header">
+    <div class="section-num">2</div>
+    <h2>รายละเอียดองค์กร</h2>
+  </div>
+  <div class="section-meta">หน้าแสดงข้อมูล profile องค์กร — พิจารณาตัดออกหรือรวมกับหน้าอื่น</div>
+
+  <div class="change-card">
+    <div class="change-card-head">
+      <div class="change-card-title"><span class="icon-circle ic-del">✗</span> พิจารณาตัดทั้งหน้า หรือรวมกับหน้าอื่น</div>
+      <span class="p-badge p-med">Medium</span>
+    </div>
+    <div class="change-body">
+      <div class="before-box">
+        <div class="box-label before-lbl">✗ ก่อน (ปัญหา)</div>
+        <div class="box-content">
+          <ul>
+            <li>"ประเภทหน่วยงาน" ซ้ำกับ header ด้านบน</li>
+            <li>"กระทรวง/หน่วยงานต้นสังกัด" ว่างเปล่า</li>
+            <li>ข้อมูลผู้ประสานงานดูเหมือน placeholder</li>
+            <li>ข้อมูลส่วนใหญ่ไม่ได้ใช้งานจริง</li>
+          </ul>
+        </div>
+      </div>
+      <div class="after-box">
+        <div class="box-label after-lbl">✓ หลัง (แก้ไข)</div>
+        <div class="box-content">
+          ตัดสินใจเลือกอย่างใดอย่างหนึ่ง:
+          <ul>
+            <li><strong>Option A:</strong> ตัดหน้านี้ออก ย้ายข้อมูลสำคัญไปรวมใน CH1</li>
+            <li><strong>Option B:</strong> ทำเป็น collapsible "ข้อมูลเพิ่มเติม" ใน CH1 sidebar</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- SECTION 3&4 -->
+  <div class="section-header">
+    <div class="section-num">3</div>
+    <h2>Well-being ผลสำรวจ (Dashboard)</h2>
+  </div>
+  <div class="section-meta">หน้าสรุปผลสำรวจ Well-being ขององค์กร</div>
+
+  <div class="change-card">
+    <div class="change-card-head">
+      <div class="change-card-title"><span class="icon-circle ic-del">✗</span> Section BMI ทั้งหมด</div>
+      <span class="p-badge p-high">High</span>
+    </div>
+    <div class="change-body">
+      <div class="before-box">
+        <div class="box-label before-lbl">✗ ก่อน (ปัญหา)</div>
+        <div class="box-content">Section BMI แสดงกราฟและสถิติ BMI ของพนักงาน — ข้อมูลนี้ควรซ่อนตามนโยบาย</div>
+      </div>
+      <div class="after-box">
+        <div class="box-label after-lbl">✓ หลัง (แก้ไข)</div>
+        <div class="box-content">ซ่อน Section BMI ทั้งหมด แทนด้วย placeholder สีเทาอ่อน "ส่วนนี้ถูกซ่อนตามคำแนะนำ" เพื่อ document การเปลี่ยนแปลงใน mockup</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="change-card">
+    <div class="change-card-head">
+      <div class="change-card-title"><span class="icon-circle ic-del">✗</span> Section TMHI-15 ทั้งหมด</div>
+      <span class="p-badge p-high">High</span>
+    </div>
+    <div class="change-body">
+      <div class="before-box">
+        <div class="box-label before-lbl">✗ ก่อน (ปัญหา)</div>
+        <div class="box-content">Section TMHI-15 แสดงคะแนนสุขภาพจิต — ควรซ่อนตามคำแนะนำ</div>
+      </div>
+      <div class="after-box">
+        <div class="box-label after-lbl">✓ หลัง (แก้ไข)</div>
+        <div class="box-content">ซ่อน Section TMHI-15 ทั้งหมด</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="change-card">
+    <div class="change-card-head">
+      <div class="change-card-title"><span class="icon-circle ic-del">✗</span> ตาราง "ผู้ตอบล่าสุด"</div>
+      <span class="p-badge p-med">Medium</span>
+    </div>
+    <div class="change-body">
+      <div class="before-box">
+        <div class="box-label before-lbl">✗ ก่อน (ปัญหา)</div>
+        <div class="box-content">ตารางแสดงรายชื่อผู้ตอบล่าสุด ซึ่งซ้ำซ้อนกับข้อมูลใน หน้า Well-being รายบุคคล</div>
+      </div>
+      <div class="after-box">
+        <div class="box-label after-lbl">✓ หลัง (แก้ไข)</div>
+        <div class="box-content">แทนด้วยลิงก์ "ดูข้อมูลรายบุคคลเพิ่มเติม →" เพื่อ dedup ข้อมูลและลด clutter</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="change-card">
+    <div class="change-card-head">
+      <div class="change-card-title"><span class="icon-circle ic-keep">✓</span> สถานะการตอบแบบสำรวจ + Gender/Age charts</div>
+      <span class="p-badge p-low">Keep</span>
+    </div>
+    <div class="change-body">
+      <div class="before-box">
+        <div class="box-label before-lbl">📋 ปัจจุบัน</div>
+        <div class="box-content">แสดง progress bar การตอบสำรวจ + breakdown ชาย/หญิง/อายุ</div>
+      </div>
+      <div class="after-box">
+        <div class="box-label after-lbl">✓ เก็บไว้ (ดี)</div>
+        <div class="box-content">เก็บส่วนนี้ไว้ทั้งหมด — ข้อมูลมีประโยชน์ ไม่ sensitive และช่วยให้ HR ติดตาม completion rate ได้</div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- SECTION 5 -->
+  <div class="section-header">
+    <div class="section-num">4</div>
+    <h2>Well-being รายบุคคล</h2>
+  </div>
+  <div class="section-meta">หน้าแสดงข้อมูล Well-being แยกรายบุคคล</div>
+
+  <div class="change-card">
+    <div class="change-card-head">
+      <div class="change-card-title"><span class="icon-circle ic-del">✗</span> Card สรุป TMHI เฉลี่ย + BMI เฉลี่ย</div>
+      <span class="p-badge p-high">High</span>
+    </div>
+    <div class="change-body">
+      <div class="before-box">
+        <div class="box-label before-lbl">✗ ก่อน (ปัญหา)</div>
+        <div class="box-content">Stats row มี 4 cards: ผู้ตอบทั้งหมด, ชาย/หญิง, TMHI เฉลี่ย, BMI เฉลี่ย — สองอันหลังควรซ่อน</div>
+      </div>
+      <div class="after-box">
+        <div class="box-label after-lbl">✓ หลัง (แก้ไข)</div>
+        <div class="box-content">เหลือแค่ 2 cards: ผู้ตอบทั้งหมด และ สัดส่วน ชาย/หญิง — ข้อมูลไม่ sensitive</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="change-card">
+    <div class="change-card-head">
+      <div class="change-card-title"><span class="icon-circle ic-del">✗</span> คอลัมน์ในตาราง: BMI, ระดับ BMI, TMHI, สถานะจิต</div>
+      <span class="p-badge p-high">High</span>
+    </div>
+    <div class="change-body">
+      <div class="before-box">
+        <div class="box-label before-lbl">✗ ก่อน (ปัญหา)</div>
+        <div class="box-content">
+          ตารางมีคอลัมน์: #, ชื่อ, เพศ, อายุ, BMI, ระดับ BMI, TMHI, สถานะจิต, วันที่ส่ง, ปุ่ม
+          <br><br>คอลัมน์ BMI, ระดับ BMI, TMHI, สถานะจิต ไม่ควรแสดงตามนโยบาย
+        </div>
+      </div>
+      <div class="after-box">
+        <div class="box-label after-lbl">✓ หลัง (แก้ไข)</div>
+        <div class="box-content">
+          ตารางใหม่มีแค่:
+          <ul>
+            <li>#, ชื่อ, เพศ, อายุ, วันที่ส่ง, ปุ่มดูทั้งหมด</li>
+          </ul>
+          กระชับและไม่แสดงข้อมูล sensitive
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="change-card">
+    <div class="change-card-head">
+      <div class="change-card-title"><span class="icon-circle ic-del">✗</span> Filter "TMHI ทุกระดับ"</div>
+      <span class="p-badge p-high">High</span>
+    </div>
+    <div class="change-body">
+      <div class="before-box">
+        <div class="box-label before-lbl">✗ ก่อน (ปัญหา)</div>
+        <div class="box-content">Filter bar มี dropdown "TMHI ทุกระดับ" ซึ่งไม่ควรปรากฏเมื่อซ่อนข้อมูล TMHI แล้ว</div>
+      </div>
+      <div class="after-box">
+        <div class="box-label after-lbl">✓ หลัง (แก้ไข)</div>
+        <div class="box-content">Filter bar เหลือแค่ search box + filter เพศ (ชาย/หญิง/อื่นๆ/ทั้งหมด) เท่านั้น</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="page-footer">
+  <strong>NIDA Wellbeing Org Portal — Redesign Mockup Report</strong><br>
+  จัดทำโดย: ทีม UX/Product &nbsp;|&nbsp; วันที่: 29 มีนาคม 2568 &nbsp;|&nbsp;
+  <a href="ch1-org-info.html" style="color:var(--P)">ch1-org-info.html</a> ·
+  <a href="wb-dashboard.html" style="color:var(--P)">wb-dashboard.html</a> ·
+  <a href="wb-individual.html" style="color:var(--P)">wb-individual.html</a>
+</div>
+
+</body>
+</html>

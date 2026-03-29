@@ -210,25 +210,59 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
         <div class="mockup-banner">
           <div class="icon">🎨</div>
           <div>
-            <div class="text">MOCKUP — Well-being ผลสำรวจ (หลังแก้ไข)</div>
-            <div class="sub">ตัด BMI card, TMHI-15 card, ผู้ตอบล่าสุด table ออก / เปลี่ยนชื่อเมนูเป็น "สถานะการตอบแบบสำรวจ"</div>
+            <div class="text">MOCKUP — Well-being ผลสำรวจ (หลังแก้ไข v2)</div>
+            <div class="sub">ตัด BMI/TMHI-15/ผู้ตอบล่าสุด ออก / เปลี่ยนชื่อเมนู / <strong>ใช้ type_official (ข้าราชการ) แทน total_staff ในการคำนวณ Progress</strong></div>
+          </div>
+        </div>
+
+        <!-- NEW: Explanation callout for calculation change -->
+        <div style="background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:12px;padding:14px 18px;margin-bottom:16px">
+          <div style="font-size:13px;font-weight:700;color:#1d4ed8;margin-bottom:6px">📐 เปลี่ยนวิธีคำนวณ Progress <span class="change-badge modified">LOGIC CHANGE</span></div>
+          <div style="font-size:12px;color:#1e40af;line-height:1.7">
+            <strong>เดิม:</strong> ใช้ <code style="background:#dbeafe;padding:2px 6px;border-radius:4px">total_staff</code> (บุคลากรทั้งหมด) เป็นตัวหาร → เช่น 2 / 7,000 = 0.03%<br>
+            <strong>ใหม่:</strong> ใช้ <code style="background:#dbeafe;padding:2px 6px;border-radius:4px">type_official</code> (ข้าราชการ) เป็นตัวหาร → เช่น 2 / 500 = 0.4%<br>
+            <span style="color:#6b7280;font-size:11px">เหตุผล: บางองค์กร total_staff = 7,000 แต่ข้าราชการจริงแค่ 500 ควรคำนวณจากกลุ่มเป้าหมายจริง</span>
           </div>
         </div>
 
         <div class="section-card wb">
           <h3>💚 สถานะการตอบแบบสำรวจ <span class="change-badge renamed">RENAMED</span></h3>
           <div class="desc">ภาพรวมผลสำรวจสุขภาวะรายบุคคลของบุคลากรในองค์กร</div>
+
+          <!-- Comparison: OLD vs NEW calculation -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+            <!-- OLD -->
+            <div style="background:#fef2f2;border:1.5px dashed #fca5a5;border-radius:10px;padding:12px;opacity:.55">
+              <div style="font-size:11px;font-weight:700;color:#dc2626;margin-bottom:6px">❌ เดิม (total_staff)</div>
+              <div style="display:flex;align-items:baseline;gap:6px">
+                <span style="font-size:20px;font-weight:700;color:#dc2626;text-decoration:line-through">0.03%</span>
+                <span style="font-size:11px;color:#dc2626">2 / 7,000 คน</span>
+              </div>
+            </div>
+            <!-- NEW -->
+            <div style="background:#ecfdf5;border:1.5px solid #6ee7b7;border-radius:10px;padding:12px">
+              <div style="font-size:11px;font-weight:700;color:#059669;margin-bottom:6px">✅ ใหม่ (type_official = ข้าราชการ)</div>
+              <div style="display:flex;align-items:baseline;gap:6px">
+                <span style="font-size:20px;font-weight:700;color:#059669">0.4%</span>
+                <span style="font-size:11px;color:#059669">2 / 500 คน</span>
+              </div>
+            </div>
+          </div>
+
           <div class="progress-wrap">
             <div class="progress-label">
-              <span class="left">ผู้ตอบ Well-being Survey</span>
-              <span class="right">4.0%</span>
+              <span class="left">ผู้ตอบ Well-being Survey (เฉพาะข้าราชการ) <span class="change-badge modified">UPDATED</span></span>
+              <span class="right">0.4%</span>
             </div>
-            <div class="progress-track"><div class="progress-fill" style="width:4%"></div></div>
-            <div class="progress-text">ผู้ที่กรอกแล้ว <strong>2 คน</strong> / 50 คน คิดเป็นร้อยละ 4.0</div>
+            <div class="progress-track"><div class="progress-fill" style="width:0.4%"></div></div>
+            <div class="progress-text">ผู้ที่กรอกแล้ว <strong>2 คน</strong> / <strong>500 คน</strong> (ข้าราชการ) คิดเป็นร้อยละ 0.4</div>
           </div>
-          <div style="display:none;margin-top:16px">
-            <div class="summary-grid" id="wb-summary-grid"></div>
+
+          <!-- Data source info -->
+          <div style="margin-top:10px;padding:8px 12px;background:#faf8ff;border:1px solid #e3def3;border-radius:8px;font-size:11px;color:var(--tx3);line-height:1.6">
+            📊 <strong>total_staff:</strong> 7,000 คน (บุคลากรทั้งหมด) &nbsp;|&nbsp; <strong>type_official:</strong> 500 คน (ข้าราชการ — ใช้เป็นฐานคำนวณ)
           </div>
+
           <div style="margin-top:16px">
             <div class="summary-grid">
               <div class="summary-item"><div class="val">2</div><div class="lbl">ผู้ตอบทั้งหมด</div></div>

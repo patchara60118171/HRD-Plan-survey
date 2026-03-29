@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Well-being รายบุคคล — Mockup Redesign</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai+Looped:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --P:#5b2aa8;--PD:#4b1f95;--PL:#f3edff;
+  --A:#ec4899;--AL:#fdf2f8;
+  --G:#16a34a;--GL:#ecfdf3;
+  --W:#b45309;--WL:#fef3c7;
+  --D:#dc2626;--DL:#fee2e2;
+  --bg:#f7f5fc;--card:#ffffff;--bdr:#e3def3;
+  --tx:#1f2937;--tx2:#4b5563;--tx3:#8b94a7;
+  --shadow:0 1px 3px rgba(15,23,42,.06),0 10px 28px rgba(91,42,168,.06);
+  --sidebar-w:244px;
+}
+body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh}
+
+/* ── SIDEBAR ── */
+#portal-app{display:flex;min-height:100vh}
+.sidebar{width:var(--sidebar-w);background:linear-gradient(180deg,#5f28ab 0%,#58239d 52%,#501f8d 100%);color:#fff;display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:20;box-shadow:4px 0 30px rgba(46,16,101,.16)}
+.sidebar-logo{padding:16px 14px;border-bottom:1px solid rgba(255,255,255,.08)}
+.logo-row{display:flex;align-items:center;gap:10px}
+.logo-icon{width:28px;height:28px;border-radius:8px;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.logo-title{font-size:12.5px;font-weight:700}
+.logo-sub{font-size:10px;color:rgba(255,255,255,.48);padding-left:38px;margin-top:4px}
+.sidebar-org{margin:12px 10px 8px;padding:12px;border-radius:8px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.06)}
+.o-label{font-size:9px;color:rgba(255,255,255,.42);margin-bottom:4px;letter-spacing:.06em;text-transform:uppercase}
+.o-name{font-size:12px;font-weight:700;line-height:1.45}
+.o-email{font-size:10px;color:rgba(255,255,255,.48);margin-top:4px}
+.portal-nav{flex:1;padding:8px 0 10px;overflow-y:auto}
+.nav-group{padding:12px 14px 6px;font-size:9px;font-weight:700;letter-spacing:.08em;color:rgba(255,255,255,.34);text-transform:uppercase}
+.nav-item{display:flex;align-items:center;gap:9px;width:100%;background:none;border:none;color:rgba(255,255,255,.72);font-family:inherit;text-align:left;cursor:pointer;padding:11px 14px;font-size:13px;border-left:3px solid transparent;text-decoration:none}
+.nav-item:hover{background:rgba(255,255,255,.06);color:#fff}
+.nav-item.active{background:rgba(255,255,255,.12);color:#fff;border-left-color:#f59e0b}
+.nav-item.dim{color:rgba(255,255,255,.38);cursor:default}
+.ni{width:16px;text-align:center;flex-shrink:0}
+.sidebar-foot{border-top:1px solid rgba(255,255,255,.08);padding:10px}
+.sidebar-foot .nav-item{padding:8px 6px;border-left:none;font-size:12px}
+
+/* ── MAIN ── */
+.portal-main-wrap{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{background:#fff;border-bottom:1px solid var(--bdr);padding:10px 24px;display:flex;align-items:center;gap:12px;min-height:58px;position:sticky;top:0;z-index:100}
+.tb-head{display:flex;flex-direction:column;gap:2px}
+.tb-title{font-size:14px;font-weight:700;color:var(--P)}
+.tb-sub{font-size:11.5px;color:var(--tx2)}
+.tb-space{flex:1}
+.tb-chips{display:flex;gap:8px;align-items:center}
+.tb-chip{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:600;border:1px solid var(--bdr);background:#faf8ff;color:var(--tx2)}
+.portal-content{padding:24px;max-width:1060px}
+
+/* ── MOCKUP BANNER ── */
+.mockup-banner{background:linear-gradient(90deg,#fef3c7,#fff7ed);border:1px solid #fcd34d;border-radius:10px;padding:10px 16px;margin-bottom:20px;display:flex;align-items:center;gap:10px;font-size:12.5px;color:#78350f}
+
+/* ── REMOVED SUBTITLE NOTE ── */
+.subtitle-removed{background:#fff0f0;border:1px solid #fecaca;border-radius:8px;padding:8px 14px;font-size:12px;color:#b91c1c;display:flex;align-items:center;gap:8px;margin-bottom:16px}
+
+/* ── STATS GRID (simplified - 2 cards only) ── */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:20px;max-width:480px}
+.stat-card{background:#fff;border:1px solid var(--bdr);border-radius:12px;padding:18px 16px;box-shadow:var(--shadow);position:relative}
+.stat-card-val{font-size:26px;font-weight:700;color:#7c3aed;line-height:1.1}
+.stat-card-lbl{font-size:12px;color:var(--tx3);margin-top:6px;line-height:1.4}
+
+/* ── REMOVED STATS PLACEHOLDER ── */
+.removed-stats-row{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+.removed-stat-card{background:#f3f4f6;border:2px dashed #d1d5db;border-radius:12px;padding:16px;text-align:center;flex:1;min-width:140px;position:relative}
+.removed-stat-val{font-size:22px;font-weight:700;color:#d1d5db}
+.removed-stat-lbl{font-size:11px;color:#d1d5db;margin-top:4px}
+
+/* ── ANNOTATION ── */
+.ann{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:6px;font-size:10.5px;font-weight:700;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.ann-del{background:#ef4444;color:#fff}
+.ann-edit{background:#f59e0b;color:#fff}
+.ann-keep{background:#10b981;color:#fff}
+.ann-wrap{position:relative}
+.ann-abs{position:absolute}
+
+/* ── FILTER BAR ── */
+.filter-bar{background:#fff;border:1px solid var(--bdr);border-radius:12px;padding:14px 16px;margin-bottom:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;box-shadow:var(--shadow);position:relative}
+.search-box{display:flex;align-items:center;gap:8px;flex:1;min-width:200px;background:#faf8ff;border:1.5px solid var(--bdr);border-radius:9px;padding:8px 12px}
+.search-box input{border:none;background:none;font-family:inherit;font-size:13px;color:var(--tx);outline:none;width:100%}
+.search-box input::placeholder{color:var(--tx3)}
+.filter-select{padding:8px 12px;border:1.5px solid var(--bdr);border-radius:9px;font-family:inherit;font-size:13px;color:var(--tx2);background:#fff;cursor:pointer}
+.filter-select:focus{outline:none;border-color:#a78bfa}
+
+/* removed filter ghost */
+.filter-removed{padding:8px 12px;border:2px dashed #d1d5db;border-radius:9px;font-size:12px;color:#d1d5db;background:#f9fafb;cursor:default;display:flex;align-items:center;gap:6px}
+
+/* ── TABLE ── */
+.table-wrap{background:#fff;border:1px solid var(--bdr);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);margin-bottom:16px;position:relative}
+.table-head-bar{padding:14px 18px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.table-head-bar h3{font-size:14px;font-weight:700;color:var(--P);display:flex;align-items:center;gap:8px}
+.table-count{background:var(--PL);color:var(--P);font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px}
+.tbl-outer{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{padding:10px 14px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.04em;color:var(--tx2);background:#faf8ff;border-bottom:1px solid var(--bdr);white-space:nowrap}
+tbody tr{border-bottom:1px solid #f1edf8}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:#fdfbff}
+td{padding:12px 14px;vertical-align:middle}
+.avatar{width:30px;height:30px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0}
+.avatar-purple{background:linear-gradient(135deg,#7c3aed,#a78bfa)}
+.avatar-pink{background:linear-gradient(135deg,#be185d,#ec4899)}
+.name-cell{display:flex;align-items:center;gap:10px}
+.name-text{font-weight:600;color:var(--tx)}
+.name-sub{font-size:11px;color:var(--tx3)}
+.gender-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:600}
+.gender-m{background:#ede9fe;color:#5b21b6}
+.gender-f{background:#fdf2f8;color:#be185d}
+.gender-o{background:#e0f2fe;color:#0369a1}
+.date-cell{font-size:12px;color:var(--tx2)}
+.btn-sm{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600;border:1.5px solid var(--bdr);background:#fff;color:var(--tx2);cursor:pointer;font-family:inherit}
+.btn-sm:hover{border-color:#c4b5fd;color:var(--P)}
+
+/* ── REMOVED COLUMNS INDICATOR ── */
+.removed-col-header{background:#fee2e2;color:#b91c1c;text-decoration:line-through;opacity:.6;position:relative}
+.removed-col-header::after{content:'✗';position:absolute;top:3px;right:4px;font-size:9px;color:#ef4444}
+.removed-col-cell{background:#fff5f5;color:#fca5a5;font-size:11.5px;font-style:italic;text-align:center}
+
+/* ── PAGINATION ── */
+.pagination{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-top:1px solid var(--bdr);background:#faf8ff;flex-wrap:wrap;gap:10px}
+.pagination-info{font-size:12px;color:var(--tx3)}
+.pagination-btns{display:flex;gap:6px}
+.pg-btn{padding:5px 11px;border-radius:7px;font-size:12.5px;font-weight:600;border:1.5px solid var(--bdr);background:#fff;color:var(--tx2);cursor:pointer;font-family:inherit}
+.pg-btn:hover{border-color:#c4b5fd;color:var(--P)}
+.pg-btn.active{background:var(--P);border-color:var(--P);color:#fff}
+
+/* ── COLUMN REMOVAL LEGEND ── */
+.col-legend{background:#fff5f5;border:1px solid #fecaca;border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:12px;color:#b91c1c;display:flex;gap:8px;align-items:flex-start}
+.col-legend-list{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+.col-tag{padding:2px 8px;border-radius:5px;font-size:11px;font-weight:700;background:#fee2e2;color:#b91c1c;text-decoration:line-through}
+
+/* ── PAGE NAV ── */
+.page-nav{background:#fff;border-top:1px solid var(--bdr);padding:14px 24px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.page-nav-label{font-size:12px;color:var(--tx3);margin-right:4px}
+.page-nav a{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;border:1px solid var(--bdr);color:var(--tx2);background:#fff}
+.page-nav a:hover{border-color:#c4b5fd;color:var(--P)}
+.page-nav a.current{background:var(--PL);border-color:#c4b5fd;color:var(--P)}
+</style>
+</head>
+<body>
+
+<div id="portal-app">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-row">
+        <div class="logo-icon">🏛️</div>
+        <div class="logo-title">NIDA Wellbeing<br>HR Portal</div>
+      </div>
+      <div class="logo-sub">ระบบสำหรับ HR องค์กร</div>
+    </div>
+    <div class="sidebar-org">
+      <div class="o-label">องค์กรปัจจุบัน</div>
+      <div class="o-name">สำนักงานทดสอบ NIDA</div>
+      <div class="o-email">hr@nida-test.ac.th</div>
+    </div>
+    <div class="portal-nav">
+      <div class="nav-group">เมนูหลัก</div>
+      <a href="#" class="nav-item"><span class="ni">🏠</span> หน้าหลัก</a>
+      <a href="#" class="nav-item dim"><span class="ni">🗂️</span> รายละเอียดองค์กร</a>
+      <a href="ch1-org-info.html" class="nav-item"><span class="ni">📊</span> CH1 ข้อมูลองค์กร</a>
+      <a href="#" class="nav-item dim"><span class="ni">✏️</span> แก้ไขฟอร์ม</a>
+      <div class="nav-group">Well-being</div>
+      <a href="wb-dashboard.html" class="nav-item"><span class="ni">📈</span> Well-being ผลสำรวจ</a>
+      <a href="wb-individual.html" class="nav-item active"><span class="ni">👤</span> Well-being รายบุคคล</a>
+      <a href="#" class="nav-item dim"><span class="ni">🔗</span> แชร์ลิงก์ Well-being</a>
+    </div>
+    <div class="sidebar-foot">
+      <a href="report.html" class="nav-item"><span class="ni">📋</span> รายงานการแก้ไข</a>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <div class="portal-main-wrap">
+    <div class="topbar">
+      <div class="tb-head">
+        <div class="tb-title">Well-being รายบุคคล</div>
+        <div class="tb-sub">ข้อมูลผู้ตอบแบบสำรวจ Well-being แยกรายบุคคล</div>
+      </div>
+      <div class="tb-space"></div>
+      <div class="tb-chips">
+        <span class="tb-chip">👥 2 / 50 คน</span>
+        <span class="tb-chip">📅 2567</span>
+      </div>
+    </div>
+
+    <div class="portal-content">
+
+      <!-- MOCKUP BANNER -->
+      <div class="mockup-banner">
+        <span style="font-size:16px">🎨</span>
+        <strong>Mockup Redesign</strong> — คอลัมน์สีแดงขีดฆ่า = ลบออกแล้ว &nbsp;·&nbsp; card สีเทา = ถูกซ่อน &nbsp;·&nbsp;
+        <a href="report.html" style="color:var(--W);font-weight:700">ดูรายงานฉบับเต็ม →</a>
+      </div>
+
+      <!-- REMOVED: duplicate subtitle -->
+      <div class="subtitle-removed">
+        <span>✗</span>
+        <span><strong>ลบออก:</strong> คำอธิบายหน้าที่ซ้ำกับ header — เหลือแค่ subtitle ใน topbar เดียว</span>
+      </div>
+
+      <!-- STATS ROW: SIMPLIFIED (2 cards only) -->
+      <div style="margin-bottom:6px;font-size:12px;font-weight:700;color:var(--tx2);display:flex;align-items:center;gap:10px">
+        สรุปภาพรวม
+        <span class="ann ann-keep" style="position:static">✓ เก็บไว้ (2 cards เท่านั้น)</span>
+        <span class="ann ann-del" style="position:static">✗ ลบออก — TMHI เฉลี่ย + BMI เฉลี่ย</span>
+      </div>
+
+      <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap">
+        <!-- KEPT cards -->
+        <div class="stats-grid" style="max-width:none;flex:none">
+          <div class="stat-card">
+            <div class="stat-card-val">2</div>
+            <div class="stat-card-lbl">ผู้ตอบทั้งหมด (คน)</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-val" style="font-size:20px">1 / 1</div>
+            <div class="stat-card-lbl">สัดส่วน ชาย / หญิง</div>
+          </div>
+        </div>
+
+        <!-- REMOVED cards (ghost) -->
+        <div class="removed-stats-row" style="margin-bottom:0;flex:1">
+          <div class="removed-stat-card">
+            <div class="ann ann-del ann-abs" style="top:-10px;left:50%;transform:translateX(-50%);z-index:10">✗ ลบออก</div>
+            <div class="removed-stat-val">44.5</div>
+            <div class="removed-stat-lbl">TMHI เฉลี่ย</div>
+          </div>
+          <div class="removed-stat-card">
+            <div class="ann ann-del ann-abs" style="top:-10px;left:50%;transform:translateX(-50%);z-index:10">✗ ลบออก</div>
+            <div class="removed-stat-val">22.8</div>
+            <div class="removed-stat-lbl">BMI เฉลี่ย</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- COLUMN REMOVAL LEGEND -->
+      <div class="col-legend">
+        <span style="font-size:15px;flex-shrink:0">✗</span>
+        <div>
+          <div style="font-weight:700;margin-bottom:6px">คอลัมน์ที่ถูกลบออกจากตาราง:</div>
+          <div class="col-legend-list">
+            <span class="col-tag">BMI</span>
+            <span class="col-tag">ระดับ BMI</span>
+            <span class="col-tag">TMHI</span>
+            <span class="col-tag">สถานะจิต</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- FILTER BAR (simplified) -->
+      <div class="filter-bar ann-wrap">
+        <div class="ann ann-del ann-abs" style="top:-10px;right:12px;z-index:10">✗ ลบออก — Filter "TMHI ทุกระดับ"</div>
+        <!-- KEPT: search -->
+        <div class="search-box">
+          <span style="color:var(--tx3);font-size:14px">🔍</span>
+          <input type="text" placeholder="ค้นหาชื่อ...">
+        </div>
+        <!-- KEPT: gender filter -->
+        <select class="filter-select">
+          <option>เพศ: ทั้งหมด</option>
+          <option>ชาย</option>
+          <option>หญิง</option>
+          <option>อื่นๆ / ไม่ระบุ</option>
+        </select>
+        <!-- REMOVED: TMHI filter (ghost) -->
+        <div class="filter-removed">
+          <span style="text-decoration:line-through">TMHI: ทุกระดับ</span>
+          <span style="font-size:10px;background:#fee2e2;color:#b91c1c;padding:1px 5px;border-radius:4px;font-weight:700">ลบ</span>
+        </div>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:6px">
+          <span class="ann ann-keep" style="position:static">✓ Search + filter เพศ</span>
+        </div>
+      </div>
+
+      <!-- TABLE -->
+      <div class="table-wrap ann-wrap">
+        <div class="table-head-bar">
+          <h3>
+            รายชื่อผู้ตอบแบบสำรวจ
+            <span class="table-count">2 รายการ</span>
+          </h3>
+          <button style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;font-size:12.5px;font-weight:600;border:1.5px solid var(--bdr);background:#fff;color:var(--tx2);cursor:pointer;font-family:inherit">
+            📥 Export
+          </button>
+        </div>
+
+        <div class="tbl-outer">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:40px">#</th>
+                <th>ชื่อ</th>
+                <th>เพศ</th>
+                <th>อายุ</th>
+                <!-- REMOVED columns shown struck-through for mockup clarity -->
+                <th class="removed-col-header" title="คอลัมน์นี้ถูกลบออก">BMI</th>
+                <th class="removed-col-header" title="คอลัมน์นี้ถูกลบออก">ระดับ BMI</th>
+                <th class="removed-col-header" title="คอลัมน์นี้ถูกลบออก">TMHI</th>
+                <th class="removed-col-header" title="คอลัมน์นี้ถูกลบออก">สถานะจิต</th>
+                <!-- KEPT columns -->
+                <th>วันที่ส่ง</th>
+                <th style="width:90px"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="color:var(--tx3);font-size:12px">1</td>
+                <td>
+                  <div class="name-cell">
+                    <div class="avatar avatar-purple">ส</div>
+                    <div>
+                      <div class="name-text">สมชาย ใจดี</div>
+                      <div class="name-sub">ID: WB-2024-001</div>
+                    </div>
+                  </div>
+                </td>
+                <td><span class="gender-badge gender-m">♂ ชาย</span></td>
+                <td style="font-size:13px">32 ปี</td>
+                <td class="removed-col-cell">—</td>
+                <td class="removed-col-cell">—</td>
+                <td class="removed-col-cell">—</td>
+                <td class="removed-col-cell">—</td>
+                <td class="date-cell">15 ม.ค. 2568<br><span style="font-size:10.5px;color:var(--tx3)">09:32 น.</span></td>
+                <td><button class="btn-sm">👁 ดูทั้งหมด</button></td>
+              </tr>
+              <tr>
+                <td style="color:var(--tx3);font-size:12px">2</td>
+                <td>
+                  <div class="name-cell">
+                    <div class="avatar avatar-pink">ก</div>
+                    <div>
+                      <div class="name-text">กมลชนก วงศ์สุข</div>
+                      <div class="name-sub">ID: WB-2024-002</div>
+                    </div>
+                  </div>
+                </td>
+                <td><span class="gender-badge gender-o">⚧ อื่นๆ</span></td>
+                <td style="font-size:13px">38 ปี</td>
+                <td class="removed-col-cell">—</td>
+                <td class="removed-col-cell">—</td>
+                <td class="removed-col-cell">—</td>
+                <td class="removed-col-cell">—</td>
+                <td class="date-cell">16 ม.ค. 2568<br><span style="font-size:10.5px;color:var(--tx3)">14:07 น.</span></td>
+                <td><button class="btn-sm">👁 ดูทั้งหมด</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pagination">
+          <span class="pagination-info">แสดง 1–2 จาก 2 รายการ</span>
+          <div class="pagination-btns">
+            <button class="pg-btn" disabled>‹ ก่อนหน้า</button>
+            <button class="pg-btn active">1</button>
+            <button class="pg-btn" disabled>ถัดไป ›</button>
+          </div>
+        </div>
+
+        <!-- annotation overlay note -->
+        <div style="background:#fff5f5;border-top:1px solid #fecaca;padding:10px 18px;font-size:12px;color:#b91c1c;display:flex;align-items:center;gap:8px">
+          <span>✗</span>
+          <span>คอลัมน์ที่แสดงด้วยพื้นหลังสีแดง (BMI, ระดับ BMI, TMHI, สถานะจิต) จะถูกซ่อนในเวอร์ชัน implement จริง — แสดงไว้ในนี้เพื่อเปรียบเทียบเท่านั้น</span>
+        </div>
+      </div>
+
+      <!-- AFTER STATE: clean table preview -->
+      <div style="background:var(--PL);border:1.5px solid #c4b5fd;border-radius:14px;padding:18px 20px;margin-bottom:16px">
+        <div style="font-size:13px;font-weight:700;color:var(--P);margin-bottom:12px;display:flex;align-items:center;gap:8px">
+          <span class="ann ann-keep" style="position:static">✓ ตัวอย่าง: ตารางหลัง implement จริง</span>
+        </div>
+        <div style="background:#fff;border-radius:10px;overflow:hidden;border:1px solid var(--bdr)">
+          <table style="width:100%;border-collapse:collapse;font-size:13px">
+            <thead>
+              <tr>
+                <th style="padding:9px 14px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.04em;color:var(--tx2);background:#faf8ff;border-bottom:1px solid var(--bdr);width:40px">#</th>
+                <th style="padding:9px 14px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.04em;color:var(--tx2);background:#faf8ff;border-bottom:1px solid var(--bdr)">ชื่อ</th>
+                <th style="padding:9px 14px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.04em;color:var(--tx2);background:#faf8ff;border-bottom:1px solid var(--bdr)">เพศ</th>
+                <th style="padding:9px 14px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.04em;color:var(--tx2);background:#faf8ff;border-bottom:1px solid var(--bdr)">อายุ</th>
+                <th style="padding:9px 14px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.04em;color:var(--tx2);background:#faf8ff;border-bottom:1px solid var(--bdr)">วันที่ส่ง</th>
+                <th style="padding:9px 14px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.04em;color:var(--tx2);background:#faf8ff;border-bottom:1px solid var(--bdr);width:90px"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="border-bottom:1px solid #f1edf8">
+                <td style="padding:11px 14px;color:var(--tx3);font-size:12px">1</td>
+                <td style="padding:11px 14px">
+                  <div style="display:flex;align-items:center;gap:10px">
+                    <div class="avatar avatar-purple">ส</div>
+                    <div>
+                      <div style="font-weight:600;color:var(--tx)">สมชาย ใจดี</div>
+                      <div style="font-size:11px;color:var(--tx3)">ID: WB-2024-001</div>
+                    </div>
+                  </div>
+                </td>
+                <td style="padding:11px 14px"><span class="gender-badge gender-m">♂ ชาย</span></td>
+                <td style="padding:11px 14px;font-size:13px">32 ปี</td>
+                <td style="padding:11px 14px;font-size:12px;color:var(--tx2)">15 ม.ค. 2568</td>
+                <td style="padding:11px 14px"><button class="btn-sm">👁 ดูทั้งหมด</button></td>
+              </tr>
+              <tr>
+                <td style="padding:11px 14px;color:var(--tx3);font-size:12px">2</td>
+                <td style="padding:11px 14px">
+                  <div style="display:flex;align-items:center;gap:10px">
+                    <div class="avatar avatar-pink">ก</div>
+                    <div>
+                      <div style="font-weight:600;color:var(--tx)">กมลชนก วงศ์สุข</div>
+                      <div style="font-size:11px;color:var(--tx3)">ID: WB-2024-002</div>
+                    </div>
+                  </div>
+                </td>
+                <td style="padding:11px 14px"><span class="gender-badge gender-o">⚧ อื่นๆ</span></td>
+                <td style="padding:11px 14px;font-size:13px">38 ปี</td>
+                <td style="padding:11px 14px;font-size:12px;color:var(--tx2)">16 ม.ค. 2568</td>
+                <td style="padding:11px 14px"><button class="btn-sm">👁 ดูทั้งหมด</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="margin-top:10px;font-size:12px;color:#6d28d9">คอลัมน์ที่เหลือ: # · ชื่อ · เพศ · อายุ · วันที่ส่ง · ปุ่มดู — กระชับและไม่แสดงข้อมูล sensitive</div>
+      </div>
+
+    </div><!-- /portal-content -->
+
+    <!-- PAGE NAV -->
+    <div class="page-nav">
+      <span class="page-nav-label">Mockup pages:</span>
+      <a href="report.html">📋 รายงาน</a>
+      <a href="ch1-org-info.html">📊 CH1 ข้อมูลองค์กร</a>
+      <a href="wb-dashboard.html">📈 WB ผลสำรวจ</a>
+      <a href="wb-individual.html" class="current">👤 WB รายบุคคล</a>
+    </div>
+  </div><!-- /portal-main-wrap -->
+
+</div><!-- /portal-app -->
+</body>
+</html>

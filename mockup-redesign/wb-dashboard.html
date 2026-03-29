@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Well-being ผลสำรวจ — Mockup Redesign</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai+Looped:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --P:#5b2aa8;--PD:#4b1f95;--PL:#f3edff;
+  --A:#ec4899;--AL:#fdf2f8;
+  --G:#16a34a;--GL:#ecfdf3;
+  --W:#b45309;--WL:#fef3c7;
+  --D:#dc2626;--DL:#fee2e2;
+  --bg:#f7f5fc;--card:#ffffff;--bdr:#e3def3;
+  --tx:#1f2937;--tx2:#4b5563;--tx3:#8b94a7;
+  --shadow:0 1px 3px rgba(15,23,42,.06),0 10px 28px rgba(91,42,168,.06);
+  --sidebar-w:244px;
+}
+body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh}
+
+/* ── SIDEBAR ── */
+#portal-app{display:flex;min-height:100vh}
+.sidebar{width:var(--sidebar-w);background:linear-gradient(180deg,#5f28ab 0%,#58239d 52%,#501f8d 100%);color:#fff;display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:20;box-shadow:4px 0 30px rgba(46,16,101,.16)}
+.sidebar-logo{padding:16px 14px;border-bottom:1px solid rgba(255,255,255,.08)}
+.logo-row{display:flex;align-items:center;gap:10px}
+.logo-icon{width:28px;height:28px;border-radius:8px;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.logo-title{font-size:12.5px;font-weight:700}
+.logo-sub{font-size:10px;color:rgba(255,255,255,.48);padding-left:38px;margin-top:4px}
+.sidebar-org{margin:12px 10px 8px;padding:12px;border-radius:8px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.06)}
+.o-label{font-size:9px;color:rgba(255,255,255,.42);margin-bottom:4px;letter-spacing:.06em;text-transform:uppercase}
+.o-name{font-size:12px;font-weight:700;line-height:1.45}
+.o-email{font-size:10px;color:rgba(255,255,255,.48);margin-top:4px}
+.portal-nav{flex:1;padding:8px 0 10px;overflow-y:auto}
+.nav-group{padding:12px 14px 6px;font-size:9px;font-weight:700;letter-spacing:.08em;color:rgba(255,255,255,.34);text-transform:uppercase}
+.nav-item{display:flex;align-items:center;gap:9px;width:100%;background:none;border:none;color:rgba(255,255,255,.72);font-family:inherit;text-align:left;cursor:pointer;padding:11px 14px;font-size:13px;border-left:3px solid transparent;text-decoration:none}
+.nav-item:hover{background:rgba(255,255,255,.06);color:#fff}
+.nav-item.active{background:rgba(255,255,255,.12);color:#fff;border-left-color:#f59e0b}
+.nav-item.dim{color:rgba(255,255,255,.38);cursor:default}
+.ni{width:16px;text-align:center;flex-shrink:0}
+.sidebar-foot{border-top:1px solid rgba(255,255,255,.08);padding:10px}
+.sidebar-foot .nav-item{padding:8px 6px;border-left:none;font-size:12px}
+
+/* ── MAIN ── */
+.portal-main-wrap{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{background:#fff;border-bottom:1px solid var(--bdr);padding:10px 24px;display:flex;align-items:center;gap:12px;min-height:58px;position:sticky;top:0;z-index:100}
+.tb-head{display:flex;flex-direction:column;gap:2px}
+.tb-title{font-size:14px;font-weight:700;color:var(--P)}
+.tb-sub{font-size:11.5px;color:var(--tx2)}
+.tb-space{flex:1}
+.tb-chips{display:flex;gap:8px;align-items:center}
+.tb-chip{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:600;border:1px solid var(--bdr);background:#faf8ff;color:var(--tx2)}
+.portal-content{padding:24px;max-width:1060px}
+
+/* ── MOCKUP BANNER ── */
+.mockup-banner{background:linear-gradient(90deg,#fef3c7,#fff7ed);border:1px solid #fcd34d;border-radius:10px;padding:10px 16px;margin-bottom:20px;display:flex;align-items:center;gap:10px;font-size:12.5px;color:#78350f}
+
+/* ── SECTION CARD ── */
+.section-card{background:#fff;border:1px solid var(--bdr);border-radius:14px;padding:20px 22px;margin-bottom:16px;box-shadow:var(--shadow);position:relative}
+.section-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:#8b5cf6;border-radius:14px 0 0 14px}
+.section-card.pink::before{background:#ec4899}
+.section-card h3{font-size:15px;font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:8px;color:var(--tx)}
+
+/* ── PROGRESS ── */
+.progress-wrap{margin-top:10px}
+.progress-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.progress-header .left{font-size:13px;font-weight:600;color:var(--tx2)}
+.progress-header .right{font-size:13px;font-weight:700;color:#7c3aed}
+.progress-track{height:12px;background:var(--PL);border-radius:999px;overflow:hidden}
+.progress-fill{height:100%;width:4%;background:linear-gradient(90deg,#7c3aed,#ec4899);border-radius:999px}
+.progress-meta{margin-top:10px;font-size:12px;color:var(--tx2);display:flex;gap:16px;flex-wrap:wrap}
+.progress-meta strong{color:var(--tx);font-weight:700}
+
+/* ── MINI STATS ── */
+.mini-stats{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+.mini-stat{background:#faf8ff;border:1px solid var(--bdr);border-radius:10px;padding:10px 14px;text-align:center;flex:1;min-width:80px}
+.mini-stat .val{font-size:18px;font-weight:700;color:#7c3aed}
+.mini-stat .lbl{font-size:10.5px;color:var(--tx3);margin-top:3px}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:10px 18px;border-radius:10px;font-size:13px;font-weight:600;border:none;cursor:pointer;font-family:inherit;transition:all .15s;text-decoration:none}
+.btn-primary{background:var(--P);color:#fff}
+.btn-primary:hover{background:var(--PD)}
+.btn-outline{background:#fff;border:1.5px solid var(--bdr);color:var(--tx2)}
+.btn-outline:hover{border-color:#c4b5fd;color:var(--P)}
+.btn-pink{background:#ec4899;color:#fff}
+.btn-pink:hover{background:#db2777}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+
+/* ── CHART BARS (CSS only) ── */
+.chart-section{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+@media(max-width:680px){.chart-section{grid-template-columns:1fr}}
+.chart-card{background:#fff;border:1px solid var(--bdr);border-radius:14px;padding:18px 20px;box-shadow:var(--shadow);position:relative}
+.chart-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:#8b5cf6;border-radius:14px 0 0 14px}
+.chart-card h4{font-size:14px;font-weight:700;color:var(--tx);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.bar-chart{display:flex;flex-direction:column;gap:10px}
+.bar-row{display:flex;align-items:center;gap:10px}
+.bar-label{font-size:12px;color:var(--tx2);width:68px;flex-shrink:0;text-align:right}
+.bar-track{flex:1;height:20px;background:#f3f0fa;border-radius:6px;overflow:hidden}
+.bar-fill{height:100%;border-radius:6px;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;font-size:10.5px;font-weight:700;color:#fff;min-width:28px}
+.bar-fill.male{background:linear-gradient(90deg,#5b2aa8,#8b5cf6)}
+.bar-fill.female{background:linear-gradient(90deg,#be185d,#ec4899)}
+.bar-fill.other{background:linear-gradient(90deg,#0369a1,#38bdf8)}
+.bar-fill.age1{background:linear-gradient(90deg,#059669,#34d399)}
+.bar-fill.age2{background:linear-gradient(90deg,#7c3aed,#a78bfa)}
+.bar-fill.age3{background:linear-gradient(90deg,#b45309,#fbbf24)}
+.bar-fill.age4{background:linear-gradient(90deg,#9f1239,#fb7185)}
+.bar-fill.age5{background:linear-gradient(90deg,#374151,#9ca3af)}
+.bar-num{font-size:11.5px;color:var(--tx2);width:28px;flex-shrink:0}
+
+/* ── ANNOTATION ── */
+.ann{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:6px;font-size:10.5px;font-weight:700;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.ann-del{background:#ef4444;color:#fff}
+.ann-edit{background:#f59e0b;color:#fff}
+.ann-keep{background:#10b981;color:#fff}
+.ann-wrap{position:relative}
+.ann-abs{position:absolute}
+
+/* ── REMOVED PLACEHOLDER ── */
+.removed-section{background:#f3f4f6;border:2px dashed #d1d5db;border-radius:14px;padding:24px 20px;margin-bottom:16px;position:relative}
+.removed-section-inner{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;color:#9ca3af}
+.removed-section-icon{font-size:28px;opacity:.45}
+.removed-section-title{font-size:14px;font-weight:700;color:#9ca3af}
+.removed-section-desc{font-size:12.5px;line-height:1.6;max-width:400px}
+.removed-section-sample{width:100%;max-width:360px;height:60px;background:#e5e7eb;border-radius:8px;margin-top:4px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#d1d5db;font-weight:600;letter-spacing:.04em}
+
+/* ── LINK CARD ── */
+.individual-link{background:linear-gradient(135deg,#f3edff,#fff);border:1.5px solid #c4b5fd;border-radius:14px;padding:20px 22px;margin-bottom:16px;display:flex;align-items:center;gap:16px;text-decoration:none;color:var(--tx);transition:all .2s;box-shadow:var(--shadow)}
+.individual-link:hover{border-color:#8b5cf6;transform:translateY(-1px);box-shadow:0 8px 24px rgba(91,42,168,.12)}
+.individual-link-icon{width:44px;height:44px;border-radius:12px;background:var(--P);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.individual-link-text h3{font-size:14px;font-weight:700;color:var(--P);margin-bottom:3px}
+.individual-link-text p{font-size:12px;color:var(--tx2)}
+.individual-link-arrow{margin-left:auto;font-size:20px;color:#a78bfa}
+
+/* ── REMOVED SUBTITLE NOTE ── */
+.subtitle-removed{background:#fff0f0;border:1px solid #fecaca;border-radius:8px;padding:8px 14px;font-size:12px;color:#b91c1c;display:flex;align-items:center;gap:8px;margin-bottom:16px}
+
+/* ── PAGE NAV ── */
+.page-nav{background:#fff;border-top:1px solid var(--bdr);padding:14px 24px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.page-nav-label{font-size:12px;color:var(--tx3);margin-right:4px}
+.page-nav a{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;border:1px solid var(--bdr);color:var(--tx2);background:#fff}
+.page-nav a:hover{border-color:#c4b5fd;color:var(--P)}
+.page-nav a.current{background:var(--PL);border-color:#c4b5fd;color:var(--P)}
+</style>
+</head>
+<body>
+
+<div id="portal-app">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-row">
+        <div class="logo-icon">🏛️</div>
+        <div class="logo-title">NIDA Wellbeing<br>HR Portal</div>
+      </div>
+      <div class="logo-sub">ระบบสำหรับ HR องค์กร</div>
+    </div>
+    <div class="sidebar-org">
+      <div class="o-label">องค์กรปัจจุบัน</div>
+      <div class="o-name">สำนักงานทดสอบ NIDA</div>
+      <div class="o-email">hr@nida-test.ac.th</div>
+    </div>
+    <div class="portal-nav">
+      <div class="nav-group">เมนูหลัก</div>
+      <a href="#" class="nav-item"><span class="ni">🏠</span> หน้าหลัก</a>
+      <a href="#" class="nav-item dim"><span class="ni">🗂️</span> รายละเอียดองค์กร</a>
+      <a href="ch1-org-info.html" class="nav-item"><span class="ni">📊</span> CH1 ข้อมูลองค์กร</a>
+      <a href="#" class="nav-item dim"><span class="ni">✏️</span> แก้ไขฟอร์ม</a>
+      <div class="nav-group">Well-being</div>
+      <a href="wb-dashboard.html" class="nav-item active"><span class="ni">📈</span> Well-being ผลสำรวจ</a>
+      <a href="wb-individual.html" class="nav-item"><span class="ni">👤</span> Well-being รายบุคคล</a>
+      <a href="#" class="nav-item dim"><span class="ni">🔗</span> แชร์ลิงก์ Well-being</a>
+    </div>
+    <div class="sidebar-foot">
+      <a href="report.html" class="nav-item"><span class="ni">📋</span> รายงานการแก้ไข</a>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <div class="portal-main-wrap">
+    <div class="topbar">
+      <div class="tb-head">
+        <div class="tb-title">Well-being ผลสำรวจ</div>
+        <div class="tb-sub">สรุปผลการสำรวจสุขภาวะของบุคลากรในองค์กร</div>
+      </div>
+      <div class="tb-space"></div>
+      <div class="tb-chips">
+        <span class="tb-chip">📅 2567</span>
+        <span class="tb-chip">👥 50 คน</span>
+      </div>
+    </div>
+
+    <div class="portal-content">
+
+      <!-- MOCKUP BANNER -->
+      <div class="mockup-banner">
+        <span style="font-size:16px">🎨</span>
+        <strong>Mockup Redesign</strong> — ส่วนสีเทาแบบ dashed border = ส่วนที่ถูกซ่อน/ลบออก &nbsp;·&nbsp;
+        <a href="report.html" style="color:var(--W);font-weight:700">ดูรายงานฉบับเต็ม →</a>
+      </div>
+
+      <!-- REMOVED: duplicate subtitle note -->
+      <div class="subtitle-removed">
+        <span>✗</span>
+        <span><strong>ลบออก:</strong> คำอธิบายหน้าที่ซ้ำกับ header — เหลือแค่ subtitle ใน topbar เดียว ไม่ต้องซ้ำในเนื้อหา</span>
+      </div>
+
+      <!-- SURVEY COMPLETION — KEEP -->
+      <div class="ann-wrap">
+        <div class="section-card">
+          <h3>
+            📋 สถานะการตอบแบบสำรวจ
+            <span class="ann ann-keep" style="position:static">✓ เก็บไว้ (ดี)</span>
+          </h3>
+          <div class="progress-wrap">
+            <div class="progress-header">
+              <span class="left">ผู้ตอบ Well-being Survey 4.0</span>
+              <span class="right">4.0% (2/50 คน)</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill"></div>
+            </div>
+            <div class="progress-meta">
+              <span>ผู้ตอบทั้งหมด: <strong>2</strong></span>
+              <span>ชาย: <strong>1</strong></span>
+              <span>หญิง: <strong>0</strong></span>
+              <span>อื่นๆ: <strong>1</strong></span>
+              <span>TMHI เฉลี่ย: <strong>44.5</strong></span>
+            </div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-primary">📊 ดู Well-being Dashboard</button>
+            <button class="btn btn-outline">📥 Export Excel</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- GENDER + AGE CHARTS — KEEP -->
+      <div class="chart-section">
+        <div class="chart-card ann-wrap">
+          <h4>
+            👥 เพศ
+            <span class="ann ann-keep" style="position:static">✓ เก็บไว้</span>
+          </h4>
+          <div class="bar-chart">
+            <div class="bar-row">
+              <span class="bar-label">ชาย</span>
+              <div class="bar-track"><div class="bar-fill male" style="width:50%">1</div></div>
+              <span class="bar-num">1 คน</span>
+            </div>
+            <div class="bar-row">
+              <span class="bar-label">หญิง</span>
+              <div class="bar-track"><div class="bar-fill female" style="width:0%;min-width:0"></div></div>
+              <span class="bar-num">0 คน</span>
+            </div>
+            <div class="bar-row">
+              <span class="bar-label">อื่นๆ / ไม่ระบุ</span>
+              <div class="bar-track"><div class="bar-fill other" style="width:50%">1</div></div>
+              <span class="bar-num">1 คน</span>
+            </div>
+          </div>
+          <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--bdr);font-size:11.5px;color:var(--tx3)">
+            รวม 2 คน จาก 50 คน (4.0%)
+          </div>
+        </div>
+
+        <div class="chart-card ann-wrap">
+          <h4>
+            🎂 ช่วงอายุ
+            <span class="ann ann-keep" style="position:static">✓ เก็บไว้</span>
+          </h4>
+          <div class="bar-chart">
+            <div class="bar-row">
+              <span class="bar-label">น้อยกว่า 25</span>
+              <div class="bar-track"><div class="bar-fill age1" style="width:0%;min-width:0"></div></div>
+              <span class="bar-num">0</span>
+            </div>
+            <div class="bar-row">
+              <span class="bar-label">25–34 ปี</span>
+              <div class="bar-track"><div class="bar-fill age2" style="width:50%">1</div></div>
+              <span class="bar-num">1</span>
+            </div>
+            <div class="bar-row">
+              <span class="bar-label">35–44 ปี</span>
+              <div class="bar-track"><div class="bar-fill age3" style="width:50%">1</div></div>
+              <span class="bar-num">1</span>
+            </div>
+            <div class="bar-row">
+              <span class="bar-label">45–54 ปี</span>
+              <div class="bar-track"><div class="bar-fill age4" style="width:0%;min-width:0"></div></div>
+              <span class="bar-num">0</span>
+            </div>
+            <div class="bar-row">
+              <span class="bar-label">55 ปีขึ้นไป</span>
+              <div class="bar-track"><div class="bar-fill age5" style="width:0%;min-width:0"></div></div>
+              <span class="bar-num">0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- REMOVED: BMI SECTION -->
+      <div class="removed-section ann-wrap">
+        <div class="ann ann-del ann-abs" style="top:-10px;right:12px;z-index:10">✗ ลบออก — Section BMI ทั้งหมด</div>
+        <div class="removed-section-inner">
+          <div class="removed-section-icon">📏</div>
+          <div class="removed-section-title">Section BMI — ถูกซ่อนตามคำแนะนำ</div>
+          <div class="removed-section-desc">
+            Section นี้เคยแสดงกราฟการกระจาย BMI ของพนักงาน แบ่งตามเกณฑ์
+            (ผอม / ปกติ / น้ำหนักเกิน / อ้วน) ถูกซ่อนทั้งหมดตามนโยบาย
+          </div>
+          <div class="removed-section-sample">[ กราฟ BMI — ซ่อนแล้ว ]</div>
+        </div>
+      </div>
+
+      <!-- REMOVED: TMHI-15 SECTION -->
+      <div class="removed-section ann-wrap">
+        <div class="ann ann-del ann-abs" style="top:-10px;right:12px;z-index:10">✗ ลบออก — Section TMHI-15 ทั้งหมด</div>
+        <div class="removed-section-inner">
+          <div class="removed-section-icon">🧠</div>
+          <div class="removed-section-title">Section TMHI-15 (สุขภาพจิต) — ถูกซ่อนตามคำแนะนำ</div>
+          <div class="removed-section-desc">
+            Section นี้เคยแสดงคะแนน TMHI-15 แบ่งตามระดับสุขภาพจิต (ดีมาก / ดี / เสี่ยง / มีปัญหา)
+            ถูกซ่อนทั้งหมดตามนโยบาย — ข้อมูลนี้ sensitive และอาจก่อให้เกิดการตีความผิด
+          </div>
+          <div class="removed-section-sample">[ กราฟ TMHI-15 — ซ่อนแล้ว ]</div>
+        </div>
+      </div>
+
+      <!-- REPLACED: ผู้ตอบล่าสุด → link -->
+      <div class="ann-wrap">
+        <div class="ann ann-del ann-abs" style="top:-10px;right:12px;z-index:10">✗ ลบออก — ตาราง "ผู้ตอบล่าสุด" (ซ้ำกับหน้า รายบุคคล)</div>
+        <a href="wb-individual.html" class="individual-link">
+          <div class="individual-link-icon">👤</div>
+          <div class="individual-link-text">
+            <h3>ดูข้อมูลรายบุคคลเพิ่มเติม</h3>
+            <p>แทนที่ตาราง "ผู้ตอบล่าสุด" ด้วยลิงก์ไปยังหน้า Well-being รายบุคคล เพื่อหลีกเลี่ยงข้อมูลซ้ำซ้อน — มีข้อมูลครบถ้วนกว่า พร้อมฟังก์ชัน search และ filter</p>
+          </div>
+          <div class="individual-link-arrow">→</div>
+        </a>
+      </div>
+
+    </div><!-- /portal-content -->
+
+    <!-- PAGE NAV -->
+    <div class="page-nav">
+      <span class="page-nav-label">Mockup pages:</span>
+      <a href="report.html">📋 รายงาน</a>
+      <a href="ch1-org-info.html">📊 CH1 ข้อมูลองค์กร</a>
+      <a href="wb-dashboard.html" class="current">📈 WB ผลสำรวจ</a>
+      <a href="wb-individual.html">👤 WB รายบุคคล</a>
+    </div>
+  </div><!-- /portal-main-wrap -->
+
+</div><!-- /portal-app -->
+</body>
+</html>
