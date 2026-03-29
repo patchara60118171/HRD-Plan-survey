@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Org HR Portal - NIDA Wellbeing</title>
-<meta name="description" content="ระบบสำหรับ HR ประจำองค์กร ดูข้อมูล CH1 ผลสำรวจ Well-being และแชร์ลิงก์แบบสอบถาม">
+<meta name="description" content="ระบบสำหรับ HR ประจำองค์กร ดูข้อมูลแบบสำรวจข้อมูลองค์กร ผลสำรวจ Well-being และแชร์ลิงก์แบบสอบถาม">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai+Looped:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -62,7 +62,11 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
 .sidebar{width:var(--sidebar-w);background:linear-gradient(180deg,#5f28ab 0%,#58239d 52%,#501f8d 100%);color:#fff;display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:20;box-shadow:4px 0 30px rgba(46,16,101,.16)}
 .sidebar-logo{padding:16px 14px;border-bottom:1px solid rgba(255,255,255,.08)}
 .logo-row{display:flex;align-items:center;gap:10px}
-.logo-icon{width:28px;height:28px;border-radius:8px;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;font-size:15px}
+.logo-icon{width:28px;height:28px;border-radius:8px;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;font-size:15px;overflow:hidden;position:relative}
+.logo-icon img{width:100%;height:100%;object-fit:cover}
+.logo-upload{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.5);color:#fff;font-size:10px;opacity:0;transition:opacity .2s;cursor:pointer}
+.logo-icon:hover .logo-upload{opacity:1}
+.logo-upload input{position:absolute;inset:0;opacity:0;cursor:pointer}
 .logo-title{font-size:12.5px;font-weight:700}
 .logo-sub{font-size:10px;color:rgba(255,255,255,.48);padding-left:38px;margin-top:4px}
 .sidebar-org{margin:12px 10px 8px;padding:12px;border-radius:8px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.06)}
@@ -110,7 +114,7 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
 .section-card h3{font-size:15px;margin-bottom:4px;display:flex;align-items:center;gap:8px}
 .desc{font-size:12.5px;color:var(--tx2);margin-bottom:14px;line-height:1.6}
 
-.org-profile-shell{display:grid;gap:14px;max-width:980px}
+.org-profile-shell{display:grid;gap:14px}
 .org-hero-card{background:linear-gradient(180deg,#ffffff 0%,#fffafd 100%);border:1px solid #f3d9e8;border-radius:18px;padding:18px 20px 60px;box-shadow:0 10px 25px rgba(109,40,217,.05);min-height:178px}
 .org-kicker{font-size:14px;font-weight:700;color:#6d28d9;margin-bottom:6px}
 .org-title{font-size:21px;font-weight:700;color:#5b21b6;line-height:1.32;margin-bottom:2px}
@@ -364,7 +368,7 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
   <div class="login-shell">
     <div class="login-card">
       <div class="login-icon">🏛️</div>
-      <h1>NIDA WELLBEING</h1>
+      <h1>ระบบจัดการข้อมูลองค์กร</h1>
       <h2>Org HR Portal</h2>
       <p class="login-sub">ระบบสำหรับ HR ประจำองค์กร</p>
       <form onsubmit="handleLogin(event)">
@@ -395,8 +399,15 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
     <div class="sidebar-logo">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
         <div class="logo-row">
-          <div class="logo-icon">🏛️</div>
-          <div class="logo-title">NIDA Wellbeing</div>
+          <div class="logo-icon" id="org-logo">
+            <img id="logo-img" src="" alt="" style="display:none">
+            <span id="logo-fallback">🏛️</span>
+            <div class="logo-upload">
+              📷
+              <input type="file" accept="image/*" onchange="handleLogoUpload(event)">
+            </div>
+          </div>
+          <div class="logo-title">ระบบจัดการข้อมูลองค์กร</div>
         </div>
         <button class="sidebar-close-btn" onclick="closeSidebar()" aria-label="ปิดเมนู">✕</button>
       </div>
@@ -412,12 +423,12 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
     <nav class="portal-nav">
       <div class="nav-group">เมนูหลัก</div>
       <button class="nav-item active" data-tab="home" onclick="switchTab('home')"><span class="ni">🏠</span> หน้าหลัก</button>
-      <button class="nav-item" data-tab="org-profile" onclick="switchTab('org-profile')"><span class="ni">🏢</span> รายละเอียดองค์กร</button>
-      <button class="nav-item" data-tab="ch1" onclick="switchTab('ch1')"><span class="ni">📝</span> CH1 ข้อมูลองค์กร</button>
-      <button class="nav-subitem" id="nav-ch1-edit" onclick="openCh1Editor()"><span class="ni">✏️</span> แก้ไขฟอร์ม</button>
-      <button class="nav-item" data-tab="wb" onclick="switchTab('wb')"><span class="ni">💚</span> Well-being ผลสำรวจ</button>
-      <button class="nav-item" data-tab="wb-individual" onclick="switchTab('wb-individual')"><span class="ni">👤</span> Well-being รายบุคคล</button>
-      <button class="nav-item" data-tab="share" onclick="switchTab('share')"><span class="ni">🔗</span> แชร์ลิงก์ Well-being</button>
+      <button class="nav-subitem" id="nav-home-progress" onclick="scrollToOrgSurvey()"><span class="ni">•</span> ความคืบหน้าและผู้ตอบแบบสำรวจ</button>
+      <button class="nav-subitem" id="nav-home-org-detail" onclick="openHomeSection('home-org-detail-section')"><span class="ni">•</span> รายละเอียดองค์กร</button>
+      <button class="nav-subitem" id="nav-home-share" onclick="openHomeSection('home-share-section')"><span class="ni">•</span> ช่องทางการตอบแบบสำรวจ</button>
+      <button class="nav-item" data-tab="ch1" onclick="switchTab('ch1')"><span class="ni">📝</span> แบบสำรวจข้อมูลองค์กร</button>
+      <button class="nav-subitem" id="nav-ch1-edit" onclick="openCh1Editor()"><span class="ni">✏️</span> ปรับปรุงแบบสำรวจ</button>
+      <button class="nav-item" data-tab="guide" onclick="switchTab('guide')"><span class="ni">📘</span> คำแนะนำการใช้งานระบบ</button>
     </nav>
 
     <div class="sidebar-foot">
@@ -440,51 +451,33 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
 
     <main class="portal-content">
       <div class="tab-page active" id="page-home">
-        <div class="welcome-bar">
-          <div>
-            <h2 id="org-name-display">—</h2>
-            <div class="sub" id="org-code-display">—</div>
-          </div>
-          <div id="ch1-status-badge"></div>
-        </div>
-
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-bottom:16px">
           <div class="section-card">
-            <h3>📝 สถานะ CH1</h3>
-            <div class="desc">ภาพรวมข้อมูลบทที่ 1 ขององค์กร</div>
+            <h3>📝 สถานะแบบสำรวจข้อมูลองค์กร</h3>
+            <div class="desc">ภาพรวมข้อมูลแบบสำรวจข้อมูลองค์กร</div>
             <div id="home-ch1-summary"><div class="info-box blue">กำลังโหลด...</div></div>
           </div>
           <div class="section-card wb">
-            <h3>💚 สถานะ Well-being</h3>
-            <div class="desc">สรุปจำนวนผู้ตอบแบบสำรวจในองค์กร</div>
-            <div id="home-wb-summary"><div class="info-box blue">กำลังโหลด...</div></div>
-          </div>
-        </div>
-
-        <div class="section-card wb">
-          <h3>📊 ความคืบหน้าการกรอก Well-being Survey</h3>
-          <div class="desc">ติดตามจำนวนผู้ตอบเทียบกับจำนวนบุคลากรทั้งหมดขององค์กร</div>
-          <div class="progress-wrap">
-            <div class="progress-label">
-              <span class="left">ผู้ตอบ Well-being</span>
-              <span class="right" id="progress-pct-text">—</span>
+            <h3>📊 ความคืบหน้าการกรอก Well-being Survey</h3>
+            <div class="desc">ติดตามจำนวนผู้ตอบเทียบกับจำนวนข้าราชการขององค์กร</div>
+            <div class="progress-wrap">
+              <div class="progress-label">
+                <span class="left">ผู้ตอบ Well-being</span>
+                <span class="right" id="progress-pct-text">—</span>
+              </div>
+              <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+              <div class="progress-text" id="progress-detail-text">กำลังโหลด...</div>
             </div>
-            <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
-            <div class="progress-text" id="progress-detail-text">กำลังโหลด...</div>
           </div>
         </div>
 
-        <div class="section-card share">
-          <h3>🚀 การดำเนินการ</h3>
-          <div class="section-actions">
-            <button class="btn btn-primary" onclick="switchTab('ch1')">📝 ดูข้อมูล CH1</button>
-            <button class="btn btn-green" onclick="switchTab('wb')">💚 ดู Well-being Dashboard</button>
-            <button class="btn btn-primary" onclick="switchTab('share')">🔗 แชร์ลิงก์ให้บุคลากร</button>
-          </div>
-        </div>
+        <div id="home-progress-section" style="scroll-margin-top:80px"></div>
+
+        <div id="wb-dashboard-area"></div>
       </div>
 
-      <div class="tab-page" id="page-org-profile">
+      <div class="tab-page" id="page-org-profile" style="margin-top:16px">
+        <div id="home-org-detail-section" style="scroll-margin-top:80px"></div>
         <div id="org-profile-content">
           <div class="info-box blue">กำลังโหลดรายละเอียดองค์กร...</div>
         </div>
@@ -492,7 +485,7 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
 
       <div class="tab-page" id="page-ch1">
         <div class="section-card">
-          <h3>📝 แบบสอบถาม - ข้อมูลสุขภาวะองค์กร</h3>
+          <h3>📝 แบบสำรวจข้อมูลองค์กร</h3>
           <div class="desc">แบบสอบถามข้อมูลบุคลากร โครงสร้างองค์กร NCD และนโยบาย HRD</div>
           <div id="ch1-summary" style="display:none"><div class="summary-grid" id="ch1-summary-grid"></div></div>
           <div id="ch1-window-info"></div>
@@ -500,7 +493,7 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
           <div class="embed-wrap" id="ch1-inline-wrap" style="display:none">
             <div class="embed-head">
               <div class="embed-head-row">
-                <div>ฟอร์ม CH1 ในหน้า Portal หากมีข้อมูลเดิม ระบบจะโหลดมาให้แก้ไขอัตโนมัติ</div>
+                <div>แบบสำรวจข้อมูลองค์กรในหน้า Portal หากมีข้อมูลเดิม ระบบจะโหลดมาให้แก้ไขอัตโนมัติ</div>
                 <div class="embed-tools">
                   <span class="embed-note" id="ch1-inline-mode-label">โหมดแก้ไขในหน้าเดียว</span>
                   <button class="btn btn-outline" type="button" onclick="closeInlineCh1Form()">ซ่อนฟอร์ม</button>
@@ -512,35 +505,8 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
         </div>
       </div>
 
-      <div class="tab-page" id="page-wb">
-        <div class="section-card wb">
-          <h3>💚 Well-being ผลสำรวจ</h3>
-          <div class="desc">ภาพรวมผลสำรวจสุขภาวะรายบุคคลของบุคลากรในองค์กร</div>
-          <div class="progress-wrap">
-            <div class="progress-label">
-              <span class="left">ผู้ตอบ Well-being Survey</span>
-              <span class="right" id="wb-pct-text">—</span>
-            </div>
-            <div class="progress-track"><div class="progress-fill" id="wb-progress-fill" style="width:0%"></div></div>
-            <div class="progress-text" id="wb-progress-detail">กำลังโหลด...</div>
-          </div>
-          <div id="wb-summary" style="display:none;margin-top:16px"><div class="summary-grid" id="wb-summary-grid"></div></div>
-          <div class="section-actions" id="wb-actions"></div>
-        </div>
-        <div id="wb-dashboard-area"></div>
-      </div>
-
-      <div class="tab-page" id="page-wb-individual">
-        <div class="section-card wb">
-          <h3>👤 Well-being รายบุคคล</h3>
-          <div class="desc">ข้อมูลผลสำรวจสุขภาวะรายบุคคลทุกข้อ (Raw Data)</div>
-        </div>
-        <div id="wb-individual-area">
-          <div class="info-box blue">กำลังโหลดข้อมูลรายบุคคล...</div>
-        </div>
-      </div>
-
-      <div class="tab-page" id="page-share">
+      <div class="tab-page" id="page-share" style="margin-top:32px">
+        <div id="home-share-section" style="scroll-margin-top:80px"></div>
         <div class="section-card share">
           <h3>🔗 แชร์ลิงก์ Well-being</h3>
           <div class="desc">ส่งลิงก์หรือ QR Code ให้บุคลากรในองค์กรกรอกแบบสอบถาม Well-being Survey</div>
@@ -560,6 +526,48 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
               <div style="background:#faf8ff;border:1px solid var(--bdr);border-radius:12px;padding:16px">
                 <div style="font-size:13px;font-weight:700;color:var(--P);margin-bottom:6px">สถานะการตอบ</div>
                 <div id="share-progress-text" style="font-size:13px;color:var(--tx2);line-height:1.7">กำลังโหลด...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-page" id="page-guide">
+        <div class="section-card">
+          <h3>📘 คำแนะนำการใช้งานระบบ</h3>
+          <div class="desc">สรุปแนวทางใช้งานระบบสำหรับ HR ของหน่วยงาน</div>
+          <div style="display:grid;gap:16px">
+            <div class="detail-card" style="height:auto">
+              <div class="detail-card-head">
+                <div class="detail-card-icon">1</div>
+                <div><h4>เมนูหน้าหลัก</h4><p>รวมข้อมูลสำคัญไว้หน้าเดียว</p></div>
+              </div>
+              <div class="detail-list">
+                <div class="detail-item"><div class="detail-value">ดูข้อมูลหน่วยงานและบุคลากร</div></div>
+                <div class="detail-item"><div class="detail-value">ติดตามความคืบหน้าการตอบแบบสำรวจ และรายชื่อผู้ตอบ</div></div>
+                <div class="detail-item"><div class="detail-value">คัดลอกลิงก์และดาวน์โหลด QR Code สำหรับส่งต่อให้บุคลากร</div></div>
+              </div>
+            </div>
+            <div class="detail-card" style="height:auto">
+              <div class="detail-card-head">
+                <div class="detail-card-icon">2</div>
+                <div><h4>เมนูแบบสำรวจข้อมูลองค์กร</h4><p>ใช้สำหรับดูและปรับปรุงข้อมูลแบบสำรวจ</p></div>
+              </div>
+              <div class="detail-list">
+                <div class="detail-item"><div class="detail-value">ดูข้อมูลที่เคยบันทึกไว้ ดาวน์โหลด PDF และเข้าสู่หน้าปรับปรุงแบบสำรวจ</div></div>
+                <div class="detail-item"><div class="detail-value">หากมีข้อมูลเดิม ระบบจะโหลดมาให้ปรับปรุงอัตโนมัติ</div></div>
+              </div>
+            </div>
+            <div class="detail-card" style="height:auto">
+              <div class="detail-card-head">
+                <div class="detail-card-icon">3</div>
+                <div><h4>แนวทางใช้งานแนะนำ</h4><p>ลำดับการใช้งานที่เหมาะสม</p></div>
+              </div>
+              <div class="detail-list">
+                <div class="detail-item"><div class="detail-value">เริ่มจากตรวจสอบข้อมูลหน่วยงานและจำนวนข้าราชการในหน้าหลัก</div></div>
+                <div class="detail-item"><div class="detail-value">ส่งลิงก์หรือ QR Code ให้บุคลากรตอบแบบสำรวจ</div></div>
+                <div class="detail-item"><div class="detail-value">ติดตามความคืบหน้าและตรวจรายชื่อผู้ตอบในหน้าหลัก</div></div>
+                <div class="detail-item"><div class="detail-value">กลับไปปรับปรุงแบบสำรวจข้อมูลองค์กรเมื่อมีข้อมูลอัปเดต</div></div>
               </div>
             </div>
           </div>
@@ -593,32 +601,30 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
 
       <section class="tutorial-slide active" data-step="0">
         <h4>ยินดีต้อนรับสู่ Org HR Portal</h4>
-        <p>หน้านี้คือศูนย์กลางการทำงานของ HR องค์กร สำหรับติดตามสถานะ CH1, ผลสำรวจ Well-being และแชร์ลิงก์ให้บุคลากรกรอกแบบประเมิน</p>
+        <p>หน้านี้คือศูนย์กลางการทำงานของ HR องค์กร สำหรับติดตามข้อมูลหน่วยงาน ความคืบหน้าผู้ตอบแบบสำรวจ และช่องทางการตอบแบบสำรวจในหน้าเดียว</p>
         <ul>
           <li>แถบเมนูซ้าย: เลือกหน้าที่ต้องการใช้งาน</li>
           <li>แถบบน: แสดงชื่อเมนูและคำอธิบายสั้น ๆ</li>
-          <li>หน้าหลัก: ดูภาพรวมความคืบหน้าแบบรวดเร็ว</li>
+          <li>หน้าหลัก: รวมข้อมูลหน่วยงาน ผู้ตอบแบบสำรวจ และลิงก์/QR สำหรับตอบแบบสำรวจ</li>
         </ul>
       </section>
 
       <section class="tutorial-slide" data-step="1">
         <h4>เมนูหลักที่ต้องใช้บ่อย</h4>
         <ul>
-          <li>หน้าหลัก: ดูสถานะ CH1 และจำนวนผู้ตอบ Well-being</li>
-          <li>รายละเอียดองค์กร: ตรวจสอบ/แก้ไขข้อมูลหน่วยงานและผู้ประสานงาน</li>
-          <li>CH1 ข้อมูลองค์กร: เข้าฟอร์ม, ดูข้อมูล, และดาวน์โหลด PDF</li>
-          <li>Well-being ผลสำรวจ: ดู Dashboard สรุปภาพรวมองค์กร</li>
-          <li>Well-being รายบุคคล: ดูข้อมูลรายคนแบบ Raw Data และ Export</li>
-          <li>แชร์ลิงก์ Well-being: คัดลอกลิงก์และดาวน์โหลด QR Code</li>
+          <li>หน้าหลัก: ดูข้อมูลหน่วยงาน จำนวนข้าราชการ ความคืบหน้าการตอบ และรายชื่อผู้ตอบทั้งหมด</li>
+          <li>แบบสำรวจข้อมูลองค์กร: เข้าฟอร์ม ดูข้อมูล ดาวน์โหลด PDF และกดปรับปรุงแบบสำรวจ</li>
+          <li>คำแนะนำการใช้งานระบบ: อ่านขั้นตอนใช้งานระบบและลำดับการทำงานที่แนะนำ</li>
         </ul>
       </section>
 
       <section class="tutorial-slide" data-step="2">
         <h4>แนวทางใช้งานแนะนำ</h4>
         <ul>
-          <li>เริ่มจากหน้า “แชร์ลิงก์ Well-being” เพื่อกระจายแบบสำรวจ</li>
-          <li>ติดตามผลที่หน้า “Well-being ผลสำรวจ” และ “รายบุคคล”</li>
-          <li>อัปเดตข้อมูลแผนงานที่หน้า “CH1 ข้อมูลองค์กร”</li>
+          <li>เริ่มจากตรวจสอบข้อมูลหน่วยงานและจำนวนข้าราชการในหน้าหลัก</li>
+          <li>คัดลอกลิงก์หรือดาวน์โหลด QR Code จากหน้าหลักเพื่อกระจายแบบสำรวจ</li>
+          <li>ติดตามรายชื่อผู้ตอบทั้งหมดจากตารางในหน้าหลัก โดยเลือกดูได้ครั้งละ 10, 50 หรือ 100 รายการ</li>
+          <li>หากต้องการแก้ไขข้อมูลแบบสำรวจข้อมูลองค์กร ให้เข้าเมนู “แบบสำรวจข้อมูลองค์กร”</li>
           <li>หากไม่ต้องการเห็นคู่มือนี้อีก ให้ติ๊ก “ไม่แสดงอีก” ก่อนกดเสร็จสิ้น</li>
         </ul>
       </section>
@@ -659,15 +665,13 @@ let portalState = {
   ch1Row: null,
   wbRows: [],
   totalStaff: 0,
+  officialStaff: 0,
 };
 
 const TAB_META = {
-  home: { title: 'หน้าหลัก', subtitle: 'ภาพรวมข้อมูลขององค์กรและสถานะการส่งแบบสำรวจ' },
-  'org-profile': { title: 'รายละเอียดองค์กร', subtitle: 'ข้อมูลโปรไฟล์และช่องทางติดต่อของหน่วยงานจากฐานข้อมูลกลาง' },
-  ch1: { title: 'ข้อมูลองค์กร', subtitle: 'แบบสำรวจข้อมูลเพื่อจัดทำแผนการพัฒนาขององค์กรสุขภาวะข้าราชการพลเรือน' },
-  wb: { title: 'Well-being ผลสำรวจ', subtitle: 'ภาพรวมผลสำรวจสุขภาวะรายบุคคลของบุคลากรในองค์กร' },
-  'wb-individual': { title: 'Well-being รายบุคคล', subtitle: 'ดูข้อมูลผลสำรวจสุขภาวะรายบุคคลทุกข้อ (Raw Data)' },
-  share: { title: 'แชร์ลิงก์ Well-being', subtitle: 'ส่งต่อแบบสำรวจให้บุคลากรในองค์กร' },
+  home: { title: 'หน้าหลัก', subtitle: 'ภาพรวมข้อมูลหน่วยงาน ผู้ตอบแบบสำรวจ และช่องทางการตอบแบบสำรวจ' },
+  ch1: { title: 'แบบสำรวจข้อมูลองค์กร', subtitle: 'แบบสำรวจข้อมูลเพื่อจัดทำแผนการพัฒนาขององค์กรสุขภาวะข้าราชการพลเรือน' },
+  guide: { title: 'คำแนะนำการใช้งานระบบ', subtitle: 'คู่มือการใช้งานระบบสำหรับ HR ของหน่วยงาน' },
 };
 
 const TUTORIAL_TOTAL_STEPS = 3;
@@ -871,9 +875,71 @@ async function saveOrgProfile() {
   portalState.orgProfileDraft = null;
   document.getElementById('user-org-badge').textContent = portalState.orgName || portalState.orgCode;
   document.getElementById('topbar-org-name').textContent = portalState.orgName || portalState.orgCode;
-  document.getElementById('org-name-display').textContent = portalState.orgName || '—';
+  // org-name-display was removed with welcome bar
   renderOrgProfile();
   showToast('บันทึกข้อมูลรายละเอียดองค์กรเรียบร้อยแล้ว', 'success');
+}
+
+// Logo upload and display functions
+async function handleLogoUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  
+  // Validate file type and size
+  if (!file.type.startsWith('image/')) {
+    showToast('กรุณาอัปโหลดไฟล์รูปภาพเท่านั้น', 'error');
+    return;
+  }
+  
+  if (file.size > 2 * 1024 * 1024) { // 2MB limit
+    showToast('ขนาดไฟล์ต้องไม่เกิน 2MB', 'error');
+    return;
+  }
+  
+  try {
+    // Convert file to base64 for storage
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const base64Data = e.target.result;
+      
+      // Save to localStorage (in production, this should be saved to database)
+      const logoKey = `org_logo_${portalState.orgCode}`;
+      localStorage.setItem(logoKey, base64Data);
+      
+      // Update display
+      displayOrgLogo(base64Data);
+      showToast('อัปโหลดโลโก้เรียบร้อยแล้ว', 'success');
+    };
+    reader.readAsDataURL(file);
+  } catch (error) {
+    console.error('Logo upload error:', error);
+    showToast('อัปโหลดโลโก้ไม่สำเร็จ', 'error');
+  }
+  
+  // Clear file input
+  event.target.value = '';
+}
+
+function displayOrgLogo(logoData) {
+  const logoImg = document.getElementById('logo-img');
+  const logoFallback = document.getElementById('logo-fallback');
+  
+  if (logoData && logoData.startsWith('data:image/')) {
+    logoImg.src = logoData;
+    logoImg.style.display = 'block';
+    logoFallback.style.display = 'none';
+  } else {
+    logoImg.style.display = 'none';
+    logoFallback.style.display = 'block';
+  }
+}
+
+function loadOrgLogo() {
+  if (!portalState.orgCode) return;
+  
+  const logoKey = `org_logo_${portalState.orgCode}`;
+  const savedLogo = localStorage.getItem(logoKey);
+  displayOrgLogo(savedLogo);
 }
 
 function renderOrgProfile() {
@@ -909,7 +975,6 @@ function renderOrgProfile() {
         <div class="org-subtitle">${esc(org.org_name_en || 'ไม่พบชื่อหน่วยงานภาษาอังกฤษ')}</div>
         <div class="org-pill-row">
           <span class="org-pill">🏷️ รหัสหน่วยงาน: ${esc(org.org_code || portalState.orgCode || '—')}</span>
-          <span class="org-pill">🏛️ ประเภทหน่วยงาน: ${esc(orgTypeText || '—')}</span>
           <span class="org-pill">🪪 ตัวย่อ: ${esc(org.abbr_th || '—')} / ${esc(org.abbr_en || '—')}</span>
         </div>
       </div>
@@ -1006,12 +1071,43 @@ function closeSidebar() {
 function switchTab(tab) {
   closeSidebar();
   document.querySelectorAll('.nav-item[data-tab]').forEach((btn) => btn.classList.toggle('active', btn.dataset.tab === tab));
-  document.querySelectorAll('.tab-page').forEach((page) => page.classList.toggle('active', page.id === `page-${tab}`));
+  ['nav-home-org', 'nav-home-progress', 'nav-home-share', 'nav-home-org-detail'].forEach((id) => document.getElementById(id)?.classList.remove('active'));
+  document.querySelectorAll('.tab-page').forEach((page) => page.classList.remove('active'));
+  if (tab === 'home') {
+    ['page-home', 'page-org-profile', 'page-share'].forEach((id) => {
+      document.getElementById(id)?.classList.add('active');
+    });
+  } else {
+    document.getElementById(`page-${tab}`)?.classList.add('active');
+  }
   document.getElementById('nav-ch1-edit').classList.toggle('active', tab === 'ch1');
   const meta = TAB_META[tab] || { title: tab, subtitle: '' };
   document.getElementById('topbar-title').textContent = meta.title;
   document.getElementById('topbar-subtitle').textContent = meta.subtitle;
-  if (tab === 'wb-individual' && !portalState._wbIndLoaded) loadWbIndividualPage();
+}
+
+function openHomeSection(sectionId) {
+  switchTab('home');
+  ['nav-home-progress', 'nav-home-share', 'nav-home-org-detail'].forEach((id) => document.getElementById(id)?.classList.remove('active'));
+  const activeMap = {
+    'home-progress-section': 'nav-home-progress',
+    'home-share-section': 'nav-home-share',
+    'home-org-detail-section': 'nav-home-org-detail',
+  };
+  document.getElementById(activeMap[sectionId] || '')?.classList.add('active');
+  const target = document.getElementById(sectionId);
+  if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function scrollToOrgSurvey() {
+  switchTab('home');
+  // Remove active class from all nav items
+  ['nav-home-progress', 'nav-home-share', 'nav-home-org-detail'].forEach((id) => document.getElementById(id)?.classList.remove('active'));
+  // Add active class to progress nav item
+  document.getElementById('nav-home-progress')?.classList.add('active');
+  
+  // Scroll to top of page
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function buildAppUrl(cleanPath, htmlFile, query = '') {
@@ -1106,7 +1202,7 @@ document.getElementById('login-pwd')?.addEventListener('keydown', (event) => {
 
 async function doLogout() {
   await sb.auth.signOut();
-  portalState = { session: null, userRole: null, orgCode: null, orgName: null, ch1Row: null, wbRows: [], totalStaff: 0 };
+  portalState = { session: null, userRole: null, orgCode: null, orgName: null, ch1Row: null, wbRows: [], totalStaff: 0, officialStaff: 0 };
   document.getElementById('portal-app').style.display = 'none';
   document.getElementById('login-gate').style.display = 'flex';
   document.getElementById('login-btn').disabled = false;
@@ -1170,9 +1266,10 @@ async function initPortal() {
   document.getElementById('user-email-display').textContent = email;
   document.getElementById('user-org-badge').textContent = portalState.orgName || portalState.orgCode;
   document.getElementById('topbar-org-name').textContent = portalState.orgName || portalState.orgCode;
-  document.getElementById('org-name-display').textContent = portalState.orgName || '—';
-  document.getElementById('org-code-display').textContent = `รหัสองค์กร: ${portalState.orgCode}`;
+  // welcome-bar elements were removed
+  loadOrgLogo(); // Load organization logo
   renderOrgProfile();
+  switchTab('home');
 
   try {
     const results = await Promise.allSettled([loadCh1Data(), loadWbData()]);
@@ -1182,12 +1279,11 @@ async function initPortal() {
     if (ch1Failed) {
       console.warn('[org-portal] loadCh1Data failed:', results[0].reason);
       const homeCh1 = document.getElementById('home-ch1-summary');
-      const badgeEl = document.getElementById('ch1-status-badge');
       const summaryEl = document.getElementById('ch1-summary');
       const windowInfo = document.getElementById('ch1-window-info');
       const actionsEl = document.getElementById('ch1-actions');
       if (homeCh1) homeCh1.innerHTML = '<div class="info-box yellow">โหลดข้อมูล CH1 ไม่สำเร็จ กรุณาลองรีเฟรชอีกครั้ง</div>';
-      if (badgeEl) badgeEl.innerHTML = '<span class="status-badge none">⚠️ โหลดไม่สำเร็จ</span>';
+      // ch1-status-badge was removed with welcome bar
       if (summaryEl) summaryEl.style.display = 'none';
       if (windowInfo) windowInfo.innerHTML = '<div class="ch1-strip yellow">ระบบดึงข้อมูล CH1 ไม่สำเร็จชั่วคราว</div>';
       if (actionsEl) actionsEl.innerHTML = '';
@@ -1195,14 +1291,7 @@ async function initPortal() {
 
     if (wbFailed) {
       console.warn('[org-portal] loadWbData failed:', results[1].reason);
-      const homeWb = document.getElementById('home-wb-summary');
-      const summaryEl = document.getElementById('wb-summary');
-      const actionsEl = document.getElementById('wb-actions');
-      const wbArea = document.getElementById('wb-dashboard-area');
-      if (homeWb) homeWb.innerHTML = '<div class="info-box yellow">โหลดข้อมูล Well-being ไม่สำเร็จ กรุณาลองรีเฟรชอีกครั้ง</div>';
-      if (summaryEl) summaryEl.style.display = 'none';
-      if (actionsEl) actionsEl.innerHTML = '<div class="info-box yellow">ระบบดึงข้อมูล Well-being ไม่สำเร็จชั่วคราว</div>';
-      if (wbArea) wbArea.innerHTML = '';
+      // home-wb-summary was removed, so we don't need to update it
       portalState.wbRows = [];
     }
 
@@ -1273,19 +1362,22 @@ async function loadCh1Data() {
   const ch1Row = rows?.[0] || null;
   const fd = ch1Row?.form_data || ch1Row || {};
   portalState.ch1Row = ch1Row;
-  portalState.totalStaff = fd.total_staff || fd.total_personnel || 0;
+  const totalStaffValue = ch1Row?.total_staff ?? fd.total_staff ?? fd.total_personnel ?? 0;
+  const officialStaffValue = ch1Row?.type_official ?? fd.type_official ?? 0;
+  portalState.totalStaff = Number(totalStaffValue || 0);
+  portalState.officialStaff = Number(officialStaffValue || 0);
   const turnoverRate = pickYearValue(fd, ['rate_2568', 'turnover_rate', 'rate_2567', 'rate_2566', 'rate_2565', 'rate_2564']);
   const ncdCount = pickYearValue(fd, ['ncd_count', 'ncd_total']);
   const engagementScore = pickYearValue(fd, ['engagement_score_2568', 'engagement_score', 'engagement_score_2567', 'engagement_score_2566', 'engagement_score_2565', 'engagement_score_2564']);
   const trainingHours = pickYearValue(fd, ['training_hours_2568', 'training_hours', 'training_hours_2567', 'training_hours_2566', 'training_hours_2565', 'training_hours_2564']);
 
-  const badgeEl = document.getElementById('ch1-status-badge');
+  const badgeEl = null; // ch1-status-badge was removed with welcome bar
   if (!ch1Row) {
-    badgeEl.innerHTML = '<span class="status-badge none">⬜ ยังไม่มีข้อมูล</span>';
+    // welcome bar was removed, so no badge to update
   } else {
     const status = ch1Row.status || 'submitted';
     const label = status === 'submitted' ? '✅ ส่งแล้ว' : status === 'draft' ? '📝 ร่างอยู่' : '🔄 เปิดแก้ไข';
-    badgeEl.innerHTML = `<span class="status-badge ${status === 'submitted' ? 'submitted' : status === 'draft' ? 'draft' : 'reopened'}">${label}</span>`;
+    // welcome bar was removed, so no badge to update
   }
 
   const homeCh1 = document.getElementById('home-ch1-summary');
@@ -1294,8 +1386,8 @@ async function loadCh1Data() {
   } else {
     homeCh1.innerHTML = `
       <div class="summary-grid" style="grid-template-columns:repeat(2,minmax(0,1fr))">
-        <div class="summary-item"><div class="val">${fmtNum(portalState.totalStaff)}</div><div class="lbl">บุคลากรรวม</div></div>
-        <div class="summary-item"><div class="val">${fmtNum(ncdCount)}</div><div class="lbl">${kpiLabel('NCD รวม', 'ค่านี้มาจากจำนวนบุคลากรที่มีโรคไม่ติดต่อเรื้อรัง (NCD) รวมทุกกลุ่มโรค')}</div></div>
+        <div class="summary-item"><div class="val">${fmtNum(portalState.totalStaff)}</div><div class="lbl">จำนวนบุคลากรรวม</div></div>
+        <div class="summary-item"><div class="val">${fmtNum(portalState.officialStaff)}</div><div class="lbl">จำนวนข้าราชการ</div></div>
       </div>`;
   }
 
@@ -1306,9 +1398,8 @@ async function loadCh1Data() {
   } else {
     summaryEl.style.display = '';
     summaryGrid.innerHTML = [
-      { val: fmtNum(fd.total_staff || fd.total_personnel), lbl: 'บุคลากรรวม' },
+      { val: fmtNum(portalState.totalStaff), lbl: 'จำนวนบุคลากรรวม' },
       { val: turnoverRate !== null ? `${fmtNum(turnoverRate, 2)}%` : '−', lbl: kpiLabel('อัตราลาออก', 'ค่านี้มาจากข้อมูลการลาออกย้อนหลัง 5 ปี โดยใช้ข้อมูลปีล่าสุดเป็นหลัก') },
-      { val: fmtNum(ncdCount), lbl: kpiLabel('NCD รวม', 'ค่านี้มาจากจำนวนบุคลากรที่มีโรคไม่ติดต่อเรื้อรัง (NCD) รวมทุกกลุ่มโรค') },
       { val: fmtNum(engagementScore, 2), lbl: kpiLabel('คะแนนความผูกพัน', 'ค่านี้มาจากคะแนนความผูกพันของบุคลากร (Engagement) ย้อนหลัง 5 ปี โดยใช้ปีล่าสุดเป็นหลัก') },
       { val: fmtNum(trainingHours, 2), lbl: kpiLabel('ชั่วโมงอบรม/คน/ปี', 'ค่านี้มาจากชั่วโมงการพัฒนาบุคลากรย้อนหลัง 5 ปี โดยใช้ปีล่าสุดเป็นหลัก') },
       { val: fmtNum(fd.sick_leave_avg, 2), lbl: 'ลาป่วยเฉลี่ย/คน' },
@@ -1451,22 +1542,13 @@ async function loadWbData() {
     rowsCount: rows.length,
     orgName,
     orgCode,
-    totalStaff: portalState.totalStaff
+    officialStaff: portalState.officialStaff
   });
   
-  // Get the elements for displaying results
-  const homeWb = document.getElementById('home-wb-summary');
-  const summaryEl = document.getElementById('wb-summary');
-  const summaryGrid = document.getElementById('wb-summary-grid');
-  const actionsEl = document.getElementById('wb-actions');
-  
-  // If no rows found, show empty state
+  // If no rows found, show empty state and return
   if (rows.length === 0) {
-    if (homeWb) homeWb.innerHTML = '<div class="info-box yellow">ยังไม่มีผู้ตอบ Well-being Survey จากองค์กรของท่าน</div>';
-    if (summaryEl) summaryEl.style.display = 'none';
-    if (actionsEl) actionsEl.innerHTML = '<div class="info-box blue">แชร์ลิงก์แบบสอบถามให้บุคลากรในองค์กรเพื่อเริ่มเก็บข้อมูล</div>';
-    const wbArea = document.getElementById('wb-dashboard-area');
-    if (wbArea) wbArea.innerHTML = '';
+    // home-wb-summary was removed, so we just render empty dashboard
+    renderWbDashboard(rows, { male: 0, female: 0, other: 0, avgTmhi: null, avgBmi: null, avgAge: null });
     return;
   }
 
@@ -1480,25 +1562,7 @@ async function loadWbData() {
   const ageRows = rows.filter(r => r.age != null);
   const avgAge = ageRows.length ? (ageRows.reduce((s, r) => s + Number(r.age), 0) / ageRows.length) : null;
 
-  homeWb.innerHTML = `
-    <div class="summary-grid" style="grid-template-columns:repeat(2,minmax(0,1fr))">
-      <div class="summary-item"><div class="val">${fmtNum(rows.length)}</div><div class="lbl">ผู้ตอบทั้งหมด</div></div>
-      <div class="summary-item"><div class="val">${fmtNum(avgTmhi, 1)}</div><div class="lbl">TMHI เฉลี่ย</div></div>
-    </div>`;
-
-  summaryEl.style.display = '';
-  summaryGrid.innerHTML = [
-    { val: fmtNum(rows.length), lbl: 'ผู้ตอบทั้งหมด' },
-    { val: fmtNum(male), lbl: 'ชาย' },
-    { val: fmtNum(female), lbl: 'หญิง' },
-    { val: fmtNum(other), lbl: 'อื่นๆ' },
-    { val: fmtNum(avgTmhi, 1), lbl: 'TMHI เฉลี่ย' },
-  ].map(i => `<div class="summary-item"><div class="val">${i.val}</div><div class="lbl">${i.lbl}</div></div>`).join('');
-
-  actionsEl.innerHTML = `
-    <button class="btn btn-green" onclick="switchTab('wb')">💚 ดู Well-being Dashboard</button>
-    <button class="btn btn-outline" onclick="exportWbExcel()">📤 Export Excel</button>`;
-
+  // home-wb-summary was removed, so we skip updating it
   renderWbDashboard(rows, { male, female, other, avgTmhi, avgBmi, avgAge });
 }
 
@@ -1513,6 +1577,63 @@ function distBar(items, maxVal, colors) {
       <div class="dist-pct">${maxVal > 0 ? (it.count / maxVal * 100).toFixed(0) : 0}%</div>
     </div>`;
   }).join('');
+}
+
+let respondentListPage = 1;
+let respondentListPerPage = 10;
+let respondentListRows = [];
+
+function setRespondentPerPage(value) {
+  respondentListPerPage = Number(value || 10);
+  respondentListPage = 1;
+  renderRespondentList();
+}
+
+function goRespondentPage(page) {
+  respondentListPage = page;
+  renderRespondentList();
+}
+
+function renderRespondentList() {
+  const tableWrap = document.getElementById('respondent-list-table');
+  const pagerWrap = document.getElementById('respondent-list-pager');
+  const countWrap = document.getElementById('respondent-list-count');
+  if (!tableWrap || !pagerWrap || !countWrap) return;
+
+  const rows = respondentListRows || [];
+  const total = rows.length;
+  const perPage = respondentListPerPage;
+  const totalPages = Math.max(1, Math.ceil(total / perPage));
+  if (respondentListPage > totalPages) respondentListPage = totalPages;
+  if (respondentListPage < 1) respondentListPage = 1;
+
+  const start = (respondentListPage - 1) * perPage;
+  const pageRows = rows.slice(start, start + perPage);
+  countWrap.textContent = `${fmtNum(total)} รายการ`;
+
+  tableWrap.innerHTML = `<table class="recent-table">
+    <thead><tr><th>#</th><th>วันเวลาที่ส่ง</th><th>ชื่อ</th><th>เพศ</th><th>อายุ</th></tr></thead>
+    <tbody>${pageRows.length ? pageRows.map((r, i) => `
+      <tr>
+        <td style="text-align:center;color:var(--tx3)">${start + i + 1}</td>
+        <td>${r.submitted_at ? new Date(r.submitted_at).toLocaleString('th-TH') : '—'}</td>
+        <td>${esc(r.name || r.title || '—')}</td>
+        <td>${esc(r.gender || '—')}</td>
+        <td>${r.age ?? '—'}</td>
+      </tr>`).join('') : '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--tx3)">ไม่พบข้อมูล</td></tr>'}</tbody>
+  </table>`;
+
+  let pagerHtml = `<div class="wbi-info">${total ? start + 1 : 0}–${Math.min(start + perPage, total)} จาก ${fmtNum(total)}</div>`;
+  pagerHtml += `<button ${respondentListPage <= 1 ? 'disabled' : ''} onclick="goRespondentPage(${respondentListPage - 1})">◀ ก่อนหน้า</button>`;
+  const maxBtns = 7;
+  let pStart = Math.max(1, respondentListPage - 3);
+  let pEnd = Math.min(totalPages, pStart + maxBtns - 1);
+  if (pEnd - pStart < maxBtns - 1) pStart = Math.max(1, pEnd - maxBtns + 1);
+  for (let p = pStart; p <= pEnd; p++) {
+    pagerHtml += `<button class="${p === respondentListPage ? 'active' : ''}" onclick="goRespondentPage(${p})">${p}</button>`;
+  }
+  pagerHtml += `<button ${respondentListPage >= totalPages ? 'disabled' : ''} onclick="goRespondentPage(${respondentListPage + 1})">ถัดไป ▶</button>`;
+  pagerWrap.innerHTML = pagerHtml;
 }
 
 function renderWbDashboard(rows, stats) {
@@ -1551,7 +1672,8 @@ function renderWbDashboard(rows, stats) {
   const tmhiData = Object.entries(tmhiCats).map(([l, c]) => ({ label: l, count: c }));
   const tmhiColors = ['#22c55e', '#f59e0b', '#ef4444'];
 
-  const recent = rows.slice(0, 8);
+  respondentListRows = rows.slice();
+  respondentListPage = 1;
 
   const area = document.getElementById('wb-dashboard-area');
   area.innerHTML = `
@@ -1564,39 +1686,33 @@ function renderWbDashboard(rows, stats) {
         <h4>📊 ช่วงอายุ</h4>
         ${distBar(ageData, n, ageColors)}
       </div>
-      <div class="dash-card">
-        <h4>⚖️ BMI</h4>
-        ${rows.some(r => r.bmi != null) ? distBar(bmiData, n, bmiColors) + `<div style="margin-top:8px;font-size:11px;color:var(--tx3)">BMI เฉลี่ย: <strong style="color:var(--tx)">${fmtNum(stats.avgBmi, 1)}</strong></div>` : '<div class="info-box blue" style="font-size:12px">ยังไม่มีข้อมูล BMI</div>'}
-      </div>
-      <div class="dash-card">
-        <h4>🧠 TMHI-15 สุขภาพจิต</h4>
-        ${rows.some(r => r.tmhi_level) ? distBar(tmhiData, n, tmhiColors) + `<div style="margin-top:8px;font-size:11px;color:var(--tx3)">คะแนนเฉลี่ย: <strong style="color:var(--tx)">${fmtNum(stats.avgTmhi, 1)}</strong> / 60</div>` : '<div class="info-box blue" style="font-size:12px">ยังไม่มีข้อมูล TMHI</div>'}
-      </div>
       <div class="dash-card dash-full">
-        <h4>🕐 ผู้ตอบล่าสุด</h4>
-        ${recent.length ? `<div style="overflow-x:auto"><table class="recent-table">
-          <thead><tr><th>#</th><th>ชื่อ</th><th>เพศ</th><th>อายุ</th><th>BMI</th><th>TMHI</th><th>สถานะจิต</th><th>วันที่</th></tr></thead>
-          <tbody>${recent.map((r, i) => {
-            const lvClass = (r.tmhi_level || '').includes('สูง') ? 'good' : (r.tmhi_level || '').includes('ปกติ') ? 'avg' : (r.tmhi_level || '').includes('ต่ำ') ? 'poor' : 'none';
-            const lvText = (r.tmhi_level || '').includes('สูง') ? '☀️ ดีมาก' : (r.tmhi_level || '').includes('ปกติ') ? '⛅ ปกติ' : (r.tmhi_level || '').includes('ต่ำ') ? '🌧️ ต่ำ' : '—';
-            return `<tr>
-              <td style="text-align:center;color:var(--tx3)">${i + 1}</td>
-              <td>${esc(r.name || r.title || '—')}</td>
-              <td>${esc(r.gender || '—')}</td>
-              <td>${r.age ?? '—'}</td>
-              <td>${r.bmi ? Number(r.bmi).toFixed(1) : '—'}</td>
-              <td>${r.tmhi_score ?? '—'}</td>
-              <td><span class="badge-sm badge-${lvClass}">${lvText}</span></td>
-              <td>${r.submitted_at ? new Date(r.submitted_at).toLocaleDateString('th-TH') : '—'}</td>
-            </tr>`;
-          }).join('')}</tbody></table></div>` : '<div class="info-box blue">ยังไม่มีข้อมูล</div>'}
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px">
+          <h4 style="margin-bottom:0">รายชื่อผู้ตอบทั้งหมด</h4>
+          <div class="wbi-toolbar" style="padding:0;border:none;background:transparent;box-shadow:none;gap:8px">
+            <label style="font-size:12px;color:var(--tx2)">แสดง
+              <select class="wbi-sel" id="respondent-per-page" onchange="setRespondentPerPage(this.value)">
+                <option value="10">10</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+              </select>
+              รายการ
+            </label>
+            <div class="wbi-count" id="respondent-list-count"></div>
+          </div>
+        </div>
+        <div class="wbi-table-wrap" id="respondent-list-table"></div>
+        <div class="wbi-pager" id="respondent-list-pager"></div>
       </div>
     </div>`;
+  const perPageSelect = document.getElementById('respondent-per-page');
+  if (perPageSelect) perPageSelect.value = String(respondentListPerPage);
+  renderRespondentList();
 }
 
 function exportWbExcel() {
   const rows = portalState.wbRows || portalState._wbRows || [];
-  if (!rows || rows.length === 0) { showToast('ไม่มีข้อมูลให้ส่งออก', 'warn'); return; }
+  if (!rows || rows.length === 0) { showToast('ไม่มีข้อมูล', 'warn'); return; }
   try {
     const data = rows.map((r, i) => ({
       '#': i + 1,
@@ -1734,6 +1850,7 @@ async function loadWbIndividualPage() {
 
         if (allRows) {
           rows = allRows.filter(row => {
+            // Check if any field matches orgName or orgCode
             const rowOrg = (row.organization || '').toLowerCase();
             const rowCode = (row.org_code || '').toLowerCase();
             const searchName = orgName.toLowerCase();
@@ -1973,14 +2090,13 @@ function exportWbIndExcel() {
 }
 
 function updateProgress() {
-  const totalStaff = Number(portalState.totalStaff || 0);
+  const officialStaff = Number(portalState.officialStaff || 0);
   const wbCount = portalState.wbRows?.length || portalState._wbRows?.length || 0;
-  const pct = totalStaff > 0 ? Math.min((wbCount / totalStaff) * 100, 100) : 0;
+  const pct = officialStaff > 0 ? Math.min((wbCount / officialStaff) * 100, 100) : 0;
   const pctText = `${pct.toFixed(1)}%`;
-  
-  // Debug logging
+
   console.log('[org-portal] updateProgress:', {
-    totalStaff,
+    officialStaff,
     wbCount,
     pct,
     wbRowsLength: portalState.wbRows?.length,
@@ -1989,15 +2105,11 @@ function updateProgress() {
 
   document.getElementById('progress-fill').style.width = pctText;
   document.getElementById('progress-pct-text').textContent = pctText;
-  document.getElementById('progress-detail-text').innerHTML = totalStaff > 0
-    ? `ผู้ที่กรอกแล้ว <strong>${fmtNum(wbCount)}</strong> คน / <strong>${fmtNum(totalStaff)}</strong> คน คิดเป็นร้อยละ <strong>${pct.toFixed(1)}</strong>`
-    : `ผู้ที่กรอกแล้ว <strong>${fmtNum(wbCount)}</strong> คน <span style="color:var(--tx3)">(ไม่พบจำนวนบุคลากรจาก CH1)</span>`;
-
-  document.getElementById('wb-progress-fill').style.width = pctText;
-  document.getElementById('wb-pct-text').textContent = pctText;
-  document.getElementById('wb-progress-detail').innerHTML = document.getElementById('progress-detail-text').innerHTML;
-  document.getElementById('share-progress-text').innerHTML = totalStaff > 0
-    ? `ผู้ที่กรอกแล้ว <strong>${fmtNum(wbCount)}</strong> คน / <strong>${fmtNum(totalStaff)}</strong> คน<br>คิดเป็นร้อยละ <strong>${pct.toFixed(1)}</strong>`
+  document.getElementById('progress-detail-text').innerHTML = officialStaff > 0
+    ? `ผู้ที่กรอกแล้ว <strong>${fmtNum(wbCount)}</strong> คน / <strong>${fmtNum(officialStaff)}</strong> คน คิดเป็นร้อยละ <strong>${pct.toFixed(1)}</strong>`
+    : `ผู้ที่กรอกแล้ว <strong>${fmtNum(wbCount)}</strong> คน <span style="color:var(--tx3)">(ไม่พบจำนวนข้าราชการจาก CH1)</span>`;
+  document.getElementById('share-progress-text').innerHTML = officialStaff > 0
+    ? `ผู้ที่กรอกแล้ว <strong>${fmtNum(wbCount)}</strong> คน / <strong>${fmtNum(officialStaff)}</strong> คน<br>คิดเป็นร้อยละ <strong>${pct.toFixed(1)}</strong>`
     : `ผู้ที่กรอกแล้ว <strong>${fmtNum(wbCount)}</strong> คน`;
 }
 
