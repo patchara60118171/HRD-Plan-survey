@@ -535,28 +535,19 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
           </div>
           <div class="dash-grid">
             <div class="dash-card">
-              <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px">
-                <h4>🏛️ การกระจายตัวตามประเภทบุคลากร</h4>
-                <span id="chart-date-1" style="font-size:11px;color:var(--tx3)"></span>
-              </div>
+              <h4>🏛️ การกระจายตัวตามประเภทบุคลากร</h4>
               <div style="position:relative;height:300px">
                 <canvas id="personnel-type-chart"></canvas>
               </div>
             </div>
             <div class="dash-card">
-              <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px">
-                <h4>🎂 การกระจายตัวตามช่วงอายุ</h4>
-                <span id="chart-date-2" style="font-size:11px;color:var(--tx3)"></span>
-              </div>
+              <h4>🎂 การกระจายตัวตามช่วงอายุ</h4>
               <div style="position:relative;height:300px">
                 <canvas id="age-distribution-chart"></canvas>
               </div>
             </div>
             <div class="dash-card">
-              <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px">
-                <h4>📋 การกระจายตัวตามระดับตำแหน่ง</h4>
-                <span id="chart-date-3" style="font-size:11px;color:var(--tx3)"></span>
-              </div>
+              <h4>📋 การกระจายตัวตามระดับตำแหน่ง</h4>
               <div style="position:relative;height:300px">
                 <canvas id="position-level-chart"></canvas>
               </div>
@@ -568,10 +559,7 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
               </div>
             </div>
             <div class="dash-card">
-              <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px">
-                <h4>⏱️ การกระจายตัวตามอายุราชการ</h4>
-                <span id="chart-date-4" style="font-size:11px;color:var(--tx3)"></span>
-              </div>
+              <h4>⏱️ การกระจายตัวตามอายุราชการ</h4>
               <div style="position:relative;height:300px">
                 <canvas id="service-years-chart"></canvas>
               </div>
@@ -2285,16 +2273,7 @@ function initHRAnalyticsCharts() {
     console.warn('[Charts] Data quality warnings:', dataQuality.warnings);
   }
 
-  // Always show current date
-  const now = new Date();
-  const dateStr = `${now.getDate()}/${now.getMonth() + 1}/${now.getFullYear()}`;
-
-  // Set chart timestamps
-  document.getElementById('chart-date-1').textContent = `อัปเดต ${dateStr}`;
-  document.getElementById('chart-date-2').textContent = `อัปเดต ${dateStr}`;
-  document.getElementById('chart-date-3').textContent = `อัปเดต ${dateStr}`;
-  document.getElementById('chart-date-4').textContent = `อัปเดต ${dateStr}`;
-
+  
   // Personnel Distribution Charts (shown first)
   createPersonnelTypeChart(data);
   createAgeDistributionChart(data);
