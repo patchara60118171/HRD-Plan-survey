@@ -2450,22 +2450,23 @@ function createServiceYearsChart(data) {
   const ctx = document.getElementById('service-years-chart');
   if (!ctx) return;
   
-  // Use real data from Supabase, fallback to 0 if not available
-  const serviceRanges = [
-    data.service_under_1 || 0,
-    data.service_1_5 || 0,
-    data.service_6_10 || 0,
-    data.service_11_15 || 0,
-    data.service_16_20 || 0,
-    data.service_21_25 || 0,
-    data.service_26_30 || 0,
-    data.service_over_30 || 0
+  // Use real data from Supabase, filter out empty ranges
+  const allRanges = [
+    { label: '< 1 ปี', value: data.service_under_1 || 0, color: '#c4b5fd' },
+    { label: '1–5 ปี', value: data.service_1_5 || 0, color: '#a78bfa' },
+    { label: '6–10 ปี', value: data.service_6_10 || 0, color: '#8b5cf6' },
+    { label: '11–15 ปี', value: data.service_11_15 || 0, color: '#7c3aed' },
+    { label: '16–20 ปี', value: data.service_16_20 || 0, color: '#6d28d9' },
+    { label: '21–25 ปี', value: data.service_21_25 || 0, color: '#5b21b6' },
+    { label: '26–30 ปี', value: data.service_26_30 || 0, color: '#4c1d95' },
+    { label: '> 30 ปี', value: data.service_over_30 || 0, color: '#3b1178' }
   ];
   
-  const svcTotal = serviceRanges.reduce((a, b) => a + b, 0);
+  // Filter out ranges with zero data
+  const filteredRanges = allRanges.filter(range => range.value > 0);
   
   // If no data, show message
-  if (svcTotal === 0) {
+  if (filteredRanges.length === 0) {
     ctx.font = "14px 'IBM Plex Sans Thai Looped', sans-serif";
     ctx.fillStyle = '#64748b';
     ctx.textAlign = 'center';
@@ -2473,17 +2474,19 @@ function createServiceYearsChart(data) {
     return;
   }
   
+  const serviceLabels = filteredRanges.map(r => r.label);
+  const serviceData = filteredRanges.map(r => r.value);
+  const serviceColors = filteredRanges.map(r => r.color);
+  const svcTotal = serviceData.reduce((a, b) => a + b, 0);
+  
   _hrCharts['service-years-chart'] = new Chart(ctx, {
     type: 'bar',
     data: {
-      labels: ['< 1 ปี','1–5 ปี','6–10 ปี','11–15 ปี','16–20 ปี','21–25 ปี','26–30 ปี','> 30 ปี'],
+      labels: serviceLabels,
       datasets: [{
         label: 'จำนวนบุคลากร',
-        data: serviceRanges,
-        backgroundColor: serviceRanges.map((_, i) => {
-          const colors = ['#c4b5fd','#a78bfa','#8b5cf6','#7c3aed','#6d28d9','#5b21b6','#4c1d95','#3b1178'];
-          return colors[i];
-        }),
+        data: serviceData,
+        backgroundColor: serviceColors,
         borderRadius: 8,
         borderWidth: 0
       }]
