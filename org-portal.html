@@ -2285,10 +2285,9 @@ function initHRAnalyticsCharts() {
     console.warn('[Charts] Data quality warnings:', dataQuality.warnings);
   }
 
-  // Get update date from ch1Row
-  const updateDate = data.updated_at || data.created_at || new Date().toISOString();
-  const date = new Date(updateDate);
-  const dateStr = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+  // Always show current date
+  const now = new Date();
+  const dateStr = `${now.getDate()}/${now.getMonth() + 1}/${now.getFullYear()}`;
 
   // Set chart timestamps
   document.getElementById('chart-date-1').textContent = `อัปเดต ${dateStr}`;
