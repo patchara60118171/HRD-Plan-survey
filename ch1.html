@@ -2993,6 +2993,26 @@
                     return false;
                 };
             }
+            
+            // Add event listener as backup to onclick
+            const nextBtn = document.getElementById('btn-next');
+            if (nextBtn) {
+                nextBtn.addEventListener('click', function(e) {
+                    console.log('btn-next clicked via event listener');
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    if (typeof nextStep === 'function') {
+                        return nextStep();
+                    } else {
+                        alert('❌ กรุณากรอกข้อมูลให้ครบถ้วนก่อนไปหน้าถัดไป!');
+                        return false;
+                    }
+                });
+                console.log('Event listener added to btn-next');
+            } else {
+                console.error('btn-next element not found!');
+            }
         });
     </script>
 
