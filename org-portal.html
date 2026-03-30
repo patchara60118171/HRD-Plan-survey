@@ -1091,7 +1091,7 @@ function switchTab(tab) {
   ['nav-home-org', 'nav-home-progress', 'nav-home-share', 'nav-home-org-detail'].forEach((id) => document.getElementById(id)?.classList.remove('active'));
   document.querySelectorAll('.tab-page').forEach((page) => page.classList.remove('active'));
   if (tab === 'home') {
-    ['page-home', 'page-org-profile', 'page-share'].forEach((id) => {
+    ['page-home', 'page-org-profile', 'page-share', 'page-guide'].forEach((id) => {
       document.getElementById(id)?.classList.add('active');
     });
   } else {
