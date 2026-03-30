@@ -523,8 +523,62 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
           </div>
         </div>
 
-        <!-- HR Analytics Dashboard - HIDDEN due to data inconsistency -->
+        <!-- HR Analytics Dashboard -->
+        <div class="section-card" style="margin-top:16px">
+          <h3>📊 กราฟวิเคราะห์ข้อมูลบุคลากร</h3>
+          <div class="desc">โครงสร้างบุคลากรและแนวโน้มย้อนหลัง 5 ปี</div>
 
+          <!-- Group 1: Personnel Structure -->
+          <div class="chart-section-header">
+            <span>🏗️ โครงสร้างบุคลากร</span>
+            <div class="cs-badge">4 กราฟ</div>
+          </div>
+          <div class="dash-grid">
+            <div class="dash-card">
+              <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px">
+                <h4>🏛️ การกระจายตัวตามประเภทบุคลากร</h4>
+                <span id="chart-date-1" style="font-size:11px;color:var(--tx3)"></span>
+              </div>
+              <div style="position:relative;height:300px">
+                <canvas id="personnel-type-chart"></canvas>
+              </div>
+            </div>
+            <div class="dash-card">
+              <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px">
+                <h4>🎂 การกระจายตัวตามช่วงอายุ</h4>
+                <span id="chart-date-2" style="font-size:11px;color:var(--tx3)"></span>
+              </div>
+              <div style="position:relative;height:300px">
+                <canvas id="age-distribution-chart"></canvas>
+              </div>
+            </div>
+            <div class="dash-card">
+              <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px">
+                <h4>📋 การกระจายตัวตามระดับตำแหน่ง</h4>
+                <span id="chart-date-3" style="font-size:11px;color:var(--tx3)"></span>
+              </div>
+              <div style="position:relative;height:300px">
+                <canvas id="position-level-chart"></canvas>
+              </div>
+              <div class="legend-row" style="margin-top:10px">
+                <div class="legend-item"><div class="legend-dot" style="background:#7c3aed"></div>ระดับ O</div>
+                <div class="legend-item"><div class="legend-dot" style="background:#2563eb"></div>ระดับ K</div>
+                <div class="legend-item"><div class="legend-dot" style="background:#16a34a"></div>ระดับ M</div>
+                <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div>ระดับ S</div>
+              </div>
+            </div>
+            <div class="dash-card">
+              <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px">
+                <h4>⏱️ การกระจายตัวตามอายุราชการ</h4>
+                <span id="chart-date-4" style="font-size:11px;color:var(--tx3)"></span>
+              </div>
+              <div style="position:relative;height:300px">
+                <canvas id="service-years-chart"></canvas>
+              </div>
+            </div>
+          </div>
+
+                  </div>
       </div>
 
       <div class="tab-page" id="page-share" style="margin-top:32px">
@@ -1106,8 +1160,17 @@ function switchTab(tab) {
   document.getElementById('topbar-title').textContent = meta.title;
   document.getElementById('topbar-subtitle').textContent = meta.subtitle;
   
+  // Initialize HR Analytics Charts when switching to CH1 tab
   if (tab === 'ch1') {
     document.getElementById('page-ch1')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setTimeout(() => {
+      // Check if Chart.js is loaded
+      if (typeof Chart !== 'undefined') {
+        initHRAnalyticsCharts();
+      } else {
+        console.error('Chart.js not loaded');
+      }
+    }, 1500);
   }
 }
 
@@ -2200,6 +2263,323 @@ function navigateCh1(action) {
   }
 }
 
+// ========================================
+// HR Analytics Charts Functions
+// ========================================
+const _hrCharts = {};
+
+function _destroyChart(id) {
+  if (_hrCharts[id]) { _hrCharts[id].destroy(); delete _hrCharts[id]; }
+}
+
+function initHRAnalyticsCharts() {
+  if (!portalState.ch1Row) return;
+  const data = portalState.ch1Row;
+
+  // Destroy all existing before re-render
+  ['personnel-type-chart','age-distribution-chart','position-level-chart','service-years-chart'].forEach(_destroyChart);
+
+  // Validate and log data quality
+  const dataQuality = validateChartData(data);
+  if (dataQuality.warnings.length > 0) {
+    console.warn('[Charts] Data quality warnings:', dataQuality.warnings);
+  }
+
+  // Get update date from ch1Row
+  const updateDate = data.updated_at || data.created_at || new Date().toISOString();
+  const date = new Date(updateDate);
+  const dateStr = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+
+  // Set chart timestamps
+  document.getElementById('chart-date-1').textContent = `อัปเดต ${dateStr}`;
+  document.getElementById('chart-date-2').textContent = `อัปเดต ${dateStr}`;
+  document.getElementById('chart-date-3').textContent = `อัปเดต ${dateStr}`;
+  document.getElementById('chart-date-4').textContent = `อัปเดต ${dateStr}`;
+
+  // Personnel Distribution Charts (shown first)
+  createPersonnelTypeChart(data);
+  createAgeDistributionChart(data);
+  createPositionLevelChart(data);
+  createServiceYearsChart(data);
+
+  }
+
+// Validate chart data quality
+function validateChartData(data) {
+  const warnings = [];
+  const fields = [
+    'type_official', 'type_employee', 'type_contract', 'type_other',
+    'age_under_30', 'age_31_40', 'age_41_50', 'age_51_60',
+    'pos_o1', 'pos_o2', 'pos_o3', 'pos_o4', 'pos_k1', 'pos_k2', 'pos_k3', 'pos_k4', 'pos_k5', 'pos_m1', 'pos_m2', 'pos_s1', 'pos_s2',
+    'service_under_1', 'service_1_5', 'service_6_10', 'service_11_15', 'service_16_20', 'service_21_25', 'service_26_30', 'service_over_30'
+  ];
+
+  fields.forEach(field => {
+    const val = data[field];
+    if (val === null || val === undefined) {
+      warnings.push(`${field} is null/undefined (treating as 0)`);
+    } else if (typeof val !== 'number' && isNaN(Number(val))) {
+      warnings.push(`${field} is not numeric: ${val}`);
+    } else if (Number(val) < 0) {
+      warnings.push(`${field} is negative: ${val}`);
+    }
+  });
+
+  return { warnings, valid: warnings.length === 0 };
+}
+
+// 1. Personnel Type Distribution Chart (ข้าราชการ vs พนักงานราชการ vs ลูกจ้าง vs อื่นๆ)
+function createPersonnelTypeChart(data) {
+  const ctx = document.getElementById('personnel-type-chart');
+  if (!ctx) return;
+  
+  const official = data.type_official || 0;
+  const employee = data.type_employee || 0;
+  const contract = data.type_contract || 0;
+  const other = data.type_other || 0;
+  
+  _hrCharts['personnel-type-chart'] = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['ข้าราชการ', 'พนักงานราชการ', 'ลูกจ้าง', 'อื่นๆ'],
+      datasets: [{
+        data: [official, employee, contract, other],
+        backgroundColor: ['#7c3aed', '#2563eb', '#16a34a', '#f59e0b'],
+        hoverBackgroundColor: ['#6d28d9', '#1d4ed8', '#15803d', '#d97706'],
+        borderWidth: 3,
+        borderColor: '#fff'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '60%',
+      plugins: {
+        legend: {
+          position: 'right',
+          labels: {
+            font: { family: "'IBM Plex Sans Thai Looped', sans-serif", size: 11, weight: '500' },
+            usePointStyle: true,
+            pointStyle: 'circle',
+            padding: 16,
+            color: '#334155',
+            generateLabels: function(chart) {
+              const data = chart.data;
+              const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
+              if (total === 0) return [];
+              return data.labels.map((label, i) => ({
+                text: `${label} (${((data.datasets[0].data[i]/total)*100).toFixed(1)}%)`,
+                fillStyle: data.datasets[0].backgroundColor[i],
+                strokeStyle: '#fff',
+                lineWidth: 2,
+                pointStyle: 'circle',
+                index: i
+              }));
+            }
+          }
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              const total = context.dataset.data.reduce((a, b) => a + b, 0);
+              if (total === 0) return context.label;
+              const pct = ((context.parsed / total) * 100).toFixed(1);
+              return ` ${context.label}: ${context.parsed.toLocaleString('th-TH')} คน (${pct}%)`;
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
+// 2. Age Distribution Chart (<30, 31-40, 41-50, 51-60 ปี)
+function createAgeDistributionChart(data) {
+  const ctx = document.getElementById('age-distribution-chart');
+  if (!ctx) return;
+  
+  // Use real data from Supabase
+  const ageUnder30 = data.age_under_30 || 0;
+  const age31_40 = data.age_31_40 || 0;
+  const age41_50 = data.age_41_50 || 0;
+  const age51_60 = data.age_51_60 || 0;
+  
+  const ageTotal = ageUnder30 + age31_40 + age41_50 + age51_60;
+  _hrCharts['age-distribution-chart'] = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['< 30 ปี', '31–40 ปี', '41–50 ปี', '51–60 ปี'],
+      datasets: [{
+        label: 'จำนวนบุคลากร',
+        data: [ageUnder30, age31_40, age41_50, age51_60],
+        backgroundColor: ['#8b5cf6', '#ec4899', '#3b82f6', '#10b981'],
+        borderRadius: 8,
+        borderWidth: 0
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              const pct = ageTotal > 0 ? ((context.parsed.y / ageTotal) * 100).toFixed(1) : 0;
+              return ` ${context.parsed.y.toLocaleString('th-TH')} คน (${pct}%)`;
+            }
+          }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          grid: { color: 'rgba(0,0,0,.05)' },
+          title: { display: true, text: 'จำนวนคน', font: { family: "'IBM Plex Sans Thai Looped', sans-serif", size: 11 } }
+        },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+}
+
+// 3. Position Level Distribution Chart (O1-O4, K1-K5, M1-M2, S1-S2)
+function createPositionLevelChart(data) {
+  const ctx = document.getElementById('position-level-chart');
+  if (!ctx) return;
+  
+  const oLevels = [data.pos_o1 || 0, data.pos_o2 || 0, data.pos_o3 || 0, data.pos_o4 || 0];
+  const kLevels = [data.pos_k1 || 0, data.pos_k2 || 0, data.pos_k3 || 0, data.pos_k4 || 0, data.pos_k5 || 0];
+  const mLevels = [data.pos_m1 || 0, data.pos_m2 || 0];
+  const sLevels = [data.pos_s1 || 0, data.pos_s2 || 0];
+  
+  _hrCharts['position-level-chart'] = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['O1','O2','O3','O4','K1','K2','K3','K4','K5','M1','M2','S1','S2'],
+      datasets: [{
+        label: 'จำนวนบุคลากร',
+        data: [...oLevels, ...kLevels, ...mLevels, ...sLevels],
+        backgroundColor: [
+          '#7c3aed','#7c3aed','#7c3aed','#7c3aed',
+          '#2563eb','#2563eb','#2563eb','#2563eb','#2563eb',
+          '#16a34a','#16a34a',
+          '#f59e0b','#f59e0b'
+        ],
+        borderRadius: 6,
+        borderWidth: 0
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            title: function(items) {
+              const groups = { O1:'ระดับ O',O2:'ระดับ O',O3:'ระดับ O',O4:'ระดับ O',
+                K1:'ระดับ K',K2:'ระดับ K',K3:'ระดับ K',K4:'ระดับ K',K5:'ระดับ K',
+                M1:'ระดับ M',M2:'ระดับ M',S1:'ระดับ S',S2:'ระดับ S' };
+              return `${items[0].label} (${groups[items[0].label]})`;
+            },
+            label: function(context) {
+              return ` ${context.parsed.y.toLocaleString('th-TH')} คน`;
+            }
+          }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          grid: { color: 'rgba(0,0,0,.05)' },
+          title: { display: true, text: 'จำนวนคน', font: { family: "'IBM Plex Sans Thai Looped', sans-serif", size: 11 } }
+        },
+        x: {
+          grid: { display: false },
+          ticks: { font: { size: 10 } }
+        }
+      }
+    }
+  });
+}
+
+// 4. Years of Service Distribution Chart (<1, 1-5, 6-10, 11-15, 16-20, 21-25, 26-30, >30 ปี)
+function createServiceYearsChart(data) {
+  const ctx = document.getElementById('service-years-chart');
+  if (!ctx) return;
+  
+  // Use real data from Supabase, filter out empty ranges
+  const allRanges = [
+    { label: '< 1 ปี', value: data.service_under_1 || 0, color: '#c4b5fd' },
+    { label: '1–5 ปี', value: data.service_1_5 || 0, color: '#a78bfa' },
+    { label: '6–10 ปี', value: data.service_6_10 || 0, color: '#8b5cf6' },
+    { label: '11–15 ปี', value: data.service_11_15 || 0, color: '#7c3aed' },
+    { label: '16–20 ปี', value: data.service_16_20 || 0, color: '#6d28d9' },
+    { label: '21–25 ปี', value: data.service_21_25 || 0, color: '#5b21b6' },
+    { label: '26–30 ปี', value: data.service_26_30 || 0, color: '#4c1d95' },
+    { label: '> 30 ปี', value: data.service_over_30 || 0, color: '#3b1178' }
+  ];
+  
+  // Filter out ranges with zero data
+  const filteredRanges = allRanges.filter(range => range.value > 0);
+  
+  // If no data, show message
+  if (filteredRanges.length === 0) {
+    ctx.font = "14px 'IBM Plex Sans Thai Looped', sans-serif";
+    ctx.fillStyle = '#64748b';
+    ctx.textAlign = 'center';
+    ctx.fillText('ไม่มีข้อมูลการกระจายตัวตามอายุราชการ', ctx.canvas.width / 2, ctx.canvas.height / 2);
+    return;
+  }
+  
+  const serviceLabels = filteredRanges.map(r => r.label);
+  const serviceData = filteredRanges.map(r => r.value);
+  const serviceColors = filteredRanges.map(r => r.color);
+  const svcTotal = serviceData.reduce((a, b) => a + b, 0);
+  
+  _hrCharts['service-years-chart'] = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: serviceLabels,
+      datasets: [{
+        label: 'จำนวนบุคลากร',
+        data: serviceData,
+        backgroundColor: serviceColors,
+        borderRadius: 8,
+        borderWidth: 0
+      }]
+    },
+    options: {
+      indexAxis: 'y', // Horizontal bars
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              const pct = svcTotal > 0 ? ((context.parsed.x / svcTotal) * 100).toFixed(1) : 0;
+              return ` ${context.parsed.x.toLocaleString('th-TH')} คน (${pct}%)`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          beginAtZero: true,
+          grid: { color: 'rgba(0,0,0,.05)' },
+          title: { display: true, text: 'จำนวนคน', font: { family: "'IBM Plex Sans Thai Looped', sans-serif", size: 11 } }
+        },
+        y: {
+          grid: { display: false },
+          ticks: { font: { size: 11 } },
+          title: { display: true, text: 'อายุราชการ', font: { family: "'IBM Plex Sans Thai Looped', sans-serif", size: 11 } }
+        }
+      }
+    }
+  });
+}
 
 (async () => {
   const { data: { session } } = await sb.auth.getSession();
