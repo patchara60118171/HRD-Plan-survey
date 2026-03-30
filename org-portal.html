@@ -506,7 +506,6 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
       <div class="tab-page" id="page-ch1">
         <div class="section-card">
           <h3>📝 แบบสำรวจข้อมูลองค์กร</h3>
-          <div class="desc">แบบสอบถามข้อมูลบุคลากร โครงสร้างองค์กร NCD และนโยบาย HRD</div>
           <div id="ch1-summary" style="display:none"><div class="summary-grid" id="ch1-summary-grid"></div></div>
           <div id="ch1-window-info"></div>
           <div class="section-actions" id="ch1-actions"></div>
@@ -765,7 +764,7 @@ let portalState = {
 
 const TAB_META = {
   home: { title: 'หน้าหลัก', subtitle: 'ภาพรวมข้อมูลหน่วยงาน ผู้ตอบแบบสำรวจ และช่องทางการตอบแบบสำรวจ' },
-  ch1: { title: 'แบบสำรวจข้อมูลองค์กร', subtitle: 'แบบสำรวจข้อมูลเพื่อจัดทำแผนการพัฒนาขององค์กรสุขภาวะข้าราชการพลเรือน' },
+  ch1: { title: 'แบบสำรวจข้อมูลองค์กร', subtitle: '' },
   guide: { title: 'คำแนะนำการใช้งานระบบ', subtitle: 'คู่มือการใช้งานระบบสำหรับ HR ของหน่วยงาน' },
 };
 
@@ -1508,10 +1507,10 @@ async function loadCh1Data() {
     summaryGrid.innerHTML = [
       { val: fmtNum(portalState.totalStaff), lbl: 'จำนวนบุคลากรรวม' },
       { val: fmtNum(portalState.officialStaff), lbl: 'จำนวนข้าราชการ' },
-      { val: turnoverRate !== null ? `${fmtNum(turnoverRate, 2)}%` : '−', lbl: kpiLabel('อัตราลาออก', 'ค่านี้มาจากข้อมูลการลาออกย้อนหลัง 5 ปี โดยใช้ข้อมูลปีล่าสุดเป็นหลัก') },
-      { val: fmtNum(engagementScore, 2), lbl: kpiLabel('คะแนนความผูกพัน', 'ค่านี้มาจากคะแนนความผูกพันของบุคลากร (Engagement) ย้อนหลัง 5 ปี โดยใช้ปีล่าสุดเป็นหลัก') },
-      { val: fmtNum(trainingHours, 2), lbl: kpiLabel('ชั่วโมงอบรม/คน/ปี', 'ค่านี้มาจากชั่วโมงการพัฒนาบุคลากรย้อนหลัง 5 ปี โดยใช้ปีล่าสุดเป็นหลัก') },
-      { val: fmtNum(fd.sick_leave_avg, 2), lbl: 'ลาป่วยเฉลี่ย/คน' },
+      { val: turnoverRate !== null ? `${fmtNum(turnoverRate, 2)}%` : '−', lbl: kpiLabel('อัตราลาออก', 'ใช้ข้อมูลปีล่าสุด') },
+      { val: fmtNum(engagementScore, 2), lbl: kpiLabel('คะแนนความผูกพัน', 'ใช้ข้อมูลปีล่าสุด') },
+      { val: fmtNum(trainingHours, 2), lbl: kpiLabel('ชั่วโมงอบรม/คน/ปี', 'ใช้ข้อมูลปีล่าสุด') },
+      { val: fmtNum(fd.sick_leave_avg, 2), lbl: kpiLabel('ลาป่วยเฉลี่ย/คน', 'ใช้ข้อมูลปีล่าสุด') },
     ].map((item) => `<div class="summary-item"><div class="val">${item.val}</div><div class="lbl">${item.lbl}</div></div>`).join('');
   }
 
