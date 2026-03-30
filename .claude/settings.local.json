@@ -14,7 +14,8 @@
       "Bash(cat /c/Users/DELL/Desktop/well-being-survey/supabase/migrations/*.sql)",
       "Bash(grep -E \"total_staff|type_official\" \"/c/Users/DELL/Desktop/well-being-survey/supabase/migrations/\"*.sql)",
       "Bash(npx serve:*)",
-      "mcp__Claude_Preview__preview_start"
+      "mcp__Claude_Preview__preview_start",
+      "Bash(curl -s http://localhost:3000)"
     ]
   }
 }

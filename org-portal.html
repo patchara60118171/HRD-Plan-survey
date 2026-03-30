@@ -2028,6 +2028,12 @@ async function loadWbIndividualPage() {
         <input class="wbi-si" id="wbi-search" placeholder="🔍 ค้นหาชื่อ...">
         <select class="wbi-sel" id="wbi-gender"><option value="">ทุกเพศ</option><option value="ชาย">ชาย</option><option value="หญิง">หญิง</option></select>
         <select class="wbi-sel" id="wbi-tmhi"><option value="">TMHI ทุกระดับ</option><option value="สูง">สูงกว่าเกณฑ์</option><option value="ปกติ">เกณฑ์ปกติ</option><option value="ต่ำ">ต่ำกว่าเกณฑ์</option></select>
+        <select class="wbi-sel" id="wbi-actions" onchange="handleWbiAction(this.value)">
+          <option value="">จัดการข้อมูล</option>
+          <option value="clear-search">🔄 ล้างการค้นหา</option>
+          <option value="clear-filters">🧹 ล้างตัวกรอง</option>
+          <option value="clear-all">🗑️ ล้างข้อมูลทั้งหมด</option>
+        </select>
         <div class="wbi-count" id="wbi-count"></div>
         <button class="btn btn-outline" style="font-size:12px;margin-left:4px" onclick="exportWbIndExcel()">📤 Export ทุกข้อ</button>
       </div>
@@ -2198,6 +2204,62 @@ function exportWbIndExcel() {
     XLSX.writeFile(wb, `wellbeing-individual-${portalState.orgCode || 'data'}-${new Date().toISOString().slice(0,10)}.xlsx`);
     showToast('ส่งออก Excel (ทุกข้อ) สำเร็จ', 'success');
   } catch (e) { showToast('ส่งออกไม่สำเร็จ: ' + e.message, 'error'); }
+}
+
+function handleWbiAction(action) {
+  const actionsSelect = document.getElementById('wbi-actions');
+  const searchInput = document.getElementById('wbi-search');
+  const genderSelect = document.getElementById('wbi-gender');
+  const tmhiSelect = document.getElementById('wbi-tmhi');
+  
+  // Reset dropdown to default option
+  actionsSelect.value = '';
+  
+  switch (action) {
+    case 'clear-search':
+      // Clear search input only
+      if (searchInput) {
+        searchInput.value = '';
+        applyWbiFilters();
+        showToast('🔄 ล้างการค้นหาเรียบร้อย', 'success');
+      }
+      break;
+      
+    case 'clear-filters':
+      // Clear all filters (gender and TMHI)
+      if (genderSelect) genderSelect.value = '';
+      if (tmhiSelect) tmhiSelect.value = '';
+      if (searchInput) searchInput.value = '';
+      
+      applyWbiFilters();
+      showToast('🧹 ล้างตัวกรองทั้งหมดเรียบร้อย', 'success');
+      break;
+      
+    case 'clear-all':
+      // Clear all data and reset to initial state
+      if (confirm('⚠️ ยืนยันการล้างข้อมูลทั้งหมด?\n\nการดำเนินการนี้จะ:\n• ล้างการค้นหาและตัวกรองทั้งหมด\n• รีเซ็ตตารางกลับไปแสดงข้อมูลดั้งเดิม\n• รีเซ็ตหน้ากลับไปหน้าแรก')) {
+        // Reset all filters
+        if (genderSelect) genderSelect.value = '';
+        if (tmhiSelect) tmhiSelect.value = '';
+        if (searchInput) searchInput.value = '';
+        
+        // Reset filtered data
+        _wbiFiltered = [];
+        
+        // Reset to first page
+        wbIndPage = 1;
+        
+        // Re-render table
+        renderWbIndividualTable();
+        
+        showToast('🗑️ ล้างข้อมูลทั้งหมดเรียบร้อย', 'success');
+      }
+      break;
+      
+    default:
+      // Do nothing for empty selection
+      break;
+  }
 }
 
 function updateProgress() {

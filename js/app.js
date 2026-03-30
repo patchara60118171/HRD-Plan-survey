@@ -1548,8 +1548,46 @@ const app = {
         }
     },
 
+    // Validate current subsection
+    validateCurrentSubsection() {
+        const sectionsOrder = PROJECT_SSOT.wellbeing.sectionsOrder;
+        const surveyData = PROJECT_SSOT.wellbeing.surveyData;
+        const sectionKey = sectionsOrder[this.currentSectionIndex];
+        const section = surveyData[sectionKey];
+        const subsection = section.subsections[this.currentSubsectionIndex];
+
+        const missingFields = [];
+
+        // Check each question in the subsection
+        if (subsection.questions) {
+            subsection.questions.forEach(question => {
+                if (question.required) {
+                    const value = this.responses[question.id];
+
+                    // Check if the field is empty
+                    if (value === undefined || value === null || value === '' ||
+                        (Array.isArray(value) && value.length === 0)) {
+                        missingFields.push(question.text);
+                    }
+                }
+            });
+        }
+
+        if (missingFields.length > 0) {
+            showToast(`กรุณากรอกข้อมูลที่จำเป็น:\n${missingFields.map(f => '• ' + f).join('\n')}`, 'error');
+            return false;
+        }
+
+        return true;
+    },
+
     // Next section
     nextSection() {
+        // Validate current subsection before moving forward
+        if (!this.validateCurrentSubsection()) {
+            return; // Stop navigation if validation fails
+        }
+
         const sectionsOrder = PROJECT_SSOT.wellbeing.sectionsOrder;
         const surveyData = PROJECT_SSOT.wellbeing.surveyData;
         const sectionKey = sectionsOrder[this.currentSectionIndex];
