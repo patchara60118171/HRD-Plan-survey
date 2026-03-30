@@ -15,7 +15,9 @@
       "Bash(grep -E \"total_staff|type_official\" \"/c/Users/DELL/Desktop/well-being-survey/supabase/migrations/\"*.sql)",
       "Bash(npx serve:*)",
       "mcp__Claude_Preview__preview_start",
-      "Bash(curl -s http://localhost:3000)"
+      "Bash(curl -s http://localhost:3000)",
+      "Bash(pkill -f \"serve\")",
+      "Bash(xargs kill:*)"
     ]
   }
 }

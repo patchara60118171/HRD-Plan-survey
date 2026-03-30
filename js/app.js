@@ -1550,11 +1550,14 @@ const app = {
 
     // Validate current subsection
     validateCurrentSubsection() {
+        console.log('validateCurrentSubsection called');
         const sectionsOrder = PROJECT_SSOT.wellbeing.sectionsOrder;
         const surveyData = PROJECT_SSOT.wellbeing.surveyData;
         const sectionKey = sectionsOrder[this.currentSectionIndex];
         const section = surveyData[sectionKey];
         const subsection = section.subsections[this.currentSubsectionIndex];
+
+        console.log('Validating section:', sectionKey, 'subsection:', this.currentSubsectionIndex);
 
         const missingFields = [];
 
@@ -1563,28 +1566,40 @@ const app = {
             subsection.questions.forEach(question => {
                 if (question.required) {
                     const value = this.responses[question.id];
+                    console.log('Checking required question:', question.id, 'value:', value);
 
                     // Check if the field is empty
                     if (value === undefined || value === null || value === '' ||
                         (Array.isArray(value) && value.length === 0)) {
+                        console.log('Missing required field:', question.id);
                         missingFields.push(question.text);
                     }
                 }
             });
         }
 
+        console.log('Missing fields count:', missingFields.length);
+
         if (missingFields.length > 0) {
+            console.log('Showing error toast for missing fields');
             showToast(`กรุณากรอกข้อมูลที่จำเป็น:\n${missingFields.map(f => '• ' + f).join('\n')}`, 'error');
             return false;
         }
 
+        console.log('Validation passed');
         return true;
     },
 
     // Next section
     nextSection() {
+        console.log('nextSection called, validating...');
+        
         // Validate current subsection before moving forward
-        if (!this.validateCurrentSubsection()) {
+        const isValid = this.validateCurrentSubsection();
+        console.log('Validation result:', isValid);
+        
+        if (!isValid) {
+            console.log('Validation failed, stopping navigation');
             return; // Stop navigation if validation fails
         }
 
