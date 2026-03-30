@@ -2980,6 +2980,22 @@
 
     <script src="js/pdf-upload.js?v=2"></script>
 
+    <script>
+        // Verify functions are loaded and add backup validation
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('CH1 Form: Checking if nextStep function exists...', typeof nextStep);
+            
+            // Add backup validation if nextStep doesn't exist
+            if (typeof nextStep !== 'function') {
+                console.error('nextStep function not found! Adding backup...');
+                window.nextStep = function() {
+                    alert('❌ ระบบมีปัญหา กรุณากรอกข้อมูลให้ครบถ้วนก่อนไปหน้าถัดไป!');
+                    return false;
+                };
+            }
+        });
+    </script>
+
 
 
     <!-- Service Worker Registration -->

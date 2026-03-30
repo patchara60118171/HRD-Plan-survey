@@ -262,11 +262,17 @@ function goBackToPortal() {
 }
 
 function nextStep() {
+    // Force validation check
     alert(`nextStep called, currentStep: ${currentStep}`);
+    
     const isValid = validateStep(currentStep);
     alert(`Validation result: ${isValid}`);
     
-    if (!isValid) return;
+    // BLOCK navigation if not valid
+    if (!isValid) {
+        alert('❌ กรุณากรอกข้อมูลให้ครบถ้วนก่อนไปหน้าถัดไป!');
+        return false;
+    }
 
     if (currentStep < TOTAL_STEPS - 1) {
         currentStep++;
@@ -275,6 +281,7 @@ function nextStep() {
     } else {
         submitForm();
     }
+    return false;
 }
 
 function prevStep() {
