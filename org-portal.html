@@ -135,11 +135,6 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
 .detail-item{background:#fcfbff;border:1px solid #f1edf8;border-radius:10px;padding:11px 12px;min-height:56px}
 .detail-label{font-size:10px;font-weight:700;color:#9ca3af;letter-spacing:.01em;margin-bottom:5px}
 .detail-value{font-size:13px;color:#374151;line-height:1.55;word-break:break-word}
-/* Debug: Force guide page content to be visible */
-#page-guide .detail-card { background: #fff !important; }
-#page-guide .detail-value { color: #374151 !important; }
-#page-guide h4 { color: #6d28d9 !important; }
-#page-guide .detail-card-icon { color: #7c3aed !important; background: #f3e8ff !important; }
 .detail-empty{color:var(--tx3)}
 .detail-card.stretch-card{display:flex;flex-direction:column}
 .detail-card.stretch-card .detail-list{flex:1;align-content:start}
@@ -527,6 +522,10 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
             <iframe id="ch1-inline-frame" class="embed-frame" title="CH1 Form"></iframe>
           </div>
         </div>
+
+        <!-- HR Analytics Dashboard - HIDDEN due to data inconsistency -->
+
+      </div>
 
       <div class="tab-page" id="page-share" style="margin-top:32px">
         <div id="home-share-section" style="scroll-margin-top:80px"></div>
@@ -1096,7 +1095,7 @@ function switchTab(tab) {
   ['nav-home-org', 'nav-home-progress', 'nav-home-share', 'nav-home-org-detail'].forEach((id) => document.getElementById(id)?.classList.remove('active'));
   document.querySelectorAll('.tab-page').forEach((page) => page.classList.remove('active'));
   if (tab === 'home') {
-    ['page-home', 'page-org-profile', 'page-share', 'page-guide'].forEach((id) => {
+    ['page-home', 'page-org-profile', 'page-share'].forEach((id) => {
       document.getElementById(id)?.classList.add('active');
     });
   } else {
@@ -1107,7 +1106,6 @@ function switchTab(tab) {
   document.getElementById('topbar-title').textContent = meta.title;
   document.getElementById('topbar-subtitle').textContent = meta.subtitle;
   
-  // Scroll to CH1 tab when switching
   if (tab === 'ch1') {
     document.getElementById('page-ch1')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
@@ -2201,7 +2199,6 @@ function navigateCh1(action) {
       break;
   }
 }
-
 
 
 (async () => {
