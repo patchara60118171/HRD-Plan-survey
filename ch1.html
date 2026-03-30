@@ -2850,7 +2850,7 @@
 
                     ย้อนกลับ</button>
 
-                <button id="btn-next" onclick="nextStep()"
+                <button id="btn-next" type="button"
 
                     class="px-6 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary-dark transition flex items-center gap-2 shadow-sm">ถัดไป
 
@@ -2981,38 +2981,55 @@
     <script src="js/pdf-upload.js?v=2"></script>
 
     <script>
-        // Verify functions are loaded and add backup validation
+        // Force validation on next button
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('CH1 Form: Checking if nextStep function exists...', typeof nextStep);
+            console.log('CH1 Form: Setting up validation...');
             
-            // Add backup validation if nextStep doesn't exist
-            if (typeof nextStep !== 'function') {
-                console.error('nextStep function not found! Adding backup...');
-                window.nextStep = function() {
+            // Find the next button
+            const nextBtn = document.getElementById('btn-next');
+            if (!nextBtn) {
+                console.error('btn-next not found!');
+                return;
+            }
+            
+            // Remove any existing handlers
+            nextBtn.onclick = null;
+            
+            // Add our validation handler
+            nextBtn.addEventListener('click', function(e) {
+                console.log('Next button clicked - validating...');
+                
+                // Stop everything
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                
+                // Check if we have the validation function
+                if (typeof validateStep !== 'function' || typeof nextStep !== 'function') {
                     alert('❌ ระบบมีปัญหา กรุณากรอกข้อมูลให้ครบถ้วนก่อนไปหน้าถัดไป!');
                     return false;
-                };
-            }
+                }
+                
+                // Get current step
+                const currentStep = window.currentStep || 1;
+                console.log('Current step:', currentStep);
+                
+                // Validate current step
+                const isValid = validateStep(currentStep);
+                console.log('Validation result:', isValid);
+                
+                if (!isValid) {
+                    // BLOCK navigation completely
+                    alert('❌ กรุณากรอกข้อมูลให้ครบถ้วนก่อนไปหน้าถัดไป!');
+                    return false;
+                }
+                
+                // Only proceed if valid
+                console.log('Validation passed, proceeding...');
+                return nextStep();
+            }, true); // Use capture phase
             
-            // Add event listener as backup to onclick
-            const nextBtn = document.getElementById('btn-next');
-            if (nextBtn) {
-                nextBtn.addEventListener('click', function(e) {
-                    console.log('btn-next clicked via event listener');
-                    e.preventDefault();
-                    e.stopPropagation();
-                    
-                    if (typeof nextStep === 'function') {
-                        return nextStep();
-                    } else {
-                        alert('❌ กรุณากรอกข้อมูลให้ครบถ้วนก่อนไปหน้าถัดไป!');
-                        return false;
-                    }
-                });
-                console.log('Event listener added to btn-next');
-            } else {
-                console.error('btn-next element not found!');
-            }
+            console.log('Validation handler attached to btn-next');
         });
     </script>
 
