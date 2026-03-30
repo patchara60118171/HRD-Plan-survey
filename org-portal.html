@@ -1507,10 +1507,10 @@ async function loadCh1Data() {
     summaryGrid.innerHTML = [
       { val: fmtNum(portalState.totalStaff), lbl: 'จำนวนบุคลากรรวม' },
       { val: fmtNum(portalState.officialStaff), lbl: 'จำนวนข้าราชการ' },
-      { val: turnoverRate !== null ? `${fmtNum(turnoverRate, 2)}%` : '−', lbl: kpiLabel('อัตราลาออก', 'ค่านี้มาจากข้อมูลการลาออกย้อนหลัง 5 ปี โดยใช้ข้อมูลปีล่าสุดเป็นหลัก') },
-      { val: fmtNum(engagementScore, 2), lbl: kpiLabel('คะแนนความผูกพัน', 'ค่านี้มาจากคะแนนความผูกพันของบุคลากร (Engagement) ย้อนหลัง 5 ปี โดยใช้ปีล่าสุดเป็นหลัก') },
-      { val: fmtNum(trainingHours, 2), lbl: kpiLabel('ชั่วโมงอบรม/คน/ปี', 'ค่านี้มาจากชั่วโมงการพัฒนาบุคลากรย้อนหลัง 5 ปี โดยใช้ปีล่าสุดเป็นหลัก') },
-      { val: fmtNum(fd.sick_leave_avg, 2), lbl: kpiLabel('ลาป่วยเฉลี่ย/คน', 'ค่านี้มาจากข้อมูลการลาป่วยย้อนหลัง 5 ปี โดยใช้ปีล่าสุดเป็นหลัก') },
+      { val: turnoverRate !== null ? `${fmtNum(turnoverRate, 2)}%` : '−', lbl: kpiLabel('อัตราลาออก', 'ค่านี้มาจากข้อมูลการลาออกของปีล่าสุด') },
+      { val: fmtNum(engagementScore, 2), lbl: kpiLabel('คะแนนความผูกพัน', 'ค่านี้มาจากคะแนนความผูกพันของบุคลากรของปีล่าสุด') },
+      { val: fmtNum(trainingHours, 2), lbl: kpiLabel('ชั่วโมงอบรม/คน/ปี', 'ค่านี้มาจากชั่วโมงการพัฒนาบุคลากรของปีล่าสุด') },
+      { val: fmtNum(fd.sick_leave_avg, 2), lbl: kpiLabel('ลาป่วยเฉลี่ย/คน', 'ค่านี้มาจากข้อมูลการลาป่วยของปีล่าสุด') },
     ].map((item) => `<div class="summary-item"><div class="val">${item.val}</div><div class="lbl">${item.lbl}</div></div>`).join('');
   }
 
