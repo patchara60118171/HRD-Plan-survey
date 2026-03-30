@@ -2183,11 +2183,11 @@ function updateProgress() {
   document.getElementById('progress-fill').style.width = pctText;
   document.getElementById('progress-pct-text').textContent = pctText;
   document.getElementById('progress-detail-text').innerHTML = officialStaff > 0
-    ? `ผู้ที่กรอกแล้ว <strong>${fmtNum(wbCount)}</strong> คน / <strong>${fmtNum(officialStaff)}</strong> คน คิดเป็นร้อยละ <strong>${pct.toFixed(1)}</strong>`
-    : `ผู้ที่กรอกแล้ว <strong>${fmtNum(wbCount)}</strong> คน <span style="color:var(--tx3)">(ไม่พบจำนวนข้าราชการจาก CH1)</span>`;
+    ? `จำนวนผู้ตอบแบบสำรวจ <strong>${fmtNum(wbCount)}</strong> คน / <strong>${fmtNum(officialStaff)}</strong> คน คิดเป็นร้อยละ <strong>${pct.toFixed(1)}</strong>`
+    : `จำนวนผู้ตอบแบบสำรวจ <strong>${fmtNum(wbCount)}</strong> คน <span style="color:var(--tx3)">(ไม่พบจำนวนข้าราชการจาก CH1)</span>`;
   document.getElementById('share-progress-text').innerHTML = officialStaff > 0
-    ? `ผู้ที่กรอกแล้ว <strong>${fmtNum(wbCount)}</strong> คน / <strong>${fmtNum(officialStaff)}</strong> คน<br>คิดเป็นร้อยละ <strong>${pct.toFixed(1)}</strong>`
-    : `ผู้ที่กรอกแล้ว <strong>${fmtNum(wbCount)}</strong> คน`;
+    ? `จำนวนผู้ตอบแบบสำรวจ <strong>${fmtNum(wbCount)}</strong> คน / <strong>${fmtNum(officialStaff)}</strong> คน<br>คิดเป็นร้อยละ <strong>${pct.toFixed(1)}</strong>`
+    : `จำนวนผู้ตอบแบบสำรวจ <strong>${fmtNum(wbCount)}</strong> คน`;
 }
 
 function generateOrgQR() {
@@ -2339,10 +2339,10 @@ function createPersonnelTypeChart(data) {
   const ctx = document.getElementById('personnel-type-chart');
   if (!ctx) return;
   
-  const official = data.type_official || 0;
-  const employee = data.type_employee || 0;
-  const contract = data.type_contract || 0;
-  const other = data.type_other || 0;
+  const official = Number(data.type_official || 0);
+  const employee = Number(data.type_employee || 0);
+  const contract = Number(data.type_contract || 0);
+  const other = Number(data.type_other || 0);
   
   _hrCharts['personnel-type-chart'] = new Chart(ctx, {
     type: 'doughnut',
@@ -2405,10 +2405,10 @@ function createAgeDistributionChart(data) {
   if (!ctx) return;
   
   // Use real data from Supabase
-  const ageUnder30 = data.age_under_30 || 0;
-  const age31_40 = data.age_31_40 || 0;
-  const age41_50 = data.age_41_50 || 0;
-  const age51_60 = data.age_51_60 || 0;
+  const ageUnder30 = Number(data.age_under_30 || 0);
+  const age31_40 = Number(data.age_31_40 || 0);
+  const age41_50 = Number(data.age_41_50 || 0);
+  const age51_60 = Number(data.age_51_60 || 0);
   
   const ageTotal = ageUnder30 + age31_40 + age41_50 + age51_60;
   _hrCharts['age-distribution-chart'] = new Chart(ctx, {
@@ -2454,10 +2454,10 @@ function createPositionLevelChart(data) {
   const ctx = document.getElementById('position-level-chart');
   if (!ctx) return;
   
-  const oLevels = [data.pos_o1 || 0, data.pos_o2 || 0, data.pos_o3 || 0, data.pos_o4 || 0];
-  const kLevels = [data.pos_k1 || 0, data.pos_k2 || 0, data.pos_k3 || 0, data.pos_k4 || 0, data.pos_k5 || 0];
-  const mLevels = [data.pos_m1 || 0, data.pos_m2 || 0];
-  const sLevels = [data.pos_s1 || 0, data.pos_s2 || 0];
+  const oLevels = [Number(data.pos_o1 || 0), Number(data.pos_o2 || 0), Number(data.pos_o3 || 0), Number(data.pos_o4 || 0)];
+  const kLevels = [Number(data.pos_k1 || 0), Number(data.pos_k2 || 0), Number(data.pos_k3 || 0), Number(data.pos_k4 || 0), Number(data.pos_k5 || 0)];
+  const mLevels = [Number(data.pos_m1 || 0), Number(data.pos_m2 || 0)];
+  const sLevels = [Number(data.pos_s1 || 0), Number(data.pos_s2 || 0)];
   
   _hrCharts['position-level-chart'] = new Chart(ctx, {
     type: 'bar',
@@ -2517,14 +2517,14 @@ function createServiceYearsChart(data) {
   
   // Use real data from Supabase, filter out empty ranges
   const allRanges = [
-    { label: '< 1 ปี', value: data.service_under_1 || 0, color: '#c4b5fd' },
-    { label: '1–5 ปี', value: data.service_1_5 || 0, color: '#a78bfa' },
-    { label: '6–10 ปี', value: data.service_6_10 || 0, color: '#8b5cf6' },
-    { label: '11–15 ปี', value: data.service_11_15 || 0, color: '#7c3aed' },
-    { label: '16–20 ปี', value: data.service_16_20 || 0, color: '#6d28d9' },
-    { label: '21–25 ปี', value: data.service_21_25 || 0, color: '#5b21b6' },
-    { label: '26–30 ปี', value: data.service_26_30 || 0, color: '#4c1d95' },
-    { label: '> 30 ปี', value: data.service_over_30 || 0, color: '#3b1178' }
+    { label: '< 1 ปี', value: Number(data.service_under_1 || 0), color: '#c4b5fd' },
+    { label: '1–5 ปี', value: Number(data.service_1_5 || 0), color: '#a78bfa' },
+    { label: '6–10 ปี', value: Number(data.service_6_10 || 0), color: '#8b5cf6' },
+    { label: '11–15 ปี', value: Number(data.service_11_15 || 0), color: '#7c3aed' },
+    { label: '16–20 ปี', value: Number(data.service_16_20 || 0), color: '#6d28d9' },
+    { label: '21–25 ปี', value: Number(data.service_21_25 || 0), color: '#5b21b6' },
+    { label: '26–30 ปี', value: Number(data.service_26_30 || 0), color: '#4c1d95' },
+    { label: '> 30 ปี', value: Number(data.service_over_30 || 0), color: '#3b1178' }
   ];
   
   // Filter out ranges with zero data
