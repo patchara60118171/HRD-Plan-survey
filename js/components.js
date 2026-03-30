@@ -503,7 +503,37 @@ function renderUserProfile(user) {
                         <div class="dropdown-email">${user.email || ''}</div>
                     </div>
                 </div>
+                <div class="dropdown-menu">
+                    <div class="dropdown-item" onclick="clearAllData()">
+                        <span class="dropdown-icon">🗑️</span>
+                        <span>ล้างข้อมูล</span>
+                    </div>
+                </div>
             </div>
         </div>
     `;
+}
+
+function clearAllData() {
+    if (confirm('⚠️ ต้องการล้างข้อมูลทั้งหมดหรือไม่?\n\nข้อมูลร่างที่บันทึกไว้จะถูกลบทั้งหมด')) {
+        // Clear all localStorage data
+        localStorage.clear();
+        
+        // Clear sessionStorage
+        sessionStorage.clear();
+        
+        // Show success message
+        alert('✅ ล้างข้อมูลทั้งหมดเรียบร้อยแล้ว\n\nหน้าเว็บจะรีเฟรชใน 3 วินาที');
+        
+        // Close dropdown
+        const dropdown = document.getElementById('profile-dropdown');
+        if (dropdown) {
+            dropdown.classList.remove('show');
+        }
+        
+        // Refresh page after delay
+        setTimeout(() => {
+            window.location.reload();
+        }, 3000);
+    }
 }
