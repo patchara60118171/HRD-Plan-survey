@@ -2263,7 +2263,35 @@ function _destroyChart(id) {
 function initHRAnalyticsCharts() {
   if (!portalState.ch1Row) return;
   const data = portalState.ch1Row;
-
+  
+  // DEBUG: Log actual data from Supabase
+  console.log('[Charts] Raw data from Supabase:', data);
+  console.log('[Charts] Position data:', {
+    pos_o1: data.pos_o1,
+    pos_o2: data.pos_o2,
+    pos_o3: data.pos_o3,
+    pos_o4: data.pos_o4,
+    pos_k1: data.pos_k1,
+    pos_k2: data.pos_k2,
+    pos_k3: data.pos_k3,
+    pos_k4: data.pos_k4,
+    pos_k5: data.pos_k5,
+    pos_m1: data.pos_m1,
+    pos_m2: data.pos_m2,
+    pos_s1: data.pos_s1,
+    pos_s2: data.pos_s2
+  });
+  console.log('[Charts] Service years data:', {
+    service_under_1: data.service_under_1,
+    service_1_5: data.service_1_5,
+    service_6_10: data.service_6_10,
+    service_11_15: data.service_11_15,
+    service_16_20: data.service_16_20,
+    service_21_25: data.service_21_25,
+    service_26_30: data.service_26_30,
+    service_over_30: data.service_over_30
+  });
+  
   // Destroy all existing before re-render
   ['personnel-type-chart','age-distribution-chart','position-level-chart','service-years-chart'].forEach(_destroyChart);
 
