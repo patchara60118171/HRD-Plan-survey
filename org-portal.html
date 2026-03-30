@@ -2317,10 +2317,10 @@ function createPersonnelTypeChart(data) {
   const ctx = document.getElementById('personnel-type-chart');
   if (!ctx) return;
   
-  const official = data.type_official || Math.floor(Math.random() * 100) + 50;
-  const employee = data.type_employee || Math.floor(Math.random() * 80) + 30;
-  const contract = data.type_contract || Math.floor(Math.random() * 40) + 10;
-  const other = data.type_other || Math.floor(Math.random() * 20) + 5;
+  const official = data.type_official || 0;
+  const employee = data.type_employee || 0;
+  const contract = data.type_contract || 0;
+  const other = data.type_other || 0;
   
   _hrCharts['personnel-type-chart'] = new Chart(ctx, {
     type: 'doughnut',
@@ -2379,11 +2379,11 @@ function createAgeDistributionChart(data) {
   const ctx = document.getElementById('age-distribution-chart');
   if (!ctx) return;
   
-  // Mock data - in real implementation, these would come from data fields
-  const ageUnder30 = data.age_under_30 || Math.floor(Math.random() * 30) + 10;
-  const age31_40 = data.age_31_40 || Math.floor(Math.random() * 50) + 30;
-  const age41_50 = data.age_41_50 || Math.floor(Math.random() * 60) + 40;
-  const age51_60 = data.age_51_60 || Math.floor(Math.random() * 40) + 20;
+  // Use real data from Supabase
+  const ageUnder30 = data.age_under_30 || 0;
+  const age31_40 = data.age_31_40 || 0;
+  const age41_50 = data.age_41_50 || 0;
+  const age51_60 = data.age_51_60 || 0;
   
   const ageTotal = ageUnder30 + age31_40 + age41_50 + age51_60;
   _hrCharts['age-distribution-chart'] = new Chart(ctx, {
@@ -2429,10 +2429,10 @@ function createPositionLevelChart(data) {
   const ctx = document.getElementById('position-level-chart');
   if (!ctx) return;
   
-  const oLevels = [data.pos_o1, data.pos_o2, data.pos_o3, data.pos_o4].map(v => v || Math.floor(Math.random() * 15) + 5);
-  const kLevels = [data.pos_k1, data.pos_k2, data.pos_k3, data.pos_k4, data.pos_k5].map(v => v || Math.floor(Math.random() * 20) + 10);
-  const mLevels = [data.pos_m1, data.pos_m2].map(v => v || Math.floor(Math.random() * 15) + 5);
-  const sLevels = [data.pos_s1, data.pos_s2].map(v => v || Math.floor(Math.random() * 10) + 3);
+  const oLevels = [data.pos_o1 || 0, data.pos_o2 || 0, data.pos_o3 || 0, data.pos_o4 || 0];
+  const kLevels = [data.pos_k1 || 0, data.pos_k2 || 0, data.pos_k3 || 0, data.pos_k4 || 0, data.pos_k5 || 0];
+  const mLevels = [data.pos_m1 || 0, data.pos_m2 || 0];
+  const sLevels = [data.pos_s1 || 0, data.pos_s2 || 0];
   
   _hrCharts['position-level-chart'] = new Chart(ctx, {
     type: 'bar',
@@ -2487,18 +2487,29 @@ function createServiceYearsChart(data) {
   const ctx = document.getElementById('service-years-chart');
   if (!ctx) return;
   
+  // Use real data from Supabase, fallback to 0 if not available
   const serviceRanges = [
-    data.service_under_1 || Math.floor(Math.random() * 15) + 5,
-    data.service_1_5 || Math.floor(Math.random() * 30) + 15,
-    data.service_6_10 || Math.floor(Math.random() * 35) + 20,
-    data.service_11_15 || Math.floor(Math.random() * 30) + 15,
-    data.service_16_20 || Math.floor(Math.random() * 25) + 10,
-    data.service_21_25 || Math.floor(Math.random() * 20) + 8,
-    data.service_26_30 || Math.floor(Math.random() * 15) + 5,
-    data.service_over_30 || Math.floor(Math.random() * 10) + 3
+    data.service_under_1 || 0,
+    data.service_1_5 || 0,
+    data.service_6_10 || 0,
+    data.service_11_15 || 0,
+    data.service_16_20 || 0,
+    data.service_21_25 || 0,
+    data.service_26_30 || 0,
+    data.service_over_30 || 0
   ];
   
   const svcTotal = serviceRanges.reduce((a, b) => a + b, 0);
+  
+  // If no data, show message
+  if (svcTotal === 0) {
+    ctx.font = "14px 'IBM Plex Sans Thai Looped', sans-serif";
+    ctx.fillStyle = '#64748b';
+    ctx.textAlign = 'center';
+    ctx.fillText('ไม่มีข้อมูลการกระจายตัวตามอายุราชการ', ctx.canvas.width / 2, ctx.canvas.height / 2);
+    return;
+  }
+  
   _hrCharts['service-years-chart'] = new Chart(ctx, {
     type: 'bar',
     data: {
@@ -2515,6 +2526,7 @@ function createServiceYearsChart(data) {
       }]
     },
     options: {
+      indexAxis: 'y', // Horizontal bars
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
@@ -2522,19 +2534,22 @@ function createServiceYearsChart(data) {
         tooltip: {
           callbacks: {
             label: function(context) {
-              const pct = svcTotal > 0 ? ((context.parsed.y / svcTotal) * 100).toFixed(1) : 0;
-              return ` ${context.parsed.y.toLocaleString('th-TH')} คน (${pct}%)`;
+              const pct = svcTotal > 0 ? ((context.parsed.x / svcTotal) * 100).toFixed(1) : 0;
+              return ` ${context.parsed.x.toLocaleString('th-TH')} คน (${pct}%)`;
             }
           }
         }
       },
       scales: {
-        y: {
+        x: {
           beginAtZero: true,
           grid: { color: 'rgba(0,0,0,.05)' },
           title: { display: true, text: 'จำนวนคน', font: { family: "'IBM Plex Sans Thai Looped', sans-serif" } }
         },
-        x: { grid: { display: false } }
+        y: { 
+          grid: { display: false },
+          title: { display: true, text: 'อายุราชการ', font: { family: "'IBM Plex Sans Thai Looped', sans-serif" } }
+        }
       }
     }
   });
@@ -2546,8 +2561,8 @@ function createTurnoverChart(data) {
   if (!ctx) return;
   
   const years = ['2564', '2565', '2566', '2567', '2568'];
-  const turnoverData = years.map(year => data[`turnover_${year}`] || Math.floor(Math.random() * 10) + 2);
-  const transferData = years.map(year => data[`transfer_${year}`] || Math.floor(Math.random() * 8) + 1);
+  const turnoverData = years.map(year => data[`turnover_${year}`] || 0);
+  const transferData = years.map(year => data[`transfer_${year}`] || 0);
 
   _hrCharts['turnover-chart'] = new Chart(ctx, {
     type: 'line',
@@ -2612,15 +2627,15 @@ function createTurnoverRateChart(data) {
   
   // Calculate rates based on turnover/transfer numbers and staff count
   const turnoverRateData = years.map(year => {
-    const turnover = data[`turnover_${year}`] || Math.floor(Math.random() * 10) + 2;
-    const staffEnd = data[`staff_end_${year}`] || 200;
-    return ((turnover / staffEnd) * 100).toFixed(2);
+    const turnover = data[`turnover_${year}`] || 0;
+    const staffEnd = data[`staff_end_${year}`] || 1;
+    return staffEnd > 0 ? ((turnover / staffEnd) * 100).toFixed(2) : 0;
   });
   
   const transferRateData = years.map(year => {
-    const transfer = data[`transfer_${year}`] || Math.floor(Math.random() * 8) + 1;
-    const staffEnd = data[`staff_end_${year}`] || 200;
-    return ((transfer / staffEnd) * 100).toFixed(2);
+    const transfer = data[`transfer_${year}`] || 0;
+    const staffEnd = data[`staff_end_${year}`] || 1;
+    return staffEnd > 0 ? ((transfer / staffEnd) * 100).toFixed(2) : 0;
   });
 
   _hrCharts['turnover-rate-chart'] = new Chart(ctx, {
@@ -2684,8 +2699,8 @@ function createWorkforceChart(data) {
   if (!ctx) return;
   
   const years = ['2564', '2565', '2566', '2567', '2568'];
-  const beginYearData = years.map(year => data[`staff_begin_${year}`] || Math.floor(Math.random() * 50) + 200);
-  const endYearData = years.map(year => data[`staff_end_${year}`] || Math.floor(Math.random() * 50) + 190);
+  const beginYearData = years.map(year => data[`staff_begin_${year}`] || 0);
+  const endYearData = years.map(year => data[`staff_end_${year}`] || 0);
 
   _hrCharts['workforce-chart'] = new Chart(ctx, {
     type: 'line',
