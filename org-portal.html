@@ -1102,17 +1102,9 @@ function switchTab(tab) {
   document.getElementById('topbar-title').textContent = meta.title;
   document.getElementById('topbar-subtitle').textContent = meta.subtitle;
   
-  // Initialize HR Analytics Charts when switching to CH1 tab
+  // Scroll to CH1 tab when switching
   if (tab === 'ch1') {
     document.getElementById('page-ch1')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    setTimeout(() => {
-      // Check if Chart.js is loaded
-      if (typeof Chart !== 'undefined') {
-        initHRAnalyticsCharts();
-      } else {
-        console.error('Chart.js not loaded');
-      }
-    }, 1500);
   }
 }
 
