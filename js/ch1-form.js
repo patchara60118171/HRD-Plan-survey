@@ -262,7 +262,11 @@ function goBackToPortal() {
 }
 
 function nextStep() {
-    if (!validateStep(currentStep)) return;
+    alert(`nextStep called, currentStep: ${currentStep}`);
+    const isValid = validateStep(currentStep);
+    alert(`Validation result: ${isValid}`);
+    
+    if (!isValid) return;
 
     if (currentStep < TOTAL_STEPS - 1) {
         currentStep++;
@@ -391,14 +395,21 @@ function getDetailedErrorMessage(err) {
 }
 
 function validateStep(step) {
+    alert(`Validating step: ${step}`);
     switch (step) {
+        case 0: return validateStep0();
         case 1: return validateStep1();
-        case 2: return true; // Optional
-        case 3: return true; // Optional
-        case 4: return true; // Optional
+        case 2: return validateStep2();
+        case 3: return validateStep3();
+        case 4: return validateStep4();
         case 5: return validateStep5();
         default: return true;
     }
+}
+
+function validateStep0() {
+    // Landing page - always allow to proceed
+    return true;
 }
 
 function validateStep1() {
@@ -427,6 +438,67 @@ function validateStep1() {
     }
 
     return valid;
+}
+
+function validateStep2() {
+    // Check if at least one field is filled in step 2
+    const policies = document.getElementById('related_policies')?.value.trim();
+    const context = document.getElementById('context_challenges')?.value.trim();
+    
+    if (!policies && !context) {
+        showToast('กรุณากรอกข้อมูลนโยบายหรือบริบทและความท้าทายอย่างน้อย 1 รายการ', 'error');
+        return false;
+    }
+    
+    return true;
+}
+
+function validateStep3() {
+    // Check if disease report type is selected
+    const reportType = document.querySelector('input[name="disease_report_type"]:checked');
+    
+    if (!reportType) {
+        showToast('กรุณาเลือกประเภทข้อมูลที่รายงาน', 'error');
+        return false;
+    }
+    
+    // If "none" is not selected, check if at least some data is provided
+    if (reportType.value !== 'none') {
+        const diabetes = document.getElementById('disease_diabetes')?.value;
+        const hypertension = document.getElementById('disease_hypertension')?.value;
+        const heart = document.getElementById('disease_heart')?.value;
+        
+        if (!diabetes && !hypertension && !heart) {
+            showToast('กรุณากรอกข้อมูลโรคที่พบอย่างน้อย 1 รายการ หรือเลือก "ไม่มีข้อมูล"', 'error');
+            return false;
+        }
+    }
+    
+    return true;
+}
+
+function validateStep4() {
+    // Check if at least one management system field is filled
+    const systems = [
+        'performance_system', 'training_system', 'communication_system',
+        'work_life_balance', 'health_promotion', 'work_environment'
+    ];
+    
+    let hasData = false;
+    for (const id of systems) {
+        const field = document.getElementById(id);
+        if (field && field.value && field.value.trim()) {
+            hasData = true;
+            break;
+        }
+    }
+    
+    if (!hasData) {
+        showToast('กรุณากรอกข้อมูลระบบการบริหารหรือสภาพแวดล้อมอย่างน้อย 1 รายการ', 'error');
+        return false;
+    }
+    
+    return true;
 }
 
 function validateStep5() {
