@@ -114,15 +114,24 @@
 
       <div class="card card-mb">
         <div class="card-head">
-          <h3>💚 Wellbeing Survey (Top 5 องค์กร)</h3>
-          <button class="btn b-gray" onclick="go('progress',document.querySelector('.nav-item:nth-child(5)'))">ดูทั้งหมด →</button>
+          <h3>💚 Wellbeing Survey รายองค์กร</h3>
+          <div style="display:flex;gap:8px;align-items:center">
+            <select class="sel" id="wb-sort-by" onchange="renderWbTable()" style="font-size:12px;padding:5px 8px">
+              <option value="count">เรียงตามจำนวนคน</option>
+              <option value="pct">เรียงตามร้อยละ</option>
+            </select>
+            <select class="sel" id="wb-sort-dir" onchange="renderWbTable()" style="font-size:12px;padding:5px 8px">
+              <option value="desc">มาก → น้อย</option>
+              <option value="asc">น้อย → มาก</option>
+            </select>
+            <button class="btn b-gray" onclick="go('progress',document.querySelector('.nav-item:nth-child(5)'))">ดูทั้งหมด →</button>
+          </div>
         </div>
-        <div class="card-body" style="display:flex;flex-direction:column;gap:0">
-          <div class="prog-item"><div class="prog-org">สำนักงานสภาพัฒน์</div><div class="prog-track"><div class="prog-fill" style="width:100%"></div></div><div class="prog-pct">100%</div><div class="prog-status"><span class="badge bg">ส่งแล้ว</span></div></div>
-          <div class="prog-item" style="margin-top:6px"><div class="prog-org">กรมสุขภาพจิต</div><div class="prog-track"><div class="prog-fill" style="width:100%"></div></div><div class="prog-pct">100%</div><div class="prog-status"><span class="badge bg">ส่งแล้ว</span></div></div>
-          <div class="prog-item" style="margin-top:6px"><div class="prog-org">สำนักงาน กพร.</div><div class="prog-track"><div class="prog-fill w" style="width:70%"></div></div><div class="prog-pct w">70%</div><div class="prog-status"><span class="badge bw">กำลังกรอก</span></div></div>
-          <div class="prog-item" style="margin-top:6px"><div class="prog-org">กรมชลประทาน</div><div class="prog-track"><div class="prog-fill r" style="width:2%"></div></div><div class="prog-pct r">0%</div><div class="prog-status"><span class="badge br">ยังไม่เริ่ม</span></div></div>
-          <div class="prog-item" style="margin-top:6px"><div class="prog-org">กรมกิจการเด็กและเยาวชน</div><div class="prog-track"><div class="prog-fill r" style="width:2%"></div></div><div class="prog-pct r">0%</div><div class="prog-status"><span class="badge br">ยังไม่เริ่ม</span></div></div>
+        <div class="card-body" style="padding:0">
+          <div class="tbl-wrap"><table id="wb-rank-table">
+            <thead><tr><th>#</th><th>องค์กร</th><th>คนกรอก / ข้าราชการ</th><th>ความคืบหน้า</th><th>% คืบหน้า</th></tr></thead>
+            <tbody id="wb-rank-tbody"><tr><td colspan="5" style="text-align:center;color:var(--tx3)">กำลังโหลด...</td></tr></tbody>
+          </table></div>
         </div>
       </div>
     </div><!-- /dashboard -->
@@ -1070,18 +1079,41 @@ function renderDashboard(summary) {
     .map(([ministry, count], idx) => `<div class="legend-row"><div class="ld" style="background:${['#0F4C81','#00A86B','#C08F2A','#8896A5','#C4444A'][idx % 5]}"></div>${esc(ministry)} — ${fmtNum(count)} หน่วยงาน</div>`)
     .join('');
 
-  const top5 = summary.slice().sort((a, b) => b.wellbeingSubmitted - a.wellbeingSubmitted).slice(0, 5);
-  const maxWb = Math.max(...top5.map(o => o.wellbeingSubmitted), 1);
-  const progBody = dashboard.querySelector('.card.card-mb .card-body');
-  progBody.innerHTML = top5.map((org) => {
+  window._wbSummary = summary;
+  renderWbTable();
+}
+
+function renderWbTable() {
+  const tbody = document.getElementById('wb-rank-tbody');
+  if (!tbody || !window._wbSummary) return;
+  const sortBy = document.getElementById('wb-sort-by')?.value || 'count';
+  const sortDir = document.getElementById('wb-sort-dir')?.value || 'desc';
+
+  const rows = window._wbSummary.map(org => {
     const count = org.wellbeingSubmitted || 0;
     const official = org.typeOfficial;
-    const realPct = official > 0 ? Math.round((count / official) * 100) : (count > 0 ? Math.round((count / maxWb) * 100) : 0);
-    const barPct = Math.min(realPct, 100);
-    const label = official != null ? `${fmtNum(count)}/${fmtNum(official)} คน` : `${fmtNum(count)} คน`;
-    const pctText = official > 0 ? `${realPct}%` : '—';
-    const cls = count > 0 ? 'bg' : 'br';
-    return `<div class="prog-item"><div class="prog-org">${esc(org.name)}</div><div class="prog-track"><div class="prog-fill" style="width:${Math.max(barPct, 2)}%"></div></div><div class="prog-pct">${label}</div><div class="prog-status"><span class="badge ${cls}">${pctText}</span></div></div>`;
+    const pct = official > 0 ? Math.round((count / official) * 100) : null;
+    return { name: org.name, count, official, pct };
+  });
+
+  rows.sort((a, b) => {
+    const valA = sortBy === 'pct' ? (a.pct ?? -1) : a.count;
+    const valB = sortBy === 'pct' ? (b.pct ?? -1) : b.count;
+    return sortDir === 'asc' ? valA - valB : valB - valA;
+  });
+
+  tbody.innerHTML = rows.map((r, i) => {
+    const barPct = r.pct != null ? Math.min(r.pct, 100) : 0;
+    const pctText = r.pct != null ? `${r.pct}%` : '—';
+    const countLabel = r.official != null ? `${fmtNum(r.count)}/${fmtNum(r.official)}` : fmtNum(r.count) || '—';
+    const cls = r.count > 0 ? 'bg' : 'br';
+    return `<tr>
+      <td style="color:var(--tx3);font-weight:700;width:32px">${i + 1}</td>
+      <td>${esc(r.name)}</td>
+      <td>${countLabel}</td>
+      <td style="width:140px"><div class="prog-track" style="margin:0"><div class="prog-fill" style="width:${Math.max(barPct, 2)}%"></div></div></td>
+      <td><span class="badge ${cls}">${pctText}</span></td>
+    </tr>`;
   }).join('');
 }
 
