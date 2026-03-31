@@ -52,9 +52,7 @@
     <div class="nav-item" onclick="go('export',this)"><span class="ni">📤</span> Export รายงาน</div>
 
     <div class="nav-group" data-min-role="superadmin">จัดการระบบ</div>
-    <div class="nav-item" data-min-role="superadmin" onclick="go('users',this)"><span class="ni">👥</span> จัดการผู้ใช้ / Viewer</div>
-    <div class="nav-item" data-min-role="superadmin" onclick="go('links',this)"><span class="ni">🔗</span> ลิงก์แบบสอบถาม well-being</div>
-    <div class="nav-item" data-min-role="superadmin" onclick="go('notif',this)"><span class="ni">🔔</span> Reminder / แจ้งเตือน <span class="nb">2</span></div>
+    <div class="nav-item" data-min-role="superadmin" onclick="go('org-credentials',this)"><span class="ni">🏢</span> Org HR Credentials</div>
     <div class="nav-item" data-min-role="superadmin" onclick="go('settings',this)"><span class="ni">⚙️</span> ตั้งค่าระบบ</div>
     <div class="nav-item" data-min-role="superadmin" onclick="go('audit',this)"><span class="ni">🔍</span> Audit Log</div>
     <div class="nav-item" data-min-role="superadmin" onclick="go('form-editor',this)"><span class="ni">✏️</span> แก้ไขเนื้อหาฟอร์ม</div>
@@ -670,98 +668,26 @@
       </div>
     </div>
 
-    <!-- ==================== USERS ==================== -->
-    <div class="page" id="page-users">
-      <div class="page-title">จัดการผู้ใช้</div>
-      <div class="page-sub">จัดการ Admin และ Viewer — กำหนดสิทธิ์และองค์กรที่เข้าถึงได้</div>
-      <div class="info blue" id="users-role-info" style="margin-bottom:14px">🔑 คุณเข้าสู่ระบบในฐานะ <b>Super Admin</b> — สามารถจัดการผู้ใช้ทุกระดับได้</div>
+    <!-- ==================== ORG CREDENTIALS ==================== -->
+    <div class="page" id="page-org-credentials">
+      <div class="page-title">🏢 Org HR Credentials</div>
+      <div class="page-sub">ข้อมูลเข้าสู่ระบบของแต่ละองค์กร สำหรับ <a href="https://nidawellbeing.vercel.app/org-portal" target="_blank" style="color:var(--blue)">org-portal</a> — ก็อปส่งให้แต่ละองค์กรได้เลย</div>
       <div class="card">
         <div class="card-head">
-          <h3>ผู้ใช้ในระบบทั้งหมด</h3>
+          <h3>รายการ Credentials รายองค์กร</h3>
           <div class="filter-bar">
-            <input class="si" id="users-search" placeholder="🔍 ค้นหา email, องค์กร..." oninput="filterUsersTable()">
-            <select class="sel" id="users-role-filter" onchange="filterUsersTable()"><option value="">ทุก Role</option><option value="superadmin">Super Admin</option><option value="admin">Admin</option><option value="org_hr">🏢 Org HR</option><option value="viewer">Viewer</option></select>
-            <select class="sel" id="users-org-filter" onchange="filterUsersTable()"><option value="">ทุกองค์กร</option></select>
-            <button class="btn b-solid" onclick="showAddUserModal()">➕ เพิ่มผู้ใช้</button>
-            <button class="btn b-green" onclick="batchCreateOrgHrUsers()" id="btn-batch-orghr">🔑 สร้าง org_hr ทั้งหมด</button>
-          </div>
-        </div>
-        <div class="tbl-wrap">
-          <table>
-            <thead><tr><th>อีเมล</th><th>Role</th><th>องค์กรที่ดูได้</th><th>เข้าล่าสุด</th><th>สถานะ</th><th>หมดอายุ</th><th>จัดการ</th></tr></thead>
-            <tbody id="users-tbody"></tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- org_hr Credentials Viewer -->
-      <div class="card" style="margin-top:14px" id="orghr-cred-card">
-        <div class="card-head">
-          <h3>🏢 org_hr Credentials — ข้อมูลเข้าสู่ระบบขององค์กร</h3>
-          <div class="filter-bar">
+            <input class="si" id="cred-search" placeholder="🔍 ค้นหาองค์กร, email..." oninput="filterCredentialsTable()">
             <button class="btn b-blue" onclick="copyAllOrgHrCredentials()">📋 Copy ทั้งหมด</button>
             <button class="btn b-gray" onclick="exportOrgHrCredentialsCsv()">📤 Export CSV</button>
+            <button class="btn b-gray" onclick="loadOrgCredentialsPage()">🔄 โหลดใหม่</button>
           </div>
         </div>
         <div id="orghr-batch-msg" style="display:none;padding:10px 18px;font-size:13px;background:#F0FFF4;border-bottom:1px solid #C6F6D5;color:#276749"></div>
         <div class="tbl-wrap">
           <table>
             <thead><tr><th>#</th><th>องค์กร</th><th>Email (Username)</th><th>Password</th><th>สถานะ</th><th>จัดการ</th></tr></thead>
-            <tbody id="orghr-cred-tbody"><tr><td colspan="6" style="text-align:center;color:var(--tx3);padding:20px">ยังไม่มีข้อมูล org_hr — กดปุ่ม "🔑 สร้าง org_hr ทั้งหมด" เพื่อเริ่มสร้าง</td></tr></tbody>
+            <tbody id="orghr-cred-tbody"><tr><td colspan="6" style="text-align:center;color:var(--tx3);padding:20px">กำลังโหลด...</td></tr></tbody>
           </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- ==================== LINKS ==================== -->
-    <div class="page" id="page-links">
-      <div class="page-title">ลิงก์แบบสอบถาม Well-being</div>
-      <div class="page-sub">รวมลิงก์ Well-being Survey รายองค์กรสำหรับ deploy และคัดลอกไปใช้งาน</div>
-      <div class="info green">✅ ลิงก์ทุกรายการอ้างอิงรูปแบบ https://nidawellbeing.vercel.app/?org=&lt;org_code&gt; และควรตรวจว่า organizations_public มี org_code ครบ 15 รายการก่อน deploy</div>
-      <div class="card card-mb">
-        <div class="card-head">
-          <h3>ลิงก์แบบสอบถาม well-being รายองค์กร</h3>
-          <div class="filter-bar">
-            <input class="si" id="links-search" placeholder="🔍 ค้นหาองค์กร..." oninput="filterLinksTable()">
-            <select class="sel" id="links-org-filter" onchange="filterLinksTable()"><option value="">ทุกองค์กร</option></select>
-            <select class="sel" id="links-status-filter" onchange="filterLinksTable()"><option value="">ทุกสถานะ</option><option value="เปิดอยู่">เปิดอยู่</option><option value="ปิด">ปิด</option></select>
-          </div>
-        </div>
-        <div class="tbl-wrap">
-          <table>
-            <thead><tr><th>องค์กร</th><th>ฟอร์ม</th><th>ลิงก์</th><th>ผู้ตอบ</th><th>สถานะ</th><th>จัดการ</th></tr></thead>
-            <tbody id="links-tbody"></tbody>
-          </table>
-        </div>
-      </div>
-      
-    <!-- ==================== NOTIF ==================== -->
-    </div>
-    <div class="page" id="page-notif">
-      <div class="page-title">Reminder / แจ้งเตือน</div>
-      <div class="page-sub">ส่ง Email เตือนองค์กรที่ยังไม่ส่งข้อมูล</div>
-      <div class="two-col-eq">
-        <div class="panel">
-          <h3>📧 ส่ง Reminder Email</h3>
-          <div class="fg"><label>ส่งถึง</label><select><option>องค์กรที่ยังไม่ส่ง Ch1 (3 องค์กร)</option><option>องค์กรที่ Wellbeing ยังไม่เริ่ม</option><option>เลือกองค์กรเอง</option></select></div>
-          <div class="fg"><label>เทมเพลต</label><select><option>เตือนส่ง Ch1 ก่อนครบกำหนด</option><option>เตือนเปิด Wellbeing Survey</option><option>แจ้ง Viewer สิทธิ์พร้อมแล้ว</option><option>กำหนดเอง</option></select></div>
-          <div class="fg"><label>ข้อความ (แก้ไขได้)</label><textarea rows="5">เรียน ท่านผู้ประสานงาน
-
-ขอเรียนแจ้งว่าแบบสอบถาม Ch1 ยังไม่ได้รับข้อมูลจากองค์กรของท่าน
-กรุณาดำเนินการก่อน 31 มีนาคม 2569
-
-ขอบคุณครับ</textarea></div>
-          <div style="display:flex;gap:8px">
-            <button class="btn b-solid" style="padding:8px 16px" onclick="sendReminderEmail()">📧 ส่งอีเมล</button>
-            <button class="btn b-gray" style="padding:8px 14px" onclick="previewReminderEmail()">ดูตัวอย่าง</button>
-          </div>
-          <div id="notif-msg" style="font-size:12px;margin-top:8px"></div>
-        </div>
-        <div class="panel">
-          <h3>📋 ประวัติการส่ง</h3>
-          <div class="audit-item"><div class="ai-time">13 มี.ค. 14:22</div><div class="ai-icon">📧</div><div><div class="ai-desc">ส่ง Reminder Ch1 → กรมการปกครอง, กรมพัฒนาฝีมือแรงงาน (2 องค์กร)</div><div class="ai-user">โดย admin@ocsc.go.th</div></div></div>
-          <div class="audit-item"><div class="ai-time">10 มี.ค. 09:00</div><div class="ai-icon">📧</div><div><div class="ai-desc">ส่งลิงก์ Wellbeing Survey → ทุกองค์กร (18 อีเมล)</div><div class="ai-user">โดย admin@ocsc.go.th</div></div></div>
-          <div class="audit-item"><div class="ai-time">1 มี.ค. 10:00</div><div class="ai-icon">🔔</div><div><div class="ai-desc">แจ้ง Viewer พร้อมใช้งาน → viewer1@dmh.go.th</div><div class="ai-user">โดย admin@ocsc.go.th</div></div></div>
         </div>
       </div>
     </div>
@@ -861,19 +787,18 @@
 <script src="admin/js/services/data.js"></script>
 <script src="admin/js/services/nav.js"></script>
 <script src="admin/js/services/auth.js"></script>
-<script src="admin/js/services/users.js"></script>
 <script src="admin/js/services/export.js"></script>
 <script src="admin/js/services/audit.js"></script>
 <script src="admin/js/services/form-editor-schema.js"></script>
 <script src="admin/js/services/forms.js"></script>
 <!-- Sprint 3C — Page modules -->
 <script src="admin/js/pages/dashboard.js"></script>
-<script src="admin/js/pages/users.js"></script>
 <script src="admin/js/pages/organizations.js"></script>
 <script src="admin/js/pages/ch1.js"></script>
 <script src="admin/js/pages/wellbeing.js"></script>
-<script src="admin/js/pages/links.js"></script>
 <script src="admin/js/pages/settings.js"></script>
+<!-- Org HR Credentials -->
+<script src="admin/js/pages/org-credentials.js"></script>
 
 <script>
 /* ========== PAGE-SPECIFIC RENDERING (services loaded via external scripts above) ========== */
@@ -1548,124 +1473,9 @@ function renderWellbeingControl(summary) {
   }
 }
 
-function renderUsers() {
-  const tbody = document.getElementById('users-tbody');
-  if (!tbody) return;
-  const myRole = state.myRole || 'superadmin';
-  const rows = state.userRows;
-
-  function roleBadge(role) {
-    const cls = role === 'superadmin' || role === 'super_admin' ? 'superadmin' : role === 'admin' ? 'admin' : role === 'org_hr' ? 'orghr' : 'viewer';
-    const label = role === 'superadmin' || role === 'super_admin' ? '👑 Super Admin' : role === 'admin' ? '🔧 Admin' : role === 'org_hr' ? '🏢 Org HR' : '👁 Viewer';
-    return `<span class="u-role-tag ${cls}">${label}</span>`;
-  }
-
-  tbody.innerHTML = rows.map((row) => {
-    const isLocked = LOCKED_SUPERADMIN_EMAILS.includes(row.email);
-    // locked email always displays as superadmin regardless of DB value
-    const rowRole = isLocked ? 'superadmin' : (row.role || 'viewer');
-    const canManage = !isLocked && (myRole === 'superadmin' || (myRole === 'admin' && rowRole === 'viewer'));
-    return `<tr ${isLocked ? 'style="background:#FFFBEB"' : ''}>
-      <td>${esc(row.email)}${isLocked ? ' <span style="font-size:10px;color:#92400E;font-weight:600;background:#FEF3CD;padding:1px 5px;border-radius:4px">🔒 Locked</span>' : ''}</td>
-      <td>${roleBadge(rowRole)}</td>
-      <td>${esc(row.org_name || 'ทุกองค์กร')}</td>
-      <td>${fmtDate(row.last_login_at)}</td>
-      <td><span class="badge ${row.is_active === false ? 'bx' : 'bg'}">${row.is_active === false ? 'Inactive' : 'Active'}</span></td>
-      <td>${fmtDate(row.expires_at)}</td>
-      <td class="td-act">
-        ${isLocked
-          ? `<button class="btn b-gray" style="font-size:12px" onclick="showChangePasswordModal('${esc(row.email)}')">🔐 รหัสผ่าน</button>`
-          : canManage
-            ? `<button class="btn b-gray" onclick="showEditUserModal('${esc(row.email)}')">✏️ จัดการ</button>
-               <button class="btn b-red" onclick="deleteViewer('${esc(row.id)}','${esc(row.email)}')">🗑️ ลบ</button>`
-            : `<span style="font-size:11px;color:var(--tx3)">—</span>`}
-      </td>
-    </tr>`;
-  }).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--tx3)">ยังไม่มีข้อมูลผู้ใช้</td></tr>';
-
-  const orgFilter = document.getElementById('users-org-filter');
-  if (orgFilter) {
-    const cur = orgFilter.value;
-    orgFilter.innerHTML = `<option value="">ทุกองค์กร</option>${ORG_NAMES.map((name) => `<option${name===cur?' selected':''}>${esc(name)}</option>`).join('')}`;
-  }
-}
-
 function buildLinkUrl(org) {
   const code = String(org.org_code || org.code || '').toLowerCase();
   return `${SURVEY_BASE_URL}/?org=${code}`;
-}
-
-function renderLinks(summary) {
-  const page = document.getElementById('page-links');
-  const tbody = document.getElementById('links-tbody') || page.querySelector('tbody');
-  const seedMap = new Map(WELLBEING_LINK_MAP.map((item) => [item.code, {
-    id: item.code,
-    org_id: null,
-    org_code: item.code,
-    org_name_th: item.organization,
-    organization: item.organization,
-    full_url: buildLinkUrl({ org_code: item.code }),
-    is_active: true,
-    created_at: null,
-    short_label: item.label,
-    short_thai: item.shortThai,
-  }]));
-
-  const dbRows = state.linkRows
-    .map((row) => {
-      const orgProfile = state.orgProfiles.find((o) => o.id === row.org_id);
-      const orgName = orgProfile?.org_name_th || row.org_name_th || row.organization || '';
-      const orgCode = String(row.org_code || orgProfile?.org_code || '').toLowerCase();
-      return {
-        ...row,
-        org_name_th: orgName,
-        organization: orgName,
-        org_code: orgCode,
-        full_url: row.full_url || row.form_url || row.url || (orgCode ? buildLinkUrl({ org_code: orgCode }) : ''),
-      };
-    })
-    .filter((row) => seedMap.has(row.org_code));
-
-  const merged = new Map(seedMap);
-  dbRows.forEach((row) => merged.set(row.org_code, { ...merged.get(row.org_code), ...row }));
-  const links = WELLBEING_LINK_MAP.map((item) => merged.get(item.code)).filter(Boolean);
-
-  function getFormType(url) {
-    if (!url) return '—';
-    return '<span style="font-size:11px;background:var(--AL);color:var(--A);padding:2px 8px;border-radius:99px;font-weight:600">💚 Wellbeing Survey</span>';
-  }
-
-  tbody.innerHTML = links.map((row) => {
-    const organization = row.org_name_th || row.organization || '—';
-    const summaryRow = summary.find((item) => item.name === organization);
-    const url = row.full_url || buildLinkUrl({ org_code: row.org_code });
-    const active = row.is_active !== false;
-    const formType = getFormType(url);
-    const respondents = fmtNum(summaryRow?.wellbeingSubmitted || 0);
-    return `<tr data-org="${esc(organization)}" data-form="Wellbeing" data-status="${active ? 'เปิดอยู่' : 'ปิด'}">
-      <td>${esc(organization)}</td>
-      <td>${formType}</td>
-      <td><code style="font-size:10.5px;background:var(--bg);padding:3px 6px;border-radius:4px;color:var(--P)">${esc(url)}</code></td>
-      <td>${respondents}</td>
-      <td><span class="badge ${active ? 'bg' : 'bx'}">${active ? 'เปิดอยู่' : 'ปิด'}</span></td>
-      <td class="td-act">
-        <button class="btn b-gray" onclick="showQRModal('${esc(url)}')">QR</button>
-        <button class="btn b-blue" onclick="navigator.clipboard.writeText('${esc(url)}').then(()=>showToast('คัดลอกแล้ว ✅'))">Copy</button>
-        <button class="btn ${active ? 'b-red' : 'b-green'}" onclick="toggleLink('${esc(row.id||'')}','${esc(organization)}',${!active})">${active ? 'ปิด' : 'เปิด'}</button>
-      </td>
-    </tr>`;
-  }).join('');
-
-  const createOrgSelect = document.getElementById('create-link-org');
-  if (createOrgSelect) {
-    createOrgSelect.innerHTML = `<option value="">— เลือก —</option>${WELLBEING_LINK_MAP.map((item) => `<option>${esc(item.organization)}</option>`).join('')}`;
-  }
-  // Populate org filter
-  const orgFilter = document.getElementById('links-org-filter');
-  if (orgFilter) {
-    const cur = orgFilter.value;
-    orgFilter.innerHTML = `<option value="">ทุกองค์กร</option>${WELLBEING_LINK_MAP.map((item) => item.organization).map((n) => `<option${n===cur?' selected':''}>${esc(n)}</option>`).join('')}`;
-  }
 }
 
 function renderAnalytics(summary) {
@@ -2551,14 +2361,6 @@ function exportCurrentPage() {
     exportRawTable();
     return;
   }
-  if (pageId === 'page-users') {
-    downloadWorkbook('admin_users.xlsx', 'Users', state.userRows);
-    return;
-  }
-  if (pageId === 'page-links') {
-    downloadWorkbook('org_form_links.xlsx', 'Links', state.linkRows.length ? state.linkRows : getOrgCatalog().map((org) => ({ organization: org.name, url: buildLinkUrl(org) })));
-    return;
-  }
   const summary = summarizeOrgs();
   downloadWorkbook('admin_org_summary.xlsx', 'Summary', summary.map((org) => ({
     organization: org.name,
@@ -2598,9 +2400,6 @@ async function init() {
     renderWellbeingControl(summary);
     renderWellbeingOrg(summary);
     renderWellbeingRaw();
-    renderUsers();
-    renderOrgHrCredentials();
-    renderLinks(summary);
     renderAnalytics(summary);
     populateOrgSelects();
     const auditExportBtn = document.querySelector('#page-audit .btn.b-gray');
@@ -2781,20 +2580,7 @@ function exportCompareReport() {
   })));
 }
 
-/* ========== USERS PAGE ========== */
-function filterUsersTable() {
-  const search = (document.getElementById('users-search')?.value || '').toLowerCase();
-  const role = (document.getElementById('users-role-filter')?.value || '').toLowerCase();
-  const org = document.getElementById('users-org-filter')?.value || '';
-  document.querySelectorAll('#users-tbody tr').forEach((tr) => {
-    if (tr.cells.length < 3) return;
-    const text = tr.textContent.toLowerCase();
-    const matchSearch = !search || text.includes(search);
-    const matchRole = !role || tr.cells[1]?.textContent?.toLowerCase().replace(/[^a-zก-๙0-9]/g,'').includes(role.replace(/[^a-zก-๙0-9]/g,''));
-    const matchOrg = !org || tr.cells[2]?.textContent?.trim() === org;
-    tr.style.display = (matchSearch && matchRole && matchOrg) ? '' : 'none';
-  });
-}
+/* ========== USERS PAGE — removed (จัดการผู้ใช้แยกไป org-portal แล้ว) ========== */
 
 // ========== USER MODAL FUNCTIONS ==========
 function showAddUserModal() {
@@ -2805,7 +2591,8 @@ function showAddUserModal() {
 
 function showEditUserModal(email) {
   if (LOCKED_SUPERADMIN_EMAILS.includes(email)) { showToast('❌ ไม่สามารถแก้ไข Super Admin ที่ถูก Lock ได้', 'warn'); return; }
-  const row = state.userRows.find((r) => r.email === email);
+  const row = (state.orgHrCredentials || []).find((r) => r.email === email)
+           || (state.userRows || []).find((r) => r.email === email);
   if (!row) { showToast('ไม่พบข้อมูลผู้ใช้', 'warn'); return; }
   const myRole = state.myRole || 'superadmin';
   const isSuper = myRole === 'superadmin';
@@ -2998,9 +2785,7 @@ async function saveUserFromModal(isEdit) {
     return;
   }
 
-  const { data } = await sb.from('admin_user_roles').select('*').order('email', { ascending: true });
-  state.userRows = data || [];
-  renderUsers();
+  state.orgHrCredentials = await fetchOrgHrCredentials();
   renderOrgHrCredentials();
 
   // Edit mode + password — update via Edge Function
@@ -3187,8 +2972,7 @@ async function deleteViewer(id, email) {
   showConfirm(`ต้องการลบ Viewer: ${email} ออกจากระบบใช่หรือไม่?`, async () => {
     const { error } = await sb.from('admin_user_roles').delete().eq('id', id);
     if (error) { showToast('ลบไม่สำเร็จ: ' + error.message, 'error'); return; }
-    state.userRows = state.userRows.filter((r) => r.id !== id);
-    renderUsers();
+    state.orgHrCredentials = (state.orgHrCredentials || []).filter((r) => r.email !== email);
     renderOrgHrCredentials();
     showToast(`ลบ ${email} เรียบร้อยแล้ว`, 'success');
   });
@@ -3227,9 +3011,7 @@ async function saveViewer() {
     return;
   }
 
-  const { data } = await sb.from('admin_user_roles').select('*').order('email', { ascending: true });
-  state.userRows = data || [];
-  renderUsers();
+  state.orgHrCredentials = await fetchOrgHrCredentials();
   renderOrgHrCredentials();
   resetViewerForm();
   const yr = new Date().getFullYear() + 543;
@@ -3248,7 +3030,7 @@ function copyTempCode() {
   navigator.clipboard.writeText(code).then(() => showToast('📋 คัดลอกรหัสชั่วคราวแล้ว ✅'));
 }
 
-/* ========== ORG HR BATCH CREATION ========== */
+/* ========== ORG HR BATCH CREATION — moved to org-credentials.js ========== */
 
 function generateOrgHrPassword() {
   const yr = new Date().getFullYear() + 543;
@@ -3322,10 +3104,8 @@ async function batchCreateOrgHrUsers() {
       }
     }
 
-    // Refresh user list
-    const { data } = await sb.from('admin_user_roles').select('*').order('email', { ascending: true });
-    state.userRows = data || [];
-    renderUsers();
+    // Refresh credentials
+    state.orgHrCredentials = await fetchOrgHrCredentials();
     renderOrgHrCredentials();
 
     if (btn) { btn.disabled = false; btn.textContent = '🔑 สร้าง org_hr ทั้งหมด'; }
@@ -3351,207 +3131,7 @@ async function batchCreateOrgHrUsers() {
   });
 }
 
-// Helper function to sort organizations according to desired order
-function sortOrganizations(orgList) {
-  const desiredOrder = [
-    'สำนักงานสภาพัฒนาการเศรษฐกิจและสังคมแห่งชาติ',
-    'สำนักงานนโยบายและยุทธศาสตร์การค้า',
-    'กรมวิทยาศาสตร์บริการ',
-    'กรมสนับสนุนบริการสุขภาพ',
-    'กรมอุตุนิยมวิทยา',
-    'กรมส่งเสริมวัฒนธรรม',
-    'กรมคุมประพฤติ',
-    'สำนักงานปลัดกระทรวงการท่องเที่ยวและกีฬา',
-    'กรมสุขภาพจิต',
-    'สำนักงานนโยบายและแผนทรัพยากรธรรมชาติและสิ่งแวดล้อม',
-    'สำนักงานการวิจัยแห่งชาติ',
-    'สำนักงานมาตรฐานสินค้าเกษตรและอาหารแห่งชาติ',
-    'สำนักงานคณะกรรมการพัฒนาระบบราชการ',
-    'กรมชลประทาน',
-    'กรมกิจการเด็กและเยาวชน'
-  ];
-
-  return [...orgList].sort((a, b) => {
-    const aName = a.display_name || a.org_name || a.org_code || '';
-    const bName = b.display_name || b.org_name || b.org_code || '';
-    
-    const aIndex = desiredOrder.indexOf(aName);
-    const bIndex = desiredOrder.indexOf(bName);
-    
-    // If both are in desired order, sort by index
-    if (aIndex !== -1 && bIndex !== -1) {
-      return aIndex - bIndex;
-    }
-    
-    // If only one is in desired order, prioritize it
-    if (aIndex !== -1) return -1;
-    if (bIndex !== -1) return 1;
-    
-    // If neither is in desired order, sort alphabetically
-    return aName.localeCompare(bName, 'th');
-  });
-}
-
-async function renderOrgHrCredentials() {
-  if (typeof fetchOrgHrCredentials === 'function') {
-    state.orgHrCredentials = await fetchOrgHrCredentials();
-  }
-
-  const tbody = document.getElementById('orghr-cred-tbody');
-  if (!tbody) return;
-
-  const orgHrUsers = state.orgHrCredentials || [];
-
-  if (orgHrUsers.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--tx3);padding:20px">ยังไม่มีข้อมูล org_hr — กดปุ่ม "🔑 สร้าง org_hr ทั้งหมด" เพื่อเริ่มสร้าง</td></tr>';
-    return;
-  }
-
-  // Sort orgHrUsers according to desired order
-  const sortedOrgHrUsers = sortOrganizations(orgHrUsers);
-
-  tbody.innerHTML = sortedOrgHrUsers.map((row, i) => {
-    const pwd = row.initial_password || '••••••••';
-    const hasPwd = !!row.initial_password;
-    return `<tr>
-      <td>${i + 1}</td>
-      <td style="font-weight:600;font-size:12px">${esc(row.display_name || row.org_name || row.org_code || '—')}</td>
-      <td><code style="font-size:12px;background:var(--bg);padding:3px 8px;border-radius:4px;color:var(--P);font-weight:600">${esc(row.email)}</code></td>
-      <td>
-        <span id="orghr-pwd-${i}" style="font-family:monospace;font-size:13px;font-weight:700;color:${hasPwd ? 'var(--A)' : 'var(--tx3)'};letter-spacing:0.05em">${hasPwd ? esc(pwd) : '(ไม่มี)'}</span>
-      </td>
-      <td><span class="badge ${row.is_active !== false ? 'bg' : 'bx'}">${row.is_active !== false ? 'Active' : 'Inactive'}</span></td>
-      <td class="td-act">
-        ${hasPwd ? `<button class="btn b-blue" style="font-size:11px;padding:4px 10px" onclick="copyOrgHrRow('${esc(row.email)}','${esc(pwd)}','${esc(row.display_name || row.org_name || '')}')">📋 Copy</button>` : ''}
-        <button class="btn b-gray" style="font-size:11px;padding:4px 10px" onclick="showEditUserModal('${esc(row.email)}')">✏️</button>
-      </td>
-    </tr>`;
-  }).join('');
-}
-
-function copyOrgHrRow(email, pwd, orgName) {
-  const text = `องค์กร: ${orgName}\nEmail: ${email}\nPassword: ${pwd}`;
-  navigator.clipboard.writeText(text).then(() =>
-    showToast(`📋 คัดลอก credentials ของ ${orgName} แล้ว`, 'success')
-  );
-}
-
-function copyAllOrgHrCredentials() {
-  const orgHrUsers = (state.orgHrCredentials || []).filter(r => r.initial_password);
-  if (orgHrUsers.length === 0) {
-    showToast('ยังไม่มีข้อมูล org_hr credentials', 'warn');
-    return;
-  }
-
-  // Sort organizations according to desired order
-  const sortedOrgHrUsers = sortOrganizations(orgHrUsers);
-
-  const header = 'ข้อมูลเข้าสู่ระบบ org_hr — Well-being Survey\n' + '='.repeat(50) + '\n\n';
-  const body = sortedOrgHrUsers.map((row, i) =>
-    `${i + 1}. ${row.display_name || row.org_name || row.org_code}\n   Email: ${row.email}\n   Password: ${row.initial_password}`
-  ).join('\n\n');
-
-  navigator.clipboard.writeText(header + body).then(() =>
-    showToast(`📋 คัดลอก credentials ทั้ง ${sortedOrgHrUsers.length} องค์กรแล้ว`, 'success', 5000)
-  );
-}
-
-function exportOrgHrCredentialsCsv() {
-  const orgHrUsers = (state.orgHrCredentials || []).filter(r => r.initial_password);
-  if (orgHrUsers.length === 0) {
-    showToast('ยังไม่มีข้อมูล org_hr credentials', 'warn');
-    return;
-  }
-
-  // Sort organizations according to desired order
-  const sortedOrgHrUsers = sortOrganizations(orgHrUsers);
-
-  const csv = 'องค์กร,Email,Password,org_code,สถานะ\n' +
-    sortedOrgHrUsers.map(row =>
-      `"${row.display_name || row.org_name || ''}","${row.email}","${row.initial_password}","${row.org_code || ''}","${row.is_active !== false ? 'Active' : 'Inactive'}"`
-    ).join('\n');
-
-  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `org_hr_credentials_${new Date().toISOString().slice(0, 10)}.csv`;
-  a.click();
-  URL.revokeObjectURL(url);
-  showToast('📤 ดาวน์โหลด CSV สำเร็จ', 'success');
-}
-
-
-async function createNewLink() {
-  const orgName = document.getElementById('create-link-org')?.value;
-  const form = document.getElementById('create-link-form')?.value || 'wb';
-  const msg = document.getElementById('create-link-msg');
-  if (!orgName) { if (msg) { msg.style.color = 'var(--D)'; msg.textContent = 'กรุณาเลือกองค์กร'; } return; }
-  const orgProfile = state.orgProfiles.find((o) => o.org_name_th === orgName) || ORG_LOOKUP.get(orgName);
-  const orgCode = orgProfile?.org_code || orgProfile?.code || orgName.replace(/[^A-Za-z0-9]/g, '').slice(0, 12).toLowerCase();
-  const orgId = orgProfile?.id || null;
-  const base = form === 'ch1' ? 'ch1.html' : 'index.html';
-  const url = `${SURVEY_BASE_URL}/${base}?org=${orgCode}`;
-  if (msg) { msg.style.color = 'var(--tx2)'; msg.textContent = 'กำลังสร้างลิงก์...'; }
-  const { error } = await sb.from('org_form_links').insert({ org_id: orgId, full_url: url, is_active: true });
-  if (error) { if (msg) { msg.style.color = 'var(--D)'; msg.textContent = 'ไม่สำเร็จ: ' + error.message; } return; }
-  const { data } = await sb.from('org_form_links').select('*');
-  state.linkRows = data || [];
-  renderLinks(summarizeOrgs());
-  if (msg) { msg.style.color = 'var(--A)'; msg.textContent = `✅ สร้างลิงก์ ${orgName} (${form.toUpperCase()}) เรียบร้อย`; }
-}
-
-function filterLinksTable() {
-  const search = (document.getElementById('links-search')?.value || '').toLowerCase();
-  const formFilter = document.getElementById('links-form-filter')?.value || '';
-  const org = document.getElementById('links-org-filter')?.value || '';
-  const status = document.getElementById('links-status-filter')?.value || '';
-  document.querySelectorAll('#links-tbody tr').forEach((tr) => {
-    const text = tr.textContent.toLowerCase();
-    const matchSearch = !search || text.includes(search);
-    const matchForm = !formFilter || tr.dataset.form === formFilter;
-    const matchOrg = !org || tr.dataset.org === org;
-    const matchStatus = !status || tr.dataset.status === status;
-    tr.style.display = (matchSearch && matchForm && matchOrg && matchStatus) ? '' : 'none';
-  });
-}
-
-async function toggleLink(id, orgName, newActive) {
-  if (!id) {
-    const summary = summarizeOrgs();
-    renderLinks(summary);
-    return;
-  }
-  const { error } = await sb.from('org_form_links').update({ is_active: newActive }).eq('id', id);
-  if (error) { showToast('อัปเดตไม่สำเร็จ: ' + error.message,'error'); return; }
-  const row = state.linkRows.find((r) => r.id === id);
-  if (row) row.is_active = newActive;
-  renderLinks(summarizeOrgs());
-}
-
-/* ========== NOTIF PAGE ========== */
-function sendReminderEmail() {
-  const msg = document.getElementById('notif-msg');
-  const summary = summarizeOrgs();
-  const pending = summary.filter((org) => org.ch1Count === 0);
-  if (msg) { msg.style.color = 'var(--A)'; msg.textContent = `✅ จำลองการส่ง Reminder ไปยัง ${pending.length} องค์กร (ต้องต่อ Email Service จริง)`; }
-  showToast(`📧 จำลองส่ง Reminder Email — ยังไม่ส่ง Ch1: ${pending.length} องค์กร (ต้องต่อ Email Service จริง)`,'info',5000);
-}
-
-function previewReminderEmail() {
-  const ch1Deadline = document.getElementById('deadline-ch1')?.value;
-  const deadlineDisplay = ch1Deadline ? isoToBuddhistDisplay(ch1Deadline) : '31/03/2569';
-  const template = `เรียน ท่านผู้ประสานงาน\n\nขอเรียนแจ้งว่าแบบสอบถาม Ch1 ยังไม่ได้รับข้อมูลจากองค์กรของท่าน\nกรุณาดำเนินการก่อน ${deadlineDisplay}\n\nลิงก์ฟอร์ม: ${SURVEY_BASE_URL}/ch1.html\n\nขอบคุณครับ\nทีมงาน NIDA Wellbeing Survey`;
-  // แสดง preview อีเมลใน modal แทน alert
-  const prev = document.getElementById('email-preview-modal');
-  if (prev) prev.remove();
-  const m = document.createElement('div');
-  m.id = 'email-preview-modal';
-  m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:99998';
-  m.innerHTML = `<div style="background:#fff;border-radius:14px;padding:24px;max-width:500px;width:92%;max-height:80vh;overflow-y:auto;box-shadow:0 20px 40px rgba(0,0,0,.2)"><div style="font-weight:700;font-size:15px;color:#0F4C81;margin-bottom:12px">📧 ตัวอย่างอีเมล Reminder</div><pre style="font-size:12.5px;white-space:pre-wrap;line-height:1.7;color:#374151;background:#F8FAFC;padding:14px;border-radius:8px;border:1px solid #E2E8F0">${template}</pre><div style="text-align:right;margin-top:14px"><button class="btn b-gray" onclick="document.getElementById('email-preview-modal').remove()">✕ ปิด</button></div></div>`;
-  document.body.appendChild(m);
-  m.addEventListener('click', (e) => { if (e.target === m) m.remove(); });
-}
+/* ========== LINKS/NOTIF PAGE — removed (หน้าเหล่านี้ถูกลบออกแล้ว) ========== */
 
 /* ========== QR MODAL ========== */
 // ==================== CH1 ROW DETAIL MODAL ====================
@@ -3981,12 +3561,6 @@ function populateOrgSelects() {
   if (viewerOrgSel) {
     const cur = viewerOrgSel.value;
     viewerOrgSel.innerHTML = `<option value="">— เลือกองค์กร —</option>${ORG_NAMES.map((name) => `<option value="${esc(name)}"${name===cur?' selected':''}>${esc(name)}</option>`).join('')}`;
-  }
-  // create link org select
-  const createLinkOrgSel = document.getElementById('create-link-org');
-  if (createLinkOrgSel) {
-    const cur = createLinkOrgSel.value;
-    createLinkOrgSel.innerHTML = `<option value="">-- เลือกองค์กร --</option>${ORG_NAMES.map((name) => `<option value="${esc(name)}"${name===cur?' selected':''}>${esc(name)}</option>`).join('')}`;
   }
 }
 </script>
