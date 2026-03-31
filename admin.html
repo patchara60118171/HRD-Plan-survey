@@ -53,8 +53,6 @@
 
     <div class="nav-group" data-min-role="superadmin">จัดการระบบ</div>
     <div class="nav-item" data-min-role="superadmin" onclick="go('org-credentials',this)"><span class="ni">🏢</span> Org HR Credentials</div>
-    <div class="nav-item" data-min-role="superadmin" onclick="go('settings',this)"><span class="ni">⚙️</span> ตั้งค่าระบบ</div>
-    <div class="nav-item" data-min-role="superadmin" onclick="go('audit',this)"><span class="ni">🔍</span> Audit Log</div>
     <div class="nav-item" data-min-role="superadmin" onclick="go('form-editor',this)"><span class="ni">✏️</span> แก้ไขเนื้อหาฟอร์ม</div>
   </nav>
 
@@ -695,55 +693,6 @@
       </div>
     </div>
 
-    <!-- ==================== SETTINGS ==================== -->
-    <div class="page" id="page-settings">
-      <div class="page-title">ตั้งค่าระบบ</div>
-      <div class="page-sub">กำหนดค่าการทำงานของระบบสำรวจ</div>
-      <div class="card card-mb">
-        <div class="card-head"><h3>⚙️ ฟอร์มและการเก็บข้อมูล</h3></div>
-        <div class="card-body">
-          <div class="set-row"><div class="set-info"><div class="set-label">Auto-save ระหว่างกรอก</div><div class="set-desc">บันทึกข้อมูลอัตโนมัติทุก 30 วินาที</div></div><label class="tgl"><input type="checkbox" id="setting-autosave" checked><div class="tgl-s"></div></label></div>
-          <div class="set-row"><div class="set-info"><div class="set-label">Google Sheets Sync</div><div class="set-desc">ซิงค์ข้อมูลทุกครั้งที่มีการ Submit</div></div><label class="tgl"><input type="checkbox" id="setting-sheets-sync" checked><div class="tgl-s"></div></label></div>
-          <div class="set-row"><div class="set-info"><div class="set-label">เวอร์ชันฟอร์มที่ใช้</div><div class="set-desc">กำหนดเวอร์ชันฟอร์มที่แสดงให้ผู้ใช้</div></div><select class="sel" id="setting-form-version"><option>v3.0 (ล่าสุด)</option><option>v2.1</option></select></div>
-        </div>
-      </div>
-      <div class="card card-mb">
-        <div class="card-head"><h3>🔐 ความปลอดภัย</h3></div>
-        <div class="card-body">
-          <div class="set-row"><div class="set-info"><div class="set-label">Session timeout</div><div class="set-desc">ล็อกอัตโนมัติหลังไม่มีกิจกรรม</div></div><select class="sel" id="setting-session-timeout"><option>30 นาที</option><option>1 ชั่วโมง</option><option>4 ชั่วโมง</option></select></div>
-          <div class="set-row"><div class="set-info"><div class="set-label">บันทึก Audit Log</div><div class="set-desc">บันทึกทุก action ของ admin/viewer</div></div><label class="tgl"><input type="checkbox" id="setting-audit-log" checked><div class="tgl-s"></div></label></div>
-          <div class="set-row"><div class="set-info"><div class="set-label">บังคับเปลี่ยนรหัสผ่าน</div><div class="set-desc">บังคับเปลี่ยนรหัสผ่านทุก 90 วัน</div></div><label class="tgl"><input type="checkbox" id="setting-force-password"><div class="tgl-s"></div></label></div>
-        </div>
-      </div>
-      <div style="display:flex;gap:10px;justify-content:flex-end;">
-        <button class="btn b-gray" onclick="resetSettings()">↩️ รีเซ็ต</button>
-        <button class="btn b-blue" onclick="saveSettings()">💾 บันทึกการตั้งค่า</button>
-      </div>
-    </div>
-
-    <!-- ==================== AUDIT ==================== -->
-    <div class="page" id="page-audit">
-      <div class="page-title">Audit Log</div>
-      <div class="page-sub">บันทึกการกระทำทุกอย่างในระบบ</div>
-      <div class="card">
-        <div class="card-head">
-          <h3>Log ทั้งหมด</h3>
-          <div class="filter-bar">
-            <input class="si" id="audit-search" placeholder="🔍 ค้นหา email, action..." oninput="filterAuditLog()">
-            <select class="sel" id="audit-type" onchange="filterAuditLog()"><option value="">ทุก Action</option><option value="Login">Login</option><option value="Export">Export</option><option value="User Manage">User Manage</option><option value="Form Control">Form Control</option></select>
-            <button class="btn b-gray" onclick="exportAuditLog()">📤 Export Log</button>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="audit-item"><div class="ai-time">14 มี.ค. 15:30</div><div class="ai-icon">👁️</div><div><div class="ai-desc">Viewer เข้าดู Dashboard องค์กร "กรมสุขภาพจิต"</div><div class="ai-user">viewer1@dmh.go.th · IP 203.x.x.x</div></div></div>
-          <div class="audit-item"><div class="ai-time">14 มี.ค. 14:22</div><div class="ai-icon">📧</div><div><div class="ai-desc">ส่ง Reminder Email → 3 องค์กร (Ch1 ยังไม่ส่ง)</div><div class="ai-user">admin@ocsc.go.th · IP 101.x.x.x</div></div></div>
-          <div class="audit-item"><div class="ai-time">14 มี.ค. 11:05</div><div class="ai-icon">📤</div><div><div class="ai-desc">Export ข้อมูล Ch1 ทั้งหมด → Excel</div><div class="ai-user">admin@ocsc.go.th · IP 101.x.x.x</div></div></div>
-          <div class="audit-item"><div class="ai-time">13 มี.ค. 09:14</div><div class="ai-icon">➕</div><div><div class="ai-desc">เพิ่ม Viewer: hr@ocsc.go.th → สำนักงาน ก.พ.</div><div class="ai-user">admin@ocsc.go.th</div></div></div>
-          <div class="audit-item"><div class="ai-time">12 มี.ค. 16:00</div><div class="ai-icon">🔐</div><div><div class="ai-desc">Login สำเร็จ</div><div class="ai-user">admin@ocsc.go.th · IP 101.x.x.x</div></div></div>
-          <div class="audit-item"><div class="ai-time">10 มี.ค. 08:30</div><div class="ai-icon">✏️</div><div><div class="ai-desc">แก้ไขข้อมูลองค์กร "กรมการแพทย์" — อัปเดตจำนวนบุคลากร</div><div class="ai-user">admin@ocsc.go.th</div></div></div>
-        </div>
-      </div>
-    </div>
 
     <!-- ==================== FORM EDITOR ==================== -->
     <div class="page" id="page-form-editor">

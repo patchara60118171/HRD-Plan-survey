@@ -4,7 +4,7 @@ function go(id, el) {
   const roleLvl = { viewer: 0, admin: 1, superadmin: 2, super_admin: 2 };
   const myLvl = roleLvl[state.myRole] ?? 0;
   const adminOnlyPages = {};
-  const superOnlyPages = { 'org-credentials': 2, settings: 2, audit: 2, 'form-editor': 2 };
+  const superOnlyPages = { 'org-credentials': 2, 'form-editor': 2 };
   const reqLvl = superOnlyPages[id] ?? adminOnlyPages[id] ?? 0;
   if (myLvl < reqLvl) { showToast('⛔ ไม่มีสิทธิ์เข้าถึงหน้านี้', 'warn'); return; }
   document.querySelectorAll('.page').forEach((page) => page.classList.remove('active'));
@@ -18,10 +18,8 @@ function go(id, el) {
     document.getElementById('tbc').textContent = title[1];
   }
   if (id === 'ch1-summary') renderCh1Summary();
-  if (id === 'settings') loadSettingsUI();
   if (id === 'form-editor') loadFormEditorFields();
   if (id === 'org-credentials') loadOrgCredentialsPage();
-  if (id === 'audit') loadAuditPage();
 }
 
 function st(el, targetId) {
