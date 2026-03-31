@@ -152,7 +152,7 @@
         </div>
         <div class="tbl-wrap">
           <table>
-            <thead><tr><th>องค์กร</th><th>Ch1</th><th>Wellbeing (คนกรอก/ข้าราชการ)</th><th>ความคืบหน้า</th><th>วันที่ส่งล่าสุด</th><th>จัดการ</th></tr></thead>
+            <thead><tr><th>องค์กร</th><th>Ch1</th><th class="th-sort" onclick="sortProgressTable('count')" id="prog-th-count">Wellbeing (คนกรอก/ข้าราชการ) <span class="sort-icon">⇅</span></th><th class="th-sort" onclick="sortProgressTable('pct')" id="prog-th-pct">ความคืบหน้า <span class="sort-icon">⇅</span></th><th class="th-sort" onclick="sortProgressTable('date')" id="prog-th-date">วันที่ส่งล่าสุด <span class="sort-icon">⇅</span></th><th>จัดการ</th></tr></thead>
             <tbody>
               <tr><td>สำนักงานสภาพัฒนาการเศรษฐกิจและสังคมแห่งชาติ</td><td>สำนักนายกฯ</td><td><span class="badge bg">ส่งแล้ว</span></td><td>100%</td><td>145</td><td>5 มี.ค. 69</td><td class="td-act"><button class="btn b-blue">ดูข้อมูล</button><button class="btn b-gray">Viewer</button></td></tr>
               <tr><td>สำนักงานนโยบายและยุทธศาสตร์การค้า</td><td>พาณิชย์</td><td><span class="badge bg">ส่งแล้ว</span></td><td>100%</td><td>98</td><td>7 มี.ค. 69</td><td class="td-act"><button class="btn b-blue">ดูข้อมูล</button><button class="btn b-gray">Viewer</button></td></tr>
@@ -1123,24 +1123,51 @@ function renderProgress(summary) {
   const respondedCh1 = summary.filter((org) => org.ch1Count > 0).length;
   page.querySelector('.page-sub').textContent = `ติดตามความคืบหน้าทุกองค์กร · ส่งครบ ${respondedCh1}/${orgCount} (${fmtNum((respondedCh1 / Math.max(orgCount, 1)) * 100, 1)}%)`;
   page.querySelector('.info.yellow').textContent = `⚠️ มี ${orgCount - respondedCh1} องค์กรที่ยังไม่ส่ง Ch1 ครบ — หน้านี้ผูกกับข้อมูลจริงจาก hrd_ch1_responses แล้ว`;
-  const tbody = page.querySelector('tbody');
-  tbody.innerHTML = summary.map((org) => {
-    const statusCls = org.ch1Count > 0 ? 'bg' : 'br';
-    const status = org.ch1Count > 0 ? 'ส่งแล้ว' : 'ยังไม่เริ่ม';
+  window._progressSummary = summary;
+  window._progressSort = window._progressSort || { col: 'count', dir: 'desc' };
+  sortProgressTable(null);
+}
+
+function sortProgressTable(col) {
+  if (!window._progressSummary) return;
+  const s = window._progressSort = window._progressSort || { col: 'count', dir: 'desc' };
+  if (col) { s.dir = (s.col === col && s.dir === 'desc') ? 'asc' : 'desc'; s.col = col; }
+  ['count','pct','date'].forEach(c => {
+    const th = document.getElementById(`prog-th-${c}`);
+    if (!th) return;
+    const icon = th.querySelector('.sort-icon');
+    if (c === s.col) icon.textContent = s.dir === 'desc' ? '↓' : '↑';
+    else icon.textContent = '⇅';
+    th.style.color = c === s.col ? 'var(--P)' : '';
+  });
+  const rows = window._progressSummary.map(org => {
     const wbCount = org.wellbeingSubmitted || 0;
     const official = org.typeOfficial;
-    const wbCell = official != null
-      ? `${fmtNum(wbCount)}/${fmtNum(official)}`
-      : wbCount > 0 ? fmtNum(wbCount) : '—';
-    const pct = official > 0
-      ? `${Math.round((wbCount / official) * 100)}%`
-      : wbCount > 0 ? '—' : '0%';
+    const pctNum = official > 0 ? Math.round((wbCount / official) * 100) : null;
+    const dateVal = org.latestCh1 || org.latestWb || '';
+    return { org, wbCount, official, pctNum, dateVal };
+  });
+  rows.sort((a, b) => {
+    let va, vb;
+    if (s.col === 'pct') { va = a.pctNum ?? -1; vb = b.pctNum ?? -1; }
+    else if (s.col === 'date') { va = a.dateVal; vb = b.dateVal; }
+    else { va = a.wbCount; vb = b.wbCount; }
+    if (va < vb) return s.dir === 'desc' ? 1 : -1;
+    if (va > vb) return s.dir === 'desc' ? -1 : 1;
+    return 0;
+  });
+  const tbody = document.querySelector('#page-progress tbody');
+  tbody.innerHTML = rows.map(({ org, wbCount, official, pctNum, dateVal }) => {
+    const statusCls = org.ch1Count > 0 ? 'bg' : 'br';
+    const status = org.ch1Count > 0 ? 'ส่งแล้ว' : 'ยังไม่เริ่ม';
+    const wbCell = official != null ? `${fmtNum(wbCount)}/${fmtNum(official)}` : wbCount > 0 ? fmtNum(wbCount) : '—';
+    const pctText = pctNum != null ? `${pctNum}%` : wbCount > 0 ? '—' : '0%';
     return `<tr>
       <td>${esc(org.name)}</td>
       <td><span class="badge ${statusCls}">${status}</span></td>
       <td>${wbCell}</td>
-      <td>${pct}</td>
-      <td>${fmtDate(org.latestCh1 || org.latestWb)}</td>
+      <td>${pctText}</td>
+      <td>${fmtDate(dateVal)}</td>
       <td class="td-act"><button class="btn b-blue" onclick="openOrgData('${esc(org.name)}')">ดูข้อมูล</button></td>
     </tr>`;
   }).join('');
