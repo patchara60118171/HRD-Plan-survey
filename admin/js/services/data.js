@@ -16,7 +16,6 @@ const ADMIN_CANONICAL_ORGS = [
   { code: 'opdc', name: 'สำนักงานคณะกรรมการพัฒนาระบบราชการ' },
   { code: 'rid', name: 'กรมชลประทาน' },
   { code: 'dcy', name: 'กรมกิจการเด็กและเยาวชน' },
-  { code: 'test-org', name: 'องค์กรทดสอบระบบ' },
 ];
 
 const ADMIN_CANONICAL_ORG_CODES = new Set(ADMIN_CANONICAL_ORGS.map((org) => org.code));
@@ -205,7 +204,8 @@ async function loadBackend(retryCount = 0) {
 }
 
 function summarizeOrgs() {
-  const map = new Map(getOrgCatalog().map((org) => [org.name, {
+  const catalog = getOrgCatalog();
+  const map = new Map(catalog.map((org) => [org.name, {
     ...org,
     wellbeingTotal: 0,
     wellbeingSubmitted: 0,
@@ -215,6 +215,7 @@ function summarizeOrgs() {
     ch1Count: 0,
     latestCh1: null,
   }]));
+  const codeMap = new Map(catalog.map((org) => [String(org.code || '').toLowerCase(), org.name]));
 
   state.surveyRows.forEach((row) => {
     const org = map.get(row.organization);
@@ -229,7 +230,9 @@ function summarizeOrgs() {
 
   state.ch1Rows.forEach((row) => {
     const orgName = getCh1Org(row);
-    const org = map.get(orgName);
+    const rowCode = String(row.org_code || row.form_data?.org_code || '').toLowerCase();
+    const resolvedName = map.has(orgName) ? orgName : (codeMap.get(rowCode) || orgName);
+    const org = map.get(resolvedName);
     if (!org) return;
     org.ch1Count += 1;
     const date = getRowDate(row);
