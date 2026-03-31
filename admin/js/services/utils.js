@@ -46,14 +46,17 @@ function getRowDate(row) {
 }
 
 function getCh1Org(row) {
-  return row.organization
-    || row.org_name
-    || row.org_name_th
-    || row.agency_name
-    || row.form_data?.agency_name
-    || row.form_data?.organization
-    || row.form_data?.org_name
-    || '—';
+  const fd = row.form_data || {};
+  const nameFromRow = row.organization || row.org_name || row.org_name_th || row.agency_name
+    || fd.agency_name || fd.organization || fd.org_name || fd.org_name_th || '';
+  if (nameFromRow) return nameFromRow;
+  // fallback: resolve via org_code → canonical name
+  const code = String(row.org_code || fd.org_code || '').toLowerCase();
+  if (code && typeof ADMIN_CANONICAL_ORGS !== 'undefined') {
+    const found = ADMIN_CANONICAL_ORGS.find(o => o.code === code);
+    if (found) return found.name;
+  }
+  return '—';
 }
 
 function normalizeSurveyRow(row, index) {
