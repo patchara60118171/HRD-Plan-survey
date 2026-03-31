@@ -164,15 +164,22 @@ function renderDashboard(summary) {
     });
   }
 
-  const donutCard = dashboard.querySelectorAll('.card')[1];
-  const ministryCounts = getOrgCatalog().reduce((acc, org) => {
-    acc[org.ministry] = (acc[org.ministry] || 0) + 1;
-    return acc;
-  }, {});
-  donutCard.querySelector('.card-body').innerHTML = Object.entries(ministryCounts)
-    .map(([ministry, count], idx) =>
-      `<div class="legend-row"><div class="ld" style="background:${['#0F4C81','#00A86B','#C08F2A','#8896A5','#C4444A'][idx % 5]}"></div>${esc(ministry)} — ${fmtNum(count)} หน่วยงาน</div>`)
-    .join('');
+  const statusGrid = document.getElementById('ch1-status-grid');
+  const statusLabel = document.getElementById('ch1-status-label');
+  if (statusGrid) {
+    const sent = summary.filter(o => o.ch1Count > 0).length;
+    const total = summary.length;
+    if (statusLabel) statusLabel.textContent = `${sent}/${total} ส่งแล้ว`;
+    statusGrid.innerHTML = summary.map(org => {
+      const done = org.ch1Count > 0;
+      const shortName = org.name.replace(/^สำนักงาน/, 'สนง.').replace(/^กรม/, 'กรม');
+      const tooltip = `${org.name}${done ? ` · ส่งแล้ว (${org.ch1Count} รายการ)` : ' · ยังไม่ส่ง'}`;
+      return `<div class="ch1-org-dot" title="${esc(tooltip)}">
+        <div class="ch1-dot-ind ${done ? 'done' : 'miss'}"></div>
+        <div class="ch1-dot-name">${esc(shortName)}</div>
+      </div>`;
+    }).join('');
+  }
 
   const top5 = summary.slice().sort((a, b) => b.ch1Count - a.ch1Count).slice(0, 5);
   const progBody = dashboard.querySelector('.card.card-mb .card-body');
