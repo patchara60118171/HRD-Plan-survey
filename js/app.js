@@ -395,6 +395,32 @@ function initSWListener() {
     }
 }
 
+// Check if form window is closed for a given org_code
+async function isFormWindowClosed(orgCode) {
+    if (!supabaseClient || !orgCode) return false;
+    try {
+        // Check org-specific window first, then fall back to global
+        const { data } = await supabaseClient
+            .from('form_windows')
+            .select('is_active,opens_at,closes_at')
+            .eq('form_code', 'wellbeing')
+            .eq('round_code', 'round_2569')
+            .or(`org_code.eq.${orgCode},org_code.is.null`)
+            .order('org_code', { ascending: false }) // org-specific first (non-null sorts before null)
+            .limit(1)
+            .maybeSingle();
+        if (!data) return false; // no window record = open by default
+        if (!data.is_active) return true;
+        const now = new Date();
+        if (data.opens_at && new Date(data.opens_at) > now) return true;
+        if (data.closes_at && new Date(data.closes_at) < now) return true;
+        return false;
+    } catch (e) {
+        console.warn('[FormWindow] check failed:', e.message);
+        return false; // fail open
+    }
+}
+
 // Save to Supabase (with offline fallback)
 async function saveToSupabase(email, responses, isDraft = false) {
     if (!email) return 'error:missing-email';
@@ -569,6 +595,15 @@ async function saveToSupabase(email, responses, isDraft = false) {
 
     // Online: try Supabase directly
     if (!supabaseClient) return 'error:supabase-not-ready';
+
+    // Check form window: ตรวจว่า org นี้ยังเปิดรับอยู่ไหม (skip check for drafts)
+    if (!isDraft) {
+        const orgCode = (responses.org_code || '').toLowerCase();
+        if (orgCode) {
+            const windowClosed = await isFormWindowClosed(orgCode);
+            if (windowClosed) return 'error:form-closed';
+        }
+    }
 
     try {
         // Prefer INSERT for public submissions. If email already exists, fallback to UPDATE.
@@ -1304,6 +1339,9 @@ const app = {
         } else if (result === 'offline') {
             showToast('📴 บันทึกในเครื่องแล้ว — จะซิงค์อัตโนมัติเมื่อออนไลน์', 'info');
             requestBackgroundSync();
+            return;
+        } else if (result === 'error:form-closed') {
+            showToast('🔒 ขออภัย — ขณะนี้ปิดรับแบบสอบถามสำหรับองค์กรของท่านแล้ว กรุณาติดต่อผู้ดูแลระบบ', 'error');
             return;
         } else if (result === 'error:permission-denied') {
             showToast('ไม่สามารถบันทึกได้ในขณะนี้ เนื่องจากสิทธิ์ฐานข้อมูลยังไม่พร้อม', 'error');

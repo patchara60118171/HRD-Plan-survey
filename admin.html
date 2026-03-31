@@ -53,6 +53,7 @@
 
     <div class="nav-group" data-min-role="superadmin">จัดการระบบ</div>
     <div class="nav-item" data-min-role="superadmin" onclick="go('org-credentials',this)"><span class="ni">🏢</span> Org HR Credentials</div>
+    <div class="nav-item" data-min-role="superadmin" onclick="go('form-windows',this)"><span class="ni">🗓️</span> เปิด/ปิดรับแบบฟอร์ม</div>
     <div class="nav-item" data-min-role="superadmin" onclick="go('form-editor',this)"><span class="ni">✏️</span> แก้ไขเนื้อหาฟอร์ม</div>
   </nav>
 
@@ -694,6 +695,31 @@
     </div>
 
 
+    <!-- ==================== FORM WINDOWS ==================== -->
+    <div class="page" id="page-form-windows">
+      <div class="page-title">🗓️ เปิด/ปิดรับแบบฟอร์ม Wellbeing</div>
+      <div class="page-sub">ควบคุมช่วงเวลาการรับคำตอบของแต่ละองค์กร</div>
+      <div class="card">
+        <div class="card-head">
+          <h3>สถานะการรับแบบสอบถามรายองค์กร</h3>
+          <div style="display:flex;gap:8px">
+            <button class="btn b-blue" onclick="fwOpenAll()">✅ เปิดทุกองค์กร</button>
+            <button class="btn b-orange" onclick="fwCloseAll()">🔒 ปิดทุกองค์กร</button>
+            <button class="btn b-gray" onclick="loadFormWindowsPage()">🔄 รีโหลด</button>
+          </div>
+        </div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>องค์กร</th><th>สถานะ</th><th>เปิดรับตั้งแต่</th><th>ปิดรับเมื่อ</th><th>เปิด/ปิด</th><th>จัดการ</th></tr></thead>
+            <tbody id="fw-table-body"><tr><td colspan="6" style="text-align:center;color:var(--tx3);padding:20px">กำลังโหลด...</td></tr></tbody>
+          </table>
+        </div>
+        <div style="padding:12px 18px;font-size:11px;color:var(--tx3);border-top:1px solid var(--bdr)">
+          💡 หากไม่ได้ตั้งวันเวลา ระบบจะใช้สถานะ เปิด/ปิด เพียงอย่างเดียว · กำหนดเอง = มีการตั้งค่าเฉพาะองค์กรนี้ · ค่าเริ่มต้น = ใช้ตามการตั้งค่าทั่วไป
+        </div>
+      </div>
+    </div>
+
     <!-- ==================== FORM EDITOR ==================== -->
     <div class="page" id="page-form-editor">
       <div class="page-title">✏️ แก้ไขเนื้อหาฟอร์ม</div>
@@ -751,6 +777,7 @@
 <script src="admin/js/pages/settings.js"></script>
 <!-- Org HR Credentials -->
 <script src="admin/js/pages/org-credentials.js"></script>
+<script src="admin/js/pages/form-windows.js"></script>
 
 <script>
 /* ========== PAGE-SPECIFIC RENDERING (services loaded via external scripts above) ========== */

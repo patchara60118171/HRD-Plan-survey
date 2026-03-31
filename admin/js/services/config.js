@@ -18,6 +18,7 @@ const ORG_HR_EMAIL_DOMAIN = PROJECT_SSOT?.constants?.orgHrEmailDomain || '@wellb
   compare:['เปรียบเทียบองค์กร','/ วิเคราะห์'],
   export:['Export รายงาน','/ วิเคราะห์'],
   'org-credentials':['Org HR Credentials','/ จัดการระบบ'],
+  'form-windows':['เปิด/ปิดรับแบบฟอร์ม','/ จัดการระบบ'],
   'form-editor':['แก้ไขเนื้อหาฟอร์ม','/ จัดการระบบ'],
 };
 
