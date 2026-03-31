@@ -21,6 +21,7 @@ function go(id, el) {
   if (id === 'settings') loadSettingsUI();
   if (id === 'form-editor') loadFormEditorFields();
   if (id === 'org-credentials') loadOrgCredentialsPage();
+  if (id === 'audit') loadAuditPage();
 }
 
 function st(el, targetId) {
