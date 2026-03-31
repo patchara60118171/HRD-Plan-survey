@@ -207,12 +207,20 @@ function renderProgress(summary) {
   tbody.innerHTML = summary.map((org) => {
     const statusCls = org.ch1Count > 0 ? 'bg' : 'br';
     const status = org.ch1Count > 0 ? 'ส่งแล้ว' : 'ยังไม่เริ่ม';
+    const wbCount = org.wellbeingSubmitted || 0;
+    const official = org.typeOfficial;
+    const wbCell = official != null
+      ? `${fmtNum(wbCount)}/${fmtNum(official)}`
+      : fmtNum(wbCount) || '—';
+    const pct = official > 0
+      ? `${fmtNum(Math.round((wbCount / official) * 100), 0)}%`
+      : wbCount > 0 ? '—' : '0%';
     return `<tr>
       <td>${esc(org.name)}</td>
       <td>${esc(org.ministry)}</td>
       <td><span class="badge ${statusCls}">${status}</span></td>
-      <td>${org.ch1Count > 0 ? '100%' : '0%'}</td>
-      <td>${fmtNum(org.wellbeingSubmitted)}</td>
+      <td>${wbCell}</td>
+      <td>${pct}</td>
       <td>${fmtDate(org.latestCh1 || org.latestWb)}</td>
       <td class="td-act"><button class="btn b-blue" onclick="openOrgData('${esc(org.name)}')">ดูข้อมูล</button></td>
     </tr>`;

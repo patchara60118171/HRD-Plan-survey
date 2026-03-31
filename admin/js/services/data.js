@@ -222,6 +222,7 @@ function summarizeOrgs() {
     latestWb: null,
     ch1Count: 0,
     latestCh1: null,
+    typeOfficial: null,
   }]));
   const codeMap = new Map(catalog.map((org) => [String(org.code || '').toLowerCase(), org.name]));
 
@@ -243,6 +244,10 @@ function summarizeOrgs() {
     const org = map.get(resolvedName);
     if (!org) return;
     org.ch1Count += 1;
+    if (org.typeOfficial === null) {
+      const v = row.form_data?.type_official ?? row.type_official;
+      if (v != null && v !== '') org.typeOfficial = Number(v) || 0;
+    }
     const date = getRowDate(row);
     if (date && (!org.latestCh1 || new Date(date) > new Date(org.latestCh1))) org.latestCh1 = date;
   });
