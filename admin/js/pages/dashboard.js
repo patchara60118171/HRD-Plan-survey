@@ -52,59 +52,116 @@ function renderDashboard(summary) {
     const peakDay = dailyRows.reduce((a, b) => b[1] > a[1] ? b : a);
     if (rangeLabel) rangeLabel.textContent = `${fmtDate(dailyRows[0][0])} — ${fmtDate(dailyRows[dailyRows.length - 1][0])}`;
 
-    // Build cumulative
-    let cum = 0;
-    const cumArr = dailyRows.map(([, c]) => { cum += c; return cum; });
-    const cumMax = cumArr[cumArr.length - 1] || 1;
-
-    // Bar colors — gradient feel via hsl
-    const barColor = (count) => {
-      const intensity = 0.3 + 0.7 * (count / maxCount);
-      return `rgba(0,168,107,${intensity.toFixed(2)})`;
-    };
-
-    const thaiDay = (dateStr) => {
-      const d = new Date(dateStr);
-      const days = ['อา','จ','อ','พ','พฤ','ศ','ส'];
-      return days[d.getDay()] || '';
-    };
     const shortDate = (dateStr) => {
-      const d = new Date(dateStr);
+      const d = new Date(dateStr + 'T00:00:00');
       return `${d.getDate()}/${d.getMonth() + 1}`;
     };
+    const thaiDay = (dateStr) => {
+      const d = new Date(dateStr + 'T00:00:00');
+      return ['อา','จ','อ','พ','พฤ','ศ','ส'][d.getDay()] || '';
+    };
 
-    chartEl.innerHTML = `<div class="daily-chart-wrap">
-      <div class="daily-chart-summary">
-        <div class="dcs-item"><div class="dcs-dot" style="background:#00A86B"></div><div><div class="dcs-val">${fmtNum(totalPeriod)}</div><div>ตอบช่วงนี้</div></div></div>
-        <div class="dcs-item"><div class="dcs-dot" style="background:#0F4C81"></div><div><div class="dcs-val">${avgPerDay}</div><div>เฉลี่ย/วัน</div></div></div>
-        <div class="dcs-item"><div class="dcs-dot" style="background:#C08F2A"></div><div><div class="dcs-val">${fmtNum(peakDay[1])}</div><div>สูงสุด (${shortDate(peakDay[0])})</div></div></div>
-        <div class="dcs-item"><div class="dcs-dot" style="background:#8896A5"></div><div><div class="dcs-val">${fmtNum(submittedWb.length)}</div><div>สะสมทั้งหมด</div></div></div>
-      </div>
-      <div class="daily-bars">
-        ${dailyRows.map(([day, count], i) => {
-          const pct = Math.max(3, (count / maxCount) * 100);
-          const cumPct = (cumArr[i] / cumMax) * 100;
-          const isToday = day === new Date().toISOString().slice(0, 10);
-          const borderStyle = isToday ? 'box-shadow:0 0 0 2px #0F4C81,0 0 0 4px rgba(15,76,129,.15);' : '';
-          return `<div class="daily-bar-col">
-            <div class="daily-bar-val">${fmtNum(count)}</div>
-            <div class="daily-bar-inner" style="height:${pct}%;background:${barColor(count)};${borderStyle}" title="${fmtDate(day)}: ${fmtNum(count)} คน">
-              <div class="daily-cum-line" style="top:${Math.max(0, 100 - cumPct)}%"></div>
-            </div>
-            <div class="daily-bar-date"><div class="dbd-day">${thaiDay(day)}</div>${shortDate(day)}</div>
-          </div>`;
-        }).join('')}
-      </div>
-      <div class="daily-chart-footer">
-        <div class="dcf-legend">
-          <div class="dcf-leg"><div class="dcf-dot" style="background:#00A86B"></div>จำนวนผู้ตอบ/วัน</div>
-          <div class="dcf-leg"><div class="dcf-dot" style="background:#0F4C81;border-radius:50%"></div>สะสม</div>
-        </div>
-        <div>แสดง ${dailyRows.length} วันล่าสุด</div>
-      </div>
-    </div>`;
+    // SVG area chart
+    const W = 600, H = 110, PAD = { t: 12, r: 8, b: 4, l: 8 };
+    const n = dailyRows.length;
+    const xStep = (W - PAD.l - PAD.r) / Math.max(n - 1, 1);
+    const yScale = (v) => PAD.t + (H - PAD.t - PAD.b) * (1 - v / maxCount);
+
+    const pts = dailyRows.map(([, c], i) => [PAD.l + i * xStep, yScale(c)]);
+    const polyline = pts.map(([x, y]) => `${x},${y}`).join(' ');
+    const areaPath = `M${pts[0][0]},${H - PAD.b} ` +
+      pts.map(([x, y]) => `L${x},${y}`).join(' ') +
+      ` L${pts[pts.length - 1][0]},${H - PAD.b} Z`;
+
+    // Y-axis grid lines (3 lines)
+    const gridLines = [0.25, 0.5, 0.75].map(f => {
+      const yv = Math.round(maxCount * f);
+      const y = yScale(yv);
+      return `<line x1="${PAD.l}" y1="${y}" x2="${W - PAD.r}" y2="${y}" stroke="var(--bdr)" stroke-width="1" stroke-dasharray="3,3"/>
+              <text x="${PAD.l}" y="${y - 3}" font-size="8" fill="var(--tx3)" text-anchor="start">${yv}</text>`;
+    }).join('');
+
+    // Hover dots (invisible, activated via JS)
+    const hoverDots = pts.map(([x, y], i) =>
+      `<circle class="area-dot" cx="${x}" cy="${y}" r="4" fill="var(--A)" stroke="#fff" stroke-width="2"
+        style="opacity:0;transition:opacity .1s;cursor:pointer"
+        data-idx="${i}" data-x="${x}" data-y="${y}"/>`
+    ).join('');
+
+    // Show only some x-labels to avoid crowding
+    const showLabel = (i) => n <= 7 || i === 0 || i === n - 1 || i % Math.ceil(n / 5) === 0;
+    const xLabels = dailyRows.map(([day], i) => showLabel(i)
+      ? `<div class="area-x-label" style="flex:${i === 0 || i === n - 1 ? '0 0 auto' : '1'}"><b>${thaiDay(day)}</b>${shortDate(day)}</div>`
+      : `<div class="area-x-label" style="flex:1"></div>`
+    ).join('');
+
     chartEl.style.height = 'auto';
     chartEl.style.background = 'transparent';
+    chartEl.innerHTML = `
+      <div class="area-chart-wrap">
+        <div class="area-stats">
+          <div class="area-stat">
+            <div class="area-stat-label"><span class="area-stat-dot" style="background:var(--A)"></span>ตอบช่วงนี้</div>
+            <div class="area-stat-val">${fmtNum(totalPeriod)}</div>
+            <div class="area-stat-sub">${dailyRows.length} วันล่าสุด</div>
+          </div>
+          <div class="area-stat">
+            <div class="area-stat-label"><span class="area-stat-dot" style="background:var(--P)"></span>เฉลี่ย/วัน</div>
+            <div class="area-stat-val">${avgPerDay}</div>
+            <div class="area-stat-sub">คน/วัน</div>
+          </div>
+          <div class="area-stat">
+            <div class="area-stat-label"><span class="area-stat-dot" style="background:#C08F2A"></span>สูงสุด</div>
+            <div class="area-stat-val">${fmtNum(peakDay[1])}</div>
+            <div class="area-stat-sub">${shortDate(peakDay[0])}</div>
+          </div>
+          <div class="area-stat">
+            <div class="area-stat-label"><span class="area-stat-dot" style="background:var(--tx3)"></span>สะสมทั้งหมด</div>
+            <div class="area-stat-val">${fmtNum(submittedWb.length)}</div>
+            <div class="area-stat-sub">ทุกช่วงเวลา</div>
+          </div>
+        </div>
+        <div class="area-svg-wrap" id="area-svg-wrap">
+          <div class="area-tooltip" id="area-tooltip"></div>
+          <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="height:120px">
+            <defs>
+              <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#00A86B" stop-opacity="0.18"/>
+                <stop offset="100%" stop-color="#00A86B" stop-opacity="0.01"/>
+              </linearGradient>
+            </defs>
+            ${gridLines}
+            <path d="${areaPath}" fill="url(#areaGrad)"/>
+            <polyline points="${polyline}" fill="none" stroke="#00A86B" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+            ${hoverDots}
+          </svg>
+          <div class="area-x-labels">${xLabels}</div>
+        </div>
+      </div>`;
+
+    // Attach hover interactions
+    const wrap = chartEl.querySelector('#area-svg-wrap');
+    const tooltip = chartEl.querySelector('#area-tooltip');
+    chartEl.querySelectorAll('.area-dot').forEach((dot) => {
+      const idx = parseInt(dot.dataset.idx);
+      const [day, count] = dailyRows[idx];
+      dot.addEventListener('mouseenter', () => {
+        dot.style.opacity = '1';
+        tooltip.textContent = `${fmtDate(day)}: ${fmtNum(count)} คน`;
+        const svgRect = wrap.querySelector('svg').getBoundingClientRect();
+        const wrapRect = wrap.getBoundingClientRect();
+        const dotRect = dot.getBoundingClientRect();
+        const x = dotRect.left + dotRect.width / 2 - wrapRect.left;
+        const y = dotRect.top - wrapRect.top;
+        tooltip.style.left = `${x}px`;
+        tooltip.style.top = `${y - 34}px`;
+        tooltip.style.opacity = '1';
+      });
+      dot.addEventListener('mouseleave', () => {
+        dot.style.opacity = '0';
+        tooltip.style.opacity = '0';
+      });
+    });
   }
 
   const donutCard = dashboard.querySelectorAll('.card')[1];
