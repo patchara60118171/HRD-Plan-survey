@@ -1070,14 +1070,17 @@ function renderDashboard(summary) {
     .map(([ministry, count], idx) => `<div class="legend-row"><div class="ld" style="background:${['#0F4C81','#00A86B','#C08F2A','#8896A5','#C4444A'][idx % 5]}"></div>${esc(ministry)} — ${fmtNum(count)} หน่วยงาน</div>`)
     .join('');
 
-  const top5 = summary.slice().sort((a, b) => b.ch1Count - a.ch1Count).slice(0, 5);
+  const top5 = summary.slice().sort((a, b) => b.wellbeingSubmitted - a.wellbeingSubmitted).slice(0, 5);
+  const maxWb = Math.max(...top5.map(o => o.wellbeingSubmitted), 1);
   const progBody = dashboard.querySelector('.card.card-mb .card-body');
   progBody.innerHTML = top5.map((org) => {
-    const pct = org.ch1Count > 0 ? 100 : 0;
-    const cls = pct === 100 ? 'bg' : pct > 0 ? 'bw' : 'br';
-    const fillCls = pct === 100 ? '' : pct > 0 ? 'w' : 'r';
-    const status = pct === 100 ? 'ส่งแล้ว' : pct > 0 ? 'กำลังกรอก' : 'ยังไม่เริ่ม';
-    return `<div class="prog-item"><div class="prog-org">${esc(org.name)}</div><div class="prog-track"><div class="prog-fill ${fillCls}" style="width:${Math.max(pct, 2)}%"></div></div><div class="prog-pct ${fillCls}">${pct}%</div><div class="prog-status"><span class="badge ${cls}">${status}</span></div></div>`;
+    const count = org.wellbeingSubmitted || 0;
+    const official = org.typeOfficial;
+    const barPct = Math.round((count / maxWb) * 100);
+    const label = official != null ? `${fmtNum(count)}/${fmtNum(official)} คน` : `${fmtNum(count)} คน`;
+    const pctText = official > 0 ? `${Math.round((count / official) * 100)}%` : '—';
+    const cls = count > 0 ? 'bg' : 'br';
+    return `<div class="prog-item"><div class="prog-org">${esc(org.name)}</div><div class="prog-track"><div class="prog-fill" style="width:${Math.max(barPct, 2)}%"></div></div><div class="prog-pct">${label}</div><div class="prog-status"><span class="badge ${cls}">${pctText}</span></div></div>`;
   }).join('');
 }
 
