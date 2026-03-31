@@ -8,12 +8,15 @@ function renderAnalytics(summary) {
   const emptyEl = document.getElementById('anwb-empty');
   const contentEl = document.getElementById('anwb-content');
 
+  // Always hide loading/empty first
+  if (emptyEl) emptyEl.style.display = 'none';
+
   if (!rows.length) {
-    if (emptyEl) { emptyEl.style.display = ''; emptyEl.textContent = allRows.length ? '⏳ ข้อมูลทั้งหมดเป็น Draft ยังไม่มีการ Submit จริง' : '⏳ ยังไม่มีข้อมูล Wellbeing Survey'; }
+    const msg = allRows.length ? '⚠️ ข้อมูลทั้งหมดเป็น Draft ยังไม่มีการ Submit จริง' : '⚠️ ยังไม่มีข้อมูล Wellbeing Survey';
+    if (emptyEl) { emptyEl.style.display = ''; emptyEl.textContent = msg; }
     if (contentEl) contentEl.style.display = 'none';
     return;
   }
-  if (emptyEl) emptyEl.style.display = 'none';
   if (contentEl) contentEl.style.display = '';
 
   _anwbRenderKPICards(rows);
