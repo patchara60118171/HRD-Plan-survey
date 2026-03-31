@@ -1508,7 +1508,7 @@ function buildLinkUrl(org) {
   return `${SURVEY_BASE_URL}/?org=${code}`;
 }
 
-function renderAnalytics(summary) {
+function _renderAnalyticsCh1(summary) {
   const ch1Page = document.getElementById('page-an-ch1');
   const totalCh1Staff = state.ch1Rows.reduce((sum, row) => sum + Number(row.total_personnel || row.total_staff || row.form_data?.total_personnel || 0), 0);
   const ch1Kpis = ch1Page.querySelectorAll('.kpi .kpi-val');
@@ -2430,7 +2430,7 @@ async function init() {
     renderWellbeingControl(summary);
     renderWellbeingOrg(summary);
     renderWellbeingRaw();
-    renderAnalytics(summary);
+    _renderAnalyticsCh1(summary);
     populateOrgSelects();
     const auditExportBtn = document.querySelector('#page-audit .btn.b-gray');
     if (auditExportBtn) auditExportBtn.onclick = exportAuditLog;
