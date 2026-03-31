@@ -17,7 +17,11 @@ function go(id, el) {
     document.getElementById('ttl').textContent = title[0];
     document.getElementById('tbc').textContent = title[1];
   }
-  if (id === 'an-wb') renderAnalytics(summarizeOrgs());
+  if (id === 'an-wb') {
+    const emptyEl = document.getElementById('anwb-empty');
+    if (emptyEl) { emptyEl.style.display = ''; emptyEl.textContent = '⏳ กำลังโหลดข้อมูล...'; }
+    setTimeout(() => renderAnalytics(summarizeOrgs()), 50);
+  }
   if (id === 'ch1-summary') renderCh1Summary();
   if (id === 'form-editor') loadFormEditorFields();
   if (id === 'org-credentials') loadOrgCredentialsPage();

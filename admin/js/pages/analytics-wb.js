@@ -1,15 +1,20 @@
 /* ========== ADMIN PORTAL — WELLBEING ANALYTICS PAGE ========== */
 
 function renderAnalytics(summary) {
-  const rows = (state.surveyRows || []).filter(r => !r.is_draft);
+  const allRows = state.surveyRows || [];
+  const rows = allRows.filter(r => !r.is_draft);
+  console.log('[Analytics] surveyRows total:', allRows.length, '| non-draft:', rows.length);
+
+  const emptyEl = document.getElementById('anwb-empty');
+  const contentEl = document.getElementById('anwb-content');
+
   if (!rows.length) {
-    document.getElementById('anwb-content')?.replaceChildren();
-    const el = document.getElementById('anwb-empty');
-    if (el) el.style.display = '';
+    if (emptyEl) { emptyEl.style.display = ''; emptyEl.textContent = allRows.length ? '⏳ ข้อมูลทั้งหมดเป็น Draft ยังไม่มีการ Submit จริง' : '⏳ ยังไม่มีข้อมูล Wellbeing Survey'; }
+    if (contentEl) contentEl.style.display = 'none';
     return;
   }
-  const el = document.getElementById('anwb-empty');
-  if (el) el.style.display = 'none';
+  if (emptyEl) emptyEl.style.display = 'none';
+  if (contentEl) contentEl.style.display = '';
 
   _anwbRenderKPICards(rows);
   _anwbRenderDistributions(rows);
