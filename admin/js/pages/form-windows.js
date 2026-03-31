@@ -53,10 +53,11 @@ async function loadFormWindowsPage() {
       <td><input type="datetime-local" class="si fw-opens" data-org="${org.code}" value="${opensVal}" style="width:175px;font-size:12px" onchange="fwSaveDatetime('${org.code}')"></td>
       <td><input type="datetime-local" class="si fw-closes" data-org="${org.code}" value="${closesVal}" style="width:175px;font-size:12px" onchange="fwSaveDatetime('${org.code}')"></td>
       <td style="text-align:center">
-        <label class="tgl" style="margin:0" title="${isOpen ? 'คลิกเพื่อปิดรับ' : 'คลิกเพื่อเปิดรับ'}">
-          <input type="checkbox" class="fw-toggle" data-org="${org.code}" ${isOpen ? 'checked' : ''} onchange="fwToggle('${org.code}',this.checked)">
-          <div class="tgl-s"></div>
-        </label>
+        <button id="fw-btn-${org.code}" class="btn ${isOpen ? 'b-blue' : 'b-gray'}"
+          onclick="fwToggle('${org.code}', ${!isOpen})"
+          style="min-width:80px;font-size:12px">
+          ${isOpen ? '✅ เปิดรับ' : '🔒 ปิดรับ'}
+        </button>
       </td>
     </tr>`;
   }).join('');
@@ -81,37 +82,47 @@ async function fwSaveDatetime(orgCode) {
   if (!row) return;
   const opensEl = row.querySelector('.fw-opens');
   const closesEl = row.querySelector('.fw-closes');
-  const toggleEl = row.querySelector('.fw-toggle');
   const opens_at = opensEl?.value ? new Date(opensEl.value).toISOString() : null;
   const closes_at = closesEl?.value ? new Date(closesEl.value).toISOString() : null;
-  const is_active = toggleEl?.checked ?? true;
-  const { error } = await sb.from('form_windows').upsert({
-    form_code: 'wellbeing', round_code: 'round_2569', org_code: orgCode,
-    opens_at, closes_at, is_active, updated_at: new Date().toISOString(),
-  }, { onConflict: 'form_code,round_code,org_code' });
+  // Get current is_active from badge
+  const badge = document.getElementById(`fw-badge-${orgCode}`);
+  const is_active = badge?.textContent?.includes('เปิด') ?? true;
+  const error = await fwUpsert(orgCode, { opens_at, closes_at, is_active });
   if (error) { showToast(`บันทึกไม่สำเร็จ: ${error.message}`, 'error'); return; }
   showToast(`✅ บันทึกวันเวลา ${orgCode} แล้ว`, 'success');
-  // refresh badge
   const now = new Date();
   const isOpen = is_active && !(opens_at && new Date(opens_at) > now) && !(closes_at && new Date(closes_at) < now);
-  const badge = document.getElementById(`fw-badge-${orgCode}`);
   if (badge) { badge.className = `badge ${isOpen ? 'bg' : 'br'}`; badge.textContent = isOpen ? 'เปิดรับ' : 'ปิดรับ'; }
+  const btn = document.getElementById(`fw-btn-${orgCode}`);
+  if (btn) { btn.className = `btn ${isOpen ? 'b-blue' : 'b-gray'}`; btn.textContent = isOpen ? '✅ เปิดรับ' : '🔒 ปิดรับ'; btn.onclick = () => fwToggle(orgCode, !isOpen); }
+}
+
+async function fwUpsert(orgCode, fields) {
+  // Check if record exists first, then insert or update
+  const { data: existing } = await sb.from('form_windows')
+    .select('id').eq('form_code', 'wellbeing').eq('round_code', 'round_2569').eq('org_code', orgCode).maybeSingle();
+  const payload = { form_code: 'wellbeing', round_code: 'round_2569', org_code: orgCode, updated_at: new Date().toISOString(), ...fields };
+  if (existing?.id) {
+    const { error } = await sb.from('form_windows').update(payload).eq('id', existing.id);
+    return error;
+  } else {
+    const { error } = await sb.from('form_windows').insert(payload);
+    return error;
+  }
 }
 
 async function fwToggle(orgCode, isOpen) {
-  const { error } = await sb.from('form_windows').upsert({
-    form_code: 'wellbeing',
-    round_code: 'round_2569',
-    org_code: orgCode,
-    is_active: isOpen,
-    updated_at: new Date().toISOString(),
-  }, { onConflict: 'form_code,round_code,org_code' });
-
+  const error = await fwUpsert(orgCode, { is_active: isOpen });
   if (error) { showToast(`เปลี่ยนสถานะไม่สำเร็จ: ${error.message}`, 'error'); return; }
-  const badge = document.querySelector(`#fw-row-${orgCode} .badge`);
-  if (badge) {
-    badge.className = `badge ${isOpen ? 'bg' : 'br'}`;
-    badge.textContent = isOpen ? 'เปิดรับ' : 'ปิดรับ';
+  // Update badge
+  const badge = document.getElementById(`fw-badge-${orgCode}`);
+  if (badge) { badge.className = `badge ${isOpen ? 'bg' : 'br'}`; badge.textContent = isOpen ? 'เปิดรับ' : 'ปิดรับ'; }
+  // Update button
+  const btn = document.getElementById(`fw-btn-${orgCode}`);
+  if (btn) {
+    btn.className = `btn ${isOpen ? 'b-blue' : 'b-gray'}`;
+    btn.textContent = isOpen ? '✅ เปิดรับ' : '🔒 ปิดรับ';
+    btn.onclick = () => fwToggle(orgCode, !isOpen);
   }
   showToast(`${isOpen ? '✅ เปิดรับ' : '🔒 ปิดรับ'} ${orgCode} แล้ว`, 'success');
 }
@@ -131,15 +142,7 @@ async function fwReset(orgCode) {
 
 async function fwOpenAll() {
   const catalog = getFwCatalog();
-  const upserts = catalog.map(org => ({
-    form_code: 'wellbeing',
-    round_code: 'round_2569',
-    org_code: org.code,
-    is_active: true,
-    updated_at: new Date().toISOString(),
-  }));
-  const { error } = await sb.from('form_windows').upsert(upserts, { onConflict: 'form_code,round_code,org_code' });
-  if (error) { showToast(`เกิดข้อผิดพลาด: ${error.message}`, 'error'); return; }
+  for (const org of catalog) await fwUpsert(org.code, { is_active: true });
   showToast('✅ เปิดรับทุกองค์กรแล้ว', 'success');
   loadFormWindowsPage();
 }
@@ -148,15 +151,7 @@ async function fwCloseAll() {
   const ok = await showConfirm('ปิดรับแบบสอบถามทุกองค์กร?');
   if (!ok) return;
   const catalog = getFwCatalog();
-  const upserts = catalog.map(org => ({
-    form_code: 'wellbeing',
-    round_code: 'round_2569',
-    org_code: org.code,
-    is_active: false,
-    updated_at: new Date().toISOString(),
-  }));
-  const { error } = await sb.from('form_windows').upsert(upserts, { onConflict: 'form_code,round_code,org_code' });
-  if (error) { showToast(`เกิดข้อผิดพลาด: ${error.message}`, 'error'); return; }
+  for (const org of catalog) await fwUpsert(org.code, { is_active: false });
   showToast('🔒 ปิดรับทุกองค์กรแล้ว', 'success');
   loadFormWindowsPage();
 }
