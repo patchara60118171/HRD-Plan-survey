@@ -154,6 +154,14 @@ async function loadBackend(retryCount = 0) {
     state.ch1Rows = (ch1Res.data || [])
       .filter(row => !isTestOrgRow(row))
       .sort((a, b) => new Date(getRowDate(b) || 0) - new Date(getRowDate(a) || 0));
+    console.log(`🏢 ch1Rows count (excl. test): ${state.ch1Rows.length}`);
+    console.table(state.ch1Rows.map(r => ({
+      id: String(r.id).slice(0,8),
+      org_code: r.org_code,
+      organization: r.organization,
+      agency_name: r.form_data?.agency_name,
+      getCh1Org: getCh1Org(r),
+    })));
     state.linkRows = linksRes.error ? [] : (linksRes.data || []);
     state.userRows = usersRows || [];
     state.orgHrCredentials = orgHrCredRows || [];
