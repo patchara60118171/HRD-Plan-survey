@@ -17,6 +17,7 @@ function go(id, el) {
     document.getElementById('ttl').textContent = title[0];
     document.getElementById('tbc').textContent = title[1];
   }
+  if (id === 'an-wb') renderAnalytics(summarizeOrgs());
   if (id === 'ch1-summary') renderCh1Summary();
   if (id === 'form-editor') loadFormEditorFields();
   if (id === 'org-credentials') loadOrgCredentialsPage();

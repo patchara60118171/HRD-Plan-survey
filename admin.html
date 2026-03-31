@@ -452,6 +452,25 @@
       </div>
     </div>
 
+    <!-- ==================== ANALYTICS WELLBEING ==================== -->
+    <div class="page" id="page-an-wb">
+      <div class="page-title">🧠 วิเคราะห์ Wellbeing</div>
+      <div class="page-sub">ภาพรวมสุขภาวะบุคลากรจากข้อมูลจริง — PHQ-9 · GAD-7 · Burnout · Engagement · WLB</div>
+      <div id="anwb-empty" style="display:none" class="info blue">⏳ ยังไม่มีข้อมูล Wellbeing Survey กรุณารอให้ระบบโหลดข้อมูลเสร็จก่อน</div>
+      <div id="anwb-content">
+        <!-- KPI Cards -->
+        <div id="anwb-kpi" style="margin-bottom:20px"></div>
+        <!-- Distribution Charts -->
+        <div id="anwb-dist" style="margin-bottom:20px"></div>
+        <!-- Heatmap -->
+        <div id="anwb-heatmap" style="margin-bottom:20px"></div>
+        <!-- Demographics -->
+        <div id="anwb-demo" style="margin-bottom:20px"></div>
+        <!-- Risk Signals -->
+        <div id="anwb-risk" style="margin-bottom:20px"></div>
+      </div>
+    </div>
+
     <div class="page" id="page-ch1-summary">
       <div class="page-title">สรุปภาพรวม Ch1</div>
       <div class="page-sub" id="ch1-summary-sub">สรุปข้อมูลที่กรอกแล้วทั้งหมด · กรองตามองค์กรเพื่อดูรายละเอียดรายหน่วยงาน</div>
@@ -748,6 +767,7 @@
 <!-- Org HR Credentials -->
 <script src="admin/js/pages/org-credentials.js"></script>
 <script src="admin/js/pages/form-windows.js"></script>
+<script src="admin/js/pages/analytics-wb.js"></script>
 
 <script>
 /* ========== PAGE-SPECIFIC RENDERING (services loaded via external scripts above) ========== */

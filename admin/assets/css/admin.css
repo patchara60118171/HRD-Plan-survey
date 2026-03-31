@@ -204,6 +204,15 @@ tbody tr:hover td{background:#FAFBFD}
 .th-sort:hover{background:var(--bg2)}
 .sort-icon{font-size:11px;opacity:.5;margin-left:3px}
 
+/* ===== WELLBEING ANALYTICS ===== */
+.anwb-kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:4px}
+.anwb-kpi-card{background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:14px 16px}
+.anwb-2col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.anwb-3col{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.anwb-heat-table td,.anwb-heat-table th{text-align:center;padding:6px 10px;white-space:nowrap}
+.anwb-heat-table td:first-child,.anwb-heat-table th:first-child{text-align:left;white-space:normal;min-width:140px}
+@media(max-width:900px){.anwb-2col,.anwb-3col{grid-template-columns:1fr}}
+
 /* ===== TWO-COL ===== */
 .two-col{display:grid;grid-template-columns:3fr 2fr;gap:16px}
 .two-col-eq{display:grid;grid-template-columns:1fr 1fr;gap:16px}
