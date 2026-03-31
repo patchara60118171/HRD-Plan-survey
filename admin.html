@@ -38,7 +38,6 @@
     <div class="nav-group">ภาพรวม</div>
     <div class="nav-item active" onclick="go('dashboard',this)"><span class="ni">📊</span> Dashboard ภาพรวม</div>
     <div class="nav-item" onclick="go('progress',this)"><span class="ni">📋</span> สถานะการส่งข้อมูล <span class="nb">3</span></div>
-    <div class="nav-item" onclick="go('timeline',this)"><span class="ni">📅</span> Timeline โครงการ</div>
 
     <div class="nav-group">จัดการข้อมูล</div>
     <div class="nav-item" onclick="go('orgs',this)"><span class="ni">🏛️</span> องค์กรที่เข้าร่วม</div>
@@ -171,32 +170,6 @@
       </div>
     </div>
 
-    <!-- ==================== TIMELINE ==================== -->
-    <div class="page" id="page-timeline">
-      <div class="page-title">Timeline โครงการ</div>
-      <div class="page-sub">แผนดำเนินงานสำรวจสุขภาวะบุคลากร พ.ศ. 2566–2570</div>
-      <div class="two-col-eq">
-        <div class="panel">
-          <h3>📅 ไทม์ไลน์ดำเนินงาน</h3>
-          <div class="tl">
-            <div class="tl-item done"><div class="tl-date">ม.ค. 2569</div><div class="tl-title">เปิดรับสมัครองค์กรนำร่อง</div><div class="tl-desc">คัดเลือก 15 หน่วยงานภาครัฐนำร่อง</div></div>
-            <div class="tl-item done"><div class="tl-date">ก.พ. 2569</div><div class="tl-title">เปิดฟอร์ม Ch1 รับข้อมูลองค์กร</div><div class="tl-desc">ส่งครบ 10/15 · อยู่ระหว่างดำเนินการ 3 องค์กร</div></div>
-            <div class="tl-item now"><div class="tl-date">มี.ค.–เม.ย. 2569</div><div class="tl-title">เปิด Wellbeing Survey (กำลังดำเนินการ)</div><div class="tl-desc">บุคลากรตอบแบบสอบถาม — เป้า 1,500–2,000 คน</div></div>
-            <div class="tl-item"><div class="tl-date">พ.ค. 2569</div><div class="tl-title">วิเคราะห์และสรุปผล</div><div class="tl-desc">จัดทำรายงานและ Dashboard ส่งผู้บริหาร</div></div>
-            <div class="tl-item"><div class="tl-date">มิ.ย. 2569</div><div class="tl-title">คืนข้อมูลให้องค์กร</div><div class="tl-desc">Viewer เข้าดูผลองค์กรตัวเอง</div></div>
-          </div>
-        </div>
-        <div class="panel">
-          <h3>⚙️ ตั้งค่า Deadline</h3>
-          <div class="fg"><label>วันปิดรับ Ch1 <span id="deadline-ch1-be" style="font-size:11px;color:var(--A);font-weight:600"></span></label><input type="date" id="deadline-ch1" value="2026-03-31" oninput="document.getElementById('deadline-ch1-be').textContent=isoToBuddhistDisplay(this.value)"></div>
-          <div class="fg"><label>วันปิดรับ Wellbeing Survey <span id="deadline-wb-be" style="font-size:11px;color:var(--A);font-weight:600"></span></label><input type="date" id="deadline-wb" value="2026-04-30" oninput="document.getElementById('deadline-wb-be').textContent=isoToBuddhistDisplay(this.value)"></div>
-          <div class="fg"><label>แจ้งเตือนก่อนครบกำหนด (วัน)</label><input type="number" id="deadline-days" value="7"></div>
-          <div class="fg"><label>หมายเหตุ</label><textarea id="deadline-note" placeholder="รายละเอียดเพิ่มเติม..."></textarea></div>
-          <button class="btn b-solid" style="padding:8px 16px;font-size:13px" onclick="saveDeadlines()">💾 บันทึก</button>
-          <div id="deadline-msg" style="font-size:12px;margin-top:6px"></div>
-        </div>
-      </div>
-    </div>
 
     <!-- ==================== ORGS ==================== -->
     <div class="page" id="page-orgs">

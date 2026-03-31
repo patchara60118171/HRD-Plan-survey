@@ -9,7 +9,6 @@ const ORG_HR_EMAIL_DOMAIN = PROJECT_SSOT?.constants?.orgHrEmailDomain || '@wellb
  const titles = {
   dashboard:['Dashboard ภาพรวม','/ ภาพรวม'],
   progress:['สถานะการส่งข้อมูล','/ ติดตามความคืบหน้า'],
-  timeline:['Timeline โครงการ','/ ภาพรวม'],
   orgs:['องค์กรที่เข้าร่วม','/ จัดการข้อมูล'],
   'form-ch1':['ฟอร์ม Ch1','/ จัดการข้อมูล'],
   'form-wb':['Wellbeing Survey','/ จัดการข้อมูล'],
