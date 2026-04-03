@@ -26,6 +26,7 @@ function renderDashboard(summary) {
 
   const kpis = dashboard.querySelectorAll('.kpi');
   kpis[0].querySelector('.kpi-val').textContent = orgCount;
+  kpis[0].querySelector('.kpi-sub').textContent = `${orgCount} หน่วยงานภาครัฐ`;
   kpis[1].querySelector('.kpi-val').textContent = respondedCh1;
   kpis[1].querySelector('.kpi-sub').textContent = `${fmtNum((respondedCh1 / Math.max(orgCount, 1)) * 100, 1)}% · ยังไม่ส่ง ${orgCount - respondedCh1} องค์กร`;
   kpis[2].querySelector('.kpi-val').textContent = fmtNum(submittedWb.length);
