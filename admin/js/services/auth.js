@@ -7,7 +7,12 @@ async function doLogout() {
 }
 
 async function requireSession() {
-  const { data: { session } } = await sb.auth.getSession();
+  const SESSION_TIMEOUT_MS = 12000;
+  const sessionPromise = sb.auth.getSession().then(({ data: { session } }) => session);
+  const timeoutPromise = new Promise((_, reject) =>
+    setTimeout(() => reject(new Error('หมดเวลาตรวจสอบ session (12s)')), SESSION_TIMEOUT_MS)
+  );
+  const session = await Promise.race([sessionPromise, timeoutPromise]);
   if (!session) {
     window.location.href = '/admin-login';
     return null;
