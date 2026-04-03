@@ -82,6 +82,12 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
+
+  // Dev mode: bypass SW cache on localhost to avoid stale admin assets.
+  if (url.hostname === 'localhost' || url.hostname === '127.0.0.1') {
+    event.respondWith(fetch(request));
+    return;
+  }
   
   // ข้าม requests ที่ไม่ใช่ GET
   if (request.method !== 'GET') {

@@ -32,7 +32,7 @@ function renderCh1(summary) {
     <td>${fmtNum(row.total_staff || row.total_personnel || row.form_data?.total_personnel)}</td>
     <td>${esc(row.form_completion || '5/5 ส่วน')}</td>
     <td>${fmtDate(getRowDate(row))}</td>
-    <td class="td-act"><button class="btn b-blue" onclick="showCh1RowDetail(${index})">ดูละเอียด</button><button class="btn b-gray" onclick="showCh1PDF(${index})">📄 PDF</button></td>
+    <td class="td-act"><button class="btn b-blue" onclick="showCh1PDF(${index})">📄 PDF</button><button class="btn b-gray" onclick="exportCh1RowDocs(${index})">📝 Docs</button></td>
   </tr>`).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--tx3)">ยังไม่มีข้อมูล Ch1</td></tr>';
 
   renderCh1RawSheet();
@@ -41,23 +41,120 @@ function renderCh1(summary) {
 
 // ─── renderCh1RawSheet ────────────────────────────────────────────────────────
 
+const CH1_RAW_ORG_ORDER = [
+  'สำนักงานสภาพัฒนาการเศรษฐกิจและสังคมแห่งชาติ',
+  'สำนักงานนโยบายและยุทธศาสตร์การค้า',
+  'กรมวิทยาศาสตร์บริการ',
+  'กรมสนับสนุนบริการสุขภาพ',
+  'กรมอุตุนิยมวิทยา',
+  'กรมส่งเสริมวัฒนธรรม',
+  'กรมคุมประพฤติ',
+  'สำนักงานปลัดกระทรวงการท่องเที่ยวและกีฬา',
+  'กรมสุขภาพจิต',
+  'สำนักงานนโยบายและแผนทรัพยากรธรรมชาติและสิ่งแวดล้อม',
+  'สำนักงานการวิจัยแห่งชาติ',
+  'สำนักงานมาตรฐานสินค้าเกษตรและอาหารแห่งชาติ',
+  'สำนักงานคณะกรรมการพัฒนาระบบราชการ',
+  'กรมชลประทาน',
+  'กรมกิจการเด็กและเยาวชน',
+];
+
+const CH1_RAW_ORG_ALIASES = {
+  'สำนักงาน ก.พ.ร.': 'สำนักงานคณะกรรมการพัฒนาระบบราชการ',
+  'สำนักงาน กพร.': 'สำนักงานคณะกรรมการพัฒนาระบบราชการ',
+};
+
+function normalizeOrgKey(name) {
+  return String(name || '').toLowerCase().replace(/[\s.]/g, '').trim();
+}
+
+function canonicalizeCh1OrgName(name) {
+  const raw = String(name || '').trim();
+  if (!raw) return '';
+  if (CH1_RAW_ORG_ALIASES[raw]) return CH1_RAW_ORG_ALIASES[raw];
+
+  const key = normalizeOrgKey(raw);
+  const aliasHit = Object.keys(CH1_RAW_ORG_ALIASES).find((alias) => normalizeOrgKey(alias) === key);
+  if (aliasHit) return CH1_RAW_ORG_ALIASES[aliasHit];
+
+  const canonicalHit = CH1_RAW_ORG_ORDER.find((org) => normalizeOrgKey(org) === key);
+  return canonicalHit || raw;
+}
+
+function buildCh1RawRows() {
+  const latestByOrg = new Map();
+
+  state.ch1Rows.forEach((row) => {
+    const canonicalOrg = canonicalizeCh1OrgName(getCh1Org(row));
+    if (!CH1_RAW_ORG_ORDER.includes(canonicalOrg)) return;
+
+    const prev = latestByOrg.get(canonicalOrg);
+    const rowDate = new Date(getRowDate(row) || 0).getTime();
+    const prevDate = prev ? new Date(getRowDate(prev) || 0).getTime() : -1;
+    if (!prev || rowDate >= prevDate) latestByOrg.set(canonicalOrg, row);
+  });
+
+  return CH1_RAW_ORG_ORDER.map((orgName) => ({ orgName, row: latestByOrg.get(orgName) || null }));
+}
+
 function renderCh1RawSheet() {
   const thead = document.getElementById('c1-sheet-thead');
   const tbody = document.getElementById('c1-sheet-tbody');
   if (!thead || !tbody) return;
 
-  thead.innerHTML = '<th style="position:sticky;left:0;background:var(--bg);z-index:3">#</th>' +
-    CH1_COLUMNS.map((col) => `<th>${esc(col.label)}</th>`).join('');
+  thead.innerHTML = '<th style="position:sticky;left:0;background:var(--bg);z-index:5;width:52px;min-width:52px;max-width:52px">#</th>' +
+    CH1_COLUMNS.map((col, index) => `<th${index === 0 ? ' class="c1-col-org"' : ''}>${esc(col.label)}</th>`).join('');
 
-  const rows = state.ch1Rows;
-  if (!rows.length) {
-    tbody.innerHTML = `<tr><td colspan="${CH1_COLUMNS.length + 1}" style="text-align:center;color:var(--tx3)">ยังไม่มีข้อมูล Ch1</td></tr>`;
-    return;
-  }
-  tbody.innerHTML = rows.map((row, index) =>
-    `<tr><td style="position:sticky;left:0;background:#F8FAFC;font-weight:600;z-index:1;border-right:1.5px solid var(--bdr)">${index + 1}</td>` +
-    CH1_COLUMNS.map((col) => `<td>${col.get(row)}</td>`).join('') + '</tr>'
-  ).join('');
+  const rows = buildCh1RawRows();
+  tbody.innerHTML = rows.map((entry, index) => {
+    const cells = CH1_COLUMNS.map((col, colIndex) => {
+      if (colIndex === 0) return `<td class="c1-col-org">${esc(entry.orgName)}</td>`;
+      if (!entry.row) return '<td>Null</td>';
+      return `<td>${col.get(entry.row)}</td>`;
+    }).join('');
+
+    return `<tr><td style="position:sticky;left:0;background:#F8FAFC;font-weight:600;z-index:3;border-right:1.5px solid var(--bdr);width:52px;min-width:52px;max-width:52px;text-align:center">${index + 1}</td>${cells}</tr>`;
+  }).join('');
+
+  enableCh1SheetHorizontalScroll();
+}
+
+function enableCh1SheetHorizontalScroll() {
+  const wrap = document.querySelector('#c1-sheet .sheet-wrap');
+  if (!wrap || wrap.dataset.hScrollReady === '1') return;
+  wrap.dataset.hScrollReady = '1';
+
+  wrap.addEventListener('wheel', (event) => {
+    if (wrap.scrollWidth <= wrap.clientWidth) return;
+    if (Math.abs(event.deltaY) < Math.abs(event.deltaX)) return;
+    wrap.scrollLeft += event.deltaY;
+    event.preventDefault();
+  }, { passive: false });
+
+  let isDragging = false;
+  let startX = 0;
+  let startLeft = 0;
+
+  wrap.addEventListener('mousedown', (event) => {
+    if (event.button !== 0) return;
+    if (event.target.closest('a,button,input,select,textarea')) return;
+    isDragging = true;
+    wrap.classList.add('is-dragging');
+    startX = event.clientX;
+    startLeft = wrap.scrollLeft;
+    event.preventDefault();
+  });
+
+  window.addEventListener('mousemove', (event) => {
+    if (!isDragging) return;
+    wrap.scrollLeft = startLeft - (event.clientX - startX);
+  });
+
+  window.addEventListener('mouseup', () => {
+    if (!isDragging) return;
+    isDragging = false;
+    wrap.classList.remove('is-dragging');
+  });
 }
 
 // ─── Helper function to sort organizations according to desired order ─────────────────

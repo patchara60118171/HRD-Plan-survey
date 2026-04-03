@@ -19,7 +19,7 @@
   --tx3:#8896A5;
   --sidebar-w:248px;
 }
-body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);color:var(--tx);font-size:14px;display:flex;min-height:100vh;line-height:1.6}
+body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);color:var(--tx);font-size:14px;display:flex;min-height:100vh;line-height:1.6;overflow-x:hidden}
 
 /* ===== SIDEBAR ===== */
 .sidebar{width:var(--sidebar-w);background:var(--PD);color:#fff;display:flex;flex-direction:column;flex-shrink:0;position:fixed;top:0;left:0;height:100vh;z-index:100;overflow-y:auto}
@@ -58,7 +58,7 @@ nav{flex:1;padding:6px 0 12px}
 .topbar-btn.primary:hover{background:var(--PD)}
 .tb-notif{position:relative;width:34px;height:34px;border-radius:7px;border:1px solid var(--bdr);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;color:var(--tx2);background:var(--card)}
 .tb-notif .dot{position:absolute;top:5px;right:5px;width:7px;height:7px;background:#D64045;border-radius:50%;border:1.5px solid #fff}
-.content{padding:22px;flex:1}
+.content{padding:22px;flex:1;overflow-x:hidden}
 
 /* ===== PAGES ===== */
 .page{display:none}
@@ -317,11 +317,47 @@ tbody tr:hover td{background:#FAFBFD}
 .set-desc{font-size:11px;color:var(--tx3);margin-top:1px}
 
 /* sheet scroll */
-.sheet-wrap{overflow:auto;max-height:420px}
-.sheet-wrap table{font-size:11px}
+.sheet-wrap{position:relative;max-width:100%;overflow-x:scroll;overflow-y:visible;max-height:none;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;scrollbar-gutter:stable both-edges;touch-action:pan-x;cursor:grab}
+.sheet-wrap table{font-size:11px;width:max-content;min-width:100%}
+.sheet-wrap.is-dragging{cursor:grabbing}
+.sheet-wrap::-webkit-scrollbar{height:12px}
+.sheet-wrap::-webkit-scrollbar-track{background:#E5E7EB;border-radius:999px}
+.sheet-wrap::-webkit-scrollbar-thumb{background:#9AA7B6;border-radius:999px}
+.sheet-wrap::-webkit-scrollbar-thumb:hover{background:#7F8C9B}
 .sheet-wrap thead th{position:sticky;top:0;z-index:2;background:var(--bg);border-right:1px solid var(--bdr)}
 .sheet-wrap tbody td{border-right:1px solid var(--bg2);white-space:nowrap;max-width:160px;overflow:hidden;text-overflow:ellipsis}
 .sheet-wrap tbody td:first-child{position:sticky;left:0;background:#F8FAFC;font-weight:600;z-index:1;border-right:1.5px solid var(--bdr)}
+
+/* CH1 Raw Data table: freeze # + organization, and show full org names */
+#c1-sheet-table thead th:first-child,
+#c1-sheet-table tbody td:first-child{
+  width:52px;
+  min-width:52px;
+  max-width:52px;
+  text-align:center;
+}
+
+#c1-sheet-table thead th.c1-col-org,
+#c1-sheet-table tbody td.c1-col-org{
+  position:sticky;
+  left:52px;
+  min-width:260px;
+  max-width:none;
+  white-space:nowrap;
+  overflow:visible;
+  text-overflow:clip;
+  border-right:1.5px solid var(--bdr);
+}
+
+#c1-sheet-table thead th.c1-col-org{
+  z-index:4;
+  background:var(--bg);
+}
+
+#c1-sheet-table tbody td.c1-col-org{
+  z-index:2;
+  background:#F8FAFC;
+}
 
 /* form ctrl card */
 .fc{background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:18px}

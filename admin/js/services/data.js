@@ -20,6 +20,7 @@ const ADMIN_CANONICAL_ORGS = [
 
 const ADMIN_CANONICAL_ORG_CODES = new Set(ADMIN_CANONICAL_ORGS.map((org) => org.code));
 const ADMIN_CANONICAL_ORG_NAMES = new Set(ADMIN_CANONICAL_ORGS.map((org) => org.name));
+const SURVEY_SELECT_FIELDS = 'id,email,name,title,organization,gender,age,org_type,job,job_duration,bmi,bmi_category,is_draft,submitted_at,timestamp,tmhi_score,raw_responses';
 
 function getOrgCatalog() {
   const profileMap = new Map(
@@ -97,18 +98,58 @@ function scopeRowsForCurrentUser() {
   });
 }
 
+async function fetchAllSurveyResponses() {
+  const pageSize = 1000;
+  const countRes = await sb.from('survey_responses').select('id', { count: 'exact', head: true });
+
+  if (countRes.error) {
+    return { data: [], error: countRes.error };
+  }
+
+  const total = countRes.count || 0;
+  if (total === 0) return { data: [], error: null };
+
+  const ranges = [];
+  for (let from = 0; from < total; from += pageSize) {
+    ranges.push([from, Math.min(from + pageSize - 1, total - 1)]);
+  }
+
+  const pageResults = await Promise.all(
+    ranges.map(([from, to]) =>
+      sb.from('survey_responses').select(SURVEY_SELECT_FIELDS).range(from, to)
+    )
+  );
+
+  const failed = pageResults.find((res) => res.error);
+  if (failed?.error) {
+    return { data: [], error: failed.error };
+  }
+
+  const rows = pageResults.flatMap((res) => res.data || []);
+
+  return { data: rows, error: null };
+}
+
 async function loadBackend(retryCount = 0) {
   const maxRetries = 2;
+  const TIMEOUT_MS = 15000;
+
+  function withTimeout(promise) {
+    return Promise.race([
+      promise,
+      new Promise((_, reject) => setTimeout(() => reject(new Error('หมดเวลาเชื่อมต่อ (15s)')), TIMEOUT_MS)),
+    ]);
+  }
   
   try {
-    const [surveyRes, ch1Res, linksRes, usersRows, orgRows, orgHrCredRows] = await Promise.all([
-      sb.from('survey_responses').select('id,email,name,title,organization,gender,age,org_type,job,job_duration,bmi,bmi_category,is_draft,submitted_at,timestamp,tmhi_score,raw_responses'),
+    const [surveyRes, ch1Res, linksRes, usersRows, orgRows, orgHrCredRows] = await withTimeout(Promise.all([
+      fetchAllSurveyResponses(),
       sb.from('hrd_ch1_responses').select('*'),
       sb.from('org_form_links').select('*'),
       fetchAdminUserRoles(),
       fetchOrganizations(),
       fetchOrgHrCredentials(),
-    ]);
+    ]));
 
     // Check for critical errors
     const criticalErrors = [];
@@ -140,28 +181,14 @@ async function loadBackend(retryCount = 0) {
       return code === 'test-org' || name.includes('ทดสอบระบบ');
     };
 
-    console.log('🔍 DEBUG surveyRes:', surveyRes);
-    console.log('📊 Raw survey rows count:', (surveyRes.data || []).length);
-    
     state.surveyRows = (surveyRes.data || [])
       .filter(row => !isTestOrgRow(row))
       .map(normalizeSurveyRow)
       .sort((a, b) => new Date(getRowDate(b) || 0) - new Date(getRowDate(a) || 0));
     
-    console.log('✅ Filtered survey rows count:', state.surveyRows.length);
-    console.log('📋 state.surveyRows:', state.surveyRows);
-    
     state.ch1Rows = (ch1Res.data || [])
       .filter(row => !isTestOrgRow(row))
       .sort((a, b) => new Date(getRowDate(b) || 0) - new Date(getRowDate(a) || 0));
-    console.log(`🏢 ch1Rows count (excl. test): ${state.ch1Rows.length}`);
-    console.table(state.ch1Rows.map(r => ({
-      id: String(r.id).slice(0,8),
-      org_code: r.org_code,
-      organization: r.organization,
-      agency_name: r.form_data?.agency_name,
-      getCh1Org: getCh1Org(r),
-    })));
     state.linkRows = linksRes.error ? [] : (linksRes.data || []);
     state.userRows = usersRows || [];
     state.orgHrCredentials = orgHrCredRows || [];
