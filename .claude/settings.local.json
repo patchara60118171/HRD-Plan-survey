@@ -17,7 +17,12 @@
       "mcp__Claude_Preview__preview_start",
       "Bash(curl -s http://localhost:3000)",
       "Bash(pkill -f \"serve\")",
-      "Bash(xargs kill:*)"
+      "Bash(xargs kill:*)",
+      "Bash(find . -type f -name *admin*)",
+      "Bash(grep -E '\\\\.\\(js|css|json|html\\)$')",
+      "Bash(find admin:*)",
+      "Bash(grep -r \"typeOfficial\\\\|type_official\" --include=*.js)",
+      "Bash(grep -r \"filled\\\\|completeness\\\\|quality\\\\|count.*column\" --include=*.js admin/js/pages/ch1.js admin/js/services/data.js)"
     ]
   }
 }

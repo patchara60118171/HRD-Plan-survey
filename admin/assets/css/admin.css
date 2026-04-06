@@ -439,3 +439,125 @@ tbody tr:hover td{background:#FAFBFD}
 .fe-gf-preview{padding:13px 16px;font-size:14px;color:var(--tx);line-height:1.6;cursor:pointer;min-height:46px;transition:background .12s}
 .fe-gf-preview:hover{background:var(--bg)}
 .fe-gf-editbox{padding:12px 16px 14px}
+
+/* ===== HAMBURGER MENU ===== */
+.hamburger{display:none;align-items:center;justify-content:center;width:38px;height:38px;border:1px solid var(--bdr);border-radius:7px;background:var(--card);cursor:pointer;font-size:18px;color:var(--tx2);flex-shrink:0;transition:background .12s}
+.hamburger:hover{background:var(--bg)}
+.sidebar-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:99;opacity:0;transition:opacity .25s}
+body.sidebar-open .sidebar-backdrop{display:block;opacity:1}
+
+/* ===== DOWNLOAD CARD BUTTON ===== */
+.card-dl-btn{width:32px;height:32px;border-radius:6px;border:1px solid var(--bdr);background:var(--card);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:14px;color:var(--tx2);transition:background .12s,color .12s;flex-shrink:0}
+.card-dl-btn:hover{background:var(--bg);color:var(--P)}
+.dl-wrap{position:relative}
+.dl-wrap .card-dl-btn{position:absolute;top:10px;right:10px;z-index:5}
+.card-head .card-dl-btn{margin-left:auto}
+
+/* ===== RESPONSIVE: TABLET ≤ 1024px ===== */
+@media(max-width:1024px){
+  .hamburger{display:flex}
+  .sidebar{transform:translateX(-100%);transition:transform .25s ease}
+  body.sidebar-open .sidebar{transform:translateX(0)}
+  .main{margin-left:0}
+
+  /* Grids → 2 col */
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+  .two-col,.two-col-eq{grid-template-columns:1fr}
+  .anwb-2col,.anwb-3col{grid-template-columns:1fr}
+  #ch1-status-grid{grid-template-columns:repeat(2,1fr)}
+  .summary-sections{grid-template-columns:1fr}
+
+  /* Dashboard inline grid override */
+  [style*="grid-template-columns:2fr 1fr"],
+  [style*="grid-template-columns: 2fr 1fr"]{grid-template-columns:1fr !important}
+
+  /* Welcome strip wrap */
+  .welcome{flex-wrap:wrap}
+  .w-space{display:none}
+  .w-stats{width:100%;justify-content:space-around;margin-top:10px}
+
+  /* Form editor sidebar */
+  .fe-layout{flex-direction:column}
+  .fe-sidebar{width:100%;border-right:none;border-bottom:1px solid var(--bdr);padding:8px 0;display:flex;overflow-x:auto}
+  .fe-tab-item{white-space:nowrap;border-left:none;border-bottom:2px solid transparent;padding:8px 14px}
+  .fe-tab-item.active{border-left:none;border-bottom-color:var(--P)}
+
+  /* Modal */
+  .umodal{min-width:auto;width:calc(100% - 32px);max-width:560px}
+
+  /* Progress items */
+  .prog-org{width:120px;font-size:11.5px}
+  .prog-status{width:auto}
+
+  /* Heatmap */
+  .hm-label{width:100px;font-size:10.5px}
+  .hm{width:28px;height:24px;font-size:8.5px}
+}
+
+/* ===== RESPONSIVE: MOBILE ≤ 640px ===== */
+@media(max-width:640px){
+  /* Topbar */
+  .topbar{padding:0 12px;height:48px;gap:8px}
+  .tb-title{font-size:13px}
+  .tb-bc{display:none}
+  .content{padding:12px}
+
+  /* Grids → 1 col */
+  .kpi-grid{grid-template-columns:1fr}
+  #ch1-status-grid{grid-template-columns:1fr}
+  .area-stats{grid-template-columns:repeat(2,1fr)}
+
+  /* KPI cards compact */
+  .kpi{padding:12px 14px}
+  .kpi .kpi-val{font-size:22px}
+
+  /* Welcome strip */
+  .welcome{padding:14px 16px;gap:12px}
+  .w-title{font-size:14px}
+  .w-stats{gap:8px}
+  .w-stat{padding:7px 10px}
+  .w-val{font-size:16px}
+
+  /* Area chart stats */
+  .area-stat{padding:8px 10px}
+  .area-stat-val{font-size:15px}
+
+  /* Cards */
+  .card-head{padding:12px 14px}
+  .card-body{padding:12px 14px}
+
+  /* Touch targets */
+  .btn{min-height:40px;padding:8px 14px;font-size:12.5px}
+  .topbar-btn{min-height:40px;padding:8px 12px}
+  .nav-item{padding:12px 14px;font-size:14px}
+  .card-dl-btn{width:44px;height:44px;font-size:16px}
+
+  /* Tables */
+  .tbl-wrap{-webkit-overflow-scrolling:touch}
+  thead th{padding:8px 10px;font-size:11px}
+  tbody td{padding:8px 10px;font-size:11.5px}
+
+  /* Progress items */
+  .prog-item{flex-wrap:wrap;gap:6px}
+  .prog-org{width:100%;font-size:12px}
+  .prog-track{order:1;flex:1}
+  .prog-pct{order:2;width:auto}
+  .prog-status{order:3;width:auto}
+
+  /* Filter bar */
+  .filter-bar{flex-direction:column}
+  .si{width:100%}
+  .sel{width:100%}
+
+  /* Page titles */
+  .page-title{font-size:15px}
+  .page-sub{font-size:11.5px}
+
+  /* Form rows */
+  .form-row{flex-direction:column}
+  .form-row .fg{min-width:100%}
+
+  /* Stats row */
+  .stats-row{flex-wrap:wrap}
+  .st{min-width:calc(50% - 5px)}
+}

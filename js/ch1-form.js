@@ -575,12 +575,6 @@ function collectAllData() {
     const type_contract = toSafeInt(document.getElementById('type_contract')?.value, 99999, 'พนักงานสัญญา');
     const type_other = toSafeInt(document.getElementById('type_other')?.value, 99999, 'อื่นๆ');
 
-    // Turnover and transfer (legacy fields - for backward compatibility)
-    const turnover_count = toSafeInt(document.getElementById('turnover_count')?.value, 99999, 'จำนวนลาออก') || null;
-    const turnover_rate = parseFloat(document.getElementById('turnover_rate')?.value) || null;
-    const transfer_count = toSafeInt(document.getElementById('transfer_count')?.value, 99999, 'จำนวนย้าย') || null;
-    const transfer_rate = parseFloat(document.getElementById('transfer_rate')?.value) || null;
-
     // Section 4: การลาออกและโอนย้าย (ย้อนหลัง 5 ปี) - ข้อมูลตามปี
     const begin_2564 = toSafeInt(document.getElementById('begin_2564')?.value, 99999, 'จำนวนต้นปี 2564');
     const begin_2565 = toSafeInt(document.getElementById('begin_2565')?.value, 99999, 'จำนวนต้นปี 2565');
@@ -749,8 +743,6 @@ function collectAllData() {
         pos_k1, pos_k2, pos_k3, pos_k4, pos_k5,
         pos_m1, pos_m2, pos_s1, pos_s2,
         type_official, type_employee, type_contract, type_other,
-        turnover_count, turnover_rate,
-        transfer_count, transfer_rate,
 
         // Section 4: ข้อมูลรายปี (ย้อนหลัง 5 ปี)
         begin_2564, begin_2565, begin_2566, begin_2567, begin_2568,

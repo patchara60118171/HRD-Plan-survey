@@ -4,10 +4,10 @@ const ADMIN_CANONICAL_ORGS = [
   { code: 'nesdc', name: 'สำนักงานสภาพัฒนาการเศรษฐกิจและสังคมแห่งชาติ' },
   { code: 'tpso', name: 'สำนักงานนโยบายและยุทธศาสตร์การค้า' },
   { code: 'dss', name: 'กรมวิทยาศาสตร์บริการ' },
-  { code: 'dhss', name: 'กรมสนับสนุนบริการสุขภาพ' },
   { code: 'tmd', name: 'กรมอุตุนิยมวิทยา' },
   { code: 'dcp', name: 'กรมส่งเสริมวัฒนธรรม' },
   { code: 'dop', name: 'กรมคุมประพฤติ' },
+  { code: 'dhss', name: 'กรมสนับสนุนบริการสุขภาพ' },
   { code: 'mots', name: 'สำนักงานปลัดกระทรวงการท่องเที่ยวและกีฬา' },
   { code: 'dmh', name: 'กรมสุขภาพจิต' },
   { code: 'onep', name: 'สำนักงานนโยบายและแผนทรัพยากรธรรมชาติและสิ่งแวดล้อม' },
@@ -249,9 +249,49 @@ function summarizeOrgs() {
     latestWb: null,
     ch1Count: 0,
     latestCh1: null,
+    ch1CompletionPct: 0,
+    ch1FilledFields: 0,
+    ch1TotalFields: 0,
     typeOfficial: null,
   }]));
   const codeMap = new Map(catalog.map((org) => [String(org.code || '').toLowerCase(), org.name]));
+
+  const countCompletedCh1Fields = (row) => {
+    const source = row?.form_data && typeof row.form_data === 'object' ? row.form_data : row;
+    if (!source || typeof source !== 'object') return { filled: 0, total: 0 };
+
+    const ignoredKeys = new Set([
+      'id', 'created_at', 'updated_at', 'submitted_at', 'timestamp', 'org_code', 'organization', 'org_name', 'agency_name', 'status', 'user_id', 'email',
+      'respondent_email', 'form_version', 'ncd_ratio_pct', 'sick_leave_avg',
+      'turnover_rate_2564', 'turnover_rate_2565', 'turnover_rate_2566', 'turnover_rate_2567', 'turnover_rate_2568',
+      'google_sync_status', 'google_sync_attempts', 'google_synced_at', 'google_sheet_row_id', 'google_sync_error',
+      'attachment_urls', 'attachments', 'files', 'file_urls'
+    ]);
+
+    let filled = 0;
+    let total = 0;
+
+    Object.entries(source).forEach(([key, value]) => {
+      if (ignoredKeys.has(key)) return;
+      total += 1;
+
+      if (Array.isArray(value)) {
+        if (value.length > 0) filled += 1;
+        return;
+      }
+
+      if (value && typeof value === 'object') {
+        if (Object.keys(value).length > 0) filled += 1;
+        return;
+      }
+
+      if (value !== null && value !== undefined && String(value).trim() !== '') {
+        filled += 1;
+      }
+    });
+
+    return { filled, total };
+  };
 
   state.surveyRows.forEach((row) => {
     const org = map.get(row.organization);
@@ -276,7 +316,13 @@ function summarizeOrgs() {
       if (v != null && v !== '') org.typeOfficial = Number(v) || 0;
     }
     const date = getRowDate(row);
-    if (date && (!org.latestCh1 || new Date(date) > new Date(org.latestCh1))) org.latestCh1 = date;
+    if (date && (!org.latestCh1 || new Date(date) > new Date(org.latestCh1))) {
+      const completion = countCompletedCh1Fields(row);
+      org.latestCh1 = date;
+      org.ch1FilledFields = completion.filled;
+      org.ch1TotalFields = completion.total;
+      org.ch1CompletionPct = completion.total > 0 ? (completion.filled / completion.total) * 100 : 0;
+    }
   });
 
   return [...map.values()];

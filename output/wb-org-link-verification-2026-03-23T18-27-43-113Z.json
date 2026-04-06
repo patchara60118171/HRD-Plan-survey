@@ -1,0 +1,958 @@
+{
+  "generatedAt": "2026-03-23T18:27:43.111Z",
+  "totalOrganizations": 16,
+  "successfulSubmissions": 0,
+  "rowsFound": 0,
+  "rawResponsesComplete": 0,
+  "columnsComplete": 0,
+  "questionCount": 97,
+  "questionIds": [
+    "title",
+    "name",
+    "gender",
+    "age",
+    "org_type",
+    "job",
+    "job_duration",
+    "activity_org",
+    "activity_thaihealth",
+    "diseases",
+    "height",
+    "weight",
+    "waist",
+    "q2001",
+    "q2002",
+    "q2003",
+    "q2004",
+    "q2005_drug",
+    "sweet_1",
+    "sweet_2",
+    "sweet_3",
+    "sweet_4",
+    "sweet_5",
+    "fat_1",
+    "fat_2",
+    "fat_3",
+    "fat_4",
+    "fat_5",
+    "salt_1",
+    "salt_2",
+    "salt_3",
+    "salt_4",
+    "salt_5",
+    "act_work_days",
+    "act_work_dur",
+    "act_commute_days",
+    "act_commute_dur",
+    "act_rec_days",
+    "act_rec_dur",
+    "sedentary_dur",
+    "screen_entertain",
+    "screen_work",
+    "tmhi_1",
+    "tmhi_2",
+    "tmhi_3",
+    "tmhi_4",
+    "tmhi_5",
+    "tmhi_6",
+    "tmhi_7",
+    "tmhi_8",
+    "tmhi_9",
+    "tmhi_10",
+    "tmhi_11",
+    "tmhi_12",
+    "tmhi_13",
+    "tmhi_14",
+    "tmhi_15",
+    "lonely_1",
+    "lonely_2",
+    "lonely_3",
+    "lonely_4",
+    "lonely_5",
+    "lonely_6",
+    "lonely_7",
+    "lonely_8",
+    "lonely_9",
+    "lonely_10",
+    "lonely_11",
+    "lonely_12",
+    "lonely_13",
+    "lonely_14",
+    "lonely_15",
+    "lonely_16",
+    "lonely_17",
+    "lonely_18",
+    "lonely_19",
+    "lonely_20",
+    "helmet_driver",
+    "helmet_passenger",
+    "seatbelt_driver",
+    "seatbelt_passenger",
+    "accident_hist",
+    "drunk_drive",
+    "env_satisfaction",
+    "env_glare",
+    "env_noise",
+    "env_smell",
+    "env_smoke",
+    "env_posture",
+    "env_awkward",
+    "pm25_impact",
+    "pm25_symptom",
+    "life_quality",
+    "emerging_known",
+    "emerging_list",
+    "climate_impact",
+    "covid_history"
+  ],
+  "results": [
+    {
+      "orgCode": "nesdc",
+      "url": "https://nidawellbeing.vercel.app/?org=nesdc",
+      "email": "autofill.nesdc.1774289863378@wellbeing.test",
+      "expectedOrganization": "สำนักงานสภาพัฒนาการเศรษฐกิจและสังคมแห่งชาติ",
+      "pageSaveResult": false,
+      "pageReadBackAvailable": false,
+      "pageReadBackError": null,
+      "responseCount": 97,
+      "submitted": false,
+      "rowFound": false,
+      "rawResponsesComplete": false,
+      "columnsComplete": false,
+      "missingRawResponseKeys": [],
+      "missingColumnKeys": [],
+      "rowOrganization": null,
+      "rowOrgCode": null,
+      "consoleMessages": [
+        {
+          "type": "log",
+          "text": "[app] Wellbeing schema loaded from DB: 97 questions"
+        },
+        {
+          "type": "log",
+          "text": "Organization detected: สำนักงานสภาพัฒนาการเศรษฐกิจและสังคมแห่งชาติ (nesdc)"
+        },
+        {
+          "type": "warning",
+          "text": "GoTrueClient@sb-fgdommhiqhzvsedfzyrr-auth-token:1 (2.99.3) 2026-03-23T18:17:45.019Z Multiple GoTrueClient instances detected in the same browser context. It is not an error, but this should be avoided as it may produce undefined behavior when used concurrently under the same storage key."
+        },
+        {
+          "type": "log",
+          "text": "Supabase initialized"
+        },
+        {
+          "type": "error",
+          "text": "Failed to load resource: the server responded with a status of 406 ()"
+        },
+        {
+          "type": "error",
+          "text": "Failed to load resource: the server responded with a status of 401 ()"
+        },
+        {
+          "type": "error",
+          "text": "Supabase save error: {code: 42501, details: null, hint: null, message: new row violates row-level security policy for table \"survey_responses\"}"
+        },
+        {
+          "type": "log",
+          "text": "Draft saved to cloud"
+        }
+      ],
+      "error": "Timed out waiting for submitted row"
+    },
+    {
+      "orgCode": "tpso",
+      "url": "https://nidawellbeing.vercel.app/?org=tpso",
+      "email": "autofill.tpso.1774289900863@wellbeing.test",
+      "expectedOrganization": "สำนักงานนโยบายและยุทธศาสตร์การค้า",
+      "pageSaveResult": false,
+      "pageReadBackAvailable": false,
+      "pageReadBackError": null,
+      "responseCount": 97,
+      "submitted": false,
+      "rowFound": false,
+      "rawResponsesComplete": false,
+      "columnsComplete": false,
+      "missingRawResponseKeys": [],
+      "missingColumnKeys": [],
+      "rowOrganization": null,
+      "rowOrgCode": null,
+      "consoleMessages": [
+        {
+          "type": "log",
+          "text": "[app] Wellbeing schema loaded from DB: 97 questions"
+        },
+        {
+          "type": "log",
+          "text": "Organization detected: สำนักงานนโยบายและยุทธศาสตร์การค้า (tpso)"
+        },
+        {
+          "type": "warning",
+          "text": "GoTrueClient@sb-fgdommhiqhzvsedfzyrr-auth-token:1 (2.99.3) 2026-03-23T18:18:22.425Z Multiple GoTrueClient instances detected in the same browser context. It is not an error, but this should be avoided as it may produce undefined behavior when used concurrently under the same storage key."
+        },
+        {
+          "type": "log",
+          "text": "Supabase initialized"
+        },
+        {
+          "type": "error",
+          "text": "Failed to load resource: the server responded with a status of 406 ()"
+        },
+        {
+          "type": "error",
+          "text": "Failed to load resource: the server responded with a status of 401 ()"
+        },
+        {
+          "type": "error",
+          "text": "Supabase save error: {code: 42501, details: null, hint: null, message: new row violates row-level security policy for table \"survey_responses\"}"
+        },
+        {
+          "type": "log",
+          "text": "Draft saved to cloud"
+        }
+      ],
+      "error": "Timed out waiting for submitted row"
+    },
+    {
+      "orgCode": "dss",
+      "url": "https://nidawellbeing.vercel.app/?org=dss",
+      "email": "autofill.dss.1774289938947@wellbeing.test",
+      "expectedOrganization": "กรมวิทยาศาสตร์บริการ",
+      "pageSaveResult": false,
+      "pageReadBackAvailable": false,
+      "pageReadBackError": null,
+      "responseCount": 97,
+      "submitted": false,
+      "rowFound": false,
+      "rawResponsesComplete": false,
+      "columnsComplete": false,
+      "missingRawResponseKeys": [],
+      "missingColumnKeys": [],
+      "rowOrganization": null,
+      "rowOrgCode": null,
+      "consoleMessages": [
+        {
+          "type": "log",
+          "text": "[app] Wellbeing schema loaded from DB: 97 questions"
+        },
+        {
+          "type": "log",
+          "text": "Organization detected: กรมวิทยาศาสตร์บริการ (dss)"
+        },
+        {
+          "type": "warning",
+          "text": "GoTrueClient@sb-fgdommhiqhzvsedfzyrr-auth-token:1 (2.99.3) 2026-03-23T18:19:00.147Z Multiple GoTrueClient instances detected in the same browser context. It is not an error, but this should be avoided as it may produce undefined behavior when used concurrently under the same storage key."
+        },
+        {
+          "type": "log",
+          "text": "Supabase initialized"
+        },
+        {
+          "type": "error",
+          "text": "Failed to load resource: the server responded with a status of 406 ()"
+        },
+        {
+          "type": "error",
+          "text": "Failed to load resource: the server responded with a status of 401 ()"
+        },
+        {
+          "type": "error",
+          "text": "Supabase save error: {code: 42501, details: null, hint: null, message: new row violates row-level security policy for table \"survey_responses\"}"
+        },
+        {
+          "type": "log",
+          "text": "Draft saved to cloud"
+        }
+      ],
+      "error": "Timed out waiting for submitted row"
+    },
+    {
+      "orgCode": "dhss",
+      "url": "https://nidawellbeing.vercel.app/?org=dhss",
+      "email": "autofill.dhss.1774289975709@wellbeing.test",
+      "expectedOrganization": "กรมสนับสนุนบริการสุขภาพ",
+      "pageSaveResult": false,
+      "pageReadBackAvailable": false,
+      "pageReadBackError": null,
+      "responseCount": 97,
+      "submitted": false,
+      "rowFound": false,
+      "rawResponsesComplete": false,
+      "columnsComplete": false,
+      "missingRawResponseKeys": [],
+      "missingColumnKeys": [],
+      "rowOrganization": null,
+      "rowOrgCode": null,
+      "consoleMessages": [
+        {
+          "type": "log",
+          "text": "[app] Wellbeing schema loaded from DB: 97 questions"
+        },
+        {
+          "type": "log",
+          "text": "Organization detected: กรมสนับสนุนบริการสุขภาพ (dhss)"
+        },
+        {
+          "type": "warning",
+          "text": "GoTrueClient@sb-fgdommhiqhzvsedfzyrr-auth-token:1 (2.99.3) 2026-03-23T18:19:37.120Z Multiple GoTrueClient instances detected in the same browser context. It is not an error, but this should be avoided as it may produce undefined behavior when used concurrently under the same storage key."
+        },
+        {
+          "type": "log",
+          "text": "Supabase initialized"
+        },
+        {
+          "type": "error",
+          "text": "Failed to load resource: the server responded with a status of 406 ()"
+        },
+        {
+          "type": "error",
+          "text": "Failed to load resource: the server responded with a status of 401 ()"
+        },
+        {
+          "type": "error",
+          "text": "Supabase save error: {code: 42501, details: null, hint: null, message: new row violates row-level security policy for table \"survey_responses\"}"
+        },
+        {
+          "type": "log",
+          "text": "Draft saved to cloud"
+        }
+      ],
+      "error": "Timed out waiting for submitted row"
+    },
+    {
+      "orgCode": "tmd",
+      "url": "https://nidawellbeing.vercel.app/?org=tmd",
+      "email": "autofill.tmd.1774290013029@wellbeing.test",
+      "expectedOrganization": "กรมอุตุนิยมวิทยา",
+      "pageSaveResult": false,
+      "pageReadBackAvailable": false,
+      "pageReadBackError": null,
+      "responseCount": 97,
+      "submitted": false,
+      "rowFound": false,
+      "rawResponsesComplete": false,
+      "columnsComplete": false,
+      "missingRawResponseKeys": [],
+      "missingColumnKeys": [],
+      "rowOrganization": null,
+      "rowOrgCode": null,
+      "consoleMessages": [
+        {
+          "type": "log",
+          "text": "[app] Wellbeing schema loaded from DB: 97 questions"
+        },
+        {
+          "type": "log",
+          "text": "Organization detected: กรมอุตุนิยมวิทยา (tmd)"
+        },
+        {
+          "type": "warning",
+          "text": "GoTrueClient@sb-fgdommhiqhzvsedfzyrr-auth-token:1 (2.99.3) 2026-03-23T18:20:14.443Z Multiple GoTrueClient instances detected in the same browser context. It is not an error, but this should be avoided as it may produce undefined behavior when used concurrently under the same storage key."
+        },
+        {
+          "type": "log",
+          "text": "Supabase initialized"
+        },
+        {
+          "type": "error",
+          "text": "Failed to load resource: the server responded with a status of 406 ()"
+        },
+        {
+          "type": "error",
+          "text": "Failed to load resource: the server responded with a status of 401 ()"
+        },
+        {
+          "type": "error",
+          "text": "Supabase save error: {code: 42501, details: null, hint: null, message: new row violates row-level security policy for table \"survey_responses\"}"
+        },
+        {
+          "type": "log",
+          "text": "Draft saved to cloud"
+        }
+      ],
+      "error": "Timed out waiting for submitted row"
+    },
+    {
+      "orgCode": "dcp",
+      "url": "https://nidawellbeing.vercel.app/?org=dcp",
+      "email": "autofill.dcp.1774290050138@wellbeing.test",
+      "expectedOrganization": "กรมส่งเสริมวัฒนธรรม",
+      "pageSaveResult": false,
+      "pageReadBackAvailable": false,
+      "pageReadBackError": null,
+      "responseCount": 97,
+      "submitted": false,
+      "rowFound": false,
+      "rawResponsesComplete": false,
+      "columnsComplete": false,
+      "missingRawResponseKeys": [],
+      "missingColumnKeys": [],
+      "rowOrganization": null,
+      "rowOrgCode": null,
+      "consoleMessages": [
+        {
+          "type": "log",
+          "text": "[app] Wellbeing schema loaded from DB: 97 questions"
+        },
+        {
+          "type": "log",
+          "text": "Organization detected: กรมส่งเสริมวัฒนธรรม (dcp)"
+        },
+        {
+          "type": "warning",
+          "text": "GoTrueClient@sb-fgdommhiqhzvsedfzyrr-auth-token:1 (2.99.3) 2026-03-23T18:20:51.606Z Multiple GoTrueClient instances detected in the same browser context. It is not an error, but this should be avoided as it may produce undefined behavior when used concurrently under the same storage key."
+        },
+        {
+          "type": "log",
+          "text": "Supabase initialized"
+        },
+        {
+          "type": "error",
+          "text": "Failed to load resource: the server responded with a status of 406 ()"
+        },
+        {
+          "type": "error",
+          "text": "Failed to load resource: the server responded with a status of 401 ()"
+        },
+        {
+          "type": "error",
+          "text": "Supabase save error: {code: 42501, details: null, hint: null, message: new row violates row-level security policy for table \"survey_responses\"}"
+        },
+        {
+          "type": "log",
+          "text": "Draft saved to cloud"
+        }
+      ],
+      "error": "Timed out waiting for submitted row"
+    },
+    {
+      "orgCode": "dop",
+      "url": "https://nidawellbeing.vercel.app/?org=dop",
+      "email": "autofill.dop.1774290087909@wellbeing.test",
+      "expectedOrganization": "กรมคุมประพฤติ",
+      "pageSaveResult": false,
+      "pageReadBackAvailable": false,
+      "pageReadBackError": null,
+      "responseCount": 97,
+      "submitted": false,
+      "rowFound": false,
+      "rawResponsesComplete": false,
+      "columnsComplete": false,
+      "missingRawResponseKeys": [],
+      "missingColumnKeys": [],
+      "rowOrganization": null,
+      "rowOrgCode": null,
+      "consoleMessages": [
+        {
+          "type": "log",
+          "text": "[app] Wellbeing schema loaded from DB: 97 questions"
+        },
+        {
+          "type": "log",
+          "text": "Organization detected: กรมคุมประพฤติ (dop)"
+        },
+        {
+          "type": "warning",
+          "text": "GoTrueClient@sb-fgdommhiqhzvsedfzyrr-auth-token:1 (2.99.3) 2026-03-23T18:21:29.239Z Multiple GoTrueClient instances detected in the same browser context. It is not an error, but this should be avoided as it may produce undefined behavior when used concurrently under the same storage key."
+        },
+        {
+          "type": "log",
+          "text": "Supabase initialized"
+        },
+        {
+          "type": "error",
+          "text": "Failed to load resource: the server responded with a status of 406 ()"
+        },
+        {
+          "type": "error",
+          "text": "Failed to load resource: the server responded with a status of 401 ()"
+        },
+        {
+          "type": "error",
+          "text": "Supabase save error: {code: 42501, details: null, hint: null, message: new row violates row-level security policy for table \"survey_responses\"}"
+        },
+        {
+          "type": "log",
+          "text": "Draft saved to cloud"
+        }
+      ],
+      "error": "Timed out waiting for submitted row"
+    },
+    {
+      "orgCode": "mots",
+      "url": "https://nidawellbeing.vercel.app/?org=mots",
+      "email": "autofill.mots.1774290125893@wellbeing.test",
+      "expectedOrganization": "สำนักงานปลัดกระทรวงการท่องเที่ยวและกีฬา",
+      "pageSaveResult": false,
+      "pageReadBackAvailable": false,
+      "pageReadBackError": null,
+      "responseCount": 97,
+      "submitted": false,
+      "rowFound": false,
+      "rawResponsesComplete": false,
+      "columnsComplete": false,
+      "missingRawResponseKeys": [],
+      "missingColumnKeys": [],
+      "rowOrganization": null,
+      "rowOrgCode": null,
+      "consoleMessages": [
+        {
+          "type": "log",
+          "text": "[app] Wellbeing schema loaded from DB: 97 questions"
+        },
+        {
+          "type": "log",
+          "text": "Organization detected: สำนักงานปลัดกระทรวงการท่องเที่ยวและกีฬา (mots)"
+        },
+        {
+          "type": "warning",
+          "text": "GoTrueClient@sb-fgdommhiqhzvsedfzyrr-auth-token:1 (2.99.3) 2026-03-23T18:22:07.411Z Multiple GoTrueClient instances detected in the same browser context. It is not an error, but this should be avoided as it may produce undefined behavior when used concurrently under the same storage key."
+        },
+        {
+          "type": "log",
+          "text": "Supabase initialized"
+        },
+        {
+          "type": "error",
+          "text": "Failed to load resource: the server responded with a status of 406 ()"
+        },
+        {
+          "type": "error",
+          "text": "Failed to load resource: the server responded with a status of 401 ()"
+        },
+        {
+          "type": "error",
+          "text": "Supabase save error: {code: 42501, details: null, hint: null, message: new row violates row-level security policy for table \"survey_responses\"}"
+        },
+        {
+          "type": "log",
+          "text": "Draft saved to cloud"
+        }
+      ],
+      "error": "Timed out waiting for submitted row"
+    },
+    {
+      "orgCode": "dmh",
+      "url": "https://nidawellbeing.vercel.app/?org=dmh",
+      "email": "autofill.dmh.1774290163051@wellbeing.test",
+      "expectedOrganization": "กรมสุขภาพจิต",
+      "pageSaveResult": false,
+      "pageReadBackAvailable": false,
+      "pageReadBackError": null,
+      "responseCount": 97,
+      "submitted": false,
+      "rowFound": false,
+      "rawResponsesComplete": false,
+      "columnsComplete": false,
+      "missingRawResponseKeys": [],
+      "missingColumnKeys": [],
+      "rowOrganization": null,
+      "rowOrgCode": null,
+      "consoleMessages": [
+        {
+          "type": "log",
+          "text": "[app] Wellbeing schema loaded from DB: 97 questions"
+        },
+        {
+          "type": "log",
+          "text": "Organization detected: กรมสุขภาพจิต (dmh)"
+        },
+        {
+          "type": "warning",
+          "text": "GoTrueClient@sb-fgdommhiqhzvsedfzyrr-auth-token:1 (2.99.3) 2026-03-23T18:22:44.797Z Multiple GoTrueClient instances detected in the same browser context. It is not an error, but this should be avoided as it may produce undefined behavior when used concurrently under the same storage key."
+        },
+        {
+          "type": "log",
+          "text": "Supabase initialized"
+        },
+        {
+          "type": "error",
+          "text": "Failed to load resource: the server responded with a status of 406 ()"
+        },
+        {
+          "type": "error",
+          "text": "Failed to load resource: the server responded with a status of 401 ()"
+        },
+        {
+          "type": "error",
+          "text": "Supabase save error: {code: 42501, details: null, hint: null, message: new row violates row-level security policy for table \"survey_responses\"}"
+        },
+        {
+          "type": "log",
+          "text": "Draft saved to cloud"
+        }
+      ],
+      "error": "Timed out waiting for submitted row"
+    },
+    {
+      "orgCode": "onep",
+      "url": "https://nidawellbeing.vercel.app/?org=onep",
+      "email": "autofill.onep.1774290201478@wellbeing.test",
+      "expectedOrganization": "สำนักงานนโยบายและแผนทรัพยากรธรรมชาติและสิ่งแวดล้อม",
+      "pageSaveResult": false,
+      "pageReadBackAvailable": false,
+      "pageReadBackError": null,
+      "responseCount": 97,
+      "submitted": false,
+      "rowFound": false,
+      "rawResponsesComplete": false,
+      "columnsComplete": false,
+      "missingRawResponseKeys": [],
+      "missingColumnKeys": [],
+      "rowOrganization": null,
+      "rowOrgCode": null,
+      "consoleMessages": [
+        {
+          "type": "log",
+          "text": "[app] Wellbeing schema loaded from DB: 97 questions"
+        },
+        {
+          "type": "log",
+          "text": "Organization detected: สำนักงานนโยบายและแผนทรัพยากรธรรมชาติและสิ่งแวดล้อม (onep)"
+        },
+        {
+          "type": "warning",
+          "text": "GoTrueClient@sb-fgdommhiqhzvsedfzyrr-auth-token:1 (2.99.3) 2026-03-23T18:23:23.139Z Multiple GoTrueClient instances detected in the same browser context. It is not an error, but this should be avoided as it may produce undefined behavior when used concurrently under the same storage key."
+        },
+        {
+          "type": "log",
+          "text": "Supabase initialized"
+        },
+        {
+          "type": "error",
+          "text": "Failed to load resource: the server responded with a status of 406 ()"
+        },
+        {
+          "type": "error",
+          "text": "Failed to load resource: the server responded with a status of 401 ()"
+        },
+        {
+          "type": "error",
+          "text": "Supabase save error: {code: 42501, details: null, hint: null, message: new row violates row-level security policy for table \"survey_responses\"}"
+        },
+        {
+          "type": "log",
+          "text": "Draft saved to cloud"
+        }
+      ],
+      "error": "Timed out waiting for submitted row"
+    },
+    {
+      "orgCode": "nrct",
+      "url": "https://nidawellbeing.vercel.app/?org=nrct",
+      "email": "autofill.nrct.1774290239281@wellbeing.test",
+      "expectedOrganization": "สำนักงานการวิจัยแห่งชาติ",
+      "pageSaveResult": false,
+      "pageReadBackAvailable": false,
+      "pageReadBackError": null,
+      "responseCount": 97,
+      "submitted": false,
+      "rowFound": false,
+      "rawResponsesComplete": false,
+      "columnsComplete": false,
+      "missingRawResponseKeys": [],
+      "missingColumnKeys": [],
+      "rowOrganization": null,
+      "rowOrgCode": null,
+      "consoleMessages": [
+        {
+          "type": "log",
+          "text": "[app] Wellbeing schema loaded from DB: 97 questions"
+        },
+        {
+          "type": "log",
+          "text": "Organization detected: สำนักงานการวิจัยแห่งชาติ (nrct)"
+        },
+        {
+          "type": "warning",
+          "text": "GoTrueClient@sb-fgdommhiqhzvsedfzyrr-auth-token:1 (2.99.3) 2026-03-23T18:24:00.447Z Multiple GoTrueClient instances detected in the same browser context. It is not an error, but this should be avoided as it may produce undefined behavior when used concurrently under the same storage key."
+        },
+        {
+          "type": "log",
+          "text": "Supabase initialized"
+        },
+        {
+          "type": "error",
+          "text": "Failed to load resource: the server responded with a status of 406 ()"
+        },
+        {
+          "type": "error",
+          "text": "Failed to load resource: the server responded with a status of 401 ()"
+        },
+        {
+          "type": "error",
+          "text": "Supabase save error: {code: 42501, details: null, hint: null, message: new row violates row-level security policy for table \"survey_responses\"}"
+        },
+        {
+          "type": "log",
+          "text": "Draft saved to cloud"
+        }
+      ],
+      "error": "Timed out waiting for submitted row"
+    },
+    {
+      "orgCode": "acfs",
+      "url": "https://nidawellbeing.vercel.app/?org=acfs",
+      "email": "autofill.acfs.1774290276455@wellbeing.test",
+      "expectedOrganization": "สำนักงานมาตรฐานสินค้าเกษตรและอาหารแห่งชาติ",
+      "pageSaveResult": false,
+      "pageReadBackAvailable": false,
+      "pageReadBackError": null,
+      "responseCount": 97,
+      "submitted": false,
+      "rowFound": false,
+      "rawResponsesComplete": false,
+      "columnsComplete": false,
+      "missingRawResponseKeys": [],
+      "missingColumnKeys": [],
+      "rowOrganization": null,
+      "rowOrgCode": null,
+      "consoleMessages": [
+        {
+          "type": "log",
+          "text": "[app] Wellbeing schema loaded from DB: 97 questions"
+        },
+        {
+          "type": "log",
+          "text": "Organization detected: สำนักงานมาตรฐานสินค้าเกษตรและอาหารแห่งชาติ (acfs)"
+        },
+        {
+          "type": "warning",
+          "text": "GoTrueClient@sb-fgdommhiqhzvsedfzyrr-auth-token:1 (2.99.3) 2026-03-23T18:24:37.869Z Multiple GoTrueClient instances detected in the same browser context. It is not an error, but this should be avoided as it may produce undefined behavior when used concurrently under the same storage key."
+        },
+        {
+          "type": "log",
+          "text": "Supabase initialized"
+        },
+        {
+          "type": "error",
+          "text": "Failed to load resource: the server responded with a status of 406 ()"
+        },
+        {
+          "type": "error",
+          "text": "Failed to load resource: the server responded with a status of 401 ()"
+        },
+        {
+          "type": "error",
+          "text": "Supabase save error: {code: 42501, details: null, hint: null, message: new row violates row-level security policy for table \"survey_responses\"}"
+        },
+        {
+          "type": "log",
+          "text": "Draft saved to cloud"
+        }
+      ],
+      "error": "Timed out waiting for submitted row"
+    },
+    {
+      "orgCode": "opdc",
+      "url": "https://nidawellbeing.vercel.app/?org=opdc",
+      "email": "autofill.opdc.1774290313736@wellbeing.test",
+      "expectedOrganization": "สำนักงานคณะกรรมการพัฒนาระบบราชการ (ก.พ.ร.)",
+      "pageSaveResult": false,
+      "pageReadBackAvailable": false,
+      "pageReadBackError": null,
+      "responseCount": 97,
+      "submitted": false,
+      "rowFound": false,
+      "rawResponsesComplete": false,
+      "columnsComplete": false,
+      "missingRawResponseKeys": [],
+      "missingColumnKeys": [],
+      "rowOrganization": null,
+      "rowOrgCode": null,
+      "consoleMessages": [
+        {
+          "type": "log",
+          "text": "[app] Wellbeing schema loaded from DB: 97 questions"
+        },
+        {
+          "type": "log",
+          "text": "Organization detected: สำนักงานคณะกรรมการพัฒนาระบบราชการ (ก.พ.ร.) (opdc)"
+        },
+        {
+          "type": "warning",
+          "text": "GoTrueClient@sb-fgdommhiqhzvsedfzyrr-auth-token:1 (2.99.3) 2026-03-23T18:25:15.330Z Multiple GoTrueClient instances detected in the same browser context. It is not an error, but this should be avoided as it may produce undefined behavior when used concurrently under the same storage key."
+        },
+        {
+          "type": "log",
+          "text": "Supabase initialized"
+        },
+        {
+          "type": "error",
+          "text": "Failed to load resource: the server responded with a status of 406 ()"
+        },
+        {
+          "type": "error",
+          "text": "Failed to load resource: the server responded with a status of 401 ()"
+        },
+        {
+          "type": "error",
+          "text": "Supabase save error: {code: 42501, details: null, hint: null, message: new row violates row-level security policy for table \"survey_responses\"}"
+        },
+        {
+          "type": "log",
+          "text": "Draft saved to cloud"
+        }
+      ],
+      "error": "Timed out waiting for submitted row"
+    },
+    {
+      "orgCode": "rid",
+      "url": "https://nidawellbeing.vercel.app/?org=rid",
+      "email": "autofill.rid.1774290350991@wellbeing.test",
+      "expectedOrganization": "กรมชลประทาน",
+      "pageSaveResult": false,
+      "pageReadBackAvailable": false,
+      "pageReadBackError": null,
+      "responseCount": 97,
+      "submitted": false,
+      "rowFound": false,
+      "rawResponsesComplete": false,
+      "columnsComplete": false,
+      "missingRawResponseKeys": [],
+      "missingColumnKeys": [],
+      "rowOrganization": null,
+      "rowOrgCode": null,
+      "consoleMessages": [
+        {
+          "type": "log",
+          "text": "[app] Wellbeing schema loaded from DB: 97 questions"
+        },
+        {
+          "type": "log",
+          "text": "Organization detected: กรมชลประทาน (rid)"
+        },
+        {
+          "type": "warning",
+          "text": "GoTrueClient@sb-fgdommhiqhzvsedfzyrr-auth-token:1 (2.99.3) 2026-03-23T18:25:52.286Z Multiple GoTrueClient instances detected in the same browser context. It is not an error, but this should be avoided as it may produce undefined behavior when used concurrently under the same storage key."
+        },
+        {
+          "type": "log",
+          "text": "Supabase initialized"
+        },
+        {
+          "type": "error",
+          "text": "Failed to load resource: the server responded with a status of 406 ()"
+        },
+        {
+          "type": "error",
+          "text": "Failed to load resource: the server responded with a status of 401 ()"
+        },
+        {
+          "type": "error",
+          "text": "Supabase save error: {code: 42501, details: null, hint: null, message: new row violates row-level security policy for table \"survey_responses\"}"
+        },
+        {
+          "type": "log",
+          "text": "Draft saved to cloud"
+        }
+      ],
+      "error": "Timed out waiting for submitted row"
+    },
+    {
+      "orgCode": "dcy",
+      "url": "https://nidawellbeing.vercel.app/?org=dcy",
+      "email": "autofill.dcy.1774290388129@wellbeing.test",
+      "expectedOrganization": "กรมกิจการเด็กและเยาวชน",
+      "pageSaveResult": false,
+      "pageReadBackAvailable": false,
+      "pageReadBackError": null,
+      "responseCount": 97,
+      "submitted": false,
+      "rowFound": false,
+      "rawResponsesComplete": false,
+      "columnsComplete": false,
+      "missingRawResponseKeys": [],
+      "missingColumnKeys": [],
+      "rowOrganization": null,
+      "rowOrgCode": null,
+      "consoleMessages": [
+        {
+          "type": "log",
+          "text": "[app] Wellbeing schema loaded from DB: 97 questions"
+        },
+        {
+          "type": "log",
+          "text": "Organization detected: กรมกิจการเด็กและเยาวชน (dcy)"
+        },
+        {
+          "type": "warning",
+          "text": "GoTrueClient@sb-fgdommhiqhzvsedfzyrr-auth-token:1 (2.99.3) 2026-03-23T18:26:29.796Z Multiple GoTrueClient instances detected in the same browser context. It is not an error, but this should be avoided as it may produce undefined behavior when used concurrently under the same storage key."
+        },
+        {
+          "type": "log",
+          "text": "Supabase initialized"
+        },
+        {
+          "type": "error",
+          "text": "Failed to load resource: the server responded with a status of 406 ()"
+        },
+        {
+          "type": "error",
+          "text": "Failed to load resource: the server responded with a status of 401 ()"
+        },
+        {
+          "type": "error",
+          "text": "Supabase save error: {code: 42501, details: null, hint: null, message: new row violates row-level security policy for table \"survey_responses\"}"
+        },
+        {
+          "type": "log",
+          "text": "Draft saved to cloud"
+        }
+      ],
+      "error": "Timed out waiting for submitted row"
+    },
+    {
+      "orgCode": "test-org",
+      "url": "https://nidawellbeing.vercel.app/?org=test-org",
+      "email": "autofill.test-org.1774290425483@wellbeing.test",
+      "expectedOrganization": "หน่วยงานทดสอบระบบ",
+      "pageSaveResult": false,
+      "pageReadBackAvailable": false,
+      "pageReadBackError": null,
+      "responseCount": 97,
+      "submitted": false,
+      "rowFound": false,
+      "rawResponsesComplete": false,
+      "columnsComplete": false,
+      "missingRawResponseKeys": [],
+      "missingColumnKeys": [],
+      "rowOrganization": null,
+      "rowOrgCode": null,
+      "consoleMessages": [
+        {
+          "type": "log",
+          "text": "[app] Wellbeing schema loaded from DB: 97 questions"
+        },
+        {
+          "type": "log",
+          "text": "Organization detected: หน่วยงานทดสอบระบบ (test-org)"
+        },
+        {
+          "type": "warning",
+          "text": "GoTrueClient@sb-fgdommhiqhzvsedfzyrr-auth-token:1 (2.99.3) 2026-03-23T18:27:07.221Z Multiple GoTrueClient instances detected in the same browser context. It is not an error, but this should be avoided as it may produce undefined behavior when used concurrently under the same storage key."
+        },
+        {
+          "type": "log",
+          "text": "Supabase initialized"
+        },
+        {
+          "type": "error",
+          "text": "Failed to load resource: the server responded with a status of 406 ()"
+        },
+        {
+          "type": "error",
+          "text": "Failed to load resource: the server responded with a status of 401 ()"
+        },
+        {
+          "type": "error",
+          "text": "Supabase save error: {code: 42501, details: null, hint: null, message: new row violates row-level security policy for table \"survey_responses\"}"
+        },
+        {
+          "type": "log",
+          "text": "Draft saved to cloud"
+        }
+      ],
+      "error": "Timed out waiting for submitted row"
+    }
+  ]
+}

@@ -155,11 +155,10 @@ ON CONFLICT (form_code, question_key) DO NOTHING;
 INSERT INTO public.form_sections (form_code, section_key, section_order, title_th, description) VALUES
   ('ch1','ch1_org_info',     1,'ข้อมูลองค์กร',                  'ชื่อ รหัส และโครงสร้างองค์กร'),
   ('ch1','ch1_workforce',    2,'ข้อมูลบุคลากร',                  'จำนวน ประเภท และอายุของบุคลากร'),
-  ('ch1','ch1_turnover',     3,'การเปลี่ยนแปลงบุคลากร',          'อัตราลาออก โอนย้าย'),
-  ('ch1','ch1_health',       4,'สุขภาพและโรคไม่ติดต่อ (NCD)',     'ข้อมูลโรคและการลาป่วย'),
-  ('ch1','ch1_engagement',   5,'Engagement & พัฒนาบุคลากร',      'คะแนน engagement และระบบพัฒนา'),
-  ('ch1','ch1_strategy',     6,'ยุทธศาสตร์และบริบทองค์กร',       'ภาพรวมยุทธศาสตร์และจุดเน้น'),
-  ('ch1','ch1_docs',         7,'เอกสารแนบ',                      'ไฟล์ PDF ที่เกี่ยวข้อง')
+  ('ch1','ch1_health',       3,'สุขภาพและโรคไม่ติดต่อ (NCD)',     'ข้อมูลโรคและการลาป่วย'),
+  ('ch1','ch1_engagement',   4,'Engagement & พัฒนาบุคลากร',      'คะแนน engagement และระบบพัฒนา'),
+  ('ch1','ch1_strategy',     5,'ยุทธศาสตร์และบริบทองค์กร',       'ภาพรวมยุทธศาสตร์และจุดเน้น'),
+  ('ch1','ch1_docs',         6,'เอกสารแนบ',                      'ไฟล์ PDF ที่เกี่ยวข้อง')
 ON CONFLICT (form_code, section_key) DO NOTHING;
 
 -- ----------------------------------------------------------------
@@ -181,11 +180,6 @@ INSERT INTO public.form_questions (form_code, section_key, question_key, questio
   ('ch1','ch1_workforce','age_31_40',          7,'อายุ 31-40 ปี',            'number',  false),
   ('ch1','ch1_workforce','age_41_50',          8,'อายุ 41-50 ปี',            'number',  false),
   ('ch1','ch1_workforce','age_51_60',          9,'อายุ 51-60 ปี',            'number',  false),
-  -- turnover
-  ('ch1','ch1_turnover','turnover_count',      1,'จำนวนลาออก',               'number',  false),
-  ('ch1','ch1_turnover','turnover_rate',       2,'อัตราลาออก (%)',            'number',  false),
-  ('ch1','ch1_turnover','transfer_count',      3,'จำนวนโอนย้าย',              'number',  false),
-  ('ch1','ch1_turnover','transfer_rate',       4,'อัตราโอนย้าย (%)',          'number',  false),
   -- health
   ('ch1','ch1_health','ncd_count',             1,'NCD รวม',                  'number',  false),
   ('ch1','ch1_health','ncd_ratio_pct',         2,'NCD (%)',                   'number',  false),

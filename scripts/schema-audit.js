@@ -38,8 +38,6 @@ const ALL_EXPECTED_COLUMNS = {
     pos_k1: 'INTEGER DEFAULT 0', pos_k2: 'INTEGER DEFAULT 0', pos_k3: 'INTEGER DEFAULT 0', pos_k4: 'INTEGER DEFAULT 0', pos_k5: 'INTEGER DEFAULT 0',
     pos_m1: 'INTEGER DEFAULT 0', pos_m2: 'INTEGER DEFAULT 0', pos_s1: 'INTEGER DEFAULT 0', pos_s2: 'INTEGER DEFAULT 0',
     type_official: 'INTEGER DEFAULT 0', type_employee: 'INTEGER DEFAULT 0', type_contract: 'INTEGER DEFAULT 0', type_other: 'INTEGER DEFAULT 0',
-    turnover_count: 'INTEGER', turnover_rate: 'NUMERIC(5,2)',
-    transfer_count: 'INTEGER', transfer_rate: 'NUMERIC(5,2)',
 
     // Section 4: Yearly
     begin_2564: 'INTEGER', begin_2565: 'INTEGER', begin_2566: 'INTEGER', begin_2567: 'INTEGER', begin_2568: 'INTEGER',

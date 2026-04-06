@@ -33,8 +33,6 @@ function renderCh1Table() {
       <td style="text-align:right">${num(r.age_31_40)}</td>
       <td style="text-align:right">${num(r.age_41_50)}</td>
       <td style="text-align:right">${num(r.age_51_60)}</td>
-      <td style="text-align:right">${num(r.turnover_rate)}</td>
-      <td style="text-align:right">${num(r.transfer_rate)}</td>
       <td style="text-align:right">${num(r.ncd_count)}</td>
       <td style="text-align:right">${num(r.ncd_ratio_pct)}</td>
       <td style="text-align:right">${num(r.disease_diabetes)}</td>
@@ -83,7 +81,6 @@ function expCh1CSV() {
     '#', 'วันที่', 'org_code', 'หน่วยงาน', 'บุคลากรรวม',
     'ข้าราชการ', 'พนักงานราชการ', 'ลูกจ้าง',
     'อายุ≤30', 'อายุ31-40', 'อายุ41-50', 'อายุ51-60',
-    'ลาออก%', 'โอนย้าย%',
     'NCD รวม', 'NCD%',
     'เบาหวาน', 'ความดัน', 'หัวใจ', 'ไต', 'ตับ', 'มะเร็ง', 'อ้วน',
     'ลาป่วยรวม', 'ลาป่วยเฉลี่ย', 'Engagement',
@@ -97,7 +94,6 @@ function expCh1CSV() {
     `"${r.org_code || ''}"`, `"${r.organization || ''}"`,
     r.total_staff ?? '', r.type_official ?? '', r.type_employee ?? '', r.type_contract ?? '',
     r.age_u30 ?? '', r.age_31_40 ?? '', r.age_41_50 ?? '', r.age_51_60 ?? '',
-    r.turnover_rate ?? '', r.transfer_rate ?? '',
     r.ncd_count ?? '', r.ncd_ratio_pct ?? '',
     r.disease_diabetes ?? '', r.disease_hypertension ?? '', r.disease_cardiovascular ?? '',
     r.disease_kidney ?? '', r.disease_liver ?? '', r.disease_cancer ?? '', r.disease_obesity ?? '',
@@ -130,8 +126,6 @@ function expCh1XLSX() {
     'อายุ31-40': r.age_31_40 ?? '',
     'อายุ41-50': r.age_41_50 ?? '',
     'อายุ51-60': r.age_51_60 ?? '',
-    'ลาออก%': r.turnover_rate ?? '',
-    'โอนย้าย%': r.transfer_rate ?? '',
     'NCD รวม': r.ncd_count ?? '',
     'NCD%': r.ncd_ratio_pct ?? '',
     'เบาหวาน': r.disease_diabetes ?? '',

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Force Refresh Well-being Survey</title>
+    <script>
+        // Function to clear all caches and redirect
+        function forceRefresh() {
+            // Clear all storage
+            localStorage.clear();
+            sessionStorage.clear();
+            
+            // Clear service worker cache
+            if ('caches' in window) {
+                caches.keys().then(cacheNames => {
+                    return Promise.all(cacheNames.map(cacheName => caches.delete(cacheName)));
+                }).then(() => {
+                    // Redirect to production site with cache-busting parameter
+                    const timestamp = Date.now();
+                    window.location.href = `https://nidawellbeing.vercel.app/?t=${timestamp}`;
+                });
+            } else {
+                // Fallback if no cache API
+                const timestamp = Date.now();
+                window.location.href = `https://nidawellbeing.vercel.app/?t=${timestamp}`;
+            }
+        }
+        
+        // Auto-execute after page loads
+        window.onload = function() {
+            setTimeout(forceRefresh, 1000);
+        };
+    </script>
+</head>
+<body>
+    <h1>🔄 Force Refreshing Well-being Survey...</h1>
+    <p>Clearing all caches and redirecting to latest version...</p>
+    <p><a href="javascript:forceRefresh()">Click here if not redirected automatically</a></p>
+</body>
+</html>

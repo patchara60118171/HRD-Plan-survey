@@ -624,14 +624,8 @@ function showCh1RowDetail(index) {
     </table>
   </div>
 </div>
-<h3>อัตราการลาออก/โอนย้าย</h3>
-<table>
-  <tr><th>จำนวนลาออก</th><td>${n('turnover_count')} คน</td></tr>
-  <tr><th>อัตราการลาออก</th><td>${fmtNum(parseFloat(v('turnover_rate'))||0,2)}%</td></tr>
-  <tr><th>จำนวนโอนย้าย</th><td>${n('transfer_count')} คน</td></tr>
-</table>
 ${histRows !== '<tr><td colspan="5" style="color:#9CA3AF;text-align:center">—</td></tr>' ? `
-<h3>ประวัติอัตราการลาออกรายปี</h3>
+<h3>ข้อมูลการลาออกย้อนหลัง 5 ปี</h3>
 <table>
   <thead><tr><th style="width:auto">ปี</th><th class="c">ต้นปี</th><th class="c">ปลายปี</th><th class="c">ลาออก</th><th class="c">อัตรา %</th></tr></thead>
   <tbody>${histRows}</tbody>
@@ -846,14 +840,8 @@ function showCh1PDF(index) {
     </table>
   </div>
 </div>
-<h3>อัตราการลาออก/โอนย้าย</h3>
-<table>
-  <tr><th>จำนวนลาออก</th><td>${n('turnover_count')} คน</td></tr>
-  <tr><th>อัตราการลาออก</th><td>${fmtNum(parseFloat(v('turnover_rate'))||0,2)}%</td></tr>
-  <tr><th>จำนวนโอนย้าย</th><td>${n('transfer_count')} คน</td></tr>
-</table>
 ${histRows !== '<tr><td colspan="5" style="color:#9CA3AF;text-align:center">—</td></tr>' ? `
-<h3>ประวัติอัตราการลาออกรายปี</h3>
+<h3>ข้อมูลการลาออกย้อนหลัง 5 ปี</h3>
 <table>
   <thead><tr><th style="width:auto">ปี</th><th class="c">ต้นปี</th><th class="c">ปลายปี</th><th class="c">ลาออก</th><th class="c">อัตรา %</th></tr></thead>
   <tbody>${histRows}</tbody>
