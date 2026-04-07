@@ -1442,7 +1442,7 @@ async function loadCh1Data() {
   const officialStaffValue = ch1Row?.type_official ?? fd.type_official ?? 0;
   portalState.totalStaff = Number(totalStaffValue || 0);
   portalState.officialStaff = Number(officialStaffValue || 0);
-  const turnoverRate = pickYearValue(fd, ['rate_2568', 'turnover_rate', 'rate_2567', 'rate_2566', 'rate_2565', 'rate_2564']);
+  const turnoverRate = pickYearValue(fd, ['rate_2568', 'rate_2567', 'rate_2566', 'rate_2565', 'rate_2564']);
   const ncdCount = pickYearValue(fd, ['ncd_count', 'ncd_total']);
   const engagementScore = pickYearValue(fd, ['engagement_score_2568', 'engagement_score', 'engagement_score_2567', 'engagement_score_2566', 'engagement_score_2565', 'engagement_score_2564']);
   const trainingHours = pickYearValue(fd, ['training_hours_2568', 'training_hours', 'training_hours_2567', 'training_hours_2566', 'training_hours_2565', 'training_hours_2564']);

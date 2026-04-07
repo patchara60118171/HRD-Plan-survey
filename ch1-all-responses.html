@@ -101,7 +101,7 @@ let allRows = [], schema = null, userRole = null, userOrgCode = null;
 // Key columns to show in the table (order matters)
 const TABLE_COLS = [
   'organization','org_code','total_staff','ncd_count','ncd_ratio_pct',
-  'engagement_score','training_hours','turnover_rate','status','updated_at'
+  'engagement_score','training_hours','status','updated_at'
 ];
 
 async function init() {
@@ -162,7 +162,7 @@ function getLabel(key) {
   // Fallback labels
   const fallback = { organization:'หน่วยงาน', org_code:'รหัส', total_staff:'บุคลากรรวม',
     ncd_count:'NCD รวม', ncd_ratio_pct:'NCD(%)', engagement_score:'Engagement',
-    training_hours:'อบรม(ชม)', turnover_rate:'ลาออก(%)', status:'Status', updated_at:'อัปเดต' };
+    training_hours:'อบรม(ชม)', status:'Status', updated_at:'อัปเดต' };
   return fallback[key] || key;
 }
 
@@ -225,7 +225,7 @@ function exportCSV() {
   if (!allRows.length) return;
   const cols = ['organization','org_code','total_staff','type_official','type_employee','type_contract',
     'ncd_count','ncd_ratio_pct','disease_diabetes','disease_hypertension',
-    'engagement_score','training_hours','turnover_rate','transfer_rate','status','updated_at'];
+    'engagement_score','training_hours','status','updated_at'];
   const header = cols.map(k => getLabel(k));
   const rows = allRows.map(r => cols.map(k => {
     const v = r[k];

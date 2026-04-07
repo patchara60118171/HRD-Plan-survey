@@ -155,7 +155,7 @@
         </div>
         <div class="card-body" style="padding:0">
           <div class="tbl-wrap"><table id="wb-rank-table">
-            <thead><tr><th>#</th><th>องค์กร</th><th>คนกรอก / ข้าราชการ</th><th>ความคืบหน้า</th><th>% คืบหน้า</th></tr></thead>
+            <thead><tr><th>#</th><th>ชื่อองค์กร</th><th>ความคืบหน้า</th><th>จำนวนผู้ตอบแบบสอบถาม / จำนวนข้าราชการในองค์กร</th><th>ร้อยละ</th></tr></thead>
             <tbody id="wb-rank-tbody"><tr><td colspan="5" style="text-align:center;color:var(--tx3)">กำลังโหลด...</td></tr></tbody>
           </table></div>
         </div>
@@ -330,7 +330,7 @@
               <button class="btn b-gray" onclick="exportCh1All()">📤 Export .xlsx</button>
             </div>
           </div>
-          <div class="sheet-wrap">
+          <div class="sheet-wrap" style="max-height:600px;overflow-y:auto">
             <table id="c1-sheet-table">
               <thead><tr id="c1-sheet-thead"></tr></thead>
               <tbody id="c1-sheet-tbody"></tbody>
@@ -870,13 +870,15 @@ function renderWbTable() {
   tbody.innerHTML = rows.map((r, i) => {
     const barPct = r.pct != null ? Math.min(r.pct, 100) : 0;
     const pctText = r.pct != null ? `${r.pct}%` : '—';
-    const countLabel = r.official != null ? `${fmtNum(r.count)}/${fmtNum(r.official)}` : fmtNum(r.count) || '—';
+    const countLabel = r.official != null
+      ? `${fmtNum(r.count)} คน / ${fmtNum(r.official)} คน`
+      : `${fmtNum(r.count) || '—'} คน`;
     const cls = r.count > 0 ? 'bg' : 'br';
     return `<tr>
       <td style="color:var(--tx3);font-weight:700;width:32px">${i + 1}</td>
       <td>${esc(r.name)}</td>
-      <td>${countLabel}</td>
-      <td style="width:140px"><div class="prog-track" style="margin:0"><div class="prog-fill" style="width:${Math.max(barPct, 2)}%"></div></div></td>
+      <td style="width:160px"><div class="prog-track" style="margin:0"><div class="prog-fill" style="width:${Math.max(barPct, 2)}%"></div></div></td>
+      <td style="white-space:nowrap">${countLabel}</td>
       <td><span class="badge ${cls}">${pctText}</span></td>
     </tr>`;
   }).join('');

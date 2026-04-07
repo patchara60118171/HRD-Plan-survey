@@ -22,6 +22,12 @@ function go(id, el) {
   if (id === 'form-editor') loadFormEditorFields();
   if (id === 'org-credentials') loadOrgCredentialsPage();
   if (id === 'form-windows') loadFormWindowsPage();
+  if (id === 'progress') {
+    renderProgress(summarizeOrgs());
+    // Set initial sort to default (seq)
+    setTimeout(() => sortProgressTable('seq'), 100);
+  }
+  document.body.classList.remove('sidebar-open');
 }
 
 function st(el, targetId) {

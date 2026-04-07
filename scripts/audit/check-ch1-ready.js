@@ -78,11 +78,6 @@ function buildPayload(respondentEmail) {
     type_contract: 30,
     type_other: 40,
 
-    turnover_count: 1,
-    turnover_rate: 1.23,
-    transfer_count: 2,
-    transfer_rate: 2.34,
-
     begin_2564: 100,
     begin_2565: 100,
     begin_2566: 100,

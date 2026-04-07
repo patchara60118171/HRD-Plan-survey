@@ -17,18 +17,27 @@ function renderOrgs(summary) {
   const table = document.querySelector('#org-table tbody');
   if (!table) return;
   if (summary.length === 0) {
-    table.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--tx3);padding:24px">ยังไม่มีข้อมูลองค์กร</td></tr>';
+    table.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--tx3);padding:24px">ยังไม่มีข้อมูลองค์กร</td></tr>';
     return;
   }
   table.innerHTML = summary.map((org) => {
-    const ch1Status = org.ch1Count > 0 ? 'ส่งแล้ว' : 'ยังไม่เริ่ม';
-    const ch1Cls = org.ch1Count > 0 ? 'bg' : 'br';
+    const ch1Status = org.ch1Count === 0 ? 'ยังไม่ได้ส่ง' : (org.ch1CompletionPct >= 60 ? 'ส่งแล้ว' : 'ยังไม่เรียบร้อย');
+    const ch1Cls = org.ch1Count === 0 ? 'br' : (org.ch1CompletionPct >= 60 ? 'bg' : 'bw');
     const profile = state.orgProfiles.find((p) => p.org_name_th === org.name);
     const orgId = profile?.id || null;
     const showDash = profile?.show_in_dashboard !== false;
+    const sarabanEmail = org.email || profile?.settings?.saraban_email || profile?.contact_email || '—';
+    const coordinatorName = org.contact || profile?.settings?.coordinator_name || '—';
+    const coordinatorEmail = org.contactEmail || profile?.settings?.coordinator_email || profile?.contact_email || '';
+    const coordinatorDisplay = coordinatorEmail && coordinatorEmail !== '—'
+      ? `${coordinatorName}<div style="font-size:11px;color:var(--tx3);margin-top:3px">${esc(coordinatorEmail)}</div>`
+      : coordinatorName;
     return `<tr>
       <td>${esc(org.name)}</td>
+      <td>${esc(org.code || '—')}</td>
       <td>${esc(org.ministry || '—')}</td>
+      <td>${sarabanEmail !== '—' ? `<a href="mailto:${esc(sarabanEmail)}" style="color:var(--A)">${esc(sarabanEmail)}</a>` : '—'}</td>
+      <td>${coordinatorDisplay}</td>
       <td><span class="badge ${ch1Cls}">${ch1Status}</span></td>
       <td>${fmtNum(org.wellbeingSubmitted)}</td>
       <td>${fmtDate(org.latestCh1 || org.latestWb)}</td>
@@ -74,7 +83,7 @@ async function deleteOrg(id, name) {
 
 function filterOrgTable() {
   const q = (document.getElementById('org-search')?.value || '').toLowerCase();
-  const ministry = (document.getElementById('org-ministry-filter')?.value || '').toLowerCase();
+  const ministry = (document.getElementById('org-filter-ministry')?.value || '').toLowerCase();
   document.querySelectorAll('#org-table tbody tr').forEach((tr) => {
     const text = tr.textContent.toLowerCase();
     const visible = (!q || text.includes(q)) && (!ministry || text.includes(ministry));

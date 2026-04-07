@@ -1776,29 +1776,6 @@ const app = {
 
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', async () => {
-    // ── Debug: Add cache clearing function ──
-    window.clearWellbeingCache = function() {
-        if (typeof FormSchema !== 'undefined' && FormSchema.clearCache) {
-            FormSchema.clearCache('wellbeing');
-            FormSchema.clearCache('ch1');
-            console.log('✅ FormSchema cache cleared');
-        }
-        ['fschema_wellbeing', 'fschema_ch1'].forEach(key => {
-            sessionStorage.removeItem(key);
-        });
-        localStorage.clear();
-        sessionStorage.clear();
-        alert('✅ Cache cleared! Please refresh the page (Ctrl+F5) to see updated questions.');
-    };
-    
-    // ── Debug: Add keyboard shortcut Ctrl+Shift+C to clear cache ──
-    document.addEventListener('keydown', function(e) {
-        if (e.ctrlKey && e.shiftKey && e.key === 'C') {
-            e.preventDefault();
-            window.clearWellbeingCache();
-        }
-    });
-    
     // ── Sprint 1 (1f): Preload wellbeing schema from DB (primary), fallback to questions.js ──
     if (typeof FormSchema !== 'undefined') {
         try {

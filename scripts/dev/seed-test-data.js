@@ -114,10 +114,6 @@ function generateOrgData() {
         pos_m2: posDist[10],
         pos_s1: posDist[11],
         pos_s2: posDist[12],
-        turnover_count: randomInt(0, Math.floor(totalStaff * 0.1)),
-        turnover_rate: randomFloat(0, 10, 2),
-        transfer_count: randomInt(0, Math.floor(totalStaff * 0.15)),
-        transfer_rate: randomFloat(0, 15, 2),
         
         // Step 2: Policies
         related_policies: `นโยบายส่งเสริมสุขภาพพนักงาน ${org} ปี ${2567 + randomInt(0, 2)}`,
