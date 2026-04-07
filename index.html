@@ -66,13 +66,30 @@
 
             <div class="loading-spinner"></div>
 
-            <p>กำลังโหลด...</p>
+            <p>...</p>
 
         </div>
 
     </div>
 
 
+
+    <!-- Consent Popup -->
+    <div class="consent-popup" id="consent-popup" style="display: none;">
+        <div class="consent-modal">
+            <div class="consent-header">
+                <div class="consent-icon">...</div>
+                <h2>...</h2>
+            </div>
+            <div class="consent-content">
+                <p>...</p>ข้อมูลส่วนบุคคลของคุณจะถูกเก็บและใช้เพื่อวัตถุประสงค์ในการประเมินสถานการณ์ด้านสุขภาพคนวัยทำงานเท่านั้น</p>
+                <div class="consent-actions">
+                    <button class="btn btn-secondary" onclick="app.declineConsent()">ไม่ยินยอม</button>
+                    <button class="btn btn-primary" onclick="app.acceptConsent()">ยินยอม</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Main App Container -->
 
