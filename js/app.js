@@ -1235,7 +1235,7 @@ const app = {
     showConsentPopup() {
         const popup = document.getElementById('consent-popup');
         if (popup) {
-            popup.style.display = 'block';
+            popup.style.display = 'flex';
         }
     },
 
