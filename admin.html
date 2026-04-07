@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="th">
 <head>
 <meta charset="UTF-8"/>
@@ -10,6 +10,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <link rel="stylesheet" href="admin/assets/css/admin.css">
 <script>
 (() => {
@@ -45,6 +46,7 @@
 <body>
 
 <!-- ===== SIDEBAR ===== -->
+<div class="sidebar-backdrop" onclick="document.body.classList.remove('sidebar-open')"></div>
 <div class="sidebar">
   <div class="sidebar-logo">
     <div class="logo-main">
@@ -95,6 +97,7 @@
 <div class="main">
   <!-- Topbar -->
   <div class="topbar">
+    <button class="hamburger" onclick="document.body.classList.toggle('sidebar-open')" aria-label="เปิดเมนู">☰</button>
     <span class="tb-title" id="ttl">Dashboard ภาพรวม</span>
     <span class="tb-bc" id="tbc">/ ภาพรวม</span>
     <div class="tb-space"></div>
@@ -106,45 +109,56 @@
 
     <!-- ==================== DASHBOARD ==================== -->
     <div class="page active" id="page-dashboard">
-      <div class="welcome">
-        <div class="w-icon">🏛️</div>
-        <div>
-          <div class="w-title">สวัสดีครับ, ผู้ดูแลระบบ</div>
-          <div class="w-sub">โครงการสำรวจสุขภาวะบุคลากรภาครัฐ พ.ศ. 2566–2570 · <span id="last-update">กำลังโหลด...</span></div>
-        </div>
-        <div class="w-space"></div>
-        <div class="w-stats">
-          <div class="w-stat"><div class="w-val">—</div><div class="w-label">องค์กรทั้งหมด</div></div>
-          <div class="w-stat"><div class="w-val">—</div><div class="w-label">Ch1 ส่งแล้ว</div></div>
-          <div class="w-stat"><div class="w-val">—</div><div class="w-label">Wellbeing ตอบแล้ว</div></div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+        <div class="page-title" style="margin-bottom:0">Dashboard ภาพรวม</div>
+        <div style="flex:1"></div>
+        <button class="card-dl-btn" onclick="downloadCard('#page-dashboard','Dashboard-ทั้งหน้า')" title="ดาวน์โหลด Dashboard ทั้งหน้า" style="width:auto;padding:0 10px;gap:5px;font-size:12px;font-weight:600;color:var(--P)">📥 ดาวน์โหลดทั้งหน้า</button>
+      </div>
+      <div class="dl-wrap" id="dl-welcome">
+        <button class="card-dl-btn" onclick="downloadCard('#dl-welcome','Welcome-Banner')" title="ดาวน์โหลด">📥</button>
+        <div class="welcome">
+          <div class="w-icon">🏛️</div>
+          <div>
+            <div class="w-title">สวัสดีครับ, ผู้ดูแลระบบ</div>
+            <div class="w-sub">โครงการสำรวจสุขภาวะบุคลากรภาครัฐ พ.ศ. 2566–2570 · <span id="last-update">กำลังโหลด...</span></div>
+          </div>
+          <div class="w-space"></div>
+          <div class="w-stats">
+            <div class="w-stat"><div class="w-val">—</div><div class="w-label">องค์กรทั้งหมด</div></div>
+            <div class="w-stat"><div class="w-val">—</div><div class="w-label">Ch1 ส่งแล้ว</div></div>
+            <div class="w-stat"><div class="w-val">—</div><div class="w-label">Wellbeing ตอบแล้ว</div></div>
+          </div>
         </div>
       </div>
 
-      <div class="kpi-grid">
-        <div class="kpi"><div class="kpi-icon">🏛️</div><div class="kpi-label">องค์กรที่เข้าร่วม</div><div class="kpi-val">—</div><div class="kpi-sub">กำลังโหลด...</div></div>
-        <div class="kpi g"><div class="kpi-icon">✅</div><div class="kpi-label">Ch1 ส่งครบแล้ว</div><div class="kpi-val">—</div><div class="kpi-sub">กำลังโหลด...</div></div>
-        <div class="kpi w"><div class="kpi-icon">💚</div><div class="kpi-label">Wellbeing ตอบแล้ว</div><div class="kpi-val">—</div><div class="kpi-sub">จากเป้า 1,500–2,000 คน</div></div>
-        <div class="kpi"><div class="kpi-icon">👤</div><div class="kpi-label">Viewer ที่ใช้งาน</div><div class="kpi-val">—</div><div class="kpi-sub">กำลังโหลด...</div></div>
+      <div class="dl-wrap" id="dl-kpi">
+        <button class="card-dl-btn" onclick="downloadCard('#dl-kpi','KPI-Cards')" title="ดาวน์โหลด KPI">📥</button>
+        <div class="kpi-grid">
+          <div class="kpi"><div class="kpi-icon">🏛️</div><div class="kpi-label">องค์กรที่เข้าร่วม</div><div class="kpi-val">—</div><div class="kpi-sub">กำลังโหลด...</div></div>
+          <div class="kpi g"><div class="kpi-icon">✅</div><div class="kpi-label">Ch1 ส่งครบแล้ว</div><div class="kpi-val">—</div><div class="kpi-sub">กำลังโหลด...</div></div>
+          <div class="kpi w"><div class="kpi-icon">💚</div><div class="kpi-label">Wellbeing ตอบแล้ว</div><div class="kpi-val">—</div><div class="kpi-sub">จากเป้า 1,500–2,000 คน</div></div>
+          <div class="kpi"><div class="kpi-icon">👤</div><div class="kpi-label">Viewer ที่ใช้งาน</div><div class="kpi-val">—</div><div class="kpi-sub">กำลังโหลด...</div></div>
+        </div>
       </div>
 
       <div style="display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:14px">
-        <div class="card">
-          <div class="card-head"><h3>📊 ความคืบหน้าการตอบ Wellbeing Survey (รายวัน)</h3><span class="chart-range-label" id="chart-range-label"></span></div>
+        <div class="card" id="dl-chart">
+          <div class="card-head"><h3>📊 ความคืบหน้าการตอบ Wellbeing Survey (รายวัน)</h3><span class="chart-range-label" id="chart-range-label"></span><button class="card-dl-btn" onclick="downloadCard('#dl-chart','Wellbeing-Chart')" title="ดาวน์โหลดกราฟ">📥</button></div>
           <div class="card-body" style="padding:14px 18px 12px"><div id="wb-daily-chart" class="chart-ph" style="height:200px"><div class="cph-icon">📈</div><div>กำลังโหลดข้อมูล...</div></div></div>
         </div>
-        <div class="card">
-          <div class="card-head"><h3>📋 สถานะ Ch1 ทุกองค์กร</h3><span id="ch1-status-label" style="font-size:11px;color:var(--tx3)"></span></div>
+        <div class="card" id="dl-ch1-status">
+          <div class="card-head"><h3>📋 สถานะ Ch1 ทุกองค์กร</h3><span id="ch1-status-label" style="font-size:11px;color:var(--tx3)"></span><button class="card-dl-btn" onclick="downloadCard('#dl-ch1-status','Ch1-Status')" title="ดาวน์โหลด">📥</button></div>
           <div class="card-body" style="padding:12px 16px" id="ch1-status-grid"><div style="color:var(--tx3);font-size:12px">กำลังโหลด...</div></div>
         </div>
       </div>
 
-      <div class="card card-mb">
+      <div class="card card-mb" id="dl-wb-table">
         <div class="card-head">
-          <h3>💚 Wellbeing Survey รายองค์กร</h3>
+          <h3>💚 Wellbeing Survey รายองค์กร</h3><button class="card-dl-btn" onclick="downloadCard('#dl-wb-table','Wellbeing-รายองค์กร')" title="ดาวน์โหลด" style="margin-right:8px">📥</button>
           <div style="display:flex;gap:8px;align-items:center">
             <select class="sel" id="wb-sort-by" onchange="renderWbTable()" style="font-size:12px;padding:5px 8px">
-              <option value="count">เรียงตามจำนวนคน</option>
-              <option value="pct">เรียงตามร้อยละ</option>
+              <option value="count">เรียงตามจำนวนผู้ตอบ</option>
+              <option value="pct">เรียงตามร้อยละผู้ตอบ</option>
             </select>
             <select class="sel" id="wb-sort-dir" onchange="renderWbTable()" style="font-size:12px;padding:5px 8px">
               <option value="desc">มาก → น้อย</option>
@@ -172,35 +186,21 @@
           <h3>รายการสถานะทุกองค์กร</h3>
           <div class="filter-bar">
             <input class="si" id="prog-search" placeholder="🔍 ค้นหาองค์กร..." oninput="filterProgressTable()">
-            <select class="sel" id="prog-status-filter" onchange="filterProgressTable()"><option value="">ทุกสถานะ</option><option value="ส่งแล้ว">ส่งแล้ว</option><option value="กำลังกรอก">กำลังกรอก</option><option value="ยังไม่เริ่ม">ยังไม่เริ่ม</option></select>
+            <select class="sel" id="prog-status-filter" onchange="filterProgressTable()"><option value="">ทุกสถานะ</option><option value="ส่งแล้ว">ส่งแล้ว</option><option value="ยังไม่เรียบร้อย">ยังไม่เรียบร้อย</option><option value="ยังไม่ได้ส่ง">ยังไม่ได้ส่ง</option></select>
+            <button class="btn b-gray" onclick="exportProgressTable()">📤 Export Excel</button>
             <button class="btn b-orange" onclick="sendReminderAll()">🔔 ส่ง Reminder ทั้งหมด</button>
           </div>
         </div>
         <div class="tbl-wrap">
           <table>
-            <thead><tr><th>องค์กร</th><th>Ch1</th><th class="th-sort" onclick="sortProgressTable('count')" id="prog-th-count">Wellbeing (คนกรอก/ข้าราชการ) <span class="sort-icon">⇅</span></th><th class="th-sort" onclick="sortProgressTable('pct')" id="prog-th-pct">ความคืบหน้า <span class="sort-icon">⇅</span></th><th class="th-sort" onclick="sortProgressTable('date')" id="prog-th-date">วันที่ส่งล่าสุด <span class="sort-icon">⇅</span></th><th>จัดการ</th></tr></thead>
+            <thead><tr><th class="th-sort" onclick="sortProgressTable('seq')" id="prog-th-seq">ลำดับ <span class="sort-icon">⇅</span></th><th class="th-sort" onclick="sortProgressTable('org')" id="prog-th-org">องค์กร <span class="sort-icon">⇅</span></th><th class="th-sort" onclick="sortProgressTable('status')" id="prog-th-status">แบบสำรวจข้อมูลองค์กร <span class="sort-icon">⇅</span></th><th class="th-sort" onclick="sortProgressTable('count')" id="prog-th-count">แบบสำรวจสุขภาพ (จำนวนผู้ตอบ/ข้าราชการทั้งหมด) <span class="sort-icon">⇅</span></th><th class="th-sort" onclick="sortProgressTable('pct')" id="prog-th-pct">ความคืบหน้า <span class="sort-icon">⇅</span></th><th class="th-sort" onclick="sortProgressTable('date')" id="prog-th-date">วันที่ส่งล่าสุด <span class="sort-icon">⇅</span></th><th>จัดการ</th></tr></thead>
             <tbody>
-              <tr><td>สำนักงานสภาพัฒนาการเศรษฐกิจและสังคมแห่งชาติ</td><td>สำนักนายกฯ</td><td><span class="badge bg">ส่งแล้ว</span></td><td>100%</td><td>145</td><td>5 มี.ค. 69</td><td class="td-act"><button class="btn b-blue">ดูข้อมูล</button><button class="btn b-gray">Viewer</button></td></tr>
-              <tr><td>สำนักงานนโยบายและยุทธศาสตร์การค้า</td><td>พาณิชย์</td><td><span class="badge bg">ส่งแล้ว</span></td><td>100%</td><td>98</td><td>7 มี.ค. 69</td><td class="td-act"><button class="btn b-blue">ดูข้อมูล</button><button class="btn b-gray">Viewer</button></td></tr>
-              <tr><td>กรมวิทยาศาสตร์บริการ</td><td>วิทยาศาสตร์ฯ</td><td><span class="badge bg">ส่งแล้ว</span></td><td>100%</td><td>187</td><td>6 มี.ค. 69</td><td class="td-act"><button class="btn b-blue">ดูข้อมูล</button><button class="btn b-gray">Viewer</button></td></tr>
-              <tr><td>กรมสนับสนุนบริการสุขภาพ</td><td>สำนักนายกฯ</td><td><span class="badge bg">ส่งแล้ว</span></td><td>100%</td><td>132</td><td>8 มี.ค. 69</td><td class="td-act"><button class="btn b-blue">ดูข้อมูล</button><button class="btn b-gray">Viewer</button></td></tr>
-              <tr><td>กรมอุตุนิยมวิทยา</td><td>ดิจิทัลฯ</td><td><span class="badge bg">ส่งแล้ว</span></td><td>100%</td><td>210</td><td>9 มี.ค. 69</td><td class="td-act"><button class="btn b-blue">ดูข้อมูล</button><button class="btn b-gray">Viewer</button></td></tr>
-              <tr><td>กรมส่งเสริมวัฒนธรรม</td><td>วัฒนธรรม</td><td><span class="badge bg">ส่งแล้ว</span></td><td>100%</td><td>120</td><td>10 มี.ค. 69</td><td class="td-act"><button class="btn b-blue">ดูข้อมูล</button><button class="btn b-gray">Viewer</button></td></tr>
-              <tr><td>กรมคุมประพฤติ</td><td>ยุติธรรม</td><td><span class="badge bg">ส่งแล้ว</span></td><td>100%</td><td>165</td><td>11 มี.ค. 69</td><td class="td-act"><button class="btn b-blue">ดูข้อมูล</button><button class="btn b-gray">Viewer</button></td></tr>
-              <tr><td>สำนักงานปลัดกระทรวงการท่องเที่ยวและกีฬา</td><td>ท่องเที่ยวฯ</td><td><span class="badge bg">ส่งแล้ว</span></td><td>100%</td><td>89</td><td>11 มี.ค. 69</td><td class="td-act"><button class="btn b-blue">ดูข้อมูล</button><button class="btn b-gray">Viewer</button></td></tr>
-              <tr><td>กรมสุขภาพจิต</td><td>สาธารณสุข</td><td><span class="badge bg">ส่งแล้ว</span></td><td>100%</td><td>234</td><td>12 มี.ค. 69</td><td class="td-act"><button class="btn b-blue">ดูข้อมูล</button><button class="btn b-gray">Viewer</button></td></tr>
-              <tr><td>สำนักงานนโยบายและแผนทรัพยากรธรรมชาติฯ</td><td>ทรัพยากรฯ</td><td><span class="badge bg">ส่งแล้ว</span></td><td>100%</td><td>76</td><td>12 มี.ค. 69</td><td class="td-act"><button class="btn b-blue">ดูข้อมูล</button><button class="btn b-gray">Viewer</button></td></tr>
-              <tr><td>สำนักงานการวิจัยแห่งชาติ</td><td>อว.</td><td><span class="badge bw">กำลังกรอก</span></td><td>80%</td><td>—</td><td>13 มี.ค. 69</td><td class="td-act"><button class="btn b-blue">ดูข้อมูล</button><button class="btn b-orange">🔔 Remind</button></td></tr>
-              <tr><td>สำนักงานมาตรฐานสินค้าเกษตรและอาหารแห่งชาติ</td><td>เกษตรฯ</td><td><span class="badge bw">กำลังกรอก</span></td><td>55%</td><td>—</td><td>13 มี.ค. 69</td><td class="td-act"><button class="btn b-blue">ดูข้อมูล</button><button class="btn b-orange">🔔 Remind</button></td></tr>
-              <tr><td>สำนักงาน กพร.</td><td>สำนักนายกฯ</td><td><span class="badge bw">กำลังกรอก</span></td><td>70%</td><td>—</td><td>14 มี.ค. 69</td><td class="td-act"><button class="btn b-blue">ดูข้อมูล</button><button class="btn b-orange">🔔 Remind</button></td></tr>
-              <tr><td>กรมชลประทาน</td><td>เกษตรฯ</td><td><span class="badge br">ยังไม่เริ่ม</span></td><td>—</td><td>—</td><td>—</td><td class="td-act"><button class="btn b-orange">🔔 Remind</button><button class="btn b-gray">ลิงก์</button></td></tr>
-              <tr><td>กรมกิจการเด็กและเยาวชน</td><td>พม.</td><td><span class="badge br">ยังไม่เริ่ม</span></td><td>—</td><td>—</td><td>—</td><td class="td-act"><button class="btn b-orange">🔔 Remind</button><button class="btn b-gray">ลิงก์</button></td></tr>
+              <tr><td colspan="7" style="text-align:center;color:var(--tx3)">กำลังโหลด...</td></tr>
             </tbody>
           </table>
         </div>
       </div>
     </div>
-
 
     <!-- ==================== ORGS ==================== -->
     <div class="page" id="page-orgs">
@@ -224,10 +224,10 @@
         <div class="tbl-wrap">
           <table id="org-table">
             <thead>
-              <tr><th>#</th><th>ชื่อองค์กร</th><th>กระทรวง</th><th>Tag</th><th>Wellbeing</th><th>Ch1</th><th>จัดการ</th></tr>
+              <tr><th>ชื่อองค์กร</th><th>รหัสองค์กร</th><th>กระทรวง</th><th>Saraban Email</th><th>ผู้ประสานงาน</th><th>Ch1</th><th>Wellbeing</th><th>ล่าสุด</th><th>แสดงใน Dashboard</th><th>จัดการ</th></tr>
             </thead>
             <tbody>
-              <tr><td colspan="7" style="text-align:center;color:var(--tx3);padding:24px">กำลังโหลดข้อมูล...</td></tr>
+              <tr><td colspan="10" style="text-align:center;color:var(--tx3);padding:24px">กำลังโหลดข้อมูล...</td></tr>
             </tbody>
           </table>
         </div>
@@ -790,7 +790,7 @@
 <script src="admin/js/services/form-editor-schema.js"></script>
 <script src="admin/js/services/forms.js"></script>
 <!-- Sprint 3C — Page modules -->
-<script src="admin/js/pages/dashboard.js"></script>
+<script src="admin/js/pages/dashboard.js?v=3"></script>
 <script src="admin/js/pages/organizations.js"></script>
 <script src="admin/js/pages/ch1.js"></script>
 <script src="admin/js/pages/wellbeing.js"></script>
@@ -851,13 +851,13 @@
 function renderWbTable() {
   const tbody = document.getElementById('wb-rank-tbody');
   if (!tbody || !window._wbSummary) return;
-  const sortBy = document.getElementById('wb-sort-by')?.value || 'count';
+  const sortBy = document.getElementById('wb-sort-by')?.value || 'pct';
   const sortDir = document.getElementById('wb-sort-dir')?.value || 'desc';
 
   const rows = window._wbSummary.map(org => {
     const count = org.wellbeingSubmitted || 0;
-    const official = org.typeOfficial;
-    const pct = official > 0 ? Math.round((count / official) * 100) : null;
+    const official = Number(org.typeOfficial || 0);
+    const pct = official > 0 ? Math.round((count / official) * 100) : 0;
     return { name: org.name, count, official, pct };
   });
 
@@ -883,55 +883,6 @@ function renderWbTable() {
     </tr>`;
   }).join('');
 }
-
-
-function sortProgressTable(col) {
-  if (!window._progressSummary) return;
-  const s = window._progressSort = window._progressSort || { col: 'count', dir: 'desc' };
-  if (col) { s.dir = (s.col === col && s.dir === 'desc') ? 'asc' : 'desc'; s.col = col; }
-  ['count','pct','date'].forEach(c => {
-    const th = document.getElementById(`prog-th-${c}`);
-    if (!th) return;
-    const icon = th.querySelector('.sort-icon');
-    if (c === s.col) icon.textContent = s.dir === 'desc' ? '↓' : '↑';
-    else icon.textContent = '⇅';
-    th.style.color = c === s.col ? 'var(--P)' : '';
-  });
-  const rows = window._progressSummary.map(org => {
-    const wbCount = org.wellbeingSubmitted || 0;
-    const official = org.typeOfficial;
-    const pctNum = official > 0 ? Math.round((wbCount / official) * 100) : null;
-    const dateVal = org.latestCh1 || org.latestWb || '';
-    return { org, wbCount, official, pctNum, dateVal };
-  });
-  rows.sort((a, b) => {
-    let va, vb;
-    if (s.col === 'pct') { va = a.pctNum ?? -1; vb = b.pctNum ?? -1; }
-    else if (s.col === 'date') { va = a.dateVal; vb = b.dateVal; }
-    else { va = a.wbCount; vb = b.wbCount; }
-    if (va < vb) return s.dir === 'desc' ? 1 : -1;
-    if (va > vb) return s.dir === 'desc' ? -1 : 1;
-    return 0;
-  });
-  const tbody = document.querySelector('#page-progress tbody');
-  tbody.innerHTML = rows.map(({ org, wbCount, official, pctNum, dateVal }) => {
-    const statusCls = org.ch1Count > 0 ? 'bg' : 'br';
-    const status = org.ch1Count > 0 ? 'ส่งแล้ว' : 'ยังไม่เริ่ม';
-    const wbCell = official != null ? `${fmtNum(wbCount)}/${fmtNum(official)}` : wbCount > 0 ? fmtNum(wbCount) : '—';
-    const pctText = pctNum != null ? `${pctNum}%` : wbCount > 0 ? '—' : '0%';
-    return `<tr>
-      <td>${esc(org.name)}</td>
-      <td><span class="badge ${statusCls}">${status}</span></td>
-      <td>${wbCell}</td>
-      <td>${pctText}</td>
-      <td>${fmtDate(dateVal)}</td>
-      <td class="td-act"><button class="btn b-blue" onclick="openOrgData('${esc(org.name)}')">ดูข้อมูล</button></td>
-    </tr>`;
-  }).join('');
-}
-
-
-
 
 
 function openOrgModal(orgName) {
