@@ -66,7 +66,7 @@
 
             <div class="loading-spinner"></div>
 
-            <p>...</p>
+            <p>กำลังโหลด...</p>
 
         </div>
 
@@ -78,14 +78,17 @@
     <div class="consent-popup" id="consent-popup" style="display: none;">
         <div class="consent-modal">
             <div class="consent-header">
-                <div class="consent-icon">...</div>
-                <h2>...</h2>
+                <div class="consent-icon">🔒</div>
+                <h2>คำชี้แจงและความยินยอมในการให้ข้อมูล</h2>
             </div>
             <div class="consent-content">
-                <p>...</p>ข้อมูลส่วนบุคคลของคุณจะถูกเก็บและใช้เพื่อวัตถุประสงค์ในการประเมินสถานการณ์ด้านสุขภาพคนวัยทำงานเท่านั้น</p>
+                <p>แบบสอบถามนี้มีการเก็บข้อมูลบางส่วนที่เกี่ยวข้องกับสุขภาพ ซึ่งถือเป็นข้อมูลส่วนบุคคลที่มีความอ่อนไหว</p>
+                <p>ข้อมูลจะถูกนำไปใช้เพื่อการวิเคราะห์ในภาพรวมของหน่วยงาน และเพื่อออกแบบแนวทางพัฒนาเท่านั้น โดยไม่มีการนำไปใช้ในการประเมินหรือตัดสินรายบุคคล</p>
+                <p>การตอบแบบสอบถามเป็นไปโดยความสมัครใจ ท่านสามารถเลือกไม่ตอบในข้อคำถามที่ไม่สะดวกได้</p>
+                <p>เมื่อท่านดำเนินการตอบแบบสอบถามต่อ ถือว่าท่านรับทราบและยินยอมตามเงื่อนไขดังกล่าว</p>
                 <div class="consent-actions">
-                    <button class="btn btn-secondary" onclick="app.declineConsent()">ไม่ยินยอม</button>
-                    <button class="btn btn-primary" onclick="app.acceptConsent()">ยินยอม</button>
+                    <button class="btn btn-secondary" onclick="app.declineConsent()">ยกเลิก</button>
+                    <button class="btn btn-primary" onclick="app.acceptConsent()">รับทราบและเริ่มทำแบบสอบถาม</button>
                 </div>
             </div>
         </div>

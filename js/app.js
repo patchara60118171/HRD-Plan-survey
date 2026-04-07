@@ -1821,24 +1821,5 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.warn('[app] Schema preload failed, using questions.js fallback:', e.message);
         }
     }
-};
-
-// Initialize when DOM is ready
-document.addEventListener('DOMContentLoaded', async () => {
-    // Sprint 1 (1f): Preload wellbeing schema from DB (primary), fallback to questions.js
-    if (typeof FormSchema !== 'undefined') {
-        try {
-            const schema = await FormSchema.loadFormSchema('wellbeing');
-            if (schema && schema.source === 'supabase') {
-                console.log('[app] Wellbeing schema loaded from DB:', schema.questions.length, 'questions');
-                // Future Sprint: replace SURVEY_DATA rendering with DB schema
-                // For now: schema is cached, label overrides accessible via FormSchema.getFieldLabel()
-            } else {
-                console.log('[app] Using fallback schema from questions.js (source:', schema?.source, ')');
-            }
-        } catch (e) {
-            console.warn('[app] Schema preload failed, using questions.js fallback:', e.message);
-        }
-    }
     app.init();
 });
