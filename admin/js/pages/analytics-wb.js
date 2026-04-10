@@ -29,6 +29,10 @@ function renderAnalytics(summary) {
 /* ── KPI summary bar ───────────────────────────────────────────── */
 function _anwbRenderKPICards(rows) {
   const n = rows.length;
+  const tmhiRows = rows.filter(r => getTmhi(r) != null && !Number.isNaN(getTmhi(r)));
+  const avgTmhi = _avg(tmhiRows, r => getTmhi(r));
+  const tmhiMeta = getTmhiLevelMeta(avgTmhi);
+  const tmhiLowCount = tmhiRows.filter(r => getTmhiLevelMeta(getTmhi(r)).key === 'poor').length;
   const avgPhq = _avg(rows, r => getPhq9(r));
   const avgGad = _avg(rows, r => getGad7(r));
   const avgBurn = _avg(rows, r => getBurnout(r));
@@ -38,6 +42,8 @@ function _anwbRenderKPICards(rows) {
   _setHtml('anwb-kpi', `
     <div class="anwb-kpi-grid">
       ${_kpiCard('👥 ผู้ตอบทั้งหมด', fmtNum(n) + ' คน', '', '#0F4C81')}
+      ${_kpiCard('🫶 TMHI-15 เฉลี่ย', fmtNum(avgTmhi, 1), tmhiMeta.shortLabel, tmhiMeta.color)}
+      ${_kpiCard('🟠 TMHI ต่ำกว่าคนทั่วไป', fmtNum(tmhiLowCount) + ' คน', fmtNum(tmhiRows.length ? (tmhiLowCount / tmhiRows.length) * 100 : 0, 1) + '% ของผู้มีคะแนน TMHI', tmhiLowCount > 0 ? '#DC2626' : '#059669')}
       ${_kpiCard('🧠 PHQ-9 เฉลี่ย', fmtNum(avgPhq, 1), _phqLabel(avgPhq), avgPhq >= 10 ? '#DC2626' : avgPhq >= 5 ? '#D97706' : '#059669')}
       ${_kpiCard('😰 GAD-7 เฉลี่ย', fmtNum(avgGad, 1), _gadLabel(avgGad), avgGad >= 10 ? '#DC2626' : avgGad >= 5 ? '#D97706' : '#059669')}
       ${_kpiCard('🔥 Burnout เฉลี่ย', fmtNum(avgBurn, 2), avgBurn >= 4 ? 'สูง' : avgBurn >= 3 ? 'ปานกลาง' : 'ต่ำ', avgBurn >= 4 ? '#DC2626' : avgBurn >= 3 ? '#D97706' : '#059669')}
@@ -48,6 +54,12 @@ function _anwbRenderKPICards(rows) {
 
 /* ── Distribution charts: PHQ9, GAD7, Burnout, Engagement ─────── */
 function _anwbRenderDistributions(rows) {
+  const tmhiRows = rows.filter(r => getTmhi(r) != null && !Number.isNaN(getTmhi(r)));
+  const tmhiBands = [
+    { label: 'ต่ำกว่าคนทั่วไป (< 43)', min: 0, max: 42.999, color: '#DC2626' },
+    { label: 'เท่ากับคนทั่วไป (44–50)', min: 44, max: 50, color: '#D97706' },
+    { label: 'ดีกว่าคนทั่วไป (51–60)', min: 51, max: 60, color: '#059669' },
+  ];
   const phqBands = [
     { label: 'ปกติ (0–4)', min: 0, max: 4, color: '#059669' },
     { label: 'เล็กน้อย (5–9)', min: 5, max: 9, color: '#84CC16' },
@@ -75,12 +87,16 @@ function _anwbRenderDistributions(rows) {
     { label: 'ปานกลาง (50–69)', min: 50, max: 69, color: '#F59E0B' },
     { label: 'ดี (70–100)', min: 70, max: 100, color: '#059669' },
   ];
+  const tmhiData = _bandCount(tmhiRows, r => getTmhi(r), tmhiBands);
   const burnData = _bandCount(rows, r => getBurnout(r), burnBands);
   const engData = _bandCount(rows, r => getEngagement(r), engBands);
 
+  const tmhiInsights = _tmhiInsights(tmhiRows);
+
   _setHtml('anwb-dist', `
     <div class="anwb-2col">
-      <div class="card"><div class="card-head"><h3>🧠 PHQ-9 ภาวะซึมเศร้า</h3></div><div class="card-body">${_barChart(phqData, rows.length)}</div></div>
+      <div class="card"><div class="card-head"><h3>🫶 TMHI-15 การแปลผลตามเฉลย</h3></div><div class="card-body">${_barChart(tmhiData, tmhiRows.length)}<div style="margin-top:14px;padding:12px 14px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;font-size:12px;line-height:1.7"><div style="font-weight:700;color:#0F4C81;margin-bottom:6px">เกณฑ์ที่ใช้จากไฟล์เฉลย</div><div>51–60 คะแนน = สุขภาพจิตดีกว่าคนทั่วไป</div><div>44–50 คะแนน = สุขภาพจิตเท่ากับคนทั่วไป</div><div>ต่ำกว่า 43 คะแนน = สุขภาพจิตต่ำกว่าคนทั่วไป</div><div style="margin-top:8px;color:#475569">${esc(tmhiInsights)}</div></div></div></div>
+      <div class="card"><div class="card-head"><h3> PHQ-9 ภาวะซึมเศร้า</h3></div><div class="card-body">${_barChart(phqData, rows.length)}</div></div>
       <div class="card"><div class="card-head"><h3>😰 GAD-7 ความวิตกกังวล</h3></div><div class="card-body">${_barChart(gadData, rows.length)}</div></div>
       <div class="card"><div class="card-head"><h3>🔥 Burnout Score</h3></div><div class="card-body">${_barChart(burnData, rows.length)}</div></div>
       <div class="card"><div class="card-head"><h3>💪 Engagement Score</h3></div><div class="card-body">${_barChart(engData, rows.length)}</div></div>
@@ -91,6 +107,7 @@ function _anwbRenderDistributions(rows) {
 function _anwbRenderHeatmap(rows, summary) {
   const orgs = getOrgCatalog().filter(o => o.code !== 'test-org');
   const metrics = [
+    { key: 'tmhi', label: 'TMHI-15', fn: r => getTmhi(r), max: 60, reverse: false },
     { key: 'phq', label: 'PHQ-9', fn: r => getPhq9(r), max: 27, reverse: true },
     { key: 'gad', label: 'GAD-7', fn: r => getGad7(r), max: 21, reverse: true },
     { key: 'burn', label: 'Burnout', fn: r => getBurnout(r), max: 5, reverse: true },
@@ -125,7 +142,7 @@ function _anwbRenderHeatmap(rows, summary) {
 
   _setHtml('anwb-heatmap', `
     <div class="card">
-      <div class="card-head"><h3>🌡️ Heatmap สุขภาวะรายองค์กร</h3><span style="font-size:11px;color:var(--tx3)">🔴 = ต้องระวัง · 🟢 = ดี</span></div>
+      <div class="card-head"><h3>🌡️ Heatmap สุขภาวะรายองค์กร</h3><span style="font-size:11px;color:var(--tx3)">TMHI ใช้เกณฑ์เฉลย · 🔴 = ต้องระวัง · 🟢 = ดี</span></div>
       <div class="tbl-wrap"><table class="anwb-heat-table"><thead>${headerRow}</thead><tbody>${dataRows}</tbody></table></div>
     </div>`);
 }
@@ -159,6 +176,8 @@ function _anwbRenderDemographics(rows) {
 /* ── Risk Signals ──────────────────────────────────────────────── */
 function _anwbRenderRiskSignals(rows) {
   const n = rows.length;
+  const tmhiRows = rows.filter(r => getTmhi(r) != null && !Number.isNaN(getTmhi(r)));
+  const lowTmhi = tmhiRows.filter(r => getTmhiLevelMeta(getTmhi(r)).key === 'poor').length;
   const highPhq = rows.filter(r => (getPhq9(r) || 0) >= 10).length;
   const highGad = rows.filter(r => (getGad7(r) || 0) >= 10).length;
   const highBurn = rows.filter(r => (getBurnout(r) || 0) >= 4).length;
@@ -178,6 +197,7 @@ function _anwbRenderRiskSignals(rows) {
   const topProbs = Object.entries(probCounts).sort((a, b) => b[1] - a[1]).slice(0, 8);
 
   const riskItems = [
+    { label: 'TMHI ต่ำกว่าคนทั่วไป', n: lowTmhi, color: '#DC2626' },
     { label: 'PHQ-9 ≥ 10 (ซึมเศร้าปานกลาง+)', n: highPhq, color: '#EF4444' },
     { label: 'GAD-7 ≥ 10 (วิตกกังวลปานกลาง+)', n: highGad, color: '#F97316' },
     { label: 'Burnout ≥ 4 (สูง)', n: highBurn, color: '#EF4444' },
@@ -245,7 +265,24 @@ function _groupCount(rows, fn) {
   return Object.entries(map).sort((a, b) => b[1] - a[1]);
 }
 
+function _tmhiInsights(rows) {
+  if (!rows.length) return 'ยังไม่มีข้อมูล TMHI-15 เพียงพอสำหรับการสรุปผล';
+  const counts = rows.reduce((acc, row) => {
+    const key = getTmhiLevelMeta(getTmhi(row)).key;
+    acc[key] = (acc[key] || 0) + 1;
+    return acc;
+  }, {});
+  const top = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
+  const labels = {
+    good: 'กลุ่มคะแนนสุขภาพจิตดีกว่าคนทั่วไปมีสัดส่วนมากที่สุด',
+    average: 'กลุ่มคะแนนสุขภาพจิตเท่ากับคนทั่วไปมีสัดส่วนมากที่สุด',
+    poor: 'กลุ่มคะแนนสุขภาพจิตต่ำกว่าคนทั่วไปมีสัดส่วนมากที่สุด'
+  };
+  return labels[top?.[0]] || 'ยังไม่สามารถสรุปการกระจายคะแนนสุขภาพจิตได้';
+}
+
 function _barChart(data, total) {
+  if (!data.length) return '<div style="color:var(--tx3);font-size:12px">ไม่มีข้อมูล</div>';
   const maxPct = Math.max(...data.map(d => d.pct), 1);
   return data.map(d => `
     <div style="margin-bottom:10px">

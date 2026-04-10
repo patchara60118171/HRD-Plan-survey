@@ -37,15 +37,15 @@ function getOrgCatalog() {
       || {};
     return {
       name: org.name,
-      ministry: row.settings?.ministry || 'ไม่ระบุ',
+      ministry: row.ministry || row.settings?.ministry || 'ไม่ระบุ',
       code: row.org_code || org.code,
-      letter: row.settings?.salutation || 'ไม่ระบุ',
-      email: row.settings?.saraban_email || row.contact_email || '',
-      contact: row.settings?.coordinator_name || '',
-      contactRole: row.settings?.coordinator_position || '',
-      contactPhone: row.settings?.coordinator_contact_line || '',
-      contactLine: row.settings?.coordinator_contact_line || '',
-      contactEmail: row.settings?.coordinator_email || row.contact_email || '',
+      letter: row.salutation || row.settings?.salutation || 'ไม่ระบุ',
+      email: row.saraban_email || row.settings?.saraban_email || row.contact_email || '',
+      contact: row.coordinator_name || row.settings?.coordinator_name || '',
+      contactRole: row.coordinator_position || row.settings?.coordinator_position || '',
+      contactPhone: row.coordinator_contact_line || row.settings?.coordinator_contact_line || '',
+      contactLine: row.coordinator_contact_line || row.settings?.coordinator_contact_line || '',
+      contactEmail: row.coordinator_email || row.settings?.coordinator_email || row.contact_email || '',
     };
   });
 }

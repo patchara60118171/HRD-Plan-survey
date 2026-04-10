@@ -706,7 +706,7 @@ function exportCh1RowDocs(idx) {
   if (!row) { showToast('ไม่พบข้อมูล Ch1 ในตำแหน่งนี้', 'warn'); return; }
   const orgCode = String(row.org_code || row.form_data?.org_code || '').trim().toLowerCase() || 'unknown';
   const qs = new URLSearchParams({ org: orgCode, id: String(row.id || ''), export: 'docs', autoclose: '1' });
-  const win = window.open(`ch1-preview?${qs.toString()}`, '_blank');
+  const win = window.open(`/ch1-preview?${qs.toString()}`, '_blank');
   if (!win) {
     showToast('กรุณาอนุญาต Popup เพื่อดาวน์โหลด Docs', 'warn');
     return;

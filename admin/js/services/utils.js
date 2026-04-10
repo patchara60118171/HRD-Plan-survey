@@ -130,6 +130,25 @@ function getWlb(row) {
   return null;
 }
 
+function getTmhi(row) {
+  if (row.tmhi_score != null && row.tmhi_score !== '') return Number(row.tmhi_score);
+  return sumFields(row, ['tmhi_1','tmhi_2','tmhi_3','tmhi_4','tmhi_5','tmhi_6','tmhi_7','tmhi_8','tmhi_9','tmhi_10','tmhi_11','tmhi_12','tmhi_13','tmhi_14','tmhi_15']);
+}
+
+function getTmhiLevelMeta(score) {
+  if (score == null || Number.isNaN(Number(score)) || Number(score) <= 0) {
+    return { key: 'unknown', label: 'ไม่มีข้อมูล', color: '#9CA3AF', shortLabel: 'ไม่มีข้อมูล' };
+  }
+  const value = Number(score);
+  if (value >= 51) {
+    return { key: 'good', label: 'สุขภาพจิตดีกว่าคนทั่วไป', color: '#059669', shortLabel: 'ดีกว่าคนทั่วไป' };
+  }
+  if (value >= 44) {
+    return { key: 'average', label: 'สุขภาพจิตเท่ากับคนทั่วไป', color: '#D97706', shortLabel: 'เท่ากับคนทั่วไป' };
+  }
+  return { key: 'poor', label: 'สุขภาพจิตต่ำกว่าคนทั่วไป', color: '#DC2626', shortLabel: 'ต่ำกว่าคนทั่วไป' };
+}
+
 function getSleep(row) {
   return row.sleep_hours ?? row.sleep ?? row.sleep_avg ?? '—';
 }

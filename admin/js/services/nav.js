@@ -19,6 +19,7 @@ function go(id, el) {
   }
   if (id === 'an-wb') renderAnalytics(summarizeOrgs());
   if (id === 'ch1-summary') renderCh1Summary();
+  if (id === 'org-coordinators') renderOrgCoordinators();
   if (id === 'form-editor') loadFormEditorFields();
   if (id === 'org-credentials') loadOrgCredentialsPage();
   if (id === 'form-windows') loadFormWindowsPage();

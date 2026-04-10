@@ -73,6 +73,7 @@
 
     <div class="nav-group">จัดการข้อมูล</div>
     <div class="nav-item" onclick="go('orgs',this)"><span class="ni">🏛️</span> องค์กรที่เข้าร่วม</div>
+    <div class="nav-item" onclick="go('org-coordinators',this)"><span class="ni">👤</span> ข้อมูลผู้ประสาน</div>
     <div class="nav-item" onclick="go('form-ch1',this)"><span class="ni">📝</span> ฟอร์ม Ch1</div>
     <div class="nav-item" onclick="go('form-wb',this)"><span class="ni">💚</span> Wellbeing Survey</div>
 
@@ -228,6 +229,30 @@
             </thead>
             <tbody>
               <tr><td colspan="10" style="text-align:center;color:var(--tx3);padding:24px">กำลังโหลดข้อมูล...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="page" id="page-org-coordinators">
+      <div class="page-title">ข้อมูลผู้ประสาน</div>
+      <div class="page-sub">ดึงจาก Supabase ตาราง organizations เพื่อใช้ในระบบ /admin โดยตรง</div>
+      <div class="card">
+        <div class="card-head">
+          <h3>รายการข้อมูลผู้ประสาน</h3>
+          <div class="filter-bar">
+            <input class="si" id="org-coordinator-search" placeholder="🔍 ค้นหาองค์กร / ผู้ประสาน / อีเมล..." oninput="filterOrgCoordinatorTable()">
+            <button class="btn b-gray" onclick="renderOrgCoordinators()">↻ โหลดใหม่</button>
+          </div>
+        </div>
+        <div class="tbl-wrap">
+          <table id="org-coordinator-table">
+            <thead>
+              <tr><th>ชื่อองค์กร</th><th>ผู้ประสาน</th><th>ตำแหน่ง</th><th>เบอร์/Line</th><th>อีเมลผู้ประสาน</th><th>อีเมลองค์กร</th></tr>
+            </thead>
+            <tbody>
+              <tr><td colspan="6" style="text-align:center;color:var(--tx3);padding:24px">กำลังโหลดข้อมูล...</td></tr>
             </tbody>
           </table>
         </div>
@@ -485,8 +510,17 @@
 
     <!-- ==================== ANALYTICS WELLBEING ==================== -->
     <div class="page" id="page-an-wb">
-      <div class="page-title">🧠 วิเคราะห์ Wellbeing</div>
+      <div class="page-title">วิเคราะห์ Wellbeing</div>
       <div class="page-sub">ภาพรวมสุขภาวะบุคลากรจากข้อมูลจริง — PHQ-9 · GAD-7 · Burnout · Engagement · WLB</div>
+      <div class="filter-bar" style="margin-bottom:16px">
+        <div class="org-multi-wrap">
+          <button type="button" class="sel org-multi-btn" id="anwb-org-toggle" onclick="anwbToggleOrgDropdown()">ทุกองค์กร ▾</button>
+          <div id="anwb-org-dropdown" class="org-dropdown">
+            <label class="org-check-item"><input type="checkbox" checked onchange="anwbOrgCheckAll(this)"> <span style="font-weight:600">เลือกทั้งหมด</span></label>
+            <div id="anwb-org-list"></div>
+          </div>
+        </div>
+      </div>
       <div id="anwb-empty" style="display:none;padding:16px 20px;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;color:#1E40AF;font-size:13px;margin-bottom:16px">⏳ กำลังโหลดข้อมูล...</div>
       <div id="anwb-content" style="display:none">
         <!-- KPI Cards -->
@@ -792,6 +826,7 @@
 <!-- Sprint 3C — Page modules -->
 <script src="admin/js/pages/dashboard.js?v=3"></script>
 <script src="admin/js/pages/organizations.js"></script>
+<script src="admin/js/pages/org-coordinators.js"></script>
 <script src="admin/js/pages/ch1.js"></script>
 <script src="admin/js/pages/wellbeing.js"></script>
 <script src="admin/js/pages/settings.js"></script>
@@ -1204,6 +1239,7 @@ async function refreshData() {
     renderDashboard(summary);
     renderProgress(summary);
     renderOrgs(summary);
+    renderOrgCoordinators();
     renderCh1(summary);
     renderCh1Summary();
     renderWellbeingControl(summary);
@@ -1251,6 +1287,7 @@ async function init() {
     renderDashboard(summary);
     renderProgress(summary);
     renderOrgs(summary);
+    renderOrgCoordinators();
     renderCh1(summary);
     renderCh1Summary();
     renderWellbeingControl(summary);

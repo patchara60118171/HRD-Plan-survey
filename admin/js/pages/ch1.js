@@ -216,17 +216,18 @@ function renderCh1Pdf() {
     return;
   }
   
-  // Sort ch1Rows using the helper function
-  const sortedCh1Rows = sortOrganizations(state.ch1Rows.map(row => ({
+  // Sort ch1Rows using the helper function — preserve original index to avoid indexOf bug on copies
+  const sortedCh1Rows = sortOrganizations(state.ch1Rows.map((row, idx) => ({
     ...row,
-    name: getCh1Org(row)
+    name: getCh1Org(row),
+    _origIdx: idx
   })));
   
   tbody.innerHTML = sortedCh1Rows.map((row, i) => `<tr data-org="${esc(getCh1Org(row))}">
     <td style="text-align:center;font-weight:600;color:var(--tx3)">${i + 1}</td>
     <td>${esc(getCh1Org(row))}</td>
     <td>${fmtDate(getRowDate(row), true)}</td>
-    <td class="td-act"><button class="btn b-gray" onclick="showCh1RowDetail(${state.ch1Rows.indexOf(row)})">📋 ดูรายละเอียด</button><button class="btn b-blue" onclick="showCh1PDF(${state.ch1Rows.indexOf(row)})">📄 PDF</button><button class="btn b-solid" onclick="exportCh1RowDocs(${state.ch1Rows.indexOf(row)})">📝 Docs</button></td>
+    <td class="td-act"><button class="btn b-gray" onclick="goCh1Preview(${row._origIdx})">📋 ดูรายละเอียด</button><button class="btn b-blue" onclick="showCh1PDF(${row._origIdx})">📄 PDF</button><button class="btn b-solid" onclick="exportCh1RowDocs(${row._origIdx})">📝 Docs</button></td>
   </tr>`).join('');
 }
 
@@ -529,6 +530,16 @@ function exportCh1SummaryPdf() {
   }
 }
 
+// ─── goCh1Preview ────────────────────────────────────────────────────────────
+
+function goCh1Preview(index) {
+  const row = state.ch1Rows[index];
+  if (!row) { showToast('ไม่พบข้อมูลในตำแหน่งนี้', 'warn'); return; }
+  const orgCode = String(row.org_code || row.form_data?.org_code || '').trim().toLowerCase() || 'unknown';
+  const qs = new URLSearchParams({ org: orgCode, id: String(row.id || '') });
+  window.open(`/ch1-preview?${qs.toString()}`, '_blank');
+}
+
 // ─── showCh1RowDetail ─────────────────────────────────────────────────────────
 
 function showCh1RowDetail(index) {
@@ -726,7 +737,7 @@ function showCh1PDF(index) {
   if (!row) { showToast('ไม่พบข้อมูลในตำแหน่งนี้', 'warn'); return; }
   const orgCode = String(row.org_code || row.form_data?.org_code || '').trim().toLowerCase() || 'unknown';
   const qs = new URLSearchParams({ org: orgCode, id: String(row.id || ''), export: 'pdf', autoclose: '1' });
-  const win = window.open(`ch1-preview?${qs.toString()}`, '_blank');
+  const win = window.open(`/ch1-preview?${qs.toString()}`, '_blank');
   if (!win) showToast('กรุณาอนุญาต Popup เพื่อดาวน์โหลด PDF', 'warn');
   return;
 
