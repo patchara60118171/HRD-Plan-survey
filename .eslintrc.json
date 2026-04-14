@@ -1,0 +1,33 @@
+{
+  "env": {
+    "browser": true,
+    "es2021": true,
+    "node": true
+  },
+  "extends": ["eslint:recommended"],
+  "parserOptions": {
+    "ecmaVersion": 2021,
+    "sourceType": "module"
+  },
+  "globals": {
+    "supabase": "readonly",
+    "SUPABASE_URL": "readonly",
+    "SUPABASE_ANON_KEY": "readonly",
+    "PROJECT_SSOT": "readonly",
+    "FormSchema": "readonly"
+  },
+  "rules": {
+    "no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
+    "no-console": ["warn", { "allow": ["warn", "error"] }],
+    "no-undef": "warn",
+    "prefer-const": "warn",
+    "eqeqeq": ["error", "always"]
+  },
+  "ignorePatterns": [
+    "node_modules/",
+    "tests/",
+    "scripts/",
+    "backend/",
+    ".claude/"
+  ]
+}

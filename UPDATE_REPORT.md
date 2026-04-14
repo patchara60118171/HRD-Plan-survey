@@ -67,7 +67,8 @@
 - `admin.html` - แก้ SyntaxError, ลบ duplicate JS declarations
 - `js/app.js` - อัพเดท logic หลายส่วน
 - `js/components.js` - แก้ไข components
-- `js/questions.js` - อัพเดทคำถามล่าสุด (474 บรรทัด)
+- `js/wellbeing/loader.js` - runtime loader สำหรับ canonical wellbeing schema
+- `js/questions.js` - compatibility shim สำหรับ legacy references
 - `sw.js` - Service worker cache v3.4
 
 ### **ไฟล์ Admin:**

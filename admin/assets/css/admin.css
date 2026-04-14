@@ -560,4 +560,49 @@ body.sidebar-open .sidebar-backdrop{display:block;opacity:1}
   /* Stats row */
   .stats-row{flex-wrap:wrap}
   .st{min-width:calc(50% - 5px)}
+
+  /* Topbar: hide connection status on small mobile */
+  #connection-status{display:none}
+
+  /* Welcome banner: fix subtitle overflow */
+  .w-sub{font-size:11px;line-height:1.4;white-space:normal;overflow:hidden}
+  .w-stats{flex-wrap:wrap}
+  .w-stat{min-width:calc(33% - 8px)}
+
+  /* Wellbeing rank table: hide long count column */
+  #wb-rank-table th:nth-child(4),
+  #wb-rank-table td:nth-child(4){display:none}
+
+  /* Sidebar: make touch target bigger */
+  .nav-item{min-height:44px}
+}
+
+/* ===== SIDEBAR CLOSE BTN (mobile/tablet only) ===== */
+.sidebar-close-btn{display:none;position:absolute;top:14px;right:12px;width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:14px;cursor:pointer;align-items:center;justify-content:center;line-height:1;font-family:inherit;transition:background .12s;flex-shrink:0;padding:0}
+.sidebar-close-btn:hover{background:rgba(255,255,255,.28)}
+.sidebar-logo{position:relative}
+
+/* ===== ADDITIONAL TABLET FIXES (≤ 1024px) ===== */
+@media(max-width:1024px){
+  /* Show sidebar close button */
+  .sidebar-close-btn{display:flex}
+  /* Topbar: prevent title wrap, let connection status shrink */
+  .tb-title{white-space:nowrap}
+  .tb-bc{white-space:nowrap}
+  /* Connection status: shrinks & truncates instead of pushing layout */
+  #connection-status{flex-shrink:1;min-width:0;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  /* Refresh button: compact at tablet */
+  #btn-refresh-data{font-size:0 !important;padding:5px 9px !important;min-width:32px;letter-spacing:0;flex-shrink:0}
+  #btn-refresh-data::before{content:'↻';font-size:13px;display:inline-block}
+  /* Area stats: 2 cols on tablet (was 4) */
+  .area-stats{grid-template-columns:repeat(2,1fr) !important}
+  /* Wellbeing rank table: hide long count col on tablet too */
+  #wb-rank-table th:nth-child(4),
+  #wb-rank-table td:nth-child(4){display:none}
+  /* Welcome banner: prevent subtitle overflow */
+  .w-sub{font-size:11px;line-height:1.4;white-space:normal}
+  /* Dashboard table: hide date col */
+  .prog-detail-date{display:none}
+  /* Ensure page content never exceeds viewport */
+  .content{max-width:100%;overflow-x:clip}
 }

@@ -8,13 +8,14 @@
     "build": "echo '✅ Static site build completed - no build process required'",
     "deploy": "vercel --prod",
     "deploy:preview": "vercel",
-    "lint": "echo 'ℹ️ No ESLint config - skipping lint'",
-    "lint:fix": "echo 'ℹ️ No ESLint config - skipping lint fix'",
-    "format": "echo 'ℹ️ No Prettier config - skipping format'",
-    "test": "echo 'ℹ️ No tests configured - skipping test'",
-    "sync:questions": "node sync-questions.js",
-    "sync:all": "node sync-all-questions.js",
-    "watch:questions": "node watch-questions.js",
+    "lint": "eslint js/ admin/js/",
+    "lint:fix": "eslint js/ admin/js/ --fix",
+    "format": "prettier --write js/ admin/js/ css/",
+    "format:check": "prettier --check js/ admin/js/ css/",
+    "test": "node tests/e2e/wellbeing-complete-test.js",
+    "sync:questions": "node scripts/wellbeing/validate-schema.js",
+    "sync:all": "node scripts/wellbeing/build-report.js",
+    "watch:questions": "node scripts/wellbeing/watch-schema.js",
     "supabase:test": "node scripts/supabase-admin.js",
     "supabase:stats": "node -e \"require('./scripts/supabase-admin').getDatabaseStats()\"",
     "supabase:export": "node -e \"require('./scripts/supabase-admin').exportData()\"",
@@ -41,6 +42,10 @@
     "@supabase/supabase-js": "^2.98.0",
     "dotenv": "^16.6.1",
     "playwright": "^1.58.2"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.0"
   },
   "engines": {
     "node": ">=18.0.0"

@@ -225,7 +225,7 @@ async function loadBackend(retryCount = 0) {
       statusEl.style.color = 'var(--D)';
     }
     
-    // Still populate empty state to prevent crashes
+    // Still populate empty state to prevent crashes - ไม่ throw error ออกไป
     state.surveyRows = [];
     state.ch1Rows = [];
     state.linkRows = [];
@@ -234,7 +234,11 @@ async function loadBackend(retryCount = 0) {
     state.orgProfiles = [];
     refreshOrgDerivedState();
     
-    throw error;
+    // แสดง error ใน console แต่ไม่ throw เพื่อให้ระบบทำงานต่อได้
+    console.warn('loadBackend: โหลดข้อมูลไม่สำเร็จหลังจากลองซ้ำ ' + maxRetries + ' ครั้ง แต่ระบบจะยังทำงานต่อด้วยข้อมูลว่าง');
+    
+    // คืนค่า error info แต่ไม่ throw
+    return { error: error.message || 'Unknown error', loaded: false };
   }
 }
 

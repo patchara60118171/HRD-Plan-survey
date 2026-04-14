@@ -16,7 +16,7 @@
     {
       "name": "Watch Questions Sync",
       "runtimeExecutable": "node",
-      "runtimeArgs": ["watch-questions.js"],
+      "runtimeArgs": ["scripts/wellbeing/watch-schema.js"],
       "port": 0
     }
   ]

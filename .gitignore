@@ -123,3 +123,9 @@ Organization_Links.csv
 # ===== Draft/working folder (Thai name folder at root) =====
 แบบสอบถามบท 1/
 .env*.local
+.env.local.bak
+*.bak
+
+# ===== Backup/draft HTML files (use git history instead) =====
+*.old.html
+*.raw.html
