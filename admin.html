@@ -1234,24 +1234,27 @@ async function refreshData() {
   const btnRefresh = document.getElementById('btn-refresh-data');
   if (statusEl) { statusEl.textContent = 'กำลังโหลด...'; statusEl.style.color = 'var(--tx2)'; }
   if (btnRefresh) btnRefresh.style.display = 'none';
-  try {
-    await loadBackend();
-    const summary = summarizeOrgs();
-    renderDashboard(summary);
-    renderProgress(summary);
-    renderOrgs(summary);
-    renderOrgCoordinators();
-    renderCh1(summary);
-    renderCh1Summary();
-    renderWellbeingControl(summary);
-    renderWellbeingOrg(summary);
-    renderWellbeingRaw();
-    _renderAnalyticsCh1(summary);
-    populateOrgSelects();
-  } catch (e) {
+  
+  const loadResult = await loadBackend();
+  if (loadResult && loadResult.error) {
     if (statusEl) { statusEl.textContent = 'โหลดไม่สำเร็จ'; statusEl.style.color = 'var(--D)'; }
     if (btnRefresh) btnRefresh.style.display = '';
+    showError('โหลดข้อมูลไม่สำเร็จ: ' + loadResult.error);
+    return;
   }
+  
+  const summary = summarizeOrgs();
+  renderDashboard(summary);
+  renderProgress(summary);
+  renderOrgs(summary);
+  renderOrgCoordinators();
+  renderCh1(summary);
+  renderCh1Summary();
+  renderWellbeingControl(summary);
+  renderWellbeingOrg(summary);
+  renderWellbeingRaw();
+  _renderAnalyticsCh1(summary);
+  populateOrgSelects();
 }
 
 async function init() {
@@ -1271,14 +1274,13 @@ async function init() {
     clearTimeout(_refreshFallbackTimer);
     
     // Try to load backend data, but don't let failures crash the entire app
-    try {
-      await loadBackend();
-    } catch (loadError) {
-      console.error('Backend loading failed:', loadError);
+    const loadResult = await loadBackend();
+    if (loadResult && loadResult.error) {
+      console.error('Backend loading failed:', loadResult.error);
       const btnRefresh = document.getElementById('btn-refresh-data');
       if (btnRefresh) btnRefresh.style.display = '';
       // Show error but continue with empty state
-      showError('โหลดข้อมูลไม่สำเร็จ: ' + loadError.message + ' - แสดงข้อมูลว่าง');
+      showError('โหลดข้อมูลไม่สำเร็จ: ' + loadResult.error + ' - แสดงข้อมูลว่าง');
     }
     
     renderChrome(); // ← after loadBackend so state.userRows is populated for role check
