@@ -4,7 +4,7 @@
   "description": "Well-being Survey - HRD Chapter 1 Form with enhanced security and performance",
   "scripts": {
     "dev": "npx serve",
-    "test:public-survey": "node survey-e2e-runner.js",
+    "test:public-survey": "node tests/e2e/survey-e2e-runner.js",
     "build": "echo '✅ Static site build completed - no build process required'",
     "deploy": "vercel --prod",
     "deploy:preview": "vercel",
@@ -40,11 +40,11 @@
   "license": "ISC",
   "dependencies": {
     "@supabase/supabase-js": "^2.98.0",
-    "dotenv": "^16.6.1",
-    "playwright": "^1.58.2"
+    "dotenv": "^16.6.1"
   },
   "devDependencies": {
     "eslint": "^8.57.0",
+    "playwright": "^1.58.2",
     "prettier": "^3.3.0"
   },
   "engines": {

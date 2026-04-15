@@ -245,3 +245,10 @@ function downloadTextFile(fileName, text, mimeType = 'text/markdown;charset=utf-
   a.click();
   setTimeout(() => URL.revokeObjectURL(url), 0);
 }
+
+
+// ─── Survey link builder (moved from admin.html inline script) ─────────────
+function buildLinkUrl(org) {
+  const code = String(org.org_code || org.code || '').toLowerCase();
+  return `${SURVEY_BASE_URL}/?org=${code}`;
+}

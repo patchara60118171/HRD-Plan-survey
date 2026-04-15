@@ -331,3 +331,29 @@ function summarizeOrgs() {
 
   return [...map.values()];
 }
+
+
+// ─── Populate Org Select Dropdowns (moved from admin.html inline script) ────
+function populateOrgSelects() {
+  const ids = ['exp-ch1-org', 'exp-wb-org', 'exp-cmp-org', 'c1data-org', 'c1sheet-org'];
+  ids.forEach((id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const cur = el.value;
+    el.innerHTML = `<option value="">ทุกองค์กร</option>${getOrgCatalog().map(org => `<option value="${esc(org.name)}">${esc(org.name)}</option>`).join('')}`;
+    el.value = cur;
+  });
+  const ch1Sel = document.getElementById('ch1-link-org');
+  if (ch1Sel) {
+    ch1Sel.innerHTML = `<option value="">-- เลือกองค์กร --</option>${getOrgCatalog().map((org) => `<option value="${esc(org.name)}">${esc(org.name)}</option>`).join('')}`;
+  }
+  const cmpSel = document.getElementById('compare-add-select');
+  if (cmpSel) {
+    cmpSel.innerHTML = `<option value="">— เลือก —</option>${ORG_NAMES.map((name) => `<option value="${esc(name)}">${esc(name)}</option>`).join('')}`;
+  }
+  const viewerOrgSel = document.getElementById('viewer-org-select');
+  if (viewerOrgSel) {
+    const cur = viewerOrgSel.value;
+    viewerOrgSel.innerHTML = `<option value="">— เลือกองค์กร —</option>${ORG_NAMES.map((name) => `<option value="${esc(name)}"${name===cur?' selected':''}>${esc(name)}</option>`).join('')}`;
+  }
+}

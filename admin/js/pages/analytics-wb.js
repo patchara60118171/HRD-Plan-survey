@@ -364,3 +364,190 @@ function _setHtml(id, html) {
   const el = document.getElementById(id);
   if (el) el.innerHTML = html;
 }
+
+
+// ─── Analytics: Ch1 + Wellbeing (moved from admin.html inline script) ────────
+function _renderAnalyticsCh1(summary) {
+  const ch1Page = document.getElementById('page-an-ch1');
+  const totalCh1Staff = state.ch1Rows.reduce((sum, row) => sum + Number(row.total_personnel || row.total_staff || row.form_data?.total_personnel || 0), 0);
+  const ch1Kpis = ch1Page.querySelectorAll('.kpi .kpi-val');
+  if (ch1Kpis.length >= 4) {
+    ch1Kpis[0].textContent = fmtNum(totalCh1Staff);
+    ch1Kpis[1].textContent = fmtNum(state.ch1Rows.length ? (state.ch1Rows.reduce((sum, row) => sum + (parseFloat(row.ncd_ratio_pct ?? row.form_data?.ncd_ratio_pct) || 0), 0) / state.ch1Rows.length) : 0, 1) + '%';
+    ch1Kpis[2].textContent = fmtNum(state.ch1Rows.length ? (state.ch1Rows.reduce((sum, row) => sum + (parseFloat(row.mental_burnout ?? row.form_data?.mental_burnout) || 0), 0) / state.ch1Rows.length) : 0, 1) + '%';
+    ch1Kpis[3].textContent = fmtNum(state.ch1Rows.length ? (state.ch1Rows.reduce((sum, row) => sum + (parseFloat(row.engagement_score ?? row.form_data?.engagement_score) || 0), 0) / state.ch1Rows.length) : 0, 1);
+  }
+
+  const submitted = state.surveyRows.filter((row) => !row.is_draft);
+  const activeOrgs = summary.filter((org) => org.wellbeingSubmitted > 0).length;
+  const subEl = document.getElementById('an-wb-sub');
+  if (subEl) subEl.textContent = `ผลการสำรวจรายบุคคล ${fmtNum(submitted.length)} คน จาก ${fmtNum(activeOrgs)} องค์กร`;
+
+  // Populate org filter dropdown
+  const orgFilter = document.getElementById('wba-org-filter');
+  if (orgFilter && orgFilter.options.length <= 1) {
+    const orgs = [...new Set(submitted.map((r) => r.organization || r.org).filter(Boolean))].sort();
+    orgs.forEach((o) => {
+      const opt = document.createElement('option');
+      opt.value = o; opt.textContent = o;
+      orgFilter.appendChild(opt);
+    });
+  }
+
+  renderWbAnalytics();
+}
+
+function renderWbAnalytics() {
+  const submitted = state.surveyRows.filter((r) => !r.is_draft);
+  const orgSel = (document.getElementById('wba-org-filter') || {}).value || '';
+  const genderSel = (document.getElementById('wba-gender-filter') || {}).value || '';
+
+  const rows = submitted.filter((r) => {
+    if (orgSel && (r.organization || r.org) !== orgSel) return false;
+    if (genderSel && r.gender !== genderSel) return false;
+    return true;
+  });
+
+  const n = rows.length;
+  const setEl = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+
+  if (n === 0) {
+    setEl('wba-total', '0 คน'); setEl('wba-phq-high', '—'); setEl('wba-gad-high', '—');
+    setEl('wba-burnout-avg', '—'); setEl('wba-eng-avg', '—'); setEl('wba-wlb-avg', '—');
+    ['wba-phq-dist', 'wba-scores', 'wba-heatmap'].forEach((id) => { const el = document.getElementById(id); if (el) el.innerHTML = '<span style="color:var(--tx3)">ยังไม่มีข้อมูล</span>'; });
+    const tb = document.getElementById('wba-org-table');
+    if (tb) tb.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--tx3);padding:24px">ยังไม่มีข้อมูล</td></tr>';
+    return;
+  }
+
+  const phqHighCount = rows.filter((r) => (getPhq9(r) || 0) >= 10).length;
+  const gadHighCount = rows.filter((r) => (getGad7(r) || 0) >= 10).length;
+  const avgBurnout = rows.reduce((s, r) => s + (getBurnout(r) || 0), 0) / n;
+  const avgEng = rows.reduce((s, r) => s + (getEngagement(r) || 0), 0) / n;
+  const avgWlb = rows.reduce((s, r) => s + (getWlb(r) || 0), 0) / n;
+  const avgPhq = rows.reduce((s, r) => s + (getPhq9(r) || 0), 0) / n;
+  const avgGad = rows.reduce((s, r) => s + (getGad7(r) || 0), 0) / n;
+
+  setEl('wba-total', fmtNum(n) + ' คน');
+  setEl('wba-phq-high', fmtNum(phqHighCount) + ' คน (' + fmtNum((phqHighCount / n) * 100, 1) + '%)');
+  setEl('wba-gad-high', fmtNum(gadHighCount) + ' คน (' + fmtNum((gadHighCount / n) * 100, 1) + '%)');
+  setEl('wba-burnout-avg', fmtNum(avgBurnout, 1));
+  setEl('wba-eng-avg', fmtNum(avgEng, 1));
+  setEl('wba-wlb-avg', fmtNum(avgWlb, 1));
+
+  // PHQ-9 distribution bars
+  const phqDist = document.getElementById('wba-phq-dist');
+  if (phqDist) {
+    const lvls = [
+      { label: 'ปกติ (0–4)', cls: 'hm1', count: rows.filter((r) => (getPhq9(r) || 0) < 5).length },
+      { label: 'เล็กน้อย (5–9)', cls: 'hm2', count: rows.filter((r) => { const p = getPhq9(r) || 0; return p >= 5 && p < 10; }).length },
+      { label: 'ปานกลาง (10–14)', cls: 'hm3', count: rows.filter((r) => { const p = getPhq9(r) || 0; return p >= 10 && p < 15; }).length },
+      { label: 'รุนแรง (≥15)', cls: 'hm5', count: rows.filter((r) => (getPhq9(r) || 0) >= 15).length },
+    ];
+    phqDist.innerHTML = lvls.map((l) => {
+      const pct = fmtNum((l.count / n) * 100, 1);
+      return `<div style="margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">
+          <span>${l.label}</span><span style="font-weight:600">${fmtNum(l.count)} คน (${pct}%)</span>
+        </div>
+        <div style="background:#F0F2F5;border-radius:4px;height:10px;overflow:hidden">
+          <div class="${l.cls}" style="width:${pct}%;height:10px;border-radius:4px;transition:width .4s"></div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // Score summary table
+  const scoresEl = document.getElementById('wba-scores');
+  if (scoresEl) {
+    scoresEl.innerHTML = `<table style="width:100%;font-size:12px;border-collapse:collapse">
+      <thead><tr style="border-bottom:1px solid var(--brd)">
+        <th style="text-align:left;padding:6px 4px">ตัวชี้วัด</th>
+        <th style="text-align:right;padding:6px 4px">เฉลี่ย</th>
+        <th style="text-align:right;padding:6px 4px">มีความเสี่ยง (≥10)</th>
+      </tr></thead>
+      <tbody>
+        <tr><td style="padding:6px 4px">PHQ-9 (ซึมเศร้า)</td><td style="text-align:right;padding:6px 4px">${fmtNum(avgPhq, 1)}</td><td style="text-align:right;padding:6px 4px;${phqHighCount / n >= 0.2 ? 'color:#991B1B;font-weight:600' : ''}">${fmtNum(phqHighCount)} คน (${fmtNum((phqHighCount / n) * 100, 1)}%)</td></tr>
+        <tr><td style="padding:6px 4px">GAD-7 (วิตกกังวล)</td><td style="text-align:right;padding:6px 4px">${fmtNum(avgGad, 1)}</td><td style="text-align:right;padding:6px 4px;${gadHighCount / n >= 0.2 ? 'color:#991B1B;font-weight:600' : ''}">${fmtNum(gadHighCount)} คน (${fmtNum((gadHighCount / n) * 100, 1)}%)</td></tr>
+        <tr><td style="padding:6px 4px">Burnout Score</td><td style="text-align:right;padding:6px 4px">${fmtNum(avgBurnout, 1)}</td><td style="text-align:right;padding:6px 4px;color:var(--tx3)">—</td></tr>
+        <tr><td style="padding:6px 4px">Engagement Score</td><td style="text-align:right;padding:6px 4px">${fmtNum(avgEng, 1)}</td><td style="text-align:right;padding:6px 4px;color:var(--tx3)">—</td></tr>
+        <tr><td style="padding:6px 4px">Work-Life Balance</td><td style="text-align:right;padding:6px 4px">${fmtNum(avgWlb, 1)}</td><td style="text-align:right;padding:6px 4px;color:var(--tx3)">—</td></tr>
+      </tbody>
+    </table>`;
+  }
+
+  // Dynamic heatmap
+  const heatmapEl = document.getElementById('wba-heatmap');
+  if (heatmapEl) {
+    const orgList = [...new Set(rows.map((r) => r.organization || r.org).filter(Boolean))].sort();
+    if (orgList.length === 0) {
+      heatmapEl.innerHTML = '<span style="color:var(--tx3)">ไม่มีข้อมูลองค์กร</span>';
+    } else {
+      const hmCls = (val, metric) => {
+        if (metric === 'phq') { if (val < 5) return 'hm1'; if (val < 10) return 'hm2'; if (val < 15) return 'hm3'; if (val < 20) return 'hm4'; return 'hm5'; }
+        if (metric === 'gad') { if (val < 5) return 'hm1'; if (val < 10) return 'hm2'; if (val < 15) return 'hm3'; return 'hm4'; }
+        if (metric === 'burnout') { if (val < 2) return 'hm1'; if (val < 4) return 'hm2'; if (val < 6) return 'hm3'; if (val < 8) return 'hm4'; return 'hm5'; }
+        if (metric === 'eng') { if (val >= 75) return 'hm1'; if (val >= 60) return 'hm2'; if (val >= 45) return 'hm3'; if (val >= 30) return 'hm4'; return 'hm5'; }
+        if (metric === 'wlb') { if (val >= 7) return 'hm1'; if (val >= 5) return 'hm2'; if (val >= 3) return 'hm3'; if (val >= 1.5) return 'hm4'; return 'hm5'; }
+        return 'hm3';
+      };
+      const abbr = (s) => s && s.length > 6 ? s.substring(0, 6) + '…' : (s || '?');
+      const orgData = orgList.map((o) => {
+        const orgRows = rows.filter((r) => (r.organization || r.org) === o);
+        const m = orgRows.length;
+        return {
+          name: o,
+          phq: m ? orgRows.reduce((s, r) => s + (getPhq9(r) || 0), 0) / m : 0,
+          gad: m ? orgRows.reduce((s, r) => s + (getGad7(r) || 0), 0) / m : 0,
+          burnout: m ? orgRows.reduce((s, r) => s + (getBurnout(r) || 0), 0) / m : 0,
+          eng: m ? orgRows.reduce((s, r) => s + (getEngagement(r) || 0), 0) / m : 0,
+          wlb: m ? orgRows.reduce((s, r) => s + (getWlb(r) || 0), 0) / m : 0,
+        };
+      });
+      const metrics = [
+        { key: 'phq', label: 'PHQ-9 (ซึมเศร้า)' },
+        { key: 'gad', label: 'GAD-7 (วิตกกังวล)' },
+        { key: 'burnout', label: 'Burnout' },
+        { key: 'eng', label: 'Engagement' },
+        { key: 'wlb', label: 'Work-Life Balance' },
+      ];
+      heatmapEl.innerHTML = `<div style="min-width:${Math.max(520, orgList.length * 42 + 160)}px">
+        <div style="display:flex;gap:3px;margin-bottom:8px;padding-left:150px">
+          ${orgData.map((o) => `<div style="width:36px;text-align:center;font-size:9px;color:var(--tx3);overflow:hidden;word-break:break-all">${abbr(o.name)}</div>`).join('')}
+        </div>
+        ${metrics.map((m) => `<div class="hm-row"><div class="hm-label">${m.label}</div><div class="hm-cells">${orgData.map((o) => `<div class="hm ${hmCls(o[m.key], m.key)}">${fmtNum(o[m.key], 1)}</div>`).join('')}</div></div>`).join('')}
+        <div style="margin-top:10px;display:flex;gap:8px;align-items:center;font-size:11px;color:var(--tx3);flex-wrap:wrap">
+          <div class="hm hm1" style="width:14px;height:14px;font-size:0"></div>ดีมาก
+          <div class="hm hm2" style="width:14px;height:14px;font-size:0"></div>ดี
+          <div class="hm hm3" style="width:14px;height:14px;font-size:0"></div>ปานกลาง
+          <div class="hm hm4" style="width:14px;height:14px;font-size:0"></div>ต้องปรับปรุง
+          <div class="hm hm5" style="width:14px;height:14px;font-size:0"></div>วิกฤต
+        </div>
+      </div>`;
+    }
+  }
+
+  // Org ranking table
+  const tbody = document.getElementById('wba-org-table');
+  if (tbody) {
+    const orgStats = [...new Set(rows.map((r) => r.organization || r.org).filter(Boolean))].sort().map((o) => {
+      const orgRows = rows.filter((r) => (r.organization || r.org) === o);
+      const m = orgRows.length;
+      const phqAvg = m ? orgRows.reduce((s, r) => s + (getPhq9(r) || 0), 0) / m : 0;
+      const phqH = m ? orgRows.filter((r) => (getPhq9(r) || 0) >= 10).length : 0;
+      const burnoutAvg = m ? orgRows.reduce((s, r) => s + (getBurnout(r) || 0), 0) / m : 0;
+      const engAvg = m ? orgRows.reduce((s, r) => s + (getEngagement(r) || 0), 0) / m : 0;
+      return { name: o, count: m, phqAvg, phqHighPct: m ? (phqH / m) * 100 : 0, burnoutAvg, engAvg };
+    }).sort((a, b) => b.phqHighPct - a.phqHighPct);
+
+    tbody.innerHTML = orgStats.map((o, i) => `<tr>
+      <td>${i + 1}</td>
+      <td>${esc(o.name)}</td>
+      <td>${fmtNum(o.count)}</td>
+      <td class="${o.phqAvg >= 10 ? 'bad' : ''}">${fmtNum(o.phqAvg, 1)}</td>
+      <td class="${o.phqHighPct >= 20 ? 'bad' : ''}">${fmtNum(o.phqHighPct, 1)}%</td>
+      <td>${fmtNum(o.burnoutAvg, 1)}</td>
+      <td>${fmtNum(o.engAvg, 1)}</td>
+    </tr>`).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--tx3)">ยังไม่มีข้อมูล</td></tr>';
+  }
+}

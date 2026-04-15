@@ -596,3 +596,19 @@ async function downloadCard(selector, filename) {
     dlBtns.forEach(b => { b.style.display = b.dataset.prevDisplay || ''; });
   }
 }
+
+
+// ─── Send Reminder (moved from admin.html inline script) ────────────────────
+function sendReminderAll() {
+  const summary = summarizeOrgs();
+  const pending = summary.filter((org) => org.ch1Count === 0);
+  if (!pending.length) { showToast('ทุกองค์กรส่ง Ch1 ครบแล้ว ไม่จำเป็นต้องส่ง Reminder','info'); return; }
+  showConfirm(
+    `จะส่ง Reminder ไปยัง ${pending.length} องค์กรที่ยังไม่ส่ง Ch1\n\n${pending.slice(0,8).map((o) => '• ' + o.name).join('\n')}${pending.length > 8 ? `\n...และอีก ${pending.length - 8} องค์กร` : ''}`,
+    () => {
+      const msg = document.getElementById('notif-msg');
+      if (msg) { msg.style.color = 'var(--A)'; msg.textContent = `✅ ส่ง Reminder ไปยัง ${pending.length} องค์กรเรียบร้อย (Simulation)`; }
+      showToast(`ส่ง Reminder ไปยัง ${pending.length} องค์กรเรียบร้อย (ต้องต่อ Email Service จริง)`,'success',5000);
+    }
+  );
+}

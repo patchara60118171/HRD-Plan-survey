@@ -282,6 +282,79 @@ function renderCh1Summary() {
   setEl('ch1sum-kpi-burnout', burnoutAvg == null ? '—' : fmtNum(burnoutAvg, 1));
   setEl('ch1sum-kpi-eng', engAvg == null ? '—' : fmtNum(engAvg, 1));
 
+  // ─── Personnel Type KPIs + Donut + Per-org bars ───────────────────────────
+  const official = ch1Sum(rows, 'type_official');
+  const employee = ch1Sum(rows, 'type_employee');
+  const contract = ch1Sum(rows, 'type_contract');
+  const other    = ch1Sum(rows, 'type_other');
+  const typeTotal = official + employee + contract + other || 1;
+
+  const setTypeKpi = (id, barId, subId, val) => {
+    setEl(id, fmtNum(val) + ' คน');
+    const pct = (val / typeTotal) * 100;
+    setEl(subId, `${fmtNum(pct, 1)}% ของบุคลากรรวม`);
+    const bar = document.getElementById(barId);
+    if (bar) bar.style.width = `${Math.min(pct, 100).toFixed(1)}%`;
+  };
+  setTypeKpi('ch1sum-kpi-official', 'ch1sum-bar-official', 'ch1sum-kpi-official-sub', official);
+  setTypeKpi('ch1sum-kpi-employee', 'ch1sum-bar-employee', 'ch1sum-kpi-employee-sub', employee);
+  setTypeKpi('ch1sum-kpi-contract', 'ch1sum-bar-contract', 'ch1sum-kpi-contract-sub', contract);
+  setTypeKpi('ch1sum-kpi-other',    'ch1sum-bar-other',    'ch1sum-kpi-other-sub',    other);
+
+  // Donut SVG (circumference = 2π×44 ≈ 276.46)
+  const CIRC = 2 * Math.PI * 44;
+  const donutSegs = [
+    { id: 'ch1sum-donut-official', val: official },
+    { id: 'ch1sum-donut-employee', val: employee },
+    { id: 'ch1sum-donut-contract', val: contract },
+    { id: 'ch1sum-donut-other',    val: other    },
+  ];
+  let donutOffset = 0;
+  donutSegs.forEach((seg) => {
+    const el = document.getElementById(seg.id);
+    if (!el) return;
+    const dash = (seg.val / typeTotal) * CIRC;
+    el.setAttribute('stroke-dasharray', `${dash.toFixed(2)} ${(CIRC - dash).toFixed(2)}`);
+    el.setAttribute('stroke-dashoffset', (-donutOffset).toFixed(2));
+    donutOffset += dash;
+  });
+  setEl('ch1sum-donut-center', fmtNum(official + employee + contract + other));
+  setEl('ch1sum-type-total-badge', `รวม ${fmtNum(official + employee + contract + other)} คน`);
+
+  // Legend values
+  [
+    ['ch1sum-leg-official', 'ch1sum-leg-official-pct', official],
+    ['ch1sum-leg-employee', 'ch1sum-leg-employee-pct', employee],
+    ['ch1sum-leg-contract', 'ch1sum-leg-contract-pct', contract],
+    ['ch1sum-leg-other',    'ch1sum-leg-other-pct',    other],
+  ].forEach(([vid, pid, val]) => {
+    setEl(vid, fmtNum(val));
+    setEl(pid, `${fmtNum((val / typeTotal) * 100, 1)}%`);
+  });
+
+  // Per-org official bar chart
+  const orgBarsEl = document.getElementById('ch1sum-official-org-bars');
+  if (orgBarsEl) {
+    const orgOfficialData = orgsInScope.map((org) => {
+      const orgRows = rows.filter((r) => getCh1Org(r) === org);
+      return { label: org, value: ch1Sum(orgRows, 'type_official') };
+    }).filter((d) => d.value > 0).sort((a, b) => b.value - a.value);
+    if (orgOfficialData.length) {
+      const maxVal = orgOfficialData[0].value || 1;
+      orgBarsEl.innerHTML = orgOfficialData.map((d) => `
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px">
+          <div style="width:96px;flex-shrink:0;font-size:11.5px;color:var(--tx2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(d.label)}">${esc(d.label)}</div>
+          <div style="flex:1;height:8px;background:var(--bg2);border-radius:99px;overflow:hidden">
+            <div style="height:100%;border-radius:99px;background:var(--P);width:${((d.value / maxVal) * 100).toFixed(1)}%;transition:width .4s"></div>
+          </div>
+          <div style="width:52px;text-align:right;font-size:11.5px;font-weight:600;color:var(--tx2);flex-shrink:0">${fmtNum(d.value)}</div>
+        </div>`).join('');
+    } else {
+      orgBarsEl.innerHTML = '<div style="color:var(--tx3);font-size:12px">ยังไม่มีข้อมูล type_official</div>';
+    }
+  }
+  // ─── end Personnel Type ───────────────────────────────────────────────────
+
   renderCh1SummaryChart(document.getElementById('ch1sum-age-chart'), [
     { label: '≤30 ปี', value: ch1Sum(rows, ['age_u30', 'age_under30']) },
     { label: '31–40 ปี', value: ch1Sum(rows, 'age_31_40') },
@@ -1543,6 +1616,15 @@ const CH1_SUMMARY_SECTIONS = [
 ];
 
 // Close dropdown on outside click
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.org-multi-wrap')) {
+    const dd = document.getElementById('ch1-org-dropdown');
+    if (dd) dd.classList.remove('show');
+  }
+});
+
+
+// ─── Ch1 Org dropdown close-on-outside-click (moved from admin.html) ──────────
 document.addEventListener('click', (e) => {
   if (!e.target.closest('.org-multi-wrap')) {
     const dd = document.getElementById('ch1-org-dropdown');

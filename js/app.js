@@ -400,28 +400,30 @@ function initSWListener() {
 }
 
 // Check if form window is closed for a given org_code
+// Returns { closed: bool, message: string|null }
 async function isFormWindowClosed(orgCode) {
-    if (!supabaseClient || !orgCode) return false;
+    if (!supabaseClient || !orgCode) return { closed: false, message: null };
     try {
         // Check org-specific window first, then fall back to global
         const { data } = await supabaseClient
             .from('form_windows')
-            .select('is_active,opens_at,closes_at')
+            .select('is_active,opens_at,closes_at,closed_message')
             .eq('form_code', 'wellbeing')
             .eq('round_code', 'round_2569')
             .or(`org_code.eq.${orgCode},org_code.is.null`)
             .order('org_code', { ascending: false }) // org-specific first (non-null sorts before null)
             .limit(1)
             .maybeSingle();
-        if (!data) return false; // no window record = open by default
-        if (!data.is_active) return true;
+        if (!data) return { closed: false, message: null }; // no window record = open by default
+        const msg = data.closed_message || null;
+        if (!data.is_active) return { closed: true, message: msg };
         const now = new Date();
-        if (data.opens_at && new Date(data.opens_at) > now) return true;
-        if (data.closes_at && new Date(data.closes_at) < now) return true;
-        return false;
+        if (data.opens_at && new Date(data.opens_at) > now) return { closed: true, message: msg };
+        if (data.closes_at && new Date(data.closes_at) < now) return { closed: true, message: msg };
+        return { closed: false, message: null };
     } catch (e) {
         console.warn('[FormWindow] check failed:', e.message);
-        return false; // fail open
+        return { closed: false, message: null }; // fail open
     }
 }
 
@@ -604,7 +606,7 @@ async function saveToSupabase(email, responses, isDraft = false) {
     if (!isDraft) {
         const orgCode = (responses.org_code || '').toLowerCase();
         if (orgCode) {
-            const windowClosed = await isFormWindowClosed(orgCode);
+            const { closed: windowClosed } = await isFormWindowClosed(orgCode);
             if (windowClosed) return 'error:form-closed';
         }
     }
@@ -734,6 +736,20 @@ const app = {
 
         // Initialize Supabase
         initSupabase();
+
+        // Check if form window is closed for this org
+        const urlOrgForCheck = (new URLSearchParams(window.location.search).get('org') || '').trim().toLowerCase();
+        if (urlOrgForCheck) {
+            const { closed, message } = await isFormWindowClosed(urlOrgForCheck);
+            if (closed) {
+                document.getElementById('loading-screen').classList.add('hidden');
+                const msgEl = document.getElementById('form-closed-message');
+                if (msgEl) msgEl.textContent = message || 'ณ ขณะนี้ฟอร์มปิดรับคำตอบแล้ว';
+                const popup = document.getElementById('form-closed-popup');
+                if (popup) popup.style.display = 'flex';
+                return;
+            }
+        }
 
         // Initialize offline sync features
         initNetworkStatus();

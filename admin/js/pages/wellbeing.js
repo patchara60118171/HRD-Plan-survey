@@ -420,3 +420,41 @@ function exportWbFiltered(orgFilter) {
     engagement: getEngagement(row), wlb_score: getWlb(row),
   })));
 }
+
+
+// ─── Wellbeing Ranking Table (moved from admin.html inline script) ───────────
+function renderWbTable() {
+  const tbody = document.getElementById('wb-rank-tbody');
+  if (!tbody || !window._wbSummary) return;
+  const sortBy = document.getElementById('wb-sort-by')?.value || 'pct';
+  const sortDir = document.getElementById('wb-sort-dir')?.value || 'desc';
+
+  const rows = window._wbSummary.map(org => {
+    const count = org.wellbeingSubmitted || 0;
+    const official = Number(org.typeOfficial || 0);
+    const pct = official > 0 ? Math.round((count / official) * 100) : 0;
+    return { name: org.name, count, official, pct };
+  });
+
+  rows.sort((a, b) => {
+    const valA = sortBy === 'pct' ? (a.pct ?? -1) : a.count;
+    const valB = sortBy === 'pct' ? (b.pct ?? -1) : b.count;
+    return sortDir === 'asc' ? valA - valB : valB - valA;
+  });
+
+  tbody.innerHTML = rows.map((r, i) => {
+    const barPct = r.pct != null ? Math.min(r.pct, 100) : 0;
+    const pctText = r.pct != null ? `${r.pct}%` : '—';
+    const countLabel = r.official != null
+      ? `${fmtNum(r.count)} คน / ${fmtNum(r.official)} คน`
+      : `${fmtNum(r.count) || '—'} คน`;
+    const cls = r.count > 0 ? 'bg' : 'br';
+    return `<tr>
+      <td style="color:var(--tx3);font-weight:700;width:32px">${i + 1}</td>
+      <td>${esc(r.name)}</td>
+      <td style="width:160px"><div class="prog-track" style="margin:0"><div class="prog-fill" style="width:${Math.max(barPct, 2)}%"></div></div></td>
+      <td style="white-space:nowrap">${countLabel}</td>
+      <td><span class="badge ${cls}">${pctText}</span></td>
+    </tr>`;
+  }).join('');
+}
