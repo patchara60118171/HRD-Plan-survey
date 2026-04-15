@@ -13,26 +13,57 @@
 
 function renderDashboard(summary) {
   const dashboard = document.getElementById('page-dashboard');
-  const orgCount = ORG_NAMES.length;
-  const submittedWb = state.surveyRows.filter((row) => !row.is_draft);
-  const respondedCh1 = summary.filter((org) => org.ch1Count > 0).length;
+  if (!dashboard) {
+    console.warn('renderDashboard: page-dashboard element not found');
+    return;
+  }
+  
+  // Defensive defaults for empty state
+  const safeOrgNames = ORG_NAMES || [];
+  const safeSurveyRows = state?.surveyRows || [];
+  const safeUserRows = state?.userRows || [];
+  const safeSummary = summary || [];
+  
+  const orgCount = safeOrgNames.length;
+  const submittedWb = safeSurveyRows.filter((row) => !row.is_draft);
+  const respondedCh1 = safeSummary.filter((org) => org.ch1Count > 0).length;
+  
   const welcome = dashboard.querySelector('.welcome');
-  welcome.querySelector('.w-title').textContent = `สวัสดีครับ, ${state.session?.user?.email || 'ผู้ดูแลระบบ'}`;
-  welcome.querySelector('.w-sub').innerHTML = `โครงการสำรวจสุขภาวะบุคลากรภาครัฐ พ.ศ. 2566–2570 · อัปเดต ${fmtDate(new Date(), true)}`;
-  const wVals = welcome.querySelectorAll('.w-val');
-  wVals[0].textContent = orgCount;
-  wVals[1].textContent = respondedCh1;
-  wVals[2].textContent = fmtNum(submittedWb.length);
+  if (welcome) {
+    const wTitle = welcome.querySelector('.w-title');
+    const wSub = welcome.querySelector('.w-sub');
+    if (wTitle) wTitle.textContent = `สวัสดีครับ, ${state?.session?.user?.email || 'ผู้ดูแลระบบ'}`;
+    if (wSub) wSub.innerHTML = `โครงการสำรวจสุขภาวะบุคลากรภาครัฐ พ.ศ. 2566–2570 · อัปเดต ${fmtDate(new Date(), true)}`;
+    const wVals = welcome.querySelectorAll('.w-val');
+    if (wVals[0]) wVals[0].textContent = orgCount;
+    if (wVals[1]) wVals[1].textContent = respondedCh1;
+    if (wVals[2]) wVals[2].textContent = fmtNum(submittedWb.length);
+  }
 
   const kpis = dashboard.querySelectorAll('.kpi');
-  kpis[0].querySelector('.kpi-val').textContent = orgCount;
-  kpis[0].querySelector('.kpi-sub').textContent = `${orgCount} หน่วยงานภาครัฐ`;
-  kpis[1].querySelector('.kpi-val').textContent = respondedCh1;
-  kpis[1].querySelector('.kpi-sub').textContent = `${fmtNum((respondedCh1 / Math.max(orgCount, 1)) * 100, 1)}% · ยังไม่ส่ง ${orgCount - respondedCh1} องค์กร`;
-  kpis[2].querySelector('.kpi-val').textContent = fmtNum(submittedWb.length);
-  kpis[2].querySelector('.kpi-sub').textContent = `Draft ${fmtNum(state.surveyRows.filter((row) => row.is_draft).length)} รายการ`;
-  kpis[3].querySelector('.kpi-val').textContent = fmtNum(state.userRows.filter((row) => row.is_active !== false).length);
-  kpis[3].querySelector('.kpi-sub').textContent = `${fmtNum(state.userRows.filter((row) => row.role === 'viewer').length)} Viewer · ${fmtNum(state.userRows.filter((row) => row.role !== 'viewer').length)} Admin`;
+  if (kpis.length >= 4) {
+    kpis[0].querySelector('.kpi-val').textContent = orgCount;
+    kpis[0].querySelector('.kpi-sub').textContent = orgCount > 0 ? `${orgCount} หน่วยงานภาครัฐ` : 'ไม่มีข้อมูลองค์กร';
+    
+    kpis[1].querySelector('.kpi-val').textContent = respondedCh1;
+    kpis[1].querySelector('.kpi-sub').textContent = orgCount > 0 
+      ? `${fmtNum((respondedCh1 / Math.max(orgCount, 1)) * 100, 1)}% · ยังไม่ส่ง ${orgCount - respondedCh1} องค์กร`
+      : 'ไม่มีข้อมูล Ch1';
+    
+    kpis[2].querySelector('.kpi-val').textContent = fmtNum(submittedWb.length);
+    const draftCount = safeSurveyRows.filter((row) => row.is_draft).length;
+    kpis[2].querySelector('.kpi-sub').textContent = submittedWb.length > 0 || draftCount > 0
+      ? `Draft ${fmtNum(draftCount)} รายการ`
+      : 'ยังไม่มีข้อมูล Wellbeing';
+    
+    const activeUsers = safeUserRows.filter((row) => row.is_active !== false);
+    kpis[3].querySelector('.kpi-val').textContent = fmtNum(activeUsers.length);
+    const viewerCount = safeUserRows.filter((row) => row.role === 'viewer').length;
+    const adminCount = safeUserRows.filter((row) => row.role !== 'viewer').length;
+    kpis[3].querySelector('.kpi-sub').textContent = activeUsers.length > 0
+      ? `${fmtNum(viewerCount)} Viewer · ${fmtNum(adminCount)} Admin`
+      : 'ไม่มีข้อมูลผู้ใช้';
+  }
 
   const chartEl = document.getElementById('wb-daily-chart');
   const rangeLabel = document.getElementById('chart-range-label');

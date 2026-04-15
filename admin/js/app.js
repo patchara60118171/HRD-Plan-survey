@@ -51,30 +51,61 @@ async function init() {
     clearTimeout(_refreshFallbackTimer);
     
     // Try to load backend data, but don't let failures crash the entire app
-    const loadResult = await loadBackend();
+    let loadResult = null;
+    try {
+      loadResult = await loadBackend();
+    } catch (loadErr) {
+      console.error('loadBackend threw exception:', loadErr);
+      loadResult = { error: loadErr.message || 'Unknown error', loaded: false };
+    }
+    
     if (loadResult && loadResult.error) {
       console.error('Backend loading failed:', loadResult.error);
       const btnRefresh = document.getElementById('btn-refresh-data');
       if (btnRefresh) btnRefresh.style.display = '';
       // Show error but continue with empty state
-      showError('โหลดข้อมูลไม่สำเร็จ: ' + loadResult.error + ' - แสดงข้อมูลว่าง');
+      showToast('โหลดข้อมูลไม่สำเร็จ: ' + loadResult.error, 'error', 5000);
     }
     
-    renderChrome(); // ← after loadBackend so state.userRows is populated for role check
-    const summary = summarizeOrgs();
+    // Always render chrome first so user sees their info
+    try {
+      renderChrome();
+    } catch (chromeErr) {
+      console.error('renderChrome error:', chromeErr);
+    }
     
-    // Render all pages - they should handle empty data gracefully
-    renderDashboard(summary);
-    renderProgress(summary);
-    renderOrgs(summary);
-    renderOrgCoordinators();
-    renderCh1(summary);
-    renderCh1Summary();
-    renderWellbeingControl(summary);
-    renderWellbeingOrg(summary);
-    renderWellbeingRaw();
-    _renderAnalyticsCh1(summary);
-    populateOrgSelects();
+    // Always calculate summary and render all pages, even with empty data
+    let summary = [];
+    try {
+      summary = summarizeOrgs();
+    } catch (summaryErr) {
+      console.error('summarizeOrgs error:', summaryErr);
+      summary = [];
+    }
+    
+    // Render all pages with individual error handling
+    const renderFns = [
+      { fn: () => renderDashboard(summary), name: 'renderDashboard' },
+      { fn: () => renderProgress(summary), name: 'renderProgress' },
+      { fn: () => renderOrgs(summary), name: 'renderOrgs' },
+      { fn: renderOrgCoordinators, name: 'renderOrgCoordinators' },
+      { fn: () => renderCh1(summary), name: 'renderCh1' },
+      { fn: renderCh1Summary, name: 'renderCh1Summary' },
+      { fn: () => renderWellbeingControl(summary), name: 'renderWellbeingControl' },
+      { fn: () => renderWellbeingOrg(summary), name: 'renderWellbeingOrg' },
+      { fn: renderWellbeingRaw, name: 'renderWellbeingRaw' },
+      { fn: () => _renderAnalyticsCh1(summary), name: '_renderAnalyticsCh1' },
+      { fn: populateOrgSelects, name: 'populateOrgSelects' },
+    ];
+    
+    for (const { fn, name } of renderFns) {
+      try {
+        fn();
+      } catch (fnErr) {
+        console.error(`${name} error:`, fnErr);
+      }
+    }
+    
     const auditExportBtn = document.querySelector('#page-audit .btn.b-gray');
     if (auditExportBtn) auditExportBtn.onclick = exportAuditLog;
     
@@ -85,7 +116,7 @@ async function init() {
     if (statusEl) { statusEl.textContent = 'โหลดล้มเหลว'; statusEl.style.color = 'var(--D)'; }
     const btnRefresh = document.getElementById('btn-refresh-data');
     if (btnRefresh) btnRefresh.style.display = '';
-    showError('โหลดระบบไม่สำเร็จ: ' + error.message + ' - กรุณารีเฟรชหน้าเว็บ');
+    showToast('โหลดระบบไม่สำเร็จ: ' + error.message, 'error', 5000);
   }
 }
 

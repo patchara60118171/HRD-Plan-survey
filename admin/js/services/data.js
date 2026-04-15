@@ -243,7 +243,17 @@ async function loadBackend(retryCount = 0) {
 }
 
 function summarizeOrgs() {
+  // Defensive: ensure state is initialized
+  const safeState = state || {};
+  const safeSurveyRows = safeState.surveyRows || [];
+  const safeCh1Rows = safeState.ch1Rows || [];
+  
   const catalog = getOrgCatalog();
+  if (!catalog || catalog.length === 0) {
+    console.warn('summarizeOrgs: empty catalog, returning empty summary');
+    return [];
+  }
+  
   const map = new Map(catalog.map((org) => [org.name, {
     ...org,
     wellbeingTotal: 0,
@@ -297,7 +307,7 @@ function summarizeOrgs() {
     return { filled, total };
   };
 
-  state.surveyRows.forEach((row) => {
+  safeSurveyRows.forEach((row) => {
     const org = map.get(row.organization);
     if (!org) return;
     org.wellbeingTotal += 1;
@@ -308,7 +318,7 @@ function summarizeOrgs() {
     if (date && (!org.latestWb || new Date(date) > new Date(org.latestWb))) org.latestWb = date;
   });
 
-  state.ch1Rows.forEach((row) => {
+  safeCh1Rows.forEach((row) => {
     const orgName = getCh1Org(row);
     const rowCode = String(row.org_code || row.form_data?.org_code || '').toLowerCase();
     const resolvedName = map.has(orgName) ? orgName : (codeMap.get(rowCode) || orgName);
