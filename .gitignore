@@ -39,6 +39,10 @@ connection-test.js
 correct-inspector.js
 playwright.config.*
 
+# BUT allow organized tests in tests/ directory
+!tests/**/*.test.js
+!tests/**/*.spec.js
+
 # Test output directories
 screenshots/
 test-results/

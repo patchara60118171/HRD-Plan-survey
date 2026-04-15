@@ -12,7 +12,9 @@
     "lint:fix": "eslint js/ admin/js/ --fix",
     "format": "prettier --write js/ admin/js/ css/",
     "format:check": "prettier --check js/ admin/js/ css/",
-    "test": "node tests/e2e/wellbeing-complete-test.js",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:e2e": "node tests/e2e/wellbeing-complete-test.js",
     "sync:questions": "node scripts/wellbeing/validate-schema.js",
     "sync:all": "node scripts/wellbeing/build-report.js",
     "watch:questions": "node scripts/wellbeing/watch-schema.js",
@@ -44,8 +46,10 @@
   },
   "devDependencies": {
     "eslint": "^8.57.0",
+    "jsdom": "^29.0.2",
     "playwright": "^1.58.2",
-    "prettier": "^3.3.0"
+    "prettier": "^3.3.0",
+    "vitest": "^4.1.4"
   },
   "engines": {
     "node": ">=18.0.0"

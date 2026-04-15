@@ -411,7 +411,7 @@ async function isFormWindowClosed(orgCode) {
             .eq('form_code', 'wellbeing')
             .eq('round_code', 'round_2569')
             .or(`org_code.eq.${orgCode},org_code.is.null`)
-            .order('org_code', { ascending: false }) // org-specific first (non-null sorts before null)
+            .order('org_code', { ascending: false, nullsFirst: false }) // org-specific first (non-null before null)
             .limit(1)
             .maybeSingle();
         if (!data) return { closed: false, message: null }; // no window record = open by default

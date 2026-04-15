@@ -264,70 +264,11 @@
       <div class="page-title">ฟอร์ม Ch1 — ภาพรวมองค์กร</div>
       <div class="page-sub">ควบคุมการเปิด-ปิดฟอร์ม · ดูข้อมูลที่ส่งมา · ดู Raw Data</div>
       <div class="tabs">
-        <div class="tab active" onclick="st(this,'c1-ctrl')">⚙️ ควบคุมฟอร์ม</div>
-        <div class="tab" onclick="st(this,'c1-data')">📊 ข้อมูลที่ส่งมา</div>
-        <div class="tab" onclick="st(this,'c1-pdf');renderCh1Pdf()">📄 ข้อมูลรายคน PDF</div>
+        <div class="tab active" onclick="st(this,'c1-pdf');renderCh1Pdf()">📄 ข้อมูลรายคน PDF</div>
         <div class="tab" onclick="st(this,'c1-sheet')">🗂️ ตารางข้อมูล (Raw)</div>
       </div>
 
-      <div id="c1-ctrl">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-          <div class="fc">
-            <div class="fc-head">
-              <span style="font-size:20px">📝</span>
-              <h3>Ch1 — ฟอร์มภาพรวมองค์กร</h3>
-              <span class="badge bg">เปิดอยู่</span>
-            </div>
-            <div class="toggle-row"><div class="tr-left"><label>เปิดให้กรอก</label><small>อนุญาตให้องค์กรเข้ากรอกข้อมูล</small></div><label class="tgl"><input type="checkbox" checked><div class="tgl-s"></div></label></div>
-            <div class="toggle-row"><div class="tr-left"><label>ต้องล็อกอินก่อนกรอก</label><small>บังคับ Authentication</small></div><label class="tgl"><input type="checkbox" checked><div class="tgl-s"></div></label></div>
-            <div class="toggle-row"><div class="tr-left"><label>อนุญาตแก้ไขหลังส่งแล้ว</label><small>Viewer แก้ไขข้อมูลของตนได้</small></div><label class="tgl"><input type="checkbox"><div class="tgl-s"></div></label></div>
-            <div class="stats-row">
-              <div class="st"><div class="st-val">15</div><div class="st-label">ส่งแล้ว</div></div>
-              <div class="st"><div class="st-val">3</div><div class="st-label">ยังไม่ส่ง</div></div>
-              <div class="st"><div class="st-val">5</div><div class="st-label">ส่วน</div></div>
-            </div>
-            <div class="fc-actions">
-              <button class="btn b-blue" onclick="go('form-editor',document.querySelector('.nav-item[onclick*=\'form-editor\']'));setTimeout(()=>feTab('ch1',document.getElementById('fe-tab-ch1')),200)"> ✏️ แก้ไขคำถาม</button>
-              <button class="btn b-gray" onclick="window.open('ch1.html','_blank')">🔗 ดูฟอร์ม</button>
-              <button class="btn b-green" onclick="exportCh1All()">📤 Export ทั้งหมด</button>
-            </div>
-          </div>
-          <div class="panel" style="margin:0">
-            <h3>🔗 ลิงก์ฟอร์ม Ch1 รายองค์กร</h3>
-            <div class="fg"><label>เลือกองค์กร</label><select id="ch1-link-org" onchange="updateCh1Link()"><option value="">-- เลือกองค์กร --</option></select></div>
-            <div class="info blue">🔗 ลิงก์จะ pre-fill ชื่อองค์กรให้อัตโนมัติ</div>
-            <div class="code-box"><code id="ch1-link-code">ch1.html?org=DMH</code><button onclick="copyCh1Link()">📋 Copy</button></div>
-            <div style="display:flex;gap:7px;margin-top:10px">
-              <button class="btn b-gray" style="flex:1;padding:8px" onclick="showQRModal(SURVEY_BASE_URL + '/ch1.html?org=' + (ORG_LOOKUP.get(document.getElementById('ch1-link-org')?.value)?.code || 'ORG'))">📷 QR Code</button>
-              <button class="btn b-blue" style="flex:1;padding:8px" onclick="sendLinkEmail('ch1')">📧 ส่งอีเมล</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div id="c1-data" style="display:none">
-        <div class="card">
-          <div class="card-head">
-            <h3>ข้อมูลที่ส่งมา (Ch1)</h3>
-            <div class="filter-bar">
-              <input class="si" id="c1data-search" placeholder="🔍 ค้นหาองค์กร..." oninput="filterCh1Data()">
-              <select class="sel" id="c1data-org" onchange="filterCh1Data()"><option value="">ทุกองค์กร</option></select>
-              <button class="btn b-gray" onclick="exportCh1All()">📤 Export Excel</button>
-            </div>
-          </div>
-          <div class="tbl-wrap">
-            <table>
-              <thead><tr><th>องค์กร</th><th>บุคลากรรวม</th><th>ส่วนที่กรอก</th><th>วันที่ส่ง</th><th>จัดการ</th></tr></thead>
-              <tbody id="c1-data-tbody">
-                <tr><td>กรมสุขภาพจิต</td><td>1,240</td><td>5/5 ส่วน</td><td>10 มี.ค. 69</td><td class="td-act"><button class="btn b-blue">📄 PDF</button><button class="btn b-gray">📝 Docs</button></td></tr>
-                <tr><td>สำนักงาน ก.พ.</td><td>856</td><td>5/5 ส่วน</td><td>8 มี.ค. 69</td><td class="td-act"><button class="btn b-blue">📄 PDF</button><button class="btn b-gray">📝 Docs</button></td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <div id="c1-pdf" style="display:none">
+      <div id="c1-pdf">
         <div class="card">
           <div class="card-head">
             <h3>📄 ข้อมูลรายคน PDF</h3>
@@ -377,25 +318,6 @@
 
       <!-- TAB 1: ควบคุม -->
       <div id="wb-ctrl">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-          <div class="fc">
-            <div class="fc-head"><span style="font-size:20px">💚</span><h3>Wellbeing Survey — ฟอร์มรายบุคคล</h3><span class="badge bg">เปิดอยู่</span></div>
-            <div class="toggle-row"><div class="tr-left"><label>เปิดให้กรอก</label></div><label class="tgl"><input type="checkbox" checked><div class="tgl-s"></div></label></div>
-            <div class="toggle-row"><div class="tr-left"><label>ไม่ระบุตัวตน (Anonymous)</label><small>ไม่เก็บชื่อ-นามสกุล</small></div><label class="tgl"><input type="checkbox" checked><div class="tgl-s"></div></label></div>
-            <div class="toggle-row"><div class="tr-left"><label>จำกัด 1 ครั้ง/อุปกรณ์</label></div><label class="tgl"><input type="checkbox"><div class="tgl-s"></div></label></div>
-              <button class="btn b-gray" onclick="window.open('index.html','_blank')">🔗 ดูฟอร์ม</button>
-              <button class="btn b-green" onclick="document.querySelector('[onclick=\'swb(this,\\\'wb-sheet\\\')\']').click()">🗂️ ดูข้อมูลรายคน</button>
-            </div>
-          </div>
-          <div class="panel" style="margin:0">
-            <h3>📋 สรุปการตอบ</h3>
-            <div class="set-row"><div class="set-info"><div class="set-label">ตอบแล้ว</div></div><b>1,247 คน</b></div>
-            <div class="set-row"><div class="set-info"><div class="set-label">กำลังกรอก (Draft)</div></div><b>38 คน</b></div>
-            <div class="set-row"><div class="set-info"><div class="set-label">ยังไม่เริ่ม (2 องค์กร)</div></div><b>—</b></div>
-            <div class="set-row"><div class="set-info"><div class="set-label">อัปเดตล่าสุด</div></div><b>14 มี.ค. 69 15:42</b></div>
-            <div class="set-row"><div class="set-info"><div class="set-label">เวลากรอกเฉลี่ย</div></div><b>8.3 นาที</b></div>
-          </div>
-        </div>
 
         <!-- เปิด/ปิดรับคำตอบรายองค์กร — superadmin only -->
         <div class="card" id="wb-form-windows-card" style="margin-top:14px;display:none">
