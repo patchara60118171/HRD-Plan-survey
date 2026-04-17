@@ -113,7 +113,6 @@ const LazyLoader = {
      */
     async loadAdminComponents() {
         const components = [
-            'js/admin-dashboard.js',
             'js/modules/storage.js',
             'js/modules/validation.js'
         ];

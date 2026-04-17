@@ -23,6 +23,10 @@ function go(id, el) {
   if (id === 'form-editor') loadFormEditorFields();
   if (id === 'org-credentials') loadOrgCredentialsPage();
   if (id === 'form-windows') loadFormWindowsPage();
+  if (id === 'form-wb') {
+    const card = document.getElementById('wb-form-windows-card');
+    if (card && myLvl >= 2) { card.style.display = ''; loadWbFormWindowsCard(); }
+  }
   if (id === 'progress') {
     renderProgress(summarizeOrgs());
     // Set initial sort to default (seq)

@@ -174,6 +174,273 @@ function getMainProblem(row) {
   return row.main_problem ?? row.top_problem ?? row.major_issue ?? row.key_issue ?? '—';
 }
 
+/* ===== EXTENDED WELLBEING DASHBOARD SCORING FUNCTIONS ===== */
+
+/* ── NCD / โรคประจำตัว ────────────────────────────────────── */
+function getDiseaseList(row) {
+  const v = row.diseases ?? row.chronic_disease ?? row.ncd ?? row.condition_list;
+  if (v == null || v === '') return [];
+  if (Array.isArray(v)) return v.filter(d => d && d !== 'ไม่มี');
+  if (typeof v === 'string') {
+    if (v === 'ไม่มี' || v === 'none' || v === 'false') return [];
+    return v.split(',').map(s => s.trim()).filter(s => s && s !== 'ไม่มี');
+  }
+  return [];
+}
+function getDiseaseCount(row) { return getDiseaseList(row).length; }
+function getNcdRiskLevel(row) {
+  const n = getDiseaseCount(row);
+  if (n === 0) return { key: 'none',   label: 'กลุ่มปกติ',                 color: '#059669' };
+  if (n === 1) return { key: 'medium', label: 'เสี่ยงปานกลาง (1 โรค)',    color: '#D97706' };
+  return               { key: 'high',  label: 'เสี่ยงสูง (≥ 2 โรค)',      color: '#DC2626' };
+}
+
+/* ── BMI — มาตรฐานอาเซียน (กรมอนามัย) ───────────────────── */
+function calcBmi(row) {
+  if (row.bmi != null && !isNaN(Number(row.bmi))) return Number(row.bmi);
+  const h = parseFloat(row.height);
+  const w = parseFloat(row.weight);
+  if (!h || !w || h <= 0) return null;
+  const hm = h > 3 ? h / 100 : h;
+  return w / (hm * hm);
+}
+function getBmiAsean(row) {
+  const bmi = calcBmi(row);
+  if (bmi == null) return null;
+  if (bmi < 18.5) return { bmi, key: 'underweight', label: 'น้ำหนักน้อยกว่ามาตรฐาน', color: '#3B82F6' };
+  if (bmi < 23)   return { bmi, key: 'normal',      label: 'ปกติ',                   color: '#059669' };
+  if (bmi < 25)   return { bmi, key: 'obese1',      label: 'อ้วนระดับ 1',            color: '#F59E0B' };
+  if (bmi < 30)   return { bmi, key: 'obese2',      label: 'อ้วนระดับ 2',            color: '#EF4444' };
+  return                   { bmi, key: 'obese3',     label: 'อ้วนระดับ 3',            color: '#991B1B' };
+}
+
+/* ── WHtR (รอบเอว / ส่วนสูง) ──────────────────────────────── */
+function calcWHtR(row) {
+  const waistIn = parseFloat(row.waist);
+  const heightCm = parseFloat(row.height);
+  if (!waistIn || !heightCm || heightCm <= 0) return null;
+  const waistCm = waistIn * 2.54;
+  return waistCm / heightCm;
+}
+function getWHtRLevel(row) {
+  const r = calcWHtR(row);
+  if (r == null) return null;
+  if (r < 0.5) return { ratio: r, key: 'normal', label: 'ปกติ (< 0.5)',      color: '#059669' };
+  return              { ratio: r, key: 'risk',   label: 'เริ่มเสี่ยง (≥ 0.5)', color: '#EF4444' };
+}
+
+/* ── พฤติกรรมบริโภค — helpers ────────────────────────────── */
+function _nutritionScore(val) {
+  if (val == null) return null;
+  const s = String(val).trim();
+  if (s.includes('ทุกวัน') || s.includes('เกือบทุกวัน')) return 3;
+  if (s.includes('3-4') || s.includes('3–4')) return 2;
+  if (s.includes('แทบไม่') || s.includes('ไม่ทำ')) return 1;
+  const n = Number(val);
+  if (!isNaN(n) && n >= 1 && n <= 3) return n;
+  return null;
+}
+function _nutritionScoreReverse(val) {
+  const s = _nutritionScore(val);
+  return s == null ? null : 4 - s;
+}
+function getSweetScore(row) {
+  const vals = [
+    _nutritionScoreReverse(row.sweet_1),
+    _nutritionScore(row.sweet_2),
+    _nutritionScore(row.sweet_3),
+    _nutritionScore(row.sweet_4),
+    _nutritionScore(row.sweet_5),
+  ].filter(v => v != null);
+  return vals.length === 5 ? vals.reduce((a, b) => a + b, 0) : null;
+}
+function getFatScore(row) {
+  const vals = ['fat_1','fat_2','fat_3','fat_4','fat_5'].map(k => _nutritionScore(row[k])).filter(v => v != null);
+  return vals.length === 5 ? vals.reduce((a, b) => a + b, 0) : null;
+}
+function getSaltScore(row) {
+  const vals = [
+    _nutritionScoreReverse(row.salt_1),
+    _nutritionScoreReverse(row.salt_2),
+    _nutritionScore(row.salt_3),
+    _nutritionScore(row.salt_4),
+    _nutritionScore(row.salt_5),
+  ].filter(v => v != null);
+  return vals.length === 5 ? vals.reduce((a, b) => a + b, 0) : null;
+}
+function _nutritionRiskLevel(score, type) {
+  if (score == null) return null;
+  const bands = {
+    sweet: [
+      { max: 5,  key: 'low',       label: 'เสี่ยงต่ำมาก',    color: '#059669' },
+      { max: 9,  key: 'medium',    label: 'เสี่ยงปานกลาง',   color: '#D97706' },
+      { max: 13, key: 'high',      label: 'เสี่ยงสูง',        color: '#EF4444' },
+      { max: 15, key: 'very_high', label: 'เสี่ยงสูงมาก',    color: '#991B1B' },
+    ],
+    fat: [
+      { max: 5,  key: 'low',       label: 'เสี่ยงน้อย',      color: '#059669' },
+      { max: 9,  key: 'medium',    label: 'เสี่ยงปานกลาง',   color: '#D97706' },
+      { max: 13, key: 'high',      label: 'เสี่ยงสูง',        color: '#EF4444' },
+      { max: 15, key: 'very_high', label: 'เสี่ยงสูงมาก',    color: '#991B1B' },
+    ],
+    salt: [
+      { max: 5,  key: 'low',       label: 'โซเดียมน้อย',     color: '#059669' },
+      { max: 9,  key: 'medium',    label: 'โซเดียมปานกลาง',  color: '#D97706' },
+      { max: 13, key: 'high',      label: 'โซเดียมสูง',       color: '#EF4444' },
+      { max: 15, key: 'very_high', label: 'โซเดียมสูงมาก',   color: '#991B1B' },
+    ],
+  };
+  return (bands[type] || bands.sweet).find(b => score <= b.max) || null;
+}
+function getSweetRisk(row) { return _nutritionRiskLevel(getSweetScore(row), 'sweet'); }
+function getFatRisk(row)   { return _nutritionRiskLevel(getFatScore(row),   'fat');   }
+function getSaltRisk(row)  { return _nutritionRiskLevel(getSaltScore(row),  'salt');  }
+
+/* ── กิจกรรมทางกาย TPAX ──────────────────────────────────── */
+function _parseTimeMins(val) {
+  if (val == null) return 0;
+  const s = String(val).trim();
+  if (s.includes(':')) {
+    const [h, m] = s.split(':').map(Number);
+    return (isNaN(h) ? 0 : h) * 60 + (isNaN(m) ? 0 : m);
+  }
+  const n = Number(s);
+  return isNaN(n) ? 0 : n;
+}
+function getTpaxMinutes(row) {
+  const wd = parseFloat(row.act_work_days)    || 0;
+  const wm = _parseTimeMins(row.act_work_dur);
+  const cd = parseFloat(row.act_commute_days) || 0;
+  const cm = _parseTimeMins(row.act_commute_dur);
+  const rd = parseFloat(row.act_rec_days)     || 0;
+  const rm = _parseTimeMins(row.act_rec_dur);
+  if (wd + cd + rd === 0) return null;
+  return wd * wm + cd * cm + rd * rm;
+}
+function getTpaxLevel(row) {
+  const mins = getTpaxMinutes(row);
+  if (mins == null) return null;
+  if (mins < 150) return { mins, key: 'low',  label: 'ไม่เพียงพอ (< 150 นาที/สัปดาห์)',  color: '#DC2626' };
+  if (mins < 300) return { mins, key: 'ok',   label: 'เพียงพอ (150–299 นาที/สัปดาห์)',  color: '#D97706' };
+  return                  { mins, key: 'good', label: 'ดี (≥ 300 นาที/สัปดาห์)',          color: '#059669' };
+}
+
+/* ── พฤติกรรมเนือยนิ่ง ─────────────────────────────────────── */
+function getSedentaryHours(row) {
+  const s = _parseTimeMins(row.sedentary_dur);
+  const e = _parseTimeMins(row.screen_entertain);
+  const w = _parseTimeMins(row.screen_work);
+  if (s + e + w === 0) return null;
+  return (s + e + w) / 60;
+}
+function getSedentaryLevel(row) {
+  const h = getSedentaryHours(row);
+  if (h == null) return null;
+  if (h < 8)  return { hours: h, key: 'safe',  label: 'ปลอดภัย (< 8 ชม./วัน)',    color: '#059669' };
+  if (h <= 10) return { hours: h, key: 'watch', label: 'เฝ้าระวัง (8–10 ชม./วัน)', color: '#D97706' };
+  return              { hours: h, key: 'risk',  label: 'เสี่ยง (> 10 ชม./วัน)',    color: '#DC2626' };
+}
+
+/* ── ยาสูบ / แอลกอฮอล์ / สิ่งเสพติด — Flag รายบุคคล ──────── */
+function _substanceVal(val) {
+  if (val == null) return 0;
+  const s = String(val).trim();
+  if (s.includes('ทุกวัน') || s.includes('เป็นประจำ')) return 3;
+  if (s.includes('2') && s.includes('3')) return 2;
+  if (s.includes('บางโอกาส') || s.includes('นาน')) return 1;
+  if (s.includes('ไม่เคย')) return 0;
+  const n = Number(s);
+  return isNaN(n) ? 0 : Math.min(n, 3);
+}
+function getSubstanceRisk(row) {
+  const q01 = _substanceVal(row.q2001);
+  const q02 = _substanceVal(row.q2002);
+  const q03 = _substanceVal(row.q2003);
+  const q04 = _substanceVal(row.q2004);
+  const q05 = _substanceVal(row.q2005_drug ?? row.q2005);
+  if (q04 >= 1 || q05 >= 1)             return { key: 'high',   label: 'ความเสี่ยงสูง',        color: '#DC2626' };
+  if ([q01,q02,q03].some(v => v === 3)) return { key: 'high',   label: 'ความเสี่ยงสูง',        color: '#DC2626' };
+  const cnt  = [q01,q02,q03].filter(v => v >= 1).length;
+  const freq = [q01,q02,q03].some(v => v >= 2);
+  if (cnt >= 2 || freq)                 return { key: 'medium', label: 'ความเสี่ยงปานกลาง',   color: '#D97706' };
+  if (cnt === 1)                        return { key: 'low',    label: 'ความเสี่ยงต่ำ',         color: '#F59E0B' };
+  return                                        { key: 'none',  label: 'ไม่มีความเสี่ยง',       color: '#059669' };
+}
+
+/* ── UCLA Loneliness Scale ──────────────────────────────────── */
+function _lonelyVal(val) {
+  if (val == null) return null;
+  const s = String(val).trim();
+  if (s === 'บ่อยครั้ง' || s === '3') return 3;
+  if (s === 'บางครั้ง'  || s === '2') return 2;
+  if (s === 'แทบไม่เคย' || s === '1') return 1;
+  if (s === 'ไม่เคย'    || s === '0') return 0;
+  const n = Number(val);
+  return isNaN(n) ? null : Math.min(Math.max(n, 0), 3);
+}
+function getLonelinessTotal(row) {
+  const vals = Array.from({length: 20}, (_, i) => _lonelyVal(row[`lonely_${i+1}`])).filter(v => v != null);
+  return vals.length === 20 ? vals.reduce((a, b) => a + b, 0) : null;
+}
+function getLonelinessSubScores(row) {
+  const sub = (keys) => {
+    const vals = keys.map(k => _lonelyVal(row[k])).filter(v => v != null);
+    return vals.length === keys.length ? vals.reduce((a, b) => a + b, 0) : null;
+  };
+  return {
+    isolation:       sub(['lonely_1','lonely_2','lonely_3','lonely_4','lonely_5']),
+    social_relation: sub(['lonely_6','lonely_7','lonely_8','lonely_9','lonely_10']),
+    self_disconnect: sub(['lonely_11','lonely_12','lonely_13','lonely_14','lonely_15']),
+    social_behavior: sub(['lonely_16','lonely_17','lonely_18','lonely_19','lonely_20']),
+  };
+}
+function getLonelinessLevel3(score) {
+  if (score == null) return null;
+  if (score <= 20) return { key: 'low',    label: 'โดดเดี่ยวน้อย',     color: '#059669' };
+  if (score <= 40) return { key: 'medium', label: 'โดดเดี่ยวปานกลาง',  color: '#D97706' };
+  return                   { key: 'high',  label: 'โดดเดี่ยวมาก',       color: '#DC2626' };
+}
+function getLonelinessLevel4(score) {
+  if (score == null) return null;
+  if (score <= 15) return { key: 'very_low',  label: 'โดดเดี่ยวน้อยมาก',       color: '#059669' };
+  if (score <= 30) return { key: 'low_mid',   label: 'โดดเดี่ยวน้อย–ปานกลาง', color: '#84CC16' };
+  if (score <= 45) return { key: 'mid_high',  label: 'โดดเดี่ยวปานกลาง–มาก',  color: '#D97706' };
+  return                   { key: 'very_high',label: 'โดดเดี่ยวมากที่สุด',      color: '#DC2626' };
+}
+
+/* ── อุบัติเหตุ & ความปลอดภัย ────────────────────────────── */
+function _safetyVal(val) {
+  if (val == null) return null;
+  const s = String(val).trim();
+  if (s === 'ใช้ทุกครั้ง') return 0;
+  if (s === 'ใช้บางครั้ง') return 1;
+  if (s === 'ไม่เคยใช้')   return 2;
+  return null;
+}
+function getSafetyCompliance(row) {
+  const vals = [
+    _safetyVal(row.helmet_driver),
+    _safetyVal(row.helmet_passenger),
+    _safetyVal(row.seatbelt_driver),
+    _safetyVal(row.seatbelt_passenger),
+  ].filter(v => v != null);
+  if (!vals.length) return null;
+  return (vals.filter(v => v === 0).length / vals.length) * 100;
+}
+function hasDrunkDriving(row) {
+  const v = row.drunk_drive;
+  if (v == null) return false;
+  const s = String(v).trim();
+  return s !== 'ไม่เคย' && !s.includes('ไม่เคยขี่') && !s.includes('ไม่เคยขับ');
+}
+function hadAccident(row) {
+  const v = row.accident_hist;
+  if (v == null) return false;
+  if (Array.isArray(v)) return v.some(x => x && x !== 'ไม่เคย');
+  const s = String(v).trim();
+  return s !== 'ไม่เคย' && s !== '' && s !== 'false';
+}
+
 function showError(message) {
   document.getElementById('tbc').textContent = message;
 }
@@ -244,4 +511,11 @@ function downloadTextFile(fileName, text, mimeType = 'text/markdown;charset=utf-
   a.download = fileName;
   a.click();
   setTimeout(() => URL.revokeObjectURL(url), 0);
+}
+
+
+// ─── Survey link builder (moved from admin.html inline script) ─────────────
+function buildLinkUrl(org) {
+  const code = String(org.org_code || org.code || '').toLowerCase();
+  return `${SURVEY_BASE_URL}/?org=${code}`;
 }

@@ -138,7 +138,7 @@ js/
 ```javascript
 // ตัวอย่างการวิเคราะห์ก่อนแก้ไข
 const impactAnalysis = {
-    affectedFiles: ['js/questions.js', 'data/questions-wellbeing.json'],
+    affectedFiles: ['js/wellbeing/loader.js', 'data/questions-wellbeing.json'],
     breakingChanges: false,
     testRequired: true,
     rollbackPlan: 'git checkout HEAD~1'
@@ -146,8 +146,9 @@ const impactAnalysis = {
 ```
 
 ### **Step 2: Code Implementation (เขียนโค้ด)**
-- **Single Source of Truth:** `js/questions.js`
-- **Sync Process:** `sync-all-questions.js`
+- **Single Source of Truth:** `data/questions-wellbeing.json`
+- **Runtime Loader:** `js/wellbeing/loader.js`
+- **Schema Report:** `scripts/wellbeing/build-report.js`
 - **Testing:** Manual + E2E with Playwright
 - **Validation:** Form validation before submission
 
@@ -202,8 +203,9 @@ LocalStorage (Draft) → Auto-save → Recovery
 ### **Development**
 ```bash
 npm run dev                    # Start development server
-npm run sync:questions         # Sync questions to JSON
-npm run sync:all              # Full sync process
+npm run sync:questions         # Validate canonical wellbeing schema
+npm run sync:all               # Build schema report + cache helpers
+npm run watch:questions        # Watch canonical wellbeing schema
 npm run test:public-survey    # Run E2E tests
 ```
 
@@ -285,7 +287,7 @@ npm run deploy:preview       # Deploy preview
 ## 🎯 10. Best Practices (แนวทางปฏิบัติที่ดีที่สุด)
 
 ### **Code Quality**
-- **Single Source of Truth:** `js/questions.js`
+- **Single Source of Truth:** `data/questions-wellbeing.json`
 - **Consistent Naming:** English variables, Thai comments
 - **Error Handling:** Try-catch blocks everywhere
 - **Documentation:** Clear function comments

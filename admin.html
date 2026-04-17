@@ -7,10 +7,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai+Looped:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
 <link rel="stylesheet" href="admin/assets/css/admin.css">
 <script>
 (() => {
@@ -49,6 +48,7 @@
 <div class="sidebar-backdrop" onclick="document.body.classList.remove('sidebar-open')"></div>
 <div class="sidebar">
   <div class="sidebar-logo">
+    <button class="sidebar-close-btn" onclick="document.body.classList.remove('sidebar-open')" aria-label="ปิดเมนู">✕</button>
     <div class="logo-main">
       <div class="logo-icon">🏛️</div>
       <div>
@@ -85,8 +85,7 @@
 
     <div class="nav-group" data-min-role="superadmin">จัดการระบบ</div>
     <div class="nav-item" data-min-role="superadmin" onclick="go('org-credentials',this)"><span class="ni">🏢</span> Org HR Credentials</div>
-    <div class="nav-item" data-min-role="superadmin" onclick="go('form-windows',this)"><span class="ni">🗓️</span> เปิด/ปิดรับแบบฟอร์ม</div>
-    <div class="nav-item" data-min-role="superadmin" onclick="go('form-editor',this)"><span class="ni">✏️</span> แก้ไขเนื้อหาฟอร์ม</div>
+
   </nav>
 
   <div class="sidebar-foot">
@@ -264,70 +263,11 @@
       <div class="page-title">ฟอร์ม Ch1 — ภาพรวมองค์กร</div>
       <div class="page-sub">ควบคุมการเปิด-ปิดฟอร์ม · ดูข้อมูลที่ส่งมา · ดู Raw Data</div>
       <div class="tabs">
-        <div class="tab active" onclick="st(this,'c1-ctrl')">⚙️ ควบคุมฟอร์ม</div>
-        <div class="tab" onclick="st(this,'c1-data')">📊 ข้อมูลที่ส่งมา</div>
-        <div class="tab" onclick="st(this,'c1-pdf');renderCh1Pdf()">📄 ข้อมูลรายคน PDF</div>
-        <div class="tab" onclick="st(this,'c1-sheet')">🗂️ ตารางข้อมูล (Raw)</div>
+        <div class="tab active" onclick="st(this,'c1-pdf');renderCh1Pdf()">📄 ข้อมูลรายคน PDF</div>
+        <div class="tab" onclick="st(this,'c1-sheet');renderCh1RawSheet()">🗂️ ตารางข้อมูล (Raw)</div>
       </div>
 
-      <div id="c1-ctrl">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-          <div class="fc">
-            <div class="fc-head">
-              <span style="font-size:20px">📝</span>
-              <h3>Ch1 — ฟอร์มภาพรวมองค์กร</h3>
-              <span class="badge bg">เปิดอยู่</span>
-            </div>
-            <div class="toggle-row"><div class="tr-left"><label>เปิดให้กรอก</label><small>อนุญาตให้องค์กรเข้ากรอกข้อมูล</small></div><label class="tgl"><input type="checkbox" checked><div class="tgl-s"></div></label></div>
-            <div class="toggle-row"><div class="tr-left"><label>ต้องล็อกอินก่อนกรอก</label><small>บังคับ Authentication</small></div><label class="tgl"><input type="checkbox" checked><div class="tgl-s"></div></label></div>
-            <div class="toggle-row"><div class="tr-left"><label>อนุญาตแก้ไขหลังส่งแล้ว</label><small>Viewer แก้ไขข้อมูลของตนได้</small></div><label class="tgl"><input type="checkbox"><div class="tgl-s"></div></label></div>
-            <div class="stats-row">
-              <div class="st"><div class="st-val">15</div><div class="st-label">ส่งแล้ว</div></div>
-              <div class="st"><div class="st-val">3</div><div class="st-label">ยังไม่ส่ง</div></div>
-              <div class="st"><div class="st-val">5</div><div class="st-label">ส่วน</div></div>
-            </div>
-            <div class="fc-actions">
-              <button class="btn b-blue" onclick="go('form-editor',document.querySelector('.nav-item[onclick*=\'form-editor\']'));setTimeout(()=>feTab('ch1',document.getElementById('fe-tab-ch1')),200)"> ✏️ แก้ไขคำถาม</button>
-              <button class="btn b-gray" onclick="window.open('ch1.html','_blank')">🔗 ดูฟอร์ม</button>
-              <button class="btn b-green" onclick="exportCh1All()">📤 Export ทั้งหมด</button>
-            </div>
-          </div>
-          <div class="panel" style="margin:0">
-            <h3>🔗 ลิงก์ฟอร์ม Ch1 รายองค์กร</h3>
-            <div class="fg"><label>เลือกองค์กร</label><select id="ch1-link-org" onchange="updateCh1Link()"><option value="">-- เลือกองค์กร --</option></select></div>
-            <div class="info blue">🔗 ลิงก์จะ pre-fill ชื่อองค์กรให้อัตโนมัติ</div>
-            <div class="code-box"><code id="ch1-link-code">ch1.html?org=DMH</code><button onclick="copyCh1Link()">📋 Copy</button></div>
-            <div style="display:flex;gap:7px;margin-top:10px">
-              <button class="btn b-gray" style="flex:1;padding:8px" onclick="showQRModal(SURVEY_BASE_URL + '/ch1.html?org=' + (ORG_LOOKUP.get(document.getElementById('ch1-link-org')?.value)?.code || 'ORG'))">📷 QR Code</button>
-              <button class="btn b-blue" style="flex:1;padding:8px" onclick="sendLinkEmail('ch1')">📧 ส่งอีเมล</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div id="c1-data" style="display:none">
-        <div class="card">
-          <div class="card-head">
-            <h3>ข้อมูลที่ส่งมา (Ch1)</h3>
-            <div class="filter-bar">
-              <input class="si" id="c1data-search" placeholder="🔍 ค้นหาองค์กร..." oninput="filterCh1Data()">
-              <select class="sel" id="c1data-org" onchange="filterCh1Data()"><option value="">ทุกองค์กร</option></select>
-              <button class="btn b-gray" onclick="exportCh1All()">📤 Export Excel</button>
-            </div>
-          </div>
-          <div class="tbl-wrap">
-            <table>
-              <thead><tr><th>องค์กร</th><th>บุคลากรรวม</th><th>ส่วนที่กรอก</th><th>วันที่ส่ง</th><th>จัดการ</th></tr></thead>
-              <tbody id="c1-data-tbody">
-                <tr><td>กรมสุขภาพจิต</td><td>1,240</td><td>5/5 ส่วน</td><td>10 มี.ค. 69</td><td class="td-act"><button class="btn b-blue">📄 PDF</button><button class="btn b-gray">📝 Docs</button></td></tr>
-                <tr><td>สำนักงาน ก.พ.</td><td>856</td><td>5/5 ส่วน</td><td>8 มี.ค. 69</td><td class="td-act"><button class="btn b-blue">📄 PDF</button><button class="btn b-gray">📝 Docs</button></td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <div id="c1-pdf" style="display:none">
+      <div id="c1-pdf">
         <div class="card">
           <div class="card-head">
             <h3>📄 ข้อมูลรายคน PDF</h3>
@@ -377,30 +317,25 @@
 
       <!-- TAB 1: ควบคุม -->
       <div id="wb-ctrl">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-          <div class="fc">
-            <div class="fc-head"><span style="font-size:20px">💚</span><h3>Wellbeing Survey — ฟอร์มรายบุคคล</h3><span class="badge bg">เปิดอยู่</span></div>
-            <div class="toggle-row"><div class="tr-left"><label>เปิดให้กรอก</label></div><label class="tgl"><input type="checkbox" checked><div class="tgl-s"></div></label></div>
-            <div class="toggle-row"><div class="tr-left"><label>ไม่ระบุตัวตน (Anonymous)</label><small>ไม่เก็บชื่อ-นามสกุล</small></div><label class="tgl"><input type="checkbox" checked><div class="tgl-s"></div></label></div>
-            <div class="toggle-row"><div class="tr-left"><label>จำกัด 1 ครั้ง/อุปกรณ์</label></div><label class="tgl"><input type="checkbox"><div class="tgl-s"></div></label></div>
-            <div class="stats-row">
-              <div class="st"><div class="st-val">1,247</div><div class="st-label">ตอบแล้ว</div></div>
-              <div class="st"><div class="st-val">—</div><div class="st-label">PHQ-9 สูง (≥10)</div></div>
-              <div class="st"><div class="st-val">—</div><div class="st-label">Burnout เฉลี่ย</div></div>
-            </div>
-            <div class="fc-actions">
-              <button class="btn b-blue" onclick="go('form-editor',document.querySelector('.nav-item[onclick*=\'form-editor\']'));setTimeout(()=>feTab('wellbeing',document.getElementById('fe-tab-wb')),200)">✏️ แก้ไขคำถาม</button>
-              <button class="btn b-gray" onclick="window.open('index.html','_blank')">🔗 ดูฟอร์ม</button>
-              <button class="btn b-green" onclick="document.querySelector('[onclick=\'swb(this,\\\'wb-sheet\\\')\']').click()">🗂️ ดูข้อมูลรายคน</button>
+
+        <!-- เปิด/ปิดรับคำตอบรายองค์กร — superadmin only -->
+        <div class="card" id="wb-form-windows-card" style="margin-top:14px;display:none">
+          <div class="card-head">
+            <h3>🔒 เปิด/ปิดการรับคำตอบรายองค์กร</h3>
+            <div style="display:flex;gap:8px">
+              <button class="btn b-blue" onclick="fwOpenAll()">✅ เปิดทุกองค์กร</button>
+              <button class="btn b-orange" onclick="fwCloseAll()">🔒 ปิดทุกองค์กร</button>
+              <button class="btn b-gray" onclick="loadWbFormWindowsCard()">🔄 รีโหลด</button>
             </div>
           </div>
-          <div class="panel" style="margin:0">
-            <h3>📋 สรุปการตอบ</h3>
-            <div class="set-row"><div class="set-info"><div class="set-label">ตอบแล้ว</div></div><b>1,247 คน</b></div>
-            <div class="set-row"><div class="set-info"><div class="set-label">กำลังกรอก (Draft)</div></div><b>38 คน</b></div>
-            <div class="set-row"><div class="set-info"><div class="set-label">ยังไม่เริ่ม (2 องค์กร)</div></div><b>—</b></div>
-            <div class="set-row"><div class="set-info"><div class="set-label">อัปเดตล่าสุด</div></div><b>14 มี.ค. 69 15:42</b></div>
-            <div class="set-row"><div class="set-info"><div class="set-label">เวลากรอกเฉลี่ย</div></div><b>8.3 นาที</b></div>
+          <div class="tbl-wrap">
+            <table id="wb-form-windows-table">
+              <thead><tr><th>องค์กร</th><th>สถานะ</th><th>ข้อความเมื่อปิด</th><th style="text-align:center">เปิด/ปิด</th></tr></thead>
+              <tbody id="fw-wb-body"><tr><td colspan="4" style="text-align:center;color:var(--tx3);padding:20px">กำลังโหลด...</td></tr></tbody>
+            </table>
+          </div>
+          <div style="padding:12px 18px;font-size:11px;color:var(--tx3);border-top:1px solid var(--bdr)">
+            💡 ข้อความเมื่อปิด จะแสดงเป็น Popup เมื่อผู้ตอบเข้าลิงค์ฟอร์ม · หากไม่ระบุจะใช้ข้อความ default
           </div>
         </div>
       </div>
@@ -525,14 +460,65 @@
       <div id="anwb-content" style="display:none">
         <!-- KPI Cards -->
         <div id="anwb-kpi" style="margin-bottom:20px"></div>
-        <!-- Distribution Charts -->
-        <div id="anwb-dist" style="margin-bottom:20px"></div>
-        <!-- Heatmap -->
-        <div id="anwb-heatmap" style="margin-bottom:20px"></div>
-        <!-- Demographics -->
-        <div id="anwb-demo" style="margin-bottom:20px"></div>
-        <!-- Risk Signals -->
-        <div id="anwb-risk" style="margin-bottom:20px"></div>
+
+        <!-- Tab Navigation -->
+        <div class="anwb-tabs" style="margin-bottom:20px">
+          <button class="anwb-tab active" data-tab="overview"     onclick="anwbSwitchTab('overview')">📊 ภาพรวม</button>
+          <button class="anwb-tab"        data-tab="physical"     onclick="anwbSwitchTab('physical')">💪 กาย</button>
+          <button class="anwb-tab"        data-tab="mental"       onclick="anwbSwitchTab('mental')">🧠 ใจ</button>
+          <button class="anwb-tab"        data-tab="social"       onclick="anwbSwitchTab('social')">🤝 สังคม</button>
+          <button class="anwb-tab"        data-tab="environment"  onclick="anwbSwitchTab('environment')">🌿 สิ่งแวดล้อม</button>
+        </div>
+
+        <!-- ─── TAB: ภาพรวม ─────────────────────────────────────── -->
+        <div class="anwb-tab-panel active" id="anwb-panel-overview">
+          <!-- Distribution Charts -->
+          <div id="anwb-dist" style="margin-bottom:20px"></div>
+          <!-- Demographics -->
+          <div id="anwb-demo" style="margin-bottom:20px"></div>
+          <!-- Risk Signals -->
+          <div id="anwb-risk" style="margin-bottom:20px"></div>
+        </div>
+
+        <!-- ─── TAB: กาย ─────────────────────────────────────────── -->
+        <div class="anwb-tab-panel" id="anwb-panel-physical" style="display:none">
+          <!-- NCD & โรคประจำตัว -->
+          <div id="anwb-ncd" style="margin-bottom:20px"></div>
+          <!-- BMI & WHtR -->
+          <div id="anwb-bmi" style="margin-bottom:20px"></div>
+          <!-- ยาสูบ/แอลกอฮอล์/สิ่งเสพติด -->
+          <div id="anwb-substance" style="margin-bottom:20px"></div>
+          <!-- พฤติกรรมบริโภค หวาน/ไขมัน/โซเดียม -->
+          <div id="anwb-nutrition" style="margin-bottom:20px"></div>
+          <!-- กิจกรรมทางกาย TPAX -->
+          <div id="anwb-tpax" style="margin-bottom:20px"></div>
+          <!-- พฤติกรรมเนือยนิ่ง -->
+          <div id="anwb-sedentary" style="margin-bottom:20px"></div>
+        </div>
+
+        <!-- ─── TAB: ใจ ──────────────────────────────────────────── -->
+        <div class="anwb-tab-panel" id="anwb-panel-mental" style="display:none">
+          <!-- TMHI-15 เชิงลึก -->
+          <div id="anwb-tmhi-deep" style="margin-bottom:20px"></div>
+        </div>
+
+        <!-- ─── TAB: สังคม ───────────────────────────────────────── -->
+        <div class="anwb-tab-panel" id="anwb-panel-social" style="display:none">
+          <!-- UCLA Loneliness Scale -->
+          <div id="anwb-loneliness" style="margin-bottom:20px"></div>
+        </div>
+
+        <!-- ─── TAB: สิ่งแวดล้อม ─────────────────────────────────── -->
+        <div class="anwb-tab-panel" id="anwb-panel-environment" style="display:none">
+          <!-- อุบัติเหตุ & ความปลอดภัย -->
+          <div id="anwb-safety" style="margin-bottom:20px"></div>
+          <!-- คุณภาพชีวิต & ความพึงพอใจสภาพแวดล้อม -->
+          <div id="anwb-qol" style="margin-bottom:20px"></div>
+          <!-- สภาพแวดล้อมทำงาน (ปัจจัยเสี่ยง 6 ด้าน) -->
+          <div id="anwb-env" style="margin-bottom:20px"></div>
+          <!-- มลพิษ · Climate · โรคอุบัติใหม่ · COVID -->
+          <div id="anwb-pollution" style="margin-bottom:20px"></div>
+        </div>
       </div>
     </div>
 
@@ -559,6 +545,69 @@
         <div class="kpi w"><div class="kpi-icon">🩺</div><div class="kpi-label">วันลาป่วยรวม</div><div class="kpi-val" id="ch1sum-kpi-sick">—</div><div class="kpi-sub">สะสมจากองค์กรที่เลือก</div></div>
         <div class="kpi"><div class="kpi-icon">🧠</div><div class="kpi-label">Burnout เฉลี่ย</div><div class="kpi-val" id="ch1sum-kpi-burnout">—</div><div class="kpi-sub">ค่าเฉลี่ยจากฟอร์ม Ch1</div></div>
         <div class="kpi g"><div class="kpi-icon">❤️</div><div class="kpi-label">Engagement เฉลี่ย</div><div class="kpi-val" id="ch1sum-kpi-eng">—</div><div class="kpi-sub">ค่าเฉลี่ยจากฟอร์ม Ch1</div></div>
+      </div>
+      <div style="font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--tx3);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--bdr)">โครงสร้างประเภทบุคลากร</div>
+      <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:14px">
+        <div class="kpi">
+          <div class="kpi-icon">🎖️</div><div class="kpi-label">ข้าราชการ</div>
+          <div class="kpi-val" id="ch1sum-kpi-official">—</div>
+          <div class="kpi-sub" id="ch1sum-kpi-official-sub">— % ของบุคลากรรวม</div>
+          <div style="height:4px;border-radius:99px;background:var(--bg2);margin-top:8px;overflow:hidden"><div id="ch1sum-bar-official" style="height:100%;border-radius:99px;background:var(--P);width:0%;transition:width .5s"></div></div>
+        </div>
+        <div class="kpi" style="border-left:4px solid #EA580C">
+          <div class="kpi-icon">📋</div><div class="kpi-label">พนักงานราชการ</div>
+          <div class="kpi-val" style="color:#EA580C" id="ch1sum-kpi-employee">—</div>
+          <div class="kpi-sub" id="ch1sum-kpi-employee-sub">— % ของบุคลากรรวม</div>
+          <div style="height:4px;border-radius:99px;background:var(--bg2);margin-top:8px;overflow:hidden"><div id="ch1sum-bar-employee" style="height:100%;border-radius:99px;background:#EA580C;width:0%;transition:width .5s"></div></div>
+        </div>
+        <div class="kpi" style="border-left:4px solid #7C3AED">
+          <div class="kpi-icon">🤝</div><div class="kpi-label">ลูกจ้าง/จ้างเหมา</div>
+          <div class="kpi-val" style="color:#7C3AED" id="ch1sum-kpi-contract">—</div>
+          <div class="kpi-sub" id="ch1sum-kpi-contract-sub">— % ของบุคลากรรวม</div>
+          <div style="height:4px;border-radius:99px;background:var(--bg2);margin-top:8px;overflow:hidden"><div id="ch1sum-bar-contract" style="height:100%;border-radius:99px;background:#7C3AED;width:0%;transition:width .5s"></div></div>
+        </div>
+        <div class="kpi" style="border-left:4px solid var(--tx3)">
+          <div class="kpi-icon">👤</div><div class="kpi-label">บุคลากรอื่น ๆ</div>
+          <div class="kpi-val" style="color:var(--tx2)" id="ch1sum-kpi-other">—</div>
+          <div class="kpi-sub" id="ch1sum-kpi-other-sub">— % ของบุคลากรรวม</div>
+          <div style="height:4px;border-radius:99px;background:var(--bg2);margin-top:8px;overflow:hidden"><div id="ch1sum-bar-other" style="height:100%;border-radius:99px;background:var(--tx3);width:0%;transition:width .5s"></div></div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+        <div class="card" style="margin-bottom:0">
+          <div class="card-head">
+            <h3>🍩 สัดส่วนประเภทบุคลากร (ภาพรวม)</h3>
+            <span class="section-badge" id="ch1sum-type-total-badge">รวม — คน</span>
+          </div>
+          <div class="card-body" style="display:flex;align-items:center;gap:24px;flex-wrap:wrap">
+            <div style="flex-shrink:0;position:relative;width:110px;height:110px">
+              <svg viewBox="0 0 110 110" style="width:110px;height:110px;transform:rotate(-90deg)">
+                <circle cx="55" cy="55" r="44" fill="none" stroke="var(--bg2)" stroke-width="16"/>
+                <circle id="ch1sum-donut-official" cx="55" cy="55" r="44" fill="none" stroke="#0F4C81" stroke-width="16" stroke-dasharray="0 276.46" stroke-linecap="butt"/>
+                <circle id="ch1sum-donut-employee" cx="55" cy="55" r="44" fill="none" stroke="#EA580C" stroke-width="16" stroke-dasharray="0 276.46" stroke-linecap="butt"/>
+                <circle id="ch1sum-donut-contract" cx="55" cy="55" r="44" fill="none" stroke="#7C3AED" stroke-width="16" stroke-dasharray="0 276.46" stroke-linecap="butt"/>
+                <circle id="ch1sum-donut-other"    cx="55" cy="55" r="44" fill="none" stroke="#8896A5" stroke-width="16" stroke-dasharray="0 276.46" stroke-linecap="butt"/>
+              </svg>
+              <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
+                <div style="font-size:15px;font-weight:700;color:var(--tx);line-height:1" id="ch1sum-donut-center">—</div>
+                <div style="font-size:9px;color:var(--tx3);font-weight:500">คนรวม</div>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:9px;flex:1;min-width:140px">
+              <div style="display:flex;align-items:center;gap:8px"><div style="width:10px;height:10px;border-radius:2px;background:#0F4C81;flex-shrink:0"></div><div style="font-size:12px;color:var(--tx2);flex:1">ข้าราชการ</div><div style="font-size:13px;font-weight:700;color:var(--tx)" id="ch1sum-leg-official">—</div><div style="font-size:11px;color:var(--tx3);min-width:40px;text-align:right" id="ch1sum-leg-official-pct">—</div></div>
+              <div style="display:flex;align-items:center;gap:8px"><div style="width:10px;height:10px;border-radius:2px;background:#EA580C;flex-shrink:0"></div><div style="font-size:12px;color:var(--tx2);flex:1">พนักงานราชการ</div><div style="font-size:13px;font-weight:700;color:var(--tx)" id="ch1sum-leg-employee">—</div><div style="font-size:11px;color:var(--tx3);min-width:40px;text-align:right" id="ch1sum-leg-employee-pct">—</div></div>
+              <div style="display:flex;align-items:center;gap:8px"><div style="width:10px;height:10px;border-radius:2px;background:#7C3AED;flex-shrink:0"></div><div style="font-size:12px;color:var(--tx2);flex:1">ลูกจ้าง/จ้างเหมา</div><div style="font-size:13px;font-weight:700;color:var(--tx)" id="ch1sum-leg-contract">—</div><div style="font-size:11px;color:var(--tx3);min-width:40px;text-align:right" id="ch1sum-leg-contract-pct">—</div></div>
+              <div style="display:flex;align-items:center;gap:8px"><div style="width:10px;height:10px;border-radius:2px;background:#8896A5;flex-shrink:0"></div><div style="font-size:12px;color:var(--tx2);flex:1">บุคลากรอื่น ๆ</div><div style="font-size:13px;font-weight:700;color:var(--tx)" id="ch1sum-leg-other">—</div><div style="font-size:11px;color:var(--tx3);min-width:40px;text-align:right" id="ch1sum-leg-other-pct">—</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="margin-bottom:0">
+          <div class="card-head">
+            <h3>📊 สัดส่วนข้าราชการ รายองค์กร</h3>
+            <span class="section-badge">เรียงจากมาก → น้อย</span>
+          </div>
+          <div class="card-body" style="max-height:260px;overflow-y:auto" id="ch1sum-official-org-bars"></div>
+        </div>
       </div>
       <div class="summary-sections" style="margin-bottom:14px">
         <div class="card summary-section-card"><div class="card-head"><h3>โครงสร้างอายุ</h3><span class="section-badge">4 กลุ่ม</span></div><div class="card-body" id="ch1sum-age-chart"></div></div>
@@ -741,69 +790,9 @@
         <div id="orghr-batch-msg" style="display:none;padding:10px 18px;font-size:13px;background:#F0FFF4;border-bottom:1px solid #C6F6D5;color:#276749"></div>
         <div class="tbl-wrap">
           <table>
-            <thead><tr><th>#</th><th>องค์กร</th><th>Email (Username)</th><th>Password</th><th>สถานะ</th><th>จัดการ</th></tr></thead>
-            <tbody id="orghr-cred-tbody"><tr><td colspan="6" style="text-align:center;color:var(--tx3);padding:20px">กำลังโหลด...</td></tr></tbody>
+            <thead><tr><th>#</th><th>องค์กร</th><th>ชื่อเต็ม</th><th>Email (Username)</th><th>Password</th><th>สถานะ</th><th>จัดการ</th></tr></thead>
+            <tbody id="orghr-cred-tbody"><tr><td colspan="7" style="text-align:center;color:var(--tx3);padding:20px">กำลังโหลด...</td></tr></tbody>
           </table>
-        </div>
-      </div>
-    </div>
-
-
-    <!-- ==================== FORM WINDOWS ==================== -->
-    <div class="page" id="page-form-windows">
-      <div class="page-title">🗓️ เปิด/ปิดรับแบบฟอร์ม Wellbeing</div>
-      <div class="page-sub">ควบคุมช่วงเวลาการรับคำตอบของแต่ละองค์กร</div>
-      <div class="card">
-        <div class="card-head">
-          <h3>สถานะการรับแบบสอบถามรายองค์กร</h3>
-          <div style="display:flex;gap:8px">
-            <button class="btn b-blue" onclick="fwOpenAll()">✅ เปิดทุกองค์กร</button>
-            <button class="btn b-orange" onclick="fwCloseAll()">🔒 ปิดทุกองค์กร</button>
-            <button class="btn b-gray" onclick="loadFormWindowsPage()">🔄 รีโหลด</button>
-          </div>
-        </div>
-        <div class="tbl-wrap">
-          <table>
-            <thead><tr><th>องค์กร</th><th>สถานะ</th><th>เปิดรับตั้งแต่</th><th>ปิดรับเมื่อ</th><th style="text-align:center">เปิด/ปิด</th></tr></thead>
-            <tbody id="fw-table-body"><tr><td colspan="6" style="text-align:center;color:var(--tx3);padding:20px">กำลังโหลด...</td></tr></tbody>
-          </table>
-        </div>
-        <div style="padding:12px 18px;font-size:11px;color:var(--tx3);border-top:1px solid var(--bdr)">
-          💡 หากไม่ได้ตั้งวันเวลา ระบบจะใช้สถานะ เปิด/ปิด เพียงอย่างเดียว · กำหนดเอง = มีการตั้งค่าเฉพาะองค์กรนี้ · ค่าเริ่มต้น = ใช้ตามการตั้งค่าทั่วไป
-        </div>
-      </div>
-    </div>
-
-    <!-- ==================== FORM EDITOR ==================== -->
-    <div class="page" id="page-form-editor">
-      <div class="page-title">✏️ แก้ไขเนื้อหาฟอร์ม</div>
-      <div class="page-sub">คลิกที่ข้อความใด ๆ เพื่อแก้ไขได้ทันที — กด 💾 บันทึก เพื่อบันทึกทั้งหมด</div>
-      <div class="card card-mb fe-layout">
-        <!-- Left: Tab sidebar -->
-        <div class="fe-sidebar">
-          <div class="fe-sidebar-title">เลือกฟอร์ม</div>
-          <div class="fe-tab-item active" id="fe-tab-ch1" onclick="feTab('ch1',this)">📝 ฟอร์ม Ch1</div>
-          <div class="fe-tab-item" id="fe-tab-wb" onclick="feTab('wellbeing',this)">💚 Wellbeing</div>
-        </div>
-        <!-- Right: Content area -->
-        <div class="fe-content">
-          <div class="info blue" style="margin-bottom:14px">💡 คลิกที่ข้อความเพื่อแก้ไข — ระบบ override เฉพาะช่องที่เปลี่ยน ไม่กระทบ default ต้นฉบับ</div>
-          <div id="fe-ch1-panel">
-            <div id="fe-ch1-status" style="font-size:12px;color:var(--tx3);margin-bottom:10px">กำลังโหลด...</div>
-            <div id="fe-ch1-fields"></div>
-            <div style="display:flex;gap:10px;margin-top:16px">
-              <button class="btn b-gray" onclick="resetAllFe('ch1')">↩️ รีเซ็ตทั้งหมด</button>
-              <button class="btn b-blue" onclick="saveFormConfig('ch1')">💾 บันทึก Ch1</button>
-            </div>
-          </div>
-          <div id="fe-wb-panel" style="display:none">
-            <div id="fe-wb-status" style="font-size:12px;color:var(--tx3);margin-bottom:10px">กำลังโหลด...</div>
-            <div id="fe-wb-fields"></div>
-            <div style="display:flex;gap:10px;margin-top:16px">
-              <button class="btn b-gray" onclick="resetAllFe('wellbeing')">↩️ รีเซ็ตทั้งหมด</button>
-              <button class="btn b-blue" onclick="saveFormConfig('wellbeing')">💾 บันทึก Wellbeing</button>
-            </div>
-          </div>
         </div>
       </div>
     </div>
@@ -811,10 +800,12 @@
   </div><!-- /content -->
 </div><!-- /main -->
 
+<!-- CDN: supabase-js moved here from <head> to eliminate render-blocking -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/project-ssot.js"></script>
 <!-- ===== Extracted Service Modules ===== -->
-<script src="admin/js/services/api.js"></script>
 <script src="admin/js/services/config.js"></script>
+<script src="admin/js/services/api.js"></script>
 <script src="admin/js/services/utils.js"></script>
 <script src="admin/js/services/data.js"></script>
 <script src="admin/js/services/nav.js?v=2"></script>
@@ -832,1110 +823,12 @@
 <script src="admin/js/pages/settings.js"></script>
 <!-- Org HR Credentials -->
 <script src="admin/js/pages/org-credentials.js"></script>
+<!-- Form Windows (used by Wellbeing page's wb-form-windows-card) -->
 <script src="admin/js/pages/form-windows.js"></script>
 <script src="admin/js/pages/analytics-wb.js?v=2"></script>
 
-<script>
-/* ========== PAGE-SPECIFIC RENDERING (services loaded via external scripts above) ========== */
-
-/* NOTE: config.js, utils.js, data.js, nav.js, auth.js, users.js, export.js, audit.js, forms.js
-   are loaded as separate <script> tags above this block. Only page-rendering and init code remains here. */
-
-/* --- Block 1 removed: config, ORG_META, state, getOrgCatalog, refreshOrgDerivedState → config.js + data.js --- */
-/* --- Block 2 removed: esc, fmtDate, isoToBuddhistDisplay, buddhistDisplayToISO, fmtNum, getRowDate, getCh1Org, normalizeSurveyRow, ageGroup, sumFields, getPhq9, getGad7, getBurnout, getEngagement, getWlb, getSleep, getExercise, getChronic, getJobSat, getMainProblem, showError, showToast, showConfirm, visiblePageId, downloadWorkbook → utils.js --- */
-/* --- Block 3 removed: go, st, swb → nav.js --- */
-/* --- Block 4 removed: requireSession, loadBackend, summarizeOrgs, renderChrome → auth.js + data.js --- */
-
-/* ========== PAGE-SPECIFIC RENDERING FUNCTIONS (Sprint 3C will extract these next) ========== */
-
-
-
-/* getOrgCatalog + refreshOrgDerivedState → canonical in data.js (Supabase organizations = SSOT) */
-
-
-
-// แปลง ISO date string (YYYY-MM-DD) → วว/ดด/ปปปป พ.ศ. สำหรับแสดงผล input
-// แปลง Buddhist display (วว/ดด/ปปปป) → ISO (YYYY-MM-DD) สำหรับ input value
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* ======= TOAST NOTIFICATION (แทน alert) ======= */
-
-/* ======= CUSTOM CONFIRM MODAL (แทน confirm) ======= */
-
-
-
-/* go, st, swb → exclusively in admin/js/services/nav.js (removed duplicate) */
-
-
-function renderWbTable() {
-  const tbody = document.getElementById('wb-rank-tbody');
-  if (!tbody || !window._wbSummary) return;
-  const sortBy = document.getElementById('wb-sort-by')?.value || 'pct';
-  const sortDir = document.getElementById('wb-sort-dir')?.value || 'desc';
-
-  const rows = window._wbSummary.map(org => {
-    const count = org.wellbeingSubmitted || 0;
-    const official = Number(org.typeOfficial || 0);
-    const pct = official > 0 ? Math.round((count / official) * 100) : 0;
-    return { name: org.name, count, official, pct };
-  });
-
-  rows.sort((a, b) => {
-    const valA = sortBy === 'pct' ? (a.pct ?? -1) : a.count;
-    const valB = sortBy === 'pct' ? (b.pct ?? -1) : b.count;
-    return sortDir === 'asc' ? valA - valB : valB - valA;
-  });
-
-  tbody.innerHTML = rows.map((r, i) => {
-    const barPct = r.pct != null ? Math.min(r.pct, 100) : 0;
-    const pctText = r.pct != null ? `${r.pct}%` : '—';
-    const countLabel = r.official != null
-      ? `${fmtNum(r.count)} คน / ${fmtNum(r.official)} คน`
-      : `${fmtNum(r.count) || '—'} คน`;
-    const cls = r.count > 0 ? 'bg' : 'br';
-    return `<tr>
-      <td style="color:var(--tx3);font-weight:700;width:32px">${i + 1}</td>
-      <td>${esc(r.name)}</td>
-      <td style="width:160px"><div class="prog-track" style="margin:0"><div class="prog-fill" style="width:${Math.max(barPct, 2)}%"></div></div></td>
-      <td style="white-space:nowrap">${countLabel}</td>
-      <td><span class="badge ${cls}">${pctText}</span></td>
-    </tr>`;
-  }).join('');
-}
-
-
-function openOrgModal(orgName) {
-  if (!document.getElementById('org-modal')) createOrgModal();
-  const modal = document.getElementById('org-modal');
-  const titleEl = modal.querySelector('.umodal-head h3');
-  if (titleEl) titleEl.textContent = orgName ? '✏️ แก้ไขหน่วยงาน' : '➕ เพิ่มหน่วยงานใหม่';
-  const msg = document.getElementById('org-form-msg');
-  if (msg) msg.textContent = '';
-  if (!orgName) {
-    document.getElementById('org-profile-form')?.reset();
-    const box = document.getElementById('org-detail-box');
-    if (box) box.innerHTML = '<div class="info blue">กรอกข้อมูลให้ครบแล้วกดบันทึกเพื่อสร้างหน่วยงานใหม่</div>';
-  } else {
-    showOrgDetail(orgName);
-  }
-  modal.style.display = 'flex';
-}
-
-function createOrgModal() {
-  const overlay = document.createElement('div');
-  overlay.id = 'org-modal';
-  overlay.className = 'umodal-overlay';
-  overlay.style.display = 'none';
-  overlay.innerHTML = `
-    <div class="umodal" style="max-width:620px">
-      <div class="umodal-head">
-        <h3>แก้ไขหน่วยงาน</h3>
-        <button class="btn b-gray" style="margin-left:auto;padding:4px 10px;font-size:13px" onclick="document.getElementById('org-modal').style.display='none'">✕</button>
-      </div>
-      <div class="umodal-body">
-        <form id="org-profile-form" onsubmit="saveOrgProfile(event)" style="display:flex;flex-direction:column;gap:10px">
-          <div class="fg"><label>ชื่อองค์กร *</label><input id="org-name" required placeholder="เช่น กรมสุขภาพจิต"></div>
-          <div class="fg"><label>กระทรวง</label><input id="org-ministry" placeholder="เช่น สาธารณสุข"></div>
-          <div class="two-col-eq">
-            <div class="fg"><label>หนังสือเรียน *</label><input id="org-salutation" required placeholder="เช่น อธิบดีกรมสุขภาพจิต"></div>
-            <div class="fg"><label>Mail Sarabun *</label><input id="org-saraban-email" type="email" required placeholder="saraban@org.go.th"></div>
-          </div>
-          <div style="background:var(--bg);border:1px solid var(--bdr);border-radius:8px;padding:12px 14px">
-            <div style="font-size:11.5px;font-weight:700;color:var(--tx2);margin-bottom:10px">👤 ผู้ประสานงานหลัก</div>
-            <div class="fg"><label>ชื่อผู้ประสานงาน *</label><input id="org-coordinator-name" required></div>
-            <div class="two-col-eq">
-              <div class="fg"><label>ตำแหน่ง *</label><input id="org-coordinator-position" required></div>
-              <div class="fg"><label>เบอร์/ID Line *</label><input id="org-coordinator-contact" required></div>
-            </div>
-            <div class="fg" style="margin-bottom:0"><label>อีเมลผู้ประสาน *</label><input id="org-coordinator-email" type="email" required></div>
-          </div>
-          <div id="org-form-msg" style="font-size:12px;color:var(--tx2);min-height:16px"></div>
-          <div id="org-detail-box" style="display:flex;flex-direction:column;gap:8px"></div>
-        </form>
-      </div>
-      <div class="umodal-foot">
-        <button class="btn b-gray" onclick="document.getElementById('org-modal').style.display='none'">ยกเลิก</button>
-        <button class="btn b-solid" onclick="document.getElementById('org-profile-form').requestSubmit()">💾 บันทึก</button>
-      </div>
-    </div>`;
-  document.body.appendChild(overlay);
-  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.style.display = 'none'; });
-  return overlay;
-}
-
-
-
-
-
-// Helper: get value from form_data JSONB (primary) or top-level column (fallback)
-// Helper: render file URL as clickable link
-// Helper: render turnover rate (stored or recalculate)
-
-
-
-
-
-
-
-
-
-
-
-
-function buildLinkUrl(org) {
-  const code = String(org.org_code || org.code || '').toLowerCase();
-  return `${SURVEY_BASE_URL}/?org=${code}`;
-}
-
-function _renderAnalyticsCh1(summary) {
-  const ch1Page = document.getElementById('page-an-ch1');
-  const totalCh1Staff = state.ch1Rows.reduce((sum, row) => sum + Number(row.total_personnel || row.total_staff || row.form_data?.total_personnel || 0), 0);
-  const ch1Kpis = ch1Page.querySelectorAll('.kpi .kpi-val');
-  if (ch1Kpis.length >= 4) {
-    ch1Kpis[0].textContent = fmtNum(totalCh1Staff);
-    ch1Kpis[1].textContent = fmtNum(state.ch1Rows.length ? (state.ch1Rows.reduce((sum, row) => sum + (parseFloat(row.ncd_ratio_pct ?? row.form_data?.ncd_ratio_pct) || 0), 0) / state.ch1Rows.length) : 0, 1) + '%';
-    ch1Kpis[2].textContent = fmtNum(state.ch1Rows.length ? (state.ch1Rows.reduce((sum, row) => sum + (parseFloat(row.mental_burnout ?? row.form_data?.mental_burnout) || 0), 0) / state.ch1Rows.length) : 0, 1) + '%';
-    ch1Kpis[3].textContent = fmtNum(state.ch1Rows.length ? (state.ch1Rows.reduce((sum, row) => sum + (parseFloat(row.engagement_score ?? row.form_data?.engagement_score) || 0), 0) / state.ch1Rows.length) : 0, 1);
-  }
-
-  const submitted = state.surveyRows.filter((row) => !row.is_draft);
-  const activeOrgs = summary.filter((org) => org.wellbeingSubmitted > 0).length;
-  const subEl = document.getElementById('an-wb-sub');
-  if (subEl) subEl.textContent = `ผลการสำรวจรายบุคคล ${fmtNum(submitted.length)} คน จาก ${fmtNum(activeOrgs)} องค์กร`;
-
-  // Populate org filter dropdown
-  const orgFilter = document.getElementById('wba-org-filter');
-  if (orgFilter && orgFilter.options.length <= 1) {
-    const orgs = [...new Set(submitted.map((r) => r.organization || r.org).filter(Boolean))].sort();
-    orgs.forEach((o) => {
-      const opt = document.createElement('option');
-      opt.value = o; opt.textContent = o;
-      orgFilter.appendChild(opt);
-    });
-  }
-
-  renderWbAnalytics();
-}
-
-function renderWbAnalytics() {
-  const submitted = state.surveyRows.filter((r) => !r.is_draft);
-  const orgSel = (document.getElementById('wba-org-filter') || {}).value || '';
-  const genderSel = (document.getElementById('wba-gender-filter') || {}).value || '';
-
-  const rows = submitted.filter((r) => {
-    if (orgSel && (r.organization || r.org) !== orgSel) return false;
-    if (genderSel && r.gender !== genderSel) return false;
-    return true;
-  });
-
-  const n = rows.length;
-  const setEl = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
-
-  if (n === 0) {
-    setEl('wba-total', '0 คน'); setEl('wba-phq-high', '—'); setEl('wba-gad-high', '—');
-    setEl('wba-burnout-avg', '—'); setEl('wba-eng-avg', '—'); setEl('wba-wlb-avg', '—');
-    ['wba-phq-dist', 'wba-scores', 'wba-heatmap'].forEach((id) => { const el = document.getElementById(id); if (el) el.innerHTML = '<span style="color:var(--tx3)">ยังไม่มีข้อมูล</span>'; });
-    const tb = document.getElementById('wba-org-table');
-    if (tb) tb.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--tx3);padding:24px">ยังไม่มีข้อมูล</td></tr>';
-    return;
-  }
-
-  const phqHighCount = rows.filter((r) => (getPhq9(r) || 0) >= 10).length;
-  const gadHighCount = rows.filter((r) => (getGad7(r) || 0) >= 10).length;
-  const avgBurnout = rows.reduce((s, r) => s + (getBurnout(r) || 0), 0) / n;
-  const avgEng = rows.reduce((s, r) => s + (getEngagement(r) || 0), 0) / n;
-  const avgWlb = rows.reduce((s, r) => s + (getWlb(r) || 0), 0) / n;
-  const avgPhq = rows.reduce((s, r) => s + (getPhq9(r) || 0), 0) / n;
-  const avgGad = rows.reduce((s, r) => s + (getGad7(r) || 0), 0) / n;
-
-  setEl('wba-total', fmtNum(n) + ' คน');
-  setEl('wba-phq-high', fmtNum(phqHighCount) + ' คน (' + fmtNum((phqHighCount / n) * 100, 1) + '%)');
-  setEl('wba-gad-high', fmtNum(gadHighCount) + ' คน (' + fmtNum((gadHighCount / n) * 100, 1) + '%)');
-  setEl('wba-burnout-avg', fmtNum(avgBurnout, 1));
-  setEl('wba-eng-avg', fmtNum(avgEng, 1));
-  setEl('wba-wlb-avg', fmtNum(avgWlb, 1));
-
-  // PHQ-9 distribution bars
-  const phqDist = document.getElementById('wba-phq-dist');
-  if (phqDist) {
-    const lvls = [
-      { label: 'ปกติ (0–4)', cls: 'hm1', count: rows.filter((r) => (getPhq9(r) || 0) < 5).length },
-      { label: 'เล็กน้อย (5–9)', cls: 'hm2', count: rows.filter((r) => { const p = getPhq9(r) || 0; return p >= 5 && p < 10; }).length },
-      { label: 'ปานกลาง (10–14)', cls: 'hm3', count: rows.filter((r) => { const p = getPhq9(r) || 0; return p >= 10 && p < 15; }).length },
-      { label: 'รุนแรง (≥15)', cls: 'hm5', count: rows.filter((r) => (getPhq9(r) || 0) >= 15).length },
-    ];
-    phqDist.innerHTML = lvls.map((l) => {
-      const pct = fmtNum((l.count / n) * 100, 1);
-      return `<div style="margin-bottom:12px">
-        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">
-          <span>${l.label}</span><span style="font-weight:600">${fmtNum(l.count)} คน (${pct}%)</span>
-        </div>
-        <div style="background:#F0F2F5;border-radius:4px;height:10px;overflow:hidden">
-          <div class="${l.cls}" style="width:${pct}%;height:10px;border-radius:4px;transition:width .4s"></div>
-        </div>
-      </div>`;
-    }).join('');
-  }
-
-  // Score summary table
-  const scoresEl = document.getElementById('wba-scores');
-  if (scoresEl) {
-    scoresEl.innerHTML = `<table style="width:100%;font-size:12px;border-collapse:collapse">
-      <thead><tr style="border-bottom:1px solid var(--brd)">
-        <th style="text-align:left;padding:6px 4px">ตัวชี้วัด</th>
-        <th style="text-align:right;padding:6px 4px">เฉลี่ย</th>
-        <th style="text-align:right;padding:6px 4px">มีความเสี่ยง (≥10)</th>
-      </tr></thead>
-      <tbody>
-        <tr><td style="padding:6px 4px">PHQ-9 (ซึมเศร้า)</td><td style="text-align:right;padding:6px 4px">${fmtNum(avgPhq, 1)}</td><td style="text-align:right;padding:6px 4px;${phqHighCount / n >= 0.2 ? 'color:#991B1B;font-weight:600' : ''}">${fmtNum(phqHighCount)} คน (${fmtNum((phqHighCount / n) * 100, 1)}%)</td></tr>
-        <tr><td style="padding:6px 4px">GAD-7 (วิตกกังวล)</td><td style="text-align:right;padding:6px 4px">${fmtNum(avgGad, 1)}</td><td style="text-align:right;padding:6px 4px;${gadHighCount / n >= 0.2 ? 'color:#991B1B;font-weight:600' : ''}">${fmtNum(gadHighCount)} คน (${fmtNum((gadHighCount / n) * 100, 1)}%)</td></tr>
-        <tr><td style="padding:6px 4px">Burnout Score</td><td style="text-align:right;padding:6px 4px">${fmtNum(avgBurnout, 1)}</td><td style="text-align:right;padding:6px 4px;color:var(--tx3)">—</td></tr>
-        <tr><td style="padding:6px 4px">Engagement Score</td><td style="text-align:right;padding:6px 4px">${fmtNum(avgEng, 1)}</td><td style="text-align:right;padding:6px 4px;color:var(--tx3)">—</td></tr>
-        <tr><td style="padding:6px 4px">Work-Life Balance</td><td style="text-align:right;padding:6px 4px">${fmtNum(avgWlb, 1)}</td><td style="text-align:right;padding:6px 4px;color:var(--tx3)">—</td></tr>
-      </tbody>
-    </table>`;
-  }
-
-  // Dynamic heatmap
-  const heatmapEl = document.getElementById('wba-heatmap');
-  if (heatmapEl) {
-    const orgList = [...new Set(rows.map((r) => r.organization || r.org).filter(Boolean))].sort();
-    if (orgList.length === 0) {
-      heatmapEl.innerHTML = '<span style="color:var(--tx3)">ไม่มีข้อมูลองค์กร</span>';
-    } else {
-      const hmCls = (val, metric) => {
-        if (metric === 'phq') { if (val < 5) return 'hm1'; if (val < 10) return 'hm2'; if (val < 15) return 'hm3'; if (val < 20) return 'hm4'; return 'hm5'; }
-        if (metric === 'gad') { if (val < 5) return 'hm1'; if (val < 10) return 'hm2'; if (val < 15) return 'hm3'; return 'hm4'; }
-        if (metric === 'burnout') { if (val < 2) return 'hm1'; if (val < 4) return 'hm2'; if (val < 6) return 'hm3'; if (val < 8) return 'hm4'; return 'hm5'; }
-        if (metric === 'eng') { if (val >= 75) return 'hm1'; if (val >= 60) return 'hm2'; if (val >= 45) return 'hm3'; if (val >= 30) return 'hm4'; return 'hm5'; }
-        if (metric === 'wlb') { if (val >= 7) return 'hm1'; if (val >= 5) return 'hm2'; if (val >= 3) return 'hm3'; if (val >= 1.5) return 'hm4'; return 'hm5'; }
-        return 'hm3';
-      };
-      const abbr = (s) => s && s.length > 6 ? s.substring(0, 6) + '…' : (s || '?');
-      const orgData = orgList.map((o) => {
-        const orgRows = rows.filter((r) => (r.organization || r.org) === o);
-        const m = orgRows.length;
-        return {
-          name: o,
-          phq: m ? orgRows.reduce((s, r) => s + (getPhq9(r) || 0), 0) / m : 0,
-          gad: m ? orgRows.reduce((s, r) => s + (getGad7(r) || 0), 0) / m : 0,
-          burnout: m ? orgRows.reduce((s, r) => s + (getBurnout(r) || 0), 0) / m : 0,
-          eng: m ? orgRows.reduce((s, r) => s + (getEngagement(r) || 0), 0) / m : 0,
-          wlb: m ? orgRows.reduce((s, r) => s + (getWlb(r) || 0), 0) / m : 0,
-        };
-      });
-      const metrics = [
-        { key: 'phq', label: 'PHQ-9 (ซึมเศร้า)' },
-        { key: 'gad', label: 'GAD-7 (วิตกกังวล)' },
-        { key: 'burnout', label: 'Burnout' },
-        { key: 'eng', label: 'Engagement' },
-        { key: 'wlb', label: 'Work-Life Balance' },
-      ];
-      heatmapEl.innerHTML = `<div style="min-width:${Math.max(520, orgList.length * 42 + 160)}px">
-        <div style="display:flex;gap:3px;margin-bottom:8px;padding-left:150px">
-          ${orgData.map((o) => `<div style="width:36px;text-align:center;font-size:9px;color:var(--tx3);overflow:hidden;word-break:break-all">${abbr(o.name)}</div>`).join('')}
-        </div>
-        ${metrics.map((m) => `<div class="hm-row"><div class="hm-label">${m.label}</div><div class="hm-cells">${orgData.map((o) => `<div class="hm ${hmCls(o[m.key], m.key)}">${fmtNum(o[m.key], 1)}</div>`).join('')}</div></div>`).join('')}
-        <div style="margin-top:10px;display:flex;gap:8px;align-items:center;font-size:11px;color:var(--tx3);flex-wrap:wrap">
-          <div class="hm hm1" style="width:14px;height:14px;font-size:0"></div>ดีมาก
-          <div class="hm hm2" style="width:14px;height:14px;font-size:0"></div>ดี
-          <div class="hm hm3" style="width:14px;height:14px;font-size:0"></div>ปานกลาง
-          <div class="hm hm4" style="width:14px;height:14px;font-size:0"></div>ต้องปรับปรุง
-          <div class="hm hm5" style="width:14px;height:14px;font-size:0"></div>วิกฤต
-        </div>
-      </div>`;
-    }
-  }
-
-  // Org ranking table
-  const tbody = document.getElementById('wba-org-table');
-  if (tbody) {
-    const orgStats = [...new Set(rows.map((r) => r.organization || r.org).filter(Boolean))].sort().map((o) => {
-      const orgRows = rows.filter((r) => (r.organization || r.org) === o);
-      const m = orgRows.length;
-      const phqAvg = m ? orgRows.reduce((s, r) => s + (getPhq9(r) || 0), 0) / m : 0;
-      const phqH = m ? orgRows.filter((r) => (getPhq9(r) || 0) >= 10).length : 0;
-      const burnoutAvg = m ? orgRows.reduce((s, r) => s + (getBurnout(r) || 0), 0) / m : 0;
-      const engAvg = m ? orgRows.reduce((s, r) => s + (getEngagement(r) || 0), 0) / m : 0;
-      return { name: o, count: m, phqAvg, phqHighPct: m ? (phqH / m) * 100 : 0, burnoutAvg, engAvg };
-    }).sort((a, b) => b.phqHighPct - a.phqHighPct);
-
-    tbody.innerHTML = orgStats.map((o, i) => `<tr>
-      <td>${i + 1}</td>
-      <td>${esc(o.name)}</td>
-      <td>${fmtNum(o.count)}</td>
-      <td class="${o.phqAvg >= 10 ? 'bad' : ''}">${fmtNum(o.phqAvg, 1)}</td>
-      <td class="${o.phqHighPct >= 20 ? 'bad' : ''}">${fmtNum(o.phqHighPct, 1)}%</td>
-      <td>${fmtNum(o.burnoutAvg, 1)}</td>
-      <td>${fmtNum(o.engAvg, 1)}</td>
-    </tr>`).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--tx3)">ยังไม่มีข้อมูล</td></tr>';
-  }
-}
-
-document.addEventListener('click', (e) => {
-  if (!e.target.closest('.org-multi-wrap')) {
-    const dd = document.getElementById('ch1-org-dropdown');
-    if (dd) dd.classList.remove('show');
-  }
-});
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-let _initSession = null;
-
-async function refreshData() {
-  const statusEl = document.getElementById('connection-status');
-  const btnRefresh = document.getElementById('btn-refresh-data');
-  if (statusEl) { statusEl.textContent = 'กำลังโหลด...'; statusEl.style.color = 'var(--tx2)'; }
-  if (btnRefresh) btnRefresh.style.display = 'none';
-  try {
-    await loadBackend();
-    const summary = summarizeOrgs();
-    renderDashboard(summary);
-    renderProgress(summary);
-    renderOrgs(summary);
-    renderOrgCoordinators();
-    renderCh1(summary);
-    renderCh1Summary();
-    renderWellbeingControl(summary);
-    renderWellbeingOrg(summary);
-    renderWellbeingRaw();
-    _renderAnalyticsCh1(summary);
-    populateOrgSelects();
-  } catch (e) {
-    if (statusEl) { statusEl.textContent = 'โหลดไม่สำเร็จ'; statusEl.style.color = 'var(--D)'; }
-    if (btnRefresh) btnRefresh.style.display = '';
-  }
-}
-
-async function init() {
-  // Show refresh button automatically after 10s if still loading
-  const _refreshFallbackTimer = setTimeout(() => {
-    const btnRefresh = document.getElementById('btn-refresh-data');
-    const statusEl = document.getElementById('connection-status');
-    if (btnRefresh && statusEl && statusEl.textContent.includes('เชื่อมต่อ')) {
-      statusEl.textContent = 'เชื่อมต่อนานเกินไป';
-      statusEl.style.color = 'var(--D)';
-    }
-  }, 10000);
-  try {
-    const session = await requireSession();
-    if (!session) return;
-    _initSession = session;
-    clearTimeout(_refreshFallbackTimer);
-    
-    // Try to load backend data, but don't let failures crash the entire app
-    try {
-      await loadBackend();
-    } catch (loadError) {
-      console.error('Backend loading failed:', loadError);
-      const btnRefresh = document.getElementById('btn-refresh-data');
-      if (btnRefresh) btnRefresh.style.display = '';
-      // Show error but continue with empty state
-      showError('โหลดข้อมูลไม่สำเร็จ: ' + loadError.message + ' - แสดงข้อมูลว่าง');
-    }
-    
-    renderChrome(); // ← after loadBackend so state.userRows is populated for role check
-    const summary = summarizeOrgs();
-    
-    // Render all pages - they should handle empty data gracefully
-    renderDashboard(summary);
-    renderProgress(summary);
-    renderOrgs(summary);
-    renderOrgCoordinators();
-    renderCh1(summary);
-    renderCh1Summary();
-    renderWellbeingControl(summary);
-    renderWellbeingOrg(summary);
-    renderWellbeingRaw();
-    _renderAnalyticsCh1(summary);
-    populateOrgSelects();
-    const auditExportBtn = document.querySelector('#page-audit .btn.b-gray');
-    if (auditExportBtn) auditExportBtn.onclick = exportAuditLog;
-    
-  } catch (error) {
-    console.error('Init error:', error);
-    // Show a more user-friendly error
-    const statusEl = document.getElementById('connection-status');
-    if (statusEl) { statusEl.textContent = 'โหลดล้มเหลว'; statusEl.style.color = 'var(--D)'; }
-    const btnRefresh = document.getElementById('btn-refresh-data');
-    if (btnRefresh) btnRefresh.style.display = '';
-    showError('โหลดระบบไม่สำเร็จ: ' + error.message + ' - กรุณารีเฟรชหน้าเว็บ');
-  }
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  init();
-  // init Buddhist Era labels on date inputs
-  ['deadline-ch1','deadline-wb','viewer-expires'].forEach(id => {
-    const el = document.getElementById(id);
-    const labelEl = document.getElementById(id + '-be');
-    if (el && labelEl) labelEl.textContent = isoToBuddhistDisplay(el.value);
-  });
-});
-
-/* ========== PROGRESS PAGE ========== */
-
-function sendReminderAll() {
-  const summary = summarizeOrgs();
-  const pending = summary.filter((org) => org.ch1Count === 0);
-  if (!pending.length) { showToast('ทุกองค์กรส่ง Ch1 ครบแล้ว ไม่จำเป็นต้องส่ง Reminder','info'); return; }
-  showConfirm(
-    `จะส่ง Reminder ไปยัง ${pending.length} องค์กรที่ยังไม่ส่ง Ch1\n\n${pending.slice(0,8).map((o) => '• ' + o.name).join('\n')}${pending.length > 8 ? `\n...และอีก ${pending.length - 8} องค์กร` : ''}`,
-    () => {
-      const msg = document.getElementById('notif-msg');
-      if (msg) { msg.style.color = 'var(--A)'; msg.textContent = `✅ ส่ง Reminder ไปยัง ${pending.length} องค์กรเรียบร้อย (Simulation)`; }
-      showToast(`ส่ง Reminder ไปยัง ${pending.length} องค์กรเรียบร้อย (ต้องต่อ Email Service จริง)`,'success',5000);
-    }
-  );
-}
-
-/* ========== TIMELINE PAGE ========== */
-
-/* ========== ORGS PAGE (simple panel) ========== */
-
-/* ========== CH1 PAGE — filters & export ========== */
-
-
-
-
-
-
-
-
-/* ========== USERS PAGE — removed (จัดการผู้ใช้แยกไป org-portal แล้ว) ========== */
-
-// ========== USER MODAL FUNCTIONS ==========
-function showAddUserModal() {
-  const myRole = state.myRole || 'superadmin';
-  const isSuper = myRole === 'superadmin';
-  _openUserModal({ title: '➕ เพิ่มผู้ใช้ใหม่', isEdit: false, email: '', role: 'viewer', orgName: '', expiresAt: '2026-06-30', isActive: true, isSuper });
-}
-
-function showEditUserModal(email) {
-  if (LOCKED_SUPERADMIN_EMAILS.includes(email)) { showToast('❌ ไม่สามารถแก้ไข Super Admin ที่ถูก Lock ได้', 'warn'); return; }
-  const row = (state.orgHrCredentials || []).find((r) => r.email === email)
-           || (state.userRows || []).find((r) => r.email === email);
-  if (!row) { showToast('ไม่พบข้อมูลผู้ใช้', 'warn'); return; }
-  const myRole = state.myRole || 'superadmin';
-  const isSuper = myRole === 'superadmin';
-  _openUserModal({
-    title: `✏️ จัดการผู้ใช้`, isEdit: true,
-    email: row.email, role: row.role || 'viewer',
-    orgName: row.org_name || '', expiresAt: row.expires_at ? row.expires_at.slice(0,10) : '2026-06-30',
-    isActive: row.is_active !== false, isSuper, rowId: row.id,
-  });
-}
-
-function _openUserModal(opts) {
-  const existing = document.getElementById('user-modal-overlay');
-  if (existing) existing.remove();
-
-  const roleOptions = opts.isSuper
-    ? `<option value="viewer"${opts.role==='viewer'?' selected':''}>👁 Viewer — ดูข้อมูลเท่านั้น</option>
-       <option value="org_hr"${opts.role==='org_hr'?' selected':''}>🏢 Org HR — HR ขององค์กร ดูข้อมูลเฉพาะองค์กร</option>
-       <option value="admin"${opts.role==='admin'?' selected':''}>🔧 Admin — จัดการข้อมูลและ Viewer</option>
-       <option value="superadmin"${opts.role==='superadmin'?' selected':''}>👑 Super Admin — สิทธิ์สูงสุด</option>`
-    : `<option value="viewer" selected>👁 Viewer — ดูข้อมูลเท่านั้น</option>`;
-
-  // Password section — ทั้ง add/edit ใช้ manual input ได้ (Edge Function จัดการ)
-  const pwdTitle = opts.isEdit ? '🔐 เปลี่ยนรหัสผ่าน' : '🔐 ตั้งรหัสผ่านเริ่มต้น';
-  const pwdHint  = opts.isEdit
-    ? 'เว้นว่างถ้าไม่ต้องการเปลี่ยน · กรอกเพื่อ Reset รหัสผ่านของผู้ใช้รายนี้'
-    : 'ตั้งรหัสผ่านสำหรับ Login ครั้งแรก · หรือกด 🔄 Auto ให้ระบบสร้างให้';
-  const pwdPlaceholder = opts.isEdit ? 'รหัสผ่านใหม่ (เว้นว่างถ้าไม่เปลี่ยน)' : 'รหัสผ่านเริ่มต้น...';
-  const pwdResetHtml = `
-    <div style="border-top:1px solid var(--bdr);padding-top:14px">
-      <div style="font-size:12.5px;font-weight:700;color:var(--tx);margin-bottom:8px;display:flex;align-items:center;gap:5px">
-        ${pwdTitle}
-        <span class="info-tip" data-tip="พิมพ์รหัสผ่าน หรือกด Auto สร้างอัตโนมัติ&#10;จากนั้นกด 📋 Copy คัดลอกแจ้งผู้ใช้">i</span>
-      </div>
-      <div style="display:flex;gap:7px;align-items:center">
-        <input type="text" id="um-new-pwd" placeholder="${pwdPlaceholder}"
-          class="si" style="flex:1;font-family:monospace;letter-spacing:0.05em;font-size:13px">
-        <button class="btn b-gray" style="padding:5px 10px;font-size:11.5px;white-space:nowrap" onclick="genTempPwd()">🔄 Auto</button>
-        <button class="btn b-gray" style="padding:5px 10px;font-size:11.5px" onclick="copyPwd()">📋 Copy</button>
-      </div>
-      <div id="um-pwd-strength" style="font-size:11px;color:var(--tx3);margin-top:5px">${pwdHint}</div>
-    </div>`;
-
-  const overlay = document.createElement('div');
-  overlay.id = 'user-modal-overlay';
-  overlay.className = 'umodal-overlay';
-  overlay.innerHTML = `
-    <div class="umodal">
-      <div class="umodal-head">
-        <h3>${opts.title}</h3>
-        <button class="btn b-gray" style="padding:5px 10px;min-width:32px" onclick="closeUserModal()">✕</button>
-      </div>
-      <div class="umodal-body">
-        <div class="fg" style="margin:0">
-          <label style="font-size:12px;font-weight:600;color:var(--tx2);display:block;margin-bottom:5px">อีเมล *</label>
-          <input class="si" id="um-email" type="email" placeholder="email@example.com" value="${esc(opts.email)}" ${opts.isEdit ? 'readonly style="background:var(--bg);color:var(--tx2)"' : ''}>
-        </div>
-        <div class="fg" style="margin:0">
-          <label style="font-size:12px;font-weight:600;color:var(--tx2);display:flex;align-items:center;gap:5px;margin-bottom:5px">Role / ระดับสิทธิ์
-            <span class="info-tip" data-tip="Viewer: ดูข้อมูลได้อย่างเดียว&#10;Admin: เพิ่ม/จัดการ Viewer ได้&#10;Super Admin: จัดการทุกอย่างรวมถึง Admin">i</span>
-          </label>
-          <select class="sel" id="um-role" style="width:100%">${roleOptions}</select>
-        </div>
-        <div class="fg" style="margin:0">
-          <label style="font-size:12px;font-weight:600;color:var(--tx2);display:flex;align-items:center;gap:5px;margin-bottom:5px">องค์กรที่เข้าถึงได้
-            <span class="info-tip" data-tip="Viewer จะเห็นเฉพาะข้อมูลขององค์กรนี้&#10;ถ้าเลือก 'ทุกองค์กร' จะเห็นข้อมูลทั้งหมด">i</span>
-          </label>
-          <select class="sel" id="um-org" style="width:100%">
-            <option value="">ทุกองค์กร (ไม่จำกัด)</option>
-            ${ORG_NAMES.map((n) => `<option value="${esc(n)}"${n===opts.orgName?' selected':''}>${esc(n)}</option>`).join('')}
-          </select>
-        </div>
-        <div class="fg" style="margin:0">
-          <label style="font-size:12px;font-weight:600;color:var(--tx2);display:block;margin-bottom:5px">วันหมดอายุสิทธิ์</label>
-          <input class="si" id="um-expires" type="date" value="${esc(opts.expiresAt)}">
-        </div>
-        <div style="display:flex;align-items:center;gap:10px">
-          <label style="font-size:12px;font-weight:600;color:var(--tx2)">สถานะ:</label>
-          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer">
-            <input type="checkbox" id="um-active" ${opts.isActive ? 'checked' : ''}> เปิดใช้งาน (Active)
-          </label>
-        </div>
-        <div>
-          <div style="font-size:12.5px;font-weight:700;color:var(--tx);margin-bottom:8px;display:flex;align-items:center;gap:6px">สิทธิ์เข้าถึงฟอร์ม
-            <span class="info-tip" data-tip="กำหนดว่า Viewer นี้มองเห็นฟอร์มใดได้บ้าง&#10;สามารถกำหนดได้อย่างละเอียด">i</span>
-          </div>
-          <div class="perm-card">
-            <label class="perm-row">
-              <input type="checkbox" id="um-perm-ch1" checked>
-              <div class="perm-info">
-                <div class="perm-name">📝 ดูผล Ch1 — ข้อมูลสุขภาวะองค์กร</div>
-                <div class="perm-desc">เข้าถึงผลสำรวจแบบฟอร์ม Ch1 (ข้อมูลบุคลากรระดับองค์กร)</div>
-              </div>
-            </label>
-            <label class="perm-row">
-              <input type="checkbox" id="um-perm-wb" checked>
-              <div class="perm-info">
-                <div class="perm-name">💚 ดูผล Wellbeing Survey — สุขภาวะรายบุคคล</div>
-                <div class="perm-desc">เข้าถึงผลสำรวจสุขภาวะรายบุคคล (PHQ-9, กิจกรรมทางกาย ฯลฯ)</div>
-              </div>
-            </label>
-            <label class="perm-row">
-              <input type="checkbox" id="um-perm-raw">
-              <div class="perm-info">
-                <div class="perm-name">🗂️ ดู Raw Data — ข้อมูลดิบรายแถว</div>
-                <div class="perm-desc">เห็นข้อมูลระดับ row ไม่ผ่านการ Aggregate (ละเอียดสุด)</div>
-              </div>
-            </label>
-            <label class="perm-row">
-              <input type="checkbox" id="um-perm-export">
-              <div class="perm-info">
-                <div class="perm-name">📤 Export Excel — ส่งออกข้อมูล</div>
-                <div class="perm-desc">ดาวน์โหลดรายงานเป็นไฟล์ .xlsx</div>
-              </div>
-            </label>
-          </div>
-        </div>
-        ${pwdResetHtml}
-        <div id="um-msg" style="font-size:12.5px;min-height:18px"></div>
-      </div>
-      <div class="umodal-foot">
-        <button class="btn b-gray" onclick="closeUserModal()">ยกเลิก</button>
-        <button class="btn b-solid" onclick="saveUserFromModal(${opts.isEdit ? 'true' : 'false'})">💾 ${opts.isEdit ? 'บันทึกการแก้ไข' : 'เพิ่มผู้ใช้'}</button>
-      </div>
-    </div>`;
-  document.body.appendChild(overlay);
-  overlay.addEventListener('click', (e) => { if (e.target === overlay) closeUserModal(); });
-  if (opts.isEdit) overlay.dataset.editEmail = opts.email;
-  if (opts.rowId) overlay.dataset.rowId = opts.rowId;
-}
-
-function closeUserModal() {
-  const el = document.getElementById('user-modal-overlay');
-  if (el) el.remove();
-}
-
-async function saveUserFromModal(isEdit) {
-  const overlay = document.getElementById('user-modal-overlay');
-  const email = document.getElementById('um-email')?.value?.trim();
-  const role = document.getElementById('um-role')?.value || 'viewer';
-  const orgName = document.getElementById('um-org')?.value || '';
-  const expires = document.getElementById('um-expires')?.value || null;
-  const isActive = document.getElementById('um-active')?.checked !== false;
-  const msg = document.getElementById('um-msg');
-
-  if (!email || !email.includes('@')) {
-    if (msg) { msg.style.color = 'var(--D)'; msg.textContent = '⚠️ กรุณากรอกอีเมลให้ถูกต้อง'; }
-    return;
-  }
-  if (msg) { msg.style.color = 'var(--tx2)'; msg.textContent = 'กำลังบันทึก...'; }
-
-  // Password — ใช้ Edge Function (set-user-password) ที่มี service_role key
-  const newPwd = document.getElementById('um-new-pwd')?.value?.trim();
-  if (!isEdit && newPwd) {
-    if (msg) { msg.style.color = 'var(--tx2)'; msg.textContent = 'กำลังสร้าง Auth account...'; }
-    const fnResult = await callSetUserPasswordFn(email, newPwd, 'create');
-    if (!fnResult.success) {
-      if (msg) { msg.style.color = 'var(--D)'; msg.textContent = '❌ สร้าง Auth account ไม่สำเร็จ: ' + fnResult.error; }
-      return;
-    }
-    if (msg) { msg.style.color = 'var(--tx2)'; msg.textContent = 'สร้าง Auth account แล้ว · กำลังบันทึก role...'; }
-  }
-
-  // Note: expires_at column removed — not in schema; use is_active for access control
-  const payload = { email, role, org_name: orgName || null, is_active: isActive };
-  // For org_hr role, also set org_code from org mapping
-  if (role === 'org_hr' && orgName) {
-    const orgMatch = ORG_LOOKUP.get(orgName) || state.orgProfiles.find(o => o.org_name_th === orgName);
-    if (orgMatch) {
-      payload.org_code = orgMatch.org_code || orgMatch.code?.toLowerCase();
-      payload.display_name = orgName;
-    }
-  }
-  let error = null;
-
-  if (isEdit) {
-    const rowId = overlay?.dataset.rowId;
-    const editEmail = overlay?.dataset.editEmail;
-    if (rowId) {
-      ({ error } = await sb.from('admin_user_roles').update(payload).eq('id', rowId));
-    } else if (editEmail) {
-      ({ error } = await sb.from('admin_user_roles').update(payload).eq('email', editEmail));
-    }
-  } else {
-    ({ error } = await sb.from('admin_user_roles').insert(payload));
-  }
-
-  if (error) {
-    if (msg) { msg.style.color = 'var(--D)'; msg.textContent = '❌ บันทึกไม่สำเร็จ: ' + error.message; }
-    return;
-  }
-
-  state.orgHrCredentials = await fetchOrgHrCredentials();
-  renderOrgHrCredentials();
-
-  // Edit mode + password — update via Edge Function
-  if (isEdit && newPwd) {
-    if (msg) { msg.style.color = 'var(--tx2)'; msg.textContent = 'กำลังเปลี่ยนรหัสผ่าน...'; }
-    const fnResult = await callSetUserPasswordFn(email, newPwd, 'update');
-    closeUserModal();
-    if (fnResult.success) {
-      showToast(`✅ แก้ไข ${email} สำเร็จ · 🔑 รหัสผ่านใหม่: ${newPwd} — แจ้งผู้ใช้ได้เลย`, 'success', 12000);
-    } else {
-      showToast(`✅ แก้ไข role สำเร็จ · ⚠️ เปลี่ยนรหัสผ่านไม่สำเร็จ: ${fnResult.error}`, 'warn', 8000);
-    }
-  } else {
-    closeUserModal();
-    if (!isEdit && newPwd) {
-      showToast(`✅ เพิ่ม ${email} สำเร็จ · 🔑 รหัสผ่าน: ${newPwd} — แจ้งผู้ใช้ได้เลย`, 'success', 12000);
-    } else {
-      showToast(`${isEdit ? 'แก้ไข' : 'เพิ่ม'} ${email} สำเร็จ ✅`, 'success');
-    }
-  }
-}
-
-// ── Password utilities ─────────────────────────────────────
-function genTempPwd() {
-  const yr = new Date().getFullYear() + 543;
-  const rand = Math.random().toString(36).slice(2,6).toUpperCase();
-  const code = `WB-${rand}-${yr}`;
-  const el = document.getElementById('um-new-pwd');
-  if (el) {
-    el.value = code;
-    el.style.color = 'var(--A)';
-    const hint = document.getElementById('um-pwd-strength');
-    if (hint) { hint.style.color = 'var(--A)'; hint.textContent = `✅ สร้างรหัส: ${code} — กด 📋 Copy แจ้งผู้ใช้`; }
-  }
-}
-
-function copyPwd() {
-  const el = document.getElementById('um-new-pwd');
-  if (el?.value?.trim()) {
-    navigator.clipboard.writeText(el.value.trim()).then(() => showToast('📋 คัดลอกรหัสผ่านแล้ว ✅'));
-  } else {
-    showToast('ยังไม่มีรหัสผ่าน — กรอกเองหรือกด 🔄 Auto ก่อน', 'warn');
-  }
-}
-
-async function applyPasswordChange(email, pwd, silent = false) {
-  if (!pwd || pwd.length < 6) {
-    if (!silent) showToast('⚠️ รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร', 'warn');
-    return false;
-  }
-  const currentEmail = state.session?.user?.email;
-  const isSelf = currentEmail?.toLowerCase() === email?.toLowerCase();
-  if (isSelf) {
-    // เปลี่ยนรหัสผ่านตัวเองโดยตรงผ่าน updateUser (ใช้ได้กับ anon key)
-    const { error } = await sb.auth.updateUser({ password: pwd });
-    if (error) {
-      if (!silent) showToast('❌ เปลี่ยนรหัสผ่านไม่สำเร็จ: ' + error.message, 'error');
-      const msgEl = document.getElementById('um-msg');
-      if (msgEl) { msgEl.style.color = 'var(--D)'; msgEl.textContent = '❌ ' + error.message; }
-      return false;
-    }
-    if (!silent) showToast('🔐 เปลี่ยนรหัสผ่านสำเร็จ ✅', 'success');
-    return true;
-  } else {
-    // เปลี่ยนรหัสผ่านผู้ใช้อื่นผ่าน Edge Function (มี service_role key)
-    const msgEl = document.getElementById('um-msg');
-    if (msgEl) { msgEl.style.color = 'var(--tx2)'; msgEl.textContent = 'กำลังเปลี่ยนรหัสผ่าน...'; }
-    const result = await callSetUserPasswordFn(email, pwd, 'update');
-    if (!result.success) {
-      if (!silent) showToast('❌ เปลี่ยนรหัสผ่านไม่สำเร็จ: ' + result.error, 'error');
-      if (msgEl) { msgEl.style.color = 'var(--D)'; msgEl.textContent = '❌ ' + result.error; }
-      return false;
-    }
-    if (!silent) showToast('🔐 เปลี่ยนรหัสผ่านสำเร็จ ✅', 'success');
-    return true;
-  }
-}
-
-async function sendPasswordResetLink(email) {
-  const loginUrl = window.location.origin + '/admin-login.html';
-  showToast('กำลังส่ง Reset Link...', 'info');
-  const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: loginUrl });
-  if (error) {
-    showToast('❌ ส่ง Reset Link ไม่สำเร็จ: ' + error.message, 'error');
-  } else {
-    showToast(`📧 ส่ง Reset Link ไปยัง ${email} แล้ว — ให้ผู้ใช้ตรวจสอบอีเมล`, 'success', 8000);
-  }
-}
-
-// ── Edge Function: set-user-password ─────────────────────────────────────────
-// action: 'create' (new user, email_confirm:true) | 'update' (change password)
-async function callSetUserPasswordFn(email, password, action) {
-  const token = state.session?.access_token;
-  if (!token) { showToast('❌ ไม่พบ session — กรุณา Login ใหม่', 'error'); return { success: false, error: 'No session' }; }
-  try {
-    const resp = await fetch(`${SUPABASE_URL}/functions/v1/set-user-password`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-        'apikey': SUPABASE_ANON_KEY,
-      },
-      body: JSON.stringify({ email, password, action }),
-    });
-    const data = await resp.json().catch(() => ({}));
-    if (!resp.ok) return { success: false, error: data.error || `HTTP ${resp.status}` };
-    return { success: true, ...data };
-  } catch (e) {
-    return { success: false, error: e.message };
-  }
-}
-
-// Modal เปลี่ยนรหัสผ่านสำหรับ locked superadmin
-function showChangePasswordModal(email) {
-  const existing = document.getElementById('user-modal-overlay');
-  if (existing) existing.remove();
-  const overlay = document.createElement('div');
-  overlay.id = 'user-modal-overlay';
-  overlay.className = 'umodal-overlay';
-  overlay.innerHTML = `
-    <div class="umodal" style="max-width:430px">
-      <div class="umodal-head">
-        <h3>🔐 เปลี่ยนรหัสผ่าน</h3>
-        <button class="btn b-gray" style="padding:5px 10px;min-width:32px" onclick="closeUserModal()">✕</button>
-      </div>
-      <div class="umodal-body">
-        <div class="fg" style="margin:0">
-          <label style="font-size:12px;font-weight:600;color:var(--tx2);display:block;margin-bottom:5px">อีเมล</label>
-          <input class="si" type="email" value="${esc(email)}" readonly
-            style="background:var(--bg);color:var(--tx2);font-weight:600">
-        </div>
-        <div class="fg" style="margin:0">
-          <label style="font-size:12px;font-weight:600;color:var(--tx2);display:flex;align-items:center;gap:5px;margin-bottom:5px">
-            รหัสผ่านใหม่ *
-            <span class="info-tip" data-tip="พิมพ์รหัสผ่านใหม่ หรือกด Auto&#10;จากนั้น Copy คัดลอกเก็บไว้">i</span>
-          </label>
-          <div style="display:flex;gap:7px;align-items:center">
-            <input type="text" id="um-new-pwd" placeholder="รหัสผ่านใหม่ (อย่างน้อย 6 ตัว)"
-              class="si" style="flex:1;font-family:monospace;letter-spacing:0.05em;font-size:13px">
-            <button class="btn b-gray" style="padding:5px 10px;font-size:11.5px;white-space:nowrap" onclick="genTempPwd()">🔄 Auto</button>
-            <button class="btn b-gray" style="padding:5px 10px;font-size:11.5px" onclick="copyPwd()">📋 Copy</button>
-          </div>
-          <div id="um-pwd-strength" style="font-size:11px;color:var(--tx3);margin-top:5px">
-            กรอกรหัสผ่านใหม่ หรือกด Auto ให้ระบบสร้างให้ แล้ว Copy เก็บไว้
-          </div>
-        </div>
-        <div id="um-msg" style="font-size:12.5px;min-height:18px"></div>
-      </div>
-      <div class="umodal-foot">
-        <button class="btn b-gray" onclick="closeUserModal()">ยกเลิก</button>
-        <button class="btn b-solid" onclick="handlePwdChangeSubmit('${esc(email)}')">🔐 เปลี่ยนรหัสผ่าน</button>
-      </div>
-    </div>`;
-  document.body.appendChild(overlay);
-  overlay.addEventListener('click', (e) => { if (e.target === overlay) closeUserModal(); });
-}
-
-async function handlePwdChangeSubmit(email) {
-  const pwd = document.getElementById('um-new-pwd')?.value?.trim();
-  const msg = document.getElementById('um-msg');
-  if (!pwd) { if (msg) { msg.style.color = 'var(--D)'; msg.textContent = '⚠️ กรุณาตั้งรหัสผ่านก่อน'; } return; }
-  if (pwd.length < 6) { if (msg) { msg.style.color = 'var(--D)'; msg.textContent = '⚠️ รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร'; } return; }
-  if (msg) { msg.style.color = 'var(--tx2)'; msg.textContent = 'กำลังบันทึก...'; }
-  const ok = await applyPasswordChange(email, pwd, false);
-  if (ok) {
-    setTimeout(() => closeUserModal(), 1800);
-  } else {
-    // Service role not available — show success with manual copy note
-    if (msg) {
-      msg.innerHTML = `⚠️ ใช้ Service Role Key เพื่อ apply อัตโนมัติ<br>
-        รหัสผ่านสำหรับ <b>${esc(email)}</b>: <code style="background:var(--PL);padding:2px 6px;border-radius:4px;color:var(--P);font-weight:700">${esc(pwd)}</code>
-        <button class="btn b-gray" style="padding:3px 8px;font-size:11px;margin-left:6px"
-          onclick="navigator.clipboard.writeText('${esc(pwd)}').then(()=>showToast('คัดลอกแล้ว ✅'))">📋 Copy</button>`;
-      msg.style.color = 'var(--W)';
-    }
-  }
-}
-
-async function resetUserPassword(email) {
-  genTempPwd(); // reuse the new genTempPwd function
-}
-
-async function deleteViewer(id, email) {
-  showConfirm(`ต้องการลบ Viewer: ${email} ออกจากระบบใช่หรือไม่?`, async () => {
-    const { error } = await sb.from('admin_user_roles').delete().eq('id', id);
-    if (error) { showToast('ลบไม่สำเร็จ: ' + error.message, 'error'); return; }
-    state.orgHrCredentials = (state.orgHrCredentials || []).filter((r) => r.email !== email);
-    renderOrgHrCredentials();
-    showToast(`ลบ ${email} เรียบร้อยแล้ว`, 'success');
-  });
-}
-
-async function saveViewer() {
-  const email = document.getElementById('viewer-email')?.value?.trim();
-  const orgName = document.getElementById('viewer-org-select')?.value || '';
-  const expires = document.getElementById('viewer-expires')?.value || null;
-  const msg = document.getElementById('viewer-form-msg');
-
-  if (!email || !email.includes('@')) {
-    if (msg) { msg.style.color = 'var(--D)'; msg.textContent = 'กรุณากรอกอีเมลให้ถูกต้อง'; }
-    return;
-  }
-  if (!orgName) {
-    if (msg) { msg.style.color = 'var(--D)'; msg.textContent = 'กรุณาเลือกองค์กร'; }
-    return;
-  }
-  if (msg) { msg.style.color = 'var(--tx2)'; msg.textContent = 'กำลังบันทึก...'; }
-
-  const editId = document.getElementById('viewer-edit-id')?.value;
-  const payload = { email, role: 'viewer', org_name: orgName, is_active: true };
-  let error = null;
-  if (editId) {
-    const existing = state.userRows.find((r) => r.email === editId);
-    if (existing?.id) {
-      ({ error } = await sb.from('admin_user_roles').update(payload).eq('id', existing.id));
-    }
-  } else {
-    ({ error } = await sb.from('admin_user_roles').insert(payload));
-  }
-
-  if (error) {
-    if (msg) { msg.style.color = 'var(--D)'; msg.textContent = 'บันทึกไม่สำเร็จ: ' + error.message; }
-    return;
-  }
-
-  state.orgHrCredentials = await fetchOrgHrCredentials();
-  renderOrgHrCredentials();
-  resetViewerForm();
-  const yr = new Date().getFullYear() + 543;
-  const code = `WB-${(ORG_LOOKUP.get(orgName)?.code || 'ORG')}-${yr}`;
-  const codeEl = document.getElementById('temp-code-display');
-  if (codeEl) codeEl.textContent = code;
-  if (msg) { msg.style.color = 'var(--A)'; msg.textContent = `✅ บันทึก ${email} สำเร็จ`; }
-}
-
-function copyTempCode() {
-  const code = document.getElementById('temp-code-display')?.textContent || '';
-  if (!code) {
-    showToast('ยังไม่มีรหัสชั่วคราวให้คัดลอก', 'warn');
-    return;
-  }
-  navigator.clipboard.writeText(code).then(() => showToast('📋 คัดลอกรหัสชั่วคราวแล้ว ✅'));
-}
-
-/* ========== ORG HR BATCH CREATION — moved to org-credentials.js ========== */
-
-function generateOrgHrPassword() {
-  const yr = new Date().getFullYear() + 543;
-  return `WB${yr}`;
-}
-
-async function batchCreateOrgHrUsers() {
-  const btn = document.getElementById('btn-batch-orghr');
-  const msgEl = document.getElementById('orghr-batch-msg');
-
-  // Check which org_hr users already exist
-  const existingOrgHr = state.userRows.filter(r => r.role === 'org_hr');
-  const existingCodes = existingOrgHr.map(r => r.org_code);
-  const toCreate = state.orgProfiles.filter(org => org.org_code && !existingCodes.includes(org.org_code));
-
-  if (toCreate.length === 0) {
-    showToast('✅ org_hr users ครบทุกองค์กรแล้ว — ไม่ต้องสร้างเพิ่ม', 'info');
-    renderOrgHrCredentials();
-    return;
-  }
-
-  const confirmMsg = `จะสร้าง org_hr user ${toCreate.length} องค์กร:\n\n${toCreate.map(o => `• ${o.org_code}${ORG_HR_EMAIL_DOMAIN} → ${o.org_name_th}`).join('\n')}\n\nดำเนินการต่อหรือไม่?`;
-
-  showConfirm(confirmMsg, async () => {
-    if (btn) { btn.disabled = true; btn.textContent = '⏳ กำลังสร้าง...'; }
-    if (msgEl) { msgEl.style.display = 'block'; msgEl.textContent = `กำลังสร้าง 0/${toCreate.length}...`; }
-
-    const results = [];
-    let successCount = 0;
-    let failCount = 0;
-
-    for (let i = 0; i < toCreate.length; i++) {
-      const org = toCreate[i];
-      const email = org.org_code + ORG_HR_EMAIL_DOMAIN;
-      const password = generateOrgHrPassword();
-
-      if (msgEl) { msgEl.textContent = `กำลังสร้าง ${i + 1}/${toCreate.length}: ${email}...`; }
-
-      try {
-        // Step 1: Create Auth user via Edge Function
-        const authResult = await callSetUserPasswordFn(email, password, 'create');
-        if (!authResult.success) {
-          results.push({ ...org, email, password, status: 'error', error: authResult.error });
-          failCount++;
-          continue;
-        }
-
-        // Step 2: Insert role into admin_user_roles
-        const { error: roleError } = await sb.from('admin_user_roles').insert({
-          email: email,
-          role: 'org_hr',
-          org_code: org.org_code,
-          org_name: org.org_name_th,
-          display_name: org.org_name_th,
-          is_active: true,
-          initial_password: password,
-          created_by: state.session?.user?.email || 'system',
-        });
-
-        if (roleError) {
-          // Auth user created but role insert failed
-          results.push({ ...org, email, password, status: 'partial', error: roleError.message });
-          failCount++;
-        } else {
-          results.push({ ...org, email, password, status: 'success' });
-          successCount++;
-        }
-      } catch (err) {
-        results.push({ ...org, email, password, status: 'error', error: err.message });
-        failCount++;
-      }
-    }
-
-    // Refresh credentials
-    state.orgHrCredentials = await fetchOrgHrCredentials();
-    renderOrgHrCredentials();
-
-    if (btn) { btn.disabled = false; btn.textContent = '🔑 สร้าง org_hr ทั้งหมด'; }
-
-    if (failCount > 0) {
-      const failedOrgs = results.filter(r => r.status !== 'success').map(r => `${r.email}: ${r.error}`).join('\n');
-      if (msgEl) {
-        msgEl.style.display = 'block';
-        msgEl.style.background = '#FFFBEB';
-        msgEl.style.color = '#92400E';
-        msgEl.textContent = `✅ สร้างสำเร็จ ${successCount} / ❌ ไม่สำเร็จ ${failCount} องค์กร`;
-      }
-      showToast(`สร้างสำเร็จ ${successCount} องค์กร · ไม่สำเร็จ ${failCount} องค์กร`, 'warn', 8000);
-    } else {
-      if (msgEl) {
-        msgEl.style.display = 'block';
-        msgEl.style.background = '#F0FFF4';
-        msgEl.style.color = '#276749';
-        msgEl.textContent = `✅ สร้าง org_hr user สำเร็จทั้ง ${successCount} องค์กร — กด 📋 Copy ทั้งหมด เพื่อคัดลอก credentials`;
-      }
-      showToast(`✅ สร้าง org_hr สำเร็จทั้ง ${successCount} องค์กร!`, 'success', 5000);
-    }
-  });
-}
-
-/* ========== LINKS/NOTIF PAGE — removed (หน้าเหล่านี้ถูกลบออกแล้ว) ========== */
-
-/* ========== QR MODAL ========== */
-// ==================== CH1 ROW DETAIL MODAL ====================
-
-/* --- Settings block removed: SETTINGS_DEFAULTS, loadSettingsUI, saveSettings, resetSettings
-       → now exclusively in admin/js/pages/settings.js --- */
-
-/* --- Settings/QR/Compare/Audit block removed: showQRModal, sendLinkEmail,
-       removeCompareChip, addCompareOrg, confirmAddCompare, exportAuditLog, filterAuditLog
-       → now exclusively in admin/js/pages/settings.js --- */
-
-/* ========== PDF GENERATION ========== */
-
-/* ========== POPULATE DYNAMIC SELECTS ON RENDER ========== */
-function populateOrgSelects() {
-  const ids = ['exp-ch1-org', 'exp-wb-org', 'exp-cmp-org', 'c1data-org', 'c1sheet-org'];
-  ids.forEach((id) => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    const cur = el.value;
-    el.innerHTML = `<option value="">ทุกองค์กร</option>${ORG_NAMES.map((name) => `<option value="${esc(name)}"${name===cur?' selected':''}>${esc(name)}</option>`).join('')}`;
-  });
-  const ch1Sel = document.getElementById('ch1-link-org');
-  if (ch1Sel) {
-    ch1Sel.innerHTML = `<option value="">-- เลือกองค์กร --</option>${getOrgCatalog().map((org) => `<option value="${esc(org.name)}">${esc(org.name)}</option>`).join('')}`;
-  }
-  const cmpSel = document.getElementById('compare-add-select');
-  if (cmpSel) {
-    cmpSel.innerHTML = `<option value="">— เลือก —</option>${ORG_NAMES.map((name) => `<option value="${esc(name)}">${esc(name)}</option>`).join('')}`;
-  }
-  // viewer org select (จัดการผู้ใช้ page)
-  const viewerOrgSel = document.getElementById('viewer-org-select');
-  if (viewerOrgSel) {
-    const cur = viewerOrgSel.value;
-    viewerOrgSel.innerHTML = `<option value="">— เลือกองค์กร —</option>${ORG_NAMES.map((name) => `<option value="${esc(name)}"${name===cur?' selected':''}>${esc(name)}</option>`).join('')}`;
-  }
-}
-</script>
-</bo
+<!-- ===== App Entry Point (replaces inline script) ===== -->
+<script src="admin/js/app.js"></script>
+
+</body>
+</html>

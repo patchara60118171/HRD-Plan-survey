@@ -41,10 +41,13 @@ function renderWelcome() {
     const emailForm = !hasEmail
         ? `
             <div class="email-input-container">
-                <input type="email" 
-                       id="user-email-input" 
-                       class="input-field" 
-                       placeholder="กรุณากรอกอีเมลของท่าน..." 
+                <label for="user-email-input" class="sr-only">อีเมลของท่าน (จำเป็น)</label>
+                <input type="email"
+                       id="user-email-input"
+                       class="input-field"
+                       placeholder="กรุณากรอกอีเมลของท่าน..."
+                       aria-label="อีเมลของท่าน"
+                       aria-required="true"
                        style="width: 300px; margin-bottom: 1rem;">
                 <button class="btn btn-primary" onclick="app.setEmail()" style="width: 300px;">
                     ยืนยันอีเมล <span>→</span>
@@ -245,15 +248,17 @@ function renderScale(question, value) {
 function renderNumber(question, value) {
     return `
         <div class="input-group">
-            <input type="number" 
-                   class="input-field" 
+            <input type="number"
+                   class="input-field"
                    id="${question.id}"
                    value="${value || ''}"
                    placeholder="${question.placeholder || ''}"
                    min="${question.min || ''}"
                    max="${question.max || ''}"
+                   aria-label="${question.text}"
+                   ${question.required ? 'aria-required="true"' : ''}
                    onchange="app.handleChange('${question.id}', this.value)">
-            ${question.unit ? `<span class="input-unit">${question.unit}</span>` : ''}
+            ${question.unit ? `<span class="input-unit" aria-hidden="true">${question.unit}</span>` : ''}
         </div>
     `;
 }
@@ -261,11 +266,13 @@ function renderNumber(question, value) {
 // Render Text Input
 function renderText(question, value) {
     return `
-        <input type="text" 
-               class="input-field" 
+        <input type="text"
+               class="input-field"
                id="${question.id}"
                value="${value || ''}"
                placeholder="${question.placeholder || 'พิมพ์คำตอบ...'}"
+               aria-label="${question.text}"
+               ${question.required ? 'aria-required="true"' : ''}
                onchange="app.handleChange('${question.id}', this.value)">
     `;
 }
@@ -297,18 +304,21 @@ function renderTime(question, value) {
 
     return `
         <div class="time-input-group">
-            <select class="input-field time-select" 
+            <select class="input-field time-select"
                     id="${question.id}_hour"
+                    aria-label="${question.text} — ชั่วโมง"
+                    ${question.required ? 'aria-required="true"' : ''}
                     onchange="app.handleTimeChange('${question.id}')">
                 ${hourOptions}
             </select>
-            <span class="time-separator">:</span>
-            <select class="input-field time-select" 
+            <span class="time-separator" aria-hidden="true">:</span>
+            <select class="input-field time-select"
                     id="${question.id}_minute"
+                    aria-label="${question.text} — นาที"
                     onchange="app.handleTimeChange('${question.id}')">
                 ${minuteOptions}
             </select>
-            <span class="time-unit">ชั่วโมง : นาที</span>
+            <span class="time-unit" aria-hidden="true">ชั่วโมง : นาที</span>
         </div>
         <input type="hidden" id="${question.id}" value="${value || ''}">
     `;
@@ -317,6 +327,8 @@ function renderTime(question, value) {
 // Render Question Card
 function renderQuestion(question, value, number) {
     let inputHtml = '';
+    // Types with a single focusable element matching question.id → use <label for="">
+    const useLabelFor = ['number', 'text'].includes(question.type);
     switch (question.type) {
         case 'radio': inputHtml = renderRadio(question, value); break;
         case 'checkbox': inputHtml = renderCheckbox(question, value); break;
@@ -327,13 +339,17 @@ function renderQuestion(question, value, number) {
         default: inputHtml = renderRadio(question, value);
     }
 
+    const questionLabel = useLabelFor
+        ? `<label class="question-text" for="${question.id}">${question.text}</label>`
+        : `<span class="question-text">${question.text}</span>`;
+
     return `
         <div class="question-card fade-in" id="card_${question.id}">
             <div>
                 <span class="question-number">${number}</span>
-                <span class="question-text">${question.text}</span>
-                ${question.required ? '<span class="question-required">*</span>' : ''}
-                ${question.tooltip ? `<span class="tooltip-icon" onmouseover="showTooltip(event, '${question.tooltip.replace(/'/g, '&#39;').replace(/"/g, '&quot;')}')" onmouseout="hideTooltip()">i</span>` : ''}
+                ${questionLabel}
+                ${question.required ? '<span class="question-required" aria-hidden="true">*</span>' : ''}
+                ${question.tooltip ? `<span class="tooltip-icon" role="button" tabindex="0" aria-label="คำอธิบายเพิ่มเติม" onmouseover="showTooltip(event, '${question.tooltip.replace(/'/g, '&#39;').replace(/"/g, '&quot;')}')" onmouseout="hideTooltip()">i</span>` : ''}
             </div>
             ${question.hint ? `<p style="color: var(--text-secondary); font-size: 0.875rem; margin: 0.5rem 0;">${question.hint}</p>` : ''}
             ${inputHtml}

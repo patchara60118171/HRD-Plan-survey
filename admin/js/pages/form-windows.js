@@ -10,34 +10,29 @@ function getFwCatalog() {
   return catalog;
 }
 
-async function loadFormWindowsPage() {
-  const container = document.getElementById('fw-table-body');
-  if (!container) return;
-  container.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--tx3);padding:20px">กำลังโหลด...</td></tr>`;
+const FW_DEFAULT_CLOSED_MSG = 'ณ ขณะนี้ฟอร์มปิดรับคำตอบแล้ว';
 
-  const catalog = getFwCatalog();
-
+async function fwFetchWindows() {
   const { data: windows, error } = await sb
     .from('form_windows')
     .select('*')
     .eq('form_code', 'wellbeing')
     .eq('round_code', 'round_2569');
+  if (error) return { windows: null, error };
+  return { windows: windows || [], error: null };
+}
 
-  if (error) {
-    container.innerHTML = `<tr><td colspan="5" style="color:var(--D);padding:16px">⚠️ โหลดข้อมูลไม่สำเร็จ: ${esc(error.message)}</td></tr>`;
-    return;
-  }
-
+function fwBuildRows(catalog, windows) {
   const winMap = new Map((windows || []).map(w => [w.org_code || '__global__', w]));
   const globalWin = winMap.get('__global__') || winMap.get(null) || null;
   const now = new Date();
-
-  container.innerHTML = catalog.map(org => {
+  return catalog.map(org => {
     const w = winMap.get(org.code) || globalWin;
     const isOpen = w ? isWindowOpen(w, now) : true;
     const hasOverride = winMap.has(org.code);
     const opensVal = w?.opens_at ? toLocalDatetimeInput(w.opens_at) : '';
     const closesVal = w?.closes_at ? toLocalDatetimeInput(w.closes_at) : '';
+    const closedMsg = winMap.has(org.code) ? (winMap.get(org.code).closed_message || '') : '';
     const isTest = org.code === 'test-org';
     const rowStyle = isTest ? 'background:var(--bg2);opacity:.85' : '';
     return `<tr id="fw-row-${org.code}" style="${rowStyle}">
@@ -52,6 +47,13 @@ async function loadFormWindowsPage() {
       </td>
       <td><input type="datetime-local" class="si fw-opens" data-org="${org.code}" value="${opensVal}" style="width:175px;font-size:12px" onchange="fwSaveDatetime('${org.code}')"></td>
       <td><input type="datetime-local" class="si fw-closes" data-org="${org.code}" value="${closesVal}" style="width:175px;font-size:12px" onchange="fwSaveDatetime('${org.code}')"></td>
+      <td>
+        <input type="text" class="si fw-closed-msg" data-org="${org.code}"
+          value="${esc(closedMsg)}"
+          placeholder="${esc(FW_DEFAULT_CLOSED_MSG)}"
+          style="width:100%;font-size:12px"
+          onchange="fwSaveClosedMsg('${org.code}')">
+      </td>
       <td style="text-align:center">
         <button id="fw-btn-${org.code}" class="btn ${isOpen ? 'b-blue' : 'b-gray'}"
           onclick="fwToggle('${org.code}', ${!isOpen})"
@@ -61,6 +63,26 @@ async function loadFormWindowsPage() {
       </td>
     </tr>`;
   }).join('');
+}
+
+async function loadWbFormWindowsCard() {
+  const container = document.getElementById('fw-wb-body');
+  if (!container) return;
+  container.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--tx3);padding:20px">กำลังโหลด...</td></tr>`;
+  const catalog = getFwCatalog();
+  const { windows, error } = await fwFetchWindows();
+  if (error) { container.innerHTML = `<tr><td colspan="6" style="color:var(--D);padding:16px">⚠️ โหลดข้อมูลไม่สำเร็จ: ${esc(error.message)}</td></tr>`; return; }
+  container.innerHTML = fwBuildRows(catalog, windows);
+}
+
+async function loadFormWindowsPage() {
+  const container = document.getElementById('fw-table-body');
+  if (!container) return;
+  container.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--tx3);padding:20px">กำลังโหลด...</td></tr>`;
+  const catalog = getFwCatalog();
+  const { windows, error } = await fwFetchWindows();
+  if (error) { container.innerHTML = `<tr><td colspan="6" style="color:var(--D);padding:16px">⚠️ โหลดข้อมูลไม่สำเร็จ: ${esc(error.message)}</td></tr>`; return; }
+  container.innerHTML = fwBuildRows(catalog, windows);
 }
 
 function isWindowOpen(w, now = new Date()) {
@@ -109,6 +131,16 @@ async function fwUpsert(orgCode, fields) {
     const { error } = await sb.from('form_windows').insert(payload);
     return error;
   }
+}
+
+async function fwSaveClosedMsg(orgCode) {
+  const row = document.getElementById(`fw-row-${orgCode}`);
+  if (!row) return;
+  const msgEl = row.querySelector('.fw-closed-msg');
+  const closed_message = msgEl?.value?.trim() || null;
+  const error = await fwUpsert(orgCode, { closed_message });
+  if (error) { showToast(`บันทึกข้อความไม่สำเร็จ: ${error.message}`, 'error'); return; }
+  showToast(`✅ บันทึกข้อความปิดรับ ${orgCode} แล้ว`, 'success');
 }
 
 async function fwToggle(orgCode, isOpen) {

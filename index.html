@@ -74,6 +74,20 @@
 
 
 
+    <!-- Form Closed Popup -->
+    <div class="consent-popup" id="form-closed-popup" style="display: none;">
+        <div class="consent-modal" style="max-width:420px;text-align:center">
+            <div class="consent-header" style="justify-content:center">
+                <div class="consent-icon">🔒</div>
+                <h2>ฟอร์มปิดรับคำตอบแล้ว</h2>
+            </div>
+            <div class="consent-content">
+                <p id="form-closed-message" style="font-size:16px;font-weight:500">ณ ขณะนี้ฟอร์มปิดรับคำตอบแล้ว</p>
+                <p style="font-size:13px;color:#666;margin-top:8px">กรุณาติดต่อผู้ประสานงานของท่านหากมีข้อสงสัย</p>
+            </div>
+        </div>
+    </div>
+
     <!-- Consent Popup -->
     <div class="consent-popup" id="consent-popup" style="display: none;">
         <div class="consent-modal">
@@ -83,6 +97,8 @@
             </div>
             <div class="consent-content">
                 <p>แบบสอบถามนี้มีการเก็บข้อมูลบางส่วนที่เกี่ยวข้องกับสุขภาพ ซึ่งถือเป็นข้อมูลส่วนบุคคลที่มีความอ่อนไหว</p>
+                <p>ข้อมูลจะถูกนำไปใช้เพื่อการวิเคราะห์ในภาพรวมของหน่วยงาน และเพื่อออกแบบแนวทางพัฒนาเท่านั้น โดยไม่มีการนำไปใช้ในการประเมินหรือตัดสินรายบุคคล</p>
+                <p>การตอบแบบสอบถามเป็นไปโดยความสมัครใจ ท่านสามารถเลือกไม่ตอบในข้อคำถามที่ไม่สะดวกได้</p>
                 <p>ข้อมูลจะถูกนำไปใช้เพื่อการวิเคราะห์ในภาพรวมของหน่วยงาน และเพื่อออกแบบแนวทางพัฒนาเท่านั้น โดยไม่มีการนำไปใช้ในการประเมินหรือตัดสินรายบุคคล</p>
                 <p>การตอบแบบสอบถามเป็นไปโดยความสมัครใจ ท่านสามารถเลือกไม่ตอบในข้อคำถามที่ไม่สะดวกได้</p>
                 <p>เมื่อท่านดำเนินการตอบแบบสอบถามต่อ ถือว่าท่านรับทราบและยินยอมตามเงื่อนไขดังกล่าว</p>
@@ -199,7 +215,9 @@
 
     <!-- Scripts -->
 
-    <script src="js/questions.js"></script>
+    <script src="js/wellbeing/loader.js"></script>
+
+    <script src="js/wellbeing/overrides.js"></script>
 
     <script src="js/form-schema.js"></script>
 

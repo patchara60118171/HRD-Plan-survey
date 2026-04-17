@@ -3,13 +3,13 @@
 const PROJECT_SSOT = {
   constants: {
     surveyBaseUrl: 'https://nidawellbeing.vercel.app',
-    lockedSuperadminEmails: ['admin@gmail.com'],
+    lockedSuperadminEmails: [], // manage superadmin emails via admin_user_roles table in DB
     orgHrEmailDomain: '@wellbeing.go.th',
   },
 
   wellbeing: {
     sectionsOrder: ['personal', 'consumption', 'nutrition', 'activity', 'mental', 'loneliness', 'safety', 'environment'],
-    surveyData: {} // populated at runtime by questions.js → setWellbeingSurveyData()
+    surveyData: {} // populated at runtime by js/wellbeing/loader.js → setWellbeingSurveyData()
   },
 
   ch1: {

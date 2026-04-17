@@ -65,6 +65,10 @@
                 {
                     "key": "Referrer-Policy",
                     "value": "strict-origin-when-cross-origin"
+                },
+                {
+                    "key": "Content-Security-Policy",
+                    "value": "default-src 'self'; script-src 'self' 'unsafe-inline' cdn.jsdelivr.net cdn.sheetjs.com cdnjs.cloudflare.com cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src 'self' fonts.gstatic.com; connect-src 'self' https://fgdommhiqhzvsedfzyrr.supabase.co https://fgdommhiqhzvsedfzyrr.supabase.in wss://fgdommhiqhzvsedfzyrr.supabase.co https://script.google.com; img-src 'self' data: blob:; frame-ancestors 'none'; object-src 'none'; base-uri 'self';"
                 }
             ]
         },

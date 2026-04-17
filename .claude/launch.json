@@ -4,8 +4,9 @@
     {
       "name": "Static Dev Server (serve)",
       "runtimeExecutable": "npx",
-      "runtimeArgs": ["serve", ".", "--listen", "3000", "--no-clipboard"],
-      "port": 3000
+      "runtimeArgs": ["serve", ".", "--no-clipboard"],
+      "port": 3000,
+      "autoPort": true
     },
     {
       "name": "NocoDB Admin (Docker)",
@@ -16,7 +17,7 @@
     {
       "name": "Watch Questions Sync",
       "runtimeExecutable": "node",
-      "runtimeArgs": ["watch-questions.js"],
+      "runtimeArgs": ["scripts/wellbeing/watch-schema.js"],
       "port": 0
     }
   ]

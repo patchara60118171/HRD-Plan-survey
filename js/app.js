@@ -250,6 +250,10 @@ window.TEST_MODE = TEST_MODE;
 // Main Application - Survey Controller
 // ========================================
 
+// Debug mode: enable by running localStorage.setItem('debug','true') in console
+const DEBUG_MODE = typeof window !== 'undefined' && window.localStorage?.getItem('debug') === 'true';
+const debugLog = DEBUG_MODE ? console.log.bind(console, '[debug]') : () => {};
+
 // Google Apps Script URL (User must fill this)
 const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby30NantvJX36X9ZHIw5DOSi-tMqGAXGoVUh9mWaZCEV5egrWckHgMS6Btw3k37FUtL/exec';
 
@@ -260,7 +264,7 @@ let supabaseClient = null;
 function initSupabase() {
     if (typeof supabase !== 'undefined') {
         supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        console.log('Supabase initialized');
+        debugLog('Supabase initialized');
     }
 }
 
@@ -326,7 +330,7 @@ async function requestBackgroundSync() {
         try {
             const reg = await navigator.serviceWorker.ready;
             await reg.sync.register('sync-form-data');
-            console.log('[App] Background sync registered');
+            debugLog('[App] Background sync registered');
         } catch (e) {
             console.warn('[App] Background sync registration failed:', e);
             // Fallback: attempt direct sync via SW message
@@ -396,28 +400,30 @@ function initSWListener() {
 }
 
 // Check if form window is closed for a given org_code
+// Returns { closed: bool, message: string|null }
 async function isFormWindowClosed(orgCode) {
-    if (!supabaseClient || !orgCode) return false;
+    if (!supabaseClient || !orgCode) return { closed: false, message: null };
     try {
         // Check org-specific window first, then fall back to global
         const { data } = await supabaseClient
             .from('form_windows')
-            .select('is_active,opens_at,closes_at')
+            .select('is_active,opens_at,closes_at,closed_message')
             .eq('form_code', 'wellbeing')
             .eq('round_code', 'round_2569')
             .or(`org_code.eq.${orgCode},org_code.is.null`)
-            .order('org_code', { ascending: false }) // org-specific first (non-null sorts before null)
+            .order('org_code', { ascending: false, nullsFirst: false }) // org-specific first (non-null before null)
             .limit(1)
             .maybeSingle();
-        if (!data) return false; // no window record = open by default
-        if (!data.is_active) return true;
+        if (!data) return { closed: false, message: null }; // no window record = open by default
+        const msg = data.closed_message || null;
+        if (!data.is_active) return { closed: true, message: msg };
         const now = new Date();
-        if (data.opens_at && new Date(data.opens_at) > now) return true;
-        if (data.closes_at && new Date(data.closes_at) < now) return true;
-        return false;
+        if (data.opens_at && new Date(data.opens_at) > now) return { closed: true, message: msg };
+        if (data.closes_at && new Date(data.closes_at) < now) return { closed: true, message: msg };
+        return { closed: false, message: null };
     } catch (e) {
         console.warn('[FormWindow] check failed:', e.message);
-        return false; // fail open
+        return { closed: false, message: null }; // fail open
     }
 }
 
@@ -585,7 +591,7 @@ async function saveToSupabase(email, responses, isDraft = false) {
     if (!navigator.onLine) {
         try {
             await saveToOfflineQueue('wellbeing', dataToSave);
-            console.log('[App] 📴 Saved to offline queue (will sync when online)');
+            debugLog('[App] Saved to offline queue (will sync when online)');
             return 'offline';  // indicate offline save
         } catch (e) {
             console.error('[App] Failed to save to offline queue:', e);
@@ -600,7 +606,7 @@ async function saveToSupabase(email, responses, isDraft = false) {
     if (!isDraft) {
         const orgCode = (responses.org_code || '').toLowerCase();
         if (orgCode) {
-            const windowClosed = await isFormWindowClosed(orgCode);
+            const { closed: windowClosed } = await isFormWindowClosed(orgCode);
             if (windowClosed) return 'error:form-closed';
         }
     }
@@ -638,7 +644,7 @@ async function saveToSupabase(email, responses, isDraft = false) {
             return `error:${writeError.message || 'save-failed'}`;
         }
 
-        console.log('Saved to Supabase:', isDraft ? 'draft' : 'submitted');
+        debugLog('Saved to Supabase:', isDraft ? 'draft' : 'submitted');
         return true;
     } catch (e) {
         console.error('Supabase save exception:', e);
@@ -669,7 +675,7 @@ async function loadFromSupabase(email) {
         }
 
         if (data && data.raw_responses) {
-            console.log('Loaded draft from Supabase');
+            debugLog('Loaded draft from Supabase');
             return data.raw_responses;
         }
 
@@ -719,8 +725,31 @@ const app = {
         // Parse URL Parameters for organization
         this.parseUrlParameters();
 
+        // Load wellbeing schema from the canonical JSON source before any rendering
+        if (typeof ensureWellbeingSurveyData === 'function') {
+            try {
+                await ensureWellbeingSurveyData();
+            } catch (e) {
+                console.warn('[app] Failed to preload wellbeing JSON schema:', e.message);
+            }
+        }
+
         // Initialize Supabase
         initSupabase();
+
+        // Check if form window is closed for this org
+        const urlOrgForCheck = (new URLSearchParams(window.location.search).get('org') || '').trim().toLowerCase();
+        if (urlOrgForCheck) {
+            const { closed, message } = await isFormWindowClosed(urlOrgForCheck);
+            if (closed) {
+                document.getElementById('loading-screen').classList.add('hidden');
+                const msgEl = document.getElementById('form-closed-message');
+                if (msgEl) msgEl.textContent = message || 'ณ ขณะนี้ฟอร์มปิดรับคำตอบแล้ว';
+                const popup = document.getElementById('form-closed-popup');
+                if (popup) popup.style.display = 'flex';
+                return;
+            }
+        }
 
         // Initialize offline sync features
         initNetworkStatus();
@@ -799,7 +828,7 @@ const app = {
             if (!this.responses) this.responses = {};
             this.responses.organization = this.organization;
             this.responses.org_code = orgCode;
-            console.log(`Organization detected: ${this.organization} (${orgCode})`);
+            debugLog(`Organization detected: ${this.organization} (${orgCode})`);
             
             // Cleanup URL to make it look clean (optional, prevents copy-pasting wrong org)
             // history.replaceState(null, '', window.location.pathname);
@@ -931,7 +960,7 @@ const app = {
                 </div>
             `;
         } else {
-            console.log('Rendering history list...');
+            debugLog('Rendering history list...');
             html += `<div class="history-list">`;
 
             // 1. Show Local Draft if exists
@@ -1389,7 +1418,7 @@ const app = {
         if (GOOGLE_SCRIPT_URL && navigator.onLine) {
             const success = await submitResponseToGAS(this.responses, GOOGLE_SCRIPT_URL);
             if (!success) {
-                console.log('GAS backup save failed, but Supabase succeeded');
+                debugLog('GAS backup save failed, but Supabase succeeded');
             }
         }
 
@@ -1618,14 +1647,14 @@ const app = {
 
     // Validate current subsection
     validateCurrentSubsection() {
-        console.log('validateCurrentSubsection called');
+        debugLog('validateCurrentSubsection called');
         const sectionsOrder = PROJECT_SSOT.wellbeing.sectionsOrder;
         const surveyData = PROJECT_SSOT.wellbeing.surveyData;
         const sectionKey = sectionsOrder[this.currentSectionIndex];
         const section = surveyData[sectionKey];
         const subsection = section.subsections[this.currentSubsectionIndex];
 
-        console.log('Validating section:', sectionKey, 'subsection:', this.currentSubsectionIndex);
+        debugLog('Validating section:', sectionKey, 'subsection:', this.currentSubsectionIndex);
 
         const missingFields = [];
 
@@ -1634,40 +1663,40 @@ const app = {
             subsection.questions.forEach(question => {
                 if (question.required) {
                     const value = this.responses[question.id];
-                    console.log('Checking required question:', question.id, 'value:', value);
+                    debugLog('Checking required question:', question.id, 'value:', value);
 
                     // Check if the field is empty
                     if (value === undefined || value === null || value === '' ||
                         (Array.isArray(value) && value.length === 0)) {
-                        console.log('Missing required field:', question.id);
+                        debugLog('Missing required field:', question.id);
                         missingFields.push(question.text);
                     }
                 }
             });
         }
 
-        console.log('Missing fields count:', missingFields.length);
+        debugLog('Missing fields count:', missingFields.length);
 
         if (missingFields.length > 0) {
-            console.log('Showing error toast for missing fields');
+            debugLog('Showing error toast for missing fields');
             showToast(`กรุณากรอกข้อมูลที่จำเป็น:\n${missingFields.map(f => '• ' + f).join('\n')}`, 'error');
             return false;
         }
 
-        console.log('Validation passed');
+        debugLog('Validation passed');
         return true;
     },
 
     // Next section
     nextSection() {
-        console.log('nextSection called, validating...');
-        
+        debugLog('nextSection called, validating...');
+
         // Validate current subsection before moving forward
         const isValid = this.validateCurrentSubsection();
-        console.log('Validation result:', isValid);
-        
+        debugLog('Validation result:', isValid);
+
         if (!isValid) {
-            console.log('Validation failed, stopping navigation');
+            debugLog('Validation failed, stopping navigation');
             return; // Stop navigation if validation fails
         }
 
@@ -1762,7 +1791,7 @@ const app = {
                     data: this.responses
                 })
             });
-            console.log('Draft saved to cloud');
+            debugLog('Draft saved to cloud');
         } catch (e) {
             console.error('Failed to save draft', e);
         }
@@ -1795,7 +1824,7 @@ const app = {
                 } else {
                     // Conflict resolution: complex. 
                     // Simple approach: Toast "Found cloud draft"
-                    console.log('Found cloud draft, but local data exists.');
+                    debugLog('Found cloud draft, but local data exists.');
                 }
             }
         } catch (e) {
@@ -1811,11 +1840,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         try {
             const schema = await FormSchema.loadFormSchema('wellbeing');
             if (schema && schema.source === 'supabase') {
-                console.log('[app] Wellbeing schema loaded from DB:', schema.questions.length, 'questions');
+                debugLog('[app] Wellbeing schema loaded from DB:', schema.questions.length, 'questions');
                 // Future Sprint: replace SURVEY_DATA rendering with DB schema
                 // For now: schema is cached, label overrides accessible via FormSchema.getFieldLabel()
             } else {
-                console.log('[app] Using fallback schema from questions.js (source:', schema?.source, ')');
+                debugLog('[app] Using fallback schema from questions.js (source:', schema?.source, ')');
             }
         } catch (e) {
             console.warn('[app] Schema preload failed, using questions.js fallback:', e.message);

@@ -213,6 +213,39 @@ tbody tr:hover td{background:#FAFBFD}
 .anwb-heat-table td:first-child,.anwb-heat-table th:first-child{text-align:left;white-space:normal;min-width:140px}
 @media(max-width:900px){.anwb-2col,.anwb-3col{grid-template-columns:1fr}}
 
+/* ─── ANWB Tab Navigation ─────────────────────────────────── */
+.anwb-tabs{display:flex;gap:4px;flex-wrap:wrap;padding:4px;background:var(--bg2);border-radius:10px}
+.anwb-tab{padding:7px 16px;font-size:12.5px;font-weight:600;color:var(--tx2);border:none;background:transparent;border-radius:7px;cursor:pointer;transition:.14s;white-space:nowrap}
+.anwb-tab:hover{background:#fff;color:var(--P)}
+.anwb-tab.active{background:#fff;color:var(--P);box-shadow:0 1px 6px rgba(0,0,0,.1)}
+
+/* ─── Extended Dashboard Cards ───────────────────────────── */
+.anwb-section-title{font-size:14px;font-weight:700;color:var(--P);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.anwb-metric-bar{margin-bottom:10px}
+.anwb-metric-bar-label{display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px;color:var(--tx2)}
+.anwb-metric-bar-track{background:var(--bg2);border-radius:4px;height:11px;overflow:hidden}
+.anwb-metric-bar-fill{height:11px;border-radius:4px;transition:width .4s ease}
+.anwb-stacked-bar{display:flex;height:22px;border-radius:6px;overflow:hidden;margin-bottom:4px}
+.anwb-stacked-seg{display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:700;color:#fff;transition:width .4s ease;overflow:hidden;white-space:nowrap}
+.anwb-risk-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:99px;font-size:11.5px;font-weight:700}
+.anwb-kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:16px}
+.anwb-kpi-mini{background:var(--bg2);border-radius:9px;padding:12px 14px;text-align:center}
+.anwb-kpi-mini-val{font-size:20px;font-weight:800;line-height:1}
+.anwb-kpi-mini-label{font-size:10.5px;color:var(--tx2);margin-top:4px;line-height:1.3}
+.anwb-sub-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:12px}
+.anwb-sub-card{background:var(--card);border:1px solid var(--bdr);border-radius:9px;padding:14px}
+.anwb-sub-card h4{font-size:12px;font-weight:700;color:var(--tx2);margin-bottom:10px;padding-bottom:7px;border-bottom:1px solid var(--bg2)}
+.anwb-lonely-sub{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:12px}
+.anwb-lonely-sub-card{background:var(--bg2);border-radius:8px;padding:10px 12px;text-align:center}
+.anwb-lonely-sub-val{font-size:17px;font-weight:800}
+.anwb-lonely-sub-name{font-size:10px;color:var(--tx2);margin-top:3px;line-height:1.3}
+.anwb-env-item{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--bg2)}
+.anwb-env-item:last-child{border-bottom:none}
+.anwb-env-label{flex:1;font-size:12px;color:var(--tx2)}
+.anwb-env-bar-wrap{width:120px;flex-shrink:0}
+.anwb-env-pct{width:44px;text-align:right;font-size:12px;font-weight:700;color:var(--tx);flex-shrink:0}
+@media(max-width:700px){.anwb-lonely-sub{grid-template-columns:1fr}}
+
 /* ===== TWO-COL ===== */
 .two-col{display:grid;grid-template-columns:3fr 2fr;gap:16px}
 .two-col-eq{display:grid;grid-template-columns:1fr 1fr;gap:16px}
@@ -560,4 +593,49 @@ body.sidebar-open .sidebar-backdrop{display:block;opacity:1}
   /* Stats row */
   .stats-row{flex-wrap:wrap}
   .st{min-width:calc(50% - 5px)}
+
+  /* Topbar: hide connection status on small mobile */
+  #connection-status{display:none}
+
+  /* Welcome banner: fix subtitle overflow */
+  .w-sub{font-size:11px;line-height:1.4;white-space:normal;overflow:hidden}
+  .w-stats{flex-wrap:wrap}
+  .w-stat{min-width:calc(33% - 8px)}
+
+  /* Wellbeing rank table: hide long count column */
+  #wb-rank-table th:nth-child(4),
+  #wb-rank-table td:nth-child(4){display:none}
+
+  /* Sidebar: make touch target bigger */
+  .nav-item{min-height:44px}
+}
+
+/* ===== SIDEBAR CLOSE BTN (mobile/tablet only) ===== */
+.sidebar-close-btn{display:none;position:absolute;top:14px;right:12px;width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:14px;cursor:pointer;align-items:center;justify-content:center;line-height:1;font-family:inherit;transition:background .12s;flex-shrink:0;padding:0}
+.sidebar-close-btn:hover{background:rgba(255,255,255,.28)}
+.sidebar-logo{position:relative}
+
+/* ===== ADDITIONAL TABLET FIXES (≤ 1024px) ===== */
+@media(max-width:1024px){
+  /* Show sidebar close button */
+  .sidebar-close-btn{display:flex}
+  /* Topbar: prevent title wrap, let connection status shrink */
+  .tb-title{white-space:nowrap}
+  .tb-bc{white-space:nowrap}
+  /* Connection status: shrinks & truncates instead of pushing layout */
+  #connection-status{flex-shrink:1;min-width:0;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  /* Refresh button: compact at tablet */
+  #btn-refresh-data{font-size:0 !important;padding:5px 9px !important;min-width:32px;letter-spacing:0;flex-shrink:0}
+  #btn-refresh-data::before{content:'↻';font-size:13px;display:inline-block}
+  /* Area stats: 2 cols on tablet (was 4) */
+  .area-stats{grid-template-columns:repeat(2,1fr) !important}
+  /* Wellbeing rank table: hide long count col on tablet too */
+  #wb-rank-table th:nth-child(4),
+  #wb-rank-table td:nth-child(4){display:none}
+  /* Welcome banner: prevent subtitle overflow */
+  .w-sub{font-size:11px;line-height:1.4;white-space:normal}
+  /* Dashboard table: hide date col */
+  .prog-detail-date{display:none}
+  /* Ensure page content never exceeds viewport */
+  .content{max-width:100%;overflow-x:clip}
 }

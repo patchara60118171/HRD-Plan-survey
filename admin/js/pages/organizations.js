@@ -223,3 +223,72 @@ async function saveSimpleOrg() {
   renderOrgs(summarizeOrgs());
   if (msg) { msg.style.color = 'var(--G)'; msg.textContent = `✅ บันทึก "${name}" เรียบร้อย`; }
 }
+
+
+// ─── Org Modal (moved from admin.html inline script) ────────────────────────
+function openOrgModal(orgName) {
+  if (!document.getElementById('org-modal')) createOrgModal();
+  const modal = document.getElementById('org-modal');
+  const titleEl = modal.querySelector('.umodal-head h3');
+  if (titleEl) titleEl.textContent = orgName ? '✏️ แก้ไขหน่วยงาน' : '➕ เพิ่มหน่วยงานใหม่';
+  const msg = document.getElementById('org-form-msg');
+  if (msg) msg.textContent = '';
+  if (!orgName) {
+    document.getElementById('org-profile-form')?.reset();
+    const box = document.getElementById('org-detail-box');
+    if (box) box.innerHTML = '<div class="info blue">กรอกข้อมูลให้ครบแล้วกดบันทึกเพื่อสร้างหน่วยงานใหม่</div>';
+  } else {
+    showOrgDetail(orgName);
+  }
+  modal.style.display = 'flex';
+}
+
+function createOrgModal() {
+  const overlay = document.createElement('div');
+  overlay.id = 'org-modal';
+  overlay.className = 'umodal-overlay';
+  overlay.style.display = 'none';
+  overlay.innerHTML = `
+    <div class="umodal" style="max-width:620px">
+      <div class="umodal-head">
+        <h3>แก้ไขหน่วยงาน</h3>
+        <button class="btn b-gray" style="margin-left:auto;padding:4px 10px;font-size:13px" onclick="document.getElementById('org-modal').style.display='none'">✕</button>
+      </div>
+      <div class="umodal-body">
+        <form id="org-profile-form" onsubmit="saveOrgProfile(event)" style="display:flex;flex-direction:column;gap:10px">
+          <div class="fg"><label>ชื่อองค์กร *</label><input id="org-name" required placeholder="เช่น กรมสุขภาพจิต"></div>
+          <div class="fg"><label>กระทรวง</label><input id="org-ministry" placeholder="เช่น สาธารณสุข"></div>
+          <div class="two-col-eq">
+            <div class="fg"><label>หนังสือเรียน *</label><input id="org-salutation" required placeholder="เช่น อธิบดีกรมสุขภาพจิต"></div>
+            <div class="fg"><label>Mail Sarabun *</label><input id="org-saraban-email" type="email" required placeholder="saraban@org.go.th"></div>
+          </div>
+          <div style="background:var(--bg);border:1px solid var(--bdr);border-radius:8px;padding:12px 14px">
+            <div style="font-size:11.5px;font-weight:700;color:var(--tx2);margin-bottom:10px">👤 ผู้ประสานงานหลัก</div>
+            <div class="fg"><label>ชื่อผู้ประสานงาน *</label><input id="org-coordinator-name" required></div>
+            <div class="two-col-eq">
+              <div class="fg"><label>ตำแหน่ง *</label><input id="org-coordinator-position" required></div>
+              <div class="fg"><label>เบอร์/ID Line *</label><input id="org-coordinator-contact" required></div>
+            </div>
+            <div class="fg" style="margin-bottom:0"><label>อีเมลผู้ประสาน *</label><input id="org-coordinator-email" type="email" required></div>
+          </div>
+          <div id="org-form-msg" style="font-size:12px;color:var(--tx2);min-height:16px"></div>
+          <div id="org-detail-box" style="display:flex;flex-direction:column;gap:8px"></div>
+        </form>
+      </div>
+      <div class="umodal-foot">
+        <button class="btn b-gray" onclick="document.getElementById('org-modal').style.display='none'">ยกเลิก</button>
+        <button class="btn b-solid" onclick="document.getElementById('org-profile-form').requestSubmit()">💾 บันทึก</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.style.display = 'none'; });
+  return overlay;
+}
+
+
+
+
+
+// Helper: get value from form_data JSONB (primary) or top-level column (fallback)
+// Helper: render file URL as clickable link
+// Helper: render turnover rate (stored or recalculate)

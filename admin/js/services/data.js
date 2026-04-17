@@ -225,7 +225,7 @@ async function loadBackend(retryCount = 0) {
       statusEl.style.color = 'var(--D)';
     }
     
-    // Still populate empty state to prevent crashes
+    // Still populate empty state to prevent crashes - ไม่ throw error ออกไป
     state.surveyRows = [];
     state.ch1Rows = [];
     state.linkRows = [];
@@ -234,12 +234,26 @@ async function loadBackend(retryCount = 0) {
     state.orgProfiles = [];
     refreshOrgDerivedState();
     
-    throw error;
+    // แสดง error ใน console แต่ไม่ throw เพื่อให้ระบบทำงานต่อได้
+    console.warn('loadBackend: โหลดข้อมูลไม่สำเร็จหลังจากลองซ้ำ ' + maxRetries + ' ครั้ง แต่ระบบจะยังทำงานต่อด้วยข้อมูลว่าง');
+    
+    // คืนค่า error info แต่ไม่ throw
+    return { error: error.message || 'Unknown error', loaded: false };
   }
 }
 
 function summarizeOrgs() {
+  // Defensive: ensure state is initialized
+  const safeState = state || {};
+  const safeSurveyRows = safeState.surveyRows || [];
+  const safeCh1Rows = safeState.ch1Rows || [];
+  
   const catalog = getOrgCatalog();
+  if (!catalog || catalog.length === 0) {
+    console.warn('summarizeOrgs: empty catalog, returning empty summary');
+    return [];
+  }
+  
   const map = new Map(catalog.map((org) => [org.name, {
     ...org,
     wellbeingTotal: 0,
@@ -293,7 +307,7 @@ function summarizeOrgs() {
     return { filled, total };
   };
 
-  state.surveyRows.forEach((row) => {
+  safeSurveyRows.forEach((row) => {
     const org = map.get(row.organization);
     if (!org) return;
     org.wellbeingTotal += 1;
@@ -304,7 +318,7 @@ function summarizeOrgs() {
     if (date && (!org.latestWb || new Date(date) > new Date(org.latestWb))) org.latestWb = date;
   });
 
-  state.ch1Rows.forEach((row) => {
+  safeCh1Rows.forEach((row) => {
     const orgName = getCh1Org(row);
     const rowCode = String(row.org_code || row.form_data?.org_code || '').toLowerCase();
     const resolvedName = map.has(orgName) ? orgName : (codeMap.get(rowCode) || orgName);
@@ -326,4 +340,30 @@ function summarizeOrgs() {
   });
 
   return [...map.values()];
+}
+
+
+// ─── Populate Org Select Dropdowns (moved from admin.html inline script) ────
+function populateOrgSelects() {
+  const ids = ['exp-ch1-org', 'exp-wb-org', 'exp-cmp-org', 'c1data-org', 'c1sheet-org'];
+  ids.forEach((id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const cur = el.value;
+    el.innerHTML = `<option value="">ทุกองค์กร</option>${getOrgCatalog().map(org => `<option value="${esc(org.name)}">${esc(org.name)}</option>`).join('')}`;
+    el.value = cur;
+  });
+  const ch1Sel = document.getElementById('ch1-link-org');
+  if (ch1Sel) {
+    ch1Sel.innerHTML = `<option value="">-- เลือกองค์กร --</option>${getOrgCatalog().map((org) => `<option value="${esc(org.name)}">${esc(org.name)}</option>`).join('')}`;
+  }
+  const cmpSel = document.getElementById('compare-add-select');
+  if (cmpSel) {
+    cmpSel.innerHTML = `<option value="">— เลือก —</option>${ORG_NAMES.map((name) => `<option value="${esc(name)}">${esc(name)}</option>`).join('')}`;
+  }
+  const viewerOrgSel = document.getElementById('viewer-org-select');
+  if (viewerOrgSel) {
+    const cur = viewerOrgSel.value;
+    viewerOrgSel.innerHTML = `<option value="">— เลือกองค์กร —</option>${ORG_NAMES.map((name) => `<option value="${esc(name)}"${name===cur?' selected':''}>${esc(name)}</option>`).join('')}`;
+  }
 }

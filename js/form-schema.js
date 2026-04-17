@@ -2,7 +2,7 @@
 // form-schema.js — Shared Schema Loader (Phase B)
 // Single source of truth: fetches form_questions + overrides from Supabase
 // Caches in sessionStorage with 10-minute TTL
-// Fallback to js/questions.js + js/hrd-ch1-fields.js if DB unavailable
+// Fallback to js/wellbeing/loader.js runtime globals + js/hrd-ch1-fields.js if DB unavailable
 // ================================================================
 
 const FormSchema = (() => {
@@ -174,16 +174,16 @@ const FormSchema = (() => {
   }
 
   function buildWellbeingFallback() {
-    // Use SURVEY_DATA from questions.js if available
-    if (typeof SURVEY_DATA === 'undefined' || !SURVEY_DATA) {
+    const surveyData = PROJECT_SSOT?.wellbeing?.surveyData || ((typeof SURVEY_DATA !== 'undefined') ? SURVEY_DATA : null);
+    if (!surveyData || Object.keys(surveyData).length === 0) {
       return { formCode: 'wellbeing', sections: [], questions: [], questionsMap: new Map(), fetchedAt: new Date().toISOString(), source: 'fallback_empty' };
     }
     const questions = [];
     const sections = [];
     let secIdx = 0;
     
-    // Convert SURVEY_DATA object to QUESTIONS array format
-    Object.entries(SURVEY_DATA).forEach(([sectionKey, section]) => {
+    // Convert canonical survey data object to questions array format
+    Object.entries(surveyData).forEach(([sectionKey, section]) => {
       secIdx++;
       const secQuestions = [];
       

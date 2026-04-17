@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Preview — สรุปภาพรวม Ch1 (ออกแบบใหม่)</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai+Looped:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --P:#0F4C81;--PD:#0A3560;--PL:#E8F1FB;
+  --A:#00A86B;--AL:#E6F7F1;
+  --W:#92681A;--WL:#FEF3CD;
+  --D:#991B1B;--DL:#FEE2E2;
+  --bg:#F4F6F9;--bg2:#EAECF0;--card:#fff;
+  --bdr:#D8DCE3;--tx:#1A2433;--tx2:#4A5568;--tx3:#8896A5;
+}
+body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);color:var(--tx);font-size:14px;line-height:1.6;padding:0}
+
+/* ── TOPBAR ── */
+.topbar{background:var(--PD);color:#fff;padding:0 24px;height:56px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:50;box-shadow:0 2px 8px rgba(0,0,0,.18)}
+.topbar-title{font-size:16px;font-weight:700}
+.topbar-sub{font-size:12px;opacity:.6}
+.topbar-space{flex:1}
+.topbar-badge{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);padding:4px 12px;border-radius:99px;font-size:11.5px;font-weight:600}
+.topbar-btn{padding:7px 14px;border-radius:7px;font-size:12.5px;font-weight:600;cursor:pointer;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.1);color:#fff;font-family:inherit;transition:background .12s}
+.topbar-btn:hover{background:rgba(255,255,255,.2)}
+.topbar-btn.primary{background:var(--A);border-color:var(--A)}
+
+/* ── LAYOUT ── */
+.content{max-width:1320px;margin:0 auto;padding:24px}
+
+/* ── SECTION TITLE ── */
+.section-label{font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--tx3);margin-bottom:10px;margin-top:24px;padding-bottom:6px;border-bottom:1px solid var(--bdr)}
+.section-label:first-child{margin-top:0}
+
+/* ── KPI GRID ── */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:6px}
+.kpi{background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:16px 18px;position:relative;overflow:hidden}
+.kpi::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--P);border-radius:10px 0 0 10px}
+.kpi.g::before{background:var(--A)}
+.kpi.w::before{background:#C08F2A}
+.kpi.r::before{background:var(--D)}
+.kpi.orange::before{background:#EA580C}
+.kpi.purple::before{background:#7C3AED}
+.kpi-icon{font-size:18px;margin-bottom:6px;opacity:.8}
+.kpi-label{font-size:11.5px;color:var(--tx2);font-weight:500;margin-bottom:4px}
+.kpi-val{font-size:26px;font-weight:700;color:var(--P);line-height:1.1}
+.kpi.g .kpi-val{color:var(--A)}
+.kpi.w .kpi-val{color:var(--W)}
+.kpi.r .kpi-val{color:var(--D)}
+.kpi.orange .kpi-val{color:#EA580C}
+.kpi.purple .kpi-val{color:#7C3AED}
+.kpi-sub{font-size:11px;color:var(--tx3);margin-top:5px}
+.kpi-pct-bar{height:4px;border-radius:99px;background:var(--bg2);margin-top:8px;overflow:hidden}
+.kpi-pct-fill{height:100%;border-radius:99px;background:var(--P);transition:width .6s ease}
+.kpi.g .kpi-pct-fill{background:var(--A)}
+.kpi.r .kpi-pct-fill{background:var(--D)}
+.kpi.orange .kpi-pct-fill{background:#EA580C}
+
+/* ── CARD ── */
+.card{background:var(--card);border:1px solid var(--bdr);border-radius:10px;margin-bottom:14px}
+.card-head{padding:14px 18px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:10px}
+.card-head h3{font-size:13.5px;font-weight:700;color:var(--P);flex:1;margin:0}
+.card-body{padding:16px 18px}
+.card-badge{background:var(--bg2);color:var(--tx2);padding:2px 10px;border-radius:99px;font-size:10.5px;font-weight:600}
+.card-badge.green{background:#D1FAE5;color:#065F46}
+.card-badge.blue{background:#DBEAFE;color:#1E40AF}
+.card-badge.red{background:var(--DL);color:var(--D)}
+
+/* ── PERSONNEL TYPE DONUT SECTION ── */
+.type-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:center}
+.donut-wrap{display:flex;flex-direction:column;align-items:center;gap:8px}
+.donut-ring{position:relative;width:120px;height:120px}
+.donut-ring svg{width:120px;height:120px;transform:rotate(-90deg)}
+.donut-ring .donut-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.donut-center-val{font-size:18px;font-weight:700;color:var(--tx)}
+.donut-center-sub{font-size:9px;color:var(--tx3);font-weight:500}
+.donut-legend{display:flex;flex-direction:column;gap:10px}
+.legend-row{display:flex;align-items:center;gap:10px}
+.legend-dot{width:11px;height:11px;border-radius:3px;flex-shrink:0}
+.legend-label{font-size:12px;color:var(--tx2);flex:1}
+.legend-val{font-size:13px;font-weight:700;color:var(--tx)}
+.legend-pct{font-size:11px;color:var(--tx3);min-width:36px;text-align:right}
+
+/* ── MINI BAR CHART ── */
+.mini-bars{display:flex;flex-direction:column;gap:8px}
+.mini-bar-row{display:flex;align-items:center;gap:8px}
+.mini-bar-label{width:96px;font-size:11.5px;color:var(--tx2);flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mini-bar-track{flex:1;height:8px;background:var(--bg2);border-radius:99px;overflow:hidden}
+.mini-bar-fill{height:100%;border-radius:99px;background:var(--P);transition:width .4s}
+.mini-bar-val{width:80px;text-align:right;font-size:11.5px;font-weight:600;color:var(--tx2);flex-shrink:0}
+
+/* ── TREND LINE ── */
+.trend-wrap{position:relative}
+.trend-wrap svg{display:block;width:100%;overflow:visible}
+
+/* ── ORG RANKING TABLE ── */
+.rank-table{width:100%;border-collapse:collapse}
+.rank-table thead th{background:var(--bg);padding:9px 12px;text-align:left;font-size:11.5px;font-weight:700;color:var(--tx2);white-space:nowrap;border-bottom:1px solid var(--bdr)}
+.rank-table tbody td{padding:9px 12px;border-bottom:1px solid var(--bg2);font-size:12.5px;vertical-align:middle}
+.rank-table tbody tr:last-child td{border-bottom:none}
+.rank-table tbody tr:hover td{background:#FAFBFD}
+.rank-num{width:36px;text-align:center;color:var(--tx3);font-size:11px;font-weight:600}
+.risk-chip{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:99px;font-size:10.5px;font-weight:700;white-space:nowrap}
+.risk-low{background:#D1FAE5;color:#065F46}
+.risk-mid{background:var(--WL);color:var(--W)}
+.risk-high{background:var(--DL);color:var(--D)}
+.tbl-wrap{overflow-x:auto}
+
+/* ── COMPLETION STATUS ── */
+.completion-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.completion-item{background:var(--bg);border-radius:8px;padding:11px 13px;display:flex;align-items:center;gap:10px}
+.completion-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.completion-dot.full{background:var(--A);box-shadow:0 0 0 3px var(--AL)}
+.completion-dot.partial{background:#F59E0B;box-shadow:0 0 0 3px #FEF3C7}
+.completion-dot.empty{background:var(--bdr);box-shadow:0 0 0 3px var(--bg2)}
+.completion-org{font-size:12px;color:var(--tx);font-weight:500;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.completion-pct{font-size:11px;font-weight:700;color:var(--tx3)}
+
+/* ── FILTER BAR ── */
+.filter-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+.sel{padding:7px 10px;border:1px solid var(--bdr);border-radius:7px;font-size:12.5px;color:var(--tx);background:#fff;font-family:inherit;cursor:pointer}
+.btn{padding:6px 14px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;border:none;font-family:inherit;transition:opacity .12s}
+.btn:hover{opacity:.85}
+.b-blue{background:#DBEAFE;color:#1E40AF}
+.b-gray{background:var(--bg2);color:var(--tx2)}
+.b-solid{background:var(--P);color:#fff}
+
+/* ── INFO BOX ── */
+.info{padding:10px 14px;border-radius:8px;font-size:12px;margin-bottom:16px;display:flex;align-items:flex-start;gap:8px}
+.info.blue{background:#EFF6FF;color:#1E40AF;border:1px solid #BFDBFE}
+.info.green{background:#F0FDF4;color:#14532D;border:1px solid #BBF7D0}
+
+/* ── LOADING ── */
+.loading-overlay{position:fixed;inset:0;background:rgba(244,246,249,.9);display:flex;align-items:center;justify-content:center;z-index:99;flex-direction:column;gap:12px}
+.spinner{width:40px;height:40px;border:4px solid var(--bdr);border-top-color:var(--P);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── GAP ANALYSIS ── */
+.gap-rows{display:flex;flex-direction:column;gap:12px}
+.gap-row{display:flex;align-items:center;gap:12px}
+.gap-metric{width:140px;font-size:12px;color:var(--tx2);font-weight:500;flex-shrink:0}
+.gap-track{flex:1;height:10px;background:var(--bg2);border-radius:99px;position:relative;overflow:visible}
+.gap-current{height:100%;border-radius:99px;position:relative;transition:width .5s}
+.gap-target-line{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--P);border-radius:2px;z-index:2}
+.gap-labels{display:flex;justify-content:space-between;margin-top:3px}
+.gap-label-current{font-size:10px;color:var(--tx3)}
+.gap-label-target{font-size:10px;color:var(--P);font-weight:600}
+.gap-delta{width:80px;font-size:12px;font-weight:700;text-align:right;flex-shrink:0}
+.gap-delta.good{color:var(--A)}
+.gap-delta.warn{color:var(--W)}
+.gap-delta.bad{color:var(--D)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  .content{padding:14px}
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+  .type-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- Loading -->
+<div class="loading-overlay" id="loading">
+  <div class="spinner"></div>
+  <div style="font-size:13px;color:var(--tx2);font-weight:500">กำลังโหลดข้อมูล Ch1...</div>
+</div>
+
+<!-- Topbar -->
+<div class="topbar">
+  <div>
+    <div class="topbar-title">📊 สรุปภาพรวม Ch1</div>
+    <div class="topbar-sub">ออกแบบใหม่ — Preview เท่านั้น ยังไม่ merge</div>
+  </div>
+  <div class="topbar-space"></div>
+  <span class="topbar-badge" id="tb-org-count">โหลด...</span>
+  <button class="topbar-btn primary" onclick="window.print()">🖨️ Print</button>
+  <button class="topbar-btn" onclick="window.close()">✕ ปิด</button>
+</div>
+
+<!-- Main Content -->
+<div class="content" id="content" style="display:none">
+
+  <div class="info blue">
+    🔍 <span>นี่คือ <strong>Preview หน้าใหม่</strong> เพื่อดูก่อน merge — ข้อมูลดึงจาก Supabase จริง · กด <kbd>Ctrl+P</kbd> เพื่อพิมพ์</span>
+  </div>
+
+  <!-- Filter -->
+  <div class="filter-bar">
+    <div style="position:relative;display:inline-block">
+      <select class="sel" id="org-filter" onchange="applyFilter()" style="min-width:220px">
+        <option value="">ทุกองค์กร</option>
+      </select>
+    </div>
+    <button class="btn b-gray" onclick="resetFilter()">ล้างตัวกรอง</button>
+    <span style="font-size:11.5px;color:var(--tx3)" id="filter-label"></span>
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!--  SECTION 1: KPI HEADLINE               -->
+  <!-- ═══════════════════════════════════════ -->
+  <div class="section-label">ตัวชี้วัดหลัก (Headline KPIs)</div>
+  <div class="kpi-grid" id="kpi-main">
+    <div class="kpi"><div class="kpi-icon">🏛️</div><div class="kpi-label">องค์กรที่มีข้อมูล</div><div class="kpi-val" id="k-orgs">—</div><div class="kpi-sub" id="k-orgs-sub">—</div></div>
+    <div class="kpi g"><div class="kpi-icon">👥</div><div class="kpi-label">บุคลากรรวมทั้งหมด</div><div class="kpi-val" id="k-staff">—</div><div class="kpi-sub" id="k-staff-sub">—</div></div>
+    <div class="kpi r"><div class="kpi-icon">🏥</div><div class="kpi-label">NCD ต่อบุคลากร</div><div class="kpi-val" id="k-ncd">—</div><div class="kpi-sub" id="k-ncd-sub">—</div></div>
+    <div class="kpi w"><div class="kpi-icon">🩺</div><div class="kpi-label">วันลาป่วยรวม</div><div class="kpi-val" id="k-sick">—</div><div class="kpi-sub">สะสมจากทุกองค์กร</div></div>
+    <div class="kpi"><div class="kpi-icon">🧠</div><div class="kpi-label">Burnout เฉลี่ย</div><div class="kpi-val" id="k-burnout">—</div><div class="kpi-sub">ค่าเฉลี่ยจากฟอร์ม Ch1</div></div>
+    <div class="kpi g"><div class="kpi-icon">❤️</div><div class="kpi-label">Engagement เฉลี่ย</div><div class="kpi-val" id="k-eng">—</div><div class="kpi-sub">คะแนน / 100</div></div>
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!--  SECTION 2: ประเภทบุคลากร (การ์ดใหม่)  -->
+  <!-- ═══════════════════════════════════════ -->
+  <div class="section-label">🆕 โครงสร้างประเภทบุคลากร (การ์ดใหม่)</div>
+
+  <!-- KPI row for type -->
+  <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr)">
+    <div class="kpi">
+      <div class="kpi-icon">🎖️</div>
+      <div class="kpi-label">ข้าราชการ (type_official)</div>
+      <div class="kpi-val" id="k-official">—</div>
+      <div class="kpi-sub" id="k-official-sub">— % ของบุคลากรรวม</div>
+      <div class="kpi-pct-bar"><div class="kpi-pct-fill" id="k-official-bar" style="width:0%"></div></div>
+    </div>
+    <div class="kpi orange">
+      <div class="kpi-icon">📋</div>
+      <div class="kpi-label">พนักงานราชการ (type_employee)</div>
+      <div class="kpi-val" id="k-employee">—</div>
+      <div class="kpi-sub" id="k-employee-sub">— % ของบุคลากรรวม</div>
+      <div class="kpi-pct-bar"><div class="kpi-pct-fill kpi.orange" id="k-employee-bar" style="width:0%;background:#EA580C"></div></div>
+    </div>
+    <div class="kpi purple">
+      <div class="kpi-icon">🤝</div>
+      <div class="kpi-label">ลูกจ้าง/จ้างเหมา (type_contract)</div>
+      <div class="kpi-val" id="k-contract">—</div>
+      <div class="kpi-sub" id="k-contract-sub">— % ของบุคลากรรวม</div>
+      <div class="kpi-pct-bar"><div class="kpi-pct-fill" id="k-contract-bar" style="width:0%;background:#7C3AED"></div></div>
+    </div>
+    <div class="kpi" style="border-left-color:var(--tx3)">
+      <div class="kpi-icon">👤</div>
+      <div class="kpi-label">บุคลากรอื่น ๆ (type_other)</div>
+      <div class="kpi-val" id="k-other">—</div>
+      <div class="kpi-sub" id="k-other-sub">— % ของบุคลากรรวม</div>
+      <div class="kpi-pct-bar"><div class="kpi-pct-fill" id="k-other-bar" style="width:0%;background:var(--tx3)"></div></div>
+    </div>
+  </div>
+
+  <!-- Donut + Per-org breakdown -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+
+    <div class="card" style="margin-bottom:0">
+      <div class="card-head">
+        <h3>🍩 สัดส่วนประเภทบุคลากร (ภาพรวม)</h3>
+        <span class="card-badge" id="type-total-badge">รวม — คน</span>
+      </div>
+      <div class="card-body" style="display:flex;align-items:center;gap:28px;flex-wrap:wrap">
+        <div class="donut-wrap">
+          <div class="donut-ring">
+            <svg viewBox="0 0 120 120">
+              <circle cx="60" cy="60" r="48" fill="none" stroke="var(--bg2)" stroke-width="18"/>
+              <circle id="donut-official" cx="60" cy="60" r="48" fill="none" stroke="#0F4C81" stroke-width="18" stroke-dasharray="0 301.59" stroke-linecap="butt"/>
+              <circle id="donut-employee" cx="60" cy="60" r="48" fill="none" stroke="#EA580C" stroke-width="18" stroke-dasharray="0 301.59" stroke-linecap="butt"/>
+              <circle id="donut-contract" cx="60" cy="60" r="48" fill="none" stroke="#7C3AED" stroke-width="18" stroke-dasharray="0 301.59" stroke-linecap="butt"/>
+              <circle id="donut-other"    cx="60" cy="60" r="48" fill="none" stroke="#8896A5" stroke-width="18" stroke-dasharray="0 301.59" stroke-linecap="butt"/>
+            </svg>
+            <div class="donut-center">
+              <div class="donut-center-val" id="donut-center-val">—</div>
+              <div class="donut-center-sub">คนรวม</div>
+            </div>
+          </div>
+        </div>
+        <div class="donut-legend" id="donut-legend">
+          <div class="legend-row"><div class="legend-dot" style="background:#0F4C81"></div><div class="legend-label">ข้าราชการ</div><div class="legend-val" id="leg-official">—</div><div class="legend-pct" id="leg-official-pct">—</div></div>
+          <div class="legend-row"><div class="legend-dot" style="background:#EA580C"></div><div class="legend-label">พนักงานราชการ</div><div class="legend-val" id="leg-employee">—</div><div class="legend-pct" id="leg-employee-pct">—</div></div>
+          <div class="legend-row"><div class="legend-dot" style="background:#7C3AED"></div><div class="legend-label">ลูกจ้าง/จ้างเหมา</div><div class="legend-val" id="leg-contract">—</div><div class="legend-pct" id="leg-contract-pct">—</div></div>
+          <div class="legend-row"><div class="legend-dot" style="background:#8896A5"></div><div class="legend-label">บุคลากรอื่น ๆ</div><div class="legend-val" id="leg-other">—</div><div class="legend-pct" id="leg-other-pct">—</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:0">
+      <div class="card-head">
+        <h3>📊 สัดส่วนข้าราชการ รายองค์กร</h3>
+        <span class="card-badge blue">เรียงจากมาก → น้อย</span>
+      </div>
+      <div class="card-body" style="max-height:280px;overflow-y:auto">
+        <div class="mini-bars" id="org-official-bars">
+          <div style="color:var(--tx3);font-size:12px">กำลังโหลด...</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!--  SECTION 3: GAP ANALYSIS               -->
+  <!-- ═══════════════════════════════════════ -->
+  <div class="section-label">🆕 Gap Analysis — ค่าปัจจุบัน vs เป้าหมาย</div>
+  <div class="card">
+    <div class="card-head">
+      <h3>📉 ช่องว่างจากเป้าหมายโครงการ</h3>
+      <span class="card-badge">เป้าหมาย HRD Plan 2566–2570</span>
+    </div>
+    <div class="card-body">
+      <div class="gap-rows" id="gap-rows">
+        <div style="color:var(--tx3);font-size:12px">กำลังโหลด...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!--  SECTION 4: ORG RANKING TABLE          -->
+  <!-- ═══════════════════════════════════════ -->
+  <div class="section-label">🆕 จัดอันดับองค์กร — ตัวชี้วัดสุขภาวะ</div>
+  <div class="card">
+    <div class="card-head">
+      <h3>🏆 Ranking องค์กร — NCD, Burnout, Engagement, ข้าราชการ</h3>
+      <span class="card-badge green" id="rank-badge">— องค์กร</span>
+    </div>
+    <div class="tbl-wrap">
+      <table class="rank-table">
+        <thead>
+          <tr>
+            <th class="rank-num">#</th>
+            <th>ชื่อองค์กร</th>
+            <th style="text-align:right">บุคลากร</th>
+            <th style="text-align:right">ข้าราชการ</th>
+            <th style="text-align:right">% ข้าราชการ</th>
+            <th style="text-align:right">NCD%</th>
+            <th style="text-align:right">Burnout%</th>
+            <th style="text-align:right">Engagement</th>
+            <th style="text-align:center">สถานะ</th>
+          </tr>
+        </thead>
+        <tbody id="rank-tbody">
+          <tr><td colspan="9" style="text-align:center;color:var(--tx3);padding:24px">กำลังโหลด...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!--  SECTION 5: DATA COMPLETENESS          -->
+  <!-- ═══════════════════════════════════════ -->
+  <div class="section-label">🆕 ความครบถ้วนของข้อมูล</div>
+  <div class="card">
+    <div class="card-head">
+      <h3>📋 สถานะการกรอกข้อมูลสำคัญ รายองค์กร</h3>
+      <span class="card-badge" id="completion-badge">— องค์กร</span>
+    </div>
+    <div class="card-body">
+      <div style="display:flex;gap:16px;margin-bottom:12px;font-size:11.5px;flex-wrap:wrap">
+        <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--A);margin-right:5px;vertical-align:middle"></span>ครบถ้วน (≥80%)</span>
+        <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#F59E0B;margin-right:5px;vertical-align:middle"></span>บางส่วน (40–79%)</span>
+        <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--bdr);margin-right:5px;vertical-align:middle"></span>น้อย (&lt;40%)</span>
+      </div>
+      <div class="completion-grid" id="completion-grid">
+        <div style="color:var(--tx3);font-size:12px">กำลังโหลด...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!--  SECTION 6: EXISTING CHARTS            -->
+  <!-- ═══════════════════════════════════════ -->
+  <div class="section-label">โครงสร้างบุคลากร (เดิม)</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+    <div class="card" style="margin-bottom:0">
+      <div class="card-head"><h3>โครงสร้างอายุ</h3><span class="card-badge">4 กลุ่ม</span></div>
+      <div class="card-body"><div class="mini-bars" id="age-bars"></div></div>
+    </div>
+    <div class="card" style="margin-bottom:0">
+      <div class="card-head"><h3>อายุราชการ</h3><span class="card-badge">8 กลุ่ม</span></div>
+      <div class="card-body"><div class="mini-bars" id="service-bars"></div></div>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+    <div class="card" style="margin-bottom:0">
+      <div class="card-head"><h3>NCD และโรคหลัก</h3><span class="card-badge red">สุขภาพกาย</span></div>
+      <div class="card-body"><div class="mini-bars" id="ncd-bars"></div></div>
+    </div>
+    <div class="card" style="margin-bottom:0">
+      <div class="card-head"><h3>สุขภาพจิต</h3><span class="card-badge">สุขภาวะจิต</span></div>
+      <div class="card-body"><div class="mini-bars" id="mental-bars"></div></div>
+    </div>
+  </div>
+
+  <div style="text-align:center;padding:20px 0;font-size:11.5px;color:var(--tx3);border-top:1px solid var(--bdr)">
+    Preview — ch1-summary-preview.html · ข้อมูล ณ วันที่ <span id="footer-date"></span> · ยังไม่ได้ merge เข้า admin.html
+  </div>
+
+</div><!-- /content -->
+
+<script>
+const SUPABASE_URL = 'https://fgdommhiqhzvsedfzyrr.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZnZG9tbWhpcWh6dnNlZGZ6eXJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkzMzY2MzUsImV4cCI6MjA4NDkxMjYzNX0.GFMOeDArhq-9lPt39OizkBOFFgK4TDpVDJrk_HRQ6Xc';
+
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ── Targets (HRD Plan benchmark) ──
+const TARGETS = {
+  burnout: { label: 'Burnout', target: 15, unit: '%', lower_is_better: true, color: '#991B1B' },
+  engagement: { label: 'Engagement Score', target: 75, unit: '', lower_is_better: false, color: '#0F4C81' },
+  ncd: { label: 'NCD ต่อบุคลากร', target: 10, unit: '%', lower_is_better: true, color: '#C08F2A' },
+  sick_leave: { label: 'วันลาป่วยเฉลี่ย/คน/ปี', target: 7, unit: 'วัน', lower_is_better: true, color: '#7C3AED' },
+};
+
+// ── Key fields for completeness check ──
+const COMPLETENESS_FIELDS = [
+  'total_personnel', 'type_official', 'type_employee', 'type_contract',
+  'ncd_count', 'mental_burnout', 'engagement_score', 'sick_leave_days',
+  'age_under30', 'service_u1',
+];
+
+let allRows = [];
+let filteredRows = [];
+
+// ── Helpers ──
+function fmtNum(v, d = 0) {
+  const n = parseFloat(v);
+  if (!isFinite(n)) return '—';
+  return n.toLocaleString('th-TH', { minimumFractionDigits: d, maximumFractionDigits: d });
+}
+function ch1v(row, field) {
+  const fd = row.form_data || {};
+  const v = row[field] ?? fd[field];
+  return v !== undefined && v !== null ? v : null;
+}
+function ch1Num(row, fields) {
+  const list = Array.isArray(fields) ? fields : [fields];
+  for (const f of list) {
+    const v = ch1v(row, f);
+    if (v === null || v === '') continue;
+    const n = Number(v);
+    if (isFinite(n)) return n;
+  }
+  return null;
+}
+function ch1Sum(rows, fields) { return rows.reduce((s, r) => s + (ch1Num(r, fields) || 0), 0); }
+function ch1Avg(rows, fields) {
+  const vals = rows.map(r => ch1Num(r, fields)).filter(v => isFinite(v));
+  return vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
+}
+function ch1Pct(num, den) { return den ? (num / den) * 100 : null; }
+function getCh1Org(row) {
+  return ch1v(row, 'org_name') || ch1v(row, 'org_name_th') || row.org_code || '?';
+}
+function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ── Risk score (0–100, higher = worse) ──
+function riskScore(row) {
+  let score = 0, count = 0;
+  const burnout = ch1Num(row, 'mental_burnout');
+  if (isFinite(burnout)) { score += Math.min(burnout / 40, 1) * 30; count++; }
+  const ncd = ch1Pct(ch1Num(row, ['ncd_count','ncd_total']), ch1Num(row, ['total_personnel','total_staff']));
+  if (isFinite(ncd)) { score += Math.min(ncd / 20, 1) * 25; count++; }
+  const sick = ch1Num(row, ['sick_leave_days','sick_leave_avg']);
+  if (isFinite(sick)) { score += Math.min(sick / 15, 1) * 25; count++; }
+  const eng = ch1Num(row, 'engagement_score');
+  if (isFinite(eng)) { score += Math.max(0, (75 - eng) / 75) * 20; count++; }
+  return count > 0 ? score : null;
+}
+
+// ── Render mini bars ──
+function renderMiniBars(containerId, items, color) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  const max = Math.max(...items.map(i => i.value || 0), 1);
+  el.innerHTML = items.map(item => `
+    <div class="mini-bar-row">
+      <div class="mini-bar-label" title="${esc(item.label)}">${esc(item.label)}</div>
+      <div class="mini-bar-track">
+        <div class="mini-bar-fill" style="width:${((item.value||0)/max*100).toFixed(1)}%;background:${color||'var(--P)'}"></div>
+      </div>
+      <div class="mini-bar-val">${item.value ? fmtNum(item.value) : '—'}${item.unit||''}</div>
+    </div>`).join('');
+}
+
+// ── Render donut ──
+const CIRC = 2 * Math.PI * 48; // ≈ 301.59
+function renderDonut(official, employee, contract, other) {
+  const total = official + employee + contract + other || 1;
+  const segs = [
+    { id: 'donut-official', val: official, color: '#0F4C81' },
+    { id: 'donut-employee', val: employee, color: '#EA580C' },
+    { id: 'donut-contract', val: contract, color: '#7C3AED' },
+    { id: 'donut-other',    val: other,    color: '#8896A5' },
+  ];
+  let offset = 0;
+  segs.forEach(s => {
+    const el = document.getElementById(s.id);
+    if (!el) return;
+    const dash = (s.val / total) * CIRC;
+    el.setAttribute('stroke-dasharray', `${dash.toFixed(2)} ${(CIRC - dash).toFixed(2)}`);
+    el.setAttribute('stroke-dashoffset', (-offset).toFixed(2));
+    el.setAttribute('stroke', s.color);
+    offset += dash;
+  });
+  document.getElementById('donut-center-val').textContent = fmtNum(official + employee + contract + other);
+  document.getElementById('type-total-badge').textContent = `รวม ${fmtNum(official + employee + contract + other)} คน`;
+}
+
+// ── Gap row HTML ──
+function renderGapRow(label, current, target, unit, lowerIsBetter, color) {
+  const pct = Math.min((current / (target * 2)) * 100, 100);
+  const targetPct = Math.min((target / (target * 2)) * 100, 100);
+  const good = lowerIsBetter ? current <= target : current >= target;
+  const delta = lowerIsBetter ? (current - target) : (target - current);
+  const deltaClass = good ? 'good' : delta > target * 0.3 ? 'bad' : 'warn';
+  const deltaText = good ? `✓ ดีกว่าเป้า` : `ห่างเป้า ${fmtNum(Math.abs(delta), 1)} ${unit}`;
+  return `
+    <div class="gap-row">
+      <div class="gap-metric">${esc(label)}</div>
+      <div style="flex:1">
+        <div class="gap-track" style="height:10px">
+          <div class="gap-current" style="width:${pct.toFixed(1)}%;background:${color}20;border-right:2px solid ${color};height:100%"></div>
+          <div class="gap-target-line" style="left:${targetPct.toFixed(1)}%;background:var(--P)"></div>
+        </div>
+        <div class="gap-labels">
+          <span class="gap-label-current">${fmtNum(current, 1)} ${unit}</span>
+          <span class="gap-label-target">เป้า ${fmtNum(target, 1)} ${unit}</span>
+        </div>
+      </div>
+      <div class="gap-delta ${deltaClass}">${deltaText}</div>
+    </div>`;
+}
+
+// ── Main render ──
+function renderAll(rows) {
+  filteredRows = rows;
+  const orgNames = [...new Set(rows.map(r => getCh1Org(r)).filter(Boolean))];
+
+  // KPI main
+  const totalStaff = ch1Sum(rows, ['total_personnel', 'total_staff']);
+  const totalNcd = ch1Sum(rows, ['ncd_count','ncd_total']);
+  const ncdRatio = ch1Pct(totalNcd, totalStaff);
+  const burnoutAvg = ch1Avg(rows, 'mental_burnout');
+  const engAvg = ch1Avg(rows, 'engagement_score');
+  const sickSum = ch1Sum(rows, ['sick_leave_days','sick_leave_avg']);
+
+  document.getElementById('k-orgs').textContent = orgNames.length;
+  document.getElementById('k-orgs-sub').textContent = `จาก ${allRows.length} รายการใน DB`;
+  document.getElementById('k-staff').textContent = fmtNum(totalStaff);
+  document.getElementById('k-staff-sub').textContent = `เฉลี่ย ${fmtNum(totalStaff / Math.max(orgNames.length, 1))} คน/องค์กร`;
+  document.getElementById('k-ncd').textContent = ncdRatio != null ? `${fmtNum(ncdRatio, 1)}%` : '—';
+  document.getElementById('k-ncd-sub').textContent = `จากบุคลากรรวม ${fmtNum(totalStaff)} คน`;
+  document.getElementById('k-sick').textContent = fmtNum(sickSum);
+  document.getElementById('k-burnout').textContent = burnoutAvg != null ? `${fmtNum(burnoutAvg, 1)}%` : '—';
+  document.getElementById('k-eng').textContent = engAvg != null ? fmtNum(engAvg, 1) : '—';
+
+  // Personnel type KPIs
+  const official = ch1Sum(rows, 'type_official');
+  const employee = ch1Sum(rows, 'type_employee');
+  const contract = ch1Sum(rows, 'type_contract');
+  const other = ch1Sum(rows, 'type_other');
+  const typeTotal = official + employee + contract + other || 1;
+
+  function setTypeKpi(id, barId, subId, val) {
+    document.getElementById(id).textContent = fmtNum(val);
+    const pct = (val / typeTotal * 100);
+    document.getElementById(subId).textContent = `${fmtNum(pct, 1)}% ของบุคลากรรวม`;
+    document.getElementById(barId).style.width = `${Math.min(pct, 100).toFixed(1)}%`;
+  }
+  setTypeKpi('k-official', 'k-official-bar', 'k-official-sub', official);
+  setTypeKpi('k-employee', 'k-employee-bar', 'k-employee-sub', employee);
+  setTypeKpi('k-contract', 'k-contract-bar', 'k-contract-sub', contract);
+  setTypeKpi('k-other', 'k-other-bar', 'k-other-sub', other);
+
+  // Legend
+  const legIds = [
+    ['leg-official','leg-official-pct', official],
+    ['leg-employee','leg-employee-pct', employee],
+    ['leg-contract','leg-contract-pct', contract],
+    ['leg-other','leg-other-pct', other],
+  ];
+  legIds.forEach(([vid, pid, val]) => {
+    document.getElementById(vid).textContent = fmtNum(val);
+    document.getElementById(pid).textContent = `${fmtNum(val / typeTotal * 100, 1)}%`;
+  });
+
+  // Donut
+  renderDonut(official, employee, contract, other);
+
+  // Per-org official bars
+  const orgOfficialData = orgNames.map(org => {
+    const orgRows = rows.filter(r => getCh1Org(r) === org);
+    return { label: org, value: ch1Sum(orgRows, 'type_official') };
+  }).filter(d => d.value > 0).sort((a, b) => b.value - a.value);
+  renderMiniBars('org-official-bars', orgOfficialData, '#0F4C81');
+
+  // Gap analysis
+  const gapData = [
+    ['burnout', burnoutAvg],
+    ['engagement', engAvg],
+    ['ncd', ncdRatio],
+  ];
+  let gapHtml = '';
+  gapData.forEach(([key, val]) => {
+    const cfg = TARGETS[key];
+    if (val == null || !isFinite(val)) return;
+    gapHtml += renderGapRow(cfg.label, val, cfg.target, cfg.unit, cfg.lower_is_better, cfg.color);
+  });
+  document.getElementById('gap-rows').innerHTML = gapHtml || '<div style="color:var(--tx3);font-size:12px">ไม่มีข้อมูลเพียงพอสำหรับ Gap Analysis</div>';
+
+  // Org ranking table
+  document.getElementById('rank-badge').textContent = `${orgNames.length} องค์กร`;
+  const rankData = orgNames.map(org => {
+    const orgRows = rows.filter(r => getCh1Org(r) === org);
+    const staff = ch1Sum(orgRows, ['total_personnel','total_staff']);
+    const off = ch1Sum(orgRows, 'type_official');
+    const offPct = ch1Pct(off, staff);
+    const ncd = ch1Pct(ch1Sum(orgRows, ['ncd_count','ncd_total']), staff);
+    const b = ch1Avg(orgRows, 'mental_burnout');
+    const e = ch1Avg(orgRows, 'engagement_score');
+    const rs = riskScore(orgRows[0] || {});
+    return { org, staff, off, offPct, ncd, b, e, rs };
+  }).sort((a, b) => (b.rs || 0) - (a.rs || 0));
+
+  document.getElementById('rank-tbody').innerHTML = rankData.map((d, i) => {
+    const risk = d.rs == null ? '' : d.rs >= 40 ? '<span class="risk-chip risk-high">🔴 ระวัง</span>' :
+      d.rs >= 20 ? '<span class="risk-chip risk-mid">🟡 ติดตาม</span>' :
+      '<span class="risk-chip risk-low">🟢 ดี</span>';
+    return `<tr>
+      <td class="rank-num">${i+1}</td>
+      <td style="font-size:12.5px;font-weight:500;max-width:200px">${esc(d.org)}</td>
+      <td style="text-align:right">${fmtNum(d.staff)}</td>
+      <td style="text-align:right;font-weight:600;color:#0F4C81">${fmtNum(d.off)}</td>
+      <td style="text-align:right">${d.offPct != null ? fmtNum(d.offPct,1)+'%' : '—'}</td>
+      <td style="text-align:right;color:${d.ncd > 12 ? 'var(--D)' : 'var(--tx)'}">${d.ncd != null ? fmtNum(d.ncd,1)+'%' : '—'}</td>
+      <td style="text-align:right;color:${d.b > 25 ? 'var(--D)' : 'var(--tx)'}">${d.b != null ? fmtNum(d.b,1)+'%' : '—'}</td>
+      <td style="text-align:right;color:${d.e < 65 ? 'var(--D)' : d.e >= 75 ? 'var(--A)' : 'var(--tx)'}">${d.e != null ? fmtNum(d.e,1) : '—'}</td>
+      <td style="text-align:center">${risk}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="9" style="text-align:center;color:var(--tx3);padding:20px">ไม่มีข้อมูล</td></tr>';
+
+  // Completeness
+  document.getElementById('completion-badge').textContent = `${orgNames.length} องค์กร`;
+  const completionHtml = orgNames.map(org => {
+    const orgRows = rows.filter(r => getCh1Org(r) === org);
+    if (!orgRows.length) return '';
+    const row = orgRows[0];
+    const filled = COMPLETENESS_FIELDS.filter(f => {
+      const v = ch1v(row, f);
+      return v !== null && v !== '' && v !== 0;
+    }).length;
+    const pct = (filled / COMPLETENESS_FIELDS.length) * 100;
+    const dotClass = pct >= 80 ? 'full' : pct >= 40 ? 'partial' : 'empty';
+    const shortName = org.replace(/^สำนักงาน/, 'สนง.').replace(/^กรม/, 'กรม');
+    return `<div class="completion-item">
+      <div class="completion-dot ${dotClass}"></div>
+      <div class="completion-org" title="${esc(org)}">${esc(shortName)}</div>
+      <div class="completion-pct">${fmtNum(pct,0)}%</div>
+    </div>`;
+  }).join('');
+  document.getElementById('completion-grid').innerHTML = completionHtml || '<div style="color:var(--tx3);font-size:12px">ไม่มีข้อมูล</div>';
+
+  // Age chart
+  renderMiniBars('age-bars', [
+    { label: '≤30 ปี', value: ch1Sum(rows, ['age_u30','age_under30']) },
+    { label: '31–40 ปี', value: ch1Sum(rows, 'age_31_40') },
+    { label: '41–50 ปี', value: ch1Sum(rows, 'age_41_50') },
+    { label: '51–60 ปี', value: ch1Sum(rows, 'age_51_60') },
+  ], 'var(--P)');
+
+  // Service chart
+  renderMiniBars('service-bars', [
+    { label: '<1 ปี', value: ch1Sum(rows, 'service_u1') },
+    { label: '1–5 ปี', value: ch1Sum(rows, 'service_1_5') },
+    { label: '6–10 ปี', value: ch1Sum(rows, 'service_6_10') },
+    { label: '11–15 ปี', value: ch1Sum(rows, 'service_11_15') },
+    { label: '16–20 ปี', value: ch1Sum(rows, 'service_16_20') },
+    { label: '21–25 ปี', value: ch1Sum(rows, 'service_21_25') },
+    { label: '26–30 ปี', value: ch1Sum(rows, 'service_26_30') },
+    { label: '>30 ปี', value: ch1Sum(rows, 'service_over30') },
+  ], 'var(--A)');
+
+  // NCD chart
+  renderMiniBars('ncd-bars', [
+    { label: 'เบาหวาน', value: ch1Sum(rows, ['disease_diabetes','ncd_diabetes']) },
+    { label: 'ความดัน', value: ch1Sum(rows, ['disease_hypertension','ncd_hypertension']) },
+    { label: 'หัวใจ/หลอดเลือด', value: ch1Sum(rows, 'disease_cardiovascular') },
+    { label: 'ไต', value: ch1Sum(rows, 'disease_kidney') },
+    { label: 'อ้วน/น้ำหนักเกิน', value: ch1Sum(rows, 'disease_obesity') },
+    { label: 'NCD รวม', value: ch1Sum(rows, ['ncd_count','ncd_total']) },
+  ], '#C4444A');
+
+  // Mental chart
+  renderMiniBars('mental-bars', [
+    { label: 'Burnout', value: ch1Avg(rows, 'mental_burnout'), unit: '%' },
+    { label: 'Engagement', value: ch1Avg(rows, 'engagement_score') },
+    { label: 'ลาป่วยเฉลี่ย', value: ch1Avg(rows, ['sick_leave_days','sick_leave_avg']), unit: ' วัน' },
+  ], '#7C3AED');
+}
+
+// ── Filter ──
+function applyFilter() {
+  const org = document.getElementById('org-filter').value;
+  const rows = org ? allRows.filter(r => getCh1Org(r) === org) : allRows;
+  document.getElementById('filter-label').textContent = org ? `แสดงเฉพาะ: ${org} (${rows.length} รายการ)` : '';
+  renderAll(rows);
+}
+function resetFilter() {
+  document.getElementById('org-filter').value = '';
+  document.getElementById('filter-label').textContent = '';
+  renderAll(allRows);
+}
+
+// ── Init ──
+async function init() {
+  try {
+    const { data, error } = await sb.from('hrd_ch1_responses').select('*').order('created_at', { ascending: false });
+    if (error) throw error;
+
+    allRows = data || [];
+
+    // Populate filter
+    const orgs = [...new Set(allRows.map(r => getCh1Org(r)).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'th'));
+    const sel = document.getElementById('org-filter');
+    orgs.forEach(o => {
+      const opt = document.createElement('option');
+      opt.value = o;
+      opt.textContent = o;
+      sel.appendChild(opt);
+    });
+
+    document.getElementById('tb-org-count').textContent = `${orgs.length} องค์กร · ${allRows.length} รายการ`;
+    document.getElementById('footer-date').textContent = new Date().toLocaleDateString('th-TH', { year:'numeric', month:'long', day:'numeric' });
+
+    renderAll(allRows);
+
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('content').style.display = 'block';
+  } catch (err) {
+    document.getElementById('loading').innerHTML = `
+      <div style="color:var(--D);font-size:13px;font-weight:600">โหลดข้อมูลล้มเหลว</div>
+      <div style="color:var(--tx3);font-size:12px;margin-top:6px">${esc(err.message)}</div>
+      <button onclick="init()" style="margin-top:12px;padding:8px 16px;background:var(--P);color:#fff;border:none;border-radius:7px;cursor:pointer;font-family:inherit">ลองใหม่</button>`;
+  }
+}
+
+init();
+</script>
+</body>
+</html>
