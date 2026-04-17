@@ -10,10 +10,10 @@ const ORG_DESIRED_ORDER = [
   'สำนักงานสภาพัฒนาการเศรษฐกิจและสังคมแห่งชาติ',
   'สำนักงานนโยบายและยุทธศาสตร์การค้า',
   'กรมวิทยาศาสตร์บริการ',
-  'กรมสนับสนุนบริการสุขภาพ',
   'กรมอุตุนิยมวิทยา',
   'กรมส่งเสริมวัฒนธรรม',
   'กรมคุมประพฤติ',
+  'กรมสนับสนุนบริการสุขภาพ',
   'สำนักงานปลัดกระทรวงการท่องเที่ยวและกีฬา',
   'กรมสุขภาพจิต',
   'สำนักงานนโยบายและแผนทรัพยากรธรรมชาติและสิ่งแวดล้อม',
@@ -22,12 +22,70 @@ const ORG_DESIRED_ORDER = [
   'สำนักงานคณะกรรมการพัฒนาระบบราชการ',
   'กรมชลประทาน',
   'กรมกิจการเด็กและเยาวชน',
+  'ทดสอบระบบ',
 ];
+
+// Email → { full, short } — most reliable key since email is unique per org
+const ORG_EMAIL_MAP = {
+  'hr@nesdc.go.th': { full: 'สำนักงานสภาพัฒนาการเศรษฐกิจและสังคมแห่งชาติ', short: 'สศช.' },
+  'hr@tpso.go.th':  { full: 'สำนักงานนโยบายและยุทธศาสตร์การค้า',             short: 'สนค.' },
+  'hr@dss.go.th':   { full: 'กรมวิทยาศาสตร์บริการ',                           short: 'วศ.' },
+  'hr@tmd.go.th':   { full: 'กรมอุตุนิยมวิทยา',                               short: 'อต.' },
+  'hr@dcp.go.th':   { full: 'กรมส่งเสริมวัฒนธรรม',                           short: 'สวธ.' },
+  'hr@dop.go.th':   { full: 'กรมคุมประพฤติ',                                  short: 'คป.' },
+  'hr@dhss.go.th':  { full: 'กรมสนับสนุนบริการสุขภาพ',                        short: 'สบส.' },
+  'hr@mots.go.th':  { full: 'สำนักงานปลัดกระทรวงการท่องเที่ยวและกีฬา',       short: 'สป.กก.' },
+  'hr@dmh.go.th':   { full: 'กรมสุขภาพจิต',                                   short: 'สจ.' },
+  'hr@onep.go.th':  { full: 'สำนักงานนโยบายและแผนทรัพยากรธรรมชาติและสิ่งแวดล้อม', short: 'สผ.' },
+  'hr@nrct.go.th':  { full: 'สำนักงานการวิจัยแห่งชาติ',                      short: 'วช.' },
+  'hr@acfs.go.th':  { full: 'สำนักงานมาตรฐานสินค้าเกษตรและอาหารแห่งชาติ',    short: 'มกอช.' },
+  'hr@opdc.go.th':  { full: 'สำนักงานคณะกรรมการพัฒนาระบบราชการ',             short: 'สำนักงาน ก.พ.ร.' },
+  'hr@rid.go.th':   { full: 'กรมชลประทาน',                                    short: 'ชป.' },
+  'hr@dcy.go.th':   { full: 'กรมกิจการเด็กและเยาวชน',                         short: 'ดย.' },
+  'hr-test@tst.go.th': { full: 'ทดสอบระบบ',                                   short: 'ทส.' },
+};
+
+// Abbreviated display_name fallback (stripped of 'HR ' prefix)
+const ORG_FULL_NAME_MAP = {
+  'สศช.': 'สำนักงานสภาพัฒนาการเศรษฐกิจและสังคมแห่งชาติ',
+  'สนค.': 'สำนักงานนโยบายและยุทธศาสตร์การค้า',
+  'วศ.':  'กรมวิทยาศาสตร์บริการ',
+  'อต.':  'กรมอุตุนิยมวิทยา',
+  'สวธ.': 'กรมส่งเสริมวัฒนธรรม',
+  'คป.':  'กรมคุมประพฤติ',
+  'สบส.': 'กรมสนับสนุนบริการสุขภาพ',
+  'สป.กก.': 'สำนักงานปลัดกระทรวงการท่องเที่ยวและกีฬา',
+  'สคจ.': 'สำนักงานปลัดกระทรวงการท่องเที่ยวและกีฬา',
+  'สจ.':  'กรมสุขภาพจิต',
+  'สผ.':  'สำนักงานนโยบายและแผนทรัพยากรธรรมชาติและสิ่งแวดล้อม',
+  'วช.':  'สำนักงานการวิจัยแห่งชาติ',
+  'มกอช.': 'สำนักงานมาตรฐานสินค้าเกษตรและอาหารแห่งชาติ',
+  'สำนักงาน ก.พ.ร.': 'สำนักงานคณะกรรมการพัฒนาระบบราชการ',
+  'ชป.':  'กรมชลประทาน',
+  'ดย.':  'กรมกิจการเด็กและเยาวชน',
+  'ทส.':  'ทดสอบระบบ',
+  'ทดสอบ': 'ทดสอบระบบ',
+};
+
+function resolveOrgFullName(row) {
+  const emailKey = (row.email || '').toLowerCase().trim();
+  if (ORG_EMAIL_MAP[emailKey]) return ORG_EMAIL_MAP[emailKey].full;
+  const raw = row.display_name || row.org_name || row.org_code || '';
+  const stripped = raw.replace(/^HR\s*/i, '').trim();
+  return ORG_FULL_NAME_MAP[stripped] || stripped || raw || '—';
+}
+
+function resolveOrgShortName(row) {
+  const emailKey = (row.email || '').toLowerCase().trim();
+  if (ORG_EMAIL_MAP[emailKey]) return ORG_EMAIL_MAP[emailKey].short;
+  const raw = row.display_name || row.org_name || row.org_code || '';
+  return raw.replace(/^HR\s*/i, '').trim() || '—';
+}
 
 function sortOrganizations(orgList) {
   return [...orgList].sort((a, b) => {
-    const aName = a.display_name || a.org_name || a.org_code || '';
-    const bName = b.display_name || b.org_name || b.org_code || '';
+    const aName = resolveOrgFullName(a);
+    const bName = resolveOrgFullName(b);
     const aIdx = ORG_DESIRED_ORDER.indexOf(aName);
     const bIdx = ORG_DESIRED_ORDER.indexOf(bName);
     if (aIdx !== -1 && bIdx !== -1) return aIdx - bIdx;
@@ -42,7 +100,7 @@ function sortOrganizations(orgList) {
 async function loadOrgCredentialsPage() {
   const tbody = document.getElementById('orghr-cred-tbody');
   if (!tbody) return;
-  tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--tx3);padding:24px">กำลังโหลด...</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--tx3);padding:24px">กำลังโหลด...</td></tr>';
 
   state.orgHrCredentials = await fetchOrgHrCredentials();
   renderOrgHrCredentials();
@@ -59,7 +117,7 @@ async function renderOrgHrCredentials() {
   const orgHrUsers = state.orgHrCredentials || [];
 
   if (orgHrUsers.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--tx3);padding:20px">ยังไม่มีข้อมูล org_hr credentials</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--tx3);padding:20px">ยังไม่มีข้อมูล org_hr credentials</td></tr>';
     return;
   }
 
@@ -68,10 +126,13 @@ async function renderOrgHrCredentials() {
   tbody.innerHTML = sorted.map((row, i) => {
     const pwd = row.initial_password || '••••••••';
     const hasPwd = !!row.initial_password;
-    const orgLabel = esc(row.display_name || row.org_name || row.org_code || '—');
+    const orgShort = esc(resolveOrgShortName(row));
+    const orgFull = esc(resolveOrgFullName(row));
+    const orgLabel = orgFull;
     return `<tr>
       <td>${i + 1}</td>
-      <td style="font-weight:600;font-size:12px">${orgLabel}</td>
+      <td style="font-weight:600;font-size:12px;white-space:nowrap">${orgShort}</td>
+      <td style="font-size:12px;color:var(--tx2)">${orgFull}</td>
       <td><code style="font-size:12px;background:var(--bg);padding:3px 8px;border-radius:4px;color:var(--P);font-weight:600">${esc(row.email)}</code></td>
       <td>
         <span style="font-family:monospace;font-size:13px;font-weight:700;color:${hasPwd ? 'var(--A)' : 'var(--tx3)'};letter-spacing:0.05em">${hasPwd ? esc(pwd) : '(ไม่มี)'}</span>
@@ -113,7 +174,7 @@ function copyAllOrgHrCredentials() {
   const header = 'ข้อมูลเข้าสู่ระบบ org_hr — Well-being Survey\n' + '='.repeat(50) + '\n\n';
   const body = sorted
     .map((row, i) =>
-      `${i + 1}. ${row.display_name || row.org_name || row.org_code}\n   Email: ${row.email}\n   Password: ${row.initial_password}`
+      `${i + 1}. ${resolveOrgFullName(row)}\n   Email: ${row.email}\n   Password: ${row.initial_password}`
     )
     .join('\n\n');
 
@@ -137,7 +198,7 @@ function exportOrgHrCredentialsCsv() {
     sorted
       .map(
         (row) =>
-          `"${row.display_name || row.org_name || ''}","${row.email}","${row.initial_password}","${row.org_code || ''}","${row.is_active !== false ? 'Active' : 'Inactive'}"`
+          `"${resolveOrgFullName(row)}","${row.email}","${row.initial_password}","${row.org_code || ''}","${row.is_active !== false ? 'Active' : 'Inactive'}"`
       )
       .join('\n');
 
