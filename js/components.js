@@ -255,7 +255,11 @@ function renderNumber(question, value) {
                    placeholder="${question.placeholder || ''}"
                    min="${question.min || ''}"
                    max="${question.max || ''}"
+<<<<<<< Updated upstream
                    aria-label="${question.text}"
+=======
+                   aria-label="${question.text || question.id}"
+>>>>>>> Stashed changes
                    ${question.required ? 'aria-required="true"' : ''}
                    onchange="app.handleChange('${question.id}', this.value)">
             ${question.unit ? `<span class="input-unit" aria-hidden="true">${question.unit}</span>` : ''}
@@ -271,7 +275,11 @@ function renderText(question, value) {
                id="${question.id}"
                value="${value || ''}"
                placeholder="${question.placeholder || 'พิมพ์คำตอบ...'}"
+<<<<<<< Updated upstream
                aria-label="${question.text}"
+=======
+               aria-label="${question.text || question.id}"
+>>>>>>> Stashed changes
                ${question.required ? 'aria-required="true"' : ''}
                onchange="app.handleChange('${question.id}', this.value)">
     `;
@@ -306,7 +314,11 @@ function renderTime(question, value) {
         <div class="time-input-group">
             <select class="input-field time-select"
                     id="${question.id}_hour"
+<<<<<<< Updated upstream
                     aria-label="${question.text} — ชั่วโมง"
+=======
+                    aria-label="${question.text || question.id} — ชั่วโมง"
+>>>>>>> Stashed changes
                     ${question.required ? 'aria-required="true"' : ''}
                     onchange="app.handleTimeChange('${question.id}')">
                 ${hourOptions}
@@ -314,7 +326,11 @@ function renderTime(question, value) {
             <span class="time-separator" aria-hidden="true">:</span>
             <select class="input-field time-select"
                     id="${question.id}_minute"
+<<<<<<< Updated upstream
                     aria-label="${question.text} — นาที"
+=======
+                    aria-label="${question.text || question.id} — นาที"
+>>>>>>> Stashed changes
                     onchange="app.handleTimeChange('${question.id}')">
                 ${minuteOptions}
             </select>
