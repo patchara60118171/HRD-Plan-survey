@@ -32,7 +32,9 @@ function renderAnalytics(summary) {
   _anwbRenderTmhiDeep(rows);
   _anwbRenderLoneliness(rows);
   _anwbRenderSafety(rows);
+  _anwbRenderQol(rows);
   _anwbRenderEnv(rows);
+  _anwbRenderPollution(rows);
 }
 
 function anwbSwitchTab(tab) {
@@ -834,6 +836,182 @@ function _anwbRenderSafety(rows) {
   `));
 }
 
+/* ── คุณภาพชีวิต & ความพึงพอใจสภาพแวดล้อม ──────────────────── */
+function _anwbRenderQol(rows) {
+  // Normalize Likert 0-4 (string or number) → integer 0..4, null if unknown
+  const _lk = (v) => {
+    if (v == null || v === '') return null;
+    const s = String(v).trim();
+    if (/^[0-4]$/.test(s)) return parseInt(s, 10);
+    if (s.includes('แย่มาก')) return 0;
+    if (s.includes('แย่'))    return 1;
+    if (s.includes('ปานกลาง')) return 2;
+    if (s.includes('ดีมาก')) return 4;
+    if (s.includes('ดี'))    return 3;
+    return null;
+  };
+  const _dist = (field) => {
+    const counts = [0,0,0,0,0];
+    let scored = 0, sum = 0, good = 0;
+    rows.forEach(r => {
+      const v = _lk(r[field]);
+      if (v == null) return;
+      counts[v]++; scored++; sum += v; if (v >= 3) good++;
+    });
+    return { counts, scored, mean: scored ? sum / scored : null, goodPct: scored ? (good/scored)*100 : 0 };
+  };
+
+  const lifeQ = _dist('life_quality');
+  const envSat = _dist('env_satisfaction');
+
+  const labels = ['แย่มาก (0)', 'แย่ (1)', 'ปานกลาง (2)', 'ดี (3)', 'ดีมาก (4)'];
+  const colors = ['#991B1B','#EF4444','#D97706','#84CC16','#059669'];
+
+  const _stacked = (stat) => labels.map((lab, i) => {
+    return _metricBar(lab, stat.counts[i], stat.scored, colors[i]);
+  }).join('');
+
+  _setHtml('anwb-qol', `<div class="anwb-2col">
+    ${_cardWrap('🌟', 'คุณภาพชีวิตโดยรวม (ข้อ 92)', `
+      <div class="anwb-kpi-row">
+        <div class="anwb-kpi-mini"><div class="anwb-kpi-mini-val">${lifeQ.mean != null ? fmtNum(lifeQ.mean,2) : '—'}</div><div class="anwb-kpi-mini-label">คะแนนเฉลี่ย<br>(0–4)</div></div>
+        <div class="anwb-kpi-mini"><div class="anwb-kpi-mini-val" style="color:#059669">${fmtNum(lifeQ.goodPct,1)}%</div><div class="anwb-kpi-mini-label">คุณภาพชีวิตดี<br>(≥ 3)</div></div>
+      </div>
+      ${_stacked(lifeQ)}
+      <div style="font-size:10.5px;color:var(--tx3);margin-top:8px">มีข้อมูล ${fmtNum(lifeQ.scored)} คน</div>
+    `)}
+    ${_cardWrap('😊', 'ความพึงพอใจสภาพแวดล้อมทำงาน', `
+      <div class="anwb-kpi-row">
+        <div class="anwb-kpi-mini"><div class="anwb-kpi-mini-val">${envSat.mean != null ? fmtNum(envSat.mean,2) : '—'}</div><div class="anwb-kpi-mini-label">คะแนนเฉลี่ย<br>(0–4)</div></div>
+        <div class="anwb-kpi-mini"><div class="anwb-kpi-mini-val" style="color:#059669">${fmtNum(envSat.goodPct,1)}%</div><div class="anwb-kpi-mini-label">พึงพอใจ<br>(≥ 3)</div></div>
+      </div>
+      ${_stacked(envSat)}
+      <div style="font-size:10.5px;color:var(--tx3);margin-top:8px">มีข้อมูล ${fmtNum(envSat.scored)} คน</div>
+    `)}
+  </div>`);
+}
+
+/* ── มลพิษ · Climate · โรคอุบัติใหม่ · COVID ─────────────────── */
+function _anwbRenderPollution(rows) {
+  const n = rows.length;
+  // Ordinal 0..4 (ไม่มีเลย..รุนแรงมาก)
+  const _ord5 = (v) => {
+    const s = String(v ?? '').trim();
+    if (s.includes('รุนแรงมาก')) return 4;
+    if (s === 'มาก') return 3;
+    if (s.includes('ปานกลาง')) return 2;
+    if (s === 'น้อย') return 1;
+    if (s.includes('ไม่มีเลย')) return 0;
+    return null;
+  };
+  const _distOrd = (field) => {
+    const counts = [0,0,0,0,0];
+    let scored = 0, sum = 0, high = 0;
+    rows.forEach(r => {
+      const v = _ord5(r[field]);
+      if (v == null) return;
+      counts[v]++; scored++; sum += v; if (v >= 3) high++;
+    });
+    return { counts, scored, mean: scored ? sum / scored : null, highPct: scored ? (high/scored)*100 : 0, high };
+  };
+
+  const pm25 = _distOrd('pm25_impact');
+  const climate = _distOrd('climate_impact');
+
+  const ordLabels = ['ไม่มีเลย','น้อย','ปานกลาง','มาก','รุนแรงมาก'];
+  const ordColors = ['#059669','#84CC16','#D97706','#EF4444','#991B1B'];
+  const _ordBar = (stat) => ordLabels.map((lab,i) => _metricBar(lab, stat.counts[i], stat.scored, ordColors[i])).join('');
+
+  // PM2.5 symptoms (multi-select array field)
+  const symptomCount = {};
+  let withSymptom = 0;
+  rows.forEach(r => {
+    const list = Array.isArray(r.pm25_symptom) ? r.pm25_symptom
+      : (typeof r.pm25_symptom === 'string' ? (() => { try { return JSON.parse(r.pm25_symptom); } catch { return []; } })() : []);
+    if (list && list.length) withSymptom++;
+    (list || []).forEach(s => { const k = String(s||'').trim(); if(k) symptomCount[k] = (symptomCount[k]||0) + 1; });
+  });
+  const topSymptoms = Object.entries(symptomCount).sort((a,b) => b[1]-a[1]).slice(0, 8);
+
+  // Emerging diseases
+  const emAware = rows.filter(r => {
+    const s = String(r.emerging_known||'').trim();
+    return s === 'เคย' || s === 'เคยได้ยิน';
+  }).length;
+  const emWithList = rows.filter(r => {
+    const v = r.emerging_list;
+    if (Array.isArray(v)) return v.length > 0;
+    if (typeof v === 'string' && v.trim()) { try { return JSON.parse(v).length > 0; } catch { return v.trim().length > 0; } }
+    return false;
+  }).length;
+  const diseaseCount = {};
+  rows.forEach(r => {
+    let list = r.emerging_list;
+    if (typeof list === 'string') { try { list = JSON.parse(list); } catch { list = []; } }
+    (Array.isArray(list) ? list : []).forEach(d => { const k = String(d||'').trim(); if(k) diseaseCount[k] = (diseaseCount[k]||0) + 1; });
+  });
+  const topDiseases = Object.entries(diseaseCount).sort((a,b) => b[1]-a[1]).slice(0, 10);
+
+  // COVID history (normalize variants)
+  const _covidBucket = (v) => {
+    const s = String(v||'').trim();
+    if (!s) return null;
+    if (s.includes('ไม่เคย')) return 'never';
+    if (s.includes('มากกว่า 1') || s.startsWith('>') || s.includes('> 1')) return 'repeat';
+    if (s.includes('1 ครั้ง')) return 'once';
+    return null;
+  };
+  const cov = { never: 0, once: 0, repeat: 0 };
+  rows.forEach(r => { const b = _covidBucket(r.covid_history); if (b) cov[b]++; });
+  const covScored = cov.never + cov.once + cov.repeat;
+  const covEverPct = covScored ? ((cov.once + cov.repeat) / covScored) * 100 : 0;
+  const covRepeatPct = covScored ? (cov.repeat / covScored) * 100 : 0;
+
+  _setHtml('anwb-pollution', `
+    <div class="anwb-2col">
+      ${_cardWrap('🌫', 'PM2.5 — ผลกระทบและอาการ', `
+        <div class="anwb-kpi-row">
+          <div class="anwb-kpi-mini"><div class="anwb-kpi-mini-val" style="color:#DC2626">${fmtNum(pm25.highPct,1)}%</div><div class="anwb-kpi-mini-label">ผลกระทบสูง<br>(≥ มาก)</div></div>
+          <div class="anwb-kpi-mini"><div class="anwb-kpi-mini-val" style="color:#D97706">${fmtNum(n ? (withSymptom/n)*100 : 0,1)}%</div><div class="anwb-kpi-mini-label">มีอาการ<br>≥ 1 อาการ</div></div>
+        </div>
+        <div style="font-size:12px;font-weight:700;color:var(--tx2);margin:6px 0 8px">ระดับผลกระทบ</div>
+        ${_ordBar(pm25)}
+        <div style="font-size:12px;font-weight:700;color:var(--tx2);margin:10px 0 8px">Top อาการ (${fmtNum(withSymptom)} คน)</div>
+        ${topSymptoms.length ? topSymptoms.map(([s,c]) => _metricBar(s, c, n, '#D97706')).join('') : '<div style="color:var(--tx3);font-size:12px">ไม่มีข้อมูลอาการ</div>'}
+        <div style="font-size:10.5px;color:var(--tx3);margin-top:6px">มีข้อมูล ${fmtNum(pm25.scored)} คน</div>
+      `)}
+      ${_cardWrap('🌡', 'การเปลี่ยนแปลงภูมิอากาศ', `
+        <div class="anwb-kpi-row">
+          <div class="anwb-kpi-mini"><div class="anwb-kpi-mini-val">${climate.mean != null ? fmtNum(climate.mean,2) : '—'}</div><div class="anwb-kpi-mini-label">คะแนนเฉลี่ย<br>(0–4)</div></div>
+          <div class="anwb-kpi-mini"><div class="anwb-kpi-mini-val" style="color:#DC2626">${fmtNum(climate.highPct,1)}%</div><div class="anwb-kpi-mini-label">ผลกระทบสูง<br>(≥ มาก)</div></div>
+        </div>
+        ${_ordBar(climate)}
+        <div style="font-size:10.5px;color:var(--tx3);margin-top:6px">มีข้อมูล ${fmtNum(climate.scored)} คน</div>
+      `)}
+    </div>
+    <div class="anwb-2col">
+      ${_cardWrap('🦠', 'โรคอุบัติใหม่ — การรับรู้', `
+        <div class="anwb-kpi-row">
+          <div class="anwb-kpi-mini"><div class="anwb-kpi-mini-val" style="color:#0F4C81">${fmtNum(n ? (emAware/n)*100 : 0,1)}%</div><div class="anwb-kpi-mini-label">Awareness Rate<br>(เคย/เคยได้ยิน)</div></div>
+          <div class="anwb-kpi-mini"><div class="anwb-kpi-mini-val">${fmtNum(emWithList)}</div><div class="anwb-kpi-mini-label">คนที่ระบุ<br>ชื่อโรคได้</div></div>
+        </div>
+        <div style="font-size:12px;font-weight:700;color:var(--tx2);margin:6px 0 8px">Top 10 โรคที่รู้จัก</div>
+        ${topDiseases.length ? topDiseases.map(([d,c]) => _metricBar(d, c, n, '#0F4C81')).join('') : '<div style="color:var(--tx3);font-size:12px">ยังไม่มีข้อมูลโรค</div>'}
+      `)}
+      ${_cardWrap('🩺', 'ประวัติติด COVID-19', `
+        <div class="anwb-kpi-row">
+          <div class="anwb-kpi-mini"><div class="anwb-kpi-mini-val" style="color:#D97706">${fmtNum(covEverPct,1)}%</div><div class="anwb-kpi-mini-label">เคยติด<br>(อย่างน้อย 1 ครั้ง)</div></div>
+          <div class="anwb-kpi-mini"><div class="anwb-kpi-mini-val" style="color:#DC2626">${fmtNum(covRepeatPct,1)}%</div><div class="anwb-kpi-mini-label">ติดซ้ำ<br>(&gt; 1 ครั้ง)</div></div>
+        </div>
+        ${_metricBar('ไม่เคยติด', cov.never, covScored, '#059669')}
+        ${_metricBar('ติด 1 ครั้ง', cov.once, covScored, '#D97706')}
+        ${_metricBar('ติดมากกว่า 1 ครั้ง', cov.repeat, covScored, '#DC2626')}
+        <div style="font-size:10.5px;color:var(--tx3);margin-top:6px">มีข้อมูล ${fmtNum(covScored)} คน</div>
+      `)}
+    </div>
+  `);
+}
+
 /* ── สภาพแวดล้อมทำงาน & มลพิษ ───────────────────────────────── */
 function _anwbRenderEnv(rows) {
   const n = rows.length;
@@ -843,42 +1021,66 @@ function _anwbRenderEnv(rows) {
     return { count, total: applicable.length };
   };
 
-  const envFactors = [
+  // Scoring per factor: ใช่+มีผล=2, ใช่+ไม่มีผล=1, ไม่ใช่=0
+  const _envScore = (v) => {
+    if (v == null) return null;
+    let s = '';
+    if (Array.isArray(v)) s = v.join(' ');
+    else if (typeof v === 'string') {
+      const t = v.trim();
+      try { const j = JSON.parse(t); if (Array.isArray(j)) s = j.join(' '); else s = t; } catch { s = t; }
+    } else s = String(v);
+    if (!s) return null;
+    const hasYes = s.includes('ใช่') || (!s.includes('ไม่ใช่') && s.includes('มีผล'));
+    const hasNo = s.startsWith('ไม่ใช่') || /(^|\s)ไม่ใช่(\s|$)/.test(s);
+    const hasImpact = s.includes('มีผล') && !s.includes('ไม่มีผล') && !s.includes('ไม่มีผลกระทบ');
+    if (hasNo && !hasYes) return 0;
+    if (hasYes || s.includes('มีผล')) return hasImpact ? 2 : 1;
+    return null;
+  };
+
+  const envDefs = [
     { id: 'env_glare',   label: 'ทำงานกลางแดด/แสงจ้า' },
     { id: 'env_noise',   label: 'เครื่องจักร/เสียงดัง/สั่นสะเทือน' },
     { id: 'env_smell',   label: 'กลิ่นสารเคมี' },
     { id: 'env_smoke',   label: 'ควัน/ไอระเหย' },
     { id: 'env_posture', label: 'ท่าทางซ้ำๆ > 1.5 ชม.' },
     { id: 'env_awkward', label: 'ท่าทางฝืนธรรมชาติ' },
-  ].map(f => {
-    const d = _envPct(f.id, ['ใช่ มีผลต่อสุขภาพ']);
-    return { ...f, ...d };
+  ];
+  const envFactors = envDefs.map(f => {
+    let affected = 0, exposed = 0, total = 0;
+    rows.forEach(r => {
+      const sc = _envScore(r[f.id]);
+      if (sc == null) return;
+      total++;
+      if (sc === 2) affected++;
+      else if (sc === 1) exposed++;
+    });
+    return { ...f, affected, exposed, total };
   });
 
-  const pm25High   = rows.filter(r => ['มาก','รุนแรงมาก'].includes(String(r.pm25_impact||'').trim())).length;
-  const climateHigh = rows.filter(r => ['มาก','รุนแรงมาก'].includes(String(r.climate_impact||'').trim())).length;
-  const covidHist  = rows.filter(r => String(r.covid_history||'').includes('ติด')).length;
+  // Risk total per respondent (0-12)
+  const riskTotals = rows.map(r => {
+    const scores = envDefs.map(f => _envScore(r[f.id])).filter(v => v != null);
+    return scores.length === envDefs.length ? scores.reduce((a,b) => a+b, 0) : null;
+  }).filter(v => v != null);
+  const riskGroups = {
+    safe: riskTotals.filter(v => v === 0).length,
+    watch: riskTotals.filter(v => v >= 1 && v <= 3).length,
+    risk: riskTotals.filter(v => v >= 4 && v <= 6).length,
+    high: riskTotals.filter(v => v >= 7).length,
+  };
+  const nRisk = riskTotals.length;
 
-  const envSatRows = rows.filter(r => r.env_satisfaction != null && r.env_satisfaction !== '');
-  const _satScore = (v) => { const s = String(v).trim(); if(s.includes('ดีมาก')||s==='4') return 5; if(s.includes('ดี')||s==='3') return 4; if(s.includes('ปานกลาง')||s==='2') return 3; if(s.includes('แย่')&&!s.includes('มาก')||s==='1') return 2; if(s.includes('แย่มาก')||s==='0') return 1; return null; };
-  const avgSat = envSatRows.length ? envSatRows.reduce((s,r) => s + (_satScore(r.env_satisfaction)||3), 0) / envSatRows.length : null;
-
-  _setHtml('anwb-env', _cardWrap('🌿', 'สภาพแวดล้อมทำงาน · มลพิษ · โรคอุบัติใหม่', `
-    <div class="anwb-2col">
-      <div>
-        <div style="font-size:12px;font-weight:700;color:var(--tx2);margin-bottom:8px">
-          ปัจจัยเสี่ยงที่มีผลต่อสุขภาพ
-          ${avgSat != null ? `<span style="font-weight:400;color:var(--tx3);margin-left:8px">ความพึงพอใจสภาพแวดล้อม: <b style="color:var(--P)">${fmtNum(avgSat,1)}/5</b></span>` : ''}
-        </div>
-        ${envFactors.map(f => _metricBar(f.label, f.count, f.total, '#DC2626')).join('')}
-      </div>
-      <div>
-        <div style="font-size:12px;font-weight:700;color:var(--tx2);margin-bottom:8px">มลพิษ & โรคอุบัติใหม่</div>
-        ${_metricBar('PM2.5 ระดับมาก/รุนแรงมาก (12 เดือน)', pm25High, n, '#D97706')}
-        ${_metricBar('ผลกระทบจากการเปลี่ยนแปลงภูมิอากาศ (มาก/รุนแรงมาก)', climateHigh, n, '#D97706')}
-        ${_metricBar('เคยติด COVID-19 (6 เดือนที่ผ่านมา)', covidHist, n, '#EF4444')}
-      </div>
+  _setHtml('anwb-env', _cardWrap('🏭', 'ปัจจัยเสี่ยงสภาพแวดล้อมการทำงาน (ข้อ 84–91)', `
+    <div class="anwb-kpi-row">
+      <div class="anwb-kpi-mini"><div class="anwb-kpi-mini-val" style="color:#059669">${fmtNum(riskGroups.safe)}</div><div class="anwb-kpi-mini-label">ปลอดภัย<br>(0)</div></div>
+      <div class="anwb-kpi-mini"><div class="anwb-kpi-mini-val" style="color:#D97706">${fmtNum(riskGroups.watch)}</div><div class="anwb-kpi-mini-label">เฝ้าระวัง<br>(1–3)</div></div>
+      <div class="anwb-kpi-mini"><div class="anwb-kpi-mini-val" style="color:#EF4444">${fmtNum(riskGroups.risk)}</div><div class="anwb-kpi-mini-label">เสี่ยง<br>(4–6)</div></div>
+      <div class="anwb-kpi-mini"><div class="anwb-kpi-mini-val" style="color:#991B1B">${fmtNum(riskGroups.high)}</div><div class="anwb-kpi-mini-label">เสี่ยงสูง<br>(≥ 7)</div></div>
     </div>
-    <div style="font-size:10.5px;color:var(--tx3);margin-top:8px">มีข้อมูล ${fmtNum(n)} คน</div>
+    <div style="font-size:12px;font-weight:700;color:var(--tx2);margin:6px 0 8px">% "ใช่ มีผลต่อสุขภาพ" รายปัจจัย</div>
+    ${envFactors.map(f => _metricBar(f.label, f.affected, f.total, '#DC2626')).join('')}
+    <div style="font-size:10.5px;color:var(--tx3);margin-top:8px">คะแนนปัจจัย: ไม่ใช่=0, ใช่ไม่มีผล=1, ใช่มีผลสุขภาพ=2 · คะแนนรวม 6 ปัจจัย (เต็ม 12) · มีข้อมูลครบ ${fmtNum(nRisk)} คน จาก ${fmtNum(n)} คน</div>
   `));
 }

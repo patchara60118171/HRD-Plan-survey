@@ -330,8 +330,8 @@
           </div>
           <div class="tbl-wrap">
             <table id="wb-form-windows-table">
-              <thead><tr><th>องค์กร</th><th>สถานะ</th><th>เปิดรับตั้งแต่</th><th>ปิดรับเมื่อ</th><th>ข้อความเมื่อปิด</th><th style="text-align:center">เปิด/ปิด</th></tr></thead>
-              <tbody id="fw-wb-body"><tr><td colspan="6" style="text-align:center;color:var(--tx3);padding:20px">กำลังโหลด...</td></tr></tbody>
+              <thead><tr><th>องค์กร</th><th>สถานะ</th><th>ข้อความเมื่อปิด</th><th style="text-align:center">เปิด/ปิด</th></tr></thead>
+              <tbody id="fw-wb-body"><tr><td colspan="4" style="text-align:center;color:var(--tx3);padding:20px">กำลังโหลด...</td></tr></tbody>
             </table>
           </div>
           <div style="padding:12px 18px;font-size:11px;color:var(--tx3);border-top:1px solid var(--bdr)">
@@ -512,8 +512,12 @@
         <div class="anwb-tab-panel" id="anwb-panel-environment" style="display:none">
           <!-- อุบัติเหตุ & ความปลอดภัย -->
           <div id="anwb-safety" style="margin-bottom:20px"></div>
-          <!-- สภาพแวดล้อมทำงาน & มลพิษ -->
+          <!-- คุณภาพชีวิต & ความพึงพอใจสภาพแวดล้อม -->
+          <div id="anwb-qol" style="margin-bottom:20px"></div>
+          <!-- สภาพแวดล้อมทำงาน (ปัจจัยเสี่ยง 6 ด้าน) -->
           <div id="anwb-env" style="margin-bottom:20px"></div>
+          <!-- มลพิษ · Climate · โรคอุบัติใหม่ · COVID -->
+          <div id="anwb-pollution" style="margin-bottom:20px"></div>
         </div>
       </div>
     </div>
@@ -800,8 +804,8 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/project-ssot.js"></script>
 <!-- ===== Extracted Service Modules ===== -->
-<script src="admin/js/services/api.js"></script>
 <script src="admin/js/services/config.js"></script>
+<script src="admin/js/services/api.js"></script>
 <script src="admin/js/services/utils.js"></script>
 <script src="admin/js/services/data.js"></script>
 <script src="admin/js/services/nav.js?v=2"></script>
