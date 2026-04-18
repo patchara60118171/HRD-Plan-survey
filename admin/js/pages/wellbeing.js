@@ -20,23 +20,24 @@
 
 function renderWellbeingControl(summary) {
   const ctrl = document.getElementById('wb-ctrl');
+  if (!ctrl) return;
   const submitted = state.surveyRows.filter((row) => !row.is_draft);
   const drafts = state.surveyRows.filter((row) => row.is_draft);
   const values = ctrl.querySelectorAll('.st-val');
-  values[0].textContent = fmtNum(submitted.length);
+  if (values[0]) values[0].textContent = fmtNum(submitted.length);
   const phqHighCount = submitted.filter((r) => (getPhq9(r) || 0) >= 10).length;
-  values[1].textContent = fmtNum(phqHighCount) + ' คน (' + (submitted.length ? fmtNum((phqHighCount / submitted.length) * 100, 1) : '0') + '%)';
-  values[2].textContent = fmtNum(submitted.length ? submitted.reduce((s, r) => s + (getBurnout(r) || 0), 0) / submitted.length : 0, 1);
+  if (values[1]) values[1].textContent = fmtNum(phqHighCount) + ' คน (' + (submitted.length ? fmtNum((phqHighCount / submitted.length) * 100, 1) : '0') + '%)';
+  if (values[2]) values[2].textContent = fmtNum(submitted.length ? submitted.reduce((s, r) => s + (getBurnout(r) || 0), 0) / submitted.length : 0, 1);
 
   const summaryLines = ctrl.querySelectorAll('.set-row b');
-  summaryLines[0].textContent = `${fmtNum(submitted.length)} คน`;
-  summaryLines[1].textContent = `${fmtNum(drafts.length)} คน`;
-  summaryLines[2].textContent = `${fmtNum(summary.filter((org) => org.wellbeingSubmitted === 0).length)} องค์กร`;
-  summaryLines[3].textContent = fmtDate(submitted[0] ? getRowDate(submitted[0]) : null, true);
+  if (summaryLines[0]) summaryLines[0].textContent = `${fmtNum(submitted.length)} คน`;
+  if (summaryLines[1]) summaryLines[1].textContent = `${fmtNum(drafts.length)} คน`;
+  if (summaryLines[2]) summaryLines[2].textContent = `${fmtNum(summary.filter((org) => org.wellbeingSubmitted === 0).length)} องค์กร`;
+  if (summaryLines[3]) summaryLines[3].textContent = fmtDate(submitted[0] ? getRowDate(submitted[0]) : null, true);
   const avgPhq = submitted.length
     ? submitted.reduce((sum, row) => sum + (getPhq9(row) || 0), 0) / submitted.length
     : 0;
-  summaryLines[4].textContent = `PHQ-9 เฉลี่ย ${fmtNum(avgPhq, 1)}`;
+  if (summaryLines[4]) summaryLines[4].textContent = `PHQ-9 เฉลี่ย ${fmtNum(avgPhq, 1)}`;
 
   const actions = ctrl.querySelectorAll('.fc-actions .btn');
   if (actions[1]) {

@@ -11,20 +11,25 @@ function renderCh1(summary) {
   const responded = summary.filter((org) => org.ch1Count > 0);
   const orgCount = ORG_NAMES.length;
   const ctrl = document.getElementById('c1-ctrl');
-  const stats = ctrl.querySelectorAll('.st-val');
-  stats[0].textContent = fmtNum(responded.length);
-  stats[1].textContent = fmtNum(orgCount - responded.length);
-  stats[2].textContent = '5';
-  ctrl.querySelector('.fc-head .badge').textContent = responded.length ? 'เชื่อมต่อแล้ว' : 'ยังไม่มีข้อมูล';
+  if (ctrl) {
+    const stats = ctrl.querySelectorAll('.st-val');
+    if (stats[0]) stats[0].textContent = fmtNum(responded.length);
+    if (stats[1]) stats[1].textContent = fmtNum(orgCount - responded.length);
+    if (stats[2]) stats[2].textContent = '5';
+    const badge = ctrl.querySelector('.fc-head .badge');
+    if (badge) badge.textContent = responded.length ? 'เชื่อมต่อแล้ว' : 'ยังไม่มีข้อมูล';
 
-  const linkSelect = ctrl.querySelector('select');
-  linkSelect.innerHTML = `<option value="">-- เลือกองค์กร --</option>${getOrgCatalog().map((org) => `<option value="${esc(org.name)}">${esc(org.name)}</option>`).join('')}`;
-  linkSelect.onchange = () => {
-    const selected = ORG_LOOKUP.get(linkSelect.value);
-    const code = selected?.code || 'ORG';
-    const codeBox = ctrl.querySelector('.code-box code');
-    codeBox.textContent = `ch1.html?org=${code}`;
-  };
+    const linkSelect = ctrl.querySelector('select');
+    if (linkSelect) {
+      linkSelect.innerHTML = `<option value="">-- เลือกองค์กร --</option>${getOrgCatalog().map((org) => `<option value="${esc(org.name)}">${esc(org.name)}</option>`).join('')}`;
+      linkSelect.onchange = () => {
+        const selected = ORG_LOOKUP.get(linkSelect.value);
+        const code = selected?.code || 'ORG';
+        const codeBox = ctrl.querySelector('.code-box code');
+        if (codeBox) codeBox.textContent = `ch1.html?org=${code}`;
+      };
+    }
+  }
 
   const ch1DataTbody = document.getElementById('c1-data-tbody') || document.querySelector('#c1-data tbody');
   if (ch1DataTbody) ch1DataTbody.innerHTML = state.ch1Rows.map((row, index) => `<tr>

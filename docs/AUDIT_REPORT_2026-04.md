@@ -1,7 +1,7 @@
 # Project Audit Report — NIDA Wellbeing Survey
 
 **Date:** 2026-04-18
-**Last Update:** 2026-04-19 (Phase 2 + safe Phase 3 fixes applied)
+**Last Update:** 2026-04-19 (KPI commit/push confirmed + Vercel live verification completed)
 **Scope:** Whole project
 **Skills applied:** `supabase-postgres-best-practices`, `web-design-guidelines`, `frontend-design`, `ui-ux-pro-max`
 **Skills skipped (not applicable):** `vercel-react-best-practices` (vanilla HTML/JS), `pdf`, `remotion-best-practices`
@@ -47,6 +47,12 @@
 4. ✅ `supabase/migrations/20260420_fix_dashboard_view_security_invoker.sql` — hotfix for advisor-flagged `security_definer_view` ERROR on the H3 view (default Supabase view behavior bypassed RLS; now explicit `security_invoker=true`)
 5. ✅ `supabase/migrations/20260421_fix_pre_existing_security_definer_views.sql` — Phase 5 Priority 1+2: audit + fix 3 pre-existing DEFINER views. `admin_user_roles_public` + `ch1_google_sync_queue` flipped to INVOKER; `organizations_public` kept as intentional DEFINER exception (required for anon pre-login org list in `js/ch1-form.js`). ERROR count: 3 → 1 (remaining = documented exception).
 6. ✅ `supabase/migrations/20260421_phase5_warn_cleanup.sql` — Phase 5 WARN cleanup: (Part A) dropped 3 duplicate indexes on `hrd_ch1_responses` (`idx_hrd_org_submission`, `idx_hrd_org`, `idx_hrd_submitted`); (Part B) pinned `search_path = public, pg_temp` on 5 functions (`requester_email`, `requester_is_org_hr`, `set_ch1_google_sync_defaults`, `set_updated_at_admin_user_roles`, `sync_ch1_to_google_sheets`). Security WARN: 6 → 2 (remaining = `extension_in_public pg_net` platform-level + `auth_leaked_password_protection` dashboard toggle).
+
+**Operational verification (2026-04-19):**
+1. ✅ Git state verified: `HEAD` and `origin/main` aligned at `291839d` (`fix(kpi): relax status check - count as submitted if submitted_at exists`)
+2. ✅ Vercel live endpoints responded HTTP 200: `/`, `/admin`, `/ch1`, `/org-portal`
+3. ✅ Live content markers confirmed for public survey, admin portal, and CH1 form pages
+4. ℹ️ `.html` paths (`/admin.html`, `/ch1.html`) return 308 redirect to clean routes on current deployment config
 
 **Phase 5 backlog (advisor findings):**
 
