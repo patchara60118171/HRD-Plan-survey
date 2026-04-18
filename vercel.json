@@ -26,10 +26,6 @@
             "destination": "/ch1-individual-pdf.html"
         },
         {
-            "source": "/ch1-printable",
-            "destination": "/ch1-printable.html"
-        },
-        {
             "source": "/org-portal",
             "destination": "/org-portal.html"
         },
