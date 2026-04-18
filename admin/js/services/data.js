@@ -23,6 +23,17 @@ const ADMIN_CANONICAL_ORG_NAMES = new Set(ADMIN_CANONICAL_ORGS.map((org) => org.
 const SURVEY_SELECT_FIELDS = 'id,email,name,title,organization,gender,age,org_type,job,job_duration,bmi,bmi_category,is_draft,submitted_at,timestamp,tmhi_score,raw_responses';
 // Light fields for first-paint: skip heavy form_data JSONB. form_data is filled in the extras phase.
 const CH1_LITE_FIELDS = 'id,org_code,organization,status,created_at,updated_at,submitted_at,form_version';
+// Full fields for extras phase — explicit list excluding raw_payload (can exceed 2MB per row).
+// If a new column is needed by the admin UI, add it here rather than reverting to '*'.
+// See docs/AUDIT_REPORT_2026-04.md item C2.
+const CH1_FULL_FIELDS = [
+  'id', 'org_code', 'organization', 'status',
+  'created_at', 'updated_at', 'submitted_at',
+  'form_version', 'respondent_email',
+  'total_personnel', 'total_staff', 'form_completion',
+  'ncd_ratio_pct', 'mental_burnout', 'engagement_score', 'type_official',
+  'form_data'
+].join(',');
 
 function getOrgCatalog() {
   const profileMap = new Map(
@@ -102,7 +113,10 @@ function scopeRowsForCurrentUser() {
 
 async function fetchAllSurveyResponses() {
   const pageSize = 1000;
-  const countRes = await sb.from('survey_responses').select('id', { count: 'exact', head: true });
+  // Use ordering to ensure consistent pagination and leverage the composite index
+  const countRes = await sb.from('survey_responses')
+    .select('id', { count: 'exact', head: true })
+    .order('submitted_at', { ascending: false, nullsFirst: false });
 
   if (countRes.error) {
     return { data: [], error: countRes.error };
@@ -116,9 +130,13 @@ async function fetchAllSurveyResponses() {
     ranges.push([from, Math.min(from + pageSize - 1, total - 1)]);
   }
 
+  // Add ordering to each page query for consistent results and index usage
   const pageResults = await Promise.all(
     ranges.map(([from, to]) =>
-      sb.from('survey_responses').select(SURVEY_SELECT_FIELDS).range(from, to)
+      sb.from('survey_responses')
+        .select(SURVEY_SELECT_FIELDS)
+        .order('submitted_at', { ascending: false, nullsFirst: false })
+        .range(from, to)
     )
   );
 
@@ -163,15 +181,43 @@ function _isTestOrgRow(row) {
 state._coreLoaded = false;
 state._extrasLoaded = false;
 
+// Simple in-memory cache for frequently accessed data (5-minute TTL)
+const _cache = new Map();
+const _CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
+function _cacheGet(key) {
+  const entry = _cache.get(key);
+  if (!entry) return null;
+  if (Date.now() - entry.timestamp > _CACHE_TTL_MS) {
+    _cache.delete(key);
+    return null;
+  }
+  return entry.data;
+}
+
+function _cacheSet(key, data) {
+  _cache.set(key, { data, timestamp: Date.now() });
+}
+
+function _cacheClear() {
+  _cache.clear();
+}
+
 async function loadBackendCore(retryCount = 0) {
   try {
+    // Check cache for organizations and admin users (rarely change)
+    const cachedOrgs = _cacheGet('organizations');
+    const cachedUsers = _cacheGet('admin_user_roles');
+
     // Fire the 4 lightweight queries in parallel.
     // Ch1 is fetched WITHOUT form_data (JSONB blob) for speed — full ch1 comes in extras.
     const [surveyRes, ch1LiteRes, usersRows, orgRows] = await _withTimeout(Promise.all([
       fetchAllSurveyResponses(),
-      sb.from('hrd_ch1_responses').select(CH1_LITE_FIELDS),
-      fetchAdminUserRoles(),
-      fetchOrganizations(),
+      sb.from('hrd_ch1_responses')
+        .select(CH1_LITE_FIELDS)
+        .order('submitted_at', { ascending: false, nullsFirst: false }),
+      cachedUsers ? Promise.resolve(cachedUsers) : fetchAdminUserRoles(),
+      cachedOrgs ? Promise.resolve(cachedOrgs) : fetchOrganizations(),
     ]));
 
     if (surveyRes.error) console.warn('loadBackendCore survey_responses:', surveyRes.error.message);
@@ -192,6 +238,10 @@ async function loadBackendCore(retryCount = 0) {
       const name = row.org_name_th || row.display_name || '';
       return ADMIN_CANONICAL_ORG_CODES.has(code) || ADMIN_CANONICAL_ORG_NAMES.has(name);
     });
+
+    // Cache organizations and admin users for future requests
+    if (!cachedOrgs && orgRows) _cacheSet('organizations', orgRows);
+    if (!cachedUsers && usersRows) _cacheSet('admin_user_roles', usersRows);
 
     refreshOrgDerivedState();
     scopeRowsForCurrentUser();
@@ -238,7 +288,9 @@ async function loadBackendExtras(retryCount = 0) {
   try {
     // Heavier queries: full ch1 (with form_data), org_form_links, org_hr_credentials
     const [ch1FullRes, linksRes, orgHrCredRows] = await _withTimeout(Promise.all([
-      sb.from('hrd_ch1_responses').select('*'),
+      sb.from('hrd_ch1_responses')
+        .select(CH1_FULL_FIELDS)
+        .order('updated_at', { ascending: false, nullsFirst: false }),
       sb.from('org_form_links').select('*'),
       fetchOrgHrCredentials(),
     ]), 15000, 'โหลดข้อมูลเพิ่มเติม');
@@ -297,6 +349,11 @@ async function loadBackend() {
   const extrasRes = await loadBackendExtras();
   if (extrasRes && extrasRes.error) return extrasRes;
   return { loaded: true };
+}
+
+// Call this function after any data modifications to invalidate cache
+function invalidateCache() {
+  _cacheClear();
 }
 
 function summarizeOrgs() {

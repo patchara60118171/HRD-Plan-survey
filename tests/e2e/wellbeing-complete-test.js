@@ -64,61 +64,75 @@ const testUsers = [
   }
 ];
 
+// Helper function for retry logic
+async function retryWithBackoff(fn, maxRetries = 3, delayMs = 1000) {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      return await fn();
+    } catch (error) {
+      if (i === maxRetries - 1) throw error;
+      console.log(`⚠️ Retry ${i + 1}/${maxRetries} for ${fn.name || 'operation'}`);
+      await page.waitForTimeout(delayMs * (i + 1)); // Exponential backoff
+    }
+  }
+}
+
 async function fillWellbeingForm(page, userData) {
   console.log(`🔄 Starting form for: ${userData.name} (${userData.email})`);
   
   try {
-    // รอให้หน้าโหลดเสร็จ
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(3000);
+    // รอให้หน้าโหลดเสร็จ - use proper wait instead of timeout
+    await page.waitForLoadState('domcontentloaded');
     
-    // ตรวจสอบว่ามีปุ่มยืนยันอีเมลหรือไม่
-    const emailConfirmBtn = await page.locator('button:has-text("ยืนยันอีเมล"), button:has-text("ยืนยัน"), button:has-text("Confirm")').first();
-    if (await emailConfirmBtn.isVisible()) {
-      console.log('📧 Found email confirmation button');
-      await emailConfirmBtn.click();
-      await page.waitForTimeout(2000);
-    }
+    // ตรวจสอบว่ามีปุ่มยืนยันอีเมลหรือไม่ - with retry
+    await retryWithBackoff(async () => {
+      const emailConfirmBtn = page.locator('button:has-text("ยืนยันอีเมล"), button:has-text("ยืนยัน"), button:has-text("Confirm")').first();
+      if (await emailConfirmBtn.isVisible({ timeout: 5000 })) {
+        console.log('📧 Found email confirmation button');
+        await emailConfirmBtn.click();
+        await page.waitForLoadState('domcontentloaded');
+      }
+    });
     
-    // ตรวจสอบว่ามีปุ่มเริ่มต้นหรือไม่
-    const startButton = await page.locator('button:has-text("เริ่มทำแบบสำรวจ"), button:has-text("เริ่ม"), button:has-text("Start")').first();
-    if (await startButton.isVisible()) {
-      console.log('🚀 Found start button');
-      await startButton.click();
-      await page.waitForTimeout(2000);
-    }
+    // ตรวจสอบว่ามีปุ่มเริ่มต้นหรือไม่ - with retry
+    await retryWithBackoff(async () => {
+      const startButton = page.locator('button:has-text("เริ่มทำแบบสำรวจ"), button:has-text("เริ่ม"), button:has-text("Start")').first();
+      if (await startButton.isVisible({ timeout: 5000 })) {
+        console.log('🚀 Found start button');
+        await startButton.click();
+        await page.waitForLoadState('domcontentloaded');
+      }
+    });
     
     // ข้อมูลส่วนบุคคล
     console.log('📝 Filling personal information...');
     
-    // รอให้ฟอร์มปรากฏ
-    await page.waitForTimeout(2000);
-    
-    // Email - ลองหาแบบต่างๆ
+    // รอให้ฟอร์มปรากฏ - wait for specific element instead of timeout
     try {
-      const emailInput = await page.locator('input[type="email"]').first();
-      if (await emailInput.isVisible()) {
-        await emailInput.fill(userData.email);
-        console.log('✅ Email filled');
-      }
+      await page.waitForSelector('input[type="email"]', { timeout: 10000 });
     } catch (e) {
-      console.log('⚠️ Email input not found');
+      console.log('⚠️ Email input not found within timeout');
     }
     
-    await page.waitForTimeout(500);
-    
-    // Name - ลองหาแบบต่างๆ
+    // Email - use more specific selector with wait
     try {
-      const nameInput = await page.locator('input[type="text"]').first();
-      if (await nameInput.isVisible()) {
-        await nameInput.fill(userData.name);
-        console.log('✅ Name filled');
-      }
+      const emailInput = page.locator('input[type="email"]').first();
+      await emailInput.waitFor({ state: 'visible', timeout: 5000 });
+      await emailInput.fill(userData.email);
+      console.log('✅ Email filled');
     } catch (e) {
-      console.log('⚠️ Name input not found');
+      console.log('⚠️ Email input not found or not visible');
     }
     
-    await page.waitForTimeout(500);
+    // Name - wait for element
+    try {
+      const nameInput = page.locator('input[type="text"]').first();
+      await nameInput.waitFor({ state: 'visible', timeout: 5000 });
+      await nameInput.fill(userData.name);
+      console.log('✅ Name filled');
+    } catch (e) {
+      console.log('⚠️ Name input not found or not visible');
+    }
     
     // Title/Position
     try {
@@ -299,82 +313,69 @@ async function fillWellbeingForm(page, userData) {
 
 async function fillSectionQuestions(page) {
   try {
-    // รอให้คำถามปรากฏ
-    await page.waitForTimeout(1000);
+    // รอให้คำถามปรากฏ - wait for any form element
+    await page.waitForSelector('input[type="radio"], input[type="checkbox"], select, input[type="text"], textarea', { timeout: 5000 }).catch(() => {});
     
-    // จัดการคำถามประเภทต่างๆ
-    
-    // Radio buttons
+    // Radio buttons - use waitForElementState before interaction
     const radioGroups = await page.locator('input[type="radio"]').all();
-    for (const radio of radioGroups.slice(0, 8)) { // เลือกแค่ 8 อันแรก
+    for (const radio of radioGroups.slice(0, 8)) {
       try {
-        if (await radio.isVisible()) {
-          await radio.check();
-          await page.waitForTimeout(200);
-        }
+        await radio.waitFor({ state: 'visible', timeout: 2000 });
+        await radio.check();
       } catch (e) {
-        // ข้ามถ้าไม่สามารถคลิกได้
+        // Skip if not interactable
       }
     }
     
-    // Checkboxes
+    // Checkboxes - use waitForElementState
     const checkboxes = await page.locator('input[type="checkbox"]').all();
-    for (const checkbox of checkboxes.slice(0, 4)) { // เลือกแค่ 4 อันแรก
+    for (const checkbox of checkboxes.slice(0, 4)) {
       try {
-        if (await checkbox.isVisible()) {
-          await checkbox.check();
-          await page.waitForTimeout(200);
-        }
+        await checkbox.waitFor({ state: 'visible', timeout: 2000 });
+        await checkbox.check();
       } catch (e) {
-        // ข้ามถ้าไม่สามารถคลิกได้
+        // Skip if not interactable
       }
     }
     
-    // Select dropdowns
+    // Select dropdowns - use waitForElementState
     const selects = await page.locator('select').all();
-    for (const select of selects.slice(0, 5)) { // เลือกแค่ 5 อันแรก
+    for (const select of selects.slice(0, 5)) {
       try {
-        if (await select.isVisible()) {
-          const options = await select.locator('option').all();
-          if (options.length > 1) {
-            // เลือกตัวเลือกที่ 2 (ข้ามค่าว่าง)
-            await select.selectOption({ index: 1 });
-            await page.waitForTimeout(200);
-          }
+        await select.waitFor({ state: 'visible', timeout: 2000 });
+        const options = await select.locator('option').all();
+        if (options.length > 1) {
+          await select.selectOption({ index: 1 });
         }
       } catch (e) {
-        // ข้ามถ้าไม่สามารถเลือกได้
+        // Skip if not interactable
       }
     }
     
-    // Text inputs
+    // Text inputs - use waitForElementState
     const textInputs = await page.locator('input[type="text"], input[type="number"], textarea').all();
-    for (const input of textInputs.slice(0, 5)) { // กรอกแค่ 5 ช่องแรก
+    for (const input of textInputs.slice(0, 5)) {
       try {
-        if (await input.isVisible()) {
-          const inputType = await input.getAttribute('type');
-          if (inputType === 'number') {
-            await input.fill(Math.floor(Math.random() * 10) + 1);
-          } else {
-            await input.fill('ทดสอบ');
-          }
-          await page.waitForTimeout(200);
+        await input.waitFor({ state: 'visible', timeout: 2000 });
+        const inputType = await input.getAttribute('type');
+        if (inputType === 'number') {
+          await input.fill(Math.floor(Math.random() * 10) + 1);
+        } else {
+          await input.fill('ทดสอบ');
         }
       } catch (e) {
-        // ข้ามถ้าไม่สามารถกรอกได้
+        // Skip if not interactable
       }
     }
     
-    // Time inputs (ชั่วโมง:นาที)
+    // Time inputs - use waitForElementState
     const timeInputs = await page.locator('.time-select').all();
-    for (const timeSelect of timeInputs.slice(0, 3)) { // เลือกแค่ 3 อันแรก
+    for (const timeSelect of timeInputs.slice(0, 3)) {
       try {
-        if (await timeSelect.isVisible()) {
-          await timeSelect.selectOption({ index: 1 }); // เลือกตัวเลือกแรก
-          await page.waitForTimeout(200);
-        }
+        await timeSelect.waitFor({ state: 'visible', timeout: 2000 });
+        await timeSelect.selectOption({ index: 1 });
       } catch (e) {
-        // ข้ามถ้าไม่สามารถเลือกได้
+        // Skip if not interactable
       }
     }
     
@@ -453,7 +454,7 @@ async function runWellbeingSurveyTest() {
     });
   }
   
-  // บันทึกผลลัพธ์
+  // บันทึกผลลัพธ์ - use OS temp directory
   const reportData = {
     testType: 'Wellbeing Survey Complete Form Test',
     url: 'https://nidawellbeing.vercel.app/?org=test-org',
@@ -467,8 +468,13 @@ async function runWellbeingSurveyTest() {
   };
   
   const fs = require('fs');
-  fs.writeFileSync('C:/temp/wellbeing-test-results.json', JSON.stringify(reportData, null, 2));
-  console.log('\n📝 Detailed results saved to: C:/temp/wellbeing-test-results.json');
+  const os = require('os');
+  const path = require('path');
+  const tempDir = os.tmpdir();
+  const reportPath = path.join(tempDir, `wellbeing-test-results-${Date.now()}.json`);
+  
+  fs.writeFileSync(reportPath, JSON.stringify(reportData, null, 2));
+  console.log(`\n📝 Detailed results saved to: ${reportPath}`);
   
   console.log('\n🎉 Wellbeing Survey Test Completed!');
   

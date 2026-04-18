@@ -272,7 +272,7 @@ function showWbRowPDF(idx) {
   const wlb = getWlb(row);
   const flagged = (phq || 0) >= 15;
   const pdfHtml = `<!DOCTYPE html><html lang="th"><head><meta charset="UTF-8">
-<title>Wellbeing Report — ${row.organization || 'ไม่ระบุ'}</title>
+<title>Wellbeing Report — ${esc(row.organization || 'ไม่ระบุ')}</title>
 <style>
   body{font-family:'Sarabun',sans-serif;margin:32px;color:#1A2433;font-size:13px;line-height:1.7}
   h1{font-size:18px;color:#0F4C81;margin-bottom:4px}

@@ -803,11 +803,11 @@
           </table>
         </div>
       </div>
-    </div>
-
   </div><!-- /content -->
 </div><!-- /main -->
 
+<!-- Production console silencer — must load before any JS that might log -->
+<script src="js/logger.js"></script>
 <!-- CDN: supabase-js moved here from <head> to eliminate render-blocking -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/project-ssot.js"></script>

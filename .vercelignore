@@ -60,6 +60,29 @@ docs/
 *.csv
 encoding_output.txt
 
+# Dev / debug HTML — not intended for public deploy (audit L7)
+clear-cache.html
+clear-all-caches.html
+force-refresh.html
+debug-ch1.mjs
+test-policy.js
+playwright-autotest-3orgs.js
+error-*.png
+CHART_DESIGNS_REMAINING.html
+SQL_DATA_AUDIT.sql
+fix-rls-survey-select.sql
+sync-report.json
+skills-lock.json
+.agents/
+.windsurf/
+.claude/
+impeccable/
+ux-ui-agent-skills/
+code-review-graph/
+tools/
+tests/
+output/
+
 # Server-side scripts and config (not needed for static site)
 scripts/
 supabase/
