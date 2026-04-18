@@ -40,10 +40,21 @@
 | L5 | ✅ fixed | Consolidated `.env.example` (deleted duplicate `.env.local.example`) |
 | L7 | ✅ fixed | `.vercelignore` — blocks dev HTML / error screenshots / debug scripts |
 
-**Migrations to apply (in order) to your Supabase project:**
-1. `supabase/migrations/20260418_harden_survey_update_rls.sql` (security — C4)
-2. `supabase/migrations/20260418_add_perf_indexes.sql` (performance — H1)
-3. `supabase/migrations/20260419_org_dashboard_summary_view.sql` (aggregation view — H3)
+**Migrations applied to production Supabase (2026-04-18):**
+1. ✅ `supabase/migrations/20260418_harden_survey_update_rls.sql` (C4 security) — applied as `harden_survey_update_rls`
+2. ✅ `supabase/migrations/20260418_add_perf_indexes.sql` (H1 performance) — applied as `add_perf_indexes` (idempotent no-op; indexes already present)
+3. ✅ `supabase/migrations/20260419_org_dashboard_summary_view.sql` (H3 aggregation view) — applied as `org_dashboard_summary_view`
+4. ✅ `supabase/migrations/20260420_fix_dashboard_view_security_invoker.sql` — hotfix for advisor-flagged `security_definer_view` ERROR on the H3 view (default Supabase view behavior bypassed RLS; now explicit `security_invoker=true`)
+
+**New advisor findings after migration (Phase 5 backlog):**
+
+| Level | Finding | Notes |
+|---|---|---|
+| ERROR | `security_definer_view` on `organizations_public`, `admin_user_roles_public`, `ch1_google_sync_queue` | Pre-existing, not introduced by Phase 1–3. Same `ALTER VIEW ... SET (security_invoker=true)` fix pattern as H3 hotfix. |
+| WARN | `duplicate_index` × 3 pairs on `hrd_ch1_responses` | `idx_ch1_org_submitted`↔`idx_hrd_org_submission`, `idx_hrd_ch1_organization`↔`idx_hrd_org`, `idx_hrd_ch1_submitted_at`↔`idx_hrd_submitted`. Drop the older `idx_hrd_*` duplicates. |
+| WARN | `multiple_permissive_policies` on `survey_responses.UPDATE` | Expected — `survey_update_admin` + `survey_update_draft_only` cover disjoint actors (intent: separate policies for clarity). Accepted. |
+| WARN | `function_search_path_mutable` × 5 functions | Pre-existing. Add `SET search_path = public` to function definitions. |
+| INFO | `unindexed_foreign_keys` × 2 | `admin_user_roles.org_code`, `org_form_links.form_id` — add covering indexes. |
 
 ---
 
