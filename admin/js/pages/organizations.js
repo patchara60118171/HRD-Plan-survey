@@ -135,7 +135,7 @@ function showOrgDetail(orgName) {
     <div style="padding:12px;border:1px solid var(--bdr);border-radius:10px;background:#fff">
       <div style="font-size:12px;color:var(--tx3);margin-bottom:6px">สถานะข้อมูลล่าสุด</div>
       <div style="font-size:12.5px">Wellbeing submit: <b>${fmtNum(summary?.wellbeingSubmitted || 0)}</b> คน</div>
-      <div style="font-size:12.5px;margin-top:4px">Ch1: <b>${summary?.ch1Count > 0 ? 'ส่งแล้ว' : 'ยังไม่ส่ง'}</b></div>
+      <div style="font-size:12.5px;margin-top:4px">แบบสำรวจข้อมูลองค์กร: <b>${summary?.ch1Count > 0 ? 'ส่งแล้ว' : 'ยังไม่ส่ง'}</b></div>
       <div style="font-size:12.5px;margin-top:4px">ล่าสุด: <b>${fmtDate(summary?.latestWb || summary?.latestCh1)}</b></div>
     </div>`;
 }

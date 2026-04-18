@@ -73,11 +73,11 @@
 
     <div class="nav-group">จัดการข้อมูล</div>
     <div class="nav-item" onclick="go('orgs',this)"><span class="ni">🏛️</span> องค์กรที่เข้าร่วม</div>
-    <div class="nav-item" onclick="go('form-ch1',this)"><span class="ni">📝</span> ฟอร์ม Ch1</div>
+    <div class="nav-item" onclick="go('form-ch1',this)"><span class="ni">📝</span> ฟอร์มแบบสำรวจข้อมูลองค์กร</div>
     <div class="nav-item" onclick="go('form-wb',this)"><span class="ni">💚</span> Wellbeing Survey</div>
 
     <div class="nav-group">วิเคราะห์ข้อมูล</div>
-    <div class="nav-item" onclick="go('ch1-summary',this)"><span class="ni">📊</span> สรุปภาพรวม Ch1</div>
+    <div class="nav-item" onclick="go('ch1-summary',this)"><span class="ni">📊</span> สรุปภาพรวมแบบสำรวจข้อมูลองค์กร</div>
     <div class="nav-item" onclick="go('an-wb',this)"><span class="ni">🧠</span> วิเคราะห์ Wellbeing</div>
     <div class="nav-item" onclick="go('compare',this)"><span class="ni">⚖️</span> เปรียบเทียบองค์กร</div>
     <div class="nav-item" onclick="go('export',this)"><span class="ni">📤</span> Export รายงาน</div>
@@ -124,7 +124,7 @@
           <div class="w-space"></div>
           <div class="w-stats">
             <div class="w-stat"><div class="w-val">—</div><div class="w-label">องค์กรทั้งหมด</div></div>
-            <div class="w-stat"><div class="w-val">—</div><div class="w-label">Ch1 ส่งแล้ว</div></div>
+            <div class="w-stat"><div class="w-val">—</div><div class="w-label">แบบสำรวจข้อมูลองค์กรส่งแล้ว</div></div>
             <div class="w-stat"><div class="w-val">—</div><div class="w-label">Wellbeing ตอบแล้ว</div></div>
           </div>
         </div>
@@ -134,7 +134,7 @@
         <button class="card-dl-btn" onclick="downloadCard('#dl-kpi','KPI-Cards')" title="ดาวน์โหลด KPI">📥</button>
         <div class="kpi-grid">
           <div class="kpi"><div class="kpi-icon">🏛️</div><div class="kpi-label">องค์กรที่เข้าร่วม</div><div class="kpi-val">—</div><div class="kpi-sub">กำลังโหลด...</div></div>
-          <div class="kpi g"><div class="kpi-icon">✅</div><div class="kpi-label">Ch1 ส่งครบแล้ว</div><div class="kpi-val">—</div><div class="kpi-sub">กำลังโหลด...</div></div>
+          <div class="kpi g"><div class="kpi-icon">✅</div><div class="kpi-label">แบบสำรวจข้อมูลองค์กรส่งครบแล้ว</div><div class="kpi-val">—</div><div class="kpi-sub">กำลังโหลด...</div></div>
           <div class="kpi w"><div class="kpi-icon">💚</div><div class="kpi-label">Wellbeing ตอบแล้ว</div><div class="kpi-val">—</div><div class="kpi-sub">จากเป้า 1,500–2,000 คน</div></div>
           <div class="kpi"><div class="kpi-icon">👤</div><div class="kpi-label">Viewer ที่ใช้งาน</div><div class="kpi-val">—</div><div class="kpi-sub">กำลังโหลด...</div></div>
         </div>
@@ -146,7 +146,7 @@
           <div class="card-body" style="padding:14px 18px 12px"><div id="wb-daily-chart" class="chart-ph" style="height:200px"><div class="cph-icon">📈</div><div>กำลังโหลดข้อมูล...</div></div></div>
         </div>
         <div class="card" id="dl-ch1-status">
-          <div class="card-head"><h3>📋 สถานะ Ch1 ทุกองค์กร</h3><span id="ch1-status-label" style="font-size:11px;color:var(--tx3)"></span><button class="card-dl-btn" onclick="downloadCard('#dl-ch1-status','Ch1-Status')" title="ดาวน์โหลด">📥</button></div>
+          <div class="card-head"><h3>📋 สถานะแบบสำรวจข้อมูลองค์กรทุกองค์กร</h3><span id="ch1-status-label" style="font-size:11px;color:var(--tx3)"></span><button class="card-dl-btn" onclick="downloadCard('#dl-ch1-status','Ch1-Status')" title="ดาวน์โหลด">📥</button></div>
           <div class="card-body" style="padding:12px 16px" id="ch1-status-grid"><div style="color:var(--tx3);font-size:12px">กำลังโหลด...</div></div>
         </div>
       </div>
@@ -179,7 +179,7 @@
     <div class="page" id="page-progress">
       <div class="page-title">สถานะการส่งข้อมูล</div>
       <div class="page-sub">ติดตามความคืบหน้าทุกองค์กร · ส่งครบ 10/15 (66.7%)</div>
-      <div class="info yellow">⚠️ มี 5 องค์กรที่ยังไม่ส่ง Ch1 ครบ — ครบกำหนดใน 17 วัน</div>
+      <div class="info yellow">⚠️ มี 5 องค์กรที่ยังไม่ส่งแบบสำรวจข้อมูลองค์กรครบ — ครบกำหนดใน 17 วัน</div>
       <div class="card">
         <div class="card-head">
           <h3>รายการสถานะทุกองค์กร</h3>
@@ -235,7 +235,7 @@
 
     <!-- ==================== FORM CH1 ==================== -->
     <div class="page" id="page-form-ch1">
-      <div class="page-title">ฟอร์ม Ch1 — ภาพรวมองค์กร</div>
+      <div class="page-title">ฟอร์มแบบสำรวจข้อมูลองค์กร — ภาพรวมองค์กร</div>
       <div class="page-sub">ควบคุมการเปิด-ปิดฟอร์ม · ดูข้อมูลที่ส่งมา · ดู Raw Data</div>
       <div class="tabs">
         <div class="tab active" onclick="st(this,'c1-pdf');renderCh1Pdf()">📄 ข้อมูลรายคน PDF</div>
@@ -498,7 +498,7 @@
     </div>
 
     <div class="page" id="page-ch1-summary">
-      <div class="page-title">สรุปภาพรวม Ch1</div>
+      <div class="page-title">สรุปภาพรวมแบบสำรวจข้อมูลองค์กร</div>
       <div class="page-sub" id="ch1-summary-sub">สรุปข้อมูลที่กรอกแล้วทั้งหมด · กรองตามองค์กรเพื่อดูรายละเอียดรายหน่วยงาน</div>
       <div class="info blue">เลือกองค์กรจากตัวกรองด้านล่างเพื่อสลับจากภาพรวมทั้งหมดไปยังรายงานเฉพาะองค์กรได้ทันที</div>
       <div class="filter-bar" style="margin-bottom:16px">
@@ -514,12 +514,12 @@
         <button class="btn b-gray" onclick="exportCh1SummaryPdf()">📄 Export PDF</button>
       </div>
       <div class="kpi-grid">
-        <div class="kpi"><div class="kpi-icon">🏛️</div><div class="kpi-label">องค์กรที่มีข้อมูล</div><div class="kpi-val" id="ch1sum-kpi-orgs">—</div><div class="kpi-sub">นับเฉพาะองค์กรที่ส่ง Ch1 แล้ว</div></div>
+        <div class="kpi"><div class="kpi-icon">🏛️</div><div class="kpi-label">องค์กรที่มีข้อมูล</div><div class="kpi-val" id="ch1sum-kpi-orgs">—</div><div class="kpi-sub">นับเฉพาะองค์กรที่ส่งแบบสำรวจข้อมูลองค์กรแล้ว</div></div>
         <div class="kpi g"><div class="kpi-icon">👥</div><div class="kpi-label">บุคลากรรวม</div><div class="kpi-val" id="ch1sum-kpi-staff">—</div><div class="kpi-sub">รวมจากทุกเรคคอร์ดที่เลือก</div></div>
         <div class="kpi r"><div class="kpi-icon">🏥</div><div class="kpi-label">NCD ต่อบุคลากร</div><div class="kpi-val" id="ch1sum-kpi-ncd">—</div><div class="kpi-sub">คำนวณจากจำนวน NCD / บุคลากรรวม</div></div>
         <div class="kpi w"><div class="kpi-icon">🩺</div><div class="kpi-label">วันลาป่วยรวม</div><div class="kpi-val" id="ch1sum-kpi-sick">—</div><div class="kpi-sub">สะสมจากองค์กรที่เลือก</div></div>
-        <div class="kpi"><div class="kpi-icon">🧠</div><div class="kpi-label">Burnout เฉลี่ย</div><div class="kpi-val" id="ch1sum-kpi-burnout">—</div><div class="kpi-sub">ค่าเฉลี่ยจากฟอร์ม Ch1</div></div>
-        <div class="kpi g"><div class="kpi-icon">❤️</div><div class="kpi-label">Engagement เฉลี่ย</div><div class="kpi-val" id="ch1sum-kpi-eng">—</div><div class="kpi-sub">ค่าเฉลี่ยจากฟอร์ม Ch1</div></div>
+        <div class="kpi"><div class="kpi-icon">🧠</div><div class="kpi-label">Burnout เฉลี่ย</div><div class="kpi-val" id="ch1sum-kpi-burnout">—</div><div class="kpi-sub">ค่าเฉลี่ยจากฟอร์มแบบสำรวจข้อมูลองค์กร</div></div>
+        <div class="kpi g"><div class="kpi-icon">❤️</div><div class="kpi-label">Engagement เฉลี่ย</div><div class="kpi-val" id="ch1sum-kpi-eng">—</div><div class="kpi-sub">ค่าเฉลี่ยจากฟอร์มแบบสำรวจข้อมูลองค์กร</div></div>
       </div>
       <div style="font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--tx3);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--bdr)">โครงสร้างประเภทบุคลากร</div>
       <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:14px">
@@ -612,7 +612,7 @@
 
     <!-- ==================== ANALYTICS CH1 ==================== -->
     <div class="page" id="page-an-ch1">
-      <div class="page-title">วิเคราะห์ผล Ch1</div>
+      <div class="page-title">วิเคราะห์ผลแบบสำรวจข้อมูลองค์กร</div>
       <div class="page-sub">Dashboard วิเคราะห์ข้อมูลภาพรวมองค์กร</div>
       <div class="filter-bar" style="margin-bottom:16px">
         <select class="sel" style="width:200px"><option>ทุกองค์กร</option><option>กรมสุขภาพจิต</option><option>สำนักงาน ก.พ.</option></select>
@@ -775,7 +775,7 @@
       <div class="page-title">Export รายงาน</div>
       <div class="page-sub">ดาวน์โหลดรายงานในรูปแบบต่าง ๆ</div>
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
-        <div class="fc"><div class="fc-head"><span style="font-size:20px">📊</span><h3>สรุปภาพรวม Ch1</h3></div><p style="font-size:12px;color:var(--tx2);margin-bottom:12px;line-height:1.6">ข้อมูลองค์กรทั้งหมด พร้อมกราฟโครงสร้างบุคลากร สุขภาวะ และ Engagement</p><div class="fg"><label>เลือกองค์กร</label><select id="exp-ch1-org"><option value="">ทุกองค์กร</option></select></div><div class="fc-actions"><button class="btn b-blue" onclick="exportCh1Filtered(document.getElementById('exp-ch1-org').value)">📊 Excel</button><button class="btn b-gray" onclick="exportCh1FilteredDocs(document.getElementById('exp-ch1-org').value)">📝 Docs</button><button class="btn b-gray" onclick="showToast('PDF: กด Ctrl+P แล้วเลือก Save as PDF','info')"> 📄 PDF</button></div></div>
+        <div class="fc"><div class="fc-head"><span style="font-size:20px">📊</span><h3>สรุปภาพรวมแบบสำรวจข้อมูลองค์กร</h3></div><p style="font-size:12px;color:var(--tx2);margin-bottom:12px;line-height:1.6">ข้อมูลองค์กรทั้งหมด พร้อมกราฟโครงสร้างบุคลากร สุขภาวะ และ Engagement</p><div class="fg"><label>เลือกองค์กร</label><select id="exp-ch1-org"><option value="">ทุกองค์กร</option></select></div><div class="fc-actions"><button class="btn b-blue" onclick="exportCh1Filtered(document.getElementById('exp-ch1-org').value)">📊 Excel</button><button class="btn b-gray" onclick="exportCh1FilteredDocs(document.getElementById('exp-ch1-org').value)">📝 Docs</button><button class="btn b-gray" onclick="showToast('PDF: กด Ctrl+P แล้วเลือก Save as PDF','info')"> 📄 PDF</button></div></div>
         <div class="fc"><div class="fc-head"><span style="font-size:20px">💚</span><h3>รายงาน Wellbeing</h3></div><p style="font-size:12px;color:var(--tx2);margin-bottom:12px;line-height:1.6">ผลการสำรวจรายบุคคล ครบทุกมิติสุขภาวะ วิเคราะห์ตามองค์กร/เพศ/อายุ</p><div class="fg"><label>เลือกองค์กร</label><select id="exp-wb-org"><option value="">ทุกองค์กร</option></select></div><div class="fc-actions"><button class="btn b-blue" onclick="exportWbFiltered(document.getElementById('exp-wb-org').value)">📊 Excel</button><button class="btn b-gray" onclick="exportWbFilteredDocs(document.getElementById('exp-wb-org').value)">📝 Docs</button><button class="btn b-gray" onclick="showToast('PDF: กด Ctrl+P แล้วเลือก Save as PDF','info')">📄 PDF</button></div></div>
         <div class="fc"><div class="fc-head"><span style="font-size:20px">⚖️</span><h3>รายงานเปรียบเทียบ</h3></div><p style="font-size:12px;color:var(--tx2);margin-bottom:12px;line-height:1.6">Benchmark ระหว่างองค์กร Heatmap ตัวชี้วัดหลัก และ Ranking</p><div class="fg"><label>เลือกองค์กร</label><select id="exp-cmp-org"><option value="">ทุกองค์กร</option></select></div><div class="fc-actions"><button class="btn b-blue" onclick="exportCompareReport()">📊 Excel</button><button class="btn b-gray" onclick="exportCompareReportDocs()">📝 Docs</button><button class="btn b-gray" onclick="showToast('PDF: กด Ctrl+P แล้วเลือก Save as PDF','info')">📄 PDF</button></div></div>
       </div>

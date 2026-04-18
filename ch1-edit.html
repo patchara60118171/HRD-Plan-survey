@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>แก้ไข CH1 — HRD Plan Survey</title>
+<title>แก้ไขแบบสำรวจข้อมูลองค์กร — HRD Plan Survey</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'IBM Plex Sans Thai Looped','Sarabun',sans-serif;background:#F8FAFC;color:#1e293b;font-size:15px}
@@ -111,7 +111,7 @@ textarea.si{resize:vertical;min-height:96px;line-height:1.7}
 <!-- Topbar -->
 <div class="topbar">
   <div class="topbar-main">
-    <h1>✏️ แก้ไขข้อมูล CH1</h1>
+    <h1>✏️ แก้ไขข้อมูลแบบสำรวจข้อมูลองค์กร</h1>
     <div class="topbar-meta">
       <span class="org-badge" id="org-name-badge">กำลังโหลด...</span>
       <span class="status-badge" id="status-badge" style="display:none"></span>
@@ -132,7 +132,7 @@ textarea.si{resize:vertical;min-height:96px;line-height:1.7}
   <div class="page-shell">
     <div class="page-intro">
       <h2>แบบสอบถาม - ข้อมูลสุขภาวะองค์กร</h2>
-      <p>แบบฟอร์มนี้ใช้ layout เดียวกับหน้า CH1 หลัก แต่เปิดให้แก้ไขแบบต่อเนื่องในหน้าเดียวโดยไม่ตัดเป็น step</p>
+      <p>แบบฟอร์มนี้ใช้ layout เดียวกับหน้าแบบสำรวจข้อมูลองค์กรหลัก แต่เปิดให้แก้ไขแบบต่อเนื่องในหน้าเดียวโดยไม่ตัดเป็น step</p>
     </div>
     <div class="loading-screen" id="loading-screen">
       <div class="spinner"></div>
@@ -1240,7 +1240,7 @@ async function saveForm(newStatus) {
     sb2.textContent = { draft:'Draft', submitted:'ส่งแล้ว', reopened:'เปิดแก้ไข' }[newStatus] || newStatus;
     sb2.className = 'status-badge status-' + newStatus;
 
-    notifyParent('saved', newStatus === 'submitted' ? 'ส่งข้อมูล CH1 เรียบร้อยแล้ว' : 'บันทึกข้อมูล CH1 เรียบร้อยแล้ว');
+    notifyParent('saved', newStatus === 'submitted' ? 'ส่งข้อมูลแบบสำรวจข้อมูลองค์กรเรียบร้อยแล้ว' : 'บันทึกข้อมูลแบบสำรวจข้อมูลองค์กรเรียบร้อยแล้ว');
 
     if (newStatus === 'submitted') {
       showAlert('✅ ส่งข้อมูลเรียบร้อยแล้ว', 'info');
@@ -1272,7 +1272,7 @@ async function deleteForm() {
     return;
   }
 
-  const confirmed = window.confirm('ยืนยันการลบข้อมูล CH1 นี้ใช่หรือไม่? การกระทำนี้ไม่สามารถย้อนกลับได้');
+  const confirmed = window.confirm('ยืนยันการลบข้อมูลแบบสำรวจข้อมูลองค์กรนี้ใช่หรือไม่? การกระทำนี้ไม่สามารถย้อนกลับได้');
   if (!confirmed) return;
 
   const deleteBtn = document.getElementById('btn-delete');
@@ -1293,7 +1293,7 @@ async function deleteForm() {
     const { error } = await sb.from('hrd_ch1_responses').delete().eq('id', responseData.id);
     if (error) throw error;
 
-    showAlert('✅ ลบข้อมูล CH1 เรียบร้อยแล้ว — กำลังกลับหน้า Portal...', 'info');
+    showAlert('✅ ลบข้อมูลแบบสำรวจข้อมูลองค์กรเรียบร้อยแล้ว — กำลังกลับหน้า Portal...', 'info');
     setTimeout(() => { location.href = 'org-portal.html'; }, 1200);
   } catch (e) {
     showAlert('❌ ลบข้อมูลไม่สำเร็จ: ' + e.message, 'error');

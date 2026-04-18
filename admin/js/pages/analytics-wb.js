@@ -2,8 +2,14 @@
 
 function renderAnalytics(summary) {
   const allRows = state.surveyRows || [];
-  const rows = allRows.filter(r => !r.is_draft);
-  console.log('[Analytics] surveyRows total:', allRows.length, '| non-draft:', rows.length);
+  const submitted = allRows.filter(r => !r.is_draft);
+  console.log('[Analytics] surveyRows total:', allRows.length, '| non-draft:', submitted.length);
+
+  _anwbPopulateOrgList(submitted);
+  const selected = anwbGetSelectedOrgs();
+  const rows = selected == null
+    ? submitted
+    : (selected.length ? submitted.filter(r => selected.includes(r.organization || r.org)) : []);
 
   const emptyEl = document.getElementById('anwb-empty');
   const contentEl = document.getElementById('anwb-content');
@@ -12,7 +18,10 @@ function renderAnalytics(summary) {
   if (emptyEl) emptyEl.style.display = 'none';
 
   if (!rows.length) {
-    const msg = allRows.length ? '⚠️ ข้อมูลทั้งหมดเป็น Draft ยังไม่มีการ Submit จริง' : '⚠️ ยังไม่มีข้อมูล Wellbeing Survey';
+    let msg;
+    if (!allRows.length) msg = '⚠️ ยังไม่มีข้อมูล Wellbeing Survey';
+    else if (!submitted.length) msg = '⚠️ ข้อมูลทั้งหมดเป็น Draft ยังไม่มีการ Submit จริง';
+    else msg = '⚠️ ไม่มีข้อมูลสำหรับองค์กรที่เลือก';
     if (emptyEl) { emptyEl.style.display = ''; emptyEl.textContent = msg; }
     if (contentEl) contentEl.style.display = 'none';
     return;
@@ -41,6 +50,66 @@ function anwbSwitchTab(tab) {
   document.querySelectorAll('.anwb-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
   document.querySelectorAll('.anwb-tab-panel').forEach(p => { p.style.display = p.id === `anwb-panel-${tab}` ? '' : 'none'; });
 }
+
+/* ── Org multi-select filter (mirrors CH1 pattern) ──────────────── */
+function _anwbPopulateOrgList(submitted) {
+  const orgList = document.getElementById('anwb-org-list');
+  if (!orgList) return;
+  const orgs = [...new Set((submitted || []).map(r => r.organization || r.org).filter(Boolean))].sort();
+  const existing = [...orgList.querySelectorAll('input[type="checkbox"]')].map(cb => cb.value).sort();
+  // Only rebuild when the org set changes
+  if (existing.length === orgs.length && existing.every((v, i) => v === orgs[i])) return;
+  orgList.innerHTML = orgs.map(org =>
+    `<label class="org-check-item"><input type="checkbox" value="${esc(org)}" checked onchange="anwbOrgCheckOne()"> <span>${esc(org)}</span></label>`
+  ).join('');
+  anwbUpdateOrgLabel();
+}
+
+function anwbToggleOrgDropdown() {
+  const dd = document.getElementById('anwb-org-dropdown');
+  if (dd) dd.classList.toggle('show');
+}
+
+function anwbOrgCheckAll(allCb) {
+  document.querySelectorAll('#anwb-org-list input[type="checkbox"]').forEach(cb => { cb.checked = allCb.checked; });
+  anwbUpdateOrgLabel();
+  renderAnalytics();
+}
+
+function anwbOrgCheckOne() {
+  const boxes = [...document.querySelectorAll('#anwb-org-list input[type="checkbox"]')];
+  const allCb = document.querySelector('#anwb-org-dropdown > label input[type="checkbox"]');
+  if (allCb) allCb.checked = boxes.length > 0 && boxes.every(cb => cb.checked);
+  anwbUpdateOrgLabel();
+  renderAnalytics();
+}
+
+function anwbUpdateOrgLabel() {
+  const btn = document.getElementById('anwb-org-toggle');
+  if (!btn) return;
+  const sel = anwbGetSelectedOrgs();
+  if (sel == null) btn.textContent = 'ทุกองค์กร ▾';
+  else if (sel.length === 0) btn.textContent = '(ไม่ได้เลือก) ▾';
+  else if (sel.length === 1) btn.textContent = sel[0] + ' ▾';
+  else btn.textContent = sel.length + ' องค์กร ▾';
+}
+
+function anwbGetSelectedOrgs() {
+  const allCb = document.querySelector('#anwb-org-dropdown > label input[type="checkbox"]');
+  if (!document.getElementById('anwb-org-list')) return null;
+  if (allCb && allCb.checked) return null;
+  return [...document.querySelectorAll('#anwb-org-list input[type="checkbox"]:checked')].map(cb => cb.value);
+}
+
+// Close dropdown on outside click
+document.addEventListener('click', (e) => {
+  const wrap = document.getElementById('anwb-org-dropdown');
+  const btn = document.getElementById('anwb-org-toggle');
+  if (!wrap || !btn) return;
+  if (!wrap.classList.contains('show')) return;
+  if (wrap.contains(e.target) || btn.contains(e.target)) return;
+  wrap.classList.remove('show');
+});
 
 /* ── KPI summary bar ───────────────────────────────────────────── */
 function _anwbRenderKPICards(rows) {

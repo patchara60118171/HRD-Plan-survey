@@ -45,12 +45,15 @@
 2. ✅ `supabase/migrations/20260418_add_perf_indexes.sql` (H1 performance) — applied as `add_perf_indexes` (idempotent no-op; indexes already present)
 3. ✅ `supabase/migrations/20260419_org_dashboard_summary_view.sql` (H3 aggregation view) — applied as `org_dashboard_summary_view`
 4. ✅ `supabase/migrations/20260420_fix_dashboard_view_security_invoker.sql` — hotfix for advisor-flagged `security_definer_view` ERROR on the H3 view (default Supabase view behavior bypassed RLS; now explicit `security_invoker=true`)
+5. ✅ `supabase/migrations/20260421_fix_pre_existing_security_definer_views.sql` — Phase 5 Priority 1+2: audit + fix 3 pre-existing DEFINER views. `admin_user_roles_public` + `ch1_google_sync_queue` flipped to INVOKER; `organizations_public` kept as intentional DEFINER exception (required for anon pre-login org list in `js/ch1-form.js`). ERROR count: 3 → 1 (remaining = documented exception).
 
-**New advisor findings after migration (Phase 5 backlog):**
+**Phase 5 backlog (advisor findings):**
 
-| Level | Finding | Notes |
+| Level | Finding | Status |
 |---|---|---|
-| ERROR | `security_definer_view` on `organizations_public`, `admin_user_roles_public`, `ch1_google_sync_queue` | Pre-existing, not introduced by Phase 1–3. Same `ALTER VIEW ... SET (security_invoker=true)` fix pattern as H3 hotfix. |
+| ~~ERROR~~ | ~~`security_definer_view` on `admin_user_roles_public`~~ | ✅ Fixed 2026-04-21 (flipped to INVOKER — closed org_hr → all-admins visibility hole) |
+| ~~ERROR~~ | ~~`security_definer_view` on `ch1_google_sync_queue`~~ | ✅ Fixed 2026-04-21 (flipped to INVOKER — consumers use service_role, no functional impact) |
+| ERROR | `security_definer_view` on `organizations_public` | 📌 **Documented exception** — intentional public-anon feature (non-PII org metadata for CH1 form). Flipping to INVOKER would break anon-form loader. |
 | WARN | `duplicate_index` × 3 pairs on `hrd_ch1_responses` | `idx_ch1_org_submitted`↔`idx_hrd_org_submission`, `idx_hrd_ch1_organization`↔`idx_hrd_org`, `idx_hrd_ch1_submitted_at`↔`idx_hrd_submitted`. Drop the older `idx_hrd_*` duplicates. |
 | WARN | `multiple_permissive_policies` on `survey_responses.UPDATE` | Expected — `survey_update_admin` + `survey_update_draft_only` cover disjoint actors (intent: separate policies for clarity). Accepted. |
 | WARN | `function_search_path_mutable` × 5 functions | Pre-existing. Add `SET search_path = public` to function definitions. |

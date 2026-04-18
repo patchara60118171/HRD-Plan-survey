@@ -376,6 +376,8 @@ function summarizeOrgs() {
     flagged: 0,
     latestWb: null,
     ch1Count: 0,
+    ch1Submitted: 0,
+    ch1Draft: 0,
     latestCh1: null,
     ch1CompletionPct: 0,
     ch1FilledFields: 0,
@@ -432,13 +434,21 @@ function summarizeOrgs() {
     if (date && (!org.latestWb || new Date(date) > new Date(org.latestWb))) org.latestWb = date;
   });
 
+  let _ch1Unmatched = 0;
   safeCh1Rows.forEach((row) => {
-    const orgName = getCh1Org(row);
+    // Prefer org_code (canonical) over row organization text to avoid name-string drift
     const rowCode = String(row.org_code || row.form_data?.org_code || '').toLowerCase();
-    const resolvedName = map.has(orgName) ? orgName : (codeMap.get(rowCode) || orgName);
-    const org = map.get(resolvedName);
-    if (!org) return;
+    const orgName = getCh1Org(row);
+    const resolvedName = codeMap.get(rowCode) || (map.has(orgName) ? orgName : null);
+    const org = resolvedName ? map.get(resolvedName) : null;
+    if (!org) { _ch1Unmatched += 1; return; }
+
     org.ch1Count += 1;
+    const status = String(row.status || row.form_data?.status || '').toLowerCase();
+    const isSubmitted = status === 'submitted' || (!status && row.submitted_at);
+    if (isSubmitted) org.ch1Submitted += 1;
+    else org.ch1Draft += 1;
+
     if (org.typeOfficial === null) {
       const v = row.form_data?.type_official ?? row.type_official;
       if (v != null && v !== '') org.typeOfficial = Number(v) || 0;
@@ -452,6 +462,10 @@ function summarizeOrgs() {
       org.ch1CompletionPct = completion.total > 0 ? (completion.filled / completion.total) * 100 : 0;
     }
   });
+
+  if (_ch1Unmatched > 0) {
+    console.warn(`[summarizeOrgs] ${_ch1Unmatched} of ${safeCh1Rows.length} ch1 rows could not be matched to a canonical org (check org_code and organization fields)`);
+  }
 
   return [...map.values()];
 }

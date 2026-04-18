@@ -52,7 +52,7 @@ function exportRawTable() {
 }
 
 function exportCh1All() {
-  if (!state.ch1Rows.length) { showToast('ยังไม่มีข้อมูล Ch1 ในระบบ', 'warn'); return; }
+  if (!state.ch1Rows.length) { showToast('ยังไม่มีข้อมูลแบบสำรวจข้อมูลองค์กรในระบบ', 'warn'); return; }
   const stripHtml = (s) => {
     if (s == null) return '';
     return String(s).replace(/<[^>]*>/g, '').replace(/📎 ดูไฟล์/g, '').trim();

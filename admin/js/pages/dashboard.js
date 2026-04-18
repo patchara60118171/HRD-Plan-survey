@@ -26,8 +26,11 @@ function renderDashboard(summary) {
   
   const orgCount = safeOrgNames.length;
   const submittedWb = safeSurveyRows.filter((row) => !row.is_draft);
-  const respondedCh1 = safeSummary.filter((org) => org.ch1Count > 0).length;
-  
+  // ส่งครบแล้ว = องค์กรที่มี ch1 status='submitted' อย่างน้อย 1 เรคคอร์ด
+  const submittedCh1Orgs = safeSummary.filter((org) => (org.ch1Submitted || 0) > 0).length;
+  // มีข้อมูล = องค์กรที่มี ch1 เรคคอร์ดใดๆ (รวม draft) — ใช้สำหรับ welcome stat
+  const respondedCh1Orgs = safeSummary.filter((org) => (org.ch1Count || 0) > 0).length;
+
   const welcome = dashboard.querySelector('.welcome');
   if (welcome) {
     const wTitle = welcome.querySelector('.w-title');
@@ -36,7 +39,7 @@ function renderDashboard(summary) {
     if (wSub) wSub.innerHTML = `โครงการสำรวจสุขภาวะบุคลากรภาครัฐ พ.ศ. 2566–2570 · อัปเดต ${fmtDate(new Date(), true)}`;
     const wVals = welcome.querySelectorAll('.w-val');
     if (wVals[0]) wVals[0].textContent = orgCount;
-    if (wVals[1]) wVals[1].textContent = respondedCh1;
+    if (wVals[1]) wVals[1].textContent = submittedCh1Orgs;
     if (wVals[2]) wVals[2].textContent = fmtNum(submittedWb.length);
   }
 
@@ -44,11 +47,11 @@ function renderDashboard(summary) {
   if (kpis.length >= 4) {
     kpis[0].querySelector('.kpi-val').textContent = orgCount;
     kpis[0].querySelector('.kpi-sub').textContent = orgCount > 0 ? `${orgCount} หน่วยงานภาครัฐ` : 'ไม่มีข้อมูลองค์กร';
-    
-    kpis[1].querySelector('.kpi-val').textContent = respondedCh1;
-    kpis[1].querySelector('.kpi-sub').textContent = orgCount > 0 
-      ? `${fmtNum((respondedCh1 / Math.max(orgCount, 1)) * 100, 1)}% · ยังไม่ส่ง ${orgCount - respondedCh1} องค์กร`
-      : 'ไม่มีข้อมูล Ch1';
+
+    kpis[1].querySelector('.kpi-val').textContent = submittedCh1Orgs;
+    kpis[1].querySelector('.kpi-sub').textContent = orgCount > 0
+      ? `${fmtNum((submittedCh1Orgs / Math.max(orgCount, 1)) * 100, 1)}% · ยังไม่ส่ง ${orgCount - submittedCh1Orgs} องค์กร${respondedCh1Orgs > submittedCh1Orgs ? ` · Draft ${respondedCh1Orgs - submittedCh1Orgs} องค์กร` : ''}`
+      : 'ไม่มีข้อมูลแบบสำรวจข้อมูลองค์กร';
     
     kpis[2].querySelector('.kpi-val').textContent = fmtNum(submittedWb.length);
     const draftCount = safeSurveyRows.filter((row) => row.is_draft).length;
@@ -239,7 +242,7 @@ function renderProgress(summary) {
   const orgCount = ORG_NAMES.length;
   const respondedCh1 = summary.filter((org) => org.ch1CompletionPct >= 60).length;
   page.querySelector('.page-sub').textContent = `ติดตามความคืบหน้าทุกองค์กร · ส่งครบ ${respondedCh1}/${orgCount} (${fmtNum((respondedCh1 / Math.max(orgCount, 1)) * 100, 1)}%)`;
-  page.querySelector('.info.yellow').textContent = `⚠️ มี ${orgCount - respondedCh1} องค์กรที่ยังไม่ส่ง Ch1 ครบ — หน้านี้ผูกกับข้อมูลจริงจาก hrd_ch1_responses แล้ว`;
+  page.querySelector('.info.yellow').textContent = `⚠️ มี ${orgCount - respondedCh1} องค์กรที่ยังไม่ส่งแบบสำรวจข้อมูลองค์กรครบ — หน้านี้ผูกกับข้อมูลจริงจาก hrd_ch1_responses แล้ว`;
   const tbody = page.querySelector('tbody');
   tbody.innerHTML = summary.map((org, index) => {
     const statusCls = org.ch1Count === 0 ? 'br' : (org.ch1CompletionPct >= 60 ? 'bg' : 'bw');

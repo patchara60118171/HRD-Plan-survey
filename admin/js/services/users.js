@@ -153,8 +153,8 @@ function _openUserModal(opts) {
             <label class="perm-row">
               <input type="checkbox" id="um-perm-ch1" checked>
               <div class="perm-info">
-                <div class="perm-name">📝 ดูผล Ch1 — ข้อมูลสุขภาวะองค์กร</div>
-                <div class="perm-desc">เข้าถึงผลสำรวจแบบฟอร์ม Ch1 (ข้อมูลบุคลากรระดับองค์กร)</div>
+                <div class="perm-name">📝 ดูผลแบบสำรวจข้อมูลองค์กร — ข้อมูลสุขภาวะองค์กร</div>
+                <div class="perm-desc">เข้าถึงผลสำรวจแบบฟอร์มแบบสำรวจข้อมูลองค์กร (ข้อมูลบุคลากรระดับองค์กร)</div>
               </div>
             </label>
             <label class="perm-row">

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>PDF รายงาน CH1 — HRD Plan Survey</title>
+<title>PDF รายงานแบบสำรวจข้อมูลองค์กร — HRD Plan Survey</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'IBM Plex Sans Thai Looped','Sarabun',sans-serif;background:#F8FAFC;color:#1e293b;font-size:15px}
@@ -120,7 +120,7 @@ body{font-family:'IBM Plex Sans Thai Looped','Sarabun',sans-serif;background:#F8
 
 <div class="topbar no-print">
   <div class="topbar-main">
-    <h1>📄 PDF รายงาน CH1</h1>
+    <h1>📄 PDF รายงานแบบสำรวจข้อมูลองค์กร</h1>
     <div class="topbar-meta">
       <span class="org-badge" id="org-name-badge">กำลังโหลด...</span>
       <span class="status-badge" id="status-badge" style="display:none"></span>
@@ -140,7 +140,7 @@ body{font-family:'IBM Plex Sans Thai Looped','Sarabun',sans-serif;background:#F8
     <div class="pdf-report-header">
       <div>
         <div class="pdf-title">🏛️ รายงานสุขภาวะองค์กร — บทที่ 1</div>
-        <div class="pdf-subtitle">แบบสรุปข้อมูลองค์กร (HRD CH1) | รอบ 2569</div>
+        <div class="pdf-subtitle">แบบสรุปข้อมูลองค์กร (แบบสำรวจข้อมูลองค์กร) | รอบ 2569</div>
       </div>
       <div class="pdf-report-header-right" id="print-meta"></div>
     </div>
@@ -283,7 +283,7 @@ async function init() {
     ]);
   } catch(e) { showError('โหลดข้อมูลไม่สำเร็จ: ' + e.message); return; }
 
-  if (!responseData) { showError('ไม่พบข้อมูล CH1 สำหรับองค์กรนี้'); return; }
+  if (!responseData) { showError('ไม่พบข้อมูลแบบสำรวจข้อมูลองค์กรสำหรับองค์กรนี้'); return; }
 
   renderPage(targetOrg);
 }

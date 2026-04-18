@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Preview CH1 — HRD Plan Survey</title>
+<title>Preview แบบสำรวจข้อมูลองค์กร — HRD Plan Survey</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'IBM Plex Sans Thai Looped','Sarabun',sans-serif;background:#F8FAFC;color:#1e293b;font-size:15px}
@@ -78,7 +78,7 @@ body{font-family:'IBM Plex Sans Thai Looped','Sarabun',sans-serif;background:#F8
 
 <div class="topbar">
   <div class="topbar-main">
-    <h1>👁️ Preview CH1</h1>
+    <h1>👁️ Preview แบบสำรวจข้อมูลองค์กร</h1>
     <div class="topbar-meta">
       <span class="org-badge" id="org-name-badge">กำลังโหลด...</span>
       <span class="status-badge" id="status-badge" style="display:none"></span>
@@ -196,7 +196,7 @@ async function init(){
   if(!targetOrg){showError('ไม่พบรหัสองค์กร');return}
   try{[schema,responseData]=await Promise.all([FormSchema.loadFormSchema('ch1'),loadResponse(targetOrg)])}
   catch(e){showError('โหลดข้อมูลไม่สำเร็จ: '+e.message);return}
-  if(!responseData){showError('ไม่พบข้อมูล CH1 สำหรับองค์กรนี้');return}
+  if(!responseData){showError('ไม่พบข้อมูลแบบสำรวจข้อมูลองค์กรสำหรับองค์กรนี้');return}
   renderPage(targetOrg);
 }
 
@@ -412,7 +412,7 @@ function downloadPreviewAsDoc(){
   const fileName = `${sanitizeFilePart(orgName)}_ch1_preview_${datePart}.doc`;
 
   const docHtml = `<!DOCTYPE html>
-<html lang="th"><head><meta charset="UTF-8"><title>CH1 Preview</title>
+<html lang="th"><head><meta charset="UTF-8"><title>แบบสำรวจข้อมูลองค์กร Preview</title>
 <style>${styleText}
 /* ── Docs export overrides ── */
 *,body,table,th,td,div,span,p,h1,h2,h3,h4,h5,h6,input,textarea,select,button{

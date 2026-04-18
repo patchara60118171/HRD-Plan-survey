@@ -2,7 +2,7 @@
 
 const FORM_CONFIG_SCHEMAS = {
   ch1: {
-    label: 'ฟอร์ม Ch1 (ข้อมูลองค์กร)',
+    label: 'ฟอร์มแบบสำรวจข้อมูลองค์กร',
     sections: [
       { key: 'general', label: '🏠 ทั่วไป', fields: [
         { key: 'main_title', label: 'ชื่อฟอร์มหลัก', default: 'แบบสำรวจข้อมูลเพื่อจัดทำแผนการพัฒนาองค์กร สุขภาวะข้าราชการพลเรือน' },

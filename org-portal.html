@@ -519,7 +519,7 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
                 </div>
               </div>
             </div>
-            <iframe id="ch1-inline-frame" class="embed-frame" title="CH1 Form"></iframe>
+            <iframe id="ch1-inline-frame" class="embed-frame" title="แบบสำรวจข้อมูลองค์กร Form"></iframe>
           </div>
         </div>
 
@@ -1210,14 +1210,14 @@ window.addEventListener('message', async (event) => {
 
   if (payload.type === 'saved') {
     await refreshCh1Section();
-    showToast(payload.message || 'บันทึกข้อมูล CH1 แล้ว', 'success');
+    showToast(payload.message || 'บันทึกข้อมูลแบบสำรวจข้อมูลองค์กรแล้ว', 'success');
   }
 
   if (payload.type === 'deleted') {
     const frame = document.getElementById('ch1-inline-frame');
     if (frame) frame.src = 'about:blank';
     await refreshCh1Section();
-    showToast(payload.message || 'ลบข้อมูล CH1 แล้ว', 'success');
+    showToast(payload.message || 'ลบข้อมูลแบบสำรวจข้อมูลองค์กรแล้ว', 'success');
   }
 });
 
@@ -1358,10 +1358,10 @@ async function initPortal() {
       const summaryEl = document.getElementById('ch1-summary');
       const windowInfo = document.getElementById('ch1-window-info');
       const actionsEl = document.getElementById('ch1-actions');
-      if (homeCh1) homeCh1.innerHTML = '<div class="info-box yellow">โหลดข้อมูล CH1 ไม่สำเร็จ กรุณาลองรีเฟรชอีกครั้ง</div>';
+      if (homeCh1) homeCh1.innerHTML = '<div class="info-box yellow">โหลดข้อมูลแบบสำรวจข้อมูลองค์กรไม่สำเร็จ กรุณาลองรีเฟรชอีกครั้ง</div>';
       // ch1-status-badge was removed with welcome bar
       if (summaryEl) summaryEl.style.display = 'none';
-      if (windowInfo) windowInfo.innerHTML = '<div class="ch1-strip yellow">ระบบดึงข้อมูล CH1 ไม่สำเร็จชั่วคราว</div>';
+      if (windowInfo) windowInfo.innerHTML = '<div class="ch1-strip yellow">ระบบดึงข้อมูลแบบสำรวจข้อมูลองค์กรไม่สำเร็จชั่วคราว</div>';
       if (actionsEl) actionsEl.innerHTML = '';
     }
 
@@ -1458,7 +1458,7 @@ async function loadCh1Data() {
 
   const homeCh1 = document.getElementById('home-ch1-summary');
   if (!ch1Row) {
-    homeCh1.innerHTML = '<div class="info-box blue">ยังไม่มีการกรอกข้อมูล CH1 ขององค์กร</div>';
+    homeCh1.innerHTML = '<div class="info-box blue">ยังไม่มีการกรอกข้อมูลแบบสำรวจข้อมูลองค์กรขององค์กร</div>';
   } else {
     homeCh1.innerHTML = `
       <div class="summary-grid" style="grid-template-columns:repeat(2,minmax(0,1fr))">
@@ -1488,7 +1488,7 @@ async function loadCh1Data() {
   const actionsEl = document.getElementById('ch1-actions');
 
   if (!ch1Row) {
-    windowInfo.innerHTML = `<div class="ch1-strip ${windowStatus.open ? 'blue' : 'yellow'}">${windowStatus.open ? '📝 สามารถเริ่มกรอกแบบสอบถาม CH1 ได้' : '⏰ ฟอร์ม CH1 ยังไม่เปิดรับข้อมูล'}</div>`;
+    windowInfo.innerHTML = `<div class="ch1-strip ${windowStatus.open ? 'blue' : 'yellow'}">${windowStatus.open ? '📝 สามารถเริ่มกรอกแบบสำรวจข้อมูลองค์กรได้' : '⏰ ฟอร์มแบบสำรวจข้อมูลองค์กรยังไม่เปิดรับข้อมูล'}</div>`;
     actionsEl.innerHTML = `<button class="btn btn-primary" ${windowStatus.open ? '' : 'disabled'} onclick="navigateCh1('new')">✏️ เริ่มกรอกฟอร์ม</button>`;
     document.getElementById('ch1-inline-wrap').style.display = 'none';
     return;
