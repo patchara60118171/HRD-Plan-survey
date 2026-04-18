@@ -1,6 +1,7 @@
 // =============================================
 // Service Worker - Offline Support for Well-being Survey v3.2
 // รองรับการทำงานแบบ Offline และ Sync ข้อมูลเมื่อกลับมออนไลน์
+// v3.7: bump cache for KPI fix - relax status check (submitted_at = submitted)
 // v3.6: bump cache for "Ch1 → แบบสำรวจข้อมูลองค์กร" rename + summarizeOrgs ch1Submitted fix
 // v3.5: bump cache to force pick-up of form-window close check in index.html + app.js
 // v3.4: bump cache version to invalidate stale JS/CSS on production
@@ -8,9 +9,9 @@
 // v3.2: sync orgMap canonical org_codes (dhss, dop, dcy, test-org)
 // =============================================
 
-const CACHE_NAME = 'wellbeing-survey-v3.6';
-const STATIC_CACHE = 'static-v3.6';
-const DATA_CACHE = 'data-v3.6';
+const CACHE_NAME = 'wellbeing-survey-v3.7';
+const STATIC_CACHE = 'static-v3.7';
+const DATA_CACHE = 'data-v3.7';
 
 // ไฟล์ที่ต้อง Cache สำหรับ Offline
 const STATIC_ASSETS = [

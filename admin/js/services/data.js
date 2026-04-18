@@ -445,9 +445,15 @@ function summarizeOrgs() {
 
     org.ch1Count += 1;
     const status = String(row.status || row.form_data?.status || '').toLowerCase();
-    const isSubmitted = status === 'submitted' || (!status && row.submitted_at);
+    // If submitted_at exists, count as submitted regardless of status value
+    const isSubmitted = status === 'submitted' || row.submitted_at;
     if (isSubmitted) org.ch1Submitted += 1;
     else org.ch1Draft += 1;
+
+    // Debug: log first few rows to see status values
+    if (org.ch1Count <= 3) {
+      console.log(`[summarizeOrgs] Row for ${resolvedName}: status="${status}", submitted_at=${row.submitted_at}, isSubmitted=${isSubmitted}`);
+    }
 
     if (org.typeOfficial === null) {
       const v = row.form_data?.type_official ?? row.type_official;
