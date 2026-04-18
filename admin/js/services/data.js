@@ -30,9 +30,8 @@ const CH1_FULL_FIELDS = [
   'id', 'org_code', 'organization', 'status',
   'created_at', 'last_saved_at', 'submitted_at',
   'form_version', 'respondent_email',
-  'total_personnel', 'total_staff', 'form_completion',
-  'ncd_ratio_pct', 'mental_burnout', 'engagement_score', 'type_official',
-  'form_data'
+  'total_staff',
+  'ncd_ratio_pct', 'mental_burnout', 'engagement_score', 'type_official'
 ].join(',');
 
 function getOrgCatalog() {
