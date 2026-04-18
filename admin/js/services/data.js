@@ -31,7 +31,10 @@ const CH1_FULL_FIELDS = [
   'created_at', 'last_saved_at', 'submitted_at',
   'form_version', 'respondent_email',
   'total_staff',
-  'ncd_ratio_pct', 'mental_burnout', 'engagement_score', 'type_official'
+  'ncd_ratio_pct', 'mental_burnout', 'engagement_score', 'type_official',
+  'age_u30', 'age_31_40', 'age_41_50', 'age_51_60',
+  'service_u1', 'service_1_5', 'service_6_10', 'service_11_15', 'service_16_20', 'service_21_25', 'service_26_30', 'service_over30',
+  'type_employee', 'type_contract', 'type_other'
 ].join(',');
 
 function getOrgCatalog() {
