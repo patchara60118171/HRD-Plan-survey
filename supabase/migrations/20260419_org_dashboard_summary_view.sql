@@ -18,9 +18,14 @@
 --   migration can refine this with a computed PHQ-9 column once the
 --   raw_responses schema stabilises.
 --
---   The view is `SECURITY INVOKER` (default) so existing RLS on the
---   underlying tables still applies; org_hr users will therefore only
---   see their own organization's aggregates.
+--   The view is explicitly set to `security_invoker = true` (see ALTER VIEW
+--   at the bottom) so existing RLS on the underlying tables still applies;
+--   org_hr users will therefore only see their own organization's aggregates.
+--
+--   IMPORTANT: Supabase/Postgres views default to SECURITY DEFINER behaviour
+--   (they execute with the privileges of the view owner, bypassing the caller's
+--   RLS). We must enforce security_invoker or the dashboard will leak
+--   cross-organization aggregates to org_hr users.
 -- =============================================
 
 CREATE OR REPLACE VIEW public.v_organization_dashboard_summary AS
@@ -62,8 +67,12 @@ FROM survey_agg s
 FULL OUTER JOIN ch1_agg c
     ON c.organization = s.organization;
 
+-- Enforce RLS of the querying user (NOT the view owner).
+-- Without this, org_hr would see aggregates for ALL organizations.
+ALTER VIEW public.v_organization_dashboard_summary SET (security_invoker = true);
+
 COMMENT ON VIEW public.v_organization_dashboard_summary IS
-    'Per-organization KPIs for admin dashboard. Replaces client-side summarizeOrgs() aggregation.';
+    'Per-organization KPIs for admin dashboard. SECURITY INVOKER: RLS on survey_responses / hrd_ch1_responses is enforced against the querying user, so org_hr sees only their own organization.';
 
 -- Allow anonymous & authenticated clients to SELECT from the view.
 -- Underlying RLS on survey_responses / hrd_ch1_responses still applies.
