@@ -21,6 +21,8 @@ const ADMIN_CANONICAL_ORGS = [
 const ADMIN_CANONICAL_ORG_CODES = new Set(ADMIN_CANONICAL_ORGS.map((org) => org.code));
 const ADMIN_CANONICAL_ORG_NAMES = new Set(ADMIN_CANONICAL_ORGS.map((org) => org.name));
 const SURVEY_SELECT_FIELDS = 'id,email,name,title,organization,gender,age,org_type,job,job_duration,bmi,bmi_category,is_draft,submitted_at,timestamp,tmhi_score,raw_responses';
+// Light fields for first-paint: skip heavy form_data JSONB. form_data is filled in the extras phase.
+const CH1_LITE_FIELDS = 'id,org_code,organization,status,created_at,updated_at,submitted_at,form_version';
 
 function getOrgCatalog() {
   const profileMap = new Map(
@@ -130,116 +132,171 @@ async function fetchAllSurveyResponses() {
   return { data: rows, error: null };
 }
 
-async function loadBackend(retryCount = 0) {
-  const maxRetries = 2;
-  const TIMEOUT_MS = 15000;
+// ────────────────────────────────────────────────────────────────────────
+// Progressive loading:
+//   loadBackendCore()   → fast, enough to paint the dashboard (KPIs + trend)
+//   loadBackendExtras() → heavy (ch1.form_data, org_form_links, credentials)
+//   loadBackend()       → legacy wrapper: runs core then extras (for refresh)
+// ────────────────────────────────────────────────────────────────────────
 
-  function withTimeout(promise) {
-    return Promise.race([
-      promise,
-      new Promise((_, reject) => setTimeout(() => reject(new Error('หมดเวลาเชื่อมต่อ (15s)')), TIMEOUT_MS)),
-    ]);
-  }
-  
+const _LOAD_TIMEOUT_MS = 10000;
+const _LOAD_MAX_RETRIES = 1;
+
+function _withTimeout(promise, ms = _LOAD_TIMEOUT_MS, label = 'เชื่อมต่อ') {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(
+      () => reject(new Error(`หมดเวลา${label} (${Math.round(ms/1000)}s)`)),
+      ms
+    )),
+  ]);
+}
+
+// Exclude test/sandbox orgs from all admin calculations and displays
+function _isTestOrgRow(row) {
+  const code = (row.org_code || row.form_data?.org_code || '').toLowerCase();
+  const name = (row.organization || row.org_name || row.org_name_th || row.agency_name || row.form_data?.agency_name || row.form_data?.organization || row.form_data?.org_name || '');
+  return code === 'test-org' || name.includes('ทดสอบระบบ');
+}
+
+// Internal flags to track phase completion
+state._coreLoaded = false;
+state._extrasLoaded = false;
+
+async function loadBackendCore(retryCount = 0) {
   try {
-    const [surveyRes, ch1Res, linksRes, usersRows, orgRows, orgHrCredRows] = await withTimeout(Promise.all([
+    // Fire the 4 lightweight queries in parallel.
+    // Ch1 is fetched WITHOUT form_data (JSONB blob) for speed — full ch1 comes in extras.
+    const [surveyRes, ch1LiteRes, usersRows, orgRows] = await _withTimeout(Promise.all([
       fetchAllSurveyResponses(),
-      sb.from('hrd_ch1_responses').select('*'),
-      sb.from('org_form_links').select('*'),
+      sb.from('hrd_ch1_responses').select(CH1_LITE_FIELDS),
       fetchAdminUserRoles(),
       fetchOrganizations(),
-      fetchOrgHrCredentials(),
     ]));
 
-    // Check for critical errors
-    const criticalErrors = [];
-    if (surveyRes.error && !surveyRes.data?.length) {
-      criticalErrors.push('survey_responses: ' + surveyRes.error.message);
-    }
-    if (ch1Res.error && !ch1Res.data?.length) {
-      criticalErrors.push('hrd_ch1_responses: ' + ch1Res.error.message);
-    }
-    if (usersRows === null || usersRows === undefined) {
-      criticalErrors.push('users: ไม่สามารถโหลดข้อมูลผู้ใช้ได้');
-    }
-
-    // If critical errors exist and we haven't exceeded retries, try again
-    if (criticalErrors.length > 0 && retryCount < maxRetries) {
-      console.warn(`loadBackend: พบข้อผิดพลาด (${criticalErrors.join(', ')}), ลองใหม่ครั้งที่ ${retryCount + 1}/${maxRetries}`);
-      await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1))); // Wait 1s, 2s
-      return loadBackend(retryCount + 1);
-    }
-
-    // Log warnings but don't fail
-    if (surveyRes.error) console.warn('loadBackend survey_responses:', surveyRes.error.message);
-    if (ch1Res.error) console.warn('loadBackend hrd_ch1_responses:', ch1Res.error.message);
-
-    // Exclude test/sandbox orgs from all admin calculations and displays
-    const isTestOrgRow = (row) => {
-      const code = (row.org_code || row.form_data?.org_code || '').toLowerCase();
-      const name = (row.organization || row.org_name || row.org_name_th || row.agency_name || row.form_data?.agency_name || row.form_data?.organization || row.form_data?.org_name || '');
-      return code === 'test-org' || name.includes('ทดสอบระบบ');
-    };
+    if (surveyRes.error) console.warn('loadBackendCore survey_responses:', surveyRes.error.message);
+    if (ch1LiteRes.error) console.warn('loadBackendCore hrd_ch1_responses:', ch1LiteRes.error.message);
 
     state.surveyRows = (surveyRes.data || [])
-      .filter(row => !isTestOrgRow(row))
+      .filter((row) => !_isTestOrgRow(row))
       .map(normalizeSurveyRow)
       .sort((a, b) => new Date(getRowDate(b) || 0) - new Date(getRowDate(a) || 0));
-    
-    state.ch1Rows = (ch1Res.data || [])
-      .filter(row => !isTestOrgRow(row))
+
+    state.ch1Rows = (ch1LiteRes.data || [])
+      .filter((row) => !_isTestOrgRow(row))
       .sort((a, b) => new Date(getRowDate(b) || 0) - new Date(getRowDate(a) || 0));
-    state.linkRows = linksRes.error ? [] : (linksRes.data || []);
+
     state.userRows = usersRows || [];
-    state.orgHrCredentials = orgHrCredRows || [];
     state.orgProfiles = (orgRows || []).filter((row) => {
       const code = String(row.org_code || '').toLowerCase();
       const name = row.org_name_th || row.display_name || '';
       return ADMIN_CANONICAL_ORG_CODES.has(code) || ADMIN_CANONICAL_ORG_NAMES.has(name);
     });
-    
+
     refreshOrgDerivedState();
     scopeRowsForCurrentUser();
     refreshOrgDerivedState();
-    
-    // Update status indicator
+
+    state._coreLoaded = true;
+
     const statusEl = document.getElementById('connection-status');
     if (statusEl) {
-      statusEl.textContent = 'เชื่อมต่อสำเร็จ';
-      statusEl.style.color = 'var(--A)';
+      statusEl.textContent = 'กำลังโหลดข้อมูลเพิ่มเติม...';
+      statusEl.style.color = 'var(--tx2)';
     }
-    
+
+    return { loaded: true };
   } catch (error) {
-    console.error('loadBackend error:', error);
-    
-    if (retryCount < maxRetries) {
-      console.warn(`loadBackend: ข้อผิดพลาดทั่วไป, ลองใหม่ครั้งที่ ${retryCount + 1}/${maxRetries}`);
-      await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1)));
-      return loadBackend(retryCount + 1);
+    console.error('loadBackendCore error:', error);
+
+    if (retryCount < _LOAD_MAX_RETRIES) {
+      console.warn(`loadBackendCore: ลองใหม่ครั้งที่ ${retryCount + 1}/${_LOAD_MAX_RETRIES}`);
+      await new Promise((resolve) => setTimeout(resolve, 800));
+      return loadBackendCore(retryCount + 1);
     }
-    
-    // Update status indicator
+
     const statusEl = document.getElementById('connection-status');
     if (statusEl) {
       statusEl.textContent = 'เชื่อมต่อล้มเหลว';
       statusEl.style.color = 'var(--D)';
     }
-    
-    // Still populate empty state to prevent crashes - ไม่ throw error ออกไป
-    state.surveyRows = [];
-    state.ch1Rows = [];
-    state.linkRows = [];
-    state.userRows = [];
-    state.orgHrCredentials = [];
-    state.orgProfiles = [];
+
+    // Populate empty state to prevent crashes
+    state.surveyRows = state.surveyRows || [];
+    state.ch1Rows = state.ch1Rows || [];
+    state.userRows = state.userRows || [];
+    state.orgProfiles = state.orgProfiles || [];
+    state.linkRows = state.linkRows || [];
+    state.orgHrCredentials = state.orgHrCredentials || [];
     refreshOrgDerivedState();
-    
-    // แสดง error ใน console แต่ไม่ throw เพื่อให้ระบบทำงานต่อได้
-    console.warn('loadBackend: โหลดข้อมูลไม่สำเร็จหลังจากลองซ้ำ ' + maxRetries + ' ครั้ง แต่ระบบจะยังทำงานต่อด้วยข้อมูลว่าง');
-    
-    // คืนค่า error info แต่ไม่ throw
+
     return { error: error.message || 'Unknown error', loaded: false };
   }
+}
+
+async function loadBackendExtras(retryCount = 0) {
+  try {
+    // Heavier queries: full ch1 (with form_data), org_form_links, org_hr_credentials
+    const [ch1FullRes, linksRes, orgHrCredRows] = await _withTimeout(Promise.all([
+      sb.from('hrd_ch1_responses').select('*'),
+      sb.from('org_form_links').select('*'),
+      fetchOrgHrCredentials(),
+    ]), 15000, 'โหลดข้อมูลเพิ่มเติม');
+
+    if (ch1FullRes.error) console.warn('loadBackendExtras hrd_ch1_responses:', ch1FullRes.error.message);
+    if (linksRes.error) console.warn('loadBackendExtras org_form_links:', linksRes.error.message);
+
+    // Replace ch1Rows with the full rows (including form_data) so ch1 pages work properly.
+    state.ch1Rows = (ch1FullRes.data || [])
+      .filter((row) => !_isTestOrgRow(row))
+      .sort((a, b) => new Date(getRowDate(b) || 0) - new Date(getRowDate(a) || 0));
+
+    state.linkRows = linksRes.error ? [] : (linksRes.data || []);
+    state.orgHrCredentials = orgHrCredRows || [];
+
+    scopeRowsForCurrentUser();
+    refreshOrgDerivedState();
+
+    state._extrasLoaded = true;
+
+    const statusEl = document.getElementById('connection-status');
+    if (statusEl) {
+      statusEl.textContent = 'เชื่อมต่อสำเร็จ';
+      statusEl.style.color = 'var(--A)';
+    }
+
+    return { loaded: true };
+  } catch (error) {
+    console.error('loadBackendExtras error:', error);
+
+    if (retryCount < _LOAD_MAX_RETRIES) {
+      console.warn(`loadBackendExtras: ลองใหม่ครั้งที่ ${retryCount + 1}/${_LOAD_MAX_RETRIES}`);
+      await new Promise((resolve) => setTimeout(resolve, 800));
+      return loadBackendExtras(retryCount + 1);
+    }
+
+    const statusEl = document.getElementById('connection-status');
+    if (statusEl) {
+      statusEl.textContent = 'เชื่อมต่อบางส่วน';
+      statusEl.style.color = 'var(--W, #C08F2A)';
+    }
+
+    // Keep empty collections so pages don't crash
+    state.linkRows = state.linkRows || [];
+    state.orgHrCredentials = state.orgHrCredentials || [];
+
+    return { error: error.message || 'Unknown error', loaded: false };
+  }
+}
+
+// Legacy wrapper: preserves the original contract (refreshData, manual reload).
+// Runs core then extras sequentially and returns a combined result.
+async function loadBackend() {
+  const coreRes = await loadBackendCore();
+  if (coreRes && coreRes.error) return coreRes;
+  const extrasRes = await loadBackendExtras();
+  if (extrasRes && extrasRes.error) return extrasRes;
+  return { loaded: true };
 }
 
 function summarizeOrgs() {

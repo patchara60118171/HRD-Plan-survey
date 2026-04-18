@@ -138,39 +138,7 @@ function filterAuditLog() {
   });
 }
 
-// ─── Compare Page Helpers ─────────────────────────────────────────────────────
-
-function removeCompareChip(el) {
-  el.remove();
-}
-
-function addCompareOrg() {
-  const sel = document.getElementById('compare-add-select');
-  if (!sel) return;
-  sel.innerHTML = `<option value="">— เลือก —</option>${ORG_NAMES.filter((name) => {
-    const chips = [...document.querySelectorAll('#compare-chips .badge[data-org]')];
-    return !chips.some((chip) => chip.dataset.org === name);
-  }).map((name) => `<option value="${esc(name)}">${esc(name)}</option>`).join('')}`;
-  sel.style.display = sel.style.display === 'none' ? 'inline-block' : 'none';
-}
-
-function confirmAddCompare(sel) {
-  const name = sel.value;
-  if (!name) return;
-  const chips = document.getElementById('compare-chips');
-  const existing = [...chips.querySelectorAll('.badge[data-org]')];
-  if (existing.length >= 5) { showToast('เปรียบเทียบได้สูงสุด 5 องค์กร', 'warn'); sel.value = ''; return; }
-  if (existing.some((c) => c.dataset.org === name)) { showToast('องค์กรนี้อยู่ในรายการแล้ว', 'warn'); sel.value = ''; return; }
-  const chip = document.createElement('span');
-  chip.className = 'badge bb';
-  chip.style.cssText = 'padding:5px 10px;font-size:12px;cursor:pointer';
-  chip.dataset.org = name;
-  chip.textContent = name + ' ✕';
-  chip.onclick = () => chip.remove();
-  chips.insertBefore(chip, chips.querySelector('button'));
-  sel.value = '';
-  sel.style.display = 'none';
-}
+// Compare page helpers moved to admin/js/pages/compare.js
 
 // ─── Form Editor (stubs — full impl TODO: move from admin.html ~4594–4826) ───
 

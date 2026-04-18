@@ -17,36 +17,32 @@ function renderOrgs(summary) {
   const table = document.querySelector('#org-table tbody');
   if (!table) return;
   if (summary.length === 0) {
-    table.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--tx3);padding:24px">ยังไม่มีข้อมูลองค์กร</td></tr>';
+    table.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--tx3);padding:24px">ยังไม่มีข้อมูลองค์กร</td></tr>';
     return;
   }
   table.innerHTML = summary.map((org) => {
-    const ch1Status = org.ch1Count === 0 ? 'ยังไม่ได้ส่ง' : (org.ch1CompletionPct >= 60 ? 'ส่งแล้ว' : 'ยังไม่เรียบร้อย');
-    const ch1Cls = org.ch1Count === 0 ? 'br' : (org.ch1CompletionPct >= 60 ? 'bg' : 'bw');
     const profile = state.orgProfiles.find((p) => p.org_name_th === org.name);
     const orgId = profile?.id || null;
-    const showDash = profile?.show_in_dashboard !== false;
-    const sarabanEmail = org.email || profile?.settings?.saraban_email || profile?.contact_email || '—';
-    const coordinatorName = org.contact || profile?.settings?.coordinator_name || '—';
+    const sarabanEmail = org.email || profile?.settings?.saraban_email || profile?.contact_email || '';
+    const coordinatorName = org.contact || profile?.settings?.coordinator_name || '';
+    const coordinatorPosition = org.contactRole || profile?.settings?.coordinator_position || '';
+    const coordinatorContact = org.contactPhone || profile?.settings?.coordinator_contact_line || '';
     const coordinatorEmail = org.contactEmail || profile?.settings?.coordinator_email || profile?.contact_email || '';
-    const coordinatorDisplay = coordinatorEmail && coordinatorEmail !== '—'
-      ? `${coordinatorName}<div style="font-size:11px;color:var(--tx3);margin-top:3px">${esc(coordinatorEmail)}</div>`
-      : coordinatorName;
+
+    // Multi-line coordinator cell: name / position / contact / email
+    const lines = [];
+    if (coordinatorName) lines.push(`<div style="font-weight:600">${esc(coordinatorName)}</div>`);
+    if (coordinatorPosition) lines.push(`<div style="font-size:11px;color:var(--tx2);margin-top:2px">${esc(coordinatorPosition)}</div>`);
+    if (coordinatorContact) lines.push(`<div style="font-size:11px;color:var(--tx3);margin-top:2px">📞 ${esc(coordinatorContact)}</div>`);
+    if (coordinatorEmail) lines.push(`<div style="font-size:11px;margin-top:2px"><a href="mailto:${esc(coordinatorEmail)}" style="color:var(--A)">${esc(coordinatorEmail)}</a></div>`);
+    const coordinatorDisplay = lines.length ? lines.join('') : '<span style="color:var(--tx3)">—</span>';
+
     return `<tr>
       <td>${esc(org.name)}</td>
       <td>${esc(org.code || '—')}</td>
       <td>${esc(org.ministry || '—')}</td>
-      <td>${sarabanEmail !== '—' ? `<a href="mailto:${esc(sarabanEmail)}" style="color:var(--A)">${esc(sarabanEmail)}</a>` : '—'}</td>
+      <td>${sarabanEmail ? `<a href="mailto:${esc(sarabanEmail)}" style="color:var(--A)">${esc(sarabanEmail)}</a>` : '—'}</td>
       <td>${coordinatorDisplay}</td>
-      <td><span class="badge ${ch1Cls}">${ch1Status}</span></td>
-      <td>${fmtNum(org.wellbeingSubmitted)}</td>
-      <td>${fmtDate(org.latestCh1 || org.latestWb)}</td>
-      <td style="text-align:center">
-        <label class="tgl" title="แสดงใน Dashboard">
-          <input type="checkbox" ${showDash ? 'checked' : ''} ${orgId ? `onchange="toggleOrgDash('${orgId}',${showDash})"` : 'disabled'}>
-          <div class="tgl-s"></div>
-        </label>
-      </td>
       <td class="td-act">
         <button class="btn b-blue" onclick="showOrgDetail('${esc(org.name)}')">✏️ จัดการ</button>
         ${orgId ? `<button class="btn b-red" onclick="deleteOrg('${orgId}','${esc(org.name)}')">🗑️</button>` : ''}

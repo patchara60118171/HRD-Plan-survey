@@ -24,7 +24,6 @@ async function refreshData() {
   renderDashboard(summary);
   renderProgress(summary);
   renderOrgs(summary);
-  renderOrgCoordinators();
   renderCh1(summary);
   renderCh1Summary();
   renderWellbeingControl(summary);
@@ -34,84 +33,90 @@ async function refreshData() {
   populateOrgSelects();
 }
 
+// Safe wrapper: run a render function, catching errors so one failure won't block others
+function _safeRender(fn, name) {
+  try { fn(); }
+  catch (err) { console.error(`${name} error:`, err); }
+}
+
+// Render pages that need only CORE data (KPIs, basic counts, org list)
+function _renderCorePages(summary) {
+  _safeRender(() => renderDashboard(summary), 'renderDashboard');
+  _safeRender(() => renderOrgs(summary), 'renderOrgs');
+  _safeRender(populateOrgSelects, 'populateOrgSelects');
+}
+
+// Render pages that need EXTRAS (ch1 form_data, links, credentials)
+function _renderExtraPages(summary) {
+  _safeRender(() => renderProgress(summary), 'renderProgress');
+  _safeRender(() => renderCh1(summary), 'renderCh1');
+  _safeRender(renderCh1Summary, 'renderCh1Summary');
+  _safeRender(() => renderWellbeingControl(summary), 'renderWellbeingControl');
+  _safeRender(() => renderWellbeingOrg(summary), 'renderWellbeingOrg');
+  _safeRender(renderWellbeingRaw, 'renderWellbeingRaw');
+  _safeRender(() => _renderAnalyticsCh1(summary), '_renderAnalyticsCh1');
+}
+
 async function init() {
-  // Show refresh button automatically after 10s if still loading
-  const _refreshFallbackTimer = setTimeout(() => {
-    const btnRefresh = document.getElementById('btn-refresh-data');
-    const statusEl = document.getElementById('connection-status');
-    if (btnRefresh && statusEl && statusEl.textContent.includes('เชื่อมต่อ')) {
-      statusEl.textContent = 'เชื่อมต่อนานเกินไป';
-      statusEl.style.color = 'var(--D)';
-    }
-  }, 10000);
   try {
     const session = await requireSession();
     if (!session) return;
     _initSession = session;
-    clearTimeout(_refreshFallbackTimer);
-    
-    // Try to load backend data, but don't let failures crash the entire app
-    let loadResult = null;
+
+    // Phase 1: CORE — quick queries → render dashboard FAST
+    // NOTE: renderChrome() must run AFTER loadBackendCore() so that state.userRows
+    // is populated and state.myRole resolves correctly (non-locked emails depend
+    // on the admin_user_roles DB table). Running renderChrome before core would
+    // default every session to 'viewer' and hide role-gated UI.
+    let coreResult = null;
     try {
-      loadResult = await loadBackend();
-    } catch (loadErr) {
-      console.error('loadBackend threw exception:', loadErr);
-      loadResult = { error: loadErr.message || 'Unknown error', loaded: false };
+      coreResult = await loadBackendCore();
+    } catch (err) {
+      console.error('loadBackendCore threw:', err);
+      coreResult = { error: err.message || 'Unknown error', loaded: false };
     }
-    
-    if (loadResult && loadResult.error) {
-      console.error('Backend loading failed:', loadResult.error);
+
+    if (coreResult && coreResult.error) {
       const btnRefresh = document.getElementById('btn-refresh-data');
       if (btnRefresh) btnRefresh.style.display = '';
-      // Show error but continue with empty state
-      showToast('โหลดข้อมูลไม่สำเร็จ: ' + loadResult.error, 'error', 5000);
+      showToast('โหลดข้อมูลหลักไม่สำเร็จ: ' + coreResult.error, 'error', 5000);
     }
-    
-    // Always render chrome first so user sees their info
-    try {
-      renderChrome();
-    } catch (chromeErr) {
-      console.error('renderChrome error:', chromeErr);
-    }
-    
-    // Always calculate summary and render all pages, even with empty data
+
+    // Render chrome now that userRows is available → role-gated UI resolves correctly
+    _safeRender(renderChrome, 'renderChrome');
+
+    // Compute summary (may be partial) and render core pages NOW
     let summary = [];
-    try {
-      summary = summarizeOrgs();
-    } catch (summaryErr) {
-      console.error('summarizeOrgs error:', summaryErr);
-      summary = [];
-    }
-    
-    // Render all pages with individual error handling
-    const renderFns = [
-      { fn: () => renderDashboard(summary), name: 'renderDashboard' },
-      { fn: () => renderProgress(summary), name: 'renderProgress' },
-      { fn: () => renderOrgs(summary), name: 'renderOrgs' },
-      { fn: renderOrgCoordinators, name: 'renderOrgCoordinators' },
-      { fn: () => renderCh1(summary), name: 'renderCh1' },
-      { fn: renderCh1Summary, name: 'renderCh1Summary' },
-      { fn: () => renderWellbeingControl(summary), name: 'renderWellbeingControl' },
-      { fn: () => renderWellbeingOrg(summary), name: 'renderWellbeingOrg' },
-      { fn: renderWellbeingRaw, name: 'renderWellbeingRaw' },
-      { fn: () => _renderAnalyticsCh1(summary), name: '_renderAnalyticsCh1' },
-      { fn: populateOrgSelects, name: 'populateOrgSelects' },
-    ];
-    
-    for (const { fn, name } of renderFns) {
-      try {
-        fn();
-      } catch (fnErr) {
-        console.error(`${name} error:`, fnErr);
-      }
-    }
-    
+    try { summary = summarizeOrgs(); }
+    catch (e) { console.error('summarizeOrgs (core) error:', e); summary = []; }
+    _renderCorePages(summary);
+
+    // Wire up audit export button (one-time)
     const auditExportBtn = document.querySelector('#page-audit .btn.b-gray');
     if (auditExportBtn) auditExportBtn.onclick = exportAuditLog;
-    
+
+    // Phase 2: EXTRAS — heavier queries in background, then re-render pages that need them
+    loadBackendExtras()
+      .then((extrasResult) => {
+        if (extrasResult && extrasResult.error) {
+          console.warn('loadBackendExtras partial:', extrasResult.error);
+          showToast('โหลดข้อมูลเพิ่มเติมไม่ครบ: ' + extrasResult.error, 'warn', 4000);
+        }
+        let summary2 = [];
+        try { summary2 = summarizeOrgs(); }
+        catch (e) { console.error('summarizeOrgs (extras) error:', e); summary2 = summary; }
+        // Re-render dashboard because ch1Count/completion is now accurate with form_data
+        _safeRender(() => renderDashboard(summary2), 'renderDashboard (refresh)');
+        _renderExtraPages(summary2);
+      })
+      .catch((err) => {
+        console.error('loadBackendExtras threw:', err);
+        const statusEl = document.getElementById('connection-status');
+        if (statusEl) { statusEl.textContent = 'เชื่อมต่อบางส่วน'; statusEl.style.color = 'var(--W, #C08F2A)'; }
+      });
+
   } catch (error) {
     console.error('Init error:', error);
-    // Show a more user-friendly error
     const statusEl = document.getElementById('connection-status');
     if (statusEl) { statusEl.textContent = 'โหลดล้มเหลว'; statusEl.style.color = 'var(--D)'; }
     const btnRefresh = document.getElementById('btn-refresh-data');

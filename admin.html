@@ -73,7 +73,6 @@
 
     <div class="nav-group">จัดการข้อมูล</div>
     <div class="nav-item" onclick="go('orgs',this)"><span class="ni">🏛️</span> องค์กรที่เข้าร่วม</div>
-    <div class="nav-item" onclick="go('org-coordinators',this)"><span class="ni">👤</span> ข้อมูลผู้ประสาน</div>
     <div class="nav-item" onclick="go('form-ch1',this)"><span class="ni">📝</span> ฟอร์ม Ch1</div>
     <div class="nav-item" onclick="go('form-wb',this)"><span class="ni">💚</span> Wellbeing Survey</div>
 
@@ -224,31 +223,7 @@
         <div class="tbl-wrap">
           <table id="org-table">
             <thead>
-              <tr><th>ชื่อองค์กร</th><th>รหัสองค์กร</th><th>กระทรวง</th><th>Saraban Email</th><th>ผู้ประสานงาน</th><th>Ch1</th><th>Wellbeing</th><th>ล่าสุด</th><th>แสดงใน Dashboard</th><th>จัดการ</th></tr>
-            </thead>
-            <tbody>
-              <tr><td colspan="10" style="text-align:center;color:var(--tx3);padding:24px">กำลังโหลดข้อมูล...</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <div class="page" id="page-org-coordinators">
-      <div class="page-title">ข้อมูลผู้ประสาน</div>
-      <div class="page-sub">ดึงจาก Supabase ตาราง organizations เพื่อใช้ในระบบ /admin โดยตรง</div>
-      <div class="card">
-        <div class="card-head">
-          <h3>รายการข้อมูลผู้ประสาน</h3>
-          <div class="filter-bar">
-            <input class="si" id="org-coordinator-search" placeholder="🔍 ค้นหาองค์กร / ผู้ประสาน / อีเมล..." oninput="filterOrgCoordinatorTable()">
-            <button class="btn b-gray" onclick="renderOrgCoordinators()">↻ โหลดใหม่</button>
-          </div>
-        </div>
-        <div class="tbl-wrap">
-          <table id="org-coordinator-table">
-            <thead>
-              <tr><th>ชื่อองค์กร</th><th>ผู้ประสาน</th><th>ตำแหน่ง</th><th>เบอร์/Line</th><th>อีเมลผู้ประสาน</th><th>อีเมลองค์กร</th></tr>
+              <tr><th>ชื่อองค์กร</th><th>รหัสองค์กร</th><th>กระทรวง</th><th>Saraban Email</th><th>ผู้ประสานงาน</th><th>จัดการ</th></tr>
             </thead>
             <tbody>
               <tr><td colspan="6" style="text-align:center;color:var(--tx3);padding:24px">กำลังโหลดข้อมูล...</td></tr>
@@ -290,7 +265,7 @@
           <div class="card-head">
             <h3>🗂️ Raw Data — ตารางข้อมูลทั้งหมด</h3>
             <div class="filter-bar">
-              <input class="si" id="c1sheet-search" placeholder="🔍 ค้นหา..." oninput="filterCh1Sheet()">
+              <input class="si" id="c1sheet-search" placeholder="🔍 ค้นหา...">
               <select class="sel" id="c1sheet-org" onchange="filterCh1Sheet()"><option value="">ทุกองค์กร</option></select>
               <button class="btn b-gray" onclick="exportCh1All()">📤 Export .xlsx</button>
             </div>
@@ -575,10 +550,7 @@
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
         <div class="card" style="margin-bottom:0">
-          <div class="card-head">
-            <h3>🍩 สัดส่วนประเภทบุคลากร (ภาพรวม)</h3>
-            <span class="section-badge" id="ch1sum-type-total-badge">รวม — คน</span>
-          </div>
+          <div class="card-head"><h3>🍩 สัดส่วนประเภทบุคลากร (ภาพรวม)</h3></div>
           <div class="card-body" style="display:flex;align-items:center;gap:24px;flex-wrap:wrap">
             <div style="flex-shrink:0;position:relative;width:110px;height:110px">
               <svg viewBox="0 0 110 110" style="width:110px;height:110px;transform:rotate(-90deg)">
@@ -735,30 +707,66 @@
     <!-- ==================== COMPARE ==================== -->
     <div class="page" id="page-compare">
       <div class="page-title">เปรียบเทียบองค์กร</div>
-      <div class="page-sub">วิเคราะห์เปรียบเทียบตัวชี้วัดระหว่างองค์กร</div>
-      <div class="info blue">💡 เลือกองค์กรที่ต้องการเปรียบเทียบ (สูงสุด 5 องค์กร)</div>
-      <div id="compare-chips" style="display:flex;gap:7px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
-        <span class="badge bb" style="padding:5px 10px;font-size:12px" data-org="กรมสุขภาพจิต" onclick="removeCompareChip(this)">กรมสุขภาพจิต ✕</span>
-        <span class="badge bb" style="padding:5px 10px;font-size:12px" data-org="สำนักงาน กพร." onclick="removeCompareChip(this)">สำนักงาน กพร. ✕</span>
-        <span class="badge bb" style="padding:5px 10px;font-size:12px" data-org="กรมวิทยาศาสตร์บริการ" onclick="removeCompareChip(this)">กรมวิทยาศาสตร์บริการ ✕</span>
-        <button class="btn b-gray" onclick="addCompareOrg()">+ เพิ่มองค์กร</button>
-        <select id="compare-add-select" style="display:none" class="sel" onchange="confirmAddCompare(this)"><option value="">— เลือก —</option></select>
-      </div>
-      <div class="card cmp-table">
-        <div class="tbl-wrap">
-          <table>
-            <thead><tr><th style="text-align:left">ตัวชี้วัด</th><th>กรมสุขภาพจิต</th><th>สำนักงาน ก.พ.</th><th>กรมการแพทย์</th><th>เฉลี่ยทุกองค์กร</th></tr></thead>
-            <tbody>
-              <tr><td>บุคลากรทั้งหมด</td><td>1,240</td><td>856</td><td>2,100</td><td>1,578</td></tr>
-              <tr><td>อายุเฉลี่ย (ปี)</td><td class="good">38.2</td><td>41.5</td><td>40.1</td><td>40.1</td></tr>
-              <tr><td>NCD รวม (%)</td><td class="good">10.2%</td><td>11.4%</td><td class="bad">18.1%</td><td>12.4%</td></tr>
-              <tr><td>Burnout (%)</td><td>23%</td><td class="good">18%</td><td class="bad">31%</td><td>24.1%</td></tr>
-              <tr><td>วันลาป่วยเฉลี่ย</td><td>8.2</td><td class="good">6.8</td><td class="bad">9.5</td><td>8.1</td></tr>
-              <tr><td>Engagement Score</td><td class="good">72</td><td>68</td><td>65</td><td>68.3</td></tr>
-              <tr><td>Work-Life Balance</td><td>3.4/5</td><td class="good">3.8/5</td><td class="mid">3.1/5</td><td>3.4/5</td></tr>
-            </tbody>
-          </table>
+      <div class="page-sub">วิเคราะห์เปรียบเทียบตัวชี้วัดระหว่างองค์กร — Benchmark, Radar, Time-series, Deep Dive</div>
+
+      <!-- ── Picker & Presets ───────────────────────────────────────── -->
+      <div class="card" style="margin-bottom:14px">
+        <div class="card-head">
+          <h3>🎯 เลือกองค์กรที่ต้องการเปรียบเทียบ</h3>
+          <span id="cmp-count-label" style="font-size:11px;color:var(--tx3)">0 / 5 องค์กร</span>
         </div>
+        <div style="padding:14px 18px">
+          <div id="cmp-chips" style="display:flex;gap:7px;flex-wrap:wrap;align-items:center;min-height:34px;margin-bottom:10px">
+            <span id="cmp-empty-hint" style="font-size:12px;color:var(--tx3);font-style:italic">ยังไม่ได้เลือกองค์กร · กดปุ่มด้านล่างเพื่อเริ่ม</span>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+            <button class="btn b-solid" onclick="cmpOpenPicker()">+ เพิ่มองค์กร</button>
+            <select id="cmp-add-select" class="sel" style="display:none" onchange="cmpConfirmAdd(this)"><option value="">— เลือก —</option></select>
+            <span style="color:var(--bdr)">│</span>
+            <button class="btn b-gray" onclick="cmpPresetTop()">🔝 Top 5 ตอบเยอะสุด</button>
+            <button class="btn b-gray" onclick="cmpPresetBottom()">⬇️ Bottom 5 ตอบน้อยสุด</button>
+            <button class="btn b-gray" onclick="cmpClear()">🗑️ ล้าง</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Empty state ───────────────────────────────────────────── -->
+      <div id="cmp-empty-state" class="info blue" style="margin-bottom:14px">
+        💡 เลือกองค์กรตั้งแต่ 2 ขึ้นไป (สูงสุด 5) เพื่อเริ่มเปรียบเทียบ — ระบบจะคำนวณตัวชี้วัดจริงจากฐานข้อมูลทันที
+      </div>
+
+      <!-- ── Dynamic content ───────────────────────────────────────── -->
+      <div id="cmp-content" style="display:none">
+        <!-- KPI cards row -->
+        <div id="cmp-kpi" style="margin-bottom:14px"></div>
+
+        <!-- Auto insights -->
+        <div id="cmp-insights" style="margin-bottom:14px"></div>
+
+        <!-- Benchmark table -->
+        <div class="card" style="margin-bottom:14px">
+          <div class="card-head">
+            <h3>📋 Benchmark Table</h3>
+            <span style="font-size:11px;color:var(--tx3)">🟢 ดีกว่าเฉลี่ย · 🟡 ใกล้เคียง · 🔴 แย่กว่า</span>
+          </div>
+          <div class="tbl-wrap">
+            <table id="cmp-benchmark-table">
+              <thead id="cmp-benchmark-thead"></thead>
+              <tbody id="cmp-benchmark-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Placeholder containers for Commit B, C, D -->
+        <div id="cmp-radar" style="margin-bottom:14px"></div>
+        <div id="cmp-heatmap" style="margin-bottom:14px"></div>
+        <div id="cmp-hbar" style="margin-bottom:14px"></div>
+        <div id="cmp-trend" style="margin-bottom:14px"></div>
+        <div id="cmp-demographics" style="margin-bottom:14px"></div>
+        <div id="cmp-ncd" style="margin-bottom:14px"></div>
+        <div id="cmp-hr-matrix" style="margin-bottom:14px"></div>
+        <div id="cmp-gap" style="margin-bottom:14px"></div>
+        <div id="cmp-ranking" style="margin-bottom:14px"></div>
       </div>
     </div>
 
@@ -807,7 +815,7 @@
 <script src="admin/js/services/config.js"></script>
 <script src="admin/js/services/api.js"></script>
 <script src="admin/js/services/utils.js"></script>
-<script src="admin/js/services/data.js"></script>
+<script src="admin/js/services/data.js?v=progressive1"></script>
 <script src="admin/js/services/nav.js?v=2"></script>
 <script src="admin/js/services/auth.js"></script>
 <script src="admin/js/services/export.js"></script>
@@ -816,19 +824,19 @@
 <script src="admin/js/services/forms.js"></script>
 <!-- Sprint 3C — Page modules -->
 <script src="admin/js/pages/dashboard.js?v=3"></script>
-<script src="admin/js/pages/organizations.js"></script>
-<script src="admin/js/pages/org-coordinators.js"></script>
+<script src="admin/js/pages/organizations.js?v=merged"></script>
 <script src="admin/js/pages/ch1.js"></script>
 <script src="admin/js/pages/wellbeing.js"></script>
 <script src="admin/js/pages/settings.js"></script>
 <!-- Org HR Credentials -->
 <script src="admin/js/pages/org-credentials.js"></script>
 <!-- Form Windows (used by Wellbeing page's wb-form-windows-card) -->
-<script src="admin/js/pages/form-windows.js"></script>
+<script src="admin/js/pages/form-windows.js?v=4cols"></script>
 <script src="admin/js/pages/analytics-wb.js?v=2"></script>
+<script src="admin/js/pages/compare.js?v=1"></script>
 
 <!-- ===== App Entry Point (replaces inline script) ===== -->
-<script src="admin/js/app.js"></script>
+<script src="admin/js/app.js?v=progressive2"></script>
 
 </body>
 </html>

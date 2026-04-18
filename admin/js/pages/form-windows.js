@@ -30,8 +30,6 @@ function fwBuildRows(catalog, windows) {
     const w = winMap.get(org.code) || globalWin;
     const isOpen = w ? isWindowOpen(w, now) : true;
     const hasOverride = winMap.has(org.code);
-    const opensVal = w?.opens_at ? toLocalDatetimeInput(w.opens_at) : '';
-    const closesVal = w?.closes_at ? toLocalDatetimeInput(w.closes_at) : '';
     const closedMsg = winMap.has(org.code) ? (winMap.get(org.code).closed_message || '') : '';
     const isTest = org.code === 'test-org';
     const rowStyle = isTest ? 'background:var(--bg2);opacity:.85' : '';
@@ -45,8 +43,6 @@ function fwBuildRows(catalog, windows) {
         <span class="badge ${isOpen ? 'bg' : 'br'}" id="fw-badge-${org.code}">${isOpen ? 'เปิดรับ' : 'ปิดรับ'}</span>
         ${hasOverride ? '<span style="font-size:10px;color:var(--P);margin-left:4px">กำหนดเอง</span>' : '<span style="font-size:10px;color:var(--tx3);margin-left:4px">ค่าเริ่มต้น</span>'}
       </td>
-      <td><input type="datetime-local" class="si fw-opens" data-org="${org.code}" value="${opensVal}" style="width:175px;font-size:12px" onchange="fwSaveDatetime('${org.code}')"></td>
-      <td><input type="datetime-local" class="si fw-closes" data-org="${org.code}" value="${closesVal}" style="width:175px;font-size:12px" onchange="fwSaveDatetime('${org.code}')"></td>
       <td>
         <input type="text" class="si fw-closed-msg" data-org="${org.code}"
           value="${esc(closedMsg)}"
@@ -90,33 +86,6 @@ function isWindowOpen(w, now = new Date()) {
   if (w.opens_at && new Date(w.opens_at) > now) return false;
   if (w.closes_at && new Date(w.closes_at) < now) return false;
   return true;
-}
-
-function toLocalDatetimeInput(isoStr) {
-  if (!isoStr) return '';
-  const d = new Date(isoStr);
-  const pad = n => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-}
-
-async function fwSaveDatetime(orgCode) {
-  const row = document.getElementById(`fw-row-${orgCode}`);
-  if (!row) return;
-  const opensEl = row.querySelector('.fw-opens');
-  const closesEl = row.querySelector('.fw-closes');
-  const opens_at = opensEl?.value ? new Date(opensEl.value).toISOString() : null;
-  const closes_at = closesEl?.value ? new Date(closesEl.value).toISOString() : null;
-  // Get current is_active from badge
-  const badge = document.getElementById(`fw-badge-${orgCode}`);
-  const is_active = badge?.textContent?.includes('เปิด') ?? true;
-  const error = await fwUpsert(orgCode, { opens_at, closes_at, is_active });
-  if (error) { showToast(`บันทึกไม่สำเร็จ: ${error.message}`, 'error'); return; }
-  showToast(`✅ บันทึกวันเวลา ${orgCode} แล้ว`, 'success');
-  const now = new Date();
-  const isOpen = is_active && !(opens_at && new Date(opens_at) > now) && !(closes_at && new Date(closes_at) < now);
-  if (badge) { badge.className = `badge ${isOpen ? 'bg' : 'br'}`; badge.textContent = isOpen ? 'เปิดรับ' : 'ปิดรับ'; }
-  const btn = document.getElementById(`fw-btn-${orgCode}`);
-  if (btn) { btn.className = `btn ${isOpen ? 'b-blue' : 'b-gray'}`; btn.textContent = isOpen ? '✅ เปิดรับ' : '🔒 ปิดรับ'; btn.onclick = () => fwToggle(orgCode, !isOpen); }
 }
 
 async function fwUpsert(orgCode, fields) {
