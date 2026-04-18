@@ -34,7 +34,16 @@ const CH1_FULL_FIELDS = [
   'ncd_ratio_pct', 'mental_burnout', 'engagement_score', 'type_official',
   'age_u30', 'age_31_40', 'age_41_50', 'age_51_60',
   'service_u1', 'service_1_5', 'service_6_10', 'service_11_15', 'service_16_20', 'service_21_25', 'service_26_30', 'service_over30',
-  'type_employee', 'type_contract', 'type_other'
+  'type_employee', 'type_contract', 'type_other',
+  'rate_2564', 'rate_2565', 'rate_2566', 'rate_2567', 'rate_2568',
+  'begin_2564', 'end_2564', 'leave_2564',
+  'begin_2565', 'end_2565', 'leave_2565',
+  'begin_2566', 'end_2566', 'leave_2566',
+  'begin_2567', 'end_2567', 'leave_2567',
+  'begin_2568', 'end_2568', 'leave_2568',
+  'engagement_score_2564', 'engagement_score_2565', 'engagement_score_2566', 'engagement_score_2567', 'engagement_score_2568',
+  'disease_diabetes', 'disease_hypertension', 'disease_cardiovascular', 'disease_kidney', 'disease_obesity',
+  'ncd_count', 'sick_leave_avg', 'clinic_users_per_year'
 ].join(',');
 
 function getOrgCatalog() {
