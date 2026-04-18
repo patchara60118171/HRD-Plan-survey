@@ -801,13 +801,14 @@
             <thead><tr><th>#</th><th>องค์กร</th><th>ชื่อเต็ม</th><th>Email (Username)</th><th>Password</th><th>สถานะ</th><th>จัดการ</th></tr></thead>
             <tbody id="orghr-cred-tbody"><tr><td colspan="7" style="text-align:center;color:var(--tx3);padding:20px">กำลังโหลด...</td></tr></tbody>
           </table>
-        </div>
       </div>
   </div><!-- /content -->
 </div><!-- /main -->
 
 <!-- Production console silencer — must load before any JS that might log -->
 <script src="js/logger.js"></script>
+<!-- Accessibility polyfills: keyboard support for legacy onclick elements -->
+<script src="js/a11y.js" defer></script>
 <!-- CDN: supabase-js moved here from <head> to eliminate render-blocking -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/project-ssot.js"></script>

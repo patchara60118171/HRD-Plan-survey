@@ -1,7 +1,7 @@
 # Project Audit Report — NIDA Wellbeing Survey
 
 **Date:** 2026-04-18
-**Last Update:** 2026-04-18 (Phase 1 fixes applied)
+**Last Update:** 2026-04-19 (Phase 2 fixes applied)
 **Scope:** Whole project
 **Skills applied:** `supabase-postgres-best-practices`, `web-design-guidelines`, `frontend-design`, `ui-ux-pro-max`
 **Skills skipped (not applicable):** `vercel-react-best-practices` (vanilla HTML/JS), `pdf`, `remotion-best-practices`
@@ -12,21 +12,33 @@
 |----|--------|-------|
 | C1 | ⏳ deferred | In-memory cache already exists; date-range filter needs schema + UI work |
 | C2 | ✅ fixed | `admin/js/services/data.js` — introduced `CH1_FULL_FIELDS`, removed `select('*')` |
-| C3 | 🟡 partial | `admin/js/pages/wellbeing.js:275` escaped. `links.js:108-110` inline-onclick quoting flagged for deeper refactor (pass via `data-*` + delegation) |
+| C3 | ✅ fixed | `wellbeing.js:275` escaped; `links.js` inline-onclick fully refactored to `data-*` + delegated handlers (XSS surface removed) |
 | C4 | ✅ fixed | `supabase/migrations/20260418_harden_survey_update_rls.sql` — replaced `survey_update_recent` with draft-only + admin/org_hr policies |
 | H1 | ✅ fixed | `supabase/migrations/20260418_add_perf_indexes.sql` |
 | H2 | ⏳ open | Schema drift — recommend `supabase db dump` → baseline snapshot |
-| H3 | ⏳ open | Server-side aggregation view — design task |
-| H4-H7 | ⏳ open | Accessibility refactor + file split + repo hygiene |
-| M1-M14 | ⏳ open | Most medium items |
+| H3 | ✅ fixed | `supabase/migrations/20260419_org_dashboard_summary_view.sql` — view `v_organization_dashboard_summary` (client switch-over is a follow-up) |
+| H4 | ✅ fixed | `js/a11y.js` — auto-upgrades `[onclick]` divs to `role=button` + `tabindex=0` + Enter/Space keydown; injects `:focus-visible` ring |
+| H5 | ✅ fixed | `js/a11y.js` — backfills `aria-label` on icon-only buttons using their `title` text |
+| H6 | ⏳ open | `admin/js/pages/ch1.js` (114KB) file split — deferred (large mechanical refactor, deserves its own PR) |
+| H7 | ✅ fixed | Dev files moved: `debug-ch1.mjs`→`scripts/dev-tools/`, `clear-*.html`/`force-refresh.html`→`dev-tools/`, SQL one-offs→`supabase/one-off/`, `CHART_DESIGNS_REMAINING.html`→`docs/` |
+| M1 | ⏳ open | `ADMIN_CANONICAL_ORGS` hardcode — needs DB sync verification first |
 | M2 | ✅ fixed | `js/logger.js` — silences `console.log/info/debug` in production |
+| M3 | ⏳ open | Loading skeletons — deferred (design task) |
+| M4 | ✅ existing | `sw.js` already implements cache-first / network-first / SWR strategies |
+| M5 | ✅ partial | `refreshData()` now phased (core→extras) + `_safeRender` wrapping + button disabled during refresh |
+| M6 | 🟡 partial | QR modal in `links.js` now has role=dialog + Esc + focus-trap; other modals still TODO |
+| M7 | ⏳ open | Supabase URL/key env injection — requires Vercel build step |
+| M8 | ⏳ open | Contrast ratio review — design task |
+| M9 | ✅ partial | `_safeRender` wrapping protects per-page render failures in both `init()` and `refreshData()` |
 | M10 | ✅ fixed | Duplicate consent paragraphs removed from `index.html` |
-| L1-L8 | ⏳ open | Polish |
+| M11-M14 | ⏳ open | Low-impact polish |
+| L1-L6, L8 | ⏳ open | Polish |
 | L7 | ✅ fixed | `.vercelignore` — blocks dev HTML / error screenshots / debug scripts |
 
-**Migrations to apply:** deploy these in order to your Supabase project:
-1. `supabase/migrations/20260418_harden_survey_update_rls.sql` (security)
-2. `supabase/migrations/20260418_add_perf_indexes.sql` (performance)
+**Migrations to apply (in order) to your Supabase project:**
+1. `supabase/migrations/20260418_harden_survey_update_rls.sql` (security — C4)
+2. `supabase/migrations/20260418_add_perf_indexes.sql` (performance — H1)
+3. `supabase/migrations/20260419_org_dashboard_summary_view.sql` (aggregation view — H3)
 
 ---
 

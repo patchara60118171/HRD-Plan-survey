@@ -22,13 +22,13 @@ const ADMIN_CANONICAL_ORG_CODES = new Set(ADMIN_CANONICAL_ORGS.map((org) => org.
 const ADMIN_CANONICAL_ORG_NAMES = new Set(ADMIN_CANONICAL_ORGS.map((org) => org.name));
 const SURVEY_SELECT_FIELDS = 'id,email,name,title,organization,gender,age,org_type,job,job_duration,bmi,bmi_category,is_draft,submitted_at,timestamp,tmhi_score,raw_responses';
 // Light fields for first-paint: skip heavy form_data JSONB. form_data is filled in the extras phase.
-const CH1_LITE_FIELDS = 'id,org_code,organization,status,created_at,updated_at,submitted_at,form_version';
+const CH1_LITE_FIELDS = 'id,org_code,organization,status,created_at,last_saved_at,submitted_at,form_version';
 // Full fields for extras phase — explicit list excluding raw_payload (can exceed 2MB per row).
 // If a new column is needed by the admin UI, add it here rather than reverting to '*'.
 // See docs/AUDIT_REPORT_2026-04.md item C2.
 const CH1_FULL_FIELDS = [
   'id', 'org_code', 'organization', 'status',
-  'created_at', 'updated_at', 'submitted_at',
+  'created_at', 'last_saved_at', 'submitted_at',
   'form_version', 'respondent_email',
   'total_personnel', 'total_staff', 'form_completion',
   'ncd_ratio_pct', 'mental_burnout', 'engagement_score', 'type_official',
@@ -290,7 +290,7 @@ async function loadBackendExtras(retryCount = 0) {
     const [ch1FullRes, linksRes, orgHrCredRows] = await _withTimeout(Promise.all([
       sb.from('hrd_ch1_responses')
         .select(CH1_FULL_FIELDS)
-        .order('updated_at', { ascending: false, nullsFirst: false }),
+        .order('submitted_at', { ascending: false, nullsFirst: false }),
       sb.from('org_form_links').select('*'),
       fetchOrgHrCredentials(),
     ]), 15000, 'โหลดข้อมูลเพิ่มเติม');

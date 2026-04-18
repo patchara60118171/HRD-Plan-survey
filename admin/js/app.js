@@ -9,28 +9,44 @@ let _initSession = null;
 async function refreshData() {
   const statusEl = document.getElementById('connection-status');
   const btnRefresh = document.getElementById('btn-refresh-data');
+  if (btnRefresh) { btnRefresh.disabled = true; btnRefresh.style.opacity = '0.6'; }
   if (statusEl) { statusEl.textContent = 'กำลังโหลด...'; statusEl.style.color = 'var(--tx2)'; }
-  if (btnRefresh) btnRefresh.style.display = 'none';
-  
-  const loadResult = await loadBackend();
-  if (loadResult && loadResult.error) {
-    if (statusEl) { statusEl.textContent = 'โหลดไม่สำเร็จ'; statusEl.style.color = 'var(--D)'; }
-    if (btnRefresh) btnRefresh.style.display = '';
-    showError('โหลดข้อมูลไม่สำเร็จ: ' + loadResult.error);
-    return;
+
+  try {
+    // Phase 1: CORE (fast) — refresh dashboard KPIs immediately
+    let coreResult = null;
+    try { coreResult = await loadBackendCore(); }
+    catch (err) { coreResult = { error: err?.message || 'Unknown error', loaded: false }; }
+
+    if (coreResult && coreResult.error) {
+      if (statusEl) { statusEl.textContent = 'โหลดไม่สำเร็จ'; statusEl.style.color = 'var(--D)'; }
+      showToast('โหลดข้อมูลหลักไม่สำเร็จ: ' + coreResult.error, 'error', 5000);
+      return;
+    }
+
+    let summary = [];
+    try { summary = summarizeOrgs(); }
+    catch (e) { console.error('summarizeOrgs (refresh core) error:', e); summary = []; }
+    _renderCorePages(summary);
+
+    // Phase 2: EXTRAS (heavier) — update remaining pages in background
+    loadBackendExtras()
+      .then((extrasResult) => {
+        if (extrasResult && extrasResult.error) {
+          console.warn('refreshData extras partial:', extrasResult.error);
+        }
+        let summary2 = [];
+        try { summary2 = summarizeOrgs(); }
+        catch (e) { console.error('summarizeOrgs (refresh extras) error:', e); summary2 = summary; }
+        _safeRender(() => renderDashboard(summary2), 'renderDashboard (refresh)');
+        _renderExtraPages(summary2);
+      })
+      .catch((err) => {
+        console.error('refreshData extras threw:', err);
+      });
+  } finally {
+    if (btnRefresh) { btnRefresh.disabled = false; btnRefresh.style.opacity = ''; }
   }
-  
-  const summary = summarizeOrgs();
-  renderDashboard(summary);
-  renderProgress(summary);
-  renderOrgs(summary);
-  renderCh1(summary);
-  renderCh1Summary();
-  renderWellbeingControl(summary);
-  renderWellbeingOrg(summary);
-  renderWellbeingRaw();
-  _renderAnalyticsCh1(summary);
-  populateOrgSelects();
 }
 
 // Safe wrapper: run a render function, catching errors so one failure won't block others

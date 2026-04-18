@@ -60,7 +60,8 @@ docs/
 *.csv
 encoding_output.txt
 
-# Dev / debug HTML — not intended for public deploy (audit L7)
+# Dev / debug HTML — not intended for public deploy (audit L7 / H7)
+dev-tools/
 clear-cache.html
 clear-all-caches.html
 force-refresh.html

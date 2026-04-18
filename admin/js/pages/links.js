@@ -105,12 +105,34 @@ function renderLinks(summary) {
       <td>${respondents}</td>
       <td><span class="badge ${active ? 'bg' : 'bx'}">${active ? 'เปิดอยู่' : 'ปิด'}</span></td>
       <td class="td-act">
-        <button class="btn b-gray" onclick="showQRModal('${esc(url)}')">QR</button>
-        <button class="btn b-blue" onclick="navigator.clipboard.writeText('${esc(url)}').then(()=>showToast('คัดลอกแล้ว ✅'))">Copy</button>
-        <button class="btn ${active ? 'b-red' : 'b-green'}" onclick="toggleLink('${esc(row.id || '')}','${esc(organization)}',${!active})">${active ? 'ปิด' : 'เปิด'}</button>
+        <button type="button" class="btn b-gray" data-action="link-qr" data-url="${esc(url)}" aria-label="แสดง QR Code">QR</button>
+        <button type="button" class="btn b-blue" data-action="link-copy" data-url="${esc(url)}" aria-label="คัดลอกลิงก์">Copy</button>
+        <button type="button" class="btn ${active ? 'b-red' : 'b-green'}" data-action="link-toggle" data-id="${esc(row.id || '')}" data-org="${esc(organization)}" data-next-active="${!active}" aria-label="${active ? 'ปิด' : 'เปิด'}ลิงก์">${active ? 'ปิด' : 'เปิด'}</button>
       </td>
     </tr>`;
   }).join('');
+
+  if (!tbody.dataset.delegateBound) {
+    tbody.addEventListener('click', (event) => {
+      const btn = event.target.closest('button[data-action]');
+      if (!btn || !tbody.contains(btn)) return;
+      const action = btn.dataset.action;
+      if (action === 'link-qr') {
+        showQRModal(btn.dataset.url || '');
+      } else if (action === 'link-copy') {
+        const url = btn.dataset.url || '';
+        if (!url) return;
+        if (navigator.clipboard?.writeText) {
+          navigator.clipboard.writeText(url).then(() => showToast('คัดลอกแล้ว ✅'));
+        } else {
+          showToast('เบราว์เซอร์ไม่รองรับการคัดลอก', 'error');
+        }
+      } else if (action === 'link-toggle') {
+        toggleLink(btn.dataset.id || '', btn.dataset.org || '', btn.dataset.nextActive === 'true');
+      }
+    });
+    tbody.dataset.delegateBound = '1';
+  }
 
   const createOrgSelect = document.getElementById('create-link-org');
   if (createOrgSelect) {
@@ -368,28 +390,70 @@ async function createNewLink() {
 // ─── QR Code Modal ───────────────────────────────────────────────────────────
 
 function showQRModal(path) {
+  if (!path) return;
   const url = path.startsWith('http') ? path : window.location.origin + '/' + path;
   const existing = document.getElementById('qr-modal-overlay');
   if (existing) existing.remove();
+
+  const prevFocus = document.activeElement;
   const overlay = document.createElement('div');
   overlay.id = 'qr-modal-overlay';
+  overlay.setAttribute('role', 'dialog');
+  overlay.setAttribute('aria-modal', 'true');
+  overlay.setAttribute('aria-label', 'QR Code ของลิงก์สำรวจ');
   overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:9999';
   overlay.innerHTML = `<div style="background:#fff;border-radius:16px;padding:28px;text-align:center;min-width:260px;box-shadow:0 20px 40px rgba(0,0,0,.2)">
     <div style="font-weight:700;font-size:15px;margin-bottom:12px">QR Code</div>
     <div id="qr-canvas" style="margin:0 auto 12px;display:flex;justify-content:center;align-items:center"></div>
     <div style="font-size:11px;color:#64748b;word-break:break-all;max-width:220px;margin:0 auto 14px">${esc(url)}</div>
     <div style="display:flex;gap:8px;justify-content:center">
-      <button class="btn b-blue" onclick="navigator.clipboard.writeText('${esc(url)}').then(()=>showToast('คัดลอกแล้ว ✅'))">📋 Copy URL</button>
-      <button class="btn b-gray" onclick="document.getElementById('qr-modal-overlay').remove()">✕ ปิด</button>
+      <button type="button" class="btn b-blue" data-action="qr-copy">📋 Copy URL</button>
+      <button type="button" class="btn b-gray" data-action="qr-close">✕ ปิด</button>
     </div>
   </div>`;
   document.body.appendChild(overlay);
-  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+
+  const closeModal = () => {
+    overlay.remove();
+    document.removeEventListener('keydown', onKey);
+    if (prevFocus && typeof prevFocus.focus === 'function') prevFocus.focus();
+  };
+  const onKey = (e) => {
+    if (e.key === 'Escape') { e.preventDefault(); closeModal(); return; }
+    if (e.key === 'Tab') {
+      const focusables = overlay.querySelectorAll('button, [href], [tabindex]:not([tabindex="-1"])');
+      if (focusables.length === 0) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+  };
+  document.addEventListener('keydown', onKey);
+
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) { closeModal(); return; }
+    const btn = e.target.closest('button[data-action]');
+    if (!btn) return;
+    if (btn.dataset.action === 'qr-close') {
+      closeModal();
+    } else if (btn.dataset.action === 'qr-copy') {
+      if (navigator.clipboard?.writeText) {
+        navigator.clipboard.writeText(url).then(() => showToast('คัดลอกแล้ว ✅'));
+      } else {
+        showToast('เบราว์เซอร์ไม่รองรับการคัดลอก', 'error');
+      }
+    }
+  });
+
   try {
     new QRCode(document.getElementById('qr-canvas'), { text: url, width: 180, height: 180, correctLevel: QRCode.CorrectLevel.M });
   } catch (e) {
     document.getElementById('qr-canvas').textContent = 'QRCode library ไม่พร้อมใช้งาน';
   }
+
+  const firstBtn = overlay.querySelector('button');
+  if (firstBtn) firstBtn.focus();
 }
 
 // ─── Export Functions ─────────────────────────────────────────────────────────
