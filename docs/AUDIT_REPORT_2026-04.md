@@ -1,7 +1,7 @@
 # Project Audit Report — NIDA Wellbeing Survey
 
 **Date:** 2026-04-18
-**Last Update:** 2026-04-19 (Phase 2 fixes applied)
+**Last Update:** 2026-04-19 (Phase 2 + safe Phase 3 fixes applied)
 **Scope:** Whole project
 **Skills applied:** `supabase-postgres-best-practices`, `web-design-guidelines`, `frontend-design`, `ui-ux-pro-max`
 **Skills skipped (not applicable):** `vercel-react-best-practices` (vanilla HTML/JS), `pdf`, `remotion-best-practices`
@@ -26,13 +26,18 @@
 | M3 | ⏳ open | Loading skeletons — deferred (design task) |
 | M4 | ✅ existing | `sw.js` already implements cache-first / network-first / SWR strategies |
 | M5 | ✅ partial | `refreshData()` now phased (core→extras) + `_safeRender` wrapping + button disabled during refresh |
-| M6 | 🟡 partial | QR modal in `links.js` now has role=dialog + Esc + focus-trap; other modals still TODO |
+| M6 | ✅ partial | QR modal + consent popup (`js/app.js::showConsentPopup`) now have role=dialog + Esc + focus-trap; CH1 detail modal still TODO |
+| M14 | ✅ fixed | `js/app.js::submitSurvey` guarded by `_submitting` re-entry flag + next/prev buttons disabled during submission |
 | M7 | ⏳ open | Supabase URL/key env injection — requires Vercel build step |
 | M8 | ⏳ open | Contrast ratio review — design task |
 | M9 | ✅ partial | `_safeRender` wrapping protects per-page render failures in both `init()` and `refreshData()` |
 | M10 | ✅ fixed | Duplicate consent paragraphs removed from `index.html` |
-| M11-M14 | ⏳ open | Low-impact polish |
-| L1-L6, L8 | ⏳ open | Polish |
+| M11 | ⏳ open | `<span lang="en">` wraps — deferred (tedious + marginal impact) |
+| M12 | ⏳ open | Timeout progress + cancel — deferred |
+| M13 | ⏳ open | `<input type="date">` with BE hint — deferred |
+| L1, L2, L3, L6, L8 | ⏳ open | Icon system, font unification, chart tokens, e2e suite, CHANGELOG |
+| L4 | ✅ fixed | Mermaid architecture diagram added to `README.md` |
+| L5 | ✅ fixed | Consolidated `.env.example` (deleted duplicate `.env.local.example`) |
 | L7 | ✅ fixed | `.vercelignore` — blocks dev HTML / error screenshots / debug scripts |
 
 **Migrations to apply (in order) to your Supabase project:**

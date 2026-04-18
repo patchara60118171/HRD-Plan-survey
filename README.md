@@ -13,6 +13,58 @@
 5. **Backend** บน Supabase สำหรับฐานข้อมูล สิทธิ์ RLS การยืนยันตัวตน และ Edge Functions
 6. **Deployment** บน Vercel สำหรับ production
 
+### Architecture Diagram
+
+```mermaid
+flowchart LR
+    subgraph Users["👥 Users"]
+        U1["พนักงาน<br/>(anonymous)"]
+        U2["HR ประจำองค์กร<br/>(org_hr)"]
+        U3["Admin / Super Admin"]
+    end
+
+    subgraph Frontend["🌐 Frontend (Vercel static)"]
+        F1["index.html<br/>Well-being Survey"]
+        F2["ch1.html<br/>HRD Chapter 1"]
+        F3["admin.html<br/>Admin Portal"]
+        SW["sw.js<br/>Service Worker<br/>offline queue"]
+    end
+
+    subgraph Supabase["🗄️ Supabase (backend)"]
+        DB[("Postgres<br/>survey_responses<br/>hrd_ch1_responses<br/>organizations<br/>org_form_links<br/>form_windows")]
+        RLS["RLS policies<br/>(anon / authenticated / org_hr / admin)"]
+        Auth["Auth<br/>email+password"]
+        EF["Edge Functions"]
+        View["v_organization_dashboard_summary<br/>(aggregation)"]
+    end
+
+    subgraph External["🔗 External"]
+        GAS["Google Apps Script<br/>(backup sink)"]
+    end
+
+    U1 -->|?org=xxx| F1
+    U1 --> F2
+    U2 -->|login| F3
+    U3 -->|login| F3
+
+    F1 -.offline.-> SW
+    F2 -.offline.-> SW
+    SW -->|background sync| DB
+
+    F1 -->|INSERT/UPDATE| DB
+    F2 -->|INSERT/UPDATE| DB
+    F3 -->|SELECT| DB
+    F3 -->|SELECT| View
+
+    F1 -.backup.-> GAS
+    F3 --> Auth
+    F3 --> EF
+
+    DB --- RLS
+```
+
+> Data-flow ย่อ: form → RLS → Postgres → aggregation view → Admin Portal; ขณะ offline จะเข้าคิวใน Service Worker IndexedDB แล้ว sync อัตโนมัติตอนกลับมาออนไลน์
+
 ## แอปหลักในระบบ
 
 | ส่วนระบบ | ไฟล์หลัก | เส้นทางใช้งาน | จุดประสงค์ |

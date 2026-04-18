@@ -1261,20 +1261,66 @@ const app = {
     },
 
     // Show Consent Popup
+    // Audit M6: wire up focus trap + Esc handling. We keep focus inside the
+    // dialog while it's open and restore focus to the previously-focused
+    // element on close. Also sets role=dialog + aria-modal so screen readers
+    // announce it correctly.
     showConsentPopup() {
         const popup = document.getElementById('consent-popup');
-        if (popup) {
-            popup.style.display = 'flex';
+        if (!popup) return;
+
+        this._consentPrevFocus = document.activeElement;
+        popup.style.display = 'flex';
+        popup.setAttribute('role', 'dialog');
+        popup.setAttribute('aria-modal', 'true');
+        popup.setAttribute('aria-labelledby', 'consent-title');
+
+        const titleEl = popup.querySelector('h2');
+        if (titleEl && !titleEl.id) titleEl.id = 'consent-title';
+
+        const getFocusables = () => Array.from(popup.querySelectorAll(
+            'button:not([disabled]), [href], input:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        ));
+
+        this._consentKeyHandler = (e) => {
+            if (e.key === 'Escape') { e.preventDefault(); this.declineConsent(); return; }
+            if (e.key === 'Tab') {
+                const focusables = getFocusables();
+                if (focusables.length === 0) return;
+                const first = focusables[0];
+                const last = focusables[focusables.length - 1];
+                if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+                else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+            }
+        };
+        document.addEventListener('keydown', this._consentKeyHandler);
+
+        // Focus the primary (accept) button after the popup paints
+        requestAnimationFrame(() => {
+            const primary = popup.querySelector('.btn-primary') || popup.querySelector('button');
+            if (primary) primary.focus();
+        });
+    },
+
+    // Internal: tear down consent-popup focus trap + restore prior focus.
+    _closeConsentPopup() {
+        const popup = document.getElementById('consent-popup');
+        if (popup) popup.style.display = 'none';
+        if (this._consentKeyHandler) {
+            document.removeEventListener('keydown', this._consentKeyHandler);
+            this._consentKeyHandler = null;
+        }
+        const prev = this._consentPrevFocus;
+        this._consentPrevFocus = null;
+        if (prev && typeof prev.focus === 'function') {
+            try { prev.focus(); } catch { /* element may be detached */ }
         }
     },
 
     // Accept Consent
     acceptConsent() {
-        const popup = document.getElementById('consent-popup');
-        if (popup) {
-            popup.style.display = 'none';
-        }
-        
+        this._closeConsentPopup();
+
         // Proceed with survey
         this.currentView = 'survey';
         this.currentSectionIndex = 0;
@@ -1284,11 +1330,7 @@ const app = {
 
     // Decline Consent
     declineConsent() {
-        const popup = document.getElementById('consent-popup');
-        if (popup) {
-            popup.style.display = 'none';
-        }
-        
+        this._closeConsentPopup();
         showToast('การทำแบบสำรวจถูกยกเลิก', 'error');
     },
 
@@ -1358,7 +1400,29 @@ const app = {
     },
 
     // Submit Survey (Final Save — with offline support)
+    // Audit M14: guard against double-submit by debouncing the Next button and
+    // using a reentry flag. Only one submission can be in-flight at a time.
     async submitSurvey() {
+        if (this._submitting) return; // already in-flight — ignore rapid re-clicks
+        this._submitting = true;
+        const btnNext = document.getElementById('btn-next');
+        const btnPrev = document.getElementById('btn-prev');
+        const origNextText = btnNext ? btnNext.innerHTML : '';
+        if (btnNext) { btnNext.disabled = true; btnNext.style.opacity = '0.6'; btnNext.style.pointerEvents = 'none'; btnNext.textContent = 'กำลังบันทึก...'; }
+        if (btnPrev) { btnPrev.disabled = true; btnPrev.style.opacity = '0.6'; btnPrev.style.pointerEvents = 'none'; }
+
+        try {
+            await this._submitSurveyInner();
+        } finally {
+            this._submitting = false;
+            if (btnNext) { btnNext.disabled = false; btnNext.style.opacity = ''; btnNext.style.pointerEvents = ''; btnNext.innerHTML = origNextText; }
+            if (btnPrev) { btnPrev.disabled = false; btnPrev.style.opacity = ''; btnPrev.style.pointerEvents = ''; }
+        }
+    },
+
+    // Internal: actual submit work. Wrapped by submitSurvey() which handles the
+    // re-entry guard and button disable-state.
+    async _submitSurveyInner() {
         showToast('กำลังบันทึกข้อมูล...', 'info');
 
         // Enforce organization context from URL before save
