@@ -422,12 +422,26 @@
     <div class="page" id="page-an-wb">
       <div class="page-title">วิเคราะห์ Wellbeing</div>
       <div class="page-sub">ภาพรวมสุขภาวะบุคลากรจากข้อมูลจริง — PHQ-9 · GAD-7 · Burnout · Engagement · WLB</div>
-      <div class="filter-bar" style="margin-bottom:16px">
+      <div class="filter-bar anwb-sticky-filters">
         <div class="org-multi-wrap">
           <button type="button" class="sel org-multi-btn" id="anwb-org-toggle" onclick="anwbToggleOrgDropdown()">ทุกองค์กร ▾</button>
           <div id="anwb-org-dropdown" class="org-dropdown">
             <label class="org-check-item"><input type="checkbox" checked onchange="anwbOrgCheckAll(this)"> <span style="font-weight:600">เลือกทั้งหมด</span></label>
             <div id="anwb-org-list"></div>
+          </div>
+        </div>
+        <div class="org-multi-wrap">
+          <button type="button" class="sel org-multi-btn" id="anwb-bmi-toggle" onclick="anwbToggleBmiDropdown()">ทุกกลุ่ม BMI ▾</button>
+          <div id="anwb-bmi-dropdown" class="org-dropdown">
+            <label class="org-check-item"><input type="checkbox" checked onchange="anwbBmiCheckAll(this)"> <span style="font-weight:600">เลือกทั้งหมด</span></label>
+            <div id="anwb-bmi-list">
+              <label class="org-check-item"><input type="checkbox" value="underweight" checked onchange="anwbBmiCheckOne()"> <span>น้ำหนักน้อย (&lt; 18.5)</span></label>
+              <label class="org-check-item"><input type="checkbox" value="normal"      checked onchange="anwbBmiCheckOne()"> <span>สมส่วน (18.5–22.9)</span></label>
+              <label class="org-check-item"><input type="checkbox" value="overweight"  checked onchange="anwbBmiCheckOne()"> <span>น้ำหนักเกิน (23–24.9)</span></label>
+              <label class="org-check-item"><input type="checkbox" value="obese1"      checked onchange="anwbBmiCheckOne()"> <span>อ้วนระดับ 1 (25–29.9)</span></label>
+              <label class="org-check-item"><input type="checkbox" value="obese2"      checked onchange="anwbBmiCheckOne()"> <span>อ้วนระดับ 2 (≥ 30)</span></label>
+              <label class="org-check-item"><input type="checkbox" value="__none__"    checked onchange="anwbBmiCheckOne()"> <span>ไม่มีข้อมูล BMI</span></label>
+            </div>
           </div>
         </div>
       </div>
@@ -834,7 +848,7 @@
 <!-- Form Windows (used by Wellbeing page's wb-form-windows-card) -->
 <script src="admin/js/pages/form-windows.js?v=4cols"></script>
 <script src="admin/js/pages/analytics-wb.js?v=2"></script>
-<script src="admin/js/pages/compare.js?v=1"></script>
+<script src="admin/js/pages/compare.js?v=3"></script>
 
 <!-- ===== App Entry Point (replaces inline script) ===== -->
 <script src="admin/js/app.js?v=progressive2"></script>

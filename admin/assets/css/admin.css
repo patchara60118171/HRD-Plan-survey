@@ -219,6 +219,18 @@ tbody tr:hover td{background:#FAFBFD}
 .anwb-tab:hover{background:#fff;color:var(--P)}
 .anwb-tab.active{background:#fff;color:var(--P);box-shadow:0 1px 6px rgba(0,0,0,.1)}
 
+/* ─── Sticky filter bar สำหรับ page-an-wb ────────────────── */
+/* ล็อคแถวตัวกรองไว้ใต้ topbar (topbar sticky อยู่ที่ top:0 สูง 54px, z-index:50) */
+.anwb-sticky-filters{
+  position:sticky;
+  top:54px;
+  z-index:40;
+  background:var(--bg);
+  padding:10px 0;
+  margin:-10px 0 6px;
+  border-bottom:1px solid var(--bdr);
+}
+
 /* ─── Extended Dashboard Cards ───────────────────────────── */
 .anwb-section-title{font-size:14px;font-weight:700;color:var(--P);margin-bottom:12px;display:flex;align-items:center;gap:8px}
 .anwb-metric-bar{margin-bottom:10px}

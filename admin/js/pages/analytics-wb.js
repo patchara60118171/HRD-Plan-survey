@@ -7,9 +7,18 @@ function renderAnalytics(summary) {
 
   _anwbPopulateOrgList(submitted);
   const selected = anwbGetSelectedOrgs();
-  const rows = selected == null
+  const orgFiltered = selected == null
     ? submitted
     : (selected.length ? submitted.filter(r => selected.includes(r.organization || r.org)) : []);
+
+  // BMI group filter (ตรงตาม WELLBEING_SCORING_REFERENCE.md §2)
+  const selectedBmi = anwbGetSelectedBmiKeys();
+  const rows = selectedBmi == null
+    ? orgFiltered
+    : (selectedBmi.length ? orgFiltered.filter(r => {
+        const key = getBmiAsean(r)?.key || '__none__';
+        return selectedBmi.includes(key);
+      }) : []);
 
   const emptyEl = document.getElementById('anwb-empty');
   const contentEl = document.getElementById('anwb-content');
@@ -103,13 +112,53 @@ function anwbGetSelectedOrgs() {
 
 // Close dropdown on outside click
 document.addEventListener('click', (e) => {
-  const wrap = document.getElementById('anwb-org-dropdown');
-  const btn = document.getElementById('anwb-org-toggle');
-  if (!wrap || !btn) return;
-  if (!wrap.classList.contains('show')) return;
-  if (wrap.contains(e.target) || btn.contains(e.target)) return;
-  wrap.classList.remove('show');
+  [['anwb-org-dropdown','anwb-org-toggle'], ['anwb-bmi-dropdown','anwb-bmi-toggle']].forEach(([wrapId, btnId]) => {
+    const wrap = document.getElementById(wrapId);
+    const btn = document.getElementById(btnId);
+    if (!wrap || !btn) return;
+    if (!wrap.classList.contains('show')) return;
+    if (wrap.contains(e.target) || btn.contains(e.target)) return;
+    wrap.classList.remove('show');
+  });
 });
+
+/* ── BMI group filter (ตรงตาม WELLBEING_SCORING_REFERENCE.md §2) ── */
+function anwbToggleBmiDropdown() {
+  const dd = document.getElementById('anwb-bmi-dropdown');
+  if (dd) dd.classList.toggle('show');
+}
+
+function anwbBmiCheckAll(allCb) {
+  document.querySelectorAll('#anwb-bmi-list input[type="checkbox"]').forEach(cb => { cb.checked = allCb.checked; });
+  anwbUpdateBmiLabel();
+  renderAnalytics();
+}
+
+function anwbBmiCheckOne() {
+  const boxes = [...document.querySelectorAll('#anwb-bmi-list input[type="checkbox"]')];
+  const allCb = document.querySelector('#anwb-bmi-dropdown > label input[type="checkbox"]');
+  if (allCb) allCb.checked = boxes.length > 0 && boxes.every(cb => cb.checked);
+  anwbUpdateBmiLabel();
+  renderAnalytics();
+}
+
+function anwbUpdateBmiLabel() {
+  const btn = document.getElementById('anwb-bmi-toggle');
+  if (!btn) return;
+  const sel = anwbGetSelectedBmiKeys();
+  const total = document.querySelectorAll('#anwb-bmi-list input[type="checkbox"]').length;
+  if (sel == null) btn.textContent = 'ทุกกลุ่ม BMI ▾';
+  else if (sel.length === 0) btn.textContent = '(ไม่ได้เลือก) ▾';
+  else if (sel.length === total) btn.textContent = 'ทุกกลุ่ม BMI ▾';
+  else btn.textContent = `BMI ${sel.length}/${total} ▾`;
+}
+
+function anwbGetSelectedBmiKeys() {
+  const allCb = document.querySelector('#anwb-bmi-dropdown > label input[type="checkbox"]');
+  if (!document.getElementById('anwb-bmi-list')) return null;
+  if (allCb && allCb.checked) return null;
+  return [...document.querySelectorAll('#anwb-bmi-list input[type="checkbox"]:checked')].map(cb => cb.value);
+}
 
 /* ── KPI summary bar ───────────────────────────────────────────── */
 function _anwbRenderKPICards(rows) {
