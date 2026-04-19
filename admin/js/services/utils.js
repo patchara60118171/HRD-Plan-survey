@@ -205,13 +205,19 @@ function calcBmi(row) {
   return w / (hm * hm);
 }
 function getBmiAsean(row) {
+  // เกณฑ์ตาม docs/WELLBEING_SCORING_REFERENCE.md §2 (กรมอนามัย มาตรฐานเอเชีย)
+  //   < 18.5      → น้ำหนักน้อย
+  //   18.5–22.9   → สมส่วน
+  //   23.0–24.9   → น้ำหนักเกิน
+  //   25.0–29.9   → อ้วนระดับ 1
+  //   ≥ 30        → อ้วนระดับ 2
   const bmi = calcBmi(row);
   if (bmi == null) return null;
-  if (bmi < 18.5) return { bmi, key: 'underweight', label: 'น้ำหนักน้อยกว่ามาตรฐาน', color: '#3B82F6' };
-  if (bmi < 23)   return { bmi, key: 'normal',      label: 'ปกติ',                   color: '#059669' };
-  if (bmi < 25)   return { bmi, key: 'obese1',      label: 'อ้วนระดับ 1',            color: '#F59E0B' };
-  if (bmi < 30)   return { bmi, key: 'obese2',      label: 'อ้วนระดับ 2',            color: '#EF4444' };
-  return                   { bmi, key: 'obese3',     label: 'อ้วนระดับ 3',            color: '#991B1B' };
+  if (bmi < 18.5) return { bmi, key: 'underweight', label: 'น้ำหนักน้อย',  color: '#3B82F6' };
+  if (bmi < 23)   return { bmi, key: 'normal',      label: 'สมส่วน',       color: '#059669' };
+  if (bmi < 25)   return { bmi, key: 'overweight',  label: 'น้ำหนักเกิน',  color: '#F59E0B' };
+  if (bmi < 30)   return { bmi, key: 'obese1',      label: 'อ้วนระดับ 1',  color: '#EF4444' };
+  return                   { bmi, key: 'obese2',    label: 'อ้วนระดับ 2',  color: '#991B1B' };
 }
 
 /* ── WHtR (รอบเอว / ส่วนสูง) ──────────────────────────────── */

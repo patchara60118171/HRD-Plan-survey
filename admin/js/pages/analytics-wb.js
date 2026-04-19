@@ -153,10 +153,9 @@ function _anwbRenderDemographics(rows) {
     if (g === 'female' || g === 'หญิง' || g === 'f') return 'หญิง';
     return 'ไม่ระบุ';
   });
-  const bmiCounts = _groupCount(rows, r => {
-    const b = String(r.bmi_category || '').trim();
-    return b || '—';
-  });
+  // ใช้ getBmiAsean() (สเปก WELLBEING_SCORING_REFERENCE.md) แทน r.bmi_category ที่เก็บใน DB
+  // เพื่อให้ label ตรงตามเอกสาร (น้ำหนักน้อย / สมส่วน / น้ำหนักเกิน / อ้วนระดับ 1 / อ้วนระดับ 2)
+  const bmiCounts = _groupCount(rows, r => getBmiAsean(r)?.label || '—');
 
   const ageColors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444'];
   const genderColors = ['#6366F1', '#EC4899', '#9CA3AF'];
@@ -593,10 +592,10 @@ function _anwbRenderBmiWhr(rows) {
 
   const bmiGroups = [
     { key: 'underweight', label: 'น้ำหนักน้อย (< 18.5)',   color: '#3B82F6' },
-    { key: 'normal',      label: 'ปกติ (18.5–22.9)',        color: '#059669' },
-    { key: 'obese1',      label: 'อ้วน ระดับ 1 (23–24.9)', color: '#F59E0B' },
-    { key: 'obese2',      label: 'อ้วน ระดับ 2 (25–29.9)', color: '#EF4444' },
-    { key: 'obese3',      label: 'อ้วน ระดับ 3 (≥ 30)',    color: '#991B1B' },
+    { key: 'normal',      label: 'สมส่วน (18.5–22.9)',     color: '#059669' },
+    { key: 'overweight',  label: 'น้ำหนักเกิน (23–24.9)',  color: '#F59E0B' },
+    { key: 'obese1',      label: 'อ้วนระดับ 1 (25–29.9)',  color: '#EF4444' },
+    { key: 'obese2',      label: 'อ้วนระดับ 2 (≥ 30)',     color: '#991B1B' },
   ].map(g => ({ ...g, count: bmiRows.filter(r => getBmiAsean(r)?.key === g.key).length }));
 
   const whrNormal = whrRows.filter(r => getWHtRLevel(r)?.key === 'normal').length;
@@ -608,8 +607,8 @@ function _anwbRenderBmiWhr(rows) {
     ${_cardWrap('⚖️', 'BMI — มาตรฐานอาเซียน (กรมอนามัย)', `
       <div class="anwb-kpi-row" style="margin-bottom:14px">
         <div class="anwb-kpi-mini"><div class="anwb-kpi-mini-val">${nb ? fmtNum(avgBmi,1) : '—'}</div><div class="anwb-kpi-mini-label">BMI เฉลี่ย</div></div>
-        <div class="anwb-kpi-mini"><div class="anwb-kpi-mini-val" style="color:#059669">${nb ? fmtNum(_pct(bmiGroups.find(g=>g.key==='normal').count,nb),1) : '—'}%</div><div class="anwb-kpi-mini-label">กลุ่มปกติ</div></div>
-        <div class="anwb-kpi-mini"><div class="anwb-kpi-mini-val" style="color:#DC2626">${nb ? fmtNum(_pct(bmiGroups.filter(g=>['obese1','obese2','obese3'].includes(g.key)).reduce((s,g)=>s+g.count,0),nb),1) : '—'}%</div><div class="anwb-kpi-mini-label">กลุ่มอ้วน</div></div>
+        <div class="anwb-kpi-mini"><div class="anwb-kpi-mini-val" style="color:#059669">${nb ? fmtNum(_pct(bmiGroups.find(g=>g.key==='normal').count,nb),1) : '—'}%</div><div class="anwb-kpi-mini-label">สมส่วน</div></div>
+        <div class="anwb-kpi-mini"><div class="anwb-kpi-mini-val" style="color:#DC2626">${nb ? fmtNum(_pct(bmiGroups.filter(g=>['overweight','obese1','obese2'].includes(g.key)).reduce((s,g)=>s+g.count,0),nb),1) : '—'}%</div><div class="anwb-kpi-mini-label">น้ำหนักเกิน/อ้วน</div></div>
       </div>
       ${bmiGroups.map(g => _metricBar(g.label, g.count, nb, g.color)).join('')}
       <div style="font-size:10.5px;color:var(--tx3);margin-top:6px">เกณฑ์อาเซียน กรมอนามัย กระทรวงสาธารณสุข · มีข้อมูล ${fmtNum(nb)} คน</div>
