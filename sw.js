@@ -1,6 +1,7 @@
 // =============================================
 // Service Worker - Offline Support for Well-being Survey v3.2
 // รองรับการทำงานแบบ Offline และ Sync ข้อมูลเมื่อกลับมออนไลน์
+// v3.8: exclude /admin/js/* from cache-first so admin always fetches fresh data logic
 // v3.7: bump cache for KPI fix - relax status check (submitted_at = submitted)
 // v3.6: bump cache for "Ch1 → แบบสำรวจข้อมูลองค์กร" rename + summarizeOrgs ch1Submitted fix
 // v3.5: bump cache to force pick-up of form-window close check in index.html + app.js
@@ -9,9 +10,9 @@
 // v3.2: sync orgMap canonical org_codes (dhss, dop, dcy, test-org)
 // =============================================
 
-const CACHE_NAME = 'wellbeing-survey-v3.7';
-const STATIC_CACHE = 'static-v3.7';
-const DATA_CACHE = 'data-v3.7';
+const CACHE_NAME = 'wellbeing-survey-v3.8';
+const STATIC_CACHE = 'static-v3.8';
+const DATA_CACHE = 'data-v3.8';
 
 // ไฟล์ที่ต้อง Cache สำหรับ Offline
 const STATIC_ASSETS = [
@@ -363,6 +364,10 @@ self.addEventListener('message', (event) => {
 // =============================================
 
 function isStaticAsset(url) {
+  // Never cache admin portal JS — it needs to always reflect the latest deploy
+  if (url.pathname.startsWith('/admin/js/') || url.pathname.startsWith('/admin/css/')) {
+    return false;
+  }
   const staticExtensions = ['.js', '.css', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.woff', '.woff2', '.ttf'];
   return staticExtensions.some(ext => url.pathname.endsWith(ext));
 }
