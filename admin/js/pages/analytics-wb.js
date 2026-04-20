@@ -321,16 +321,19 @@ function _tmhiInsights(rows) {
 function _barChart(data, total) {
   if (!data.length) return '<div style="color:var(--tx3);font-size:12px">ไม่มีข้อมูล</div>';
   const maxPct = Math.max(...data.map(d => d.pct), 1);
-  return data.map(d => `
-    <div style="margin-bottom:10px">
+  return data.map(d => {
+    const tip = `${d.label} · ${fmtNum(d.count)} คน${total ? ` จากทั้งหมด ${fmtNum(total)} คน` : ''} (${fmtNum(d.pct, 1)}%)`;
+    return `
+    <div style="margin-bottom:10px" title="${esc(tip)}">
       <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px">
         <span>${esc(d.label)}</span>
         <span style="font-weight:600">${fmtNum(d.count)} คน (${fmtNum(d.pct, 1)}%)</span>
       </div>
       <div style="background:#F3F4F6;border-radius:4px;height:10px">
-        <div style="background:${d.color};width:${(d.pct/maxPct*100).toFixed(1)}%;height:10px;border-radius:4px;transition:width .4s"></div>
+        <div style="background:${d.color};width:${(d.pct/maxPct*100).toFixed(1)}%;height:10px;border-radius:4px;transition:width .4s" title="${esc(tip)}"></div>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 function _donutChart(entries, total, colors) {
@@ -370,6 +373,281 @@ function _heatColor(heat) {
   const g = heat < 0.5 ? 180 : Math.round((1 - heat) * 2 * 180);
   const a = 0.25 + heat * 0.5;
   return `rgba(${r},${g},60,${a.toFixed(2)})`;
+}
+
+/* ── Per-item heatmap (Grid + Stacked-bar views with toggle) ──────
+   Usage: _anwbBuildHeatmap({
+     id: 'ucla' | 'tmhi',
+     itemLabels: ['...', '...'],     // row labels (1 per question)
+     levelLabels: ['...','...','...','...'],  // column labels (4 answer levels)
+     dist: { dist: [[c0,c1,c2,c3], ...], totals: [...] },   // from getXxxItemDistribution
+     reverseIdxs: Set<number>,       // 0-indexed items that are reverse-coded (optional)
+     colorBase: '#0F4C81',           // base color for intensity
+     note: '...'                     // optional footnote
+   })
+   Returns HTML string with tab switcher + both views; only one visible via
+   data-heat-view. Toggle handled by anwbSwitchHeatView(btn, viewKey).
+*/
+// 5 color palettes for the heatmap Grid view. Users can pick any swatch to
+// recolor cells in-place. Selection persists in localStorage (per heatmap id).
+const ANWB_HEAT_PALETTE = [
+  { key: 'blue',   hex: '#0F4C81', label: 'น้ำเงิน' },
+  { key: 'teal',   hex: '#0D9488', label: 'เขียวน้ำทะเล' },
+  { key: 'violet', hex: '#7C3AED', label: 'ม่วง' },
+  { key: 'rose',   hex: '#E11D48', label: 'ชมพูแดง' },
+  { key: 'amber',  hex: '#D97706', label: 'ส้มอำพัน' },
+];
+function _anwbHeatColor(hmId, fallback) {
+  try {
+    const saved = localStorage.getItem(`anwb_heat_color_${hmId}`);
+    if (saved && /^#[0-9A-Fa-f]{6}$/.test(saved)) return saved;
+  } catch(e) {}
+  return fallback;
+}
+function _anwbHeatValueMode(hmId) {
+  try {
+    const saved = localStorage.getItem(`anwb_heat_valmode_${hmId}`);
+    if (saved === 'count' || saved === 'pct') return saved;
+  } catch(e) {}
+  return 'pct';
+}
+function _anwbCellText2(mode, p, c) {
+  // What is rendered inside a cell.
+  if (mode === 'count') return c > 0 ? String(c) : '—';
+  return p > 0 ? p.toFixed(0) + '%' : '—';
+}
+// Discrete 4-band stepped gradient (absolute % of item respondents):
+//   band 0 :   0 – 24.9%  → ขาว (ไม่มี tint)
+//   band 1 :  25 – 49.9%  → อ่อน   (alpha 0.30)
+//   band 2 :  50 – 74.9%  → กลาง   (alpha 0.60)
+//   band 3 :  75 – 100%   → เข้ม   (alpha 0.90)  → ใช้ตัวอักษรสีขาว
+function _anwbHeatBand(p) {
+  if (p < 25) return 0;
+  if (p < 50) return 1;
+  if (p < 75) return 2;
+  return 3;
+}
+function _anwbCellBg(hex, p /*, maxPct (unused) */) {
+  const band = _anwbHeatBand(p || 0);
+  if (band === 0) return '#FFFFFF';
+  const r = parseInt(hex.slice(1,3), 16);
+  const g = parseInt(hex.slice(3,5), 16);
+  const b = parseInt(hex.slice(5,7), 16);
+  const a = [0, 0.30, 0.60, 0.90][band];
+  return `rgba(${r},${g},${b},${a.toFixed(2)})`;
+}
+function _anwbCellText(p /*, maxPct (unused) */) {
+  return _anwbHeatBand(p || 0) === 3 ? '#fff' : '#0F172A';
+}
+
+function _anwbBuildHeatmap(opts) {
+  const { id, itemLabels, levelLabels, dist: distObj, reverseIdxs, colorBase, note } = opts;
+  const { dist, totals } = distObj;
+  const rev = reverseIdxs || new Set();
+  // Per-cell % of that item's respondents
+  const pct = dist.map((row, i) => {
+    const t = totals[i] || 0;
+    return row.map(c => (t ? (c / t) * 100 : 0));
+  });
+  const maxPct = Math.max(1, ...pct.flat());
+  const activeHex = _anwbHeatColor(id, colorBase);
+  const valueMode = _anwbHeatValueMode(id); // 'pct' | 'count'
+
+  // Color palette picker
+  const palette = ANWB_HEAT_PALETTE.map(c =>
+    `<button type="button" class="anwb-hm-swatch ${c.hex.toLowerCase() === activeHex.toLowerCase() ? 'active' : ''}"
+       style="background:${c.hex}" data-color="${c.hex}" onclick="anwbSetHeatColor(this,'${c.hex}')"
+       title="เปลี่ยนเป็นสี${c.label}" aria-label="สี${c.label}"></button>`
+  ).join('');
+
+  // Value-mode toggle (% vs count)
+  const valueToggle = `
+    <div class="anwb-hm-vmode" role="group" aria-label="แสดงค่าเป็น">
+      <button type="button" class="anwb-hm-vbtn ${valueMode === 'pct' ? 'active' : ''}" data-vmode="pct" onclick="anwbSetHeatValueMode(this,'pct')">%</button>
+      <button type="button" class="anwb-hm-vbtn ${valueMode === 'count' ? 'active' : ''}" data-vmode="count" onclick="anwbSetHeatValueMode(this,'count')">คน</button>
+    </div>`;
+
+  // Grid view
+  const gridHeader = `<div class="anwb-hm-grid-row anwb-hm-grid-head">
+    <div class="anwb-hm-grid-rowlabel" style="font-weight:700;color:var(--tx2)">ข้อ / ระดับ</div>
+    ${levelLabels.map(l => `<div class="anwb-hm-grid-cell" style="font-weight:700;color:var(--tx2);background:transparent">${esc(l)}</div>`).join('')}
+    <div class="anwb-hm-grid-total" style="font-weight:700;color:var(--tx3)">n</div>
+  </div>`;
+  const gridRows = itemLabels.map((lbl, i) => {
+    const isRev = rev.has(i);
+    return `<div class="anwb-hm-grid-row">
+      <div class="anwb-hm-grid-rowlabel">
+        <span style="display:inline-block;min-width:20px;color:var(--tx3);font-size:10px">${i+1}.</span>
+        ${esc(lbl)}${isRev ? ' <span style="color:#DC2626;font-size:9px">(↺)</span>' : ''}
+      </div>
+      ${pct[i].map((p, j) => {
+        const c = dist[i][j];
+        const t = totals[i] || 0;
+        const tipTitle = `${lbl} · ${levelLabels[j]}`;
+        const tipCount = `${fmtNum(c)} คน จากทั้งหมด ${fmtNum(t)} คน`;
+        const tipPct = `${p.toFixed(1)}%`;
+        return `<div class="anwb-hm-grid-cell" data-pct="${p.toFixed(3)}" data-count="${c}" data-total="${t}" data-tip-title="${esc(tipTitle)}" data-tip-count="${esc(tipCount)}" data-tip-pct="${esc(tipPct)}" style="background:${_anwbCellBg(activeHex, p)};color:${_anwbCellText(p)}">${_anwbCellText2(valueMode, p, c)}</div>`;
+      }).join('')}
+      <div class="anwb-hm-grid-total" title="ผู้ตอบข้อนี้รวม ${fmtNum(totals[i] || 0)} คน">${totals[i] || 0}</div>
+    </div>`;
+  }).join('');
+  const gridView = `<div data-heat-view="grid" class="anwb-hm-grid" data-max-pct="${maxPct.toFixed(3)}">${gridHeader}${gridRows}</div>`;
+
+  // Stacked bar view — each item is a 100% horizontal bar with 4 colored segments
+  const segColors = ['#10B981', '#84CC16', '#F59E0B', '#DC2626']; // low→high
+  const barRows = itemLabels.map((lbl, i) => {
+    const isRev = rev.has(i);
+    const t = totals[i] || 0;
+    const segs = pct[i].map((p, j) => ({ pct: p, count: dist[i][j], color: segColors[j], label: levelLabels[j] }));
+    return `<div class="anwb-hm-bar-row">
+      <div class="anwb-hm-bar-label">
+        <span style="display:inline-block;min-width:20px;color:var(--tx3);font-size:10px">${i+1}.</span>
+        ${esc(lbl)}${isRev ? ' <span style="color:#DC2626;font-size:9px">(↺)</span>' : ''}
+      </div>
+      <div class="anwb-hm-bar-track">
+        ${segs.map(s => {
+          if (s.pct <= 0) return '';
+          const tipTitle = `${lbl} · ${s.label}`;
+          const tipCount = `${fmtNum(s.count)} คน จากทั้งหมด ${fmtNum(t)} คน`;
+          const tipPct = `${s.pct.toFixed(1)}%`;
+          return `<div class="anwb-hm-bar-seg" style="width:${s.pct}%;background:${s.color}" data-tip-title="${esc(tipTitle)}" data-tip-count="${esc(tipCount)}" data-tip-pct="${esc(tipPct)}">${s.pct >= 8 ? s.pct.toFixed(0) + '%' : ''}</div>`;
+        }).join('')}
+      </div>
+    </div>`;
+  }).join('');
+  const barLegend = `<div class="anwb-hm-bar-legend">
+    ${levelLabels.map((l, j) => `<span class="anwb-hm-bar-legend-item"><span class="anwb-hm-bar-swatch" style="background:${segColors[j]}"></span>${esc(l)}</span>`).join('')}
+  </div>`;
+  const barView = `<div data-heat-view="bar" style="display:none">${barLegend}<div class="anwb-hm-bar">${barRows}</div></div>`;
+
+  return `<div class="anwb-hm" data-hm-id="${esc(id)}">
+    <div class="anwb-hm-head">
+      <div class="anwb-hm-title">🔥 Heatmap รายข้อ — น้ำหนักคำตอบของผู้ตอบ</div>
+      <div class="anwb-hm-ctrls">
+        <div class="anwb-hm-palette" role="group" aria-label="เลือกสี heatmap" data-palette-for="grid">${palette}</div>
+        ${valueToggle}
+        <div class="anwb-hm-tabs" role="tablist">
+          <button type="button" class="anwb-hm-tab active" data-view="grid" onclick="anwbSwitchHeatView(this,'grid')">ตารางสี</button>
+          <button type="button" class="anwb-hm-tab" data-view="bar" onclick="anwbSwitchHeatView(this,'bar')">แถบเรียง</button>
+        </div>
+      </div>
+    </div>
+    ${gridView}
+    ${barView}
+    ${note ? `<div style="font-size:10.5px;color:var(--tx3);margin-top:6px">${esc(note)}</div>` : ''}
+  </div>`;
+}
+
+function anwbSwitchHeatView(btn, view) {
+  const root = btn.closest('.anwb-hm');
+  if (!root) return;
+  root.querySelectorAll('.anwb-hm-tab').forEach(b => b.classList.toggle('active', b.dataset.view === view));
+  root.querySelectorAll('[data-heat-view]').forEach(el => {
+    el.style.display = el.getAttribute('data-heat-view') === view ? '' : 'none';
+  });
+  // Hide palette + value toggle when viewing bar (they only apply to grid)
+  const palette = root.querySelector('.anwb-hm-palette');
+  const vmode   = root.querySelector('.anwb-hm-vmode');
+  if (palette) palette.style.display = (view === 'grid') ? '' : 'none';
+  if (vmode)   vmode.style.display   = (view === 'grid') ? '' : 'none';
+}
+
+// Recolor the Grid-view cells in place (no re-render) using the selected hex.
+function anwbSetHeatColor(btn, hex) {
+  const root = btn.closest('.anwb-hm');
+  if (!root) return;
+  const id = root.getAttribute('data-hm-id');
+  try { localStorage.setItem(`anwb_heat_color_${id}`, hex); } catch(e) {}
+  root.querySelectorAll('.anwb-hm-swatch').forEach(s => {
+    s.classList.toggle('active', (s.getAttribute('data-color') || '').toLowerCase() === hex.toLowerCase());
+  });
+  const grid = root.querySelector('.anwb-hm-grid');
+  if (!grid) return;
+  grid.querySelectorAll('.anwb-hm-grid-cell[data-pct]').forEach(cell => {
+    const p = parseFloat(cell.getAttribute('data-pct')) || 0;
+    cell.style.background = _anwbCellBg(hex, p);
+    cell.style.color = _anwbCellText(p);
+  });
+}
+
+// Toggle cell content between % and absolute count
+function anwbSetHeatValueMode(btn, mode) {
+  const root = btn.closest('.anwb-hm');
+  if (!root) return;
+  const id = root.getAttribute('data-hm-id');
+  try { localStorage.setItem(`anwb_heat_valmode_${id}`, mode); } catch(e) {}
+  root.querySelectorAll('.anwb-hm-vbtn').forEach(b => {
+    b.classList.toggle('active', b.getAttribute('data-vmode') === mode);
+  });
+  root.querySelectorAll('.anwb-hm-grid-cell[data-pct]').forEach(cell => {
+    const p = parseFloat(cell.getAttribute('data-pct')) || 0;
+    const c = parseInt(cell.getAttribute('data-count'), 10) || 0;
+    cell.textContent = _anwbCellText2(mode, p, c);
+  });
+}
+
+/* ── Custom tooltip (instant, follows mouse) ────────────────────
+   One shared floating div. Triggered by hovering any element with
+   data-tip-title / data-tip-count / data-tip-pct attributes.
+   Installed once via anwbInstallHeatTooltip() (idempotent). */
+function anwbInstallHeatTooltip() {
+  if (typeof document === 'undefined') return;
+  if (window.__anwbTipInstalled) return;
+  window.__anwbTipInstalled = true;
+
+  const tip = document.createElement('div');
+  tip.id = 'anwb-hm-tooltip';
+  tip.setAttribute('role', 'tooltip');
+  tip.style.display = 'none';
+  document.body.appendChild(tip);
+
+  const hide = () => { tip.style.display = 'none'; };
+  const show = (el, ev) => {
+    const title = el.getAttribute('data-tip-title') || '';
+    const count = el.getAttribute('data-tip-count') || '';
+    const pctT  = el.getAttribute('data-tip-pct') || '';
+    tip.innerHTML =
+      `<div class="anwb-tip-title">${title}</div>` +
+      `<div class="anwb-tip-row"><span>จำนวน</span><b>${count}</b></div>` +
+      `<div class="anwb-tip-row"><span>สัดส่วน</span><b>${pctT}</b></div>`;
+    tip.style.display = 'block';
+    position(ev);
+  };
+  const position = (ev) => {
+    const pad = 14;
+    const w = tip.offsetWidth, h = tip.offsetHeight;
+    let x = ev.clientX + pad;
+    let y = ev.clientY + pad;
+    if (x + w > window.innerWidth - 8)  x = ev.clientX - w - pad;
+    if (y + h > window.innerHeight - 8) y = ev.clientY - h - pad;
+    tip.style.left = x + 'px';
+    tip.style.top  = y + 'px';
+  };
+
+  document.addEventListener('mouseover', (ev) => {
+    const el = ev.target && ev.target.closest && ev.target.closest('[data-tip-title]');
+    if (el) show(el, ev);
+  });
+  document.addEventListener('mousemove', (ev) => {
+    if (tip.style.display === 'block') {
+      const el = ev.target && ev.target.closest && ev.target.closest('[data-tip-title]');
+      if (el) position(ev);
+      else hide();
+    }
+  });
+  document.addEventListener('mouseout', (ev) => {
+    const el = ev.target && ev.target.closest && ev.target.closest('[data-tip-title]');
+    if (el && !el.contains(ev.relatedTarget)) hide();
+  });
+  document.addEventListener('scroll', hide, true);
+}
+// Install immediately so hovering works as soon as heatmaps render
+if (typeof window !== 'undefined') {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', anwbInstallHeatTooltip);
+  } else {
+    anwbInstallHeatTooltip();
+  }
 }
 
 function _kpiCard(label, value, sub, color) {
@@ -598,7 +876,10 @@ function _pctStr(n, total) { return fmtNum(_pct(n, total), 1) + '%'; }
 
 function _metricBar(label, count, total, color) {
   const p = _pct(count, total);
-  return `<div class="anwb-metric-bar">
+  const tipCount = `${fmtNum(count)} คน จากทั้งหมด ${fmtNum(total)} คน`;
+  const tipPct = `${fmtNum(p,1)}%`;
+  const tipAttrs = `data-tip-title="${esc(label)}" data-tip-count="${esc(tipCount)}" data-tip-pct="${esc(tipPct)}"`;
+  return `<div class="anwb-metric-bar" ${tipAttrs}>
     <div class="anwb-metric-bar-label"><span>${esc(label)}</span><span style="font-weight:700;color:${color}">${fmtNum(count)} คน (${fmtNum(p,1)}%)</span></div>
     <div class="anwb-metric-bar-track"><div class="anwb-metric-bar-fill" style="width:${Math.max(p,0.5)}%;background:${color}"></div></div>
   </div>`;
@@ -824,6 +1105,26 @@ function _anwbRenderSedentary(rows) {
 }
 
 /* ── TMHI-15 เชิงลึก ──────────────────────────────────────────── */
+const TMHI_ITEM_LABELS = [
+  'ท่านรู้สึกพึงพอใจในชีวิต',
+  'ท่านรู้สึกสบายใจ',
+  'ท่านรู้สึกภูมิใจในตนเอง',
+  'ท่านรู้สึกเบื่อหน่ายท้อแท้กับการดำเนินชีวิตประจำวัน',
+  'ท่านรู้สึกผิดหวังในตนเอง',
+  'ท่านรู้สึกว่าชีวิตมีแต่ความทุกข์',
+  'ท่านสามารถทำใจยอมรับได้สำหรับปัญหาที่ยากจะแก้ไข (เมื่อมีปัญหา)',
+  'ท่านมั่นใจว่าจะสามารถควบคุมอารมณ์ได้เมื่อมีเหตุการณ์คับขัน',
+  'ท่านมั่นใจที่จะเผชิญกับเหตุการณ์ร้ายแรงที่เกิดขึ้นในชีวิต',
+  'ท่านรู้สึกเห็นอกเห็นใจเมื่อผู้อื่นมีความทุกข์',
+  'ท่านรู้สึกเป็นสุขในการช่วยเหลือผู้อื่นที่มีปัญหา',
+  'ท่านให้ความช่วยเหลือแก่ผู้อื่นเมื่อมีโอกาส',
+  'ท่านรู้สึกมั่นคงปลอดภัยเมื่ออยู่ในครอบครัว',
+  'หากท่านป่วยหนัก ท่านเชื่อว่าคนในครอบครัวจะดูแลท่านเป็นอย่างดี',
+  'สมาชิกในครอบครัวมีความรักและผูกพันต่อกัน',
+];
+const TMHI_LEVEL_LABELS = ['ไม่เลย', 'เล็กน้อย', 'มาก', 'มากที่สุด'];
+const TMHI_REVERSE_IDXS = new Set([3, 4, 5]); // tmhi_4,5,6 (0-indexed: 3,4,5)
+
 function _anwbRenderTmhiDeep(rows) {
   const tmhiRows = rows.filter(r => getTmhi(r) != null && !isNaN(getTmhi(r)) && getTmhi(r) > 0);
   const n = tmhiRows.length;
@@ -832,21 +1133,58 @@ function _anwbRenderTmhiDeep(rows) {
   const average = tmhiRows.filter(r => getTmhiLevelMeta(getTmhi(r)).key === 'average').length;
   const good    = tmhiRows.filter(r => getTmhiLevelMeta(getTmhi(r)).key === 'good').length;
 
+  // Sub-domain scores (transformed to 1-4 range)
+  const scoreItem = (row, idx) => {
+    const raw = Number(row[`tmhi_${idx+1}`]);
+    if (!Number.isFinite(raw) || raw < 0 || raw > 3) return null;
+    return TMHI_REVERSE_IDXS.has(idx) ? (4 - raw) : (raw + 1);
+  };
   const subDomains = [
-    { label: 'ด้านอารมณ์', keys: ['tmhi_1','tmhi_2','tmhi_3','tmhi_4','tmhi_5','tmhi_6'] },
-    { label: 'ด้านการปรับตัว', keys: ['tmhi_7','tmhi_8','tmhi_9'] },
-    { label: 'ด้านสังคม (เห็นอกเห็นใจ)', keys: ['tmhi_10','tmhi_11','tmhi_12'] },
-    { label: 'ด้านครอบครัว', keys: ['tmhi_13','tmhi_14','tmhi_15'] },
+    { label: 'ด้านอารมณ์',            idxs: [0,1,2,3,4,5] },
+    { label: 'ด้านการปรับตัว',         idxs: [6,7,8] },
+    { label: 'ด้านสังคม (เห็นอกเห็นใจ)', idxs: [9,10,11] },
+    { label: 'ด้านครอบครัว',           idxs: [12,13,14] },
   ].map(d => {
-    const vals = tmhiRows.map(r => d.keys.reduce((s, k) => s + (Number(r[k]) || 0), 0)).filter(v => v > 0);
-    const max = d.keys.length * 3;
+    const max = d.idxs.length * 4;
+    const min = d.idxs.length * 1;
+    const vals = tmhiRows.map(r => {
+      const parts = d.idxs.map(i => scoreItem(r, i));
+      return parts.some(v => v == null) ? null : parts.reduce((a,b) => a+b, 0);
+    }).filter(v => v != null);
     const avg = vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
-    return { ...d, avg, max, pct: avg != null ? (avg / max) * 100 : null };
+    return { ...d, avg, max, min, pct: avg != null ? ((avg - min) / (max - min)) * 100 : null };
+  });
+
+  const heatmap = _anwbBuildHeatmap({
+    id: 'tmhi',
+    itemLabels: TMHI_ITEM_LABELS,
+    levelLabels: TMHI_LEVEL_LABELS,
+    // For reverse items, dist column 0 (= final 1 = "ไม่เลย") ← raw 3 "มากที่สุด"
+    // For normal items, dist column 0 (= final 1 = "ไม่เลย") ← raw 0 "ไม่เลย"
+    // getTmhiItemDistribution already normalises to "final score 1..4" columns,
+    // so column headers show the TRANSFORMED answer direction. We prefer to
+    // display the RAW answer the respondent actually chose — recompute here.
+    dist: (function() {
+      const d = Array.from({length: 15}, () => [0,0,0,0]);
+      const totals = new Array(15).fill(0);
+      tmhiRows.forEach(r => {
+        for (let i = 0; i < 15; i++) {
+          const raw = Number(r[`tmhi_${i+1}`]);
+          if (!Number.isFinite(raw) || raw < 0 || raw > 3) continue;
+          d[i][raw] += 1;
+          totals[i] += 1;
+        }
+      });
+      return { dist: d, totals };
+    })(),
+    reverseIdxs: TMHI_REVERSE_IDXS,
+    colorBase: '#0F4C81',
+    note: 'คำถามกลับข้าง (tmhi 4/5/6) — สีเข้มด้าน "มากที่สุด" = สุขภาพจิตแย่กว่า',
   });
 
   _setHtml('anwb-tmhi-deep', _cardWrap('🧠', 'สุขภาพจิต TMHI-15 — วิเคราะห์เชิงลึก', `
     <div class="anwb-kpi-row">
-      <div class="anwb-kpi-mini"><div class="anwb-kpi-mini-val">${avgTmhi != null ? fmtNum(avgTmhi,1) : '—'}</div><div class="anwb-kpi-mini-label">คะแนนเฉลี่ย<br>(เต็ม 45)</div></div>
+      <div class="anwb-kpi-mini"><div class="anwb-kpi-mini-val">${avgTmhi != null ? fmtNum(avgTmhi,1) : '—'}</div><div class="anwb-kpi-mini-label">คะแนนเฉลี่ย<br>(เต็ม 60)</div></div>
       <div class="anwb-kpi-mini"><div class="anwb-kpi-mini-val" style="color:#DC2626">${fmtNum(poor)}</div><div class="anwb-kpi-mini-label">ต่ำกว่าคนทั่วไป<br>(< 44)</div></div>
       <div class="anwb-kpi-mini"><div class="anwb-kpi-mini-val" style="color:#D97706">${fmtNum(average)}</div><div class="anwb-kpi-mini-label">เท่ากับคนทั่วไป<br>(44–50)</div></div>
       <div class="anwb-kpi-mini"><div class="anwb-kpi-mini-val" style="color:#059669">${fmtNum(good)}</div><div class="anwb-kpi-mini-label">ดีกว่าคนทั่วไป<br>(≥ 51)</div></div>
@@ -854,64 +1192,119 @@ function _anwbRenderTmhiDeep(rows) {
     ${_metricBar('ต่ำกว่าคนทั่วไป (< 44)', poor, n, '#DC2626')}
     ${_metricBar('เท่ากับคนทั่วไป (44–50)', average, n, '#D97706')}
     ${_metricBar('ดีกว่าคนทั่วไป (≥ 51)', good, n, '#059669')}
-    <div style="font-size:12px;font-weight:700;color:var(--tx2);margin:14px 0 8px">คะแนนรายด้าน (เฉลี่ย)</div>
+    <div style="font-size:12px;font-weight:700;color:var(--tx2);margin:14px 0 8px">คะแนนรายด้าน (เฉลี่ย, เต็ม ${4} ต่อข้อ)</div>
     ${subDomains.map(d => `<div class="anwb-metric-bar">
       <div class="anwb-metric-bar-label"><span>${esc(d.label)}</span><span style="font-weight:700;color:var(--P)">${d.avg != null ? fmtNum(d.avg,1) : '—'} / ${d.max}</span></div>
       <div class="anwb-metric-bar-track"><div class="anwb-metric-bar-fill" style="width:${d.pct != null ? Math.max(d.pct,0.5) : 0}%;background:#0F4C81"></div></div>
     </div>`).join('')}
-    <div style="font-size:10.5px;color:var(--tx3);margin-top:8px">ที่มา: กรมสุขภาพจิต กระทรวงสาธารณสุข · มีข้อมูล ${fmtNum(n)} คน</div>
+    ${heatmap}
+    <div style="font-size:10.5px;color:var(--tx3);margin-top:8px">ที่มา: กรมสุขภาพจิต กระทรวงสาธารณสุข · เกณฑ์คะแนน 1–4 ต่อข้อ (บวกจากดัชนี 0–3 ที่จัดเก็บ) · มีข้อมูล ${fmtNum(n)} คน</div>
   `));
 }
 
-/* ── UCLA Loneliness Scale ────────────────────────────────────── */
+/* ── UCLA Loneliness Scale — ความเหงา (20 ข้อ) ─────────────────
+   Dual-mode:
+   - Original 1978 (default) : N=0,R=1,S=2,O=3  → total 0–60   (cutoffs 0-20/21-40/41-60)
+   - Version 3 (1996)        : N=1,R=2,S=3,O=4  → total 20–80  (cutoffs +20 shifted)
+   Sub-scale breakdown removed per request — focus on the 20 items collectively.
+*/
+const UCLA_ITEM_LABELS = [
+  'ฉันไม่มีความสุขที่ต้องทำสิ่งต่าง ๆ คนเดียว',
+  'ฉันไม่มีใครให้คุยด้วย',
+  'ฉันทนไม่ได้ที่จะอยู่คนเดียวอย่างนี้',
+  'ฉันขาดมิตรภาพ',
+  'ฉันรู้สึกราวกับว่าไม่มีใครเข้าใจฉันจริงๆ',
+  'ฉันพบว่าตัวเองมักรอให้คนอื่นติดต่อมาก่อน',
+  'ฉันไม่มีใครให้พึ่ง',
+  'ฉันรู้สึกว่าไม่เหลือคนที่สนิทด้วยแล้ว',
+  'ความสนใจและความคิดของฉันไม่ค่อยสอดคล้องกับคนรอบข้าง',
+  'ฉันรู้สึกถูกทอดทิ้ง',
+  'ฉันรู้สึกโดดเดี่ยวโดยสิ้นเชิง',
+  'ฉันไม่สามารถติดต่อสื่อสารกับคนรอบข้างได้',
+  'ฉันมีความสัมพันธ์ทางสังคมเพียงผิวเผิน',
+  'ฉันโหยหาการมีเพื่อนพ้อง',
+  'ไม่มีใครเข้าใจฉันอย่างแท้จริง',
+  'ฉันรู้สึกถูกแยกออกจากคนอื่นๆ',
+  'ฉันไม่มีความสุขที่ตัวเองถอยห่างจากสังคม',
+  'การทำความรู้จักกับคนใหม่ ๆ เป็นเรื่องยากสำหรับฉัน',
+  'ฉันรู้สึกถูกกีดกัน และถูกตัดขาดออกจากผู้อื่น',
+  'แม้มีคนมากมายอยู่รอบตัวแต่ฉันก็ยังรู้สึกโดดเดี่ยว',
+];
+const UCLA_LEVEL_LABELS_1978 = ['ไม่เคย (0)', 'แทบไม่เคย (1)', 'บางครั้ง (2)', 'บ่อยครั้ง (3)'];
+const UCLA_LEVEL_LABELS_V3   = ['ไม่เคย (1)', 'แทบไม่เคย (2)', 'บางครั้ง (3)', 'บ่อยครั้ง (4)'];
+
+function anwbSetUclaMode(mode) {
+  window.anwbUclaMode = (mode === 'v3_1996') ? 'v3_1996' : 'orig1978';
+  renderAnalytics();
+}
+
 function _anwbRenderLoneliness(rows) {
-  const lRows = rows.filter(r => getLonelinessTotal(r) != null);
+  const mode = window.anwbUclaMode === 'v3_1996' ? 'v3_1996' : 'orig1978';
+  const lRows = rows.filter(r => getLonelinessTotal(r, mode) != null);
   const n = lRows.length;
-  const avgScore = n ? lRows.reduce((s, r) => s + getLonelinessTotal(r), 0) / n : null;
+  const avgScore = n ? lRows.reduce((s, r) => s + getLonelinessTotal(r, mode), 0) / n : null;
 
-  const l3 = [
-    { key: 'low',    label: 'โดดเดี่ยวน้อย (0–20)',    color: '#059669' },
-    { key: 'medium', label: 'โดดเดี่ยวปานกลาง (21–40)', color: '#D97706' },
-    { key: 'high',   label: 'โดดเดี่ยวมาก (41–60)',     color: '#DC2626' },
-  ].map(l => ({ ...l, count: lRows.filter(r => getLonelinessLevel3(getLonelinessTotal(r))?.key === l.key).length }));
-
-  const l4 = [
-    { key: 'very_low',  label: 'โดดเดี่ยวน้อยมาก (0–15)',       color: '#059669' },
-    { key: 'low_mid',   label: 'โดดเดี่ยวน้อย–ปานกลาง (16–30)', color: '#84CC16' },
-    { key: 'mid_high',  label: 'โดดเดี่ยวปานกลาง–มาก (31–45)',  color: '#D97706' },
-    { key: 'very_high', label: 'โดดเดี่ยวมากที่สุด (46–60)',     color: '#DC2626' },
-  ].map(l => ({ ...l, count: lRows.filter(r => getLonelinessLevel4(getLonelinessTotal(r))?.key === l.key).length }));
-
-  const subLabels = { isolation: 'ความโดดเดี่ยว', social_relation: 'ความสัมพันธ์สังคม', self_disconnect: 'การตัดขาดตนเอง', social_behavior: 'พฤติกรรมสังคม' };
-  const subAvgs = Object.fromEntries(Object.keys(subLabels).map(k => {
-    const vals = lRows.map(r => getLonelinessSubScores(r)[k]).filter(v => v != null);
-    return [k, vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null];
+  // Bands per mode
+  const bands1978 = [
+    { key: 'low',    label: 'โดดเดี่ยวน้อย (0–20)',     color: '#059669', min: 0,  max: 20 },
+    { key: 'medium', label: 'โดดเดี่ยวปานกลาง (21–40)',  color: '#D97706', min: 21, max: 40 },
+    { key: 'high',   label: 'โดดเดี่ยวมาก (41–60)',      color: '#DC2626', min: 41, max: 60 },
+  ];
+  const bandsV3 = [
+    { key: 'low',    label: 'โดดเดี่ยวน้อย (20–40)',     color: '#059669', min: 20, max: 40 },
+    { key: 'medium', label: 'โดดเดี่ยวปานกลาง (41–60)',   color: '#D97706', min: 41, max: 60 },
+    { key: 'high',   label: 'โดดเดี่ยวมาก (61–80)',       color: '#DC2626', min: 61, max: 80 },
+  ];
+  const bands = mode === 'v3_1996' ? bandsV3 : bands1978;
+  const bandsWithCount = bands.map(b => ({
+    ...b,
+    count: lRows.filter(r => {
+      const s = getLonelinessTotal(r, mode);
+      return s != null && s >= b.min && s <= b.max;
+    }).length,
   }));
+  const highCount = bandsWithCount.find(b => b.key === 'high').count;
+  const maxTotal = mode === 'v3_1996' ? 80 : 60;
+  const minTotal = mode === 'v3_1996' ? 20 : 0;
 
-  _setHtml('anwb-loneliness', _cardWrap('💙', 'UCLA Loneliness Scale — ความโดดเดี่ยว', `
+  // Per-item distribution heatmap (always uses raw 0..3 → shows answer direction)
+  const itemDist = getLonelinessItemDistribution(lRows);
+  const heatmap = _anwbBuildHeatmap({
+    id: 'ucla',
+    itemLabels: UCLA_ITEM_LABELS,
+    levelLabels: mode === 'v3_1996' ? UCLA_LEVEL_LABELS_V3 : UCLA_LEVEL_LABELS_1978,
+    dist: itemDist,
+    reverseIdxs: new Set(), // UCLA 1978/V3 (this survey) has no reverse-scored items
+    colorBase: '#0F4C81',
+    note: 'สีเข้ม = สัดส่วนของผู้ตอบในช่องนั้นสูง · ด้านขวา (บ่อยครั้ง) = โดดเดี่ยวมาก',
+  });
+
+  const toggleBtn = (key, label, desc) => `
+    <button type="button" class="anwb-ucla-mode-btn ${mode === key ? 'active' : ''}" onclick="anwbSetUclaMode('${key}')" title="${esc(desc)}">
+      ${esc(label)}
+    </button>`;
+
+  _setHtml('anwb-loneliness', _cardWrap('💙', 'UCLA Loneliness Scale — ความเหงา (20 ข้อ)', `
+    <div class="anwb-ucla-mode-bar">
+      <div style="font-size:11.5px;font-weight:700;color:var(--tx2)">เวอร์ชันการให้คะแนน:</div>
+      <div class="anwb-ucla-mode-group">
+        ${toggleBtn('orig1978', 'Original 1978 (0–3)', 'Russell, Peplau & Ferguson 1978 — N=0,R=1,S=2,O=3 · total 0–60')}
+        ${toggleBtn('v3_1996', 'Version 3 1996 (1–4)', 'Russell 1996 — N=1,R=2,S=3,O=4 · total 20–80 (เพิ่ม +1 ทุกข้อ)')}
+      </div>
+    </div>
     <div class="anwb-kpi-row">
-      <div class="anwb-kpi-mini"><div class="anwb-kpi-mini-val">${avgScore != null ? fmtNum(avgScore,1) : '—'}</div><div class="anwb-kpi-mini-label">คะแนนเฉลี่ย<br>(เต็ม 60)</div></div>
-      <div class="anwb-kpi-mini"><div class="anwb-kpi-mini-val" style="color:#DC2626">${n ? fmtNum(_pct(l3.find(l=>l.key==='high').count, n), 1) : '—'}%</div><div class="anwb-kpi-mini-label">โดดเดี่ยวมาก<br>(≥ 41 คะแนน)</div></div>
+      <div class="anwb-kpi-mini"><div class="anwb-kpi-mini-val">${avgScore != null ? fmtNum(avgScore,1) : '—'}</div><div class="anwb-kpi-mini-label">คะแนนเฉลี่ย<br>(${minTotal}–${maxTotal})</div></div>
+      <div class="anwb-kpi-mini"><div class="anwb-kpi-mini-val" style="color:#DC2626">${n ? fmtNum(_pct(highCount, n), 1) : '—'}%</div><div class="anwb-kpi-mini-label">โดดเดี่ยวมาก<br>(${bandsWithCount.find(b=>b.key==='high').label.match(/\((.*?)\)/)?.[1] || ''})</div></div>
+      <div class="anwb-kpi-mini"><div class="anwb-kpi-mini-val">${fmtNum(n)}</div><div class="anwb-kpi-mini-label">ผู้ตอบครบ<br>20 ข้อ</div></div>
     </div>
-    <div class="anwb-2col">
-      <div>
-        <div style="font-size:12px;font-weight:700;color:var(--tx2);margin-bottom:8px">เกณฑ์ 3 ระดับ (ต้นฉบับ 1978)</div>
-        ${l3.map(l => _metricBar(l.label, l.count, n, l.color)).join('')}
-      </div>
-      <div>
-        <div style="font-size:12px;font-weight:700;color:var(--tx2);margin-bottom:8px">เกณฑ์ 4 ระดับ (แบ่งเชิงสถิติ)</div>
-        ${l4.map(l => _metricBar(l.label, l.count, n, l.color)).join('')}
-        <div style="font-size:10px;color:var(--tx3);margin-top:4px">* แบ่ง range 60 เป็น 4 ส่วนเท่ากัน (15 คะแนน)</div>
-      </div>
+    <div style="font-size:12px;font-weight:700;color:var(--tx2);margin:6px 0 8px">การกระจายคะแนน — 3 ระดับ</div>
+    ${bandsWithCount.map(b => _metricBar(b.label, b.count, n, b.color)).join('')}
+    ${heatmap}
+    <div style="font-size:10.5px;color:var(--tx3);margin-top:10px">
+      ที่มา: UCLA Loneliness Scale${mode === 'v3_1996' ? ' Version 3 (Russell, 1996)' : ' Original (Russell, Peplau & Ferguson, 1978)'} ·
+      ${mode === 'v3_1996' ? 'Never=1, Rarely=2, Sometimes=3, Often=4 · total 20–80' : 'Never=0, Rarely=1, Sometimes=2, Often=3 · total 0–60'} ·
+      ข้อมูลดิบจัดเก็บเป็น 0–3 (ตรงกับ 1978) · Version 3 บวก +1 ต่อข้อตอนแสดงผล · มีข้อมูลครบ ${fmtNum(n)} คน
     </div>
-    <div class="anwb-lonely-sub">
-      ${Object.entries(subLabels).map(([k, label]) => `
-        <div class="anwb-lonely-sub-card">
-          <div class="anwb-lonely-sub-val" style="color:var(--P)">${subAvgs[k] != null ? fmtNum(subAvgs[k],1) : '—'}</div>
-          <div class="anwb-lonely-sub-name">${esc(label)}<br><span style="font-size:9px;color:var(--tx3)">/ 15 คะแนน</span></div>
-        </div>`).join('')}
-    </div>
-    <div style="font-size:10.5px;color:var(--tx3);margin-top:10px">ที่มา: UCLA Loneliness Scale (1978) · O=3, S=2, R=1, N=0 · ทุกข้อบวกเดียวกัน (ไม่มี reverse) · มีข้อมูล ${fmtNum(n)} คน</div>
   `));
 }
 

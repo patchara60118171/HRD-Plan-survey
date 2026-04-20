@@ -11,6 +11,186 @@
 
 // ─── Dashboard ──────────────────────────────────────────────────────────────
 
+// Fast-path paint: fill KPI cards + daily chart from the RPC summary
+// returned by get_admin_dashboard_summary. This runs before the heavy
+// loadBackendCore()/loadBackendExtras() data is available so users see
+// numbers instantly. renderDashboard() below replaces this once the
+// full datasets are loaded.
+function renderDashboardFromRPC(rpc) {
+  if (!rpc || typeof rpc !== 'object') return;
+  const dashboard = document.getElementById('page-dashboard');
+  if (!dashboard) return;
+
+  const orgCount = rpc.org_count || 0;
+  const wbSubmitted = rpc.wb_submitted || 0;
+  const wbDraft = rpc.wb_draft || 0;
+  const ch1SubmittedOrgs = rpc.ch1_submitted_orgs || 0;
+  const ch1RespondedOrgs = rpc.ch1_responded_orgs || ch1SubmittedOrgs;
+  const activeUsers = rpc.active_users || 0;
+  const viewerCount = rpc.viewer_count || 0;
+  const adminCount = rpc.admin_count || 0;
+
+  const welcome = dashboard.querySelector('.welcome');
+  if (welcome) {
+    const wTitle = welcome.querySelector('.w-title');
+    const wSub = welcome.querySelector('.w-sub');
+    if (wTitle) wTitle.textContent = `สวัสดีครับ, ${state?.session?.user?.email || 'ผู้ดูแลระบบ'}`;
+    if (wSub) wSub.innerHTML = `โครงการสำรวจสุขภาวะบุคลากรภาครัฐ พ.ศ. 2566–2570 · อัปเดต ${fmtDate(new Date(), true)}`;
+    const wVals = welcome.querySelectorAll('.w-val');
+    if (wVals[0]) wVals[0].textContent = orgCount;
+    if (wVals[1]) wVals[1].textContent = ch1SubmittedOrgs;
+    if (wVals[2]) wVals[2].textContent = fmtNum(wbSubmitted);
+  }
+
+  const kpis = dashboard.querySelectorAll('.kpi');
+  if (kpis.length >= 4) {
+    kpis[0].querySelector('.kpi-val').textContent = orgCount;
+    kpis[0].querySelector('.kpi-sub').textContent = orgCount > 0 ? `${orgCount} หน่วยงานภาครัฐ` : 'ไม่มีข้อมูลองค์กร';
+
+    kpis[1].querySelector('.kpi-val').textContent = ch1SubmittedOrgs;
+    kpis[1].querySelector('.kpi-sub').textContent = orgCount > 0
+      ? `${fmtNum((ch1SubmittedOrgs / Math.max(orgCount, 1)) * 100, 1)}% · ยังไม่ส่ง ${orgCount - ch1SubmittedOrgs} องค์กร${ch1RespondedOrgs > ch1SubmittedOrgs ? ` · Draft ${ch1RespondedOrgs - ch1SubmittedOrgs} องค์กร` : ''}`
+      : 'ไม่มีข้อมูลแบบสำรวจข้อมูลองค์กร';
+
+    kpis[2].querySelector('.kpi-val').textContent = fmtNum(wbSubmitted);
+    kpis[2].querySelector('.kpi-sub').textContent = wbSubmitted > 0 || wbDraft > 0
+      ? `Draft ${fmtNum(wbDraft)} รายการ`
+      : 'ยังไม่มีข้อมูล Wellbeing';
+
+    kpis[3].querySelector('.kpi-val').textContent = fmtNum(activeUsers);
+    kpis[3].querySelector('.kpi-sub').textContent = activeUsers > 0
+      ? `${fmtNum(viewerCount)} Viewer · ${fmtNum(adminCount)} Admin`
+      : 'ไม่มีข้อมูลผู้ใช้';
+  }
+
+  // Daily trend chart from RPC payload (show last 14 days)
+  const trend = Array.isArray(rpc.daily_trend) ? rpc.daily_trend.slice(-14) : [];
+  renderDashboardTrendChart(trend.map(d => [d.date, d.count || 0]), wbSubmitted);
+}
+
+// Extracted chart renderer so both RPC fast-path and full renderDashboard
+// can reuse it. `dailyRows` = [[YYYY-MM-DD, count], ...] sorted asc.
+function renderDashboardTrendChart(dailyRows, totalAllTime) {
+  const chartEl = document.getElementById('wb-daily-chart');
+  const rangeLabel = document.getElementById('chart-range-label');
+  if (!chartEl) return;
+
+  if (!dailyRows || !dailyRows.length) {
+    chartEl.innerHTML = '<div class="cph-icon">📈</div><div>ยังไม่มีข้อมูล Wellbeing ที่ submit แล้ว</div>';
+    return;
+  }
+
+  const maxCount = Math.max(...dailyRows.map(e => e[1]), 1);
+  const totalPeriod = dailyRows.reduce((s, e) => s + e[1], 0);
+  const avgPerDay = (totalPeriod / dailyRows.length).toFixed(1);
+  const peakDay = dailyRows.reduce((a, b) => b[1] > a[1] ? b : a);
+  if (rangeLabel) rangeLabel.textContent = `${fmtDate(dailyRows[0][0])} — ${fmtDate(dailyRows[dailyRows.length - 1][0])}`;
+
+  const shortDate = (dateStr) => {
+    const d = new Date(dateStr + 'T00:00:00');
+    return `${d.getDate()}/${d.getMonth() + 1}`;
+  };
+  const thaiDay = (dateStr) => {
+    const d = new Date(dateStr + 'T00:00:00');
+    return ['อา','จ','อ','พ','พฤ','ศ','ส'][d.getDay()] || '';
+  };
+
+  const W = 600, H = 110, PAD = { t: 12, r: 8, b: 4, l: 8 };
+  const n = dailyRows.length;
+  const xStep = (W - PAD.l - PAD.r) / Math.max(n - 1, 1);
+  const yScale = (v) => PAD.t + (H - PAD.t - PAD.b) * (1 - v / maxCount);
+  const pts = dailyRows.map(([, c], i) => [PAD.l + i * xStep, yScale(c)]);
+  const polyline = pts.map(([x, y]) => `${x},${y}`).join(' ');
+  const areaPath = `M${pts[0][0]},${H - PAD.b} ` +
+    pts.map(([x, y]) => `L${x},${y}`).join(' ') +
+    ` L${pts[pts.length - 1][0]},${H - PAD.b} Z`;
+
+  const gridLines = [0.25, 0.5, 0.75].map(f => {
+    const yv = Math.round(maxCount * f);
+    const y = yScale(yv);
+    return `<line x1="${PAD.l}" y1="${y}" x2="${W - PAD.r}" y2="${y}" stroke="var(--bdr)" stroke-width="1" stroke-dasharray="3,3"/>
+            <text x="${PAD.l}" y="${y - 3}" font-size="8" fill="var(--tx3)" text-anchor="start">${yv}</text>`;
+  }).join('');
+
+  const hoverDots = pts.map(([x, y], i) =>
+    `<circle class="area-dot" cx="${x}" cy="${y}" r="4" fill="var(--A)" stroke="#fff" stroke-width="2"
+      style="opacity:0;transition:opacity .1s;cursor:pointer"
+      data-idx="${i}" data-x="${x}" data-y="${y}"/>`
+  ).join('');
+
+  const showLabel = (i) => n <= 7 || i === 0 || i === n - 1 || i % Math.ceil(n / 5) === 0;
+  const xLabels = dailyRows.map(([day], i) => showLabel(i)
+    ? `<div class="area-x-label" style="flex:${i === 0 || i === n - 1 ? '0 0 auto' : '1'}"><b>${thaiDay(day)}</b>${shortDate(day)}</div>`
+    : `<div class="area-x-label" style="flex:1"></div>`
+  ).join('');
+
+  chartEl.style.height = 'auto';
+  chartEl.style.background = 'transparent';
+  chartEl.innerHTML = `
+    <div class="area-chart-wrap">
+      <div class="area-stats">
+        <div class="area-stat">
+          <div class="area-stat-label"><span class="area-stat-dot" style="background:var(--A)"></span>ตอบช่วงนี้</div>
+          <div class="area-stat-val">${fmtNum(totalPeriod)}</div>
+          <div class="area-stat-sub">${dailyRows.length} วันล่าสุด</div>
+        </div>
+        <div class="area-stat">
+          <div class="area-stat-label"><span class="area-stat-dot" style="background:var(--P)"></span>เฉลี่ย/วัน</div>
+          <div class="area-stat-val">${avgPerDay}</div>
+          <div class="area-stat-sub">คน/วัน</div>
+        </div>
+        <div class="area-stat">
+          <div class="area-stat-label"><span class="area-stat-dot" style="background:#C08F2A"></span>สูงสุด</div>
+          <div class="area-stat-val">${fmtNum(peakDay[1])}</div>
+          <div class="area-stat-sub">${shortDate(peakDay[0])}</div>
+        </div>
+        <div class="area-stat">
+          <div class="area-stat-label"><span class="area-stat-dot" style="background:var(--tx3)"></span>สะสมทั้งหมด</div>
+          <div class="area-stat-val">${fmtNum(totalAllTime || 0)}</div>
+          <div class="area-stat-sub">ทุกช่วงเวลา</div>
+        </div>
+      </div>
+      <div class="area-svg-wrap" id="area-svg-wrap">
+        <div class="area-tooltip" id="area-tooltip"></div>
+        <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="height:120px">
+          <defs>
+            <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#00A86B" stop-opacity="0.18"/>
+              <stop offset="100%" stop-color="#00A86B" stop-opacity="0.01"/>
+            </linearGradient>
+          </defs>
+          ${gridLines}
+          <path d="${areaPath}" fill="url(#areaGrad)"/>
+          <polyline points="${polyline}" fill="none" stroke="#00A86B" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+          ${hoverDots}
+        </svg>
+        <div class="area-x-labels">${xLabels}</div>
+      </div>
+    </div>`;
+
+  const wrap = chartEl.querySelector('#area-svg-wrap');
+  const tooltip = chartEl.querySelector('#area-tooltip');
+  chartEl.querySelectorAll('.area-dot').forEach((dot) => {
+    const idx = parseInt(dot.dataset.idx);
+    const [day, count] = dailyRows[idx];
+    dot.addEventListener('mouseenter', () => {
+      dot.style.opacity = '1';
+      tooltip.textContent = `${fmtDate(day)}: ${fmtNum(count)} คน`;
+      const wrapRect = wrap.getBoundingClientRect();
+      const dotRect = dot.getBoundingClientRect();
+      const x = dotRect.left + dotRect.width / 2 - wrapRect.left;
+      const y = dotRect.top - wrapRect.top;
+      tooltip.style.left = `${x}px`;
+      tooltip.style.top = `${y - 34}px`;
+      tooltip.style.opacity = '1';
+    });
+    dot.addEventListener('mouseleave', () => {
+      dot.style.opacity = '0';
+      tooltip.style.opacity = '0';
+    });
+  });
+}
+
 function renderDashboard(summary) {
   const dashboard = document.getElementById('page-dashboard');
   if (!dashboard) {
@@ -68,8 +248,8 @@ function renderDashboard(summary) {
       : 'ไม่มีข้อมูลผู้ใช้';
   }
 
-  const chartEl = document.getElementById('wb-daily-chart');
-  const rangeLabel = document.getElementById('chart-range-label');
+  // Build daily-trend rows from full surveyRows then delegate to the
+  // shared chart renderer (extracted above so RPC fast-path can reuse).
   const perDay = {};
   submittedWb.forEach((row) => {
     const key = String(getRowDate(row) || '').slice(0, 10);
@@ -77,127 +257,7 @@ function renderDashboard(summary) {
     perDay[key] = (perDay[key] || 0) + 1;
   });
   const dailyRows = Object.entries(perDay).sort((a, b) => a[0].localeCompare(b[0])).slice(-14);
-
-  if (!dailyRows.length) {
-    chartEl.innerHTML = '<div class="cph-icon">📈</div><div>ยังไม่มีข้อมูล Wellbeing ที่ submit แล้ว</div>';
-  } else {
-    const maxCount = Math.max(...dailyRows.map(e => e[1]), 1);
-    const totalPeriod = dailyRows.reduce((s, e) => s + e[1], 0);
-    const avgPerDay = (totalPeriod / dailyRows.length).toFixed(1);
-    const peakDay = dailyRows.reduce((a, b) => b[1] > a[1] ? b : a);
-    if (rangeLabel) rangeLabel.textContent = `${fmtDate(dailyRows[0][0])} — ${fmtDate(dailyRows[dailyRows.length - 1][0])}`;
-
-    const shortDate = (dateStr) => {
-      const d = new Date(dateStr + 'T00:00:00');
-      return `${d.getDate()}/${d.getMonth() + 1}`;
-    };
-    const thaiDay = (dateStr) => {
-      const d = new Date(dateStr + 'T00:00:00');
-      return ['อา','จ','อ','พ','พฤ','ศ','ส'][d.getDay()] || '';
-    };
-
-    // SVG area chart
-    const W = 600, H = 110, PAD = { t: 12, r: 8, b: 4, l: 8 };
-    const n = dailyRows.length;
-    const xStep = (W - PAD.l - PAD.r) / Math.max(n - 1, 1);
-    const yScale = (v) => PAD.t + (H - PAD.t - PAD.b) * (1 - v / maxCount);
-
-    const pts = dailyRows.map(([, c], i) => [PAD.l + i * xStep, yScale(c)]);
-    const polyline = pts.map(([x, y]) => `${x},${y}`).join(' ');
-    const areaPath = `M${pts[0][0]},${H - PAD.b} ` +
-      pts.map(([x, y]) => `L${x},${y}`).join(' ') +
-      ` L${pts[pts.length - 1][0]},${H - PAD.b} Z`;
-
-    // Y-axis grid lines (3 lines)
-    const gridLines = [0.25, 0.5, 0.75].map(f => {
-      const yv = Math.round(maxCount * f);
-      const y = yScale(yv);
-      return `<line x1="${PAD.l}" y1="${y}" x2="${W - PAD.r}" y2="${y}" stroke="var(--bdr)" stroke-width="1" stroke-dasharray="3,3"/>
-              <text x="${PAD.l}" y="${y - 3}" font-size="8" fill="var(--tx3)" text-anchor="start">${yv}</text>`;
-    }).join('');
-
-    // Hover dots (invisible, activated via JS)
-    const hoverDots = pts.map(([x, y], i) =>
-      `<circle class="area-dot" cx="${x}" cy="${y}" r="4" fill="var(--A)" stroke="#fff" stroke-width="2"
-        style="opacity:0;transition:opacity .1s;cursor:pointer"
-        data-idx="${i}" data-x="${x}" data-y="${y}"/>`
-    ).join('');
-
-    // Show only some x-labels to avoid crowding
-    const showLabel = (i) => n <= 7 || i === 0 || i === n - 1 || i % Math.ceil(n / 5) === 0;
-    const xLabels = dailyRows.map(([day], i) => showLabel(i)
-      ? `<div class="area-x-label" style="flex:${i === 0 || i === n - 1 ? '0 0 auto' : '1'}"><b>${thaiDay(day)}</b>${shortDate(day)}</div>`
-      : `<div class="area-x-label" style="flex:1"></div>`
-    ).join('');
-
-    chartEl.style.height = 'auto';
-    chartEl.style.background = 'transparent';
-    chartEl.innerHTML = `
-      <div class="area-chart-wrap">
-        <div class="area-stats">
-          <div class="area-stat">
-            <div class="area-stat-label"><span class="area-stat-dot" style="background:var(--A)"></span>ตอบช่วงนี้</div>
-            <div class="area-stat-val">${fmtNum(totalPeriod)}</div>
-            <div class="area-stat-sub">${dailyRows.length} วันล่าสุด</div>
-          </div>
-          <div class="area-stat">
-            <div class="area-stat-label"><span class="area-stat-dot" style="background:var(--P)"></span>เฉลี่ย/วัน</div>
-            <div class="area-stat-val">${avgPerDay}</div>
-            <div class="area-stat-sub">คน/วัน</div>
-          </div>
-          <div class="area-stat">
-            <div class="area-stat-label"><span class="area-stat-dot" style="background:#C08F2A"></span>สูงสุด</div>
-            <div class="area-stat-val">${fmtNum(peakDay[1])}</div>
-            <div class="area-stat-sub">${shortDate(peakDay[0])}</div>
-          </div>
-          <div class="area-stat">
-            <div class="area-stat-label"><span class="area-stat-dot" style="background:var(--tx3)"></span>สะสมทั้งหมด</div>
-            <div class="area-stat-val">${fmtNum(submittedWb.length)}</div>
-            <div class="area-stat-sub">ทุกช่วงเวลา</div>
-          </div>
-        </div>
-        <div class="area-svg-wrap" id="area-svg-wrap">
-          <div class="area-tooltip" id="area-tooltip"></div>
-          <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="height:120px">
-            <defs>
-              <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#00A86B" stop-opacity="0.18"/>
-                <stop offset="100%" stop-color="#00A86B" stop-opacity="0.01"/>
-              </linearGradient>
-            </defs>
-            ${gridLines}
-            <path d="${areaPath}" fill="url(#areaGrad)"/>
-            <polyline points="${polyline}" fill="none" stroke="#00A86B" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-            ${hoverDots}
-          </svg>
-          <div class="area-x-labels">${xLabels}</div>
-        </div>
-      </div>`;
-
-    // Attach hover interactions
-    const wrap = chartEl.querySelector('#area-svg-wrap');
-    const tooltip = chartEl.querySelector('#area-tooltip');
-    chartEl.querySelectorAll('.area-dot').forEach((dot) => {
-      const idx = parseInt(dot.dataset.idx);
-      const [day, count] = dailyRows[idx];
-      dot.addEventListener('mouseenter', () => {
-        dot.style.opacity = '1';
-        tooltip.textContent = `${fmtDate(day)}: ${fmtNum(count)} คน`;
-        const svgRect = wrap.querySelector('svg').getBoundingClientRect();
-        const wrapRect = wrap.getBoundingClientRect();
-        const dotRect = dot.getBoundingClientRect();
-        const x = dotRect.left + dotRect.width / 2 - wrapRect.left;
-        const y = dotRect.top - wrapRect.top;
-        tooltip.style.left = `${x}px`;
-        tooltip.style.top = `${y - 34}px`;
-        tooltip.style.opacity = '1';
-      });
-      dot.addEventListener('mouseleave', () => {
-        dot.style.opacity = '0';
-        tooltip.style.opacity = '0';
-      });
-    });
-  }
+  renderDashboardTrendChart(dailyRows, submittedWb.length);
 
   const statusGrid = document.getElementById('ch1-status-grid');
   const statusLabel = document.getElementById('ch1-status-label');

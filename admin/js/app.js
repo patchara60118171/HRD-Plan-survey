@@ -13,6 +13,17 @@ async function refreshData() {
   if (statusEl) { statusEl.textContent = 'กำลังโหลด...'; statusEl.style.color = 'var(--tx2)'; }
 
   try {
+    // Phase 0: FAST-PATH — force-fetch fresh RPC summary so KPI cards
+    // update before the heavier core/extras fetches complete. On manual
+    // refresh we bypass the SWR cache.
+    try {
+      fetchDashboardSummary()
+        .then((rpc) => {
+          if (rpc) _safeRender(() => renderDashboardFromRPC(rpc), 'renderDashboardFromRPC (refresh)');
+        })
+        .catch((err) => console.warn('fetchDashboardSummary (refresh) error:', err));
+    } catch (err) { console.warn('fetchDashboardSummary (refresh) error:', err); }
+
     // Phase 1: CORE (fast) — refresh dashboard KPIs immediately
     let coreResult = null;
     try { coreResult = await loadBackendCore(); }
@@ -79,6 +90,16 @@ async function init() {
     if (!session) return;
     _initSession = session;
 
+    // Phase 0: FAST-PATH — render KPI cards + daily chart from a single
+    // pre-aggregated RPC (get_admin_dashboard_summary). Uses a localStorage
+    // SWR cache so returning users see numbers instantly (<50 ms) before
+    // the heavier per-row fetches in Phase 1/2 complete.
+    try {
+      primeDashboardSummary((rpc) => {
+        _safeRender(() => renderDashboardFromRPC(rpc), 'renderDashboardFromRPC');
+      });
+    } catch (err) { console.warn('primeDashboardSummary error:', err); }
+
     // Phase 1: CORE — quick queries → render dashboard FAST
     // NOTE: renderChrome() must run AFTER loadBackendCore() so that state.userRows
     // is populated and state.myRole resolves correctly (non-locked emails depend
@@ -92,7 +113,8 @@ async function init() {
       coreResult = { error: err.message || 'Unknown error', loaded: false };
     }
 
-    if (coreResult && coreResult.error) {
+    const coreFailed = !!(coreResult && coreResult.error);
+    if (coreFailed) {
       const btnRefresh = document.getElementById('btn-refresh-data');
       if (btnRefresh) btnRefresh.style.display = '';
       showToast('โหลดข้อมูลหลักไม่สำเร็จ: ' + coreResult.error, 'error', 5000);
@@ -101,11 +123,20 @@ async function init() {
     // Render chrome now that userRows is available → role-gated UI resolves correctly
     _safeRender(renderChrome, 'renderChrome');
 
-    // Compute summary (may be partial) and render core pages NOW
+    // Compute summary and render core pages — but ONLY if core succeeded.
+    // If core failed, keep the RPC fast-path KPI numbers from Phase 0;
+    // rendering with empty surveyRows/userRows would overwrite them with 0.
     let summary = [];
-    try { summary = summarizeOrgs(); }
-    catch (e) { console.error('summarizeOrgs (core) error:', e); summary = []; }
-    _renderCorePages(summary);
+    if (!coreFailed) {
+      try { summary = summarizeOrgs(); }
+      catch (e) { console.error('summarizeOrgs (core) error:', e); summary = []; }
+      _renderCorePages(summary);
+    } else {
+      // Still render the org list and org selects so the side panel works,
+      // but DO NOT re-render the dashboard (it would zero-out the RPC KPIs).
+      _safeRender(() => { try { summary = summarizeOrgs(); } catch (_e) { summary = []; } renderOrgs(summary); }, 'renderOrgs (core-failed)');
+      _safeRender(populateOrgSelects, 'populateOrgSelects');
+    }
 
     // Wire up audit export button (one-time)
     const auditExportBtn = document.querySelector('#page-audit .btn.b-gray');
@@ -121,8 +152,12 @@ async function init() {
         let summary2 = [];
         try { summary2 = summarizeOrgs(); }
         catch (e) { console.error('summarizeOrgs (extras) error:', e); summary2 = summary; }
-        // Re-render dashboard because ch1Count/completion is now accurate with form_data
-        _safeRender(() => renderDashboard(summary2), 'renderDashboard (refresh)');
+        // Only re-render the full dashboard if core succeeded (so we have
+        // real surveyRows/userRows). Otherwise the RPC fast-path numbers
+        // must stand — re-running renderDashboard with empty state zeros them.
+        if (!coreFailed && (state.surveyRows || []).length > 0) {
+          _safeRender(() => renderDashboard(summary2), 'renderDashboard (refresh)');
+        }
         _renderExtraPages(summary2);
       })
       .catch((err) => {

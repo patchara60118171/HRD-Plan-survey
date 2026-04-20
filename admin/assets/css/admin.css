@@ -233,7 +233,7 @@ tbody tr:hover td{background:#FAFBFD}
 
 /* ─── Extended Dashboard Cards ───────────────────────────── */
 .anwb-section-title{font-size:14px;font-weight:700;color:var(--P);margin-bottom:12px;display:flex;align-items:center;gap:8px}
-.anwb-metric-bar{margin-bottom:10px}
+.anwb-metric-bar{margin-bottom:10px;cursor:help}
 .anwb-metric-bar-label{display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px;color:var(--tx2)}
 .anwb-metric-bar-track{background:var(--bg2);border-radius:4px;height:11px;overflow:hidden}
 .anwb-metric-bar-fill{height:11px;border-radius:4px;transition:width .4s ease}
@@ -257,6 +257,77 @@ tbody tr:hover td{background:#FAFBFD}
 .anwb-env-bar-wrap{width:120px;flex-shrink:0}
 .anwb-env-pct{width:44px;text-align:right;font-size:12px;font-weight:700;color:var(--tx);flex-shrink:0}
 @media(max-width:700px){.anwb-lonely-sub{grid-template-columns:1fr}}
+
+/* ─── UCLA mode toggle ─────────────────────────────────────── */
+.anwb-ucla-mode-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;padding:8px 12px;background:var(--bg2);border-radius:8px}
+.anwb-ucla-mode-group{display:inline-flex;background:var(--card);border:1px solid var(--bdr);border-radius:8px;padding:3px;gap:2px}
+.anwb-ucla-mode-btn{border:none;background:transparent;padding:6px 12px;font-size:11.5px;font-weight:600;color:var(--tx2);border-radius:6px;cursor:pointer;transition:all .15s ease;font-family:inherit}
+.anwb-ucla-mode-btn:hover{background:var(--bg2);color:var(--tx)}
+.anwb-ucla-mode-btn.active{background:var(--P);color:#fff;box-shadow:0 1px 3px rgba(15,76,129,.25)}
+
+/* ─── Heatmap (rายข้อ) ─────────────────────────────────────── */
+.anwb-hm{margin-top:16px;background:var(--bg2);border-radius:10px;padding:12px}
+.anwb-hm-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.anwb-hm-title{font-size:12.5px;font-weight:700;color:var(--tx2)}
+.anwb-hm-ctrls{display:inline-flex;align-items:center;gap:10px;flex-wrap:wrap}
+.anwb-hm-tabs{display:inline-flex;background:var(--card);border:1px solid var(--bdr);border-radius:6px;padding:2px;gap:2px}
+.anwb-hm-tab{border:none;background:transparent;padding:4px 10px;font-size:11px;font-weight:600;color:var(--tx2);border-radius:4px;cursor:pointer;transition:all .15s ease;font-family:inherit}
+.anwb-hm-tab:hover{background:var(--bg2)}
+.anwb-hm-tab.active{background:var(--P);color:#fff}
+
+/* Palette swatches — 5 color choices for Grid view */
+.anwb-hm-palette{display:inline-flex;align-items:center;gap:4px;padding:3px 6px;background:var(--card);border:1px solid var(--bdr);border-radius:6px}
+.anwb-hm-swatch{width:20px;height:20px;border-radius:50%;border:2px solid transparent;cursor:pointer;padding:0;transition:transform .12s ease,border-color .15s ease;box-shadow:inset 0 0 0 1px rgba(255,255,255,.25)}
+.anwb-hm-swatch:hover{transform:scale(1.15)}
+.anwb-hm-swatch.active{border-color:var(--tx);transform:scale(1.1);box-shadow:inset 0 0 0 1px rgba(255,255,255,.4),0 0 0 2px rgba(15,76,129,.15)}
+.anwb-hm-swatch:focus-visible{outline:2px solid var(--P);outline-offset:2px}
+
+/* Value-mode toggle (%  ↔  คน) */
+.anwb-hm-vmode{display:inline-flex;background:var(--card);border:1px solid var(--bdr);border-radius:6px;padding:2px;gap:2px}
+.anwb-hm-vbtn{border:none;background:transparent;padding:4px 10px;font-size:11px;font-weight:700;color:var(--tx2);border-radius:4px;cursor:pointer;transition:all .15s ease;font-family:inherit;min-width:34px}
+.anwb-hm-vbtn:hover{background:var(--bg2)}
+.anwb-hm-vbtn.active{background:var(--P);color:#fff}
+
+/* Custom floating tooltip — shared, one instance per page */
+#anwb-hm-tooltip{
+  position:fixed;z-index:9999;pointer-events:none;
+  background:#0F172A;color:#fff;padding:8px 12px;border-radius:8px;
+  font-size:11.5px;line-height:1.5;
+  box-shadow:0 6px 20px rgba(0,0,0,.25),0 2px 6px rgba(0,0,0,.15);
+  min-width:180px;max-width:320px;
+  animation:anwb-tip-in .12s ease-out;
+}
+#anwb-hm-tooltip .anwb-tip-title{font-weight:700;color:#fff;margin-bottom:5px;padding-bottom:4px;border-bottom:1px solid rgba(255,255,255,.15);font-size:12px;line-height:1.3}
+#anwb-hm-tooltip .anwb-tip-row{display:flex;justify-content:space-between;gap:14px;align-items:baseline}
+#anwb-hm-tooltip .anwb-tip-row span{color:rgba(255,255,255,.7);font-size:10.5px}
+#anwb-hm-tooltip .anwb-tip-row b{font-weight:700;font-variant-numeric:tabular-nums}
+@keyframes anwb-tip-in{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:none}}
+
+/* Grid view — table of colored cells */
+.anwb-hm-grid{display:flex;flex-direction:column;gap:2px;background:var(--card);border-radius:8px;padding:8px;overflow-x:auto}
+.anwb-hm-grid-row{display:grid;grid-template-columns:minmax(200px,2.2fr) repeat(4, minmax(54px,1fr)) 44px;gap:2px;align-items:stretch;min-width:540px}
+.anwb-hm-grid-head{position:sticky;top:0;background:var(--card);z-index:1}
+.anwb-hm-grid-rowlabel{display:flex;align-items:center;padding:6px 8px;font-size:11px;line-height:1.3;color:var(--tx);background:transparent}
+.anwb-hm-grid-cell{display:flex;align-items:center;justify-content:center;padding:6px 4px;font-size:11px;font-weight:600;border-radius:4px;text-align:center;cursor:default;transition:transform .12s ease}
+.anwb-hm-grid-cell:hover{transform:scale(1.05);box-shadow:0 0 0 2px rgba(15,76,129,.3)}
+.anwb-hm-grid-total{display:flex;align-items:center;justify-content:center;padding:6px 4px;font-size:10.5px;color:var(--tx3);font-variant-numeric:tabular-nums}
+.anwb-hm-grid-head .anwb-hm-grid-cell{font-size:10.5px;padding:8px 4px}
+
+/* Stacked-bar view */
+.anwb-hm-bar-legend{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:8px;padding:0 4px}
+.anwb-hm-bar-legend-item{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--tx2)}
+.anwb-hm-bar-swatch{display:inline-block;width:12px;height:12px;border-radius:3px}
+.anwb-hm-bar{display:flex;flex-direction:column;gap:4px;background:var(--card);border-radius:8px;padding:8px}
+.anwb-hm-bar-row{display:grid;grid-template-columns:minmax(200px,2.2fr) 1fr;gap:8px;align-items:center}
+.anwb-hm-bar-label{font-size:11px;line-height:1.3;color:var(--tx);padding:4px 0}
+.anwb-hm-bar-track{display:flex;height:22px;border-radius:5px;overflow:hidden;background:rgba(0,0,0,.04)}
+.anwb-hm-bar-seg{display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:700;color:#fff;transition:width .4s ease;overflow:hidden;white-space:nowrap}
+
+@media(max-width:700px){
+  .anwb-hm-grid-row{grid-template-columns:minmax(120px,1.6fr) repeat(4, minmax(40px,1fr)) 36px;min-width:400px}
+  .anwb-hm-bar-row{grid-template-columns:1fr;gap:3px}
+  .anwb-hm-bar-label{padding:2px 0}
+}
 
 /* ===== TWO-COL ===== */
 .two-col{display:grid;grid-template-columns:3fr 2fr;gap:16px}

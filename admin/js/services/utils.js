@@ -130,9 +130,49 @@ function getWlb(row) {
   return null;
 }
 
+// TMHI-15: raw responses stored as 0-3 per item; spec requires 1-4 per item.
+// Normal items: score = raw + 1 ; reverse items (tmhi_4,5,6): score = 4 - raw.
+// Total range after transform: 15-60. Stored `tmhi_score` column is ignored
+// here because historical rows were computed with a buggy formula — we always
+// recompute from the raw per-item values.
+const TMHI_REVERSE_KEYS = new Set(['tmhi_4','tmhi_5','tmhi_6']);
 function getTmhi(row) {
+  let total = 0;
+  let answered = 0;
+  for (let i = 1; i <= 15; i++) {
+    const key = `tmhi_${i}`;
+    const raw = row[key];
+    if (raw == null || raw === '') continue;
+    const v = Number(raw);
+    if (!Number.isFinite(v) || v < 0 || v > 3) continue;
+    answered += 1;
+    total += TMHI_REVERSE_KEYS.has(key) ? (4 - v) : (v + 1);
+  }
+  if (answered === 15) return total;
+  // Fallback: if no per-item answers but stored column exists, accept it
   if (row.tmhi_score != null && row.tmhi_score !== '') return Number(row.tmhi_score);
-  return sumFields(row, ['tmhi_1','tmhi_2','tmhi_3','tmhi_4','tmhi_5','tmhi_6','tmhi_7','tmhi_8','tmhi_9','tmhi_10','tmhi_11','tmhi_12','tmhi_13','tmhi_14','tmhi_15']);
+  return null;
+}
+
+// TMHI per-item distribution for heatmap: returns 15 × 4 counts where each
+// item's score has been transformed to 1-4 via +1 (normal) or 4-v (reverse).
+// Columns correspond to final score 1,2,3,4 respectively — so "low" column is
+// always the "good mental health" side and "high" column is the "poor" side.
+function getTmhiItemDistribution(rows) {
+  const dist = Array.from({length: 15}, () => [0, 0, 0, 0]);
+  const totals = new Array(15).fill(0);
+  rows.forEach(r => {
+    for (let i = 1; i <= 15; i++) {
+      const raw = r[`tmhi_${i}`];
+      if (raw == null || raw === '') continue;
+      const v = Number(raw);
+      if (!Number.isFinite(v) || v < 0 || v > 3) continue;
+      const finalScore = TMHI_REVERSE_KEYS.has(`tmhi_${i}`) ? (4 - v) : (v + 1);
+      dist[i-1][finalScore - 1] += 1;
+      totals[i-1] += 1;
+    }
+  });
+  return { dist, totals };
 }
 
 function getTmhiLevelMeta(score) {
@@ -384,34 +424,43 @@ function _lonelyVal(val) {
   const n = Number(val);
   return isNaN(n) ? null : Math.min(Math.max(n, 0), 3);
 }
-function getLonelinessTotal(row) {
-  const vals = Array.from({length: 20}, (_, i) => _lonelyVal(row[`lonely_${i+1}`])).filter(v => v != null);
-  return vals.length === 20 ? vals.reduce((a, b) => a + b, 0) : null;
+// UCLA Loneliness Scale — dual mode:
+//   mode='orig1978' (default): Never=0, Rarely=1, Sometimes=2, Often=3   → total 0–60
+//   mode='v3_1996' : Never=1, Rarely=2, Sometimes=3, Often=4             → total 20–80
+// Raw responses are stored as 0–3 (index), matching the 1978 scoring.
+// For Version 3 we simply add +1 per item.
+function getLonelinessTotal(row, mode = 'orig1978') {
+  const vals = Array.from({length: 20}, (_, i) => _lonelyVal(row[`lonely_${i+1}`]));
+  if (vals.some(v => v == null)) return null;
+  const shift = mode === 'v3_1996' ? 1 : 0;
+  return vals.reduce((a, b) => a + (b + shift), 0);
 }
-function getLonelinessSubScores(row) {
-  const sub = (keys) => {
-    const vals = keys.map(k => _lonelyVal(row[k])).filter(v => v != null);
-    return vals.length === keys.length ? vals.reduce((a, b) => a + b, 0) : null;
-  };
-  return {
-    isolation:       sub(['lonely_1','lonely_2','lonely_3','lonely_4','lonely_5']),
-    social_relation: sub(['lonely_6','lonely_7','lonely_8','lonely_9','lonely_10']),
-    self_disconnect: sub(['lonely_11','lonely_12','lonely_13','lonely_14','lonely_15']),
-    social_behavior: sub(['lonely_16','lonely_17','lonely_18','lonely_19','lonely_20']),
-  };
-}
-function getLonelinessLevel3(score) {
+function getLonelinessLevel3(score, mode = 'orig1978') {
   if (score == null) return null;
+  if (mode === 'v3_1996') {
+    // Scaled thresholds: shift 1978 bands by +20 (equal-width 20-point bins)
+    if (score <= 40) return { key: 'low',    label: 'โดดเดี่ยวน้อย',     color: '#059669' };
+    if (score <= 60) return { key: 'medium', label: 'โดดเดี่ยวปานกลาง',  color: '#D97706' };
+    return                    { key: 'high',  label: 'โดดเดี่ยวมาก',       color: '#DC2626' };
+  }
+  // 1978 original: 0–20 / 21–40 / 41–60
   if (score <= 20) return { key: 'low',    label: 'โดดเดี่ยวน้อย',     color: '#059669' };
   if (score <= 40) return { key: 'medium', label: 'โดดเดี่ยวปานกลาง',  color: '#D97706' };
   return                   { key: 'high',  label: 'โดดเดี่ยวมาก',       color: '#DC2626' };
 }
-function getLonelinessLevel4(score) {
-  if (score == null) return null;
-  if (score <= 15) return { key: 'very_low',  label: 'โดดเดี่ยวน้อยมาก',       color: '#059669' };
-  if (score <= 30) return { key: 'low_mid',   label: 'โดดเดี่ยวน้อย–ปานกลาง', color: '#84CC16' };
-  if (score <= 45) return { key: 'mid_high',  label: 'โดดเดี่ยวปานกลาง–มาก',  color: '#D97706' };
-  return                   { key: 'very_high',label: 'โดดเดี่ยวมากที่สุด',      color: '#DC2626' };
+// Per-item distribution: returns array of 20 × 4 counts for heatmap rendering.
+function getLonelinessItemDistribution(rows) {
+  const dist = Array.from({length: 20}, () => [0, 0, 0, 0]);
+  const totals = new Array(20).fill(0);
+  rows.forEach(r => {
+    for (let i = 0; i < 20; i++) {
+      const v = _lonelyVal(r[`lonely_${i+1}`]);
+      if (v == null || v < 0 || v > 3) continue;
+      dist[i][v] += 1;
+      totals[i] += 1;
+    }
+  });
+  return { dist, totals };
 }
 
 /* ── อุบัติเหตุ & ความปลอดภัย ────────────────────────────── */

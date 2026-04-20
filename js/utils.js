@@ -39,29 +39,29 @@ function getBMICategory(bmi) {
 }
 
 // Calculate TMHI-15 Score
+// Raw responses are stored as 0-3 (scale index). Thai Mental Health Indicator
+// requires 1-4 per item, so we shift by +1 for normal items and invert to 4-val
+// for reverse items (tmhi_4, 5, 6). Total range: 15-60.
 function calculateTMHIScore(responses) {
     let score = 0;
-    // TMHI-15 items: tmhi_1 to tmhi_15
-    // Scoring: Not at all=1, A little=2, Much=3, Very much=4
-    // Negative items (reverse score): 4, 5, 6 (1=4, 2=3, 3=2, 4=1)
-
-    // Check if TMHI section is done
-    if (!responses['tmhi_1']) return 0;
-
     const reverseItems = ['tmhi_4', 'tmhi_5', 'tmhi_6'];
+    let answered = 0;
 
     for (let i = 1; i <= 15; i++) {
         const key = `tmhi_${i}`;
-        const val = parseInt(responses[key]) || 0;
-        if (val === 0) continue; // Skip if not answered
+        const raw = responses[key];
+        if (raw === undefined || raw === null || raw === '') continue;
+        const v = parseInt(raw, 10);
+        if (isNaN(v) || v < 0 || v > 3) continue;
+        answered += 1;
 
         if (reverseItems.includes(key)) {
-            score += (5 - val); // Reverse: 1->4, 2->3, 3->2, 4->1
+            score += (4 - v); // 0->4, 1->3, 2->2, 3->1
         } else {
-            score += val;
+            score += (v + 1); // 0->1, 1->2, 2->3, 3->4
         }
     }
-    return score;
+    return answered === 15 ? score : 0;
 }
 
 // Get Mental Health Level (TMHI-15)

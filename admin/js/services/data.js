@@ -20,7 +20,15 @@ const ADMIN_CANONICAL_ORGS = [
 
 const ADMIN_CANONICAL_ORG_CODES = new Set(ADMIN_CANONICAL_ORGS.map((org) => org.code));
 const ADMIN_CANONICAL_ORG_NAMES = new Set(ADMIN_CANONICAL_ORGS.map((org) => org.name));
-const SURVEY_SELECT_FIELDS = 'id,email,name,title,organization,gender,age,org_type,job,job_duration,bmi,bmi_category,is_draft,submitted_at,timestamp,tmhi_score,raw_responses';
+// LITE fields for Phase 1 (loadBackendCore). We intentionally EXCLUDE
+// `raw_responses` here — it's a JSONB blob (~10-50KB per row) holding the
+// full wellbeing form answers. On production (~4400 rows) including it
+// inflates the payload to 20-200 MB and makes loadBackendCore reliably
+// time out on Thai networks. Analytics pages that need individual
+// answers (PHQ-9/GAD-7/Burnout/WLB/UCLA) must call ensureSurveyRaw()
+// which performs a lazy fetch + merge.
+const SURVEY_SELECT_FIELDS = 'id,email,name,title,organization,gender,age,org_type,job,job_duration,bmi,bmi_category,is_draft,submitted_at,timestamp,tmhi_score';
+const SURVEY_RAW_FIELDS    = 'id,raw_responses';
 // Light fields for first-paint: skip heavy form_data JSONB. form_data is filled in the extras phase.
 const CH1_LITE_FIELDS = 'id,org_code,organization,status,created_at,last_saved_at,submitted_at,form_version';
 // Full fields for extras phase — explicit list excluding raw_payload (can exceed 2MB per row).
@@ -111,6 +119,67 @@ function scopeRowsForCurrentUser() {
     const rowOrgName = row.org_name_th || row.display_name || '';
     return (myOrgCode && rowOrgCode === myOrgCode) || (myOrgName && rowOrgName === myOrgName);
   });
+}
+
+// Lazy-loader for survey raw_responses. Analytics pages (wellbeing,
+// analytics-wb, compare, export) that need per-question answers call
+// this once. Subsequent calls are no-ops while the promise resolves /
+// if raw has already been merged. Deduplicates concurrent callers.
+let _rawFetchPromise = null;
+let _rawMerged = false;
+
+async function ensureSurveyRaw() {
+  if (_rawMerged) return { loaded: true };
+  if (_rawFetchPromise) return _rawFetchPromise;
+
+  _rawFetchPromise = (async () => {
+    try {
+      const { data, error } = await fetchAllSurveyRaw();
+      if (error) { console.warn('ensureSurveyRaw:', error.message); return { error: error.message }; }
+      const byId = new Map((data || []).map((row) => [row.id, row.raw_responses || {}]));
+      const rows = state.surveyRows || [];
+      state.surveyRows = rows.map((row) => {
+        const raw = byId.get(row.id);
+        if (!raw) return row;
+        // Re-normalize with raw_responses spread in, preserving top-level
+        // columns (top-level wins over raw_responses).
+        return { ...raw, ...row, raw_responses: raw };
+      });
+      _rawMerged = true;
+      return { loaded: true };
+    } finally {
+      _rawFetchPromise = null;
+    }
+  })();
+  return _rawFetchPromise;
+}
+
+async function fetchAllSurveyRaw() {
+  const pageSize = 1000;
+  const countRes = await sb.from('survey_responses')
+    .select('id', { count: 'exact', head: true });
+  if (countRes.error) return { data: [], error: countRes.error };
+  const total = countRes.count || 0;
+  if (total === 0) return { data: [], error: null };
+
+  const ranges = [];
+  for (let from = 0; from < total; from += pageSize) {
+    ranges.push([from, Math.min(from + pageSize - 1, total - 1)]);
+  }
+
+  const pageResults = await Promise.all(
+    ranges.map(([from, to]) =>
+      sb.from('survey_responses')
+        .select(SURVEY_RAW_FIELDS)
+        .order('submitted_at', { ascending: false, nullsFirst: false })
+        .range(from, to)
+    )
+  );
+
+  const failed = pageResults.find((res) => res.error);
+  if (failed?.error) return { data: [], error: failed.error };
+
+  return { data: pageResults.flatMap((res) => res.data || []), error: null };
 }
 
 async function fetchAllSurveyResponses() {
@@ -288,17 +357,21 @@ async function loadBackendCore(retryCount = 0) {
 
 async function loadBackendExtras(retryCount = 0) {
   try {
-    // Heavier queries: full ch1 (with form_data), org_form_links, org_hr_credentials
-    const [ch1FullRes, linksRes, orgHrCredRows] = await _withTimeout(Promise.all([
+    // Heavier queries: full ch1 (with form_data), org_form_links, org_hr_credentials,
+    // plus the survey raw_responses blob (now lazy-loaded so loadBackendCore is fast).
+    // 30s timeout because raw_responses payload is the largest query in the app.
+    const [ch1FullRes, linksRes, orgHrCredRows, rawRes] = await _withTimeout(Promise.all([
       sb.from('hrd_ch1_responses')
         .select(CH1_FULL_FIELDS)
         .order('submitted_at', { ascending: false, nullsFirst: false }),
       sb.from('org_form_links').select('*'),
       fetchOrgHrCredentials(),
-    ]), 15000, 'โหลดข้อมูลเพิ่มเติม');
+      ensureSurveyRaw(),
+    ]), 30000, 'โหลดข้อมูลเพิ่มเติม');
 
     if (ch1FullRes.error) console.warn('loadBackendExtras hrd_ch1_responses:', ch1FullRes.error.message);
     if (linksRes.error) console.warn('loadBackendExtras org_form_links:', linksRes.error.message);
+    if (rawRes?.error) console.warn('loadBackendExtras survey_raw:', rawRes.error);
 
     // Replace ch1Rows with the full rows (including form_data) so ch1 pages work properly.
     state.ch1Rows = (ch1FullRes.data || [])
@@ -356,6 +429,84 @@ async function loadBackend() {
 // Call this function after any data modifications to invalidate cache
 function invalidateCache() {
   _cacheClear();
+  _rawMerged = false;
+  _rawFetchPromise = null;
+  try { localStorage.removeItem(_DASH_SUMMARY_KEY); } catch (_e) {}
+}
+
+// ────────────────────────────────────────────────────────────────────────
+// Fast-path: admin dashboard summary (RPC)
+//
+// Calls the `get_admin_dashboard_summary` Postgres function which returns
+// all dashboard KPIs + daily trend in a single ~1-2 KB JSON blob. This
+// lets the dashboard paint KPI cards instantly, long before the heavy
+// per-row fetches in loadBackendCore/Extras complete.
+//
+// Caching strategy: stale-while-revalidate via localStorage.
+//   - First paint uses cached value if fresh (<60s) or even if stale.
+//   - Then triggers a background RPC call that updates cache + UI.
+// ────────────────────────────────────────────────────────────────────────
+
+const _DASH_SUMMARY_KEY = 'admin_dashboard_summary_v1';
+const _DASH_SUMMARY_FRESH_MS = 60 * 1000;     // show cached without re-fetch
+const _DASH_SUMMARY_MAX_AGE_MS = 30 * 60 * 1000; // hard cap: drop older entries
+
+function _loadCachedDashboardSummary() {
+  try {
+    const raw = localStorage.getItem(_DASH_SUMMARY_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object') return null;
+    const age = Date.now() - (parsed.cachedAt || 0);
+    if (age > _DASH_SUMMARY_MAX_AGE_MS) {
+      localStorage.removeItem(_DASH_SUMMARY_KEY);
+      return null;
+    }
+    return { data: parsed.data, cachedAt: parsed.cachedAt, age };
+  } catch (_e) { return null; }
+}
+
+function _saveCachedDashboardSummary(data) {
+  try {
+    localStorage.setItem(_DASH_SUMMARY_KEY, JSON.stringify({ data, cachedAt: Date.now() }));
+  } catch (_e) {}
+}
+
+async function fetchDashboardSummary({ trendDays = 14 } = {}) {
+  const { data, error } = await sb.rpc('get_admin_dashboard_summary', { p_trend_days: trendDays });
+  if (error) { console.warn('fetchDashboardSummary:', error.message); return null; }
+  _saveCachedDashboardSummary(data);
+  state.dashboardSummary = data;
+  return data;
+}
+
+// Returns the cached summary immediately (if any), and schedules a
+// background refresh. Callback `onFresh(summary)` is invoked when
+// the network response arrives with the up-to-date numbers.
+function primeDashboardSummary(onFresh) {
+  const cached = _loadCachedDashboardSummary();
+  if (cached && cached.data) {
+    state.dashboardSummary = cached.data;
+  }
+
+  // Only skip the network call if we have a VERY recent cache
+  const skipFetch = cached && cached.age < _DASH_SUMMARY_FRESH_MS;
+  if (skipFetch) {
+    try { if (typeof onFresh === 'function') onFresh(cached.data); } catch (e) { console.error(e); }
+    return Promise.resolve(cached.data);
+  }
+
+  return fetchDashboardSummary()
+    .then((data) => {
+      if (data && typeof onFresh === 'function') {
+        try { onFresh(data); } catch (e) { console.error(e); }
+      }
+      return data;
+    })
+    .catch((err) => {
+      console.warn('primeDashboardSummary: RPC failed', err);
+      return cached?.data || null;
+    });
 }
 
 function summarizeOrgs() {
