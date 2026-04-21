@@ -1,6 +1,7 @@
 // =============================================
 // Service Worker - Offline Support for Well-being Survey v3.2
 // รองรับการทำงานแบบ Offline และ Sync ข้อมูลเมื่อกลับมออนไลน์
+// v3.9: switch HTML to network-first (was stale-while-revalidate) so users get fresh page after each deploy; force re-fetch of components.js/org-portal.html to clear stale mix
 // v3.8: exclude /admin/js/* from cache-first so admin always fetches fresh data logic
 // v3.7: bump cache for KPI fix - relax status check (submitted_at = submitted)
 // v3.6: bump cache for "Ch1 → แบบสำรวจข้อมูลองค์กร" rename + summarizeOrgs ch1Submitted fix
@@ -10,9 +11,9 @@
 // v3.2: sync orgMap canonical org_codes (dhss, dop, dcy, test-org)
 // =============================================
 
-const CACHE_NAME = 'wellbeing-survey-v3.8';
-const STATIC_CACHE = 'static-v3.8';
-const DATA_CACHE = 'data-v3.8';
+const CACHE_NAME = 'wellbeing-survey-v3.9';
+const STATIC_CACHE = 'static-v3.9';
+const DATA_CACHE = 'data-v3.9';
 
 // ไฟล์ที่ต้อง Cache สำหรับ Offline
 const STATIC_ASSETS = [
@@ -111,9 +112,9 @@ self.addEventListener('fetch', (event) => {
     return;
   }
   
-  // Strategy 3: Stale While Revalidate สำหรับ HTML Pages
+  // Strategy 3: Network First สำหรับ HTML Pages (fresh ทุก navigation, fallback cache เมื่อ offline)
   if (isHTMLPage(request)) {
-    event.respondWith(staleWhileRevalidate(request));
+    event.respondWith(htmlNetworkFirst(request));
     return;
   }
   
@@ -172,7 +173,23 @@ async function networkFirst(request) {
   }
 }
 
-// Stale While Revalidate - ใช้ Cache ทันที พร้อม Update Cache ใน background
+// Network First (HTML) - ดึง network ก่อนเสมอ, fallback cache เมื่อ offline
+async function htmlNetworkFirst(request) {
+  const cache = await caches.open(STATIC_CACHE);
+  try {
+    const networkResponse = await fetch(request);
+    if (networkResponse.ok) {
+      cache.put(request, networkResponse.clone());
+    }
+    return networkResponse;
+  } catch (error) {
+    const cached = await cache.match(request);
+    if (cached) return cached;
+    throw error;
+  }
+}
+
+// Stale While Revalidate - ใช้ Cache ทันที พร้อม Update Cache ใน background (kept for future use)
 async function staleWhileRevalidate(request) {
   const cache = await caches.open(STATIC_CACHE);
   const cached = await cache.match(request);
