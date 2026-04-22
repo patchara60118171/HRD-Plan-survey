@@ -62,6 +62,15 @@
   <script src="https://cdn.jsdelivr.net/npm/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin></script>
   <script src="https://cdn.jsdelivr.net/npm/prop-types@15.8.1/prop-types.min.js" crossorigin></script>
   <script src="https://cdn.jsdelivr.net/npm/recharts@2.12.7/umd/Recharts.min.js" crossorigin></script>
+
+  <!-- Supabase UMD -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Scoring + Data + Filter libs -->
+  <script src="/shared/config/supabase.js"></script>
+  <script src="/idp-dashboard/lib/scoring.js"></script>
+  <script src="/idp-dashboard/lib/data-source.js"></script>
+  <script src="/idp-dashboard/lib/filter-bar.js"></script>
 </head>
 <body>
   <header>
@@ -70,7 +79,7 @@
       <div class="title-row">
         <div>
           <h1>IDP Dashboard</h1>
-          <div class="subtitle">รายงาน 5 มิติสุขภาวะ · Mock Data Preview</div>
+          <div class="subtitle" id="subtitle">รายงาน 5 มิติสุขภาวะ · กำลังเชื่อม Supabase…</div>
         </div>
       </div>
       <div class="tabs" id="tabs">
@@ -83,6 +92,9 @@
     </div>
   </header>
 
+  <!-- Global filter bar (sticky under header) -->
+  <div id="filter-bar" style="position:sticky;top:0;z-index:90;background:#F8FAFC;border-bottom:1px solid #E2E8F0"></div>
+
   <main id="main">
     <div class="panel active" id="panel-exec"><div class="loading"><div class="spinner"></div><div>กำลังโหลด Executive…</div></div></div>
     <div class="panel" id="panel-physical"><div class="loading"><div class="spinner"></div><div>กำลังโหลด Physical…</div></div></div>
@@ -93,7 +105,6 @@
 
   <script>
   (function () {
-    // Pre-compiled .js files (built by ../idp dashboard/build.js)
     var SOURCES = {
       exec:     '/idp-dashboard/dashboards/exec.js',
       physical: '/idp-dashboard/dashboards/physical.js',
@@ -102,12 +113,15 @@
       env:      '/idp-dashboard/dashboards/env.js'
     };
 
-    var loaded  = Object.create(null); // key -> true once script tag loaded
-    var loading = Object.create(null); // key -> Promise
-    var roots   = Object.create(null); // key -> React root
+    var scriptTags = Object.create(null); // key -> <script> element currently loaded
+    var roots      = Object.create(null); // key -> React root
+    var activeKey  = 'exec';
+    var totalCount = 0;
+    var currentFiltered = 0;
+    var realDataLoaded = false;
 
     function showError(key, err) {
-      console.error('Dashboard load error:', key, err);
+      console.error('[IDP] Dashboard load error:', key, err);
       var el = document.getElementById('panel-' + key);
       el.innerHTML = '<div class="error">' + String(err && err.stack || err)
         .replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</div>';
@@ -115,8 +129,7 @@
 
     function ensureLibs() {
       if (!window.React || !window.ReactDOM || !window.Recharts) {
-        throw new Error('React / ReactDOM / Recharts failed to load. ' +
-          'Check browser console for CSP or network errors.');
+        throw new Error('React / ReactDOM / Recharts failed to load. Check console for CSP/network errors.');
       }
     }
 
@@ -125,10 +138,22 @@
         var s = document.createElement('script');
         s.src = url;
         s.async = true;
-        s.onload = function () { resolve(); };
+        s.onload  = function () { resolve(s); };
         s.onerror = function () { reject(new Error('Failed to load ' + url)); };
         document.head.appendChild(s);
       });
+    }
+
+    function unmount(key) {
+      if (roots[key]) {
+        try { roots[key].unmount(); } catch (e) { /* ignore */ }
+        delete roots[key];
+      }
+      if (scriptTags[key]) {
+        try { scriptTags[key].remove(); } catch (e) { /* ignore */ }
+        delete scriptTags[key];
+      }
+      if (window.__DASHBOARDS__) delete window.__DASHBOARDS__[key];
     }
 
     function mount(key) {
@@ -136,38 +161,94 @@
       if (!Comp) { showError(key, 'Component not registered: ' + key); return; }
       var container = document.getElementById('panel-' + key);
       container.innerHTML = '';
-      if (!roots[key]) roots[key] = ReactDOM.createRoot(container);
+      roots[key] = ReactDOM.createRoot(container);
       try { roots[key].render(React.createElement(Comp)); }
       catch (e) { showError(key, e); }
     }
 
-    function load(key) {
+    // Load + mount a single key. Always re-fetches with cache-bust so module-scope
+    // `const employees = ...` picks up the latest window.__IDP_EMPLOYEES__.
+    function loadAndMount(key) {
       try { ensureLibs(); } catch (e) { showError(key, e); return; }
-
-      if (loaded[key]) { mount(key); return; }
-      if (loading[key]) { loading[key].then(function () { mount(key); }); return; }
-
-      loading[key] = loadScript(SOURCES[key] + '?v=' + Date.now())
-        .then(function () { loaded[key] = true; mount(key); })
+      unmount(key);
+      loadScript(SOURCES[key] + '?v=' + Date.now())
+        .then(function (s) { scriptTags[key] = s; mount(key); })
         .catch(function (e) { showError(key, e); });
     }
 
+    function reloadActive() {
+      // Reload only the visible tab immediately; others load on switch.
+      loadAndMount(activeKey);
+    }
+
     function switchTab(key) {
+      activeKey = key;
       document.querySelectorAll('.tab').forEach(function (b) {
         b.classList.toggle('active', b.dataset.key === key);
       });
       document.querySelectorAll('.panel').forEach(function (p) {
         p.classList.toggle('active', p.id === 'panel-' + key);
       });
-      load(key);
+      loadAndMount(key);
     }
 
     document.querySelectorAll('.tab').forEach(function (btn) {
       btn.addEventListener('click', function () { switchTab(btn.dataset.key); });
     });
 
-    // Boot with Executive tab
-    load('exec');
+    // ── Data bootstrap ────────────────────────────────────────────────────────
+    function setSubtitle(text) {
+      var el = document.getElementById('subtitle');
+      if (el) el.textContent = text;
+    }
+
+    function handleFilterChange(filters) {
+      if (!realDataLoaded) return;
+      var bundle = window.IDPData.applyFilters(filters);
+      window.__IDP_EMPLOYEES__ = bundle;
+      currentFiltered = bundle.exec.length;
+      window.IDPFilterBar.setCounts(totalCount, currentFiltered);
+      reloadActive();
+    }
+
+    function mountFilterBar() {
+      window.IDPFilterBar.mount(document.getElementById('filter-bar'), {
+        onChange: handleFilterChange
+      });
+      window.IDPFilterBar.setCounts(totalCount, currentFiltered);
+    }
+
+    async function bootstrap() {
+      try {
+        if (typeof SUPABASE_URL === 'undefined' || typeof SUPABASE_ANON_KEY === 'undefined') {
+          throw new Error('SUPABASE_URL/KEY globals missing — check /shared/config/supabase.js');
+        }
+        window.IDPData.init(SUPABASE_URL, SUPABASE_ANON_KEY);
+        setSubtitle('กำลังดึงข้อมูลจาก survey_responses…');
+        var rows = await window.IDPData.fetchAll();
+        totalCount = rows.length;
+        currentFiltered = rows.length;
+        var bundle = window.IDPData.buildEmployees();
+        window.__IDP_EMPLOYEES__ = bundle;
+        realDataLoaded = true;
+        setSubtitle('รายงาน 5 มิติสุขภาวะ · ข้อมูลจริงจาก Supabase (' + totalCount.toLocaleString() + ' คน)');
+        mountFilterBar();
+        loadAndMount('exec'); // initial render
+      } catch (e) {
+        console.error('[IDP] Bootstrap failed:', e);
+        setSubtitle('⚠️ โหลดข้อมูลจริงไม่สำเร็จ — ใช้ Mock Data · ' + (e.message || e));
+        window.__IDP_EMPLOYEES__ = null;
+        // Still mount filter bar (it will show "loading" state) and the exec tab with mock
+        loadAndMount('exec');
+      }
+    }
+
+    // Fire bootstrap once DOM + UMD libs are ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', bootstrap);
+    } else {
+      bootstrap();
+    }
   })();
   </script>
 </body>

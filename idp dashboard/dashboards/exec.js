@@ -61,7 +61,8 @@
     color: "#0EA5E9",
     light: "#E0F2FE"
   }];
-  const DEPTS = ["นโยบาย", "ปฏิบัติการ", "สนับสนุน"];
+  const _IDP_REAL = typeof window !== 'undefined' && window.__IDP_EMPLOYEES__ && window.__IDP_EMPLOYEES__.exec || null;
+  const DEPTS = _IDP_REAL ? [...new Set(_IDP_REAL.map(e => e.dept).filter(Boolean))].sort().slice(0, 8) : ["นโยบาย", "ปฏิบัติการ", "สนับสนุน"];
   const NAMES = ["นายสมชาย ใจดี", "นางสาวมาลี รักสุข", "นายประสิทธิ์ ทำงาน", "นางวิภา สดใส", "นายกิตติ เก่งมาก", "นางสาวอัญชลี ร่าเริง", "นายวีระ ขยันดี", "นางรัตนา มีสุข", "นายพิทักษ์ ตั้งใจ", "นางสาวสุภา สวยงาม", "นายอนุชา ดีเลิศ", "นางเพ็ญศรี แจ่มใส", "นายชัยวัฒน์ รุ่งเรือง", "นางสาวนิภา ยิ้มแย้ม", "นายสุรศักดิ์ มั่นคง", "นางกัลยา ใสสะอาด", "นายธนพล ฉลาดดี", "นางสาวลัดดา สะอาด", "นายปิยะ เฉลียวฉลาด", "นางวรรณา สุขสบาย"];
   const rand = (a, b) => Math.floor(Math.random() * (b - a + 1)) + a;
 
@@ -94,7 +95,7 @@
       overallGroup
     };
   };
-  const employees = NAMES.map((n, i) => genEmployee(n, i));
+  const employees = _IDP_REAL || NAMES.map((n, i) => genEmployee(n, i));
 
   // ─── Aggregates ───────────────────────────────────────────────────────────────
   const GROUP_A = employees.filter(e => e.overallGroup === "A");

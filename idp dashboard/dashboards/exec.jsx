@@ -18,7 +18,10 @@ const DIMS_4 = [
   { key: "environ",  label: "แวดล้อม",  icon: "🌿", color: "#0EA5E9", light: "#E0F2FE" },
 ];
 
-const DEPTS = ["นโยบาย","ปฏิบัติการ","สนับสนุน"];
+const _IDP_REAL = (typeof window !== 'undefined' && window.__IDP_EMPLOYEES__ && window.__IDP_EMPLOYEES__.exec) || null;
+const DEPTS = _IDP_REAL
+  ? [...new Set(_IDP_REAL.map(e => e.dept).filter(Boolean))].sort().slice(0, 8)
+  : ["นโยบาย","ปฏิบัติการ","สนับสนุน"];
 const NAMES = [
   "นายสมชาย ใจดี","นางสาวมาลี รักสุข","นายประสิทธิ์ ทำงาน","นางวิภา สดใส",
   "นายกิตติ เก่งมาก","นางสาวอัญชลี ร่าเริง","นายวีระ ขยันดี","นางรัตนา มีสุข",
@@ -52,7 +55,7 @@ const genEmployee = (name, idx) => {
   return { id:idx+1, name, dept: DEPTS[idx%3], scores, highCount, overallGroup };
 };
 
-const employees = NAMES.map((n,i) => genEmployee(n,i));
+const employees = _IDP_REAL || NAMES.map((n,i) => genEmployee(n,i));
 
 // ─── Aggregates ───────────────────────────────────────────────────────────────
 const GROUP_A = employees.filter(e => e.overallGroup==="A");
