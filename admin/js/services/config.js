@@ -14,6 +14,7 @@ const ORG_HR_EMAIL_DOMAIN = PROJECT_SSOT?.constants?.orgHrEmailDomain || '@wellb
   'form-wb':['Wellbeing Survey','/ จัดการข้อมูล'],
   'ch1-summary':['สรุปภาพรวม Ch1','/ วิเคราะห์ข้อมูล'],
   'an-wb':['วิเคราะห์ Wellbeing','/ วิเคราะห์'],
+  idp:['แผนพัฒนาบุคลากร (IDP)','/ วิเคราะห์'],
   compare:['เปรียบเทียบองค์กร','/ วิเคราะห์'],
   export:['Export รายงาน','/ วิเคราะห์'],
   'org-credentials':['Org HR Credentials','/ จัดการระบบ'],

@@ -84,6 +84,10 @@ function _renderExtraPages(summary) {
   _safeRender(() => _renderAnalyticsCh1(summary), '_renderAnalyticsCh1');
 }
 
+function _renderIdpPage() {
+  _safeRender(initIdpDashboard, 'initIdpDashboard');
+}
+
 async function init() {
   try {
     const session = await requireSession();
