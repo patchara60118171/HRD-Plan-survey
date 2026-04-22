@@ -1,7 +1,7 @@
 # Project Audit Report — NIDA Wellbeing Survey
 
 **Date:** 2026-04-18
-**Last Update:** 2026-04-19 (KPI commit/push confirmed + Vercel live verification completed)
+**Last Update:** 2026-04-23 (IDP Dashboard 6-tab implementation complete — commit ec51b58)
 **Scope:** Whole project
 **Skills applied:** `supabase-postgres-best-practices`, `web-design-guidelines`, `frontend-design`, `ui-ux-pro-max`
 **Skills skipped (not applicable):** `vercel-react-best-practices` (vanilla HTML/JS), `pdf`, `remotion-best-practices`
@@ -53,6 +53,12 @@
 2. ✅ Vercel live endpoints responded HTTP 200: `/`, `/admin`, `/ch1`, `/org-portal`
 3. ✅ Live content markers confirmed for public survey, admin portal, and CH1 form pages
 4. ℹ️ `.html` paths (`/admin.html`, `/ch1.html`) return 308 redirect to clean routes on current deployment config
+
+**New features (2026-04-23):**
+
+| Feature | Commit | Status |
+|---|---|---|
+| IDP Dashboard — 6-tab admin page (ภาพรวม/กาย/ใจ/สังคม/แวดล้อม/รายบุคคล) with 4-dim scoring, Group A-D classification, SVG radar+donut charts, risk profile panel, paginated individual table + Excel export | ec51b58 | ✅ Done |
 
 **Phase 5 backlog (advisor findings):**
 
