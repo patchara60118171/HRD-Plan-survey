@@ -123,10 +123,16 @@
       var Comp = (window.__DASHBOARDS__ || {})[key];
       if (!Comp) { showError(key, 'Component not registered: ' + key); return; }
       var container = document.getElementById('panel-' + key);
+      // Clear spinner or previous content before mounting React
+      container.innerHTML = '';
       if (!roots[key]) {
         roots[key] = ReactDOM.createRoot(container);
       }
-      roots[key].render(React.createElement(Comp));
+      try {
+        roots[key].render(React.createElement(Comp));
+      } catch (e) {
+        showError(key, e);
+      }
     }
 
     function load(key) {
