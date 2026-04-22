@@ -77,21 +77,21 @@
         </div>
       </div>
       <div class="tabs" id="tabs">
-        <button class="tab active" data-key="env">🌿 Environment</button>
+        <button class="tab active" data-key="exec">📊 Executive</button>
         <button class="tab" data-key="physical">💪 Physical</button>
         <button class="tab" data-key="tmhi">🧠 Mental (TMHI)</button>
         <button class="tab" data-key="ucla">🤝 Social (UCLA)</button>
-        <button class="tab" data-key="exec">📊 Executive</button>
+        <button class="tab" data-key="env">🌿 Environment</button>
       </div>
     </div>
   </header>
 
   <main id="main">
-    <div class="panel active" id="panel-env"><div class="loading"><div class="spinner"></div><div>กำลังโหลด Environment…</div></div></div>
+    <div class="panel active" id="panel-exec"><div class="loading"><div class="spinner"></div><div>กำลังโหลด Executive…</div></div></div>
     <div class="panel" id="panel-physical"><div class="loading"><div class="spinner"></div><div>กำลังโหลด Physical…</div></div></div>
     <div class="panel" id="panel-tmhi"><div class="loading"><div class="spinner"></div><div>กำลังโหลด TMHI…</div></div></div>
     <div class="panel" id="panel-ucla"><div class="loading"><div class="spinner"></div><div>กำลังโหลด UCLA…</div></div></div>
-    <div class="panel" id="panel-exec"><div class="loading"><div class="spinner"></div><div>กำลังโหลด Executive…</div></div></div>
+    <div class="panel" id="panel-env"><div class="loading"><div class="spinner"></div><div>กำลังโหลด Environment…</div></div></div>
   </main>
 
   <script>
@@ -111,7 +111,7 @@
 
     var loaded = Object.create(null);
     var roots = Object.create(null); // key -> React root
-    var current = 'env';
+    var current = 'exec';
 
     function showError(key, err) {
       console.error('Dashboard load error:', key, err);
@@ -169,7 +169,7 @@
     });
 
     // Load first tab
-    load('env');
+    load('exec');
   })();
   </script>
 </body>
