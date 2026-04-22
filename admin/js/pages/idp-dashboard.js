@@ -799,22 +799,31 @@ const idpState = {
 
 function _applyIdpFilters() {
   const rows = (state.surveyRows || []).filter(r => !r.is_draft);
-  const search = (document.getElementById('idp-search')?.value || '').toLowerCase();
-  const org    = document.getElementById('idp-org-filter')?.value || '';
-  const group  = document.getElementById('idp-group-filter')?.value || '';
-  const gender = document.getElementById('idp-gender-filter')?.value || '';
-  const age    = document.getElementById('idp-age-filter')?.value || '';
+  const search  = (document.getElementById('idp-search')?.value || '').toLowerCase();
+  const org     = document.getElementById('idp-org-filter')?.value || '';
+  const group   = document.getElementById('idp-group-filter')?.value || '';
+  const gender  = document.getElementById('idp-gender-filter')?.value || '';
+  const age     = document.getElementById('idp-age-filter')?.value || '';
+  const bmiKey  = document.getElementById('idp-bmi-filter')?.value || '';
+  const job     = document.getElementById('idp-job-filter')?.value || '';
+  const orgType = document.getElementById('idp-orgtype-filter')?.value || '';
 
   idpState.filtered = rows.filter(row => {
     if (org && row.organization !== org) return false;
     if (gender && row.gender !== gender) return false;
     if (age && ageGroup(row) !== age) return false;
+    if (job && row.job !== job) return false;
+    if (orgType && row.org_type !== orgType) return false;
+    if (bmiKey) {
+      const b = getBmiAsean(row);
+      if (!b || b.key !== bmiKey) return false;
+    }
     if (group) {
       const dims = idpGet4Dims(row);
       if (idpGetGroup(dims) !== group) return false;
     }
     if (search) {
-      const hay = [row.organization, row.email, row.name, row.job, row.title].filter(Boolean).join(' ').toLowerCase();
+      const hay = [row.organization, row.email, row.name, row.job, row.title, row.org_type].filter(Boolean).join(' ').toLowerCase();
       if (!hay.includes(search)) return false;
     }
     return true;
@@ -994,11 +1003,15 @@ function initIdpDashboard() {
   idpState.page = 1;
 
   if (!_idpWiredUp) {
-    document.getElementById('idp-search')?.addEventListener('input', () => { _applyIdpFilters(); _renderIdpIndividualTable(); });
-    document.getElementById('idp-org-filter')?.addEventListener('change', () => { _applyIdpFilters(); _renderIdpIndividualTable(); });
-    document.getElementById('idp-group-filter')?.addEventListener('change', () => { _applyIdpFilters(); _renderIdpIndividualTable(); });
-    document.getElementById('idp-gender-filter')?.addEventListener('change', () => { _applyIdpFilters(); _renderIdpIndividualTable(); });
-    document.getElementById('idp-age-filter')?.addEventListener('change', () => { _applyIdpFilters(); _renderIdpIndividualTable(); });
+    const rerender = () => { _applyIdpFilters(); _renderIdpIndividualTable(); };
+    document.getElementById('idp-search')?.addEventListener('input', rerender);
+    document.getElementById('idp-org-filter')?.addEventListener('change', rerender);
+    document.getElementById('idp-group-filter')?.addEventListener('change', rerender);
+    document.getElementById('idp-gender-filter')?.addEventListener('change', rerender);
+    document.getElementById('idp-age-filter')?.addEventListener('change', rerender);
+    document.getElementById('idp-bmi-filter')?.addEventListener('change', rerender);
+    document.getElementById('idp-job-filter')?.addEventListener('change', rerender);
+    document.getElementById('idp-orgtype-filter')?.addEventListener('change', rerender);
     document.getElementById('idp-size')?.addEventListener('change', e => { idpState.pageSize = Number(e.target.value); idpState.page = 1; _renderIdpIndividualTable(); });
     document.getElementById('idp-prev')?.addEventListener('click', () => { idpState.page--; _renderIdpIndividualTable(); });
     document.getElementById('idp-next')?.addEventListener('click', () => { idpState.page++; _renderIdpIndividualTable(); });
@@ -1006,13 +1019,17 @@ function initIdpDashboard() {
     _idpWiredUp = true;
   }
 
-  // Populate org dropdown
-  const orgEl = document.getElementById('idp-org-filter');
-  if (orgEl && !orgEl.dataset.populated) {
-    const orgs = [...new Set(rows.map(r => r.organization).filter(Boolean))].sort();
-    orgEl.innerHTML = '<option value="">ทุกองค์กร</option>' + orgs.map(o => `<option value="${esc(o)}">${esc(o)}</option>`).join('');
-    orgEl.dataset.populated = '1';
-  }
+  // Populate filter dropdowns from current rows
+  const _populate = (id, values, placeholder) => {
+    const el = document.getElementById(id);
+    if (!el || el.dataset.populated) return;
+    const opts = [...new Set(values.filter(v => v && v !== '—'))].sort((a, b) => a.localeCompare(b, 'th'));
+    el.innerHTML = `<option value="">${placeholder}</option>` + opts.map(v => `<option value="${esc(v)}">${esc(v)}</option>`).join('');
+    el.dataset.populated = '1';
+  };
+  _populate('idp-org-filter',     rows.map(r => r.organization), 'ทุกองค์กร');
+  _populate('idp-job-filter',     rows.map(r => r.job),          'ทุกตำแหน่ง');
+  _populate('idp-orgtype-filter', rows.map(r => r.org_type),     'ทุกประเภท');
 
   // Render default tab (exec)
   _idpRenderExec(rows);
@@ -1025,9 +1042,12 @@ function _idpExportIndividual() {
     const dims  = idpGet4Dims(row);
     const group = idpGetGroup(dims);
     const recs  = generateIdpRecommendations(row);
+    const bmi = getBmiAsean(row);
     return {
-      ลำดับ: i+1, องค์กร: row.organization||'—', ชื่อ: row.name||'—', อีเมล: row.email||'—',
+      ลำดับ: i+1, องค์กร: row.organization||'—', ประเภทตำแหน่ง: row.org_type||'—',
+      ชื่อ: row.name||'—', อีเมล: row.email||'—',
       เพศ: row.gender||'—', กลุ่มอายุ: ageGroup(row), ตำแหน่ง: row.job||'—',
+      BMI_ระดับ: bmi?.label||'—',
       กลุ่ม_IDP: group, มิติกาย: dims.physical||'—', มิติใจ: dims.mental||'—',
       มิติสังคม: dims.social||'—', มิติแวดล้อม: dims.environ||'—',
       PHQ_9: getPhq9(row)??'—', GAD_7: getGad7(row)??'—', Burnout: getBurnout(row)??'—',
