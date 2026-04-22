@@ -23,7 +23,7 @@
     h1 { margin: 0; font-size: 20px; font-weight: 800; }
     .subtitle { font-size: 12px; color: #94A3B8; }
 
-    .tabs { display: flex; gap: 2px; }
+    .tabs { display: flex; gap: 2px; overflow-x: auto; }
     .tab {
       background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.7);
       border: none; padding: 12px 20px; font-family: inherit; font-size: 13px;
@@ -31,9 +31,7 @@
       transition: all 0.15s; white-space: nowrap;
     }
     .tab:hover { background: rgba(255,255,255,0.15); color: #fff; }
-    .tab.active {
-      background: #F1F5F9; color: #0F172A;
-    }
+    .tab.active { background: #F1F5F9; color: #0F172A; }
 
     main { max-width: 1400px; margin: 0 auto; padding: 24px; min-height: 80vh; }
 
@@ -59,12 +57,11 @@
     .panel.active { display: block; }
   </style>
 
-  <!-- React + Recharts + Babel -->
-  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script crossorigin src="https://unpkg.com/prop-types@15/prop-types.min.js"></script>
-  <script crossorigin src="https://unpkg.com/recharts@2.12.7/umd/Recharts.js"></script>
-  <script src="https://unpkg.com/@babel/standalone@7.25.6/babel.min.js"></script>
+  <!-- React + Recharts (jsdelivr — whitelisted by site CSP) -->
+  <script src="https://cdn.jsdelivr.net/npm/react@18.3.1/umd/react.production.min.js" crossorigin></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://cdn.jsdelivr.net/npm/prop-types@15.8.1/prop-types.min.js" crossorigin></script>
+  <script src="https://cdn.jsdelivr.net/npm/recharts@2.12.7/umd/Recharts.min.js" crossorigin></script>
 </head>
 <body>
   <header>
@@ -89,71 +86,73 @@
   <main id="main">
     <div class="panel active" id="panel-exec"><div class="loading"><div class="spinner"></div><div>กำลังโหลด Executive…</div></div></div>
     <div class="panel" id="panel-physical"><div class="loading"><div class="spinner"></div><div>กำลังโหลด Physical…</div></div></div>
-    <div class="panel" id="panel-tmhi"><div class="loading"><div class="spinner"></div><div>กำลังโหลด TMHI…</div></div></div>
-    <div class="panel" id="panel-ucla"><div class="loading"><div class="spinner"></div><div>กำลังโหลด UCLA…</div></div></div>
+    <div class="panel" id="panel-tmhi"><div class="loading"><div class="spinner"></div><div>กำลังโหลด Mental…</div></div></div>
+    <div class="panel" id="panel-ucla"><div class="loading"><div class="spinner"></div><div>กำลังโหลด Social…</div></div></div>
     <div class="panel" id="panel-env"><div class="loading"><div class="spinner"></div><div>กำลังโหลด Environment…</div></div></div>
   </main>
 
   <script>
   (function () {
-    // Globals for compiled JSX
-    window.React = React;
-    window.ReactDOM = ReactDOM;
-    window.Recharts = Recharts;
-
+    // Pre-compiled .js files (built by ../idp dashboard/build.js)
     var SOURCES = {
-      env:      '../idp dashboard/dashboards/env.jsx',
-      physical: '../idp dashboard/dashboards/physical.jsx',
-      tmhi:     '../idp dashboard/dashboards/tmhi.jsx',
-      ucla:     '../idp dashboard/dashboards/ucla.jsx',
-      exec:     '../idp dashboard/dashboards/exec.jsx'
+      exec:     'dashboards/exec.js',
+      physical: 'dashboards/physical.js',
+      tmhi:     'dashboards/tmhi.js',
+      ucla:     'dashboards/ucla.js',
+      env:      'dashboards/env.js'
     };
 
-    var loaded = Object.create(null);
-    var roots = Object.create(null); // key -> React root
-    var current = 'exec';
+    var loaded  = Object.create(null); // key -> true once script tag loaded
+    var loading = Object.create(null); // key -> Promise
+    var roots   = Object.create(null); // key -> React root
 
     function showError(key, err) {
       console.error('Dashboard load error:', key, err);
       var el = document.getElementById('panel-' + key);
-      el.innerHTML = '<div class="error">' + String(err).replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</div>';
+      el.innerHTML = '<div class="error">' + String(err && err.stack || err)
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</div>';
+    }
+
+    function ensureLibs() {
+      if (!window.React || !window.ReactDOM || !window.Recharts) {
+        throw new Error('React / ReactDOM / Recharts failed to load. ' +
+          'Check browser console for CSP or network errors.');
+      }
+    }
+
+    function loadScript(url) {
+      return new Promise(function (resolve, reject) {
+        var s = document.createElement('script');
+        s.src = url;
+        s.async = true;
+        s.onload = function () { resolve(); };
+        s.onerror = function () { reject(new Error('Failed to load ' + url)); };
+        document.head.appendChild(s);
+      });
     }
 
     function mount(key) {
       var Comp = (window.__DASHBOARDS__ || {})[key];
       if (!Comp) { showError(key, 'Component not registered: ' + key); return; }
       var container = document.getElementById('panel-' + key);
-      // Clear spinner or previous content before mounting React
       container.innerHTML = '';
-      if (!roots[key]) {
-        roots[key] = ReactDOM.createRoot(container);
-      }
-      try {
-        roots[key].render(React.createElement(Comp));
-      } catch (e) {
-        showError(key, e);
-      }
+      if (!roots[key]) roots[key] = ReactDOM.createRoot(container);
+      try { roots[key].render(React.createElement(Comp)); }
+      catch (e) { showError(key, e); }
     }
 
     function load(key) {
+      try { ensureLibs(); } catch (e) { showError(key, e); return; }
+
       if (loaded[key]) { mount(key); return; }
-      var url = SOURCES[key] + '?t=' + Date.now();
-      fetch(url)
-        .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
-        .then(function (src) {
-          var out = Babel.transform(src, {
-            presets: [['react', { runtime: 'classic' }]],
-            filename: key + '.jsx'
-          }).code;
-          (0, eval)(out);
-          loaded[key] = true;
-          mount(key);
-        })
+      if (loading[key]) { loading[key].then(function () { mount(key); }); return; }
+
+      loading[key] = loadScript(SOURCES[key] + '?v=' + Date.now())
+        .then(function () { loaded[key] = true; mount(key); })
         .catch(function (e) { showError(key, e); });
     }
 
     function switchTab(key) {
-      current = key;
       document.querySelectorAll('.tab').forEach(function (b) {
         b.classList.toggle('active', b.dataset.key === key);
       });
@@ -163,12 +162,11 @@
       load(key);
     }
 
-    // Tab click handlers
     document.querySelectorAll('.tab').forEach(function (btn) {
       btn.addEventListener('click', function () { switchTab(btn.dataset.key); });
     });
 
-    // Load first tab
+    // Boot with Executive tab
     load('exec');
   })();
   </script>
