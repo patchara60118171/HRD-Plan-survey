@@ -9,17 +9,15 @@
  * Pre-compiling avoids @babel/standalone + eval() in the browser,
  * which is blocked by the site's Content-Security-Policy.
  *
- * Usage:  node "idp dashboard/build.js"
+ * Usage:  node "idp-dashboard/build.js"
  */
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
-const SRC_DIR = __dirname;
+const SRC_DIR = path.join(__dirname, 'src');
 const OUT_DIR = path.join(__dirname, 'dashboards');
 const ROOT_DIR = path.resolve(__dirname, '..');
-// Mirror output to /idp-dashboard/dashboards/ (deployable URL-safe path)
-const MIRROR_DIR = path.resolve(ROOT_DIR, 'idp-dashboard', 'dashboards');
 
 const FILES = [
   { src: '✔ Environment dashboard.txt',  key: 'env',      title: '🌿 Environment',         component: 'EnvDashboard' },

@@ -124,31 +124,38 @@
           </div>
           <div class="w-space"></div>
           <div class="w-stats">
-            <div class="w-stat"><div class="w-val">—</div><div class="w-label">องค์กรทั้งหมด</div></div>
-            <div class="w-stat"><div class="w-val">—</div><div class="w-label">แบบสำรวจข้อมูลองค์กรส่งแล้ว</div></div>
-            <div class="w-stat"><div class="w-val">—</div><div class="w-label">Wellbeing ตอบแล้ว</div></div>
+            <div class="w-stat shimmer-loading" id="w-stat-orgs"><div class="w-val">—</div><div class="w-label">องค์กรทั้งหมด</div></div>
+            <div class="w-stat shimmer-loading" id="w-stat-ch1"><div class="w-val">—</div><div class="w-label">แบบสำรวจข้อมูลองค์กรส่งแล้ว</div></div>
+            <div class="w-stat shimmer-loading" id="w-stat-wb"><div class="w-val">—</div><div class="w-label">Wellbeing ตอบแล้ว</div></div>
           </div>
         </div>
       </div>
 
       <div class="dl-wrap" id="dl-kpi">
         <button class="card-dl-btn" onclick="downloadCard('#dl-kpi','KPI-Cards')" title="ดาวน์โหลด KPI">📥</button>
-        <div class="kpi-grid">
-          <div class="kpi"><div class="kpi-icon">🏛️</div><div class="kpi-label">องค์กรที่เข้าร่วม</div><div class="kpi-val">—</div><div class="kpi-sub">กำลังโหลด...</div></div>
-          <div class="kpi g"><div class="kpi-icon">✅</div><div class="kpi-label">แบบสำรวจข้อมูลองค์กรส่งครบแล้ว</div><div class="kpi-val">—</div><div class="kpi-sub">กำลังโหลด...</div></div>
-          <div class="kpi w"><div class="kpi-icon">💚</div><div class="kpi-label">Wellbeing ตอบแล้ว</div><div class="kpi-val">—</div><div class="kpi-sub">จากเป้า 1,500–2,000 คน</div></div>
-          <div class="kpi"><div class="kpi-icon">👤</div><div class="kpi-label">Viewer ที่ใช้งาน</div><div class="kpi-val">—</div><div class="kpi-sub">กำลังโหลด...</div></div>
+        <div class="kpi-grid" id="kpi-grid">
+          <div class="kpi shimmer-loading" id="kpi-orgs"><div class="kpi-icon">🏛️</div><div class="kpi-label">องค์กรที่เข้าร่วม</div><div class="kpi-val">—</div><div class="kpi-sub">กำลังโหลด...</div></div>
+          <div class="kpi g shimmer-loading" id="kpi-ch1"><div class="kpi-icon">✅</div><div class="kpi-label">แบบสำรวจข้อมูลองค์กรส่งครบแล้ว</div><div class="kpi-val">—</div><div class="kpi-sub">กำลังโหลด...</div></div>
+          <div class="kpi w shimmer-loading" id="kpi-wb"><div class="kpi-icon">💚</div><div class="kpi-label">Wellbeing ตอบแล้ว</div><div class="kpi-val">—</div><div class="kpi-sub">จากเป้า 1,500–2,000 คน</div></div>
+          <div class="kpi shimmer-loading" id="kpi-users"><div class="kpi-icon">👤</div><div class="kpi-label">Viewer ที่ใช้งาน</div><div class="kpi-val">—</div><div class="kpi-sub">กำลังโหลด...</div></div>
         </div>
       </div>
 
       <div style="display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:14px">
         <div class="card" id="dl-chart">
           <div class="card-head"><h3>📊 ความคืบหน้าการตอบ Wellbeing Survey (รายวัน)</h3><span class="chart-range-label" id="chart-range-label"></span><button class="card-dl-btn" onclick="downloadCard('#dl-chart','Wellbeing-Chart')" title="ดาวน์โหลดกราฟ">📥</button></div>
-          <div class="card-body" style="padding:14px 18px 12px"><div id="wb-daily-chart" class="chart-ph" style="height:200px"><div class="cph-icon">📈</div><div>กำลังโหลดข้อมูล...</div></div></div>
+          <div class="card-body" style="padding:14px 18px 12px"><div id="wb-daily-chart" class="chart-ph shimmer-loading" style="height:200px"><div class="cph-icon">📈</div><div>กำลังโหลดข้อมูล...</div></div></div>
         </div>
         <div class="card" id="dl-ch1-status">
           <div class="card-head"><h3>📋 สถานะแบบสำรวจข้อมูลองค์กรทุกองค์กร</h3><span id="ch1-status-label" style="font-size:11px;color:var(--tx3)"></span><button class="card-dl-btn" onclick="downloadCard('#dl-ch1-status','Ch1-Status')" title="ดาวน์โหลด">📥</button></div>
-          <div class="card-body" style="padding:12px 16px" id="ch1-status-grid"><div style="color:var(--tx3);font-size:12px">กำลังโหลด...</div></div>
+          <div class="card-body" style="padding:12px 16px" id="ch1-status-grid" class="shimmer-loading"><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">
+            <div class="ch1-org-dot"><div class="ch1-dot-ind"></div><div class="ch1-dot-name" style="width:80%"></div></div>
+            <div class="ch1-org-dot"><div class="ch1-dot-ind"></div><div class="ch1-dot-name" style="width:60%"></div></div>
+            <div class="ch1-org-dot"><div class="ch1-dot-ind"></div><div class="ch1-dot-name" style="width:70%"></div></div>
+            <div class="ch1-org-dot"><div class="ch1-dot-ind"></div><div class="ch1-dot-name" style="width:50%"></div></div>
+            <div class="ch1-org-dot"><div class="ch1-dot-ind"></div><div class="ch1-dot-name" style="width:75%"></div></div>
+            <div class="ch1-org-dot"><div class="ch1-dot-ind"></div><div class="ch1-dot-name" style="width:65%"></div></div>
+          </div></div>
         </div>
       </div>
 
@@ -170,7 +177,13 @@
         <div class="card-body" style="padding:0">
           <div class="tbl-wrap"><table id="wb-rank-table">
             <thead><tr><th>#</th><th>ชื่อองค์กร</th><th>ความคืบหน้า</th><th>จำนวนผู้ตอบแบบสอบถาม / จำนวนข้าราชการในองค์กร</th><th>ร้อยละ</th></tr></thead>
-            <tbody id="wb-rank-tbody"><tr><td colspan="5" style="text-align:center;color:var(--tx3)">กำลังโหลด...</td></tr></tbody>
+            <tbody id="wb-rank-tbody" class="tbody-shimmer">
+              <tr><td><span class="shimmer-cell w-sm"></span></td><td><span class="shimmer-cell w-md"></span></td><td><span class="shimmer-cell w-sm"></span></td><td><span class="shimmer-cell w-lg"></span></td><td><span class="shimmer-cell w-sm"></span></td></tr>
+              <tr><td><span class="shimmer-cell w-sm"></span></td><td><span class="shimmer-cell w-md"></span></td><td><span class="shimmer-cell w-sm"></span></td><td><span class="shimmer-cell w-lg"></span></td><td><span class="shimmer-cell w-sm"></span></td></tr>
+              <tr><td><span class="shimmer-cell w-sm"></span></td><td><span class="shimmer-cell w-md"></span></td><td><span class="shimmer-cell w-sm"></span></td><td><span class="shimmer-cell w-lg"></span></td><td><span class="shimmer-cell w-sm"></span></td></tr>
+              <tr><td><span class="shimmer-cell w-sm"></span></td><td><span class="shimmer-cell w-md"></span></td><td><span class="shimmer-cell w-sm"></span></td><td><span class="shimmer-cell w-lg"></span></td><td><span class="shimmer-cell w-sm"></span></td></tr>
+              <tr><td><span class="shimmer-cell w-sm"></span></td><td><span class="shimmer-cell w-md"></span></td><td><span class="shimmer-cell w-sm"></span></td><td><span class="shimmer-cell w-lg"></span></td><td><span class="shimmer-cell w-sm"></span></td></tr>
+            </tbody>
           </table></div>
         </div>
       </div>
@@ -224,10 +237,10 @@
         <div class="tbl-wrap">
           <table id="org-table">
             <thead>
-              <tr><th>ชื่อองค์กร</th><th>รหัสองค์กร</th><th>กระทรวง</th><th>Saraban Email</th><th>ผู้ประสานงาน</th><th>จัดการ</th></tr>
+              <tr><th>ชื่อองค์กร</th><th>รหัสองค์กร</th><th>กระทรวง</th><th>Saraban Email</th><th>ผู้ประสานงาน</th></tr>
             </thead>
             <tbody>
-              <tr><td colspan="6" style="text-align:center;color:var(--tx3);padding:24px">กำลังโหลดข้อมูล...</td></tr>
+              <tr><td colspan="5" style="text-align:center;color:var(--tx3);padding:24px">กำลังโหลดข้อมูล...</td></tr>
             </tbody>
           </table>
         </div>
@@ -720,106 +733,13 @@
     </div>
 
     <!-- ==================== IDP DASHBOARD ==================== -->
-    <div class="page" id="page-idp">
-      <div class="page-title">แผนพัฒนาบุคลากรรายบุคคล (IDP)</div>
-      <div class="page-sub">Individual Development Plan · ประเมินความเสี่ยง 4 มิติ (กาย ใจ สังคม แวดล้อม) และแผนพัฒนารายบุคคลจากข้อมูล Wellbeing Survey</div>
-
-      <!-- Tab Navigation -->
-      <div class="anwb-tabs" style="margin-bottom:16px">
-        <button class="anwb-tab active" data-tab="exec"       onclick="idpSwitchTab('exec',this)">📊 ภาพรวม</button>
-        <button class="anwb-tab"        data-tab="physical"   onclick="idpSwitchTab('physical',this)">🏃 สุขภาพกาย</button>
-        <button class="anwb-tab"        data-tab="mental"     onclick="idpSwitchTab('mental',this)">🧠 สุขภาพจิต</button>
-        <button class="anwb-tab"        data-tab="social"     onclick="idpSwitchTab('social',this)">💙 ความเหงา</button>
-        <button class="anwb-tab"        data-tab="environ"    onclick="idpSwitchTab('environ',this)">🌿 แวดล้อม</button>
-        <button class="anwb-tab"        data-tab="individual" onclick="idpSwitchTab('individual',this)">👤 รายบุคคล</button>
-      </div>
-
-      <!-- Panel: Executive Summary -->
-      <div class="idp-panel" id="idp-panel-exec">
-        <div id="idp-exec-kpi"></div>
-        <div id="idp-exec-dims"></div>
-        <div id="idp-exec-orgtable"></div>
-        <div id="idp-exec-profile"></div>
-      </div>
-
-      <!-- Panel: Physical -->
-      <div class="idp-panel" id="idp-panel-physical" style="display:none">
-        <div id="idp-physical-content"></div>
-      </div>
-
-      <!-- Panel: Mental / TMHI -->
-      <div class="idp-panel" id="idp-panel-mental" style="display:none">
-        <div id="idp-mental-content"></div>
-      </div>
-
-      <!-- Panel: Social / UCLA -->
-      <div class="idp-panel" id="idp-panel-social" style="display:none">
-        <div id="idp-social-content"></div>
-      </div>
-
-      <!-- Panel: Environment -->
-      <div class="idp-panel" id="idp-panel-environ" style="display:none">
-        <div id="idp-environ-content"></div>
-      </div>
-
-      <!-- Panel: Individual Table -->
-      <div class="idp-panel" id="idp-panel-individual" style="display:none">
-        <div class="card" style="margin-bottom:14px">
-          <div class="card-head">
-            <h3>👤 IDP รายบุคคล</h3>
-            <div class="filter-bar">
-              <input class="si" id="idp-search" placeholder="🔍 ค้นหาชื่อ อีเมล หรือตำแหน่ง...">
-              <select class="sel" id="idp-org-filter"><option value="">ทุกองค์กร</option></select>
-              <select class="sel" id="idp-group-filter">
-                <option value="">ทุกกลุ่ม</option>
-                <option value="A">กลุ่ม A (เสี่ยงสูง ≥3 มิติ)</option>
-                <option value="B">กลุ่ม B (2 มิติ)</option>
-                <option value="C">กลุ่ม C (1 มิติ)</option>
-                <option value="D">กลุ่ม D (ปกติ)</option>
-              </select>
-              <select class="sel" id="idp-gender-filter"><option value="">ทุกเพศ</option><option value="ชาย">ชาย</option><option value="หญิง">หญิง</option></select>
-              <select class="sel" id="idp-age-filter"><option value="">ทุกกลุ่มอายุ</option><option value="≤30 ปี">≤30 ปี</option><option value="31–40 ปี">31–40 ปี</option><option value="41–50 ปี">41–50 ปี</option><option value="51+ ปี">51+ ปี</option></select>
-              <select class="sel" id="idp-bmi-filter">
-                <option value="">ทุกระดับ BMI</option>
-                <option value="underweight">น้ำหนักน้อย (&lt;18.5)</option>
-                <option value="normal">สมส่วน (18.5–22.9)</option>
-                <option value="overweight">น้ำหนักเกิน (23.0–24.9)</option>
-                <option value="obese1">อ้วนระดับ 1 (25.0–29.9)</option>
-                <option value="obese2">อ้วนระดับ 2 (≥30)</option>
-              </select>
-              <select class="sel" id="idp-job-filter"><option value="">ทุกตำแหน่ง</option></select>
-              <select class="sel" id="idp-orgtype-filter"><option value="">ทุกประเภท</option></select>
-              <button class="btn b-gray" id="idp-export">📤 Export Excel</button>
-            </div>
-          </div>
-          <div class="tbl-wrap">
-            <table>
-              <thead>
-                <tr><th>#</th><th>องค์กร</th><th>ชื่อ / อีเมล</th><th>เพศ</th><th>กลุ่ม IDP</th><th>🏃 กาย</th><th>🧠 ใจ</th><th>💙 สังคม</th><th>🌿 แวดล้อม</th><th>ข้อเสนอแนะหลัก</th><th>จัดการ</th></tr>
-              </thead>
-              <tbody id="idp-individual-tbody"><tr><td colspan="11" style="text-align:center;color:var(--tx3);padding:24px">กำลังโหลด...</td></tr></tbody>
-            </table>
-          </div>
-          <div style="padding:10px 18px;border-top:1px solid var(--bdr);display:flex;align-items:center;gap:10px;background:var(--bg)">
-            <div style="font-size:11.5px;color:var(--tx2)" id="idp-page-info">—</div>
-            <div style="flex:1"></div>
-            <button class="btn b-gray" style="padding:5px 10px" id="idp-prev">← ก่อนหน้า</button>
-            <button class="btn b-gray" style="padding:5px 10px" id="idp-next">ถัดไป →</button>
-            <select class="sel" style="font-size:11.5px" id="idp-size"><option value="50">50 แถว/หน้า</option><option value="100">100 แถว/หน้า</option><option value="99999">ทั้งหมด</option></select>
-          </div>
-        </div>
-      </div>
-
-      <!-- IDP Detail Modal (shared across tabs) -->
-      <div id="idp-detail-modal" style="display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;padding:20px">
-        <div style="background:var(--card-bg,#fff);border-radius:12px;max-width:760px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.25);border:1px solid var(--bdr)">
-          <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--bdr)">
-            <h3 style="margin:0;font-size:16px">📋 รายละเอียด IDP รายบุคคล</h3>
-            <button class="btn b-gray" onclick="idpCloseDetail()" style="padding:4px 12px;font-size:12px">ปิด</button>
-          </div>
-          <div id="idp-detail-content" style="padding:20px"></div>
-        </div>
-      </div>
+    <!-- NOTE: หน้า IDP ใช้ดีไซน์จาก /idp-dashboard/ (React + Recharts + Supabase จริง)
+               ฝังแบบ iframe เพื่อยกดีไซน์และฟีเจอร์ทั้งชุดมาใช้โดยไม่ต้องซ้ำโค้ด -->
+    <div class="page" id="page-idp" style="margin:-22px;padding:0">
+      <iframe id="idp-iframe"
+              src="about:blank"
+              title="IDP Dashboard"
+              style="width:100%;height:calc(100vh - 56px);border:0;display:block;background:#F1F5F9"></iframe>
     </div>
 
     <!-- ==================== COMPARE ==================== -->

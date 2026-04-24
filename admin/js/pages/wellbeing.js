@@ -427,6 +427,7 @@ function exportWbFiltered(orgFilter) {
 function renderWbTable() {
   const tbody = document.getElementById('wb-rank-tbody');
   if (!tbody || !window._wbSummary) return;
+  tbody.classList.remove('tbody-shimmer');
   const sortBy = document.getElementById('wb-sort-by')?.value || 'pct';
   const sortDir = document.getElementById('wb-sort-dir')?.value || 'desc';
 

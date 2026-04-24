@@ -17,7 +17,7 @@ function renderOrgs(summary) {
   const table = document.querySelector('#org-table tbody');
   if (!table) return;
   if (summary.length === 0) {
-    table.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--tx3);padding:24px">ยังไม่มีข้อมูลองค์กร</td></tr>';
+    table.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--tx3);padding:24px">ยังไม่มีข้อมูลองค์กร</td></tr>';
     return;
   }
   table.innerHTML = summary.map((org) => {
@@ -37,16 +37,12 @@ function renderOrgs(summary) {
     if (coordinatorEmail) lines.push(`<div style="font-size:11px;margin-top:2px"><a href="mailto:${esc(coordinatorEmail)}" style="color:var(--A)">${esc(coordinatorEmail)}</a></div>`);
     const coordinatorDisplay = lines.length ? lines.join('') : '<span style="color:var(--tx3)">—</span>';
 
-    return `<tr>
+    return `<tr style="cursor:pointer" onclick="showOrgDetail('${esc(org.name)}')">
       <td>${esc(org.name)}</td>
       <td>${esc(org.code || '—')}</td>
       <td>${esc(org.ministry || '—')}</td>
-      <td>${sarabanEmail ? `<a href="mailto:${esc(sarabanEmail)}" style="color:var(--A)">${esc(sarabanEmail)}</a>` : '—'}</td>
+      <td>${sarabanEmail ? `<a href="mailto:${esc(sarabanEmail)}" style="color:var(--A)" onclick="event.stopPropagation()">${esc(sarabanEmail)}</a>` : '—'}</td>
       <td>${coordinatorDisplay}</td>
-      <td class="td-act">
-        <button class="btn b-blue" onclick="showOrgDetail('${esc(org.name)}')">✏️ จัดการ</button>
-        ${orgId ? `<button class="btn b-red" onclick="deleteOrg('${orgId}','${esc(org.name)}')">🗑️</button>` : ''}
-      </td>
     </tr>`;
   }).join('');
 }

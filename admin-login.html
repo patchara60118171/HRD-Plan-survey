@@ -74,9 +74,23 @@
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZnZG9tbWhpcWh6dnNlZGZ6eXJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkzMzY2MzUsImV4cCI6MjA4NDkxMjYzNX0.GFMOeDArhq-9lPt39OizkBOFFgK4TDpVDJrk_HRQ6Xc';
         const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+        // Check session and role before auto-redirect (prevent loop with org-portal users)
         (async () => {
             const { data: { session } } = await sb.auth.getSession();
-            if (session) window.location.href = '/admin';
+            if (!session) return;
+            
+            // Validate admin role before redirecting to /admin
+            const { data: roleRow } = await sb
+                .from('admin_user_roles')
+                .select('role, is_active')
+                .eq('email', session.user.email)
+                .maybeSingle();
+            
+            const adminRoles = ['superadmin', 'super_admin', 'admin'];
+            if (roleRow?.is_active && adminRoles.includes(roleRow.role?.toLowerCase())) {
+                window.location.href = '/admin';
+            }
+            // If not admin role, stay on login page (user needs to login with different account)
         })();
     </script>
 
@@ -164,6 +178,24 @@
             try {
                 const { data, error } = await sb.auth.signInWithPassword({ email, password });
                 if (error) throw error;
+                
+                // Validate role before redirecting
+                const { data: roleRow } = await sb
+                    .from('admin_user_roles')
+                    .select('role, is_active')
+                    .eq('email', email)
+                    .maybeSingle();
+                
+                const adminRoles = ['superadmin', 'super_admin', 'admin'];
+                if (!roleRow?.is_active || !adminRoles.includes(roleRow.role?.toLowerCase())) {
+                    await sb.auth.signOut();
+                    btn.disabled = false;
+                    btn.textContent = 'เข้าสู่ระบบ';
+                    errText.textContent = 'บัญชีนี้ไม่มีสิทธิ์เข้าใช้งาน Admin Portal';
+                    errBox.style.display = 'block';
+                    return;
+                }
+                
                 window.location.href = '/admin';
             } catch (err) {
                 btn.disabled = false;

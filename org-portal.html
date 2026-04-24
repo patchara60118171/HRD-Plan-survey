@@ -715,7 +715,28 @@ body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);col
 </div>
 
 <script>
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Initialize Supabase client with safety check
+let sb = null;
+function initSupabaseClient() {
+  if (typeof supabase !== 'undefined' && supabase.createClient) {
+    sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    return true;
+  }
+  return false;
+}
+
+// Try to initialize immediately, or wait until loaded
+if (!initSupabaseClient()) {
+  // Retry after a short delay if supabase isn't ready yet
+  setTimeout(() => {
+    if (!initSupabaseClient()) {
+      console.error('[org-portal] Failed to initialize Supabase client');
+      document.getElementById('error-text').textContent = 'ไม่สามารถโหลดระบบได้ กรุณารีเฟรชหน้า';
+      document.getElementById('error-box').style.display = 'block';
+    }
+  }, 500);
+}
+
 let portalState = {
   session: null,
   userRole: null,
@@ -1256,6 +1277,14 @@ async function handleLogin(event) {
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner-sm"></span> กำลังเข้าสู่ระบบ...';
 
+  if (!sb) {
+    btn.disabled = false;
+    btn.textContent = 'เข้าสู่ระบบ';
+    errText.textContent = 'ระบบยังโหลดไม่เสร็จ กรุณารอสักครู่แล้วลองใหม่';
+    errBox.style.display = 'block';
+    return;
+  }
+
   try {
     const { data, error } = await sb.auth.signInWithPassword({ email, password: pwd });
     if (error) throw error;
@@ -1277,6 +1306,7 @@ document.getElementById('login-pwd')?.addEventListener('keydown', (event) => {
 });
 
 async function doLogout() {
+  if (!sb) return;
   await sb.auth.signOut();
   portalState = { session: null, userRole: null, orgCode: null, orgName: null, ch1Row: null, wbRows: [], totalStaff: 0, officialStaff: 0 };
   document.getElementById('portal-app').style.display = 'none';
@@ -1304,6 +1334,7 @@ async function initPortal() {
     .eq('email', email)
     .maybeSingle();
 
+  // Only org_hr role is allowed in this portal (admin/superadmin should use /admin)
   if (roleErr || !roleRow || !roleRow.is_active || roleRow.role !== 'org_hr') {
     await sb.auth.signOut();
     portalState.session = null;
@@ -1313,7 +1344,12 @@ async function initPortal() {
     document.getElementById('login-btn').textContent = 'เข้าสู่ระบบ';
     const errBox = document.getElementById('error-box');
     const errText = document.getElementById('error-text');
-    errText.textContent = 'อีเมลหรือรหัสผ่านไม่ถูกต้อง';
+    // Show different message for admin users vs invalid credentials
+    if (roleRow && roleRow.is_active && roleRow.role !== 'org_hr') {
+      errText.textContent = 'บัญชีนี้ไม่มีสิทธิ์เข้าใช้งาน Org Portal · ผู้ดูแลระบบให้ใช้ /admin';
+    } else {
+      errText.textContent = 'อีเมลหรือรหัสผ่านไม่ถูกต้อง';
+    }
     errBox.style.display = 'block';
     showLoading(false);
     return;
@@ -2588,6 +2624,7 @@ function createServiceYearsChart(data) {
 }
 
 (async () => {
+  if (!sb) return;
   const { data: { session } } = await sb.auth.getSession();
   if (session) {
     portalState.session = session;

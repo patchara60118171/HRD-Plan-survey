@@ -11,6 +11,16 @@
 
 // ─── Dashboard ──────────────────────────────────────────────────────────────
 
+/** Remove shimmer/skeleton loading classes from elements once data is ready */
+function removeDashboardShimmer() {
+  document.querySelectorAll('.kpi.shimmer-loading').forEach(el => el.classList.remove('shimmer-loading'));
+  document.querySelectorAll('.w-stat.shimmer-loading').forEach(el => el.classList.remove('shimmer-loading'));
+  const chartPh = document.getElementById('wb-daily-chart');
+  if (chartPh) chartPh.classList.remove('shimmer-loading');
+  const ch1Grid = document.getElementById('ch1-status-grid');
+  if (ch1Grid) ch1Grid.classList.remove('shimmer-loading');
+}
+
 // Fast-path paint: fill KPI cards + daily chart from the RPC summary
 // returned by get_admin_dashboard_summary. This runs before the heavy
 // loadBackendCore()/loadBackendExtras() data is available so users see
@@ -66,6 +76,7 @@ function renderDashboardFromRPC(rpc) {
   // Daily trend chart from RPC payload (show last 14 days)
   const trend = Array.isArray(rpc.daily_trend) ? rpc.daily_trend.slice(-14) : [];
   renderDashboardTrendChart(trend.map(d => [d.date, d.count || 0]), wbSubmitted);
+  removeDashboardShimmer();
 }
 
 // Extracted chart renderer so both RPC fast-path and full renderDashboard
@@ -75,6 +86,7 @@ function renderDashboardTrendChart(dailyRows, totalAllTime) {
   const rangeLabel = document.getElementById('chart-range-label');
   if (!chartEl) return;
 
+  chartEl.classList.remove('shimmer-loading');
   if (!dailyRows || !dailyRows.length) {
     chartEl.innerHTML = '<div class="cph-icon">📈</div><div>ยังไม่มีข้อมูล Wellbeing ที่ submit แล้ว</div>';
     return;
@@ -288,6 +300,7 @@ function renderDashboard(summary) {
     sortDirEl.dataset.initialized = 'true';
   }
   renderWbTable();
+  removeDashboardShimmer();
 }
 
 // ─── Progress ────────────────────────────────────────────────────────────────

@@ -995,44 +995,23 @@ function generateIdpRecommendations(row) {
 
 /* ══ Init / Wire-up ══════════════════════════════════════════════════════════ */
 
-let _idpWiredUp = false;
-
+/**
+ * หน้า IDP ของ admin ได้ย้ายไปใช้ดีไซน์ /idp-dashboard/ (React + Recharts + Supabase)
+ * แบบฝัง iframe เพื่อยกดีไซน์และฟีเจอร์ครบชุดมาใช้โดยตรง (ดู admin.html #page-idp)
+ * ฟังก์ชันเก่าด้านบนยังอยู่เพื่อรองรับ export/ลิงก์ภายในกรณีเรียกจากที่อื่น
+ */
 function initIdpDashboard() {
-  const rows = (state.surveyRows || []).filter(r => !r.is_draft);
-  idpState.filtered = [...rows];
-  idpState.page = 1;
-
-  if (!_idpWiredUp) {
-    const rerender = () => { _applyIdpFilters(); _renderIdpIndividualTable(); };
-    document.getElementById('idp-search')?.addEventListener('input', rerender);
-    document.getElementById('idp-org-filter')?.addEventListener('change', rerender);
-    document.getElementById('idp-group-filter')?.addEventListener('change', rerender);
-    document.getElementById('idp-gender-filter')?.addEventListener('change', rerender);
-    document.getElementById('idp-age-filter')?.addEventListener('change', rerender);
-    document.getElementById('idp-bmi-filter')?.addEventListener('change', rerender);
-    document.getElementById('idp-job-filter')?.addEventListener('change', rerender);
-    document.getElementById('idp-orgtype-filter')?.addEventListener('change', rerender);
-    document.getElementById('idp-size')?.addEventListener('change', e => { idpState.pageSize = Number(e.target.value); idpState.page = 1; _renderIdpIndividualTable(); });
-    document.getElementById('idp-prev')?.addEventListener('click', () => { idpState.page--; _renderIdpIndividualTable(); });
-    document.getElementById('idp-next')?.addEventListener('click', () => { idpState.page++; _renderIdpIndividualTable(); });
-    document.getElementById('idp-export')?.addEventListener('click', _idpExportIndividual);
-    _idpWiredUp = true;
+  const iframe = document.getElementById('idp-iframe');
+  if (!iframe) return;
+  const target = '/idp-dashboard/index.html';
+  // โหลดครั้งแรก: set src; ครั้งต่อไป: บังคับ reload เพื่อดึงข้อมูลล่าสุดจาก Supabase
+  if (!iframe.dataset.loaded) {
+    iframe.src = target;
+    iframe.dataset.loaded = '1';
+  } else {
+    try { iframe.contentWindow.location.reload(); }
+    catch (_) { iframe.src = target + '?t=' + Date.now(); }
   }
-
-  // Populate filter dropdowns from current rows
-  const _populate = (id, values, placeholder) => {
-    const el = document.getElementById(id);
-    if (!el || el.dataset.populated) return;
-    const opts = [...new Set(values.filter(v => v && v !== '—'))].sort((a, b) => a.localeCompare(b, 'th'));
-    el.innerHTML = `<option value="">${placeholder}</option>` + opts.map(v => `<option value="${esc(v)}">${esc(v)}</option>`).join('');
-    el.dataset.populated = '1';
-  };
-  _populate('idp-org-filter',     rows.map(r => r.organization), 'ทุกองค์กร');
-  _populate('idp-job-filter',     rows.map(r => r.job),          'ทุกตำแหน่ง');
-  _populate('idp-orgtype-filter', rows.map(r => r.org_type),     'ทุกประเภท');
-
-  // Render default tab (exec)
-  _idpRenderExec(rows);
 }
 
 function _idpExportIndividual() {
