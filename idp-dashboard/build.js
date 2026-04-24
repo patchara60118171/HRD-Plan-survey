@@ -107,7 +107,6 @@ window.__DASHBOARDS__[${JSON.stringify(key)}] = ${component};
 `;
 
 fs.mkdirSync(OUT_DIR, { recursive: true });
-fs.mkdirSync(MIRROR_DIR, { recursive: true });
 
 for (const f of FILES) {
   const raw = fs.readFileSync(path.join(SRC_DIR, f.src), 'utf8');
@@ -131,7 +130,6 @@ for (const f of FILES) {
     configFile: false,
   });
   fs.writeFileSync(path.join(OUT_DIR, f.key + '.js'), compiled, 'utf8');
-  fs.writeFileSync(path.join(MIRROR_DIR, f.key + '.js'), compiled, 'utf8');
 
   console.log('✔', f.key, '→', f.key + '.js (' + Math.round(compiled.length / 1024) + ' KB)');
 }
@@ -140,5 +138,4 @@ const manifest = JSON.stringify(
   FILES.map(f => ({ key: f.key, title: f.title, file: f.key + '.js' })), null, 2
 );
 fs.writeFileSync(path.join(OUT_DIR, 'manifest.json'), manifest);
-fs.writeFileSync(path.join(MIRROR_DIR, 'manifest.json'), manifest);
-console.log('✔ manifest.json (× 2 locations)');
+console.log('✔ manifest.json');

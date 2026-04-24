@@ -1,27 +1,27 @@
 [
   {
     "key": "env",
-    "title": "🌿 Environment",
+    "title": "env",
     "file": "env.js"
   },
   {
     "key": "physical",
-    "title": "💪 Physical",
+    "title": "physical",
     "file": "physical.js"
   },
   {
     "key": "tmhi",
-    "title": "🧠 TMHI v2 (Mental)",
+    "title": "tmhi",
     "file": "tmhi.js"
   },
   {
     "key": "ucla",
-    "title": "🤝 UCLA (Social)",
+    "title": "ucla",
     "file": "ucla.js"
   },
   {
     "key": "exec",
-    "title": "📊 Executive Summary",
+    "title": "exec",
     "file": "exec.js"
   }
 ]
