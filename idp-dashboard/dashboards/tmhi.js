@@ -135,7 +135,37 @@ const genEmployee = (name, idx) => {
     totalPct: Math.round(total / 60 * 100)
   };
 };
-const employees = NAMES.map((n, i) => genEmployee(n, i));
+// ─── Real data adapter ───────────────────────────────────────────────────────
+const _TMHI_REAL = typeof window !== 'undefined' && window.__IDP_EMPLOYEES__ && window.__IDP_EMPLOYEES__.tmhi || null;
+const _tmhiVal = (v) => {
+  if (v == null) return 2;
+  const n = parseInt(String(v).trim(), 10);
+  if (isNaN(n)) return 2;
+  // Normalize: raw 1-4 (1=ไม่เลย, 2=เล็กน้อย, 3=มาก, 4=มากที่สุด)
+  if (n >= 0 && n <= 3) return n + 1; // if stored 0-3, shift to 1-4
+  return Math.min(Math.max(n, 1), 4);
+};
+const _toTmhiEmployee = (rec, idx) => {
+  const row = rec._raw || {};
+  const rawAnswers = Array.from({ length: 15 }, (_, i) => _tmhiVal(row[`tmhi_${i + 1}`]));
+  // scored: items 4-6 (index 3,4,5) reverse-coded = 5 - raw
+  const scored = rawAnswers.map((v, i) => (i >= 3 && i <= 5) ? (5 - v) : v);
+  const total = scored.reduce((s, v) => s + v, 0);
+  const dimScores = DIMS.map(d => {
+    const raw = d.items.reduce((s, i) => s + scored[i], 0);
+    return { key: d.key, raw, pct: Math.round(raw / (d.items.length * 4) * 100) };
+  });
+  return {
+    id: rec.id || idx + 1,
+    name: rec.name || '—',
+    dept: rec.dept || rec.org || '—',
+    rawAnswers, scored, total,
+    level: getLevel(total),
+    dimScores,
+    totalPct: Math.round(total / 60 * 100)
+  };
+};
+const employees = _TMHI_REAL ? _TMHI_REAL.map(_toTmhiEmployee) : NAMES.map((n, i) => genEmployee(n, i));
 
 // ─── Aggregates ───────────────────────────────────────────────────────────────
 const avgDim = key => Math.round(employees.reduce((s, e) => s + e.dimScores.find(d => d.key === key).pct, 0) / employees.length);

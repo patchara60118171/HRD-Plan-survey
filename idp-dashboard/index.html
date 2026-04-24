@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https:; script-src 'self' 'unsafe-eval' https://cdn.jsdelivr.net https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://*.supabase.co https://cdn.jsdelivr.net; frame-ancestors 'self' https://nidawellbeing.vercel.app;" />
+  <!-- CSP handled by parent document -->
   <title>IDP Dashboard · Well-being Survey</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -34,7 +34,7 @@
     .tab:hover { background: rgba(255,255,255,0.15); color: #fff; }
     .tab.active { background: #F1F5F9; color: #0F172A; }
 
-    main { max-width: 1400px; margin: 0 auto; padding: 24px; min-height: 80vh; }
+    main { max-width: 1400px; margin: 0 auto; padding: 0 24px 24px; min-height: 80vh; }
 
     .loading {
       display: flex; align-items: center; justify-content: center;
@@ -46,6 +46,58 @@
       animation: spin 0.9s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
+    
+    /* Skeleton loading styles */
+    .skeleton-container {
+      width: 100%; max-width: 1200px; margin: 0 auto; padding: 20px;
+    }
+    .skeleton-card {
+      background: #fff; border-radius: 12px; padding: 20px; margin-bottom: 20px;
+      border: 1px solid #E2E8F0;
+    }
+    .skeleton {
+      background: linear-gradient(90deg, #F1F5F9 25%, #E2E8F0 50%, #F1F5F9 75%);
+      background-size: 200% 100%; animation: shimmer 1.5s infinite;
+      border-radius: 6px;
+    }
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+    .skeleton-header {
+      height: 24px; width: 200px; margin-bottom: 16px;
+    }
+    .skeleton-kpi {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px;
+    }
+    .skeleton-kpi-item {
+      background: #fff; border-radius: 12px; padding: 20px; border: 1px solid #E2E8F0;
+    }
+    .skeleton-number {
+      height: 32px; width: 80px; margin-bottom: 8px;
+    }
+    .skeleton-label {
+      height: 16px; width: 120px; margin-bottom: 4px;
+    }
+    .skeleton-sub {
+      height: 14px; width: 100px;
+    }
+    .skeleton-chart {
+      height: 300px; margin-bottom: 16px;
+    }
+    .skeleton-table {
+      height: 200px;
+    }
+    
+    /* Ensure filter bar stays sticky below header */
+    #filter-bar {
+      position: sticky !important;
+      top: var(--header-h, 150px) !important;
+      z-index: 85 !important;
+      background: #F8FAFC !important;
+      border-bottom: 1px solid #E2E8F0 !important;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05) !important;
+    }
 
     .error {
       margin: 40px; padding: 24px; border-radius: 14px;
@@ -94,15 +146,115 @@
   </header>
 
   <!-- Global filter bar (sticky under header) -->
-  <div id="filter-bar" style="position:sticky;top:0;z-index:90;background:#F8FAFC;border-bottom:1px solid #E2E8F0"></div>
+  <div id="filter-bar" style="position:sticky;top:76px;z-index:85;background:#F8FAFC;border-bottom:1px solid #E2E8F0;box-shadow:0 2px 4px rgba(0,0,0,0.05)"></div>
 
   <main id="main">
-    <div class="panel active" id="panel-exec"><div class="loading"><div class="spinner"></div><div>กำลังโหลด Executive…</div></div></div>
-    <div class="panel" id="panel-physical"><div class="loading"><div class="spinner"></div><div>กำลังโหลด Physical…</div></div></div>
-    <div class="panel" id="panel-tmhi"><div class="loading"><div class="spinner"></div><div>กำลังโหลด Mental…</div></div></div>
-    <div class="panel" id="panel-ucla"><div class="loading"><div class="spinner"></div><div>กำลังโหลด Social…</div></div></div>
-    <div class="panel" id="panel-env"><div class="loading"><div class="spinner"></div><div>กำลังโหลด Environment…</div></div></div>
+    <div class="panel active" id="panel-exec"><div class="skeleton-container">
+      <div class="skeleton-kpi">
+        <div class="skeleton-kpi-item"><div class="skeleton skeleton-number"></div><div class="skeleton skeleton-label"></div><div class="skeleton skeleton-sub"></div></div>
+        <div class="skeleton-kpi-item"><div class="skeleton skeleton-number"></div><div class="skeleton skeleton-label"></div><div class="skeleton skeleton-sub"></div></div>
+        <div class="skeleton-kpi-item"><div class="skeleton skeleton-number"></div><div class="skeleton skeleton-label"></div><div class="skeleton skeleton-sub"></div></div>
+        <div class="skeleton-kpi-item"><div class="skeleton skeleton-number"></div><div class="skeleton skeleton-label"></div><div class="skeleton skeleton-sub"></div></div>
+        <div class="skeleton-kpi-item"><div class="skeleton skeleton-number"></div><div class="skeleton skeleton-label"></div><div class="skeleton skeleton-sub"></div></div>
+      </div>
+      <div class="skeleton-card">
+        <div class="skeleton skeleton-header"></div>
+        <div class="skeleton skeleton-chart"></div>
+      </div>
+      <div class="skeleton-card">
+        <div class="skeleton skeleton-header"></div>
+        <div class="skeleton skeleton-chart"></div>
+      </div>
+      <div class="skeleton-card">
+        <div class="skeleton skeleton-header"></div>
+        <div class="skeleton skeleton-table"></div>
+      </div>
+    </div></div>
+    <div class="panel" id="panel-physical"><div class="skeleton-container">
+      <div class="skeleton-kpi">
+        <div class="skeleton-kpi-item"><div class="skeleton skeleton-number"></div><div class="skeleton skeleton-label"></div><div class="skeleton skeleton-sub"></div></div>
+        <div class="skeleton-kpi-item"><div class="skeleton skeleton-number"></div><div class="skeleton skeleton-label"></div><div class="skeleton skeleton-sub"></div></div>
+        <div class="skeleton-kpi-item"><div class="skeleton skeleton-number"></div><div class="skeleton skeleton-label"></div><div class="skeleton skeleton-sub"></div></div>
+        <div class="skeleton-kpi-item"><div class="skeleton skeleton-number"></div><div class="skeleton skeleton-label"></div><div class="skeleton skeleton-sub"></div></div>
+      </div>
+      <div class="skeleton-card">
+        <div class="skeleton skeleton-header"></div>
+        <div class="skeleton skeleton-chart"></div>
+      </div>
+      <div class="skeleton-card">
+        <div class="skeleton skeleton-header"></div>
+        <div class="skeleton skeleton-chart"></div>
+      </div>
+    </div></div>
+    <div class="panel" id="panel-tmhi"><div class="skeleton-container">
+      <div class="skeleton-kpi">
+        <div class="skeleton-kpi-item"><div class="skeleton skeleton-number"></div><div class="skeleton skeleton-label"></div><div class="skeleton skeleton-sub"></div></div>
+        <div class="skeleton-kpi-item"><div class="skeleton skeleton-number"></div><div class="skeleton skeleton-label"></div><div class="skeleton skeleton-sub"></div></div>
+        <div class="skeleton-kpi-item"><div class="skeleton skeleton-number"></div><div class="skeleton skeleton-label"></div><div class="skeleton skeleton-sub"></div></div>
+      </div>
+      <div class="skeleton-card">
+        <div class="skeleton skeleton-header"></div>
+        <div class="skeleton skeleton-chart"></div>
+      </div>
+      <div class="skeleton-card">
+        <div class="skeleton skeleton-header"></div>
+        <div class="skeleton skeleton-chart"></div>
+      </div>
+    </div></div>
+    <div class="panel" id="panel-ucla"><div class="skeleton-container">
+      <div class="skeleton-kpi">
+        <div class="skeleton-kpi-item"><div class="skeleton skeleton-number"></div><div class="skeleton skeleton-label"></div><div class="skeleton skeleton-sub"></div></div>
+        <div class="skeleton-kpi-item"><div class="skeleton skeleton-number"></div><div class="skeleton skeleton-label"></div><div class="skeleton skeleton-sub"></div></div>
+        <div class="skeleton-kpi-item"><div class="skeleton skeleton-number"></div><div class="skeleton skeleton-label"></div><div class="skeleton skeleton-sub"></div></div>
+      </div>
+      <div class="skeleton-card">
+        <div class="skeleton skeleton-header"></div>
+        <div class="skeleton skeleton-chart"></div>
+      </div>
+      <div class="skeleton-card">
+        <div class="skeleton skeleton-header"></div>
+        <div class="skeleton skeleton-chart"></div>
+      </div>
+    </div></div>
+    <div class="panel" id="panel-env"><div class="skeleton-container">
+      <div class="skeleton-kpi">
+        <div class="skeleton-kpi-item"><div class="skeleton skeleton-number"></div><div class="skeleton skeleton-label"></div><div class="skeleton skeleton-sub"></div></div>
+        <div class="skeleton-kpi-item"><div class="skeleton skeleton-number"></div><div class="skeleton skeleton-label"></div><div class="skeleton skeleton-sub"></div></div>
+        <div class="skeleton-kpi-item"><div class="skeleton skeleton-number"></div><div class="skeleton skeleton-label"></div><div class="skeleton skeleton-sub"></div></div>
+      </div>
+      <div class="skeleton-card">
+        <div class="skeleton skeleton-header"></div>
+        <div class="skeleton skeleton-chart"></div>
+      </div>
+      <div class="skeleton-card">
+        <div class="skeleton skeleton-header"></div>
+        <div class="skeleton skeleton-chart"></div>
+      </div>
+    </div></div>
   </main>
+
+  <script>
+  // ── Dynamic header height measurement for sticky filter bar ─────────────────
+  (function () {
+    function updateHeaderHeight() {
+      var hdr = document.querySelector('header');
+      if (!hdr) return;
+      var h = hdr.getBoundingClientRect().height;
+      document.documentElement.style.setProperty('--header-h', h + 'px');
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', updateHeaderHeight);
+    } else {
+      updateHeaderHeight();
+    }
+    window.addEventListener('resize', updateHeaderHeight);
+    // Re-measure after fonts load (header height can change)
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(updateHeaderHeight);
+    }
+    setTimeout(updateHeaderHeight, 500);
+  })();
+  </script>
 
   <script>
   (function () {

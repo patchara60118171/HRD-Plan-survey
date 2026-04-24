@@ -1003,16 +1003,25 @@ function generateIdpRecommendations(row) {
 function initIdpDashboard() {
   const iframe = document.getElementById('idp-iframe');
   if (!iframe) return;
-  const target = '/idp-dashboard/index.html';
-  // โหลดครั้งแรก: set src; ครั้งต่อไป: บังคับ reload เพื่อดึงข้อมูลล่าสุดจาก Supabase
+  const target = '/idp-dashboard/';
+  // โหลดครั้งแรกเท่านั้น: set src; ครั้งต่อไปคงสถานะเดิมเพื่อไม่ต้องดึง Supabase ซ้ำ
+  // (ผู้ใช้กดปุ่ม "รีเฟรช" เองถ้าต้องการข้อมูลล่าสุด)
   if (!iframe.dataset.loaded) {
     iframe.src = target;
     iframe.dataset.loaded = '1';
-  } else {
-    try { iframe.contentWindow.location.reload(); }
-    catch (_) { iframe.src = target + '?t=' + Date.now(); }
   }
+  // else: do nothing — iframe retains its cached DOM, data, and scroll state
 }
+
+/** บังคับรีโหลด iframe — เรียกจากปุ่มรีเฟรชเท่านั้น */
+function reloadIdpDashboard() {
+  const iframe = document.getElementById('idp-iframe');
+  if (!iframe) return;
+  const target = '/idp-dashboard/';
+  try { iframe.contentWindow.location.reload(); }
+  catch (_) { iframe.src = target + '?t=' + Date.now(); }
+}
+if (typeof window !== 'undefined') window.reloadIdpDashboard = reloadIdpDashboard;
 
 function _idpExportIndividual() {
   const rows = idpState.filtered;

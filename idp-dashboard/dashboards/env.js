@@ -130,7 +130,63 @@ const genEmployee = (name, idx) => {
     envGroup
   };
 };
-const employees = NAMES.map((n, i) => genEmployee(n, i));
+// ─── Real data adapter ───────────────────────────────────────────────────────
+const _ENV_REAL = typeof window !== 'undefined' && window.__IDP_EMPLOYEES__ && window.__IDP_EMPLOYEES__.env || null;
+const _envHazard = (v) => {
+  if (v == null) return 0;
+  const s = String(v).trim();
+  if (!s || s.startsWith('ไม่ใช่') || s === 'false' || s === '0') return 0;
+  const hasImpact = s.includes('มีผล') && !s.includes('ไม่มีผล');
+  if (hasImpact) return 2;
+  if (s.includes('ใช่') || s.includes('มี') || s === 'true' || s === '1') return 1;
+  const n = parseInt(s, 10);
+  return isNaN(n) ? 0 : Math.min(Math.max(n, 0), 2);
+};
+const _num04 = (v) => {
+  if (v == null) return 2;
+  const n = parseInt(String(v).trim(), 10);
+  return isNaN(n) ? 2 : Math.min(Math.max(n, 0), 4);
+};
+const _flag = (v) => {
+  if (v == null) return false;
+  const s = String(v).trim();
+  return s !== '' && s !== '0' && s !== 'false' && !/^ไม่/.test(s);
+};
+const _toEnvEmployee = (rec, idx) => {
+  const row = rec._raw || {};
+  const envSatisfaction = _num04(row.env_satisfaction ?? row.q84);
+  const hazards = {
+    sunlight: _envHazard(row.env_glare ?? row.q85),
+    noise:    _envHazard(row.env_noise ?? row.q86),
+    chemical: _envHazard(row.env_smell ?? row.q87),
+    fume:     _envHazard(row.env_smoke ?? row.q88),
+    posture:  _envHazard(row.env_posture ?? row.q89),
+    awkward:  _envHazard(row.env_awkward ?? row.q90),
+  };
+  const hazardCount = Object.values(hazards).filter(v => v === 2).length;
+  const pm25Level = _num04(row.env_pm25 ?? row.q91);
+  const symptoms = {
+    none: pm25Level === 0,
+    cough:    _flag(row.env_pm_cough ?? row.q92_cough),
+    breath:   _flag(row.env_pm_breath ?? row.q92_breath),
+    eye:      _flag(row.env_pm_eye ?? row.q92_eye),
+    headache: _flag(row.env_pm_headache ?? row.q92_headache),
+  };
+  const symptomCount = Object.entries(symptoms).filter(([k, v]) => k !== 'none' && v).length;
+  const qualityOfLife = _num04(row.env_qol ?? row.q93);
+  const pmRisk = pm25Level >= 3 && symptomCount > 0;
+  const envRiskScore = hazardCount + (pmRisk ? 1 : 0);
+  const envGroup = envRiskScore >= 2 ? 'high' : envRiskScore >= 1 ? 'medium' : 'low';
+  return {
+    id: rec.id || idx + 1,
+    name: rec.name || '—',
+    dept: rec.dept || rec.org || '—',
+    envSatisfaction, hazards, hazardCount,
+    pm25Level, symptoms, symptomCount, pmRisk,
+    qualityOfLife, envRiskScore, envGroup,
+  };
+};
+const employees = _ENV_REAL ? _ENV_REAL.map(_toEnvEmployee) : NAMES.map((n, i) => genEmployee(n, i));
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 const GROUP_CFG = {

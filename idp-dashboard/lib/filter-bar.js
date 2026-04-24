@@ -12,13 +12,13 @@
   'use strict';
 
   const FIELDS = [
-    { key: 'org',     label: '🏛️ องค์กร',  width: 240 },
-    { key: 'group',   label: '🎯 กลุ่ม IDP', width: 190 },
-    { key: 'gender',  label: '👥 เพศ',       width: 110 },
-    { key: 'age',     label: '🎂 อายุ',      width: 130 },
-    { key: 'bmi',     label: '⚖️ BMI',      width: 180 },
-    { key: 'job',     label: '💼 ตำแหน่ง', width: 180 },
-    { key: 'orgType', label: '🏷️ ประเภท',  width: 160 },
+    { key: 'org',     label: '🏛️ องค์กร',  width: 220 },
+    { key: 'group',   label: '🎯 กลุ่ม IDP', width: 180 },
+    { key: 'gender',  label: '👥 เพศ',       width: 100 },
+    { key: 'age',     label: '🎂 อายุ',      width: 120 },
+    { key: 'bmi',     label: '⚖️ BMI',      width: 160 },
+    { key: 'job',     label: '💼 ตำแหน่ง', width: 160 },
+    { key: 'orgType', label: '🏷️ ประเภท',  width: 140 },
   ];
 
   const state = {

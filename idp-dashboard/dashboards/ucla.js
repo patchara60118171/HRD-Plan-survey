@@ -114,7 +114,41 @@ const genEmployee = (name, idx) => {
     totalPct: Math.round(total / 60 * 100)
   };
 };
-const employees = NAMES.map((n, i) => genEmployee(n, i));
+// ─── Real data adapter ───────────────────────────────────────────────────────
+const _UCLA_REAL = typeof window !== 'undefined' && window.__IDP_EMPLOYEES__ && window.__IDP_EMPLOYEES__.ucla || null;
+const _lonelyVal = (v) => {
+  if (v == null) return null;
+  const s = String(v).trim();
+  if (/^(0|ไม่เคย|never|น้อยมาก)$/i.test(s)) return 0;
+  if (/^(1|บางครั้ง|sometimes|น้อย)$/i.test(s)) return 1;
+  if (/^(2|บ่อย|often|ปานกลาง|บางที)$/i.test(s)) return 2;
+  if (/^(3|บ่อยมาก|always|มาก|เสมอ)$/i.test(s)) return 3;
+  const n = parseInt(s, 10);
+  return isNaN(n) ? 0 : Math.min(Math.max(n, 0), 3);
+};
+const _toUclaEmployee = (rec, idx) => {
+  const row = rec._raw || {};
+  const answers = Array.from({ length: 20 }, (_, i) => {
+    const v = _lonelyVal(row[`lonely_${i + 1}`]);
+    return v == null ? 0 : v;
+  });
+  const total = answers.reduce((s, v) => s + v, 0);
+  const dimScores = DIMS.map(d => {
+    const raw = d.items.reduce((s, i) => s + answers[i], 0);
+    return { key: d.key, raw, pct: Math.round(raw / (d.items.length * 3) * 100) };
+  });
+  return {
+    id: rec.id || idx + 1,
+    name: rec.name || '—',
+    dept: rec.dept || rec.org || '—',
+    answers,
+    total,
+    level: getLevel(total),
+    dimScores,
+    totalPct: Math.round(total / 60 * 100)
+  };
+};
+const employees = _UCLA_REAL ? _UCLA_REAL.map(_toUclaEmployee) : NAMES.map((n, i) => genEmployee(n, i));
 
 // ─── Aggregates ───────────────────────────────────────────────────────────────
 const avgDim = dim => Math.round(employees.reduce((s, e) => s + e.dimScores.find(d => d.key === dim).pct, 0) / employees.length);
