@@ -124,7 +124,7 @@ const Tag = ({ label, color, small }) => (
     background: color + "22", color, border: `1px solid ${color}44`,
     padding: small ? "1px 7px" : "3px 10px",
     borderRadius: 999, fontSize: small ? 10 : 11, fontWeight: 700,
-    fontFamily: "'Sarabun',sans-serif", display: "inline-flex", alignItems: "center", gap: 3
+    fontFamily: "'IBM Plex Sans Thai Looped','Sarabun',system-ui,sans-serif", display: "inline-flex", alignItems: "center", gap: 3
   }}>{label}</span>
 );
 
@@ -182,9 +182,7 @@ function PhysicalDashboard() {
     .filter(e => filter === "all" || e.physicalGroup === filter);
 
   return (
-    <div style={{ fontFamily: "'Sarabun',sans-serif", background: "#F0F4F8", minHeight: "100vh" }}>
-      <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-
+    <div style={{ fontFamily: "'IBM Plex Sans Thai Looped','Sarabun',system-ui,sans-serif", background: "#F0F4F8", minHeight: "100vh" }}>
       {/* ── Header ── */}
       <div style={{
         background: "linear-gradient(135deg, #134E4A 0%, #0F766E 50%, #059669 100%)",
@@ -236,7 +234,7 @@ function PhysicalDashboard() {
               <button key={t.key} onClick={() => setTab(t.key)} style={{
                 padding: "10px 20px", borderRadius: "8px 8px 0 0",
                 border: "none", cursor: "pointer", fontSize: 13, fontWeight: 700,
-                fontFamily: "'Sarabun',sans-serif",
+                fontFamily: "'IBM Plex Sans Thai Looped','Sarabun',system-ui,sans-serif",
                 background: tab === t.key ? "#F0F4F8" : "transparent",
                 color: tab === t.key ? "#134E4A" : "rgba(255,255,255,0.65)",
               }}>{t.label}</button>
@@ -300,13 +298,13 @@ function PhysicalDashboard() {
               <ResponsiveContainer width="100%" height={180}>
                 <BarChart data={deptData} barSize={40} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" vertical={false} />
-                  <XAxis dataKey="name" tick={{ fill: "#6B7280", fontSize: 13, fontFamily: "'Sarabun',sans-serif" }} axisLine={false} tickLine={false} />
+                  <XAxis dataKey="name" tick={{ fill: "#6B7280", fontSize: 13, fontFamily: "'IBM Plex Sans Thai Looped','Sarabun',system-ui,sans-serif" }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fill: "#9CA3AF", fontSize: 11 }} axisLine={false} tickLine={false} />
-                  <Tooltip contentStyle={{ fontFamily: "'Sarabun',sans-serif", borderRadius: 10, fontSize: 12 }} />
+                  <Tooltip contentStyle={{ fontFamily: "'IBM Plex Sans Thai Looped','Sarabun',system-ui,sans-serif", borderRadius: 10, fontSize: 12 }} />
                   <Bar dataKey="เสี่ยงสูง"   stackId="a" fill="#EF4444" radius={[0,0,0,0]} />
                   <Bar dataKey="เฝ้าระวัง" stackId="a" fill="#F59E0B" radius={[0,0,0,0]} />
                   <Bar dataKey="ปกติ"        stackId="a" fill="#10B981" radius={[4,4,0,0]} />
-                  <Legend wrapperStyle={{ fontFamily: "'Sarabun',sans-serif", fontSize: 12 }} />
+                  <Legend wrapperStyle={{ fontFamily: "'IBM Plex Sans Thai Looped','Sarabun',system-ui,sans-serif", fontSize: 12 }} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -379,7 +377,7 @@ function PhysicalDashboard() {
                       <Pie data={ncdCounts} dataKey="value" cx="50%" cy="50%" innerRadius={38} outerRadius={62} paddingAngle={2}>
                         {ncdCounts.map((entry, i) => <Cell key={i} fill={entry.color} />)}
                       </Pie>
-                      <Tooltip formatter={(v, n) => [`${v} คน`, n]} contentStyle={{ fontFamily: "'Sarabun',sans-serif", fontSize: 12, borderRadius: 8 }} />
+                      <Tooltip formatter={(v, n) => [`${v} คน`, n]} contentStyle={{ fontFamily: "'IBM Plex Sans Thai Looped','Sarabun',system-ui,sans-serif", fontSize: 12, borderRadius: 8 }} />
                     </PieChart>
                   </ResponsiveContainer>
                   <div style={{ flex: 1 }}>
@@ -421,7 +419,7 @@ function PhysicalDashboard() {
               {[["all","ทั้งหมด","#6366F1"],["high","🔴 เสี่ยงสูง","#EF4444"],["medium","🟠 เฝ้าระวัง","#F59E0B"],["low","🟢 ปกติ","#10B981"]].map(([key, label, color]) => (
                 <button key={key} onClick={() => setFilter(key)} style={{
                   padding: "6px 14px", borderRadius: 999, fontSize: 12, fontWeight: 700,
-                  fontFamily: "'Sarabun',sans-serif", cursor: "pointer", border: "none",
+                  fontFamily: "'IBM Plex Sans Thai Looped','Sarabun',system-ui,sans-serif", cursor: "pointer", border: "none",
                   background: filter === key ? color : "#F3F4F6",
                   color: filter === key ? "#fff" : "#6B7280",
                 }}>{label}</button>

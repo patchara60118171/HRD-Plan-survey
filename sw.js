@@ -11,9 +11,9 @@
 // v3.2: sync orgMap canonical org_codes (dhss, dop, dcy, test-org)
 // =============================================
 
-const CACHE_NAME = 'wellbeing-survey-v3.9';
-const STATIC_CACHE = 'static-v3.9';
-const DATA_CACHE = 'data-v3.9';
+const CACHE_NAME = 'wellbeing-survey-v4.0';
+const STATIC_CACHE = 'static-v4.0';
+const DATA_CACHE = 'data-v4.0';
 
 // ไฟล์ที่ต้อง Cache สำหรับ Offline
 const STATIC_ASSETS = [
@@ -91,6 +91,12 @@ self.addEventListener('fetch', (event) => {
 
   // Dev mode: bypass SW cache on localhost to avoid stale admin assets.
   if (url.hostname === 'localhost' || url.hostname === '127.0.0.1') {
+    event.respondWith(fetch(request));
+    return;
+  }
+
+  // Bypass SW for idp-dashboard vendor assets (fonts, React, Recharts) — let browser handle directly
+  if (url.pathname.startsWith('/idp-dashboard/vendor/')) {
     event.respondWith(fetch(request));
     return;
   }

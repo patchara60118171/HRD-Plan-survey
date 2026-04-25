@@ -130,63 +130,7 @@ const genEmployee = (name, idx) => {
     envGroup
   };
 };
-// ─── Real data adapter ───────────────────────────────────────────────────────
-const _ENV_REAL = typeof window !== 'undefined' && window.__IDP_EMPLOYEES__ && window.__IDP_EMPLOYEES__.env || null;
-const _envHazard = (v) => {
-  if (v == null) return 0;
-  const s = String(v).trim();
-  if (!s || s.startsWith('ไม่ใช่') || s === 'false' || s === '0') return 0;
-  const hasImpact = s.includes('มีผล') && !s.includes('ไม่มีผล');
-  if (hasImpact) return 2;
-  if (s.includes('ใช่') || s.includes('มี') || s === 'true' || s === '1') return 1;
-  const n = parseInt(s, 10);
-  return isNaN(n) ? 0 : Math.min(Math.max(n, 0), 2);
-};
-const _num04 = (v) => {
-  if (v == null) return 2;
-  const n = parseInt(String(v).trim(), 10);
-  return isNaN(n) ? 2 : Math.min(Math.max(n, 0), 4);
-};
-const _flag = (v) => {
-  if (v == null) return false;
-  const s = String(v).trim();
-  return s !== '' && s !== '0' && s !== 'false' && !/^ไม่/.test(s);
-};
-const _toEnvEmployee = (rec, idx) => {
-  const row = rec._raw || {};
-  const envSatisfaction = _num04(row.env_satisfaction ?? row.q84);
-  const hazards = {
-    sunlight: _envHazard(row.env_glare ?? row.q85),
-    noise:    _envHazard(row.env_noise ?? row.q86),
-    chemical: _envHazard(row.env_smell ?? row.q87),
-    fume:     _envHazard(row.env_smoke ?? row.q88),
-    posture:  _envHazard(row.env_posture ?? row.q89),
-    awkward:  _envHazard(row.env_awkward ?? row.q90),
-  };
-  const hazardCount = Object.values(hazards).filter(v => v === 2).length;
-  const pm25Level = _num04(row.env_pm25 ?? row.q91);
-  const symptoms = {
-    none: pm25Level === 0,
-    cough:    _flag(row.env_pm_cough ?? row.q92_cough),
-    breath:   _flag(row.env_pm_breath ?? row.q92_breath),
-    eye:      _flag(row.env_pm_eye ?? row.q92_eye),
-    headache: _flag(row.env_pm_headache ?? row.q92_headache),
-  };
-  const symptomCount = Object.entries(symptoms).filter(([k, v]) => k !== 'none' && v).length;
-  const qualityOfLife = _num04(row.env_qol ?? row.q93);
-  const pmRisk = pm25Level >= 3 && symptomCount > 0;
-  const envRiskScore = hazardCount + (pmRisk ? 1 : 0);
-  const envGroup = envRiskScore >= 2 ? 'high' : envRiskScore >= 1 ? 'medium' : 'low';
-  return {
-    id: rec.id || idx + 1,
-    name: rec.name || '—',
-    dept: rec.dept || rec.org || '—',
-    envSatisfaction, hazards, hazardCount,
-    pm25Level, symptoms, symptomCount, pmRisk,
-    qualityOfLife, envRiskScore, envGroup,
-  };
-};
-const employees = _ENV_REAL ? _ENV_REAL.map(_toEnvEmployee) : NAMES.map((n, i) => genEmployee(n, i));
+const employees = NAMES.map((n, i) => genEmployee(n, i));
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 const GROUP_CFG = {
@@ -228,7 +172,7 @@ const Tag = ({
     borderRadius: 999,
     fontSize: small ? 10 : 11,
     fontWeight: 700,
-    fontFamily: "'Sarabun',sans-serif"
+    fontFamily: "'IBM Plex Sans Thai Looped','Sarabun',system-ui,sans-serif"
   }
 }, label);
 
@@ -244,7 +188,7 @@ const CustomTooltip = ({
       background: "#1E293B",
       borderRadius: 10,
       padding: "12px 16px",
-      fontFamily: "'Sarabun',sans-serif"
+      fontFamily: "'IBM Plex Sans Thai Looped','Sarabun',system-ui,sans-serif"
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
@@ -335,14 +279,11 @@ function EnvDashboard() {
   const avgQol = (employees.reduce((s, e) => s + e.qualityOfLife, 0) / employees.length).toFixed(1);
   return /*#__PURE__*/React.createElement("div", {
     style: {
-      fontFamily: "'Sarabun',sans-serif",
+      fontFamily: "'IBM Plex Sans Thai Looped','Sarabun',system-ui,sans-serif",
       background: "#F1F5F9",
       minHeight: "100vh"
     }
-  }, /*#__PURE__*/React.createElement("link", {
-    href: "https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap",
-    rel: "stylesheet"
-  }), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", {
     style: {
       background: "linear-gradient(135deg,#1E3A5F 0%,#1D4ED8 60%,#2563EB 100%)",
       padding: "24px 32px 0",
@@ -451,7 +392,7 @@ function EnvDashboard() {
       cursor: "pointer",
       fontSize: 13,
       fontWeight: 700,
-      fontFamily: "'Sarabun',sans-serif",
+      fontFamily: "'IBM Plex Sans Thai Looped','Sarabun',system-ui,sans-serif",
       background: tab === t.key ? "#F1F5F9" : "transparent",
       color: tab === t.key ? "#1E3A5F" : "rgba(255,255,255,0.65)"
     }
@@ -827,7 +768,7 @@ function EnvDashboard() {
     radius: [0, 4, 4, 0]
   }), /*#__PURE__*/React.createElement(Legend, {
     wrapperStyle: {
-      fontFamily: "'Sarabun',sans-serif",
+      fontFamily: "'IBM Plex Sans Thai Looped','Sarabun',system-ui,sans-serif",
       fontSize: 12
     }
   })))), /*#__PURE__*/React.createElement("div", {
@@ -1073,7 +1014,7 @@ function EnvDashboard() {
     tick: {
       fill: "#6B7280",
       fontSize: 13,
-      fontFamily: "'Sarabun',sans-serif"
+      fontFamily: "'IBM Plex Sans Thai Looped','Sarabun',system-ui,sans-serif"
     },
     axisLine: false,
     tickLine: false
@@ -1104,7 +1045,7 @@ function EnvDashboard() {
     radius: [4, 4, 0, 0]
   }), /*#__PURE__*/React.createElement(Legend, {
     wrapperStyle: {
-      fontFamily: "'Sarabun',sans-serif",
+      fontFamily: "'IBM Plex Sans Thai Looped','Sarabun',system-ui,sans-serif",
       fontSize: 12
     }
   }))), /*#__PURE__*/React.createElement("div", {
@@ -1127,7 +1068,7 @@ function EnvDashboard() {
     tick: {
       fill: "#6B7280",
       fontSize: 10,
-      fontFamily: "'Sarabun',sans-serif"
+      fontFamily: "'IBM Plex Sans Thai Looped','Sarabun',system-ui,sans-serif"
     }
   }), /*#__PURE__*/React.createElement(PolarRadiusAxis, {
     domain: [0, 100],
@@ -1150,7 +1091,7 @@ function EnvDashboard() {
     strokeDasharray: "4 3"
   }), /*#__PURE__*/React.createElement(Legend, {
     wrapperStyle: {
-      fontFamily: "'Sarabun',sans-serif",
+      fontFamily: "'IBM Plex Sans Thai Looped','Sarabun',system-ui,sans-serif",
       fontSize: 11
     }
   })))))), tab === "risklist" && /*#__PURE__*/React.createElement("div", {
@@ -1183,7 +1124,7 @@ function EnvDashboard() {
       borderRadius: 999,
       fontSize: 12,
       fontWeight: 700,
-      fontFamily: "'Sarabun',sans-serif",
+      fontFamily: "'IBM Plex Sans Thai Looped','Sarabun',system-ui,sans-serif",
       cursor: "pointer",
       border: "none",
       background: filter === key ? color : "#F3F4F6",

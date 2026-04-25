@@ -117,7 +117,7 @@ const Tag = ({ label, color, small }) => (
 background: color + "22", color, border: `1px solid ${color}44`,
 padding: small ? "1px 7px" : "3px 10px",
 borderRadius: 999, fontSize: small ? 10 : 11, fontWeight: 700,
-fontFamily: "'Sarabun',sans-serif",
+fontFamily: "'IBM Plex Sans Thai Looped','Sarabun',system-ui,sans-serif",
 }}>{label}</span>
 );
 
@@ -125,7 +125,7 @@ fontFamily: "'Sarabun',sans-serif",
 const CustomTooltip = ({ active, payload, label }) => {
 if (!active || !payload?.length) return null;
 return (
-<div style={{ background:"#1E293B", borderRadius:10, padding:"12px 16px", fontFamily:"'Sarabun',sans-serif" }}>
+<div style={{ background:"#1E293B", borderRadius:10, padding:"12px 16px", fontFamily:"'IBM Plex Sans Thai Looped','Sarabun',system-ui,sans-serif" }}>
 <div style={{ color:"#94A3B8", fontSize:11, marginBottom:8 }}>{label}</div>
 {payload.map((p, i) => (
 <div key={i} style={{ display:"flex", gap:10, alignItems:"center", marginBottom:4 }}>
@@ -193,10 +193,8 @@ const avgSat = (employees.reduce((s,e) => s + e.envSatisfaction, 0) / employees.
 const avgQol = (employees.reduce((s,e) => s + e.qualityOfLife, 0) / employees.length).toFixed(1);
 
 return (
-<div style={{ fontFamily:"'Sarabun',sans-serif", background:"#F1F5F9", minHeight:"100vh" }}>
-<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-
-  {/* ── Header ── */}
+<div style={{ fontFamily:"'IBM Plex Sans Thai Looped','Sarabun',system-ui,sans-serif", background:"#F1F5F9", minHeight:"100vh" }}>
+{/* ── Header ── */}
   <div style={{
     background:"linear-gradient(135deg,#1E3A5F 0%,#1D4ED8 60%,#2563EB 100%)",
     padding:"24px 32px 0", color:"#fff"
@@ -249,7 +247,7 @@ return (
           <button key={t.key} onClick={() => setTab(t.key)} style={{
             padding:"10px 20px", borderRadius:"8px 8px 0 0", border:"none",
             cursor:"pointer", fontSize:13, fontWeight:700,
-            fontFamily:"'Sarabun',sans-serif",
+            fontFamily:"'IBM Plex Sans Thai Looped','Sarabun',system-ui,sans-serif",
             background: tab === t.key ? "#F1F5F9" : "transparent",
             color: tab === t.key ? "#1E3A5F" : "rgba(255,255,255,0.65)",
           }}>{t.label}</button>
@@ -370,7 +368,7 @@ return (
                   <Bar dataKey="affected" name="กระทบสุขภาพ" stackId="a" fill="#EF4444" radius={[0,0,0,0]} />
                   <Bar dataKey="watch"    name="มีแต่ไม่กระทบ" stackId="a" fill="#FCD34D" radius={[0,0,0,0]} />
                   <Bar dataKey="none"     name="ไม่มี" stackId="a" fill="#D1FAE5" radius={[0,4,4,0]} />
-                  <Legend wrapperStyle={{ fontFamily:"'Sarabun',sans-serif", fontSize:12 }} />
+                  <Legend wrapperStyle={{ fontFamily:"'IBM Plex Sans Thai Looped','Sarabun',system-ui,sans-serif", fontSize:12 }} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -458,13 +456,13 @@ return (
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={deptData} barSize={44} margin={{ top:0, right:0, left:-20, bottom:0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" vertical={false} />
-                <XAxis dataKey="name" tick={{ fill:"#6B7280", fontSize:13, fontFamily:"'Sarabun',sans-serif" }} axisLine={false} tickLine={false} />
+                <XAxis dataKey="name" tick={{ fill:"#6B7280", fontSize:13, fontFamily:"'IBM Plex Sans Thai Looped','Sarabun',system-ui,sans-serif" }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fill:"#9CA3AF", fontSize:11 }} axisLine={false} tickLine={false} />
                 <Tooltip content={<CustomTooltip />} cursor={{ fill:"rgba(0,0,0,0.03)" }} />
                 <Bar dataKey="เสี่ยงสูง"   stackId="a" fill="#EF4444" />
                 <Bar dataKey="เฝ้าระวัง" stackId="a" fill="#F59E0B" />
                 <Bar dataKey="ปกติ"        stackId="a" fill="#10B981" radius={[4,4,0,0]} />
-                <Legend wrapperStyle={{ fontFamily:"'Sarabun',sans-serif", fontSize:12 }} />
+                <Legend wrapperStyle={{ fontFamily:"'IBM Plex Sans Thai Looped','Sarabun',system-ui,sans-serif", fontSize:12 }} />
               </BarChart>
             </ResponsiveContainer>
 
@@ -475,11 +473,11 @@ return (
             <ResponsiveContainer width="100%" height={180}>
               <RadarChart data={radarData}>
                 <PolarGrid stroke="#E5E7EB" />
-                <PolarAngleAxis dataKey="dim" tick={{ fill:"#6B7280", fontSize:10, fontFamily:"'Sarabun',sans-serif" }} />
+                <PolarAngleAxis dataKey="dim" tick={{ fill:"#6B7280", fontSize:10, fontFamily:"'IBM Plex Sans Thai Looped','Sarabun',system-ui,sans-serif" }} />
                 <PolarRadiusAxis domain={[0,100]} tick={false} axisLine={false} />
                 <Radar name="กระทบสุขภาพ (%)" dataKey="กระทบสุขภาพ" stroke="#EF4444" fill="#EF4444" fillOpacity={0.2} strokeWidth={2} />
                 <Radar name="มีแต่ไม่กระทบ (%)" dataKey="มีแต่ไม่กระทบ" stroke="#F59E0B" fill="#F59E0B" fillOpacity={0.1} strokeWidth={1.5} strokeDasharray="4 3" />
-                <Legend wrapperStyle={{ fontFamily:"'Sarabun',sans-serif", fontSize:11 }} />
+                <Legend wrapperStyle={{ fontFamily:"'IBM Plex Sans Thai Looped','Sarabun',system-ui,sans-serif", fontSize:11 }} />
               </RadarChart>
             </ResponsiveContainer>
           </div>
@@ -496,7 +494,7 @@ return (
           {[["all","ทั้งหมด","#6366F1"],["high","🔴 เสี่ยงสูง","#EF4444"],["medium","🟠 เฝ้าระวัง","#F59E0B"],["low","🟢 ปกติ","#10B981"]].map(([key,label,color]) => (
             <button key={key} onClick={() => setFilter(key)} style={{
               padding:"6px 14px", borderRadius:999, fontSize:12, fontWeight:700,
-              fontFamily:"'Sarabun',sans-serif", cursor:"pointer", border:"none",
+              fontFamily:"'IBM Plex Sans Thai Looped','Sarabun',system-ui,sans-serif", cursor:"pointer", border:"none",
               background: filter === key ? color : "#F3F4F6",
               color: filter === key ? "#fff" : "#6B7280",
             }}>{label}</button>
