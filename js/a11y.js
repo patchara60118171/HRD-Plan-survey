@@ -92,16 +92,65 @@
       + '.tab:focus-visible,'
       + '.anwb-tab:focus-visible,'
       + 'button:focus-visible,'
-      + '[role="button"]:focus-visible {'
+      + '[role="button"]:focus-visible,'
+      + 'input:focus-visible,'
+      + 'select:focus-visible,'
+      + 'textarea:focus-visible,'
+      + 'a:focus-visible {'
       + '  outline: 2px solid #2563eb;'
       + '  outline-offset: 2px;'
       + '  border-radius: 6px;'
+      + '}'
+      + '.skip-link {'
+      + '  position: absolute;'
+      + '  top: -40px;'
+      + '  left: 6px;'
+      + '  background: #0F4C81;'
+      + '  color: white;'
+      + '  padding: 8px 16px;'
+      + '  text-decoration: none;'
+      + '  border-radius: 4px;'
+      + '  font-weight: 600;'
+      + '  font-size: 14px;'
+      + '  z-index: 10000;'
+      + '  transition: top 0.2s;'
+      + '}'
+      + '.skip-link:focus {'
+      + '  top: 6px;'
+      + '  outline: 2px solid #fff;'
+      + '  outline-offset: 2px;'
       + '}';
     (document.head || document.documentElement).appendChild(style);
   }
 
+  function injectSkipLinks() {
+    if (document.getElementById('a11y-skip-links')) return;
+    
+    var main = document.querySelector('main') || document.querySelector('[role="main"]') || document.body;
+    var nav = document.querySelector('nav') || document.querySelector('[role="navigation"]');
+    
+    var skipLinks = document.createElement('div');
+    skipLinks.id = 'a11y-skip-links';
+    skipLinks.innerHTML = '';
+    
+    if (main) {
+      skipLinks.innerHTML += '<a href="#main-content" class="skip-link">ข้ามไปเนื้อหาหลัก</a>';
+      main.id = 'main-content';
+    }
+    
+    if (nav) {
+      skipLinks.innerHTML += '<a href="#main-navigation" class="skip-link">ข้ามไปเมนูนำทาง</a>';
+      nav.id = 'main-navigation';
+    }
+    
+    if (skipLinks.innerHTML) {
+      document.body.insertBefore(skipLinks, document.body.firstChild);
+    }
+  }
+
   function boot() {
     injectFocusRing();
+    injectSkipLinks();
     scan(document);
 
     if (typeof MutationObserver === 'function') {

@@ -182,6 +182,24 @@ async function fetchAllSurveyRaw() {
   return { data: pageResults.flatMap((res) => res.data || []), error: null };
 }
 
+// Paginated survey responses for Phase 1 performance fix
+async function fetchPaginatedSurveyResponses(page = 1, pageSize = 50, options = {}) {
+  const start = (page - 1) * pageSize;
+  const { data, count, error } = await sb.from('survey_responses')
+    .select(SURVEY_SELECT_FIELDS, { count: 'exact' })
+    .order('submitted_at', { ascending: false, nullsFirst: false })
+    .range(start, start + pageSize - 1);
+  
+  if (error) return { data: [], error, totalPages: 0 };
+  
+  return {
+    data: (data || []).filter(row => !_isTestOrgRow(row)).map(normalizeSurveyRow),
+    totalPages: Math.ceil((count || 0) / pageSize),
+    currentPage: page,
+    totalRecords: count || 0
+  };
+}
+
 async function fetchAllSurveyResponses() {
   const pageSize = 1000;
   // Use ordering to ensure consistent pagination and leverage the composite index
@@ -283,7 +301,7 @@ async function loadBackendCore(retryCount = 0) {
     // Fire the 4 lightweight queries in parallel.
     // Ch1 is fetched WITHOUT form_data (JSONB blob) for speed — full ch1 comes in extras.
     const [surveyRes, ch1LiteRes, usersRows, orgRows] = await _withTimeout(Promise.all([
-      fetchAllSurveyResponses(),
+      fetchAllSurveyResponses(), // Load all data as before
       sb.from('hrd_ch1_responses')
         .select(CH1_LITE_FIELDS)
         .order('submitted_at', { ascending: false, nullsFirst: false }),

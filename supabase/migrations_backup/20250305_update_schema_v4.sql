@@ -34,24 +34,11 @@ ADD COLUMN IF NOT EXISTS hrd_plan_results TEXT;
 
 -- Step 5: Add support systems fields (section 13)
 ALTER TABLE hrd_ch1_responses 
-ADD COLUMN IF NOT EXISTS support_systems TEXT; -- JSON array of support systems status
+ADD COLUMN IF NOT EXISTS support_systems JSONB; -- JSON array of support systems status
 
 -- Step 6: Add digital systems as proper array (section 15)
--- Note: digital_systems already exists as TEXT[], but ensure it's properly configured
-DO $$
-BEGIN
-    -- Check if column exists and is NOT already TEXT[] (ARRAY of text)
-    -- PostgreSQL reports TEXT[] as data_type='ARRAY', udt_name='_text' in information_schema
-    IF EXISTS (
-        SELECT 1 FROM information_schema.columns 
-        WHERE table_name = 'hrd_ch1_responses' 
-        AND column_name = 'digital_systems'
-        AND NOT (data_type = 'ARRAY' AND udt_name = '_text')
-    ) THEN
-        ALTER TABLE hrd_ch1_responses DROP COLUMN IF EXISTS digital_systems CASCADE;
-        ALTER TABLE hrd_ch1_responses ADD COLUMN digital_systems TEXT[];
-    END IF;
-END $$;
+ALTER TABLE hrd_ch1_responses 
+ADD COLUMN IF NOT EXISTS digital_systems TEXT[];
 
 -- Step 7: Add ergonomics detail fields (section 16)
 ALTER TABLE hrd_ch1_responses 
@@ -114,7 +101,7 @@ WHERE strategic_priority_rank1 IS NOT NULL;
 
 -- Index for organization and submission time
 CREATE INDEX IF NOT EXISTS idx_hrd_org_submission 
-ON hrd_ch1_responses(organization, submitted_at DESC);
+ON hrd_ch1_responses(organization_id, created_at DESC);
 
 -- =============================================
 -- Add comments for documentation

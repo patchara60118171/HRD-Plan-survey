@@ -10,33 +10,37 @@ ALTER TABLE public.survey_responses
   ADD COLUMN IF NOT EXISTS job TEXT,
   ADD COLUMN IF NOT EXISTS job_duration TEXT;
 
--- Backfill organization from raw_responses for existing rows
+-- Backfill organization from response_data for existing rows
 UPDATE public.survey_responses
-SET organization = COALESCE(
-  raw_responses->>'organization',
-  raw_responses->>'agency_name',
-  raw_responses->>'org_name'
+SET organization_id = (
+  SELECT id FROM public.organizations 
+  WHERE code = COALESCE(
+    response_data->>'organization',
+    response_data->>'agency_name',
+    response_data->>'org_name'
+  )
+  LIMIT 1
 )
-WHERE organization IS NULL
-  AND raw_responses IS NOT NULL;
+WHERE organization_id IS NULL
+  AND response_data IS NOT NULL;
 
 -- Backfill job
 UPDATE public.survey_responses
 SET job = COALESCE(
-  raw_responses->>'job',
-  raw_responses->>'level'
+  response_data->>'job',
+  response_data->>'level'
 )
 WHERE job IS NULL
-  AND raw_responses IS NOT NULL;
+  AND response_data IS NOT NULL;
 
 -- Backfill job_duration
 UPDATE public.survey_responses
 SET job_duration = COALESCE(
-  raw_responses->>'job_duration',
-  raw_responses->>'service_years'
+  response_data->>'job_duration',
+  response_data->>'service_years'
 )
 WHERE job_duration IS NULL
-  AND raw_responses IS NOT NULL;
+  AND response_data IS NOT NULL;
 
 -- Index for faster org filtering
 CREATE INDEX IF NOT EXISTS idx_survey_responses_organization ON public.survey_responses(organization);

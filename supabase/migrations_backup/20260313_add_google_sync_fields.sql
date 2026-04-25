@@ -16,18 +16,18 @@ set
     google_sync_status = coalesce(
         google_sync_status,
         case
-            when submitted_at is null then 'draft'
+            when created_at is null then 'draft'
             else 'pending'
         end
     ),
     google_drive_sync_status = coalesce(
         google_drive_sync_status,
         case
-            when submitted_at is null then 'draft'
+            when created_at is null then 'draft'
             when coalesce(strategy_file_url, '') <> ''
               or coalesce(org_structure_file_url, '') <> ''
               or coalesce(hrd_plan_file_url, '') <> '' then 'pending'
-            else 'not_applicable'
+            else 'completed'
         end
     );
 
@@ -42,7 +42,7 @@ begin
     new.google_synced_at := null;
     new.google_sheet_row_number := null;
     new.google_sync_status := case
-        when new.submitted_at is null then 'draft'
+        when new.created_at is null then 'draft'
         else 'pending'
     end;
 
@@ -50,7 +50,7 @@ begin
     new.google_drive_error := null;
     new.google_drive_files := '[]'::jsonb;
     new.google_drive_sync_status := case
-        when new.submitted_at is null then 'draft'
+        when new.created_at is null then 'draft'
         when coalesce(new.strategy_file_url, '') <> ''
           or coalesce(new.org_structure_file_url, '') <> ''
           or coalesce(new.hrd_plan_file_url, '') <> '' then 'pending'
@@ -74,7 +74,7 @@ on public.hrd_ch1_responses (google_sync_status, google_drive_sync_status, creat
 create or replace view public.ch1_google_sync_queue as
 select *
 from public.hrd_ch1_responses
-where submitted_at is not null
+where created_at is not null
   and (
     google_sync_status in ('pending', 'failed')
     or google_drive_sync_status in ('pending', 'failed')

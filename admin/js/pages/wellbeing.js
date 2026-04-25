@@ -16,6 +16,32 @@
  *   exportWbFiltered(orgFilter)  → TODO: move from export.js integration
  */
 
+// HTML escape utilities for XSS prevention (Phase 1 security fix)
+function esc(str) {
+  if (typeof str !== 'string') {
+    str = String(str || '');
+  }
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function createSafeButton(text, onClick, options = {}) {
+  const button = document.createElement('button');
+  button.textContent = text;
+  
+  if (options.className) button.className = options.className;
+  if (options.id) button.id = options.id;
+  if (options.style) button.style.cssText = options.style;
+  if (options.ariaLabel) button.setAttribute('aria-label', options.ariaLabel);
+  
+  if (typeof onClick === 'function') {
+    button.addEventListener('click', onClick);
+  }
+  
+  return button;
+}
+
 // ─── Wellbeing Control Panel ─────────────────────────────────────────────────
 
 function renderWellbeingControl(summary) {
@@ -86,7 +112,7 @@ function renderWellbeingOrg(summary) {
       <td><span class="badge ${org.wellbeingSubmitted > 0 ? 'bg' : 'br'}">${fmtNum((org.wellbeingSubmitted / totalSubmitted) * 100, 1)}%</span></td>
       <td>${org.flagged ? `<span style="color:#991B1B;font-weight:700">⚠️ ${fmtNum(org.flagged)}</span>` : '—'}</td>
       <td>${fmtDate(org.latestWb)}</td>
-      <td class="td-act"><button class="btn b-blue" onclick="openWbRaw('${esc(org.name)}')">ดูรายคน</button></td>
+      <td class="td-act">${createSafeButton('ดูรายคน', () => openWbRaw(org.name), {className: 'btn b-blue'}).outerHTML}</td>
     </tr>`).join('');
   };
 
@@ -224,7 +250,7 @@ function renderRawTable() {
       <td>${row.bmi != null ? fmtNum(row.bmi, 1) + ' (' + esc(row.bmi_category) + ')' : '—'}</td>
       <td>${esc(getJobSat(row))}</td>
       <td>${esc(getMainProblem(row))}</td>
-      <td class="td-act"><button class="btn b-gray" style="padding:3px 8px;font-size:11px" onclick="showWbRowPDF(${start+index})">📄 PDF</button></td>
+      <td class="td-act">${createSafeButton('📄 PDF', () => showWbRowPDF(start+index), {className: 'btn b-gray', style: 'padding:3px 8px;font-size:11px'}).outerHTML}</td>
     </tr>`;
   }).join('');
 
@@ -402,8 +428,8 @@ async function renderWellbeingCh1PdfReports() {
       <td style="font-weight:600;font-size:12px">${esc(orgName)}</td>
       <td>${createdAt}</td>
       <td>
-        <button class="btn b-outline" onclick="viewWellbeingCh1PdfReport('${row.id}')">ดูรายงาน</button>
-        <button class="btn b-outline" onclick="downloadWellbeingCh1PdfReport('${row.id}', '${orgName}')">PDF</button>
+        ${createSafeButton('ดูรายงาน', () => viewWellbeingCh1PdfReport(row.id), {className: 'btn b-outline'}).outerHTML}
+        ${createSafeButton('PDF', () => downloadWellbeingCh1PdfReport(row.id, orgName), {className: 'btn b-outline'}).outerHTML}
       </td>
     </tr>`;
   }).join('');

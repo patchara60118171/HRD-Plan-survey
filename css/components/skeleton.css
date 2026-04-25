@@ -1,0 +1,265 @@
+/**
+ * Loading Skeletons - Phase 2.1 UX Foundation
+ * Makes long load times feel faster with content-shaped placeholders
+ */
+
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+}
+
+/* Skeleton variants */
+.skeleton-text {
+  height: 1em;
+  margin-bottom: 0.5em;
+}
+
+.skeleton-text.short {
+  width: 60%;
+}
+
+.skeleton-text.medium {
+  width: 80%;
+}
+
+.skeleton-text.long {
+  width: 100%;
+}
+
+.skeleton-title {
+  height: 1.5em;
+  width: 70%;
+  margin-bottom: 0.75em;
+  border-radius: 6px;
+}
+
+.skeleton-card {
+  height: 120px;
+  margin-bottom: 1rem;
+  border-radius: 8px;
+}
+
+.skeleton-card-small {
+  height: 80px;
+  margin-bottom: 1rem;
+  border-radius: 8px;
+}
+
+.skeleton-table-row {
+  height: 48px;
+  margin-bottom: 2px;
+  border-radius: 4px;
+}
+
+.skeleton-button {
+  height: 36px;
+  width: 100px;
+  border-radius: 6px;
+}
+
+.skeleton-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.skeleton-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+}
+
+/* Dashboard specific skeletons */
+.skeleton-kpi-card {
+  height: 140px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.skeleton-kpi-value {
+  height: 2.5rem;
+  width: 60%;
+  margin: 1rem 0;
+  border-radius: 6px;
+}
+
+.skeleton-kpi-label {
+  height: 1rem;
+  width: 80%;
+  border-radius: 4px;
+}
+
+.skeleton-chart {
+  height: 300px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.skeleton-progress-bar {
+  height: 8px;
+  width: 100%;
+  border-radius: 4px;
+  margin: 0.5rem 0;
+}
+
+/* Table skeletons */
+.skeleton-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.skeleton-table th,
+.skeleton-table td {
+  padding: 12px;
+  text-align: left;
+}
+
+.skeleton-table th .skeleton {
+  height: 1rem;
+  width: 70%;
+}
+
+.skeleton-table td .skeleton {
+  height: 0.875rem;
+  width: 100%;
+}
+
+.skeleton-table td .skeleton.short {
+  width: 40%;
+}
+
+.skeleton-table td .skeleton.medium {
+  width: 60%;
+}
+
+/* Form skeletons */
+.skeleton-form-group {
+  margin-bottom: 1.5rem;
+}
+
+.skeleton-input {
+  height: 44px;
+  width: 100%;
+  border-radius: 6px;
+}
+
+.skeleton-label {
+  height: 1rem;
+  width: 30%;
+  margin-bottom: 0.5rem;
+  border-radius: 4px;
+}
+
+.skeleton-select {
+  height: 44px;
+  width: 100%;
+  border-radius: 6px;
+}
+
+/* Animation */
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Skeleton container for shimmer effect */
+.skeleton-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.skeleton-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.4),
+    transparent
+  );
+  transform: translateX(-100%);
+  animation: skeleton-shimmer 2s infinite;
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Responsive skeletons */
+@media (max-width: 768px) {
+  .skeleton-kpi-card {
+    height: 120px;
+    padding: 1rem;
+  }
+  
+  .skeleton-chart {
+    height: 250px;
+    padding: 1rem;
+  }
+  
+  .skeleton-table-row {
+    height: 56px;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .skeleton {
+    background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%);
+    background-size: 200% 100%;
+  }
+  
+  .skeleton-kpi-card,
+  .skeleton-chart {
+    background: #1f2937;
+    border-color: #374151;
+  }
+}
+
+/* Utility classes */
+.skeleton-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.skeleton-fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

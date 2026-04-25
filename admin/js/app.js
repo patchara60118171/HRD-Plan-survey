@@ -12,6 +12,14 @@ async function refreshData() {
   if (btnRefresh) { btnRefresh.disabled = true; btnRefresh.style.opacity = '0.6'; }
   if (statusEl) { statusEl.textContent = 'กำลังโหลด...'; statusEl.style.color = 'var(--tx2)'; }
 
+  // Phase 2.1: Show skeleton loading for better perceived performance
+  if (window.skeletonManager) {
+    window.showSkeleton('page-dashboard', 'dashboard', { 
+      cardCount: 4, 
+      showCharts: true 
+    });
+  }
+
   try {
     // Phase 0: FAST-PATH — force-fetch fresh RPC summary so KPI cards
     // update before the heavier core/extras fetches complete. On manual
@@ -71,6 +79,11 @@ function _renderCorePages(summary) {
   _safeRender(() => renderDashboard(summary), 'renderDashboard');
   _safeRender(() => renderOrgs(summary), 'renderOrgs');
   _safeRender(populateOrgSelects, 'populateOrgSelects');
+  
+  // Phase 2.1: Hide skeleton after core data loads
+  if (window.skeletonManager) {
+    window.hideSkeleton('page-dashboard');
+  }
 }
 
 // Render pages that need EXTRAS (ch1 form_data, links, credentials)

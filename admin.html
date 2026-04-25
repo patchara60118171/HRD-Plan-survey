@@ -11,6 +11,7 @@
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
 <link rel="stylesheet" href="admin/assets/css/admin.css">
+<link rel="stylesheet" href="css/components/skeleton.css">
 <script>
 (() => {
   const host = window.location.hostname;
@@ -253,7 +254,7 @@
       <div class="page-sub">ควบคุมการเปิด-ปิดฟอร์ม · ดูข้อมูลที่ส่งมา · ดู Raw Data</div>
       <div class="tabs">
         <div class="tab active" onclick="st(this,'c1-pdf');renderCh1Pdf()">📄 ข้อมูลรายคน PDF</div>
-        <div class="tab" onclick="st(this,'c1-sheet');renderCh1RawSheet()">🗂️ ตารางข้อมูล (Raw)</div>
+        <div class="tab" onclick="window.open('http://localhost:8080', '_blank')">� ตารางข้อมูล (NocoDB)</div>
       </div>
 
       <div id="c1-pdf">
@@ -874,6 +875,9 @@
 <script src="admin/js/pages/analytics-wb.js?v=2"></script>
 <script src="admin/js/pages/compare.js?v=3"></script>
 <script src="admin/js/pages/idp-dashboard.js"></script>
+
+<!-- Phase 2 UX Components -->
+<script src="js/components/skeleton.js"></script>
 
 <!-- ===== App Entry Point (replaces inline script) ===== -->
 <script src="admin/js/app.js?v=fastpath2"></script>
