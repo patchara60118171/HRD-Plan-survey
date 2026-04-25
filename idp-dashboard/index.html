@@ -245,7 +245,43 @@
       from { opacity: 0; transform: translateY(8px); }
       to { opacity: 1; transform: translateY(0); }
     }
+
+    /* ── Embedded in iframe: compact mode ── */
+    .is-embedded .brand,
+    .is-embedded .title-row {
+      display: none !important;
+    }
+    .is-embedded header .header-inner {
+      padding-top: 0 !important;
+      padding-bottom: 0 !important;
+    }
+    .is-embedded header {
+      box-shadow: none;
+    }
+    .is-embedded #filter-bar {
+      top: 42px !important;
+    }
+    /* Hide the per-component coloured gradient sub-headers when embedded */
+    .is-embedded .panel > div > div:first-child[style*="gradient"],
+    .is-embedded .panel > div > div:first-child[style*="linear-gradient"] {
+      display: none !important;
+    }
   </style>
+  <script>
+    /* Detect iframe embed immediately (on html element to avoid flash) */
+    try {
+      if (window.self !== window.top) {
+        document.documentElement.classList.add('is-embedded');
+      }
+    } catch(e) {
+      document.documentElement.classList.add('is-embedded');
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+      if (document.documentElement.classList.contains('is-embedded')) {
+        document.body.classList.add('is-embedded');
+      }
+    });
+  </script>
 
   <!-- React + Recharts (self-hosted to avoid CDN CSP issues on Vercel) -->
   <script src="/idp-dashboard/vendor/react.min.js"></script>

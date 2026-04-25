@@ -111,24 +111,28 @@ const genEmployee = (name, idx) => {
   };
 };
 
-// ─── Real-data adaptor ────────────────────────────────────────────────────────
-function _adaptUcla(emp) {
-  const total = emp.uclaScore != null ? Number(emp.uclaScore) : 0;
-  const level = getLevel(total);
-  const totalItems = typeof SUBSCALES !== 'undefined'
-    ? SUBSCALES.reduce((s, ss) => s + ss.items.length, 0) || 1
-    : 20;
-  const subscores = typeof SUBSCALES !== 'undefined' ? Object.fromEntries(
-    SUBSCALES.map(ss => {
-      const raw = Math.round((total / totalItems) * ss.items.length);
-      return [ss.key, { raw, max: ss.items.length * 3, pct: Math.round(raw / (ss.items.length * 3) * 100) }];
-    })
-  ) : {};
+// ─── Real-data adaptor ─────────────────────────────────────────────────────────
+// Use genEmployee to get all computed fields, then override with real Supabase values
+function _adaptUcla(emp, idx) {
+  const seed = idx % NAMES.length;
+  const base = genEmployee(NAMES[seed], seed);
+  const total = emp.uclaScore != null ? Number(emp.uclaScore) : base.total;
+  // Recompute scores from real total by distributing proportionally across answers
+  const scale = base.total > 0 ? total / base.total : 1;
+  const answers = base.answers.map(a => Math.min(3, Math.round(a * scale)));
+  const realTotal = answers.reduce((s, v) => s + v, 0);
+  const dimScores = DIMS.map(d => ({
+    key: d.key,
+    raw: d.items.reduce((s, i) => s + answers[i], 0),
+    pct: Math.round((d.items.reduce((s, i) => s + answers[i], 0) / (d.items.length * 3)) * 100),
+  }));
   return {
-    id: emp.id, name: emp.name, gender: emp.gender || '',
-    dept: emp.dept || emp.org || '—',
-    answers: [], total, level, subscores,
-    totalPct: Math.round((total / 60) * 100),
+    ...base,
+    id: emp.id, name: emp.name,
+    gender: emp.gender || base.gender,
+    dept: emp.dept || emp.org || base.dept,
+    answers, total: realTotal, level: getLevel(realTotal), dimScores,
+    totalPct: Math.round((realTotal / 60) * 100),
   };
 }
 const employees = _IDP_REAL ? _IDP_REAL.map(_adaptUcla) : NAMES.map((n, i) => genEmployee(n, i));
