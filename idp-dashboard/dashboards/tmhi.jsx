@@ -140,7 +140,23 @@ const genEmployee = (name, idx) => {
   };
 };
 
-const employees = NAMES.map((n, i) => genEmployee(n, i));
+// ─── Real-data adaptor ────────────────────────────────────────────────────────
+function _adaptTmhi(emp) {
+  const total = emp.tmhiScore != null ? Number(emp.tmhiScore) : 0;
+  const level = getLevel(total);
+  const perDimItems = DIMS.reduce((s, d) => s + d.items.length, 0) || 1;
+  const dimScores = DIMS.map(d => ({
+    key: d.key,
+    raw: Math.round((total / perDimItems) * d.items.length),
+    pct: Math.round(((total / perDimItems) * d.items.length) / (d.items.length * 4) * 100),
+  }));
+  return {
+    id: emp.id, name: emp.name, dept: emp.dept || emp.org || '—',
+    rawAnswers: [], scored: [], total, level, dimScores,
+    totalPct: Math.round((total / 60) * 100),
+  };
+}
+const employees = _IDP_REAL ? _IDP_REAL.map(_adaptTmhi) : NAMES.map((n, i) => genEmployee(n, i));
 
 // ─── Aggregates ───────────────────────────────────────────────────────────────
 const avgDim = (key) => Math.round(

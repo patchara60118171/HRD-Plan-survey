@@ -4,6 +4,9 @@
   var React = window.React;
   var Recharts = window.Recharts;
   var useState = React.useState, useMemo = React.useMemo, useEffect = React.useEffect, useRef = React.useRef, Fragment = React.Fragment;
+  // Real data from IDPData bootstrap (set by index.html before each dashboard load)
+  var _IDP_KEY = "tmhi"; // replaced per-file below
+  var _IDP_REAL = (window.__IDP_EMPLOYEES__ && window.__IDP_EMPLOYEES__[_IDP_KEY]) || null;
   var BarChart = Recharts.BarChart, Bar = Recharts.Bar, XAxis = Recharts.XAxis, YAxis = Recharts.YAxis,
       CartesianGrid = Recharts.CartesianGrid, Tooltip = Recharts.Tooltip, ResponsiveContainer = Recharts.ResponsiveContainer,
       RadarChart = Recharts.RadarChart, Radar = Recharts.Radar, PolarGrid = Recharts.PolarGrid,
@@ -135,7 +138,30 @@ const genEmployee = (name, idx) => {
     totalPct: Math.round(total / 60 * 100)
   };
 };
-const employees = NAMES.map((n, i) => genEmployee(n, i));
+
+// ─── Real-data adaptor ────────────────────────────────────────────────────────
+function _adaptTmhi(emp) {
+  const total = emp.tmhiScore != null ? Number(emp.tmhiScore) : 0;
+  const level = getLevel(total);
+  const perDimItems = DIMS.reduce((s, d) => s + d.items.length, 0) || 1;
+  const dimScores = DIMS.map(d => ({
+    key: d.key,
+    raw: Math.round(total / perDimItems * d.items.length),
+    pct: Math.round(total / perDimItems * d.items.length / (d.items.length * 4) * 100)
+  }));
+  return {
+    id: emp.id,
+    name: emp.name,
+    dept: emp.dept || emp.org || '—',
+    rawAnswers: [],
+    scored: [],
+    total,
+    level,
+    dimScores,
+    totalPct: Math.round(total / 60 * 100)
+  };
+}
+const employees = _IDP_REAL ? _IDP_REAL.map(_adaptTmhi) : NAMES.map((n, i) => genEmployee(n, i));
 
 // ─── Aggregates ───────────────────────────────────────────────────────────────
 const avgDim = key => Math.round(employees.reduce((s, e) => s + e.dimScores.find(d => d.key === key).pct, 0) / employees.length);

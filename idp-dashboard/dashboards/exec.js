@@ -4,6 +4,9 @@
   var React = window.React;
   var Recharts = window.Recharts;
   var useState = React.useState, useMemo = React.useMemo, useEffect = React.useEffect, useRef = React.useRef, Fragment = React.Fragment;
+  // Real data from IDPData bootstrap (set by index.html before each dashboard load)
+  var _IDP_KEY = "exec"; // replaced per-file below
+  var _IDP_REAL = (window.__IDP_EMPLOYEES__ && window.__IDP_EMPLOYEES__[_IDP_KEY]) || null;
   var BarChart = Recharts.BarChart, Bar = Recharts.Bar, XAxis = Recharts.XAxis, YAxis = Recharts.YAxis,
       CartesianGrid = Recharts.CartesianGrid, Tooltip = Recharts.Tooltip, ResponsiveContainer = Recharts.ResponsiveContainer,
       RadarChart = Recharts.RadarChart, Radar = Recharts.Radar, PolarGrid = Recharts.PolarGrid,
@@ -39,7 +42,6 @@ const DIMS_4 = [{
   color: "#0EA5E9",
   light: "#E0F2FE"
 }];
-const _IDP_REAL = typeof window !== 'undefined' && window.__IDP_EMPLOYEES__ && window.__IDP_EMPLOYEES__.exec || null;
 const DEPTS = _IDP_REAL ? [...new Set(_IDP_REAL.map(e => e.dept).filter(Boolean))].sort().slice(0, 8) : ["นโยบาย", "ปฏิบัติการ", "สนับสนุน"];
 const NAMES = ["นายสมชาย ใจดี", "นางสาวมาลี รักสุข", "นายประสิทธิ์ ทำงาน", "นางวิภา สดใส", "นายกิตติ เก่งมาก", "นางสาวอัญชลี ร่าเริง", "นายวีระ ขยันดี", "นางรัตนา มีสุข", "นายพิทักษ์ ตั้งใจ", "นางสาวสุภา สวยงาม", "นายอนุชา ดีเลิศ", "นางเพ็ญศรี แจ่มใส", "นายชัยวัฒน์ รุ่งเรือง", "นางสาวนิภา ยิ้มแย้ม", "นายสุรศักดิ์ มั่นคง", "นางกัลยา ใสสะอาด", "นายธนพล ฉลาดดี", "นางสาวลัดดา สะอาด", "นายปิยะ เฉลียวฉลาด", "นางวรรณา สุขสบาย"];
 const rand = (a, b) => Math.floor(Math.random() * (b - a + 1)) + a;

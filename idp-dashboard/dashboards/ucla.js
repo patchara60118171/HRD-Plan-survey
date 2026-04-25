@@ -4,6 +4,9 @@
   var React = window.React;
   var Recharts = window.Recharts;
   var useState = React.useState, useMemo = React.useMemo, useEffect = React.useEffect, useRef = React.useRef, Fragment = React.Fragment;
+  // Real data from IDPData bootstrap (set by index.html before each dashboard load)
+  var _IDP_KEY = "ucla"; // replaced per-file below
+  var _IDP_REAL = (window.__IDP_EMPLOYEES__ && window.__IDP_EMPLOYEES__[_IDP_KEY]) || null;
   var BarChart = Recharts.BarChart, Bar = Recharts.Bar, XAxis = Recharts.XAxis, YAxis = Recharts.YAxis,
       CartesianGrid = Recharts.CartesianGrid, Tooltip = Recharts.Tooltip, ResponsiveContainer = Recharts.ResponsiveContainer,
       RadarChart = Recharts.RadarChart, Radar = Recharts.Radar, PolarGrid = Recharts.PolarGrid,
@@ -114,7 +117,33 @@ const genEmployee = (name, idx) => {
     totalPct: Math.round(total / 60 * 100)
   };
 };
-const employees = NAMES.map((n, i) => genEmployee(n, i));
+
+// ─── Real-data adaptor ────────────────────────────────────────────────────────
+function _adaptUcla(emp) {
+  const total = emp.uclaScore != null ? Number(emp.uclaScore) : 0;
+  const level = getLevel(total);
+  const totalItems = typeof SUBSCALES !== 'undefined' ? SUBSCALES.reduce((s, ss) => s + ss.items.length, 0) || 1 : 20;
+  const subscores = typeof SUBSCALES !== 'undefined' ? Object.fromEntries(SUBSCALES.map(ss => {
+    const raw = Math.round(total / totalItems * ss.items.length);
+    return [ss.key, {
+      raw,
+      max: ss.items.length * 3,
+      pct: Math.round(raw / (ss.items.length * 3) * 100)
+    }];
+  })) : {};
+  return {
+    id: emp.id,
+    name: emp.name,
+    gender: emp.gender || '',
+    dept: emp.dept || emp.org || '—',
+    answers: [],
+    total,
+    level,
+    subscores,
+    totalPct: Math.round(total / 60 * 100)
+  };
+}
+const employees = _IDP_REAL ? _IDP_REAL.map(_adaptUcla) : NAMES.map((n, i) => genEmployee(n, i));
 
 // ─── Aggregates ───────────────────────────────────────────────────────────────
 const avgDim = dim => Math.round(employees.reduce((s, e) => s + e.dimScores.find(d => d.key === dim).pct, 0) / employees.length);

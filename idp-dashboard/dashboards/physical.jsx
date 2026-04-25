@@ -91,7 +91,41 @@ const generateEmployee = (name, idx) => {
   };
 };
 
-const employees = NAMES.map((n, i) => generateEmployee(n, i));
+// ─── Real-data adaptor ────────────────────────────────────────────────────────
+function _adaptPhysical(emp) {
+  const bmi = emp.bmi != null ? parseFloat(emp.bmi) : null;
+  const bmiLvl = bmi != null ? getBMILevel(bmi) : { label: "ไม่ระบุ", color: "#94A3B8", risk: false };
+  const physicalRisk = (emp.dims && emp.dims.physical) || 'normal';
+  const physicalGroup = physicalRisk === 'high' ? 'high' : physicalRisk === 'medium' ? 'medium' : 'low';
+  const raw = emp._raw || {};
+  const smokeCig  = raw.smoke_cigarette  || 'none';
+  const smokeVape = raw.smoke_vape       || 'none';
+  const alcohol   = raw.alcohol          || 'none';
+  const substance = raw.substance        || 'none';
+  const hasRiskyBehavior = smokeCig !== 'none' || smokeVape !== 'none' || alcohol !== 'none' || substance !== 'none';
+  const ncdList = [];
+  if (raw.ncd_diabetes)     ncdList.push('เบาหวาน');
+  if (raw.ncd_hypertension) ncdList.push('ความดันโลหิตสูง');
+  if (raw.ncd_heart)        ncdList.push('โรคหัวใจ');
+  if (raw.ncd_kidney)       ncdList.push('โรคไต');
+  if (raw.ncd_liver)        ncdList.push('โรคตับ');
+  if (raw.ncd_cancer)       ncdList.push('มะเร็ง');
+  const exerciseDays = raw.exercise_days != null ? Number(raw.exercise_days) : 0;
+  const riskCount = [bmiLvl.risk, exerciseDays < 3].filter(Boolean).length;
+  return {
+    id: emp.id, name: emp.name, gender: emp.gender || '',
+    dept: emp.dept || emp.org || '—',
+    height: raw.height || null, weight: raw.weight || null, bmi,
+    bmiLevel: bmiLvl,
+    waist: raw.waist || null, waistRisk: false,
+    dietScore: 0, exerciseDays, sedentaryHours: raw.sedentary_hours || 0,
+    bmiRisk: bmiLvl.risk, dietRisk: false, exerciseRisk: exerciseDays < 3, sedentaryRisk: false,
+    riskCount, physicalGroup,
+    smokeCig, smokeVape, alcohol, substance, hasRiskyBehavior,
+    ncdList, hasNCD: ncdList.length > 0,
+  };
+}
+const employees = _IDP_REAL ? _IDP_REAL.map(_adaptPhysical) : NAMES.map((n, i) => generateEmployee(n, i));
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 const GROUP_CFG = {

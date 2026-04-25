@@ -111,7 +111,27 @@ const genEmployee = (name, idx) => {
   };
 };
 
-const employees = NAMES.map((n, i) => genEmployee(n, i));
+// ─── Real-data adaptor ────────────────────────────────────────────────────────
+function _adaptUcla(emp) {
+  const total = emp.uclaScore != null ? Number(emp.uclaScore) : 0;
+  const level = getLevel(total);
+  const totalItems = typeof SUBSCALES !== 'undefined'
+    ? SUBSCALES.reduce((s, ss) => s + ss.items.length, 0) || 1
+    : 20;
+  const subscores = typeof SUBSCALES !== 'undefined' ? Object.fromEntries(
+    SUBSCALES.map(ss => {
+      const raw = Math.round((total / totalItems) * ss.items.length);
+      return [ss.key, { raw, max: ss.items.length * 3, pct: Math.round(raw / (ss.items.length * 3) * 100) }];
+    })
+  ) : {};
+  return {
+    id: emp.id, name: emp.name, gender: emp.gender || '',
+    dept: emp.dept || emp.org || '—',
+    answers: [], total, level, subscores,
+    totalPct: Math.round((total / 60) * 100),
+  };
+}
+const employees = _IDP_REAL ? _IDP_REAL.map(_adaptUcla) : NAMES.map((n, i) => genEmployee(n, i));
 
 // ─── Aggregates ───────────────────────────────────────────────────────────────
 const avgDim = (dim) => Math.round(

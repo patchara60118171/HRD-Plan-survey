@@ -95,7 +95,22 @@ envRiskScore, envGroup,
 };
 };
 
-const employees = NAMES.map((n, i) => genEmployee(n, i));
+// ─── Real-data adaptor ────────────────────────────────────────────────────────
+function _adaptEnv(emp) {
+  const raw = emp._raw || {};
+  const envRisk = (emp.dims && emp.dims.environ) || 'normal';
+  const envGroup = envRisk === 'high' ? 'high' : envRisk === 'medium' ? 'medium' : 'low';
+  return {
+    id: emp.id, name: emp.name, gender: emp.gender || '',
+    dept: emp.dept || emp.org || '—',
+    workSatisfaction: raw.work_satisfaction != null ? Number(raw.work_satisfaction) : 3,
+    workloadScore:    raw.workload          != null ? Number(raw.workload)          : 3,
+    relationshipScore: raw.relationship     != null ? Number(raw.relationship)      : 3,
+    stressScore:      raw.stress            != null ? Number(raw.stress)            : 3,
+    envGroup, burnoutRisk: envRisk === 'high',
+  };
+}
+const employees = _IDP_REAL ? _IDP_REAL.map(_adaptEnv) : NAMES.map((n,i) => genEmployee(n,i));
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 const GROUP_CFG = {
