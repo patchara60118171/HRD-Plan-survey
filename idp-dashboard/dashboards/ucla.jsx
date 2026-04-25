@@ -111,34 +111,31 @@ const genEmployee = (name, idx) => {
   };
 };
 
-// ─── Real-data adaptor ─────────────────────────────────────────────────────────
-// Use genEmployee to get all computed fields, then override with real Supabase values
-function _adaptUcla(emp, idx) {
-  const seed = idx % NAMES.length;
-  const base = genEmployee(NAMES[seed], seed);
-  const total = emp.uclaScore != null ? Number(emp.uclaScore) : base.total;
-  // Recompute scores from real total by distributing proportionally across answers
-  const scale = base.total > 0 ? total / base.total : 1;
-  const answers = base.answers.map(a => Math.min(3, Math.round(a * scale)));
-  const realTotal = answers.reduce((s, v) => s + v, 0);
-  const dimScores = DIMS.map(d => ({
-    key: d.key,
-    raw: d.items.reduce((s, i) => s + answers[i], 0),
-    pct: Math.round((d.items.reduce((s, i) => s + answers[i], 0) / (d.items.length * 3)) * 100),
-  }));
+// ─── Real-data adaptor ────────────────────────────────────────────────────────
+function _adaptUcla(emp) {
+  const total = emp.uclaScore != null ? Number(emp.uclaScore) : 0;
+  const level = getLevel(total);
+  // Distribute total proportionally across DIMS (4 dims × 5 items × max 3 = 60)
+  const totalItems = DIMS.reduce((s, d) => s + d.items.length, 0) || 20;
+  const dimScores = DIMS.map(d => {
+    const raw = Math.round((total / totalItems) * d.items.length);
+    const max = d.items.length * 3;
+    return { key: d.key, raw, pct: Math.round((raw / max) * 100) };
+  });
+  // Generate synthetic answers consistent with total
+  const perItem = totalItems > 0 ? Math.round(total / totalItems) : 0;
+  const answers = Array.from({ length: 20 }, () => Math.min(perItem, 3));
   return {
-    ...base,
-    id: emp.id, name: emp.name,
-    gender: emp.gender || base.gender,
-    dept: emp.dept || emp.org || base.dept,
-    answers, total: realTotal, level: getLevel(realTotal), dimScores,
-    totalPct: Math.round((realTotal / 60) * 100),
+    id: emp.id, name: emp.name, gender: emp.gender || '',
+    dept: emp.dept || emp.org || '—',
+    answers, total, level, dimScores,
+    totalPct: Math.round((total / 60) * 100),
   };
 }
 const employees = _IDP_REAL ? _IDP_REAL.map(_adaptUcla) : NAMES.map((n, i) => genEmployee(n, i));
 
 // ─── Aggregates ───────────────────────────────────────────────────────────────
-const avgDim = (dim) => Math.round(
+const avgDim = (dim) => employees.length === 0 ? 0 : Math.round(
   employees.reduce((s, e) => s + e.dimScores.find(d => d.key === dim).pct, 0) / employees.length
 );
 
@@ -283,7 +280,7 @@ function UCLADashboard() {
   const highGroup = employees.filter(e => e.level.key === "high");
   const midGroup  = employees.filter(e => e.level.key === "mid");
   const lowGroup  = employees.filter(e => e.level.key === "low");
-  const orgAvg    = Math.round(employees.reduce((s, e) => s + e.total, 0) / employees.length);
+  const orgAvg    = employees.length === 0 ? 0 : Math.round(employees.reduce((s, e) => s + e.total, 0) / employees.length);
 
   return (
     <div style={{ fontFamily: "'IBM Plex Sans Thai Looped','Sarabun',system-ui,sans-serif", background: "#F5F3FF", minHeight: "100vh" }}>

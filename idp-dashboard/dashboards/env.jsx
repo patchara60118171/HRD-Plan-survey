@@ -95,20 +95,34 @@ envRiskScore, envGroup,
 };
 };
 
-// ─── Real-data adaptor ─────────────────────────────────────────────────────────
-// Use genEmployee for all computed fields, override real identity + envGroup from Supabase
-function _adaptEnv(emp, idx) {
-  const seed = idx % NAMES.length;
-  const base = genEmployee(NAMES[seed], seed);
+// ─── Real-data adaptor ────────────────────────────────────────────────────────
+function _adaptEnv(emp) {
+  const raw = emp._raw || {};
   const envRisk = (emp.dims && emp.dims.environ) || 'normal';
   const envGroup = envRisk === 'high' ? 'high' : envRisk === 'medium' ? 'medium' : 'low';
-  const envRiskScore = envRisk === 'high' ? 2 : envRisk === 'medium' ? 1 : 0;
+  // envSatisfaction: map from survey field or derive from risk (0-4 scale)
+  const envSatisfaction = raw.env_satisfaction != null
+    ? Math.min(4, Math.max(0, Number(raw.env_satisfaction)))
+    : envRisk === 'high' ? 1 : envRisk === 'medium' ? 2 : 3;
+  // qualityOfLife: 0-4
+  const qualityOfLife = raw.quality_of_life != null
+    ? Math.min(4, Math.max(0, Number(raw.quality_of_life)))
+    : envRisk === 'high' ? 1 : envRisk === 'medium' ? 2 : 3;
+  // hazards: default no hazards from survey (fields not mapped yet)
+  const hazards = { noise: 0, heat: 0, chemical: 0, ergonomic: 0, psychosocial: 0 };
+  const hazardCount = 0;
+  // pm25: default none
+  const pm25Level = 0;
+  const symptoms = { none: true, cough: false, breath: false, eye: false, headache: false };
+  const symptomCount = 0;
+  const pmRisk = false;
+  const envRiskScore = envGroup === 'high' ? 2 : envGroup === 'medium' ? 1 : 0;
   return {
-    ...base,
-    id: emp.id, name: emp.name,
-    gender: emp.gender || base.gender || '',
-    dept: emp.dept || emp.org || base.dept,
-    envGroup, envRiskScore,
+    id: emp.id, name: emp.name, gender: emp.gender || '',
+    dept: emp.dept || emp.org || '—',
+    envSatisfaction, hazards, hazardCount,
+    pm25Level, symptoms, symptomCount, pmRisk,
+    qualityOfLife, envRiskScore, envGroup,
   };
 }
 const employees = _IDP_REAL ? _IDP_REAL.map(_adaptEnv) : NAMES.map((n,i) => genEmployee(n,i));
@@ -205,8 +219,8 @@ fullLabel: h.label,
 "มีแต่ไม่กระทบ": Math.round((employees.filter(e => e.hazards[h.key] === 1).length / employees.length) * 100),
 }));
 
-const avgSat = (employees.reduce((s,e) => s + e.envSatisfaction, 0) / employees.length).toFixed(1);
-const avgQol = (employees.reduce((s,e) => s + e.qualityOfLife, 0) / employees.length).toFixed(1);
+const avgSat = employees.length === 0 ? '—' : (employees.reduce((s,e) => s + e.envSatisfaction, 0) / employees.length).toFixed(1);
+const avgQol = employees.length === 0 ? '—' : (employees.reduce((s,e) => s + e.qualityOfLife, 0) / employees.length).toFixed(1);
 
 return (
 <div style={{ fontFamily:"'IBM Plex Sans Thai Looped','Sarabun',system-ui,sans-serif", background:"#F1F5F9", minHeight:"100vh" }}>

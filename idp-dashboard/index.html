@@ -246,29 +246,27 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* ── Embedded in iframe: compact mode ── */
-    .is-embedded .brand,
-    .is-embedded .title-row {
-      display: none !important;
-    }
-    .is-embedded header .header-inner {
-      padding-top: 0 !important;
-      padding-bottom: 0 !important;
-    }
-    .is-embedded header {
-      box-shadow: none;
-    }
-    .is-embedded #filter-bar {
-      top: 42px !important;
-    }
-    /* Hide the per-component coloured gradient sub-headers when embedded */
+    /* ── Iframe embed: hide duplicate gradient sub-headers inside panels ── */
     .is-embedded .panel > div > div:first-child[style*="gradient"],
     .is-embedded .panel > div > div:first-child[style*="linear-gradient"] {
       display: none !important;
     }
+    /* Also hide standalone header when embedded (IDP page shows its own) */
+    .is-embedded header {
+      display: none !important;
+    }
+    .is-embedded #filter-bar {
+      top: 0 !important;
+      position: sticky !important;
+    }
+    /* Remove body overflow that causes double scrollbar in iframe */
+    .is-embedded body {
+      overflow-x: hidden;
+    }
   </style>
+
   <script>
-    /* Detect iframe embed immediately (on html element to avoid flash) */
+    /* Detect iframe embed immediately — add class before first paint */
     try {
       if (window.self !== window.top) {
         document.documentElement.classList.add('is-embedded');
