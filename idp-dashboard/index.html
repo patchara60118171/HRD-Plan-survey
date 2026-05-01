@@ -26,95 +26,82 @@
     html, body { margin: 0; padding: 0; font-family: 'IBM Plex Sans Thai Looped', system-ui, sans-serif; background: var(--bg-surface); color: var(--text-primary); }
 
     header {
-      background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 50%, #1e293b 100%);
+      background: linear-gradient(135deg, #0F1E3D 0%, #1E2A5A 100%);
       color: #fff;
       padding: 0;
       position: sticky;
       top: 0;
       z-index: 100;
       box-shadow: var(--shadow-lg);
-      border-bottom: 1px solid rgba(255,255,255,0.1);
     }
     .header-inner {
       max-width: 1440px;
       margin: 0 auto;
-      padding: 20px 32px 0;
+      padding: 28px 32px 0;
     }
     .brand {
-      font-size: 10px;
-      letter-spacing: 3px;
-      color: rgba(255,255,255,0.6);
+      font-size: 11px;
+      letter-spacing: .18em;
+      color: #A5B4D7;
       text-transform: uppercase;
       font-weight: 600;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
     .title-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin: 0 0 16px;
+      margin: 0 0 22px;
     }
     h1 {
       margin: 0;
-      font-size: 24px;
+      font-size: 28px;
       font-weight: 700;
       letter-spacing: -0.5px;
     }
     .subtitle {
       font-size: 13px;
-      color: rgba(255,255,255,0.7);
-      margin-top: 4px;
+      color: #CBD5E1;
+      margin-top: 6px;
       font-weight: 400;
     }
 
     .tabs {
       display: flex;
-      gap: 0;
+      gap: 4px;
       overflow-x: auto;
       padding-bottom: 0;
       margin-left: -32px;
       margin-right: -32px;
       padding-left: 32px;
       padding-right: 32px;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
+      border-bottom: 1px solid rgba(255,255,255,0.12);
     }
     .tab {
       background: transparent;
-      color: rgba(255,255,255,0.6);
+      color: #CBD5E1;
       border: none;
-      padding: 14px 24px;
+      padding: 10px 18px;
       font-family: inherit;
       font-size: 13px;
-      font-weight: 500;
+      font-weight: 600;
       cursor: pointer;
       border-radius: 8px 8px 0 0;
       transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
       white-space: nowrap;
-      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 6px;
       margin-bottom: -1px;
-    }
-    .tab::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 50%;
-      width: 0;
-      height: 2px;
-      background: var(--accent);
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      transform: translateX(-50%);
     }
     .tab:hover {
       background: rgba(255,255,255,0.08);
       color: #fff;
     }
     .tab.active {
-      background: rgba(255,255,255,0.12);
-      color: #fff;
-      font-weight: 600;
-    }
-    .tab.active::after {
-      width: 60%;
+      background: #fff;
+      color: #0F4C81;
+      font-weight: 700;
     }
 
     main {
