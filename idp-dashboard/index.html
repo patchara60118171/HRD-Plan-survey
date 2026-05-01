@@ -25,15 +25,18 @@
     * { box-sizing: border-box; }
     html, body { margin: 0; padding: 0; font-family: 'IBM Plex Sans Thai Looped', system-ui, sans-serif; background: var(--bg-surface); color: var(--text-primary); }
 
-    header {
-      background: linear-gradient(135deg, #0F1E3D 0%, #1E2A5A 100%);
-      color: #fff;
-      padding: 0;
+    #sticky-wrap {
       position: sticky;
       top: 0;
       z-index: 100;
       box-shadow: var(--shadow-lg);
     }
+    header {
+      background: linear-gradient(135deg, #0F1E3D 0%, #1E2A5A 100%);
+      color: #fff;
+      padding: 0;
+    }
+    ::-webkit-scrollbar-button { display: none; }
     .header-inner {
       max-width: 1440px;
       margin: 0 auto;
@@ -197,14 +200,10 @@
       height: 220px;
     }
 
-    /* Ensure filter bar stays sticky below header */
     #filter-bar {
-      position: sticky !important;
-      top: 88px !important;
-      z-index: 90 !important;
-      background: var(--bg-surface) !important;
-      border-bottom: 1px solid var(--border-subtle) !important;
-      box-shadow: var(--shadow-sm) !important;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-subtle);
+      box-shadow: var(--shadow-sm);
     }
 
     .error {
@@ -237,10 +236,6 @@
     .is-embedded .panel > div > div:first-child[style*="gradient"],
     .is-embedded .panel > div > div:first-child[style*="linear-gradient"] {
       display: none !important;
-    }
-    .is-embedded #filter-bar {
-      top: 88px !important;
-      position: sticky !important;
     }
     /* Remove body overflow that causes double scrollbar in iframe */
     .is-embedded body {
@@ -280,6 +275,7 @@
   <script src="/idp-dashboard/lib/filter-bar.js"></script>
 </head>
 <body>
+  <div id="sticky-wrap">
   <header>
     <div class="header-inner">
       <div class="brand">NIDA · Well-being Survey</div>
@@ -299,8 +295,8 @@
     </div>
   </header>
 
-  <!-- Global filter bar (sticky under header) -->
-  <div id="filter-bar" style="position:sticky;top:76px;z-index:85;background:#F8FAFC;border-bottom:1px solid #E2E8F0;box-shadow:0 2px 4px rgba(0,0,0,0.05)"></div>
+  <div id="filter-bar"></div>
+  </div><!-- /sticky-wrap -->
 
   <main id="main">
     <div class="panel active" id="panel-exec"><div class="skeleton-container">
