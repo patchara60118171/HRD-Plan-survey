@@ -103,6 +103,11 @@
     <span class="tb-bc" id="tbc">/ ภาพรวม</span>
     <div class="tb-space"></div>
     <span id="connection-status" style="font-size:12px;color:var(--tx2);margin-right:6px;">กำลังเชื่อมต่อ...</span>
+    <div id="load-progress-wrap" style="display:none;align-items:center;gap:6px;margin-right:6px">
+      <div style="width:80px;height:5px;background:var(--bg2);border-radius:99px;overflow:hidden"><div id="load-progress-bar" style="height:100%;width:0%;background:var(--P);border-radius:99px;transition:width .3s"></div></div>
+      <span id="load-progress-pct" style="font-size:10px;color:var(--tx3);min-width:28px">0%</span>
+      <button id="btn-cancel-load" onclick="cancelLoad()" title="ยกเลิกการโหลด" style="font-size:10px;padding:2px 7px;border:1px solid var(--D);border-radius:5px;background:var(--DL);color:var(--D);cursor:pointer;font-weight:600">✕ ยกเลิก</button>
+    </div>
     <button id="btn-refresh-data" onclick="refreshData()" title="โหลดข้อมูลใหม่" style="font-size:11px;padding:3px 9px;border:1px solid var(--bdr);border-radius:6px;background:var(--bg);color:var(--tx2);cursor:pointer;margin-right:8px;">↻ รีเฟรช</button>
   </div>
 
@@ -865,6 +870,9 @@
 <!-- Sprint 3C — Page modules -->
 <script src="admin/js/pages/dashboard.js?v=fastpath2"></script>
 <script src="admin/js/pages/organizations.js?v=merged"></script>
+<script src="admin/js/pages/ch1-helpers.js"></script>
+<script src="admin/js/pages/ch1-table.js"></script>
+<script src="admin/js/pages/ch1-export.js"></script>
 <script src="admin/js/pages/ch1.js"></script>
 <script src="admin/js/pages/wellbeing.js"></script>
 <script src="admin/js/pages/settings.js"></script>
