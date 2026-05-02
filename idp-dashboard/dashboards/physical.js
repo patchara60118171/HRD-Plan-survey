@@ -4,9 +4,6 @@
   var React = window.React;
   var Recharts = window.Recharts;
   var useState = React.useState, useMemo = React.useMemo, useEffect = React.useEffect, useRef = React.useRef, Fragment = React.Fragment;
-  // Real data from IDPData bootstrap (set by index.html before each dashboard load)
-  var _IDP_KEY = "physical"; // replaced per-file below
-  var _IDP_REAL = (window.__IDP_EMPLOYEES__ && window.__IDP_EMPLOYEES__[_IDP_KEY]) || null;
   var BarChart = Recharts.BarChart, Bar = Recharts.Bar, XAxis = Recharts.XAxis, YAxis = Recharts.YAxis,
       CartesianGrid = Recharts.CartesianGrid, Tooltip = Recharts.Tooltip, ResponsiveContainer = Recharts.ResponsiveContainer,
       RadarChart = Recharts.RadarChart, Radar = Recharts.Radar, PolarGrid = Recharts.PolarGrid,
@@ -121,62 +118,100 @@ const generateEmployee = (name, idx) => {
     hasNCD: ncdList.length > 0
   };
 };
+// ─── Real data adapter ───────────────────────────────────────────────────────
+const _PHYS_REAL = typeof window !== 'undefined' && window.__IDP_EMPLOYEES__ && window.__IDP_EMPLOYEES__.physical || null;
+const _hasFlag = (v) => {
+  if (v == null) return false;
+  const s = String(v).trim();
+  return s !== '' && s !== '0' && s !== 'false' && !/^ไม่/.test(s);
+};
+// Parse NCD list from a single string/array field (matches admin/js/services/utils.js)
+const _parseNcdList = (row) => {
+  const v = row.diseases ?? row.chronic_disease ?? row.ncd ?? row.condition_list;
+  if (v == null || v === '') return [];
+  if (Array.isArray(v)) return v.filter(d => d && d !== 'ไม่มี');
+  if (typeof v === 'string') {
+    const s = v.trim();
+    if (!s || s === 'ไม่มี' || s === 'none' || s === 'false') return [];
+    return s.split(',').map(x => x.trim()).filter(x => x && x !== 'ไม่มี');
+  }
+  return [];
+};
+// Normalize to canonical NCD names used in charts
+const _normalizeNcd = (label) => {
+  const s = String(label || '').trim();
+  if (!s) return null;
+  if (/เบาหวาน|diabetes/i.test(s)) return 'เบาหวาน';
+  if (/ความดัน|hypertension/i.test(s)) return 'ความดันโลหิตสูง';
+  if (/หัวใจ|หลอดเลือด|cardio|heart/i.test(s)) return 'โรคหัวใจ';
+  if (/ไต|kidney/i.test(s)) return 'โรคไต';
+  if (/ตับ|liver/i.test(s)) return 'โรคตับ';
+  if (/มะเร็ง|cancer/i.test(s)) return 'มะเร็ง';
+  return s;
+};
+const _toPhysEmployee = (rec, idx) => {
+  const row = rec._raw || {};
+  const gender = row.gender || (rec.name && rec.name.startsWith('นาย') ? 'ชาย' : 'หญิง');
+  const height = parseFloat(row.height) || 165;
+  const weight = parseFloat(row.weight) || 60;
+  const bmiVal = rec.bmi != null ? rec.bmi : (weight / Math.pow(height > 3 ? height/100 : height, 2));
+  const bmi = parseFloat((bmiVal || 0).toFixed(1));
+  const waist = parseFloat(row.waist) || (gender === 'ชาย' ? 85 : 75);
 
-// ─── Real-data adaptor ────────────────────────────────────────────────────────
-function _adaptPhysical(emp) {
-  const bmi = emp.bmi != null ? parseFloat(emp.bmi) : null;
-  const bmiLvl = bmi != null ? getBMILevel(bmi) : {
-    label: "ไม่ระบุ",
-    color: "#94A3B8",
-    risk: false
-  };
-  const physicalRisk = emp.dims && emp.dims.physical || 'normal';
-  const physicalGroup = physicalRisk === 'high' ? 'high' : physicalRisk === 'medium' ? 'medium' : 'low';
-  const raw = emp._raw || {};
-  const smokeCig = raw.smoke_cigarette || 'none';
-  const smokeVape = raw.smoke_vape || 'none';
-  const alcohol = raw.alcohol || 'none';
-  const substance = raw.substance || 'none';
+  // Diet risk from scoring helpers
+  const S = window.IDPScoring || {};
+  const sweetR = S.sweetRisk ? S.sweetRisk(row) : null;
+  const fatR   = S.fatRisk   ? S.fatRisk(row)   : null;
+  const saltR  = S.saltRisk  ? S.saltRisk(row)  : null;
+  const dietRisk = [sweetR, fatR, saltR].some(r => r && (r.key === 'high' || r.key === 'very_high'));
+  const dietScore = (sweetR?.key === 'high' ? 2 : sweetR?.key === 'very_high' ? 3 : 1) +
+                    (fatR?.key === 'high' ? 2 : fatR?.key === 'very_high' ? 3 : 1) +
+                    (saltR?.key === 'high' ? 2 : saltR?.key === 'very_high' ? 3 : 1);
+
+  // Exercise
+  const tpax = S.tpaxLevel ? S.tpaxLevel(row) : null;
+  const exerciseDays = tpax?.key === 'good' ? 5 : tpax?.key === 'ok' ? 3 : 1;
+  const exerciseRisk = tpax?.key === 'low';
+
+  // Sedentary
+  const sed = S.sedentaryLevel ? S.sedentaryLevel(row) : null;
+  const sedentaryHours = sed?.key === 'risk' ? 11 : 6;
+  const sedentaryRisk = sed?.key === 'risk';
+
+  const bmiLvl = getBMILevel(bmi);
+  const bmiRisk = bmiLvl.risk;
+  const waistRisk = getWaistRisk(waist, gender);
+  const riskCount = [bmiRisk, dietRisk, exerciseRisk].filter(Boolean).length;
+  const physicalGroup = riskCount >= 3 ? 'high' : riskCount >= 1 ? 'medium' : 'low';
+
+  // Risky behaviors from substance scoring
+  const smokeCig = _hasFlag(row.q2001) ? 'daily' : 'none';
+  const smokeVape = _hasFlag(row.q2002) ? 'occasional' : 'none';
+  const alcohol = _hasFlag(row.q2003) ? 'weekly' : 'none';
+  const substance = _hasFlag(row.q2004) || _hasFlag(row.q2005) || _hasFlag(row.q2005_drug) ? 'occasional' : 'none';
   const hasRiskyBehavior = smokeCig !== 'none' || smokeVape !== 'none' || alcohol !== 'none' || substance !== 'none';
-  const ncdList = [];
-  if (raw.ncd_diabetes) ncdList.push('เบาหวาน');
-  if (raw.ncd_hypertension) ncdList.push('ความดันโลหิตสูง');
-  if (raw.ncd_heart) ncdList.push('โรคหัวใจ');
-  if (raw.ncd_kidney) ncdList.push('โรคไต');
-  if (raw.ncd_liver) ncdList.push('โรคตับ');
-  if (raw.ncd_cancer) ncdList.push('มะเร็ง');
-  const exerciseDays = raw.exercise_days != null ? Number(raw.exercise_days) : 0;
-  const riskCount = [bmiLvl.risk, exerciseDays < 3].filter(Boolean).length;
+
+  // NCD — real data stored as comma-separated string in row.diseases (or alternates)
+  const _rawNcd = _parseNcdList(row).map(_normalizeNcd).filter(Boolean);
+  const ncdList = Array.from(new Set(_rawNcd));
+
   return {
-    id: emp.id,
-    name: emp.name,
-    gender: emp.gender || '',
-    dept: emp.dept || emp.org || '—',
-    height: raw.height || null,
-    weight: raw.weight || null,
-    bmi,
-    bmiLevel: bmiLvl,
-    waist: raw.waist || null,
-    waistRisk: false,
-    dietScore: 0,
-    exerciseDays,
-    sedentaryHours: raw.sedentary_hours || 0,
-    bmiRisk: bmiLvl.risk,
-    dietRisk: false,
-    exerciseRisk: exerciseDays < 3,
-    sedentaryRisk: false,
-    riskCount,
-    physicalGroup,
-    smokeCig,
-    smokeVape,
-    alcohol,
-    substance,
-    hasRiskyBehavior,
-    ncdList,
-    hasNCD: ncdList.length > 0
+    id: rec.id || idx + 1,
+    name: rec.name || '—',
+    gender,
+    dept: rec.dept || rec.org || '—',
+    height, weight, bmi, bmiLevel: bmiLvl,
+    waist, waistRisk,
+    dietScore, exerciseDays, sedentaryHours,
+    bmiRisk, dietRisk, exerciseRisk, sedentaryRisk,
+    riskCount, physicalGroup,
+    smokeCig, smokeVape, alcohol, substance,
+    hasRiskyBehavior, ncdList,
+    hasNCD: ncdList.length > 0,
+    _raw: row
   };
-}
-const employees = _IDP_REAL ? _IDP_REAL.map(_adaptPhysical) : NAMES.map((n, i) => generateEmployee(n, i));
+};
+const employees = _PHYS_REAL ? _PHYS_REAL.map(_toPhysEmployee) : NAMES.map((n, i) => generateEmployee(n, i));
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 const GROUP_CFG = {
@@ -248,7 +283,7 @@ const Tag = ({
     borderRadius: 999,
     fontSize: small ? 10 : 11,
     fontWeight: 700,
-    fontFamily: "'IBM Plex Sans Thai Looped','Sarabun',system-ui,sans-serif",
+    fontFamily: "'Sarabun',sans-serif",
     display: "inline-flex",
     alignItems: "center",
     gap: 3
@@ -310,6 +345,262 @@ const deptData = DEPTS.map(dept => {
   };
 });
 
+// ─── Deep Charts: reusable ChartCard (pie/bar toggle) ────────────────────────
+function ChartCard(props) {
+  var title = props.title, subtitle = props.subtitle, data = props.data || [];
+  var defaultType = props.defaultType || 'pie';
+  var accent = props.color || '#0F766E';
+  var state = useState(defaultType);
+  var type = state[0], setType = state[1];
+  var total = data.reduce(function (s, d) { return s + (d.value || 0); }, 0);
+  var withPct = data.map(function (d) {
+    return Object.assign({}, d, {
+      pct: total > 0 ? Math.round(d.value / total * 100) : 0
+    });
+  });
+  var btnStyle = function (active) {
+    return {
+      padding: '4px 10px', fontSize: 11, fontWeight: 700, cursor: 'pointer',
+      border: '1px solid ' + (active ? accent : '#E5E7EB'),
+      borderRadius: 6, background: active ? accent : '#fff',
+      color: active ? '#fff' : '#475569',
+      fontFamily: "'Sarabun',sans-serif"
+    };
+  };
+  var tooltipFormatter = function (v, n) {
+    var pct = total > 0 ? Math.round(v / total * 100) : 0;
+    return [v + ' คน (' + pct + '%)', n];
+  };
+  var pieLabel = function (d) { return d.pct >= 5 ? (d.pct + '%') : ''; };
+  var barLabel = { position: 'top', fontSize: 10, fill: '#374151',
+    formatter: function (v) { return v + ' คน'; } };
+  var pie = React.createElement(ResponsiveContainer, { width: '100%', height: 280 },
+    React.createElement(PieChart, null,
+      React.createElement(Pie, {
+        data: withPct, dataKey: 'value', nameKey: 'name',
+        cx: '50%', cy: '45%', outerRadius: 85, innerRadius: 42,
+        paddingAngle: 1, label: pieLabel, labelLine: false
+      }, withPct.map(function (d, i) {
+        return React.createElement(Cell, { key: i, fill: d.color || '#CBD5E1' });
+      })),
+      React.createElement(Tooltip, { formatter: tooltipFormatter }),
+      React.createElement(Legend, {
+        verticalAlign: 'bottom', height: 40, iconSize: 10,
+        wrapperStyle: { fontSize: 11, paddingTop: 4 }
+      })
+    )
+  );
+  var bar = React.createElement(ResponsiveContainer, { width: '100%', height: 280 },
+    React.createElement(BarChart, { data: withPct, margin: { top: 24, right: 12, left: 0, bottom: 50 } },
+      React.createElement(CartesianGrid, { strokeDasharray: '3 3', stroke: '#E5E7EB', vertical: false }),
+      React.createElement(XAxis, { dataKey: 'name', tick: { fontSize: 10, fill: '#475569' },
+        interval: 0, angle: -20, textAnchor: 'end', height: 60 }),
+      React.createElement(YAxis, { tick: { fontSize: 10, fill: '#475569' }, allowDecimals: false }),
+      React.createElement(Tooltip, { formatter: tooltipFormatter, cursor: { fill: '#F1F5F9' } }),
+      React.createElement(Bar, { dataKey: 'value', radius: [6, 6, 0, 0], label: barLabel },
+        withPct.map(function (d, i) {
+          return React.createElement(Cell, { key: i, fill: d.color || '#CBD5E1' });
+        }))
+    )
+  );
+  return React.createElement('div', {
+    style: {
+      background: '#fff', borderRadius: 14, padding: '18px 18px 12px',
+      border: '1px solid #E5E7EB', boxShadow: '0 1px 3px rgba(15,23,42,0.04)'
+    }
+  },
+    React.createElement('div', {
+      style: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10, gap: 8 }
+    },
+      React.createElement('div', null,
+        React.createElement('div', { style: { fontSize: 14, fontWeight: 800, color: '#0F172A' } }, title),
+        subtitle && React.createElement('div', { style: { fontSize: 11, color: '#64748B', marginTop: 2 } }, subtitle),
+        React.createElement('div', { style: { fontSize: 10, color: '#94A3B8', marginTop: 2 } }, 'รวม ' + total + ' คน')
+      ),
+      React.createElement('div', { style: { display: 'flex', gap: 4 } },
+        React.createElement('button', { onClick: function () { setType('pie'); }, style: btnStyle(type === 'pie') }, 'Pie'),
+        React.createElement('button', { onClick: function () { setType('bar'); }, style: btnStyle(type === 'bar') }, 'Bar')
+      )
+    ),
+    type === 'pie' ? pie : bar
+  );
+}
+
+// ─── Deep Charts: all 10 chart datasets + layout ─────────────────────────────
+function DeepCharts(props) {
+  var emps = props.employees || [];
+  var S = (typeof window !== 'undefined' && window.IDPScoring) || {};
+  var getRaw = function (e) { return e._raw || {}; };
+
+  // 1. NCD
+  var ncdTypes = ['เบาหวาน', 'ความดันโลหิตสูง', 'โรคหัวใจ', 'โรคไต', 'โรคตับ', 'มะเร็ง'];
+  var ncdData = ncdTypes.map(function (t) {
+    return { name: t, value: emps.filter(function (e) { return e.ncdList && e.ncdList.indexOf(t) >= 0; }).length, color: NCD_COLORS[t] };
+  }).filter(function (d) { return d.value > 0; });
+  var noNcdCount = emps.filter(function (e) { return !e.ncdList || e.ncdList.length === 0; }).length;
+  var ncdFull = ncdData.concat([{ name: 'ไม่มี NCD', value: noNcdCount, color: '#10B981' }]);
+
+  // 2. BMI ASEAN
+  var bmiCats = [
+    { key: 'underweight', name: 'น้ำหนักน้อย (<18.5)', color: '#60A5FA' },
+    { key: 'normal', name: 'สมส่วน (18.5–22.9)', color: '#10B981' },
+    { key: 'overweight', name: 'น้ำหนักเกิน (23–24.9)', color: '#F59E0B' },
+    { key: 'obese1', name: 'อ้วนระดับ 1 (25–29.9)', color: '#F97316' },
+    { key: 'obese2', name: 'อ้วนระดับ 2 (≥30)', color: '#EF4444' }
+  ];
+  var bmiData = bmiCats.map(function (c) {
+    return {
+      name: c.name, color: c.color,
+      value: emps.filter(function (e) {
+        var b = S.bmiLevel ? S.bmiLevel(getRaw(e)) : null;
+        return b && b.key === c.key;
+      }).length
+    };
+  });
+
+  // 3. WHtR = waist / height
+  var whtrBands = [
+    { name: 'ปกติ (<0.5)', min: 0, max: 0.5, color: '#10B981' },
+    { name: 'เสี่ยง (0.5–0.59)', min: 0.5, max: 0.6, color: '#F59E0B' },
+    { name: 'เสี่ยงสูง (≥0.6)', min: 0.6, max: 99, color: '#EF4444' }
+  ];
+  var whtrValues = emps.map(function (e) {
+    var r = getRaw(e);
+    var w = parseFloat(r.waist);
+    var h = parseFloat(r.height);
+    if (!w || !h) return null;
+    var hCm = h > 3 ? h : h * 100;
+    return w / hCm;
+  }).filter(function (v) { return v != null && !isNaN(v) && v > 0 && v < 2; });
+  var whtrData = whtrBands.map(function (b) {
+    return { name: b.name, color: b.color,
+      value: whtrValues.filter(function (v) { return v >= b.min && v < b.max; }).length };
+  });
+
+  // 4a. Substance — risk level per person
+  var subCats = [
+    { key: 'none', name: 'ไม่มีความเสี่ยง', color: '#10B981' },
+    { key: 'low', name: 'เสี่ยงต่ำ', color: '#84CC16' },
+    { key: 'medium', name: 'เสี่ยงปานกลาง', color: '#F59E0B' },
+    { key: 'high', name: 'เสี่ยงสูง', color: '#EF4444' }
+  ];
+  var subLevelData = subCats.map(function (c) {
+    return { name: c.name, color: c.color,
+      value: emps.filter(function (e) {
+        return (S.substanceRisk ? S.substanceRisk(getRaw(e)) : 'none') === c.key;
+      }).length };
+  });
+
+  // 4b. Substance — frequency per behavior (count of people using each)
+  var subBehaviors = [
+    { name: '🚬 ยาสูบ', field: 'smokeCig', color: '#DC2626' },
+    { name: '💨 บุหรี่ไฟฟ้า', field: 'smokeVape', color: '#7C3AED' },
+    { name: '🍺 แอลกอฮอล์', field: 'alcohol', color: '#F59E0B' },
+    { name: '💊 สารเสพติด', field: 'substance', color: '#991B1B' }
+  ];
+  var subFreqData = subBehaviors.map(function (b) {
+    return { name: b.name, color: b.color,
+      value: emps.filter(function (e) { return e[b.field] && e[b.field] !== 'none'; }).length };
+  });
+
+  // 5-7. Diet bands (same for sweet/fat/salt)
+  var dietBands = [
+    { name: 'น้อย (5)', min: 5, max: 6, color: '#10B981' },
+    { name: 'ปานกลาง (6–9)', min: 6, max: 10, color: '#F59E0B' },
+    { name: 'สูง (10–13)', min: 10, max: 14, color: '#F97316' },
+    { name: 'สูงมาก (14–15)', min: 14, max: 99, color: '#EF4444' }
+  ];
+  var mkDiet = function (fn) {
+    if (!fn) return dietBands.map(function (b) { return { name: b.name, value: 0, color: b.color }; });
+    var scores = emps.map(function (e) { return fn(getRaw(e)); }).filter(function (v) { return v != null; });
+    return dietBands.map(function (b) {
+      return { name: b.name, color: b.color,
+        value: scores.filter(function (v) { return v >= b.min && v < b.max; }).length };
+    });
+  };
+  var sweetData = mkDiet(S.sweetScore);
+  var fatData = mkDiet(S.fatScore);
+  var saltData = mkDiet(S.saltScore);
+
+  // 8. TPAX (WHO)
+  var tpaxCats = [
+    { key: 'low', name: 'ไม่เพียงพอ (<150)', color: '#EF4444' },
+    { key: 'ok', name: 'เพียงพอ (150–299)', color: '#F59E0B' },
+    { key: 'good', name: 'ดี (≥300)', color: '#10B981' }
+  ];
+  var tpaxData = tpaxCats.map(function (c) {
+    return { name: c.name, color: c.color,
+      value: emps.filter(function (e) {
+        var t = S.tpaxLevel ? S.tpaxLevel(getRaw(e)) : null;
+        return t && t.key === c.key;
+      }).length };
+  });
+
+  // 9. Sedentary — total sitting/screen hours per day
+  var sedCats = [
+    { name: '<4 ชม./วัน', min: 0, max: 4, color: '#10B981' },
+    { name: '4–7.9 ชม./วัน', min: 4, max: 8, color: '#F59E0B' },
+    { name: '≥8 ชม./วัน', min: 8, max: 99, color: '#EF4444' }
+  ];
+  var sedData = sedCats.map(function (c) {
+    return { name: c.name, color: c.color,
+      value: emps.filter(function (e) {
+        var h = S.sedentaryHours ? S.sedentaryHours(getRaw(e)) : null;
+        return h != null && h >= c.min && h < c.max;
+      }).length };
+  });
+
+  // ── Layout helpers ────────────────────────────────────────────────────────
+  var chartGrid = {
+    display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
+    gap: 16, marginTop: 8
+  };
+  var section = function (heading, charts) {
+    return React.createElement('div', { style: { marginTop: 24 } },
+      React.createElement('div', {
+        style: { display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }
+      },
+        React.createElement('div', { style: { width: 4, height: 20, background: '#0F766E', borderRadius: 2 } }),
+        React.createElement('h3', { style: { margin: 0, fontSize: 16, fontWeight: 800, color: '#0F172A' } }, heading)
+      ),
+      React.createElement.apply(null, [ 'div', { style: chartGrid } ].concat(charts))
+    );
+  };
+
+  return React.createElement('div', { style: { marginTop: 24 } },
+    React.createElement('div', {
+      style: {
+        padding: '16px 20px', borderRadius: 14,
+        background: 'linear-gradient(135deg,#F0FDFA 0%,#ECFEFF 100%)',
+        border: '1px solid #A7F3D0'
+      }
+    },
+      React.createElement('div', { style: { fontSize: 13, fontWeight: 800, color: '#0F766E' } },
+        '📊 กราฟเชิงลึก — สุขภาพกายรายด้าน'),
+      React.createElement('div', { style: { fontSize: 11, color: '#115E59', marginTop: 4 } },
+        'คลิกปุ่ม Pie/Bar ที่หัวกราฟเพื่อสลับรูปแบบ · ตัวเลขแสดงเป็นจำนวนคน และ % ของผู้ตอบ')
+    ),
+    section('🏥 โรคเรื้อรัง (NCD) และดัชนีร่างกาย', [
+      React.createElement(ChartCard, { key: 'ncd', title: '🏥 โรค NCD', subtitle: 'การกระจายของโรคเรื้อรังในองค์กร', data: ncdFull, defaultType: 'pie', color: '#DC2626' }),
+      React.createElement(ChartCard, { key: 'bmi', title: '⚖️ BMI — มาตรฐานอาเซียน', subtitle: 'กรมอนามัย (5 ระดับ)', data: bmiData, defaultType: 'pie', color: '#F59E0B' }),
+      React.createElement(ChartCard, { key: 'whtr', title: '📏 WHtR — อัตราส่วนรอบเอว/ส่วนสูง', subtitle: '<0.5 ปกติ · ≥0.6 เสี่ยงสูง', data: whtrData, defaultType: 'pie', color: '#0EA5E9' })
+    ]),
+    section('🚬 ยาสูบ · แอลกอฮอล์ · สารเสพติด', [
+      React.createElement(ChartCard, { key: 'sub-risk', title: '🚨 ระดับความเสี่ยงรายบุคคล', subtitle: 'จัดกลุ่มตาม q2001–q2005', data: subLevelData, defaultType: 'pie', color: '#991B1B' }),
+      React.createElement(ChartCard, { key: 'sub-freq', title: '📊 ความถี่รายพฤติกรรม', subtitle: 'จำนวนคนที่มีพฤติกรรมแต่ละประเภท', data: subFreqData, defaultType: 'bar', color: '#DC2626' })
+    ]),
+    section('🍽️ พฤติกรรมบริโภค — หวาน · ไขมัน · โซเดียม', [
+      React.createElement(ChartCard, { key: 'sweet', title: '🍭 หวาน', subtitle: 'เต็ม 15 · ≥10 เริ่มเสี่ยง', data: sweetData, defaultType: 'pie', color: '#EC4899' }),
+      React.createElement(ChartCard, { key: 'fat', title: '🍔 ไขมัน', subtitle: 'เต็ม 15 · ≥10 เริ่มเสี่ยง', data: fatData, defaultType: 'pie', color: '#F97316' }),
+      React.createElement(ChartCard, { key: 'salt', title: '🧂 เค็ม/โซเดียม', subtitle: 'เต็ม 15 · ≥10 เริ่มเสี่ยง', data: saltData, defaultType: 'pie', color: '#0EA5E9' })
+    ]),
+    section('🏃 กิจกรรมทางกาย · พฤติกรรมเนือยนิ่ง', [
+      React.createElement(ChartCard, { key: 'tpax', title: '🏃 กิจกรรมทางกาย (TPAX)', subtitle: 'เกณฑ์ WHO — ≥150 นาที/สัปดาห์', data: tpaxData, defaultType: 'pie', color: '#10B981' }),
+      React.createElement(ChartCard, { key: 'sed', title: '🪑 พฤติกรรมเนือยนิ่ง', subtitle: 'เวลานั่ง + หน้าจอ รวม/วัน', data: sedData, defaultType: 'pie', color: '#7C3AED' })
+    ])
+  );
+}
+
 // ─── Main Component ──────────────────────────────────────────────────────────
 function PhysicalDashboard() {
   const [tab, setTab] = useState("overview");
@@ -329,11 +620,14 @@ function PhysicalDashboard() {
   const listData = [...employees].sort((a, b) => b.riskCount - a.riskCount).filter(e => filter === "all" || e.physicalGroup === filter);
   return /*#__PURE__*/React.createElement("div", {
     style: {
-      fontFamily: "'IBM Plex Sans Thai Looped','Sarabun',system-ui,sans-serif",
+      fontFamily: "'Sarabun',sans-serif",
       background: "#F0F4F8",
       minHeight: "100vh"
     }
-  }, /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("link", {
+    href: "https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap",
+    rel: "stylesheet"
+  }), /*#__PURE__*/React.createElement("div", {
     style: {
       background: "linear-gradient(135deg, #134E4A 0%, #0F766E 50%, #059669 100%)",
       padding: "24px 32px 0",
@@ -434,7 +728,7 @@ function PhysicalDashboard() {
       cursor: "pointer",
       fontSize: 13,
       fontWeight: 700,
-      fontFamily: "'IBM Plex Sans Thai Looped','Sarabun',system-ui,sans-serif",
+      fontFamily: "'Sarabun',sans-serif",
       background: tab === t.key ? "#F0F4F8" : "transparent",
       color: tab === t.key ? "#134E4A" : "rgba(255,255,255,0.65)"
     }
@@ -604,7 +898,7 @@ function PhysicalDashboard() {
     tick: {
       fill: "#6B7280",
       fontSize: 13,
-      fontFamily: "'IBM Plex Sans Thai Looped','Sarabun',system-ui,sans-serif"
+      fontFamily: "'Sarabun',sans-serif"
     },
     axisLine: false,
     tickLine: false
@@ -617,7 +911,7 @@ function PhysicalDashboard() {
     tickLine: false
   }), /*#__PURE__*/React.createElement(Tooltip, {
     contentStyle: {
-      fontFamily: "'IBM Plex Sans Thai Looped','Sarabun',system-ui,sans-serif",
+      fontFamily: "'Sarabun',sans-serif",
       borderRadius: 10,
       fontSize: 12
     }
@@ -638,7 +932,7 @@ function PhysicalDashboard() {
     radius: [4, 4, 0, 0]
   }), /*#__PURE__*/React.createElement(Legend, {
     wrapperStyle: {
-      fontFamily: "'IBM Plex Sans Thai Looped','Sarabun',system-ui,sans-serif",
+      fontFamily: "'Sarabun',sans-serif",
       fontSize: 12
     }
   })))), /*#__PURE__*/React.createElement("div", {
@@ -839,7 +1133,7 @@ function PhysicalDashboard() {
   }))), /*#__PURE__*/React.createElement(Tooltip, {
     formatter: (v, n) => [`${v} คน`, n],
     contentStyle: {
-      fontFamily: "'IBM Plex Sans Thai Looped','Sarabun',system-ui,sans-serif",
+      fontFamily: "'Sarabun',sans-serif",
       fontSize: 12,
       borderRadius: 8
     }
@@ -904,7 +1198,7 @@ function PhysicalDashboard() {
       fontSize: 11,
       color: "#5B21B6"
     }
-  }, "\u0E01\u0E25\u0E38\u0E48\u0E21\u0E40\u0E1B\u0E23\u0E32\u0E30\u0E1A\u0E32\u0E07 \u2014 \u0E15\u0E49\u0E2D\u0E07\u0E14\u0E39\u0E41\u0E25\u0E40\u0E23\u0E48\u0E07\u0E14\u0E48\u0E27\u0E19\u0E17\u0E35\u0E48\u0E2A\u0E38\u0E14"))))), tab === "risklist" && /*#__PURE__*/React.createElement("div", {
+  }, "\u0E01\u0E25\u0E38\u0E48\u0E21\u0E40\u0E1B\u0E23\u0E32\u0E30\u0E1A\u0E32\u0E07 \u2014 \u0E15\u0E49\u0E2D\u0E07\u0E14\u0E39\u0E41\u0E25\u0E40\u0E23\u0E48\u0E07\u0E14\u0E48\u0E27\u0E19\u0E17\u0E35\u0E48\u0E2A\u0E38\u0E14"))))), tab === "overview" && /*#__PURE__*/React.createElement(DeepCharts, { key: "deep-charts", employees: employees }), tab === "risklist" && /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       flexDirection: "column",
@@ -934,7 +1228,7 @@ function PhysicalDashboard() {
       borderRadius: 999,
       fontSize: 12,
       fontWeight: 700,
-      fontFamily: "'IBM Plex Sans Thai Looped','Sarabun',system-ui,sans-serif",
+      fontFamily: "'Sarabun',sans-serif",
       cursor: "pointer",
       border: "none",
       background: filter === key ? color : "#F3F4F6",

@@ -41,9 +41,6 @@ const HEADER = `/* auto-generated from .jsx – do not edit */
   var React = window.React;
   var Recharts = window.Recharts;
   var useState = React.useState, useMemo = React.useMemo, useEffect = React.useEffect, useRef = React.useRef, Fragment = React.Fragment;
-  // Real data from IDPData bootstrap (set by index.html before each dashboard load)
-  var _IDP_KEY = '__KEY__'; // replaced per-file below
-  var _IDP_REAL = (window.__IDP_EMPLOYEES__ && window.__IDP_EMPLOYEES__[_IDP_KEY]) || null;
   var BarChart = Recharts.BarChart, Bar = Recharts.Bar, XAxis = Recharts.XAxis, YAxis = Recharts.YAxis,
       CartesianGrid = Recharts.CartesianGrid, Tooltip = Recharts.Tooltip, ResponsiveContainer = Recharts.ResponsiveContainer,
       RadarChart = Recharts.RadarChart, Radar = Recharts.Radar, PolarGrid = Recharts.PolarGrid,
@@ -78,9 +75,6 @@ for (const f of FILES) {
     .replace(/const\s*\{\s*useState,\s*useMemo,\s*useEffect,\s*useRef,\s*Fragment\s*\}\s*=\s*React;?\s*\n?/g, '')
     .replace(/const\s*\{[\s\S]*?\}\s*=\s*Recharts;?\s*\n?/, '')
     .replace(/window\.__DASHBOARDS__\s*=\s*window\.__DASHBOARDS__\s*\|\|\s*\{\};[\s\S]*$/, '')
-    // Strip any _IDP_REAL declarations from jsx source (now injected by HEADER)
-    .replace(/\/\/\s*─+\s*Real-data resolver[\s\S]*?\n\n/g, '')
-    .replace(/const\s+_IDP_REAL\s*=[\s\S]*?\|\|\s*null;\s*\n?/g, '')
     .trim();
   
   // Compile JSX first (before wrapping with IIFE)
@@ -91,8 +85,8 @@ for (const f of FILES) {
     configFile: false,
   });
   
-  // Wrap with IIFE after compilation — replace _IDP_KEY placeholder with actual key
-  const final = HEADER.replace("'__KEY__'", JSON.stringify(f.key)) + compiled.trim() + FOOTER(f.key, f.component);
+  // Wrap with IIFE after compilation
+  const final = HEADER + compiled.trim() + FOOTER(f.key, f.component);
   
   const outputPath = path.join(DASHBOARDS_DIR, f.key + '.js');
   fs.writeFileSync(outputPath, final, 'utf8');

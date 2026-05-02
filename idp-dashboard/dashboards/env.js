@@ -4,9 +4,6 @@
   var React = window.React;
   var Recharts = window.Recharts;
   var useState = React.useState, useMemo = React.useMemo, useEffect = React.useEffect, useRef = React.useRef, Fragment = React.Fragment;
-  // Real data from IDPData bootstrap (set by index.html before each dashboard load)
-  var _IDP_KEY = "env"; // replaced per-file below
-  var _IDP_REAL = (window.__IDP_EMPLOYEES__ && window.__IDP_EMPLOYEES__[_IDP_KEY]) || null;
   var BarChart = Recharts.BarChart, Bar = Recharts.Bar, XAxis = Recharts.XAxis, YAxis = Recharts.YAxis,
       CartesianGrid = Recharts.CartesianGrid, Tooltip = Recharts.Tooltip, ResponsiveContainer = Recharts.ResponsiveContainer,
       RadarChart = Recharts.RadarChart, Radar = Recharts.Radar, PolarGrid = Recharts.PolarGrid,
@@ -133,55 +130,63 @@ const genEmployee = (name, idx) => {
     envGroup
   };
 };
-
-// ─── Real-data adaptor ────────────────────────────────────────────────────────
-function _adaptEnv(emp) {
-  const raw = emp._raw || {};
-  const envRisk = emp.dims && emp.dims.environ || 'normal';
-  const envGroup = envRisk === 'high' ? 'high' : envRisk === 'medium' ? 'medium' : 'low';
-  // envSatisfaction: map from survey field or derive from risk (0-4 scale)
-  const envSatisfaction = raw.env_satisfaction != null ? Math.min(4, Math.max(0, Number(raw.env_satisfaction))) : envRisk === 'high' ? 1 : envRisk === 'medium' ? 2 : 3;
-  // qualityOfLife: 0-4
-  const qualityOfLife = raw.quality_of_life != null ? Math.min(4, Math.max(0, Number(raw.quality_of_life))) : envRisk === 'high' ? 1 : envRisk === 'medium' ? 2 : 3;
-  // hazards: default no hazards from survey (fields not mapped yet)
+// ─── Real data adapter ───────────────────────────────────────────────────────
+const _ENV_REAL = typeof window !== 'undefined' && window.__IDP_EMPLOYEES__ && window.__IDP_EMPLOYEES__.env || null;
+const _envHazard = (v) => {
+  if (v == null) return 0;
+  const s = String(v).trim();
+  if (!s || s.startsWith('ไม่ใช่') || s === 'false' || s === '0') return 0;
+  const hasImpact = s.includes('มีผล') && !s.includes('ไม่มีผล');
+  if (hasImpact) return 2;
+  if (s.includes('ใช่') || s.includes('มี') || s === 'true' || s === '1') return 1;
+  const n = parseInt(s, 10);
+  return isNaN(n) ? 0 : Math.min(Math.max(n, 0), 2);
+};
+const _num04 = (v) => {
+  if (v == null) return 2;
+  const n = parseInt(String(v).trim(), 10);
+  return isNaN(n) ? 2 : Math.min(Math.max(n, 0), 4);
+};
+const _flag = (v) => {
+  if (v == null) return false;
+  const s = String(v).trim();
+  return s !== '' && s !== '0' && s !== 'false' && !/^ไม่/.test(s);
+};
+const _toEnvEmployee = (rec, idx) => {
+  const row = rec._raw || {};
+  const envSatisfaction = _num04(row.env_satisfaction ?? row.q84);
   const hazards = {
-    noise: 0,
-    heat: 0,
-    chemical: 0,
-    ergonomic: 0,
-    psychosocial: 0
+    sunlight: _envHazard(row.env_glare ?? row.q85),
+    noise:    _envHazard(row.env_noise ?? row.q86),
+    chemical: _envHazard(row.env_smell ?? row.q87),
+    fume:     _envHazard(row.env_smoke ?? row.q88),
+    posture:  _envHazard(row.env_posture ?? row.q89),
+    awkward:  _envHazard(row.env_awkward ?? row.q90),
   };
-  const hazardCount = 0;
-  // pm25: default none
-  const pm25Level = 0;
+  const hazardCount = Object.values(hazards).filter(v => v === 2).length;
+  const pm25Level = _num04(row.env_pm25 ?? row.q91);
   const symptoms = {
-    none: true,
-    cough: false,
-    breath: false,
-    eye: false,
-    headache: false
+    none: pm25Level === 0,
+    cough:    _flag(row.env_pm_cough ?? row.q92_cough),
+    breath:   _flag(row.env_pm_breath ?? row.q92_breath),
+    eye:      _flag(row.env_pm_eye ?? row.q92_eye),
+    headache: _flag(row.env_pm_headache ?? row.q92_headache),
   };
-  const symptomCount = 0;
-  const pmRisk = false;
-  const envRiskScore = envGroup === 'high' ? 2 : envGroup === 'medium' ? 1 : 0;
+  const symptomCount = Object.entries(symptoms).filter(([k, v]) => k !== 'none' && v).length;
+  const qualityOfLife = _num04(row.env_qol ?? row.q93);
+  const pmRisk = pm25Level >= 3 && symptomCount > 0;
+  const envRiskScore = hazardCount + (pmRisk ? 1 : 0);
+  const envGroup = envRiskScore >= 2 ? 'high' : envRiskScore >= 1 ? 'medium' : 'low';
   return {
-    id: emp.id,
-    name: emp.name,
-    gender: emp.gender || '',
-    dept: emp.dept || emp.org || '—',
-    envSatisfaction,
-    hazards,
-    hazardCount,
-    pm25Level,
-    symptoms,
-    symptomCount,
-    pmRisk,
-    qualityOfLife,
-    envRiskScore,
-    envGroup
+    id: rec.id || idx + 1,
+    name: rec.name || '—',
+    dept: rec.dept || rec.org || '—',
+    envSatisfaction, hazards, hazardCount,
+    pm25Level, symptoms, symptomCount, pmRisk,
+    qualityOfLife, envRiskScore, envGroup,
   };
-}
-const employees = _IDP_REAL ? _IDP_REAL.map(_adaptEnv) : NAMES.map((n, i) => genEmployee(n, i));
+};
+const employees = _ENV_REAL ? _ENV_REAL.map(_toEnvEmployee) : NAMES.map((n, i) => genEmployee(n, i));
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 const GROUP_CFG = {
@@ -223,7 +228,7 @@ const Tag = ({
     borderRadius: 999,
     fontSize: small ? 10 : 11,
     fontWeight: 700,
-    fontFamily: "'IBM Plex Sans Thai Looped','Sarabun',system-ui,sans-serif"
+    fontFamily: "'Sarabun',sans-serif"
   }
 }, label);
 
@@ -239,7 +244,7 @@ const CustomTooltip = ({
       background: "#1E293B",
       borderRadius: 10,
       padding: "12px 16px",
-      fontFamily: "'IBM Plex Sans Thai Looped','Sarabun',system-ui,sans-serif"
+      fontFamily: "'Sarabun',sans-serif"
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
@@ -326,15 +331,18 @@ function EnvDashboard() {
     "กระทบสุขภาพ": Math.round(employees.filter(e => e.hazards[h.key] === 2).length / employees.length * 100),
     "มีแต่ไม่กระทบ": Math.round(employees.filter(e => e.hazards[h.key] === 1).length / employees.length * 100)
   }));
-  const avgSat = employees.length === 0 ? '—' : (employees.reduce((s, e) => s + e.envSatisfaction, 0) / employees.length).toFixed(1);
-  const avgQol = employees.length === 0 ? '—' : (employees.reduce((s, e) => s + e.qualityOfLife, 0) / employees.length).toFixed(1);
+  const avgSat = (employees.reduce((s, e) => s + e.envSatisfaction, 0) / employees.length).toFixed(1);
+  const avgQol = (employees.reduce((s, e) => s + e.qualityOfLife, 0) / employees.length).toFixed(1);
   return /*#__PURE__*/React.createElement("div", {
     style: {
-      fontFamily: "'IBM Plex Sans Thai Looped','Sarabun',system-ui,sans-serif",
+      fontFamily: "'Sarabun',sans-serif",
       background: "#F1F5F9",
       minHeight: "100vh"
     }
-  }, /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("link", {
+    href: "https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap",
+    rel: "stylesheet"
+  }), /*#__PURE__*/React.createElement("div", {
     style: {
       background: "linear-gradient(135deg,#1E3A5F 0%,#1D4ED8 60%,#2563EB 100%)",
       padding: "24px 32px 0",
@@ -443,7 +451,7 @@ function EnvDashboard() {
       cursor: "pointer",
       fontSize: 13,
       fontWeight: 700,
-      fontFamily: "'IBM Plex Sans Thai Looped','Sarabun',system-ui,sans-serif",
+      fontFamily: "'Sarabun',sans-serif",
       background: tab === t.key ? "#F1F5F9" : "transparent",
       color: tab === t.key ? "#1E3A5F" : "rgba(255,255,255,0.65)"
     }
@@ -819,7 +827,7 @@ function EnvDashboard() {
     radius: [0, 4, 4, 0]
   }), /*#__PURE__*/React.createElement(Legend, {
     wrapperStyle: {
-      fontFamily: "'IBM Plex Sans Thai Looped','Sarabun',system-ui,sans-serif",
+      fontFamily: "'Sarabun',sans-serif",
       fontSize: 12
     }
   })))), /*#__PURE__*/React.createElement("div", {
@@ -1065,7 +1073,7 @@ function EnvDashboard() {
     tick: {
       fill: "#6B7280",
       fontSize: 13,
-      fontFamily: "'IBM Plex Sans Thai Looped','Sarabun',system-ui,sans-serif"
+      fontFamily: "'Sarabun',sans-serif"
     },
     axisLine: false,
     tickLine: false
@@ -1096,7 +1104,7 @@ function EnvDashboard() {
     radius: [4, 4, 0, 0]
   }), /*#__PURE__*/React.createElement(Legend, {
     wrapperStyle: {
-      fontFamily: "'IBM Plex Sans Thai Looped','Sarabun',system-ui,sans-serif",
+      fontFamily: "'Sarabun',sans-serif",
       fontSize: 12
     }
   }))), /*#__PURE__*/React.createElement("div", {
@@ -1119,7 +1127,7 @@ function EnvDashboard() {
     tick: {
       fill: "#6B7280",
       fontSize: 10,
-      fontFamily: "'IBM Plex Sans Thai Looped','Sarabun',system-ui,sans-serif"
+      fontFamily: "'Sarabun',sans-serif"
     }
   }), /*#__PURE__*/React.createElement(PolarRadiusAxis, {
     domain: [0, 100],
@@ -1142,7 +1150,7 @@ function EnvDashboard() {
     strokeDasharray: "4 3"
   }), /*#__PURE__*/React.createElement(Legend, {
     wrapperStyle: {
-      fontFamily: "'IBM Plex Sans Thai Looped','Sarabun',system-ui,sans-serif",
+      fontFamily: "'Sarabun',sans-serif",
       fontSize: 11
     }
   })))))), tab === "risklist" && /*#__PURE__*/React.createElement("div", {
@@ -1175,7 +1183,7 @@ function EnvDashboard() {
       borderRadius: 999,
       fontSize: 12,
       fontWeight: 700,
-      fontFamily: "'IBM Plex Sans Thai Looped','Sarabun',system-ui,sans-serif",
+      fontFamily: "'Sarabun',sans-serif",
       cursor: "pointer",
       border: "none",
       background: filter === key ? color : "#F3F4F6",

@@ -95,7 +95,6 @@ function _renderExtraPages(summary) {
   _safeRender(() => renderWellbeingOrg(summary), 'renderWellbeingOrg');
   _safeRender(renderWellbeingRaw, 'renderWellbeingRaw');
   _safeRender(() => _renderAnalyticsCh1(summary), '_renderAnalyticsCh1');
-  _bindBuddhistDateLabels();
 }
 
 function _renderIdpPage() {
@@ -196,20 +195,10 @@ async function init() {
 
 document.addEventListener('DOMContentLoaded', () => {
   init();
-  // M13: init + live-bind Buddhist Era labels on all date inputs
-  _bindBuddhistDateLabels();
-});
-
-function _bindBuddhistDateLabels() {
+  // init Buddhist Era labels on date inputs
   ['deadline-ch1','deadline-wb','viewer-expires'].forEach(id => {
     const el = document.getElementById(id);
     const labelEl = document.getElementById(id + '-be');
-    if (el && labelEl) {
-      labelEl.textContent = isoToBuddhistDisplay(el.value);
-      if (!el.dataset.beBound) {
-        el.dataset.beBound = '1';
-        el.addEventListener('change', () => { labelEl.textContent = isoToBuddhistDisplay(el.value); });
-      }
-    }
+    if (el && labelEl) labelEl.textContent = isoToBuddhistDisplay(el.value);
   });
-}
+});

@@ -30,13 +30,12 @@
 
   function _select(name, label, options, width) {
     return `
-      <label style="display:flex;flex-direction:column;gap:4px;min-width:${width}px">
-        <span style="font-size:10px;color:#64748B;letter-spacing:1px;font-weight:600;text-transform:uppercase">${label}</span>
+      <label style="display:flex;flex-direction:column;gap:3px;min-width:${width}px">
+        <span style="font-size:10px;color:#94A3B8;letter-spacing:.5px;font-weight:600">${label}</span>
         <select data-filter="${name}" style="
-          padding:8px 12px; border-radius:10px; border:1px solid #E2E8F0;
+          padding:7px 10px; border-radius:8px; border:1px solid #CBD5E1;
           background:#fff; font-family:inherit; font-size:13px; color:#0F172A;
           cursor:pointer; min-width:${width}px; max-width:${width}px;
-          transition:all 0.2s ease; box-shadow:0 1px 2px rgba(0,0,0,0.05);
         ">${options}</select>
       </label>`;
   }
@@ -46,16 +45,15 @@
     const { total, filtered } = state.counts;
     const active = Object.values(state.filters).filter(Boolean).length;
     const tag = active > 0
-      ? `<span style="background:#F59E0B;color:#fff;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;margin-left:8px">${active} filter</span>`
+      ? `<span style="background:#2563EB;color:#fff;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;margin-left:6px">${active} filter</span>`
       : '';
     return `
-      <div style="display:flex;align-items:center;gap:10px;padding:8px 0;font-size:12px;color:#64748B">
-        <span style="font-weight:500">แสดง <b style="color:#1E3A8A;font-weight:700">${filtered.toLocaleString()}</b> จาก <b style="color:#1E3A8A;font-weight:700">${total.toLocaleString()}</b> คน</span>
+      <div style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:12px;color:#475569">
+        <span style="font-weight:600">แสดง <b style="color:#0F172A">${filtered.toLocaleString()}</b> จาก <b>${total.toLocaleString()}</b> คน</span>
         ${tag}
         <button data-reset="1" style="
-          margin-left:auto; padding:7px 14px; border-radius:8px; border:1px solid #E2E8F0;
-          background:#fff; font-family:inherit; font-size:12px; font-weight:600; color:#64748B; cursor:pointer;
-          transition:all 0.2s ease; box-shadow:0 1px 2px rgba(0,0,0,0.05);
+          margin-left:auto; padding:6px 12px; border-radius:8px; border:1px solid #CBD5E1;
+          background:#fff; font-family:inherit; font-size:12px; color:#475569; cursor:pointer;
           ${active === 0 ? 'opacity:.4;pointer-events:none' : ''}
         ">↺ ล้างตัวกรอง</button>
       </div>`;
@@ -80,7 +78,7 @@
     if (!state.el) return;
     const opts = _buildOptions();
     if (!opts) {
-      state.el.innerHTML = `<div style="padding:16px 24px;color:#64748B;font-size:13px;font-weight:500">⏳ กำลังโหลดตัวเลือกกรอง…</div>`;
+      state.el.innerHTML = `<div style="padding:14px 18px;color:#64748B;font-size:13px">⏳ กำลังโหลดตัวเลือกกรอง…</div>`;
       return;
     }
 
@@ -96,12 +94,12 @@
 
     state.el.innerHTML = `
       <div style="
-        display:flex; gap:14px; flex-wrap:wrap; align-items:flex-end;
-        padding:16px 24px; background:#F8FAFC; border-bottom:1px solid #E2E8F0;
+        display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end;
+        padding:14px 18px; background:#F8FAFC; border-bottom:1px solid #E2E8F0;
       ">
         ${FIELDS.map(f => _select(f.key, f.label, byKey[f.key], f.width)).join('')}
       </div>
-      <div style="padding:0 24px 12px; background:#F8FAFC; border-bottom:1px solid #E2E8F0">
+      <div style="padding:0 18px; background:#F8FAFC; border-bottom:1px solid #E2E8F0">
         ${_renderCountLabel()}
       </div>
     `;

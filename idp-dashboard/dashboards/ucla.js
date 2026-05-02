@@ -4,9 +4,6 @@
   var React = window.React;
   var Recharts = window.Recharts;
   var useState = React.useState, useMemo = React.useMemo, useEffect = React.useEffect, useRef = React.useRef, Fragment = React.Fragment;
-  // Real data from IDPData bootstrap (set by index.html before each dashboard load)
-  var _IDP_KEY = "ucla"; // replaced per-file below
-  var _IDP_REAL = (window.__IDP_EMPLOYEES__ && window.__IDP_EMPLOYEES__[_IDP_KEY]) || null;
   var BarChart = Recharts.BarChart, Bar = Recharts.Bar, XAxis = Recharts.XAxis, YAxis = Recharts.YAxis,
       CartesianGrid = Recharts.CartesianGrid, Tooltip = Recharts.Tooltip, ResponsiveContainer = Recharts.ResponsiveContainer,
       RadarChart = Recharts.RadarChart, Radar = Recharts.Radar, PolarGrid = Recharts.PolarGrid,
@@ -117,43 +114,44 @@ const genEmployee = (name, idx) => {
     totalPct: Math.round(total / 60 * 100)
   };
 };
-
-// ─── Real-data adaptor ────────────────────────────────────────────────────────
-function _adaptUcla(emp) {
-  const total = emp.uclaScore != null ? Number(emp.uclaScore) : 0;
-  const level = getLevel(total);
-  // Distribute total proportionally across DIMS (4 dims × 5 items × max 3 = 60)
-  const totalItems = DIMS.reduce((s, d) => s + d.items.length, 0) || 20;
-  const dimScores = DIMS.map(d => {
-    const raw = Math.round(total / totalItems * d.items.length);
-    const max = d.items.length * 3;
-    return {
-      key: d.key,
-      raw,
-      pct: Math.round(raw / max * 100)
-    };
+// ─── Real data adapter ───────────────────────────────────────────────────────
+const _UCLA_REAL = typeof window !== 'undefined' && window.__IDP_EMPLOYEES__ && window.__IDP_EMPLOYEES__.ucla || null;
+const _lonelyVal = (v) => {
+  if (v == null) return null;
+  const s = String(v).trim();
+  if (/^(0|ไม่เคย|never|น้อยมาก)$/i.test(s)) return 0;
+  if (/^(1|บางครั้ง|sometimes|น้อย)$/i.test(s)) return 1;
+  if (/^(2|บ่อย|often|ปานกลาง|บางที)$/i.test(s)) return 2;
+  if (/^(3|บ่อยมาก|always|มาก|เสมอ)$/i.test(s)) return 3;
+  const n = parseInt(s, 10);
+  return isNaN(n) ? 0 : Math.min(Math.max(n, 0), 3);
+};
+const _toUclaEmployee = (rec, idx) => {
+  const row = rec._raw || {};
+  const answers = Array.from({ length: 20 }, (_, i) => {
+    const v = _lonelyVal(row[`lonely_${i + 1}`]);
+    return v == null ? 0 : v;
   });
-  // Generate synthetic answers consistent with total
-  const perItem = totalItems > 0 ? Math.round(total / totalItems) : 0;
-  const answers = Array.from({
-    length: 20
-  }, () => Math.min(perItem, 3));
+  const total = answers.reduce((s, v) => s + v, 0);
+  const dimScores = DIMS.map(d => {
+    const raw = d.items.reduce((s, i) => s + answers[i], 0);
+    return { key: d.key, raw, pct: Math.round(raw / (d.items.length * 3) * 100) };
+  });
   return {
-    id: emp.id,
-    name: emp.name,
-    gender: emp.gender || '',
-    dept: emp.dept || emp.org || '—',
+    id: rec.id || idx + 1,
+    name: rec.name || '—',
+    dept: rec.dept || rec.org || '—',
     answers,
     total,
-    level,
+    level: getLevel(total),
     dimScores,
     totalPct: Math.round(total / 60 * 100)
   };
-}
-const employees = _IDP_REAL ? _IDP_REAL.map(_adaptUcla) : NAMES.map((n, i) => genEmployee(n, i));
+};
+const employees = _UCLA_REAL ? _UCLA_REAL.map(_toUclaEmployee) : NAMES.map((n, i) => genEmployee(n, i));
 
 // ─── Aggregates ───────────────────────────────────────────────────────────────
-const avgDim = dim => employees.length === 0 ? 0 : Math.round(employees.reduce((s, e) => s + e.dimScores.find(d => d.key === dim).pct, 0) / employees.length);
+const avgDim = dim => Math.round(employees.reduce((s, e) => s + e.dimScores.find(d => d.key === dim).pct, 0) / employees.length);
 const orgRadar = DIMS.map(d => ({
   dim: d.icon + " " + d.short,
   fullLabel: d.label,
@@ -184,7 +182,7 @@ const Tag = ({
     borderRadius: 999,
     fontSize: small ? 10 : 12,
     fontWeight: 700,
-    fontFamily: "'IBM Plex Sans Thai Looped','Sarabun',system-ui,sans-serif"
+    fontFamily: "'Sarabun',sans-serif"
   }
 }, label);
 const MiniBar = ({
@@ -277,7 +275,7 @@ const Gauge = ({
       dominantBaseline: "middle",
       fontSize: size * 0.055,
       fill: "#94A3B8",
-      fontFamily: "'IBM Plex Sans Thai Looped','Sarabun',system-ui,sans-serif"
+      fontFamily: "'Sarabun',sans-serif"
     }, v));
   }), /*#__PURE__*/React.createElement("line", {
     x1: cx,
@@ -304,14 +302,14 @@ const Gauge = ({
     fontSize: size * 0.13,
     fontWeight: "800",
     fill: lvl.color,
-    fontFamily: "'IBM Plex Sans Thai Looped','Sarabun',system-ui,sans-serif"
+    fontFamily: "'Sarabun',sans-serif"
   }, score), /*#__PURE__*/React.createElement("text", {
     x: cx,
     y: cy + size * 0.21,
     textAnchor: "middle",
     fontSize: size * 0.06,
     fill: "#64748B",
-    fontFamily: "'IBM Plex Sans Thai Looped','Sarabun',system-ui,sans-serif"
+    fontFamily: "'Sarabun',sans-serif"
   }, "/ 60"));
 };
 const CustomTooltip = ({
@@ -325,7 +323,7 @@ const CustomTooltip = ({
       background: "#1E293B",
       borderRadius: 10,
       padding: "12px 16px",
-      fontFamily: "'IBM Plex Sans Thai Looped','Sarabun',system-ui,sans-serif"
+      fontFamily: "'Sarabun',sans-serif"
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
@@ -378,14 +376,17 @@ function UCLADashboard() {
   const highGroup = employees.filter(e => e.level.key === "high");
   const midGroup = employees.filter(e => e.level.key === "mid");
   const lowGroup = employees.filter(e => e.level.key === "low");
-  const orgAvg = employees.length === 0 ? 0 : Math.round(employees.reduce((s, e) => s + e.total, 0) / employees.length);
+  const orgAvg = Math.round(employees.reduce((s, e) => s + e.total, 0) / employees.length);
   return /*#__PURE__*/React.createElement("div", {
     style: {
-      fontFamily: "'IBM Plex Sans Thai Looped','Sarabun',system-ui,sans-serif",
+      fontFamily: "'Sarabun',sans-serif",
       background: "#F5F3FF",
       minHeight: "100vh"
     }
-  }, /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("link", {
+    href: "https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap",
+    rel: "stylesheet"
+  }), /*#__PURE__*/React.createElement("div", {
     style: {
       background: "linear-gradient(135deg,#4C1D95 0%,#6D28D9 60%,#7C3AED 100%)",
       padding: "24px 32px 0",
@@ -492,7 +493,7 @@ function UCLADashboard() {
       cursor: "pointer",
       fontSize: 13,
       fontWeight: 700,
-      fontFamily: "'IBM Plex Sans Thai Looped','Sarabun',system-ui,sans-serif",
+      fontFamily: "'Sarabun',sans-serif",
       background: tab === t.key ? "#F5F3FF" : "transparent",
       color: tab === t.key ? "#4C1D95" : "rgba(255,255,255,0.65)"
     }
@@ -663,7 +664,7 @@ function UCLADashboard() {
     tick: {
       fill: "#6B7280",
       fontSize: 13,
-      fontFamily: "'IBM Plex Sans Thai Looped','Sarabun',system-ui,sans-serif"
+      fontFamily: "'Sarabun',sans-serif"
     },
     axisLine: false,
     tickLine: false
@@ -694,7 +695,7 @@ function UCLADashboard() {
     radius: [4, 4, 0, 0]
   }), /*#__PURE__*/React.createElement(Legend, {
     wrapperStyle: {
-      fontFamily: "'IBM Plex Sans Thai Looped','Sarabun',system-ui,sans-serif",
+      fontFamily: "'Sarabun',sans-serif",
       fontSize: 12
     }
   }))))), /*#__PURE__*/React.createElement("div", {
@@ -756,7 +757,7 @@ function UCLADashboard() {
     tick: {
       fill: "#6B7280",
       fontSize: 12,
-      fontFamily: "'IBM Plex Sans Thai Looped','Sarabun',system-ui,sans-serif"
+      fontFamily: "'Sarabun',sans-serif"
     }
   }), /*#__PURE__*/React.createElement(PolarRadiusAxis, {
     domain: [0, 100],
@@ -787,7 +788,7 @@ function UCLADashboard() {
     }
   }), /*#__PURE__*/React.createElement(Legend, {
     wrapperStyle: {
-      fontFamily: "'IBM Plex Sans Thai Looped','Sarabun',system-ui,sans-serif",
+      fontFamily: "'Sarabun',sans-serif",
       fontSize: 12
     }
   })))), /*#__PURE__*/React.createElement("div", {
@@ -922,7 +923,7 @@ function UCLADashboard() {
       borderRadius: 999,
       fontSize: 12,
       fontWeight: 700,
-      fontFamily: "'IBM Plex Sans Thai Looped','Sarabun',system-ui,sans-serif",
+      fontFamily: "'Sarabun',sans-serif",
       cursor: "pointer",
       border: "none",
       background: filter === key ? color : "#F3F4F6",
