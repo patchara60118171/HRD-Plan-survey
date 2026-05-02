@@ -910,7 +910,6 @@ function PhysicalDashboard() {
             padding: "10px 20px", display: "flex", gap: 24, fontSize: 12, color: "#D1FAE5"
           }}>
             <span>📐 <strong>ชั้น 1 — ปัจจัยเสี่ยงกาย:</strong> BMI + การกิน + ออกกำลังกาย</span>
-            <span>🚬 <strong>ชั้น 2 — พฤติกรรมเสี่ยง:</strong> สูบ / ดื่ม / เสพ</span>
             <span>🏥 <strong>ชั้น 3 — NCD:</strong> โรคที่เป็นอยู่แล้ว (ข้อมูลอ่อนไหว)</span>
           </div>
 
@@ -1236,98 +1235,61 @@ function PhysicalDashboard() {
               </div>
             </div>
 
-            {/* ── ชั้น 2 + ชั้น 3 ── */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
-
-              {/* ชั้น 2: พฤติกรรมเสี่ยง */}
-              <div style={{ background: "#fff", borderRadius: 16, padding: 24, boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
-                  <div style={{ width: 4, height: 20, background: "#D97706", borderRadius: 2 }} />
-                  <div style={{ fontSize: 15, fontWeight: 800, color: "#92400E" }}>ชั้น 2 — พฤติกรรมเสี่ยง</div>
+            {/* ── ชั้น 3: NCD — full-width ── */}
+            <div style={{ background: "#fff", borderRadius: 16, padding: 24, boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <div style={{ width: 4, height: 20, background: "#7C3AED", borderRadius: 2 }} />
+                  <div style={{ fontSize: 15, fontWeight: 800, color: "#4C1D95" }}>🏥 ชั้น 3 — NCD (โรคที่เป็นอยู่)</div>
                 </div>
-                {[
-                  { label: "🚬 สูบบุหรี่ (มวน)",      key: "smokeCig",  icon: "🚬" },
-                  { label: "💨 สูบบุหรี่ไฟฟ้า",        key: "smokeVape", icon: "💨" },
-                  { label: "🍺 ดื่มแอลกอฮอล์",         key: "alcohol",   icon: "🍺" },
-                  { label: "💊 สารเสพติดอื่นๆ",        key: "substance", icon: "💊" },
-                ].map(b => {
-                  const daily = employees.filter(e => e[b.key] === "daily").length;
-                  const occ   = employees.filter(e => e[b.key] === "occasional" || e[b.key] === "weekly").length;
-                  const none  = employees.length - daily - occ;
-                  return (
-                    <div key={b.key} style={{ marginBottom: 16 }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-                        <span style={{ fontSize: 13, fontWeight: 600, color: "#374151" }}>{b.label}</span>
-                        <div style={{ display: "flex", gap: 6 }}>
-                          {daily > 0 && <Tag label={`ประจำ ${daily} คน`} color="#EF4444" small />}
-                          {occ > 0   && <Tag label={`บางครั้ง ${occ} คน`} color="#F59E0B" small />}
-                        </div>
-                      </div>
-                      <div style={{ height: 8, background: "#F3F4F6", borderRadius: 4, display: "flex", overflow: "hidden" }}>
-                        <div style={{ width: `${pct(daily, employees.length)}%`, background: "#EF4444" }} />
-                        <div style={{ width: `${pct(occ,   employees.length)}%`, background: "#FCD34D" }} />
-                        <div style={{ width: `${pct(none,  employees.length)}%`, background: "#D1FAE5" }} />
-                      </div>
-                      <div style={{ display: "flex", gap: 12, marginTop: 4, fontSize: 10, color: "#9CA3AF" }}>
-                        <span>🔴 ประจำ: {pct(daily, employees.length)}%</span>
-                        <span>🟡 บางครั้ง: {pct(occ, employees.length)}%</span>
-                        <span>🟢 ไม่มี: {pct(none, employees.length)}%</span>
-                      </div>
-                    </div>
-                  );
-                })}
-
-                {/* เสี่ยงกาย + พฤติกรรมเสี่ยง */}
-                <div style={{
-                  background: "#FFF7ED", borderRadius: 10, padding: "12px 14px",
-                  border: "1px solid #FED7AA", marginTop: 8
-                }}>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: "#92400E" }}>⚠️ เสี่ยงกาย + มีพฤติกรรมเสี่ยง</div>
-                  <div style={{ fontSize: 24, fontWeight: 800, color: "#EA580C", marginTop: 4 }}>{highAndBeh.length} คน</div>
-                  <div style={{ fontSize: 11, color: "#9A3412" }}>ต้องการ IDP เข้มข้นเป็นพิเศษ</div>
-                </div>
+                <span style={{ fontSize: 11, color: "#9CA3AF" }}>🔒 ข้อมูลอ่อนไหว · แสดงรายชื่อเฉพาะ HR ผู้รับผิดชอบ</span>
               </div>
 
-              {/* ชั้น 3: NCD */}
-              <div style={{ background: "#fff", borderRadius: 16, padding: 24, boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
-                  <div style={{ width: 4, height: 20, background: "#7C3AED", borderRadius: 2 }} />
-                  <div style={{ fontSize: 15, fontWeight: 800, color: "#4C1D95" }}>ชั้น 3 — NCD (โรคที่เป็นอยู่)</div>
-                </div>
-                <div style={{ fontSize: 11, color: "#9CA3AF", marginBottom: 16 }}>
-                  🔒 ข้อมูลอ่อนไหว · แสดงรายชื่อเฉพาะ HR ผู้รับผิดชอบ
-                </div>
+              <div style={{ display: "grid", gridTemplateColumns: "220px 1fr auto", gap: 28, alignItems: "start" }}>
 
-                <div style={{ display: "flex", gap: 16, alignItems: "center", marginBottom: 20 }}>
-                  <ResponsiveContainer width={140} height={140}>
+                {/* Donut chart */}
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                  <ResponsiveContainer width={180} height={180}>
                     <PieChart>
-                      <Pie data={ncdCounts} dataKey="value" cx="50%" cy="50%" innerRadius={38} outerRadius={62} paddingAngle={2}>
+                      <Pie data={ncdCounts} dataKey="value" cx="50%" cy="50%" innerRadius={48} outerRadius={78} paddingAngle={3}>
                         {ncdCounts.map((entry, i) => <Cell key={i} fill={entry.color} />)}
                       </Pie>
                       <Tooltip formatter={(v, n) => [`${v} คน`, n]} contentStyle={{ fontFamily: "'IBM Plex Sans Thai Looped',sans-serif", fontSize: 12, borderRadius: 8 }} />
                     </PieChart>
                   </ResponsiveContainer>
-                  <div style={{ flex: 1 }}>
-                    {ncdCounts.map((d, i) => (
-                      <div key={i} style={{ display: "flex", justifyContent: "space-between", marginBottom: 6, alignItems: "center" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                          <div style={{ width: 8, height: 8, borderRadius: "50%", background: d.color }} />
-                          <span style={{ fontSize: 12, color: "#374151" }}>{d.name}</span>
-                        </div>
-                        <span style={{ fontSize: 12, fontWeight: 700, color: d.color }}>{d.value} คน</span>
-                      </div>
-                    ))}
-                  </div>
+                  <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 4, textAlign: "center" }}>ผู้มี NCD ทั้งหมด {ncdGroup.length} คน ({pct(ncdGroup.length, employees.length)}%)</div>
                 </div>
 
-                {/* เสี่ยงกาย + NCD */}
-                <div style={{
-                  background: "#F5F3FF", borderRadius: 10, padding: "12px 14px",
-                  border: "1px solid #DDD6FE"
-                }}>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: "#4C1D95" }}>🏥 เสี่ยงกาย + มีโรค NCD</div>
-                  <div style={{ fontSize: 24, fontWeight: 800, color: "#7C3AED", marginTop: 4 }}>{highAndNCD.length} คน</div>
-                  <div style={{ fontSize: 11, color: "#5B21B6" }}>กลุ่มเปราะบาง — ต้องดูแลเร่งด่วนที่สุด</div>
+                {/* NCD breakdown bars */}
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  {ncdCounts.map((d, i) => (
+                    <div key={i}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+                          <div style={{ width: 10, height: 10, borderRadius: "50%", background: d.color, flexShrink: 0 }} />
+                          <span style={{ fontSize: 12, color: "#374151", fontWeight: 600 }}>{d.name}</span>
+                        </div>
+                        <span style={{ fontSize: 13, fontWeight: 800, color: d.color }}>{d.value} คน</span>
+                      </div>
+                      <div style={{ height: 7, background: "#F3F4F6", borderRadius: 4, overflow: "hidden" }}>
+                        <div style={{ width: `${pct(d.value, employees.length)}%`, height: "100%", background: d.color, borderRadius: 4 }} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Summary callout */}
+                <div style={{ display: "flex", flexDirection: "column", gap: 12, minWidth: 180 }}>
+                  <div style={{ background: "#F5F3FF", borderRadius: 12, padding: "16px 18px", border: "1px solid #DDD6FE", textAlign: "center" }}>
+                    <div style={{ fontSize: 11, color: "#7C3AED", fontWeight: 700, marginBottom: 4 }}>🏥 เสี่ยงกาย + มีโรค NCD</div>
+                    <div style={{ fontSize: 32, fontWeight: 800, color: "#7C3AED" }}>{highAndNCD.length}</div>
+                    <div style={{ fontSize: 10, color: "#5B21B6", marginTop: 2 }}>กลุ่มเปราะบาง — ดูแลเร่งด่วน</div>
+                  </div>
+                  <div style={{ background: "#FFF7ED", borderRadius: 12, padding: "14px 18px", border: "1px solid #FED7AA", textAlign: "center" }}>
+                    <div style={{ fontSize: 11, color: "#D97706", fontWeight: 700, marginBottom: 4 }}>🟡 เสี่ยงกาย</div>
+                    <div style={{ fontSize: 32, fontWeight: 800, color: "#F59E0B" }}>{medRisk.length + highRisk.length}</div>
+                    <div style={{ fontSize: 10, color: "#92400E", marginTop: 2 }}>ชั้น 1 เฝ้าระวัง + เสี่ยงสูง</div>
+                  </div>
                 </div>
               </div>
             </div>

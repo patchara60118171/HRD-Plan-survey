@@ -58,6 +58,8 @@ nav{flex:1;padding:6px 0 12px}
 .topbar-btn.primary:hover{background:var(--PD)}
 .tb-notif{position:relative;width:34px;height:34px;border-radius:7px;border:1px solid var(--bdr);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;color:var(--tx2);background:var(--card)}
 .tb-notif .dot{position:absolute;top:5px;right:5px;width:7px;height:7px;background:#D64045;border-radius:50%;border:1.5px solid #fff}
+#btn-refresh-data{font-size:11px;padding:4px 10px;border:1px solid var(--bdr);border-radius:6px;background:var(--bg);color:var(--tx2);cursor:pointer;font-family:inherit;transition:background .12s;white-space:nowrap}
+#btn-refresh-data:hover{background:var(--bg2)}
 .content{padding:22px;flex:1;overflow-x:clip;min-width:0}
 
 /* ===== PAGES ===== */
@@ -773,7 +775,7 @@ body.sidebar-open .sidebar-backdrop{display:block;opacity:1}
 /* ===== RESPONSIVE: TABLET ≤ 1024px ===== */
 @media(max-width:1024px){
   .hamburger{display:flex}
-  .sidebar{transform:translateX(-100%);transition:transform .25s ease}
+  .sidebar{transform:translateX(-100%);transition:transform .28s cubic-bezier(.4,0,.2,1)}
   body.sidebar-open .sidebar{transform:translateX(0)}
   .main{margin-left:0}
 
@@ -809,117 +811,244 @@ body.sidebar-open .sidebar-backdrop{display:block;opacity:1}
   /* Heatmap */
   .hm-label{width:100px;font-size:10.5px}
   .hm{width:28px;height:24px;font-size:8.5px}
+
+  /* ── ขั้น 3: Card head filter-bar wraps on tablet ── */
+  .card-head{flex-wrap:wrap;gap:8px}
+  .card-head h3{flex:1;min-width:0}
+  .card-head .filter-bar{width:100%;margin-top:2px}
+
+  /* ── ขั้น 5: Sticky filters adjust for tablet topbar height ── */
+  .anwb-sticky-filters{top:54px}
 }
 
 /* ===== RESPONSIVE: MOBILE ≤ 640px ===== */
 @media(max-width:640px){
-  /* Topbar */
-  .topbar{padding:0 12px;height:48px;gap:8px}
-  .tb-title{font-size:13px}
+
+  /* ── ขั้น 2: Topbar mobile ── */
+  .topbar{padding:0 12px;height:52px;gap:8px}
+  .tb-title{font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px}
   .tb-bc{display:none}
+  #connection-status{display:none}
+  #btn-refresh-data{font-size:0 !important;padding:6px 10px !important;min-width:36px;height:36px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+  #btn-refresh-data::before{content:'↻';font-size:15px;display:inline-block}
+
+  /* ── Content padding ── */
   .content{padding:12px}
 
-  /* Grids → 1 col */
-  .kpi-grid{grid-template-columns:1fr}
-  #ch1-status-grid{grid-template-columns:1fr}
-  .area-stats{grid-template-columns:repeat(2,1fr)}
-
-  /* KPI cards compact */
-  .kpi{padding:12px 14px}
+  /* ── ขั้น 1: KPI Grid 2×2 on mobile ── */
+  .kpi-grid{grid-template-columns:repeat(2,1fr);gap:10px}
+  .kpi{padding:12px 14px;border-radius:9px}
   .kpi .kpi-val{font-size:22px}
+  .kpi .kpi-label{font-size:11px}
+  .kpi .kpi-sub{font-size:10.5px}
+  .kpi .kpi-icon{font-size:16px;margin-bottom:4px}
 
-  /* Welcome strip */
-  .welcome{padding:14px 16px;gap:12px}
+  /* ── ขั้น 1: Welcome strip mobile ── */
+  .welcome{padding:14px 16px;gap:10px;flex-direction:column;align-items:flex-start;border-radius:10px}
+  .w-icon{font-size:26px}
   .w-title{font-size:14px}
-  .w-stats{gap:8px}
-  .w-stat{padding:7px 10px}
-  .w-val{font-size:16px}
+  .w-sub{font-size:11px;line-height:1.4;white-space:normal;overflow:hidden;word-break:break-word}
+  .w-space{display:none}
+  .w-stats{width:100%;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:4px}
+  .w-stat{padding:8px 6px;text-align:center;border-radius:7px}
+  .w-val{font-size:17px;font-weight:700}
+  .w-label{font-size:9.5px;opacity:.65;margin-top:1px;line-height:1.3}
 
-  /* Area chart stats */
+  /* ── Area chart stats: 2 cols ── */
+  .area-stats{grid-template-columns:repeat(2,1fr) !important}
   .area-stat{padding:8px 10px}
   .area-stat-val{font-size:15px}
 
-  /* Cards */
-  .card-head{padding:12px 14px}
+  /* ── ขั้น 5: Chart height compact on mobile ── */
+  #wb-daily-chart{height:160px !important}
+
+  /* ── Cards ── */
+  .card{border-radius:10px}
+  .card-head{padding:12px 14px;flex-wrap:wrap;gap:6px}
+  .card-head h3{font-size:13px;flex:1;min-width:0}
+  .card-head .filter-bar{width:100%;margin-top:2px}
   .card-body{padding:12px 14px}
 
-  /* Touch targets */
-  .btn{min-height:40px;padding:8px 14px;font-size:12.5px}
-  .topbar-btn{min-height:40px;padding:8px 12px}
-  .nav-item{padding:12px 14px;font-size:14px}
-  .card-dl-btn{width:44px;height:44px;font-size:16px}
+  /* ── #ch1-status-grid: 1 col ── */
+  #ch1-status-grid{grid-template-columns:1fr}
 
-  /* Tables */
-  .tbl-wrap{-webkit-overflow-scrolling:touch}
-  thead th{padding:8px 10px;font-size:11px}
-  tbody td{padding:8px 10px;font-size:11.5px}
+  /* ── ขั้น 2: Sidebar touch targets ── */
+  .nav-item{padding:13px 14px;font-size:14px;min-height:48px;gap:12px}
+  .nav-item .ni{font-size:16px;width:20px}
+  .nav-group{padding:18px 14px 5px;font-size:10px}
+  .sidebar-user{margin:10px 12px;padding:10px 12px}
+  .sidebar-user .u-avatar{width:34px;height:34px;font-size:14px}
+  .sidebar-user .u-name{font-size:13px}
+  .sidebar-user .u-role{font-size:11px}
+  .sidebar-foot .nav-item{min-height:48px;font-size:13px}
 
-  /* Progress items */
+  /* ── ขั้น 3: Touch target buttons ── */
+  .btn{min-height:42px;padding:9px 14px;font-size:13px;border-radius:8px}
+  .topbar-btn{min-height:42px;padding:9px 12px}
+  .card-dl-btn{width:40px;height:40px;font-size:16px}
+
+  /* ── ขั้น 3: Filter bars — 2-col grid for inputs/selects, action btns row ── */
+  .filter-bar{flex-direction:row;flex-wrap:wrap;gap:7px}
+  .filter-bar .si{flex:1 1 calc(50% - 4px);min-width:0;font-size:13px;padding:9px 11px;min-height:42px}
+  .filter-bar .sel{flex:1 1 calc(50% - 4px);min-width:0;font-size:13px;padding:9px 11px;min-height:42px}
+  /* Wide search bar takes full row */
+  .filter-bar .si:only-child,
+  .filter-bar .si:first-child:last-of-type{flex:1 1 100%}
+  /* Action buttons stay side-by-side in a row */
+  .filter-bar .btn{flex:1 1 auto;min-height:42px;justify-content:center;font-size:12.5px}
+
+  /* ── ขั้น 3: ANWB tabs wrap nicely on mobile ── */
+  .anwb-tabs{gap:3px;padding:3px}
+  .anwb-tab{padding:8px 10px;font-size:12px;flex:1;text-align:center;white-space:nowrap}
+
+  /* ── ขั้น 3: Tabs bar scroll on mobile ── */
+  .tabs{overflow-x:auto;-webkit-overflow-scrolling:touch;flex-wrap:nowrap;padding-bottom:0}
+  .tab{white-space:nowrap;padding:10px 14px;font-size:12.5px;flex-shrink:0}
+
+  /* ── ขั้น 4: Tables mobile ── */
+  .tbl-wrap{-webkit-overflow-scrolling:touch;border-radius:0}
+  thead th{padding:9px 10px;font-size:11px;white-space:nowrap}
+  tbody td{padding:9px 10px;font-size:12px}
+
+  /* Wellbeing rank table: hide columns that don't fit */
+  #wb-rank-table th:nth-child(4),
+  #wb-rank-table td:nth-child(4){display:none}
+
+  /* Progress table: hide date + manage columns on mobile */
+  #prog-th-date,
+  #page-progress .tbl-wrap tbody td:nth-child(6){display:none}
+  /* Hide progress col header text, show only bar */
+  #prog-th-count{font-size:10px}
+
+  /* Org table: hide contact column on mobile */
+  #org-table th:nth-child(5),
+  #org-table td:nth-child(5){display:none}
+
+  /* ── ขั้น 4: Modal slide-up on mobile ── */
+  .umodal-overlay{align-items:flex-end;padding:0}
+  .umodal{
+    min-width:auto;
+    width:100%;
+    max-width:100%;
+    border-radius:18px 18px 0 0;
+    max-height:90vh;
+    overflow-y:auto;
+    animation:modal-slide-up .28s cubic-bezier(.4,0,.2,1);
+  }
+  .umodal-head{padding:16px 18px}
+  .umodal-body{padding:16px 18px}
+  .umodal-foot{padding:12px 18px;gap:8px}
+  .umodal-foot .btn{flex:1;min-height:44px;font-size:13.5px}
+
+  /* ── Progress items ── */
   .prog-item{flex-wrap:wrap;gap:6px}
-  .prog-org{width:100%;font-size:12px}
+  .prog-org{width:100%;font-size:12.5px}
   .prog-track{order:1;flex:1}
   .prog-pct{order:2;width:auto}
   .prog-status{order:3;width:auto}
 
-  /* Filter bar */
-  .filter-bar{flex-direction:column}
-  .si{width:100%}
-  .sel{width:100%}
+  /* ── Page titles ── */
+  .page-title{font-size:16px}
+  .page-sub{font-size:12px;margin-bottom:14px}
 
-  /* Page titles */
-  .page-title{font-size:15px}
-  .page-sub{font-size:11.5px}
-
-  /* Form rows */
+  /* ── Form rows ── */
   .form-row{flex-direction:column}
   .form-row .fg{min-width:100%}
 
-  /* Stats row */
+  /* ── Stats row ── */
   .stats-row{flex-wrap:wrap}
   .st{min-width:calc(50% - 5px)}
 
-  /* Topbar: hide connection status on small mobile */
-  #connection-status{display:none}
+  /* ── ขั้น 5: Sticky filters offset mobile topbar ── */
+  .anwb-sticky-filters{top:52px;padding:8px 0}
 
-  /* Welcome banner: fix subtitle overflow */
-  .w-sub{font-size:11px;line-height:1.4;white-space:normal;overflow:hidden}
-  .w-stats{flex-wrap:wrap}
-  .w-stat{min-width:calc(33% - 8px)}
+  /* ── Org credential card head wrap ── */
+  .fc-head{flex-wrap:wrap}
 
-  /* Wellbeing rank table: hide long count column */
-  #wb-rank-table th:nth-child(4),
-  #wb-rank-table td:nth-child(4){display:none}
+  /* ── info box: prevent overflow ── */
+  .info{font-size:11.5px;line-height:1.5;padding:9px 12px;word-break:break-word;overflow-wrap:anywhere;overflow:hidden}
 
-  /* Sidebar: make touch target bigger */
-  .nav-item{min-height:44px}
+  /* ── Summary mini label ── */
+  .summary-mini-label{width:90px;font-size:11px}
+
+  /* ── Pagination bar ── */
+  [style*="display:flex;align-items:center;gap:10px"]{flex-wrap:wrap;gap:6px}
+
+  /* ── Table rows: tighter on mobile ── */
+  tbody tr td{vertical-align:middle}
+  /* Org table: org name clamp to 2 lines */
+  #org-table td:nth-child(1){max-width:120px;display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.35;white-space:normal}
+  /* Org table: prevent email overflow */
+  #org-table td:nth-child(4){max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px}
+  /* Progress table: wrap org names */
+  #page-progress tbody td:nth-child(2){white-space:normal;max-width:120px;line-height:1.3;font-size:12px}
+  /* Search in filter-bar takes full width when alone */
+  .card-head .filter-bar > .si:first-child{flex:1 1 100%}
+  /* Explicit full-row for primary CTA button */
+  .card-head .filter-bar > .b-solid{flex:1 1 100%;text-align:center;justify-content:center}
+
+  /* ── Progress page: search full-row, status select full-row, Export+Reminder side by side ── */
+  #page-progress .filter-bar .si{flex:1 1 100%}
+  #page-progress .filter-bar .sel{flex:1 1 100%}
+  #page-progress .filter-bar .b-gray,
+  #page-progress .filter-bar .b-orange{flex:1 1 calc(50% - 4px)}
+
+  /* ── Org page: search full-row, ministry select full-row, add btn full-row ── */
+  #page-orgs .filter-bar .si{flex:1 1 100%}
+  #page-orgs .filter-bar .sel{flex:1 1 100%}
+  #page-orgs .filter-bar .b-solid{flex:1 1 100%}
+
+  /* ── WB form-control buttons: side-by-side ── */
+  #wb-form-windows-card .card-head > div{flex-wrap:wrap;gap:6px;width:100%}
+  #wb-form-windows-card .card-head > div .btn{flex:1}
 }
 
 /* ===== SIDEBAR CLOSE BTN (mobile/tablet only) ===== */
-.sidebar-close-btn{display:none;position:absolute;top:14px;right:12px;width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:14px;cursor:pointer;align-items:center;justify-content:center;line-height:1;font-family:inherit;transition:background .12s;flex-shrink:0;padding:0}
+.sidebar-close-btn{display:none;position:absolute;top:14px;right:12px;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:15px;cursor:pointer;align-items:center;justify-content:center;line-height:1;font-family:inherit;transition:background .12s;flex-shrink:0;padding:0}
 .sidebar-close-btn:hover{background:rgba(255,255,255,.28)}
 .sidebar-logo{position:relative}
+
+/* ===== SLIDE-UP MODAL ANIMATION ===== */
+@keyframes modal-slide-up{
+  from{opacity:0;transform:translateY(32px)}
+  to{opacity:1;transform:translateY(0)}
+}
 
 /* ===== ADDITIONAL TABLET FIXES (≤ 1024px) ===== */
 @media(max-width:1024px){
   /* Show sidebar close button */
   .sidebar-close-btn{display:flex}
-  /* Topbar: prevent title wrap, let connection status shrink */
+  /* Topbar: prevent title wrap */
   .tb-title{white-space:nowrap}
-  .tb-bc{white-space:nowrap}
-  /* Connection status: shrinks & truncates instead of pushing layout */
+  .tb-bc{white-space:nowrap;font-size:11.5px}
+  /* Connection status shrinks & truncates */
   #connection-status{flex-shrink:1;min-width:0;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   /* Refresh button: compact at tablet */
-  #btn-refresh-data{font-size:0 !important;padding:5px 9px !important;min-width:32px;letter-spacing:0;flex-shrink:0}
-  #btn-refresh-data::before{content:'↻';font-size:13px;display:inline-block}
-  /* Area stats: 2 cols on tablet (was 4) */
+  #btn-refresh-data{font-size:0 !important;padding:6px 10px !important;min-width:36px;height:36px;border-radius:8px;letter-spacing:0;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+  #btn-refresh-data::before{content:'↻';font-size:14px;display:inline-block}
+  /* Area stats: 2 cols on tablet */
   .area-stats{grid-template-columns:repeat(2,1fr) !important}
-  /* Wellbeing rank table: hide long count col on tablet too */
+  /* Wellbeing rank table: hide long count col on tablet */
   #wb-rank-table th:nth-child(4),
   #wb-rank-table td:nth-child(4){display:none}
   /* Welcome banner: prevent subtitle overflow */
-  .w-sub{font-size:11px;line-height:1.4;white-space:normal}
+  .w-sub{font-size:11.5px;line-height:1.4;white-space:normal}
   /* Dashboard table: hide date col */
   .prog-detail-date{display:none}
   /* Ensure page content never exceeds viewport */
   .content{max-width:100%;overflow-x:clip}
+  /* Nav items bigger touch target on tablet */
+  .nav-item{min-height:44px}
+  /* Hamburger bigger */
+  .hamburger{width:42px;height:42px;font-size:20px}
+  /* Topbar height stays 54px on tablet, topbar buttons touch-friendly */
+  .topbar-btn{min-height:40px}
+  /* ANWB tabs: allow horizontal scroll on tablet */
+  .anwb-tabs{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .anwb-tab{flex-shrink:0}
+  /* Tabs: scrollable on tablet */
+  .tabs{overflow-x:auto;-webkit-overflow-scrolling:touch;flex-wrap:nowrap}
+  .tab{white-space:nowrap;flex-shrink:0}
+  /* Modal: wider on tablet */
+  .umodal{min-width:auto;width:calc(100% - 48px);max-width:560px;border-radius:14px}
 }
