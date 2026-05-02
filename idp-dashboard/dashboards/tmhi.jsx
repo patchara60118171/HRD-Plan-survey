@@ -175,7 +175,7 @@ const Tag = ({ label, color, small }) => (
     background: color + "22", color, border: `1px solid ${color}44`,
     padding: small ? "1px 8px" : "3px 12px",
     borderRadius: 999, fontSize: small ? 10 : 12, fontWeight: 700,
-    fontFamily: "'Sarabun',sans-serif",
+    fontFamily: "'IBM Plex Sans Thai Looped',sans-serif",
   }}>{label}</span>
 );
 
@@ -219,7 +219,7 @@ const Gauge = ({ score, size = 200 }) => {
           <g key={v}>
             <line x1={inn.x} y1={inn.y} x2={o.x} y2={o.y} stroke="#64748B" strokeWidth={1.5} />
             <text x={lbl.x} y={lbl.y} textAnchor="middle" dominantBaseline="middle"
-              fontSize={size*0.055} fill="#94A3B8" fontFamily="'Sarabun',sans-serif">{v}</text>
+              fontSize={size*0.055} fill="#94A3B8" fontFamily="'IBM Plex Sans Thai Looped',sans-serif">{v}</text>
           </g>
         );
       })}
@@ -227,9 +227,9 @@ const Gauge = ({ score, size = 200 }) => {
       <circle cx={cx} cy={cy} r={size*0.04} fill="#1E293B" />
       <circle cx={cx} cy={cy} r={size*0.024} fill="#F8FAFC" />
       <text x={cx} y={cy+size*0.1} textAnchor="middle" fontSize={size*0.13}
-        fontWeight="800" fill={lvl.color} fontFamily="'Sarabun',sans-serif">{score}</text>
+        fontWeight="800" fill={lvl.color} fontFamily="'IBM Plex Sans Thai Looped',sans-serif">{score}</text>
       <text x={cx} y={cy+size*0.21} textAnchor="middle" fontSize={size*0.06}
-        fill="#64748B" fontFamily="'Sarabun',sans-serif">/ 60</text>
+        fill="#64748B" fontFamily="'IBM Plex Sans Thai Looped',sans-serif">/ 60</text>
     </svg>
   );
 };
@@ -237,7 +237,7 @@ const Gauge = ({ score, size = 200 }) => {
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
   return (
-    <div style={{ background:"#1E293B", borderRadius:10, padding:"12px 16px", fontFamily:"'Sarabun',sans-serif" }}>
+    <div style={{ background:"#1E293B", borderRadius:10, padding:"12px 16px", fontFamily:"'IBM Plex Sans Thai Looped',sans-serif" }}>
       <div style={{ color:"#94A3B8", fontSize:11, marginBottom:8 }}>{label}</div>
       {payload.map((p,i) => (
         <div key={i} style={{ display:"flex", gap:10, marginBottom:4, alignItems:"center" }}>
@@ -265,8 +265,7 @@ function TMHIDashboard() {
   const highGroup = employees.filter(e => e.level.key === "high");
 
   return (
-    <div style={{ fontFamily:"'Sarabun',sans-serif", background:"#FFF7ED", minHeight:"100vh" }}>
-      <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <div style={{ fontFamily:"'IBM Plex Sans Thai Looped',sans-serif", background:"#FFF7ED", minHeight:"100vh" }}>
 
       {/* Header */}
       <div style={{
@@ -317,7 +316,7 @@ function TMHIDashboard() {
               <button key={t.key} onClick={() => setTab(t.key)} style={{
                 padding:"10px 20px", borderRadius:"8px 8px 0 0", border:"none",
                 cursor:"pointer", fontSize:13, fontWeight:700,
-                fontFamily:"'Sarabun',sans-serif",
+                fontFamily:"'IBM Plex Sans Thai Looped',sans-serif",
                 background: tab === t.key ? "#FFF7ED" : "transparent",
                 color: tab === t.key ? "#92400E" : "rgba(255,255,255,0.65)",
               }}>{t.label}</button>
@@ -373,13 +372,13 @@ function TMHIDashboard() {
                 <ResponsiveContainer width="100%" height={180}>
                   <BarChart data={deptData} barSize={52} margin={{ top:0, right:0, left:-20, bottom:0 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" vertical={false} />
-                    <XAxis dataKey="name" tick={{ fill:"#6B7280", fontSize:13, fontFamily:"'Sarabun',sans-serif" }} axisLine={false} tickLine={false} />
+                    <XAxis dataKey="name" tick={{ fill:"#6B7280", fontSize:13, fontFamily:"'IBM Plex Sans Thai Looped',sans-serif" }} axisLine={false} tickLine={false} />
                     <YAxis tick={{ fill:"#9CA3AF", fontSize:11 }} axisLine={false} tickLine={false} />
                     <Tooltip content={<CustomTooltip />} cursor={{ fill:"rgba(0,0,0,0.02)" }} />
                     <Bar dataKey="ต่ำกว่าคนทั่วไป"  stackId="a" fill="#EF4444" />
                     <Bar dataKey="เท่ากับคนทั่วไป"  stackId="a" fill="#F59E0B" />
                     <Bar dataKey="ดีกว่าคนทั่วไป"  stackId="a" fill="#10B981" radius={[4,4,0,0]} />
-                    <Legend wrapperStyle={{ fontFamily:"'Sarabun',sans-serif", fontSize:12 }} />
+                    <Legend wrapperStyle={{ fontFamily:"'IBM Plex Sans Thai Looped',sans-serif", fontSize:12 }} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -403,11 +402,11 @@ function TMHIDashboard() {
                   <ResponsiveContainer width="100%" height={280}>
                     <RadarChart data={orgRadar}>
                       <PolarGrid stroke="#E5E7EB" />
-                      <PolarAngleAxis dataKey="dim" tick={{ fill:"#6B7280", fontSize:11, fontFamily:"'Sarabun',sans-serif" }} />
+                      <PolarAngleAxis dataKey="dim" tick={{ fill:"#6B7280", fontSize:11, fontFamily:"'IBM Plex Sans Thai Looped',sans-serif" }} />
                       <PolarRadiusAxis domain={[0,100]} tick={false} axisLine={false} />
                       <Radar name="กลุ่มต่ำกว่าคนทั่วไป" dataKey="ต่ำกว่าคนทั่วไป (≤43)" stroke="#EF4444" fill="#EF4444" fillOpacity={0.2} strokeWidth={2} dot={{ fill:"#EF4444", r:4 }} />
                       <Radar name="ค่าเฉลี่ยองค์กร" dataKey="ค่าเฉลี่ยองค์กร" stroke="#D97706" fill="#D97706" fillOpacity={0.1} strokeWidth={1.5} strokeDasharray="4 3" dot={{ fill:"#D97706", r:3 }} />
-                      <Legend wrapperStyle={{ fontFamily:"'Sarabun',sans-serif", fontSize:12 }} />
+                      <Legend wrapperStyle={{ fontFamily:"'IBM Plex Sans Thai Looped',sans-serif", fontSize:12 }} />
                     </RadarChart>
                   </ResponsiveContainer>
                 </div>
@@ -466,7 +465,7 @@ function TMHIDashboard() {
               {[["all","ทั้งหมด","#D97706"],["low","🔴 ต่ำกว่าคนทั่วไป","#EF4444"],["mid","🟡 เท่ากับ","#F59E0B"],["high","🟢 ดีกว่า","#10B981"]].map(([key,label,color]) => (
                 <button key={key} onClick={() => setFilter(key)} style={{
                   padding:"6px 14px", borderRadius:999, fontSize:12, fontWeight:700,
-                  fontFamily:"'Sarabun',sans-serif", cursor:"pointer", border:"none",
+                  fontFamily:"'IBM Plex Sans Thai Looped',sans-serif", cursor:"pointer", border:"none",
                   background: filter===key ? color : "#F3F4F6",
                   color: filter===key ? "#fff" : "#6B7280",
                 }}>{label}</button>

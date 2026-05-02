@@ -10,7 +10,7 @@
 
 | ID | Status | Notes |
 |----|--------|-------|
-| C1 | ⏳ deferred | In-memory cache already exists; date-range filter needs schema + UI work |
+| C1 | ✅ partial | `SURVEY_FETCH_CAP=10000` + `_batchedFetch(concurrency=3)` added to `fetchAllSurveyResponses()` + `fetchAllSurveyRaw()` — caps memory spike; full server-side aggregation deferred |
 | C2 | ✅ fixed | `admin/js/services/data.js` — introduced `CH1_FULL_FIELDS`, removed `select('*')` |
 | C3 | ✅ fixed | `wellbeing.js:275` escaped; `links.js` inline-onclick fully refactored to `data-*` + delegated handlers (XSS surface removed) |
 | C4 | ✅ fixed | `supabase/migrations/20260418_harden_survey_update_rls.sql` — replaced `survey_update_recent` with draft-only + admin/org_hr policies |
@@ -22,7 +22,7 @@
 | H6 | ⏳ open | `admin/js/pages/ch1.js` (114KB) file split — deferred (large mechanical refactor, deserves its own PR) |
 | H7 | ✅ fixed | Dev files moved: `debug-ch1.mjs`→`scripts/dev-tools/`, `clear-*.html`/`force-refresh.html`→`dev-tools/`, SQL one-offs→`supabase/one-off/`, `CHART_DESIGNS_REMAINING.html`→`docs/` |
 | M1 | ⏳ open | `ADMIN_CANONICAL_ORGS` hardcode — needs DB sync verification first |
-| M2 | ✅ fixed | `js/logger.js` — silences `console.log/info/debug` in production |
+| M2 | ✅ fixed | `js/logger.js` silences production; 2 stray `console.log` removed: `analytics-wb.js` L6 + `data.js::summarizeOrgs` debug block |
 | M3 | ⏳ open | Loading skeletons — deferred (design task) |
 | M4 | ✅ existing | `sw.js` already implements cache-first / network-first / SWR strategies |
 | M5 | ✅ partial | `refreshData()` now phased (core→extras) + `_safeRender` wrapping + button disabled during refresh |
@@ -35,10 +35,11 @@
 | M11 | ⏳ open | `<span lang="en">` wraps — deferred (tedious + marginal impact) |
 | M12 | ⏳ open | Timeout progress + cancel — deferred |
 | M13 | ⏳ open | `<input type="date">` with BE hint — deferred |
-| L1, L2, L3, L6, L8 | ⏳ open | Icon system, font unification, chart tokens, e2e suite, CHANGELOG |
-| L4 | ✅ fixed | Mermaid architecture diagram added to `README.md` |
+| L1, L2, L3, L6 | ⏳ open | Icon system, font unification, chart tokens, e2e suite |
+| L4 | ✅ fixed | Mermaid architecture diagram added; file paths + routing refs corrected (W4-A 2026-04-25) |
 | L5 | ✅ fixed | Consolidated `.env.example` (deleted duplicate `.env.local.example`) |
 | L7 | ✅ fixed | `.vercelignore` — blocks dev HTML / error screenshots / debug scripts |
+| L8 | ✅ fixed | CHANGELOG updated with April 2026 audit entries (W4-B 2026-04-25) |
 
 **Migrations applied to production Supabase (2026-04-18):**
 1. ✅ `supabase/migrations/20260418_harden_survey_update_rls.sql` (C4 security) — applied as `harden_survey_update_rls`

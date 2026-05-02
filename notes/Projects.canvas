@@ -1,0 +1,88 @@
+{
+  "nodes": [
+    {
+      "id": "central_project",
+      "type": "text",
+      "x": 0,
+      "y": -100,
+      "width": 250,
+      "height": 120,
+      "color": "4",
+      "text": "# HRD Plan Survey\n\nCore platform & strategy"
+    },
+    {
+      "id": "admin_dash",
+      "type": "file",
+      "x": -400,
+      "y": -150,
+      "width": 200,
+      "height": 100,
+      "file": "Projects/Admin-Dashboard.md",
+      "color": "3"
+    },
+    {
+      "id": "survey_comp",
+      "type": "file",
+      "x": -200,
+      "y": -250,
+      "width": 200,
+      "height": 100,
+      "file": "Projects/Survey-Components.md",
+      "color": "2"
+    },
+    {
+      "id": "data_schema",
+      "type": "file",
+      "x": 200,
+      "y": -250,
+      "width": 200,
+      "height": 100,
+      "file": "Projects/Data-Schema.md",
+      "color": "5"
+    },
+    {
+      "id": "future",
+      "type": "file",
+      "x": 400,
+      "y": -150,
+      "width": 200,
+      "height": 100,
+      "file": "Projects/Future-Features.md",
+      "color": "6"
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge1",
+      "fromNode": "central_project",
+      "fromSide": "left",
+      "toNode": "admin_dash",
+      "toSide": "right",
+      "label": "implements"
+    },
+    {
+      "id": "edge2",
+      "fromNode": "central_project",
+      "fromSide": "top",
+      "toNode": "survey_comp",
+      "toSide": "bottom",
+      "label": "uses"
+    },
+    {
+      "id": "edge3",
+      "fromNode": "central_project",
+      "fromSide": "top",
+      "toNode": "data_schema",
+      "toSide": "bottom",
+      "label": "relies on"
+    },
+    {
+      "id": "edge4",
+      "fromNode": "central_project",
+      "fromSide": "right",
+      "toNode": "future",
+      "toSide": "left",
+      "label": "extends to"
+    }
+  ]
+}

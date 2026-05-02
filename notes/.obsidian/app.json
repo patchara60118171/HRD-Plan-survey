@@ -1,0 +1,23 @@
+{
+  "baseFontSize": 16,
+  "interfaceFontSize": 16,
+  "cssTheme": "",
+  "showLineNumber": false,
+  "showFrontmatter": false,
+  "showMarkdownInPreview": true,
+  "strictLineBreaks": false,
+  "foldHeading": false,
+  "foldIndent": false,
+  "foldIndentMore": false,
+  "promptDelete": true,
+  "showBreadcrumbs": true,
+  "lineWrappingByDefault": true,
+  "rightToLeft": false,
+  "command": "",
+  "pdfExportSettings": {
+    "pageSize": "Letter",
+    "landscape": false,
+    "margin": "1in",
+    "downscalePercent": 130
+  }
+}

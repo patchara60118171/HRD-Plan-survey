@@ -1,0 +1,56 @@
+filters:
+  and:
+    - file.hasTag("project")
+
+formulas:
+  status_emoji: 'if(status == "complete", "✅", if(status == "in-progress", "🔄", if(status == "planning", "⏳", "❓")))'
+  priority_badge: 'if(priority == "high", "🔴 High", if(priority == "medium", "🟡 Medium", "🟢 Low"))'
+
+properties:
+  status:
+    displayName: "Status"
+  priority:
+    displayName: "Priority"
+  owner:
+    displayName: "Owner"
+  formula.status_emoji:
+    displayName: ""
+  formula.priority_badge:
+    displayName: "Priority"
+
+views:
+  - type: table
+    name: "All Projects"
+    order:
+      - file.name
+      - formula.status_emoji
+      - status
+      - formula.priority_badge
+      - owner
+      - date
+    groupBy:
+      property: status
+      direction: DESC
+    summaries:
+      priority: Unique
+
+  - type: cards
+    name: "Project Cards"
+    order:
+      - file.name
+      - status
+      - owner
+      - priority
+    filters:
+      and:
+        - 'status == "in-progress"'
+
+  - type: table
+    name: "By Priority"
+    order:
+      - file.name
+      - status
+      - owner
+    groupBy:
+      property: priority
+      direction: DESC

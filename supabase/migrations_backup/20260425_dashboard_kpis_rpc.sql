@@ -19,12 +19,12 @@ as $$
     'engagement_avg', (select round(avg(engagement_score)::numeric, 2) from survey_responses where engagement_score is not null and is_draft = false),
     'last_update', (select max(submitted_at) from survey_responses where is_draft = false),
     'total_responses', (select count(*) from survey_responses),
-    'completion_rate', case 
-      when (select count(*) from survey_responses) > 0 
+    'completion_rate', case
+      when (select count(*) from survey_responses) > 0
       then round(
-        (select count(*)::numeric / (select count(*)::numeric from survey_responses) * 100, 2
+        (select count(*)::numeric / (select count(*)::numeric from survey_responses) * 100), 2
       )
-      else 0 
+      else 0
     end
   );
 $$;

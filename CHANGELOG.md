@@ -1,7 +1,44 @@
 # 📋 CHANGELOG — Well-being Survey System
 
 > รายงานการเปลี่ยนแปลงทั้งหมดของระบบ  
-> Repository: https://github.com/pchr-pyl/well-being-survey
+> Repository: https://github.com/patchara60118171/HRD-Plan-survey
+
+---
+
+## [2026-04-25] — Audit Fixes: Security, Performance & Docs (Wave 1/2/4)
+
+**Branch:** main  
+**Ref:** docs/AUDIT\_REPORT\_2026-04.md
+
+---
+
+### 🔒 Security (W1-B)
+- **`admin/js/services/utils.js`** — escape `message` ใน `showToast()` ด้วย `esc()` เพื่อป้องกัน XSS จาก Supabase error message ที่ contain HTML characters
+
+### ⚡ Performance — C1 Pagination Cap (W2)
+- **`admin/js/services/data.js`** — เพิ่ม `SURVEY_FETCH_CAP = 10000` ใน `fetchAllSurveyResponses()` และ `fetchAllSurveyRaw()` คุม memory spike เมื่อ dataset โตขึ้น
+- เปลี่ยน `Promise.all` ที่ไม่มี limit เป็น `_batchedFetch()` (max concurrency = 3) เพื่อลด burst request ต่อ Supabase
+- ถ้า `rawTotal > SURVEY_FETCH_CAP` จะแสดง warning ใน connection-status bar และ `console.warn`
+
+### 🧹 Code Quality (W1-A)
+- **`admin/js/pages/analytics-wb.js`** — ลบ `console.log('[Analytics] surveyRows total:...')` ที่หลุดอยู่ (audit M2 / rule 7)
+- **`admin/js/services/data.js`** — ลบ debug `console.log` ใน `summarizeOrgs()` (audit M2 / rule 7)
+
+### 📄 Docs (W1-C, W4)
+- ลบ `docs/CURRENT_PROJECT_STATUS.md` — ไฟล์ progress ล้าสมัย (audit rule 7)
+- **`README.md`** — แก้ path ผิด: `apps/public-survey/index.html` → `index.html`, routing `/ch1` → `org-portal.html` (ตรงตาม `vercel.json` จริง), ปรับโครงสร้างโปรเจกต์ให้ตรงกับ repo จริง
+- **`CHANGELOG.md`** — เพิ่ม entries สำหรับ April 2026 audit fixes (IDP Dashboard, security migrations, Wave 1/2/4)
+
+### 📦 Migrations (ก่อนหน้านี้ — บันทึกย้อนหลัง 2026-04-18 — 2026-04-23)
+| Migration | สถานะ | รายละเอียด |
+|---|---|---|
+| `20260418_harden_survey_update_rls` | ✅ applied | C4 security: แทน survey_update_recent ด้วย draft-only policy |
+| `20260418_add_perf_indexes` | ✅ applied | H1: เพิ่ม indexes บน columns ที่ filter บ่อย |
+| `20260419_org_dashboard_summary_view` | ✅ applied | H3: view `v_organization_dashboard_summary` |
+| `20260420_fix_dashboard_view_security_invoker` | ✅ applied | Hotfix: เพิ่ม `security_invoker=true` |
+| `20260421_fix_pre_existing_security_definer_views` | ✅ applied | Phase 5: flip DEFINER views เป็น INVOKER |
+| `20260421_phase5_warn_cleanup` | ✅ applied | ลบ duplicate indexes + pin search_path บน 5 functions |
+| `20260425_dashboard_kpis_rpc` | ✅ applied | เพิ่ม RPC `get_admin_dashboard_summary` สำหรับ IDP Dashboard |
 
 ---
 

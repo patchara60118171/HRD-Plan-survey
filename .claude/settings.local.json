@@ -22,7 +22,27 @@
       "Bash(grep -E '\\\\.\\(js|css|json|html\\)$')",
       "Bash(find admin:*)",
       "Bash(grep -r \"typeOfficial\\\\|type_official\" --include=*.js)",
-      "Bash(grep -r \"filled\\\\|completeness\\\\|quality\\\\|count.*column\" --include=*.js admin/js/pages/ch1.js admin/js/services/data.js)"
+      "Bash(grep -r \"filled\\\\|completeness\\\\|quality\\\\|count.*column\" --include=*.js admin/js/pages/ch1.js admin/js/services/data.js)",
+      "Bash(npm run *)",
+      "Bash(curl -s http://localhost:5173)",
+      "Bash(curl -s http://localhost:3001)",
+      "mcp__Claude_in_Chrome__tabs_context_mcp",
+      "mcp__Claude_in_Chrome__browser_batch",
+      "mcp__Claude_in_Chrome__tabs_create_mcp",
+      "mcp__Claude_in_Chrome__read_console_messages",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(supabase --version)",
+      "Bash(npx supabase *)",
+      "PowerShell(Get-ChildItem *)",
+      "Bash(npm install *)",
+      "PowerShell(scoop *)",
+      "Bash(C:/Users/DELL/supabase-cli/supabase.exe login *)",
+      "Bash(C:/Users/DELL/supabase-cli/supabase.exe link *)",
+      "Bash(node idp-dashboard/build-from-jsx.js)",
+      "Bash(git push *)",
+      "Bash(vercel --prod --yes)",
+      "Bash(git remote *)"
     ]
   }
 }

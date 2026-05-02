@@ -135,37 +135,7 @@ const genEmployee = (name, idx) => {
     totalPct: Math.round(total / 60 * 100)
   };
 };
-// ─── Real data adapter ───────────────────────────────────────────────────────
-const _TMHI_REAL = typeof window !== 'undefined' && window.__IDP_EMPLOYEES__ && window.__IDP_EMPLOYEES__.tmhi || null;
-const _tmhiVal = (v) => {
-  if (v == null) return 2;
-  const n = parseInt(String(v).trim(), 10);
-  if (isNaN(n)) return 2;
-  // Normalize: raw 1-4 (1=ไม่เลย, 2=เล็กน้อย, 3=มาก, 4=มากที่สุด)
-  if (n >= 0 && n <= 3) return n + 1; // if stored 0-3, shift to 1-4
-  return Math.min(Math.max(n, 1), 4);
-};
-const _toTmhiEmployee = (rec, idx) => {
-  const row = rec._raw || {};
-  const rawAnswers = Array.from({ length: 15 }, (_, i) => _tmhiVal(row[`tmhi_${i + 1}`]));
-  // scored: items 4-6 (index 3,4,5) reverse-coded = 5 - raw
-  const scored = rawAnswers.map((v, i) => (i >= 3 && i <= 5) ? (5 - v) : v);
-  const total = scored.reduce((s, v) => s + v, 0);
-  const dimScores = DIMS.map(d => {
-    const raw = d.items.reduce((s, i) => s + scored[i], 0);
-    return { key: d.key, raw, pct: Math.round(raw / (d.items.length * 4) * 100) };
-  });
-  return {
-    id: rec.id || idx + 1,
-    name: rec.name || '—',
-    dept: rec.dept || rec.org || '—',
-    rawAnswers, scored, total,
-    level: getLevel(total),
-    dimScores,
-    totalPct: Math.round(total / 60 * 100)
-  };
-};
-const employees = _TMHI_REAL ? _TMHI_REAL.map(_toTmhiEmployee) : NAMES.map((n, i) => genEmployee(n, i));
+const employees = NAMES.map((n, i) => genEmployee(n, i));
 
 // ─── Aggregates ───────────────────────────────────────────────────────────────
 const avgDim = key => Math.round(employees.reduce((s, e) => s + e.dimScores.find(d => d.key === key).pct, 0) / employees.length);
@@ -200,7 +170,7 @@ const Tag = ({
     borderRadius: 999,
     fontSize: small ? 10 : 12,
     fontWeight: 700,
-    fontFamily: "'Sarabun',sans-serif"
+    fontFamily: "'IBM Plex Sans Thai Looped',sans-serif"
   }
 }, label);
 const MiniBar = ({
@@ -293,7 +263,7 @@ const Gauge = ({
       dominantBaseline: "middle",
       fontSize: size * 0.055,
       fill: "#94A3B8",
-      fontFamily: "'Sarabun',sans-serif"
+      fontFamily: "'IBM Plex Sans Thai Looped',sans-serif"
     }, v));
   }), /*#__PURE__*/React.createElement("line", {
     x1: cx,
@@ -320,14 +290,14 @@ const Gauge = ({
     fontSize: size * 0.13,
     fontWeight: "800",
     fill: lvl.color,
-    fontFamily: "'Sarabun',sans-serif"
+    fontFamily: "'IBM Plex Sans Thai Looped',sans-serif"
   }, score), /*#__PURE__*/React.createElement("text", {
     x: cx,
     y: cy + size * 0.21,
     textAnchor: "middle",
     fontSize: size * 0.06,
     fill: "#64748B",
-    fontFamily: "'Sarabun',sans-serif"
+    fontFamily: "'IBM Plex Sans Thai Looped',sans-serif"
   }, "/ 60"));
 };
 const CustomTooltip = ({
@@ -341,7 +311,7 @@ const CustomTooltip = ({
       background: "#1E293B",
       borderRadius: 10,
       padding: "12px 16px",
-      fontFamily: "'Sarabun',sans-serif"
+      fontFamily: "'IBM Plex Sans Thai Looped',sans-serif"
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
@@ -389,14 +359,11 @@ function TMHIDashboard() {
   const highGroup = employees.filter(e => e.level.key === "high");
   return /*#__PURE__*/React.createElement("div", {
     style: {
-      fontFamily: "'Sarabun',sans-serif",
+      fontFamily: "'IBM Plex Sans Thai Looped',sans-serif",
       background: "#FFF7ED",
       minHeight: "100vh"
     }
-  }, /*#__PURE__*/React.createElement("link", {
-    href: "https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap",
-    rel: "stylesheet"
-  }), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", {
     style: {
       background: "linear-gradient(135deg,#92400E 0%,#B45309 50%,#D97706 100%)",
       padding: "24px 32px 0",
@@ -503,7 +470,7 @@ function TMHIDashboard() {
       cursor: "pointer",
       fontSize: 13,
       fontWeight: 700,
-      fontFamily: "'Sarabun',sans-serif",
+      fontFamily: "'IBM Plex Sans Thai Looped',sans-serif",
       background: tab === t.key ? "#FFF7ED" : "transparent",
       color: tab === t.key ? "#92400E" : "rgba(255,255,255,0.65)"
     }
@@ -673,7 +640,7 @@ function TMHIDashboard() {
     tick: {
       fill: "#6B7280",
       fontSize: 13,
-      fontFamily: "'Sarabun',sans-serif"
+      fontFamily: "'IBM Plex Sans Thai Looped',sans-serif"
     },
     axisLine: false,
     tickLine: false
@@ -704,7 +671,7 @@ function TMHIDashboard() {
     radius: [4, 4, 0, 0]
   }), /*#__PURE__*/React.createElement(Legend, {
     wrapperStyle: {
-      fontFamily: "'Sarabun',sans-serif",
+      fontFamily: "'IBM Plex Sans Thai Looped',sans-serif",
       fontSize: 12
     }
   }))))), /*#__PURE__*/React.createElement("div", {
@@ -766,7 +733,7 @@ function TMHIDashboard() {
     tick: {
       fill: "#6B7280",
       fontSize: 11,
-      fontFamily: "'Sarabun',sans-serif"
+      fontFamily: "'IBM Plex Sans Thai Looped',sans-serif"
     }
   }), /*#__PURE__*/React.createElement(PolarRadiusAxis, {
     domain: [0, 100],
@@ -797,7 +764,7 @@ function TMHIDashboard() {
     }
   }), /*#__PURE__*/React.createElement(Legend, {
     wrapperStyle: {
-      fontFamily: "'Sarabun',sans-serif",
+      fontFamily: "'IBM Plex Sans Thai Looped',sans-serif",
       fontSize: 12
     }
   })))), /*#__PURE__*/React.createElement("div", {
@@ -930,7 +897,7 @@ function TMHIDashboard() {
       borderRadius: 999,
       fontSize: 12,
       fontWeight: 700,
-      fontFamily: "'Sarabun',sans-serif",
+      fontFamily: "'IBM Plex Sans Thai Looped',sans-serif",
       cursor: "pointer",
       border: "none",
       background: filter === key ? color : "#F3F4F6",

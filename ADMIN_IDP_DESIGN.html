@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>Well-being Survey · Admin Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai+Looped:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="colors_and_type.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: #F8FAFC;
+    font-family: 'IBM Plex Sans Thai Looped', sans-serif;
+    color: #1E293B;
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.55;
+    font-size: 14px;
+  }
+  button { font-family: inherit; }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb { background: #E2E8F0; border-radius: 5px; }
+  ::-webkit-scrollbar-thumb:hover { background: #CBD5E1; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px) } to { opacity: 1; transform: none } }
+  .scr { animation: fadeIn .25s ease-out; }
+</style>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState } = React;
+
+const C = {
+  navy: '#0F4C81', navyDark: '#0A3560', navyLight: '#E8F1FB',
+  teal: '#0D9488', blue: '#3B82F6',
+  green: '#10B981', greenLight: '#D1FAE5',
+  amber: '#F59E0B', amberLight: '#FEF3C7',
+  red: '#EF4444', redLight: '#FEE2E2',
+  orange: '#F97316', orangeLight: '#FFEDD5',
+  yellow: '#EAB308', yellowLight: '#FEF9C3',
+  purple: '#8B5CF6', purpleLight: '#EDE9FE',
+  cyan: '#06B6D4',
+  bg: '#F8FAFC', card: '#FFFFFF', hover: '#F1F5F9',
+  border: '#E2E8F0', borderStrong: '#CBD5E1',
+  text: '#1E293B', textSec: '#64748B', textMuted: '#94A3B8',
+  // dark hero gradient (the navy banner around the title)
+  heroFrom: '#0F1E3D', heroTo: '#1E2A5A',
+};
+
+// ===== Sidebar (cloned) =====
+const SIDEBAR_GROUPS = [
+  {
+    head: 'ภาพรวม',
+    items: [
+      { id: 'dashboard', emj: '📊', label: 'Dashboard ภาพรวม' },
+      { id: 'submission', emj: '📈', label: 'สถานะการส่งข้อมูล' },
+    ],
+  },
+  {
+    head: 'ข้อมูลองค์กร',
+    items: [
+      { id: 'orgs', emj: '🏢', label: 'องค์กรที่เข้าร่วม' },
+      { id: 'org-form', emj: '📋', label: 'ฟอร์มแบบสำรวจข้อมูลองค์กร' },
+      { id: 'wellbeing', emj: '🌿', label: 'Wellbeing Survey' },
+    ],
+  },
+  {
+    head: 'รายงานข้อมูล',
+    items: [
+      { id: 'summary-org', emj: '📑', label: 'สรุปภาพรวมแบบสำรวจข้อมูลองค์กร' },
+      { id: 'analyze', emj: '📊', label: 'วิเคราะห์ Wellbeing' },
+      { id: 'idp', emj: '🎯', label: 'แผนพัฒนาบุคลากร (IDP)' },
+      { id: 'compare', emj: '🔀', label: 'เปรียบเทียบองค์กร' },
+      { id: 'export', emj: '📥', label: 'Export รายงาน' },
+    ],
+  },
+];
+
+function Sidebar({ active, onSelect }) {
+  return (
+    <aside style={{
+      width: 248, background: '#fff', borderRight: `1px solid ${C.border}`,
+      display: 'flex', flexDirection: 'column', position: 'sticky', top: 0, height: '100vh', flexShrink: 0,
+    }}>
+      {/* Brand */}
+      <div style={{ padding: '14px 16px', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{ width: 36, height: 36, borderRadius: 10, background: 'linear-gradient(135deg,#0D9488,#3B82F6)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 16, fontWeight: 700 }}>🌿</div>
+        <div style={{ minWidth: 0 }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: C.text, lineHeight: 1.2 }}>Well-being Survey</div>
+          <div style={{ fontSize: 11.5, fontWeight: 600, color: C.textSec, lineHeight: 1.2 }}>Admin Portal</div>
+          <div style={{ fontSize: 10, color: C.textMuted, lineHeight: 1.3, marginTop: 2 }}>ระบบประมวลผลแบบสำรวจสุขภาวะภาครัฐ</div>
+        </div>
+      </div>
+
+      {/* User card */}
+      <div style={{ padding: 12, borderBottom: `1px solid ${C.border}` }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', background: C.hover, borderRadius: 10 }}>
+          <div style={{ width: 32, height: 32, borderRadius: '50%', background: C.teal, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 13 }}>A</div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 12, fontWeight: 600, color: C.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>admin@gmail.com</div>
+            <div style={{ fontSize: 10.5, color: C.textMuted }}>● Admin</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Menu */}
+      <nav style={{ padding: '8px 10px', flex: 1, overflowY: 'auto' }}>
+        {SIDEBAR_GROUPS.map((g, gi) => (
+          <div key={gi} style={{ marginBottom: 12 }}>
+            <div style={{ fontSize: 10, color: C.textMuted, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', padding: '8px 10px 4px' }}>{g.head}</div>
+            {g.items.map(it => {
+              const on = active === it.id;
+              return (
+                <button key={it.id} onClick={() => onSelect(it.id)} style={{
+                  display: 'flex', alignItems: 'center', gap: 10, width: '100%',
+                  padding: '8px 10px', marginBottom: 1,
+                  background: on ? C.navyLight : 'transparent',
+                  color: on ? C.navy : '#475569',
+                  border: 'none', borderRadius: 8,
+                  fontFamily: 'inherit', fontSize: 13,
+                  fontWeight: on ? 600 : 500,
+                  cursor: 'pointer', textAlign: 'left',
+                  transition: 'background 150ms ease',
+                }}
+                onMouseEnter={e => { if (!on) e.currentTarget.style.background = C.hover }}
+                onMouseLeave={e => { if (!on) e.currentTarget.style.background = 'transparent' }}>
+                  <span style={{ fontSize: 15, width: 18, textAlign: 'center' }}>{it.emj}</span>
+                  <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{it.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        ))}
+      </nav>
+
+      {/* Logout */}
+      <div style={{ padding: 12, borderTop: `1px solid ${C.border}` }}>
+        <button style={{
+          width: '100%', padding: '8px 10px', background: 'transparent',
+          border: `1px solid ${C.redLight}`, borderRadius: 8,
+          color: C.red, fontSize: 12.5, fontWeight: 600, cursor: 'pointer',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+        }}>↪ ออกจากระบบ</button>
+      </div>
+    </aside>
+  );
+}
+
+// ===== Top breadcrumb bar =====
+function TopBar() {
+  return (
+    <div style={{
+      background: '#fff', borderBottom: `1px solid ${C.border}`,
+      padding: '10px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16,
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13 }}>
+        <span style={{ color: C.navy, fontWeight: 600 }}>แผนพัฒนาบุคลากร (IDP)</span>
+        <span style={{ color: C.textMuted }}>/ Dashboard</span>
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <span style={{ fontSize: 12, color: C.green, fontWeight: 600 }}>● เชื่อมต่อสำเร็จ</span>
+        <button style={{ padding: '6px 12px', background: '#fff', border: `1px solid ${C.border}`, borderRadius: 6, fontSize: 12, fontWeight: 500, cursor: 'pointer', color: C.text }}>↻ รีเฟรช</button>
+      </div>
+    </div>
+  );
+}
+
+// ===== Hero Banner =====
+function HeroBanner({ tab, onTab }) {
+  const TABS = [
+    { id: 'exec', label: 'Executive', emj: '📊' },
+    { id: 'phys', label: 'Physical', emj: '💪' },
+    { id: 'mental', label: 'Mental (TMHI)', emj: '🧠' },
+    { id: 'social', label: 'Social (UCLA)', emj: '👥' },
+    { id: 'env', label: 'Environment', emj: '🌿' },
+  ];
+  return (
+    <div style={{
+      background: `linear-gradient(135deg, ${C.heroFrom} 0%, ${C.heroTo} 100%)`,
+      padding: '28px 32px 0', color: '#fff', position: 'relative',
+    }}>
+      <div style={{ fontSize: 11, letterSpacing: '.18em', color: '#A5B4D7', fontWeight: 600, marginBottom: 6 }}>
+        NIDA · WELL-BEING SURVEY
+      </div>
+      <h1 style={{ margin: 0, fontSize: 28, fontWeight: 700, color: '#fff' }}>IDP Dashboard</h1>
+      <p style={{ margin: '6px 0 0', fontSize: 13, color: '#CBD5E1' }}>
+        รายงาน 5 มิติสุขภาวะ · ข้อมูลจริงจาก Supabase (4,707 คน)
+      </p>
+      <div style={{ display: 'flex', gap: 4, marginTop: 22, borderBottom: '1px solid rgba(255,255,255,.12)' }}>
+        {TABS.map(t => {
+          const on = tab === t.id;
+          return (
+            <button key={t.id} onClick={() => onTab(t.id)} style={{
+              padding: '10px 18px',
+              background: on ? '#fff' : 'transparent',
+              color: on ? C.navy : '#CBD5E1',
+              border: 'none', borderRadius: '8px 8px 0 0',
+              fontFamily: 'inherit', fontSize: 13, fontWeight: 600,
+              cursor: 'pointer',
+              display: 'flex', alignItems: 'center', gap: 6,
+            }}>
+              <span>{t.emj}</span> {t.label}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ===== Dimension tab content (Physical / Mental / Social / Env) =====
+function DimensionTab({ id }) {
+  const META = {
+    phys: { emj: '💪', th: 'มิติกาย (Physical)', accent: '#10B981', bg: '#ECFDF5', gradFrom: '#0F766E', gradTo: '#10B981', subText: '#A7F3D0', metaText: '#D1FAE5',
+      summary: 'BMI · พฤติกรรมการกิน · การออกกำลังกาย · การพักผ่อน',
+      total: 4707, high: 1535, mid: 2078, low: 1094,
+      kpis: [
+        { label: 'BMI เกินมาตรฐาน', val: '38%', sub: '1,789 คน', c: '#EF4444' },
+        { label: 'ออกกำลังกาย < 150 นาที/สัปดาห์', val: '52%', sub: '2,448 คน', c: '#F59E0B' },
+        { label: 'นอน < 6 ชั่วโมง/วัน', val: '31%', sub: '1,459 คน', c: '#F97316' },
+        { label: 'ดื่มน้ำ < 8 แก้ว/วัน', val: '44%', sub: '2,071 คน', c: '#0EA5E9' },
+      ],
+      sections: [
+        { title: 'การกระจาย BMI', rows: [
+          { l: 'น้ำหนักน้อยกว่าเกณฑ์ (<18.5)', v: 7, c: '#0EA5E9' },
+          { l: 'ปกติ (18.5–22.9)', v: 38, c: '#10B981' },
+          { l: 'น้ำหนักเกิน (23–24.9)', v: 22, c: '#F59E0B' },
+          { l: 'อ้วนระดับ 1 (25–29.9)', v: 24, c: '#F97316' },
+          { l: 'อ้วนระดับ 2 (≥30)', v: 9, c: '#EF4444' },
+        ]},
+        { title: 'พฤติกรรมการออกกำลังกาย', rows: [
+          { l: 'ทุกวัน', v: 12, c: '#10B981' },
+          { l: '3–5 วัน/สัปดาห์', v: 22, c: '#22C55E' },
+          { l: '1–2 วัน/สัปดาห์', v: 31, c: '#F59E0B' },
+          { l: 'ไม่ค่อยได้ออก', v: 35, c: '#EF4444' },
+        ]},
+      ],
+    },
+    mental: { emj: '🧠', th: 'มิติใจ — TMHI-15', accent: '#F97316', bg: '#FFF7ED', gradFrom: '#9A3412', gradTo: '#F97316', subText: '#FED7AA', metaText: '#FFEDD5',
+      summary: 'Thai Mental Health Indicator (TMHI-15) · ระดับความเครียด · การจัดการอารมณ์',
+      total: 4707, high: 962, mid: 2052, low: 1693,
+      kpis: [
+        { label: 'TMHI ระดับ "ต่ำกว่ามาตรฐาน"', val: '20%', sub: '962 คน', c: '#EF4444' },
+        { label: 'ความเครียดเรื้อรัง', val: '17%', sub: '802 คน', c: '#F59E0B' },
+        { label: 'ปัญหาการนอน', val: '24%', sub: '1,128 คน', c: '#8B5CF6' },
+        { label: 'มีอาการซึมเศร้าเบื้องต้น', val: '11%', sub: '518 คน', c: '#EC4899' },
+      ],
+      sections: [
+        { title: 'คะแนน TMHI-15', rows: [
+          { l: 'สูงกว่าคนทั่วไป (≥51)', v: 36, c: '#10B981' },
+          { l: 'เท่ากับคนทั่วไป (44–50)', v: 44, c: '#22C55E' },
+          { l: 'ต่ำกว่าคนทั่วไป (≤43)', v: 20, c: '#EF4444' },
+        ]},
+        { title: 'แหล่งความเครียดที่พบบ่อย', rows: [
+          { l: 'ปริมาณงาน', v: 58, c: '#8B5CF6' },
+          { l: 'ความสัมพันธ์ในทีม', v: 22, c: '#A78BFA' },
+          { l: 'ภาระการเงิน', v: 41, c: '#EC4899' },
+          { l: 'ปัญหาครอบครัว', v: 28, c: '#F59E0B' },
+        ]},
+      ],
+    },
+    social: { emj: '👥', th: 'มิติสังคม — UCLA Loneliness', accent: '#8B5CF6', bg: '#F5F3FF', gradFrom: '#5B21B6', gradTo: '#8B5CF6', subText: '#DDD6FE', metaText: '#EDE9FE',
+      summary: 'UCLA Loneliness Scale · ความสัมพันธ์ในทีม · การมีส่วนร่วม',
+      total: 4707, high: 140, mid: 1338, low: 3229,
+      kpis: [
+        { label: 'รู้สึกโดดเดี่ยวสูง', val: '3%', sub: '140 คน', c: '#EF4444' },
+        { label: 'รู้สึกโดดเดี่ยวบ้าง', val: '28%', sub: '1,318 คน', c: '#F59E0B' },
+        { label: 'มีเพื่อนสนิทในที่ทำงาน', val: '74%', sub: '3,483 คน', c: '#10B981' },
+        { label: 'รู้สึกได้รับการสนับสนุน', val: '81%', sub: '3,813 คน', c: '#0D9488' },
+      ],
+      sections: [
+        { title: 'ระดับความเหงา (UCLA)', rows: [
+          { l: 'ต่ำ (20–34)', v: 69, c: '#10B981' },
+          { l: 'ปานกลาง (35–49)', v: 28, c: '#F59E0B' },
+          { l: 'สูง (50–64)', v: 3, c: '#EF4444' },
+        ]},
+        { title: 'ความรู้สึกในทีม', rows: [
+          { l: 'รู้สึกเป็นส่วนหนึ่งของทีม', v: 78, c: '#10B981' },
+          { l: 'ได้รับการรับฟัง', v: 71, c: '#22C55E' },
+          { l: 'ได้รับคำชื่นชม', v: 56, c: '#F59E0B' },
+          { l: 'มีคนปรึกษาเมื่อมีปัญหา', v: 64, c: '#3B82F6' },
+        ]},
+      ],
+    },
+    env: { emj: '🌿', th: 'มิติสิ่งแวดล้อม', accent: '#06B6D4', bg: '#F0FDFA', gradFrom: '#0E7490', gradTo: '#06B6D4', subText: '#A5F3FC', metaText: '#CFFAFE',
+      summary: 'สภาพแวดล้อมการทำงาน · ความปลอดภัย · ความสมดุลชีวิต',
+      total: 4707, high: 896, mid: 1842, low: 1969,
+      kpis: [
+        { label: 'พื้นที่ทำงานไม่เหมาะสม', val: '19%', sub: '894 คน', c: '#EF4444' },
+        { label: 'ทำงานเกินเวลาเป็นประจำ', val: '34%', sub: '1,600 คน', c: '#F59E0B' },
+        { label: 'ความปลอดภัยในที่ทำงาน', val: '88%', sub: '4,142 คน', c: '#10B981' },
+        { label: 'WLB น่าพอใจ', val: '62%', sub: '2,919 คน', c: '#06B6D4' },
+      ],
+      sections: [
+        { title: 'สภาพแวดล้อมที่ทำงาน', rows: [
+          { l: 'แสง/อากาศถ่ายเทดี', v: 72, c: '#10B981' },
+          { l: 'พื้นที่นั่งทำงานเหมาะสม', v: 64, c: '#22C55E' },
+          { l: 'อุปกรณ์ครบถ้วน', v: 81, c: '#06B6D4' },
+          { l: 'พื้นที่พักผ่อนเพียงพอ', v: 47, c: '#F59E0B' },
+        ]},
+        { title: 'ความสมดุลชีวิต-งาน', rows: [
+          { l: 'ทำงานในเวลาปกติ', v: 58, c: '#10B981' },
+          { l: 'OT บางครั้ง', v: 28, c: '#F59E0B' },
+          { l: 'OT เป็นประจำ', v: 14, c: '#EF4444' },
+        ]},
+      ],
+    },
+  };
+  const m = META[id];
+  return (
+    <div className="scr" style={{ padding: '20px 24px 32px' }}>
+      {/* Banner */}
+      <div style={{
+        background: `linear-gradient(135deg, ${m.gradFrom} 0%, ${m.gradTo} 100%)`,
+        borderRadius: 12, padding: '22px 28px', color: '#fff',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 24,
+        boxShadow: '0 10px 25px rgba(15,30,61,.15)',
+      }}>
+        <div>
+          <div style={{ fontSize: 11, letterSpacing: '.18em', color: m.metaText, fontWeight: 600, marginBottom: 6 }}>
+            DIMENSION DETAIL · {m.th}
+          </div>
+          <h2 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: '#fff' }}>{m.emj} {m.th}</h2>
+          <div style={{ fontSize: 12, color: m.subText, marginTop: 4 }}>{m.summary}</div>
+        </div>
+        <div style={{ display: 'flex', gap: 10 }}>
+          <div style={{ background: 'rgba(255,255,255,.95)', padding: '10px 14px', borderRadius: 10, textAlign: 'center', minWidth: 88, border: '1px solid rgba(255,255,255,.4)' }}>
+            <div style={{ fontSize: 22, fontWeight: 800, color: '#DC2626', fontVariantNumeric: 'tabular-nums', lineHeight: 1.1 }}>{m.high.toLocaleString()}</div>
+            <div style={{ fontSize: 10.5, color: '#991B1B', fontWeight: 700, marginTop: 3, letterSpacing: '.02em' }}>เสี่ยงสูง</div>
+          </div>
+          <div style={{ background: 'rgba(255,255,255,.95)', padding: '10px 14px', borderRadius: 10, textAlign: 'center', minWidth: 88, border: '1px solid rgba(255,255,255,.4)' }}>
+            <div style={{ fontSize: 22, fontWeight: 800, color: '#D97706', fontVariantNumeric: 'tabular-nums', lineHeight: 1.1 }}>{m.mid.toLocaleString()}</div>
+            <div style={{ fontSize: 10.5, color: '#92400E', fontWeight: 700, marginTop: 3, letterSpacing: '.02em' }}>ปานกลาง</div>
+          </div>
+          <div style={{ background: 'rgba(255,255,255,.95)', padding: '10px 14px', borderRadius: 10, textAlign: 'center', minWidth: 88, border: '1px solid rgba(255,255,255,.4)' }}>
+            <div style={{ fontSize: 22, fontWeight: 800, color: '#059669', fontVariantNumeric: 'tabular-nums', lineHeight: 1.1 }}>{m.low.toLocaleString()}</div>
+            <div style={{ fontSize: 10.5, color: '#065F46', fontWeight: 700, marginTop: 3, letterSpacing: '.02em' }}>ปกติ</div>
+          </div>
+        </div>
+      </div>
+
+      {/* KPI cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 16, marginTop: 16 }}>
+        {m.kpis.map((k, i) => (
+          <div key={i} style={{ background: '#fff', border: `1px solid ${C.border}`, borderTop: `4px solid ${k.c}`, borderRadius: 12, padding: 18, boxShadow: '0 1px 2px rgba(0,0,0,.04)' }}>
+            <div style={{ fontSize: 12, color: C.textSec, fontWeight: 500, marginBottom: 6 }}>{k.label}</div>
+            <div style={{ fontSize: 28, fontWeight: 700, color: C.text, fontVariantNumeric: 'tabular-nums', lineHeight: 1.1 }}>{k.val}</div>
+            <div style={{ fontSize: 11.5, color: k.c, fontWeight: 600, marginTop: 4 }}>{k.sub}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Two-section breakdowns */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 16, marginTop: 16 }}>
+        {m.sections.map((s, si) => (
+          <div key={si} style={{ background: '#fff', border: `1px solid ${C.border}`, borderRadius: 12, padding: 22, boxShadow: '0 1px 3px rgba(0,0,0,.04)' }}>
+            <h3 style={{ margin: '0 0 16px', fontSize: 14.5, fontWeight: 700, color: C.text, paddingLeft: 10, borderLeft: `4px solid ${m.accent}` }}>{s.title}</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {s.rows.map((r, ri) => (
+                <div key={ri}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
+                    <span style={{ fontSize: 13, color: C.text, fontWeight: 500 }}>{r.l}</span>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: r.c, fontVariantNumeric: 'tabular-nums' }}>{r.v}%</span>
+                  </div>
+                  <div style={{ height: 8, background: C.hover, borderRadius: 4, overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: `${r.v}%`, background: r.c, borderRadius: 4 }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Recommended IDP actions */}
+      <div style={{ background: m.bg, border: `1px solid ${C.border}`, borderRadius: 12, padding: 22, marginTop: 16 }}>
+        <h3 style={{ margin: '0 0 4px', fontSize: 15, fontWeight: 700, color: C.text }}>💡 ข้อเสนอแนะการพัฒนา (IDP)</h3>
+        <p style={{ margin: '0 0 14px', fontSize: 12, color: C.textSec }}>กิจกรรม/หลักสูตรที่แนะนำสำหรับมิตินี้</p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12 }}>
+          {(id === 'phys' ? [
+            ['🥗 หลักสูตรโภชนาการ', 'พื้นฐานการกินเพื่อสุขภาพ'],
+            ['🏃 โครงการออกกำลังกายในที่ทำงาน', 'ชม.ออกกำลังกายร่วมกัน'],
+            ['😴 Sleep Hygiene Workshop', 'การนอนคุณภาพดี'],
+          ] : id === 'mental' ? [
+            ['🧘 Mindfulness Training', 'จัดการความเครียดเชิงบวก'],
+            ['💬 Counseling Service', 'บริการให้คำปรึกษา 1-on-1'],
+            ['📓 Resilience Workshop', 'สร้างภูมิคุ้มกันใจ'],
+          ] : id === 'social' ? [
+            ['🤝 Team-building กลุ่มเล็ก', 'สร้างสายสัมพันธ์'],
+            ['☕ Coffee Chat ข้ามทีม', 'ขยายเครือข่ายภายใน'],
+            ['👂 Active Listening Course', 'ทักษะการรับฟัง'],
+          ] : [
+            ['🪑 Ergonomics Audit', 'ปรับสภาพโต๊ะทำงาน'],
+            ['⏱ Time Management', 'จัดการเวลา-ลด OT'],
+            ['🌿 Workplace Wellness', 'พื้นที่พักผ่อน/สวนในออฟฟิศ'],
+          ]).map((a, i) => (
+            <div key={i} style={{ background: '#fff', border: `1px solid ${C.border}`, borderRadius: 10, padding: 14 }}>
+              <div style={{ fontSize: 14, fontWeight: 700, color: C.text, marginBottom: 4 }}>{a[0]}</div>
+              <div style={{ fontSize: 12, color: C.textSec }}>{a[1]}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ===== Filter row =====
+function Filters() {
+  const filters = [
+    { label: 'องค์กร' }, { label: 'กลุ่ม IDP' }, { label: 'ช่วงอายุ' },
+    { label: 'BMI' }, { label: 'ตำแหน่ง' }, { label: 'อายุงาน' },
+  ];
+  return (
+    <div style={{
+      background: '#fff', borderBottom: `1px solid ${C.border}`,
+      padding: '14px 24px',
+      display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 12,
+    }}>
+      {filters.map(f => (
+        <div key={f.label}>
+          <div style={{ fontSize: 11, color: C.textSec, fontWeight: 500, marginBottom: 4 }}>{f.label}</div>
+          <div style={{
+            position: 'relative',
+            padding: '8px 28px 8px 10px',
+            border: `1px solid ${C.border}`, borderRadius: 6,
+            fontSize: 13, color: C.text, background: '#fff', cursor: 'pointer',
+          }}>
+            ทั้งหมด
+            <span style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', color: C.textMuted, fontSize: 10 }}>▾</span>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ===== Executive summary banner =====
+function ExecutiveSummaryBanner() {
+  return (
+    <div style={{
+      background: `linear-gradient(135deg, ${C.heroFrom} 0%, ${C.heroTo} 100%)`,
+      borderRadius: 12, padding: '22px 28px', color: '#fff',
+      display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 24,
+      boxShadow: '0 10px 25px rgba(15,30,61,.15)',
+    }}>
+      <div>
+        <div style={{ fontSize: 11, letterSpacing: '.18em', color: '#A5B4D7', fontWeight: 600, marginBottom: 6 }}>
+          EXECUTIVE SUMMARY · สุขภาวะบุคลากร 4 มิติ
+        </div>
+        <h2 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: '#fff' }}>
+          🌿 รายงานภาพรวมสุขภาวะบุคลากร
+        </h2>
+        <div style={{ fontSize: 12, color: '#CBD5E1', marginTop: 4 }}>
+          สถาบันบัณฑิตพัฒนบริหารศาสตร์ (NIDA) · 4,707 คน · ครบกลุ่ม 4 มิติ
+        </div>
+      </div>
+      <div style={{ display: 'flex', gap: 12 }}>
+        {[
+          { emj: '🏃', pct: '33%', sub: 'กาย', bg: 'rgba(239,68,68,.15)', fg: '#FCA5A5' },
+          { emj: '🧠', pct: '20%', sub: 'ใจ', bg: 'rgba(139,92,246,.15)', fg: '#C4B5FD' },
+          { emj: '👥', pct: '3%', sub: 'สังคม', bg: 'rgba(245,158,11,.15)', fg: '#FCD34D' },
+          { emj: '🌿', pct: '19%', sub: 'สิ่งแวดล้อม', bg: 'rgba(16,185,129,.15)', fg: '#6EE7B7' },
+        ].map((p, i) => (
+          <div key={i} style={{
+            background: p.bg, padding: '10px 16px', borderRadius: 10,
+            textAlign: 'center', minWidth: 78,
+            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
+          }}>
+            <div style={{ fontSize: 20 }}>{p.emj}</div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: '#fff', fontVariantNumeric: 'tabular-nums' }}>{p.pct}</div>
+            <div style={{ fontSize: 10, color: p.fg, fontWeight: 600 }}>{p.sub}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ===== Sub-tabs under summary =====
+function SubTabs() {
+  return (
+    <div style={{ display: 'flex', gap: 4, padding: '14px 0 0' }}>
+      {[
+        { label: 'Executive Summary', emj: '📊', active: true },
+        { label: 'Risk List รวม 4 มิติ', emj: '⚠️' },
+        { label: 'Risk Profile รายบุคคล', emj: '👤' },
+      ].map((t, i) => (
+        <button key={i} style={{
+          padding: '10px 16px',
+          background: t.active ? '#fff' : 'transparent',
+          color: t.active ? C.navy : C.textSec,
+          border: t.active ? `1px solid ${C.border}` : 'none',
+          borderBottom: t.active ? '1px solid #fff' : `1px solid ${C.border}`,
+          borderRadius: '8px 8px 0 0',
+          fontFamily: 'inherit', fontSize: 13, fontWeight: 600,
+          cursor: 'pointer',
+          display: 'flex', alignItems: 'center', gap: 6,
+          marginBottom: -1,
+          position: 'relative',
+        }}>
+          <span>{t.emj}</span> {t.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// ===== Risk groups card =====
+function RiskGroupsCard() {
+  const groups = [
+    { code: 'A', label: 'กลุ่ม A – เร่งด่วน', count: 158, sub: 'เสี่ยงสูง 4 มิติ', pct: '3% ของทั้งหมด',
+      bgTop: '#FECACA', circle: '#EF4444', barFill: '#EF4444', barBg: '#FEE2E2' },
+    { code: 'B', label: 'กลุ่ม B – ดูแลใกล้ชิด', count: 649, sub: 'เสี่ยง 3-4 มิติ', pct: '14% ของทั้งหมด',
+      bgTop: '#FED7AA', circle: '#F97316', barFill: '#F97316', barBg: '#FFEDD5' },
+    { code: 'C', label: 'กลุ่ม C – ติดตาม', count: 1747, sub: 'เสี่ยง 1-2 มิติ', pct: '37% ของทั้งหมด',
+      bgTop: '#FEF08A', circle: '#EAB308', barFill: '#EAB308', barBg: '#FEF9C3' },
+    { code: 'D', label: 'กลุ่ม D – ส่งเสริม', count: 2153, sub: 'ไม่มีเสี่ยง', pct: '46% ของทั้งหมด',
+      bgTop: '#BBF7D0', circle: '#10B981', barFill: '#10B981', barBg: '#D1FAE5' },
+  ];
+
+  // Department breakdown
+  const depts = [
+    { name: 'กรมประชาชน', a: 2, b: 5, c: 3, d: 1 },
+    { name: 'กรมวิทยาศาสตร์บริการ', a: 0, b: 0, c: 2, d: 0 },
+    { name: 'นโยบาย', a: 0, b: 0, c: 0, d: 0 },
+    { name: '(ส่วนกลาง)', a: 87, b: 295, c: 384, d: 0 },
+    { name: 'ปฏิบัติการ', a: 525, b: 0, c: 0, d: 1080 },
+    { name: 'หลักสูตร', a: 41, b: 226, c: 0, d: 763 },
+    { name: 'หน่วยงานทดสอบบริการ', a: 0, b: 0, c: 0, d: 0 },
+    { name: 'หน่วยงานคลังเก็บ', a: 0, b: 1, c: 0, d: 0 },
+  ];
+
+  return (
+    <div style={{ background: '#fff', border: `1px solid ${C.border}`, borderRadius: 12, padding: 22, boxShadow: '0 1px 3px rgba(0,0,0,.04)' }}>
+      <div style={{ marginBottom: 16, paddingLeft: 10, borderLeft: `4px solid ${C.navy}` }}>
+        <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: C.text }}>กลุ่มความเสี่ยงรวม 4 มิติ</h3>
+        <p style={{ margin: '2px 0 0', fontSize: 11.5, color: C.textSec }}>
+          A = เสี่ยงสูง 3-4 มิติ · B = 1-2 มิติ · C = ไม่มีความเสี่ยง
+        </p>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr 1.3fr', gap: 16, alignItems: 'stretch' }}>
+        {groups.map(g => (
+          <div key={g.code} style={{
+            background: `linear-gradient(180deg, ${g.bgTop}55 0%, #fff 100%)`,
+            border: `1px solid ${C.border}`, borderRadius: 10,
+            padding: '18px 14px', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: 6, position: 'relative',
+          }}>
+            <div style={{
+              width: 42, height: 42, borderRadius: '50%',
+              background: g.circle, color: '#fff',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontWeight: 700, fontSize: 16, margin: '0 auto 4px',
+              boxShadow: '0 4px 10px rgba(0,0,0,.12)',
+            }}>{g.code}</div>
+            <div style={{ fontSize: 28, fontWeight: 700, color: C.text, fontVariantNumeric: 'tabular-nums', lineHeight: 1 }}>{g.count.toLocaleString()}</div>
+            <div style={{ fontSize: 12, color: C.text, fontWeight: 600 }}>{g.label.split(' – ')[1]}</div>
+            <div style={{ fontSize: 11, color: C.textSec }}>{g.sub}</div>
+            <div style={{ marginTop: 'auto', paddingTop: 10 }}>
+              <div style={{ height: 5, background: g.barBg, borderRadius: 3, overflow: 'hidden' }}>
+                <div style={{ height: '100%', width: g.pct, background: g.barFill, borderRadius: 3 }} />
+              </div>
+              <div style={{ fontSize: 10.5, color: C.textMuted, marginTop: 4 }}>{g.pct}</div>
+            </div>
+          </div>
+        ))}
+
+        {/* Department total column */}
+        <div style={{ background: '#fff', border: `1px solid ${C.border}`, borderRadius: 10, padding: 12 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8, paddingBottom: 6, borderBottom: `1px solid ${C.border}` }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: C.text }}>แยกหน่วยงาน · ผลรวม</div>
+            <div style={{ fontSize: 10, color: C.textMuted }}>คน</div>
+          </div>
+          {(() => {
+            const totals = depts.map(d => ({ name: d.name, total: d.a + d.b + d.c + d.d }));
+            const grand = totals.reduce((s, x) => s + x.total, 0) || 1;
+            const max = Math.max(...totals.map(t => t.total)) || 1;
+            return (
+              <>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  {totals.map((d, i) => (
+                    <div key={i}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 6, marginBottom: 2 }}>
+                        <span style={{ fontSize: 10.5, color: C.text, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>{d.name}</span>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: C.navy, fontVariantNumeric: 'tabular-nums' }}>{d.total.toLocaleString()}</span>
+                      </div>
+                      <div style={{ height: 6, background: '#F1F5F9', borderRadius: 3, overflow: 'hidden' }}>
+                        <div style={{ width: `${(d.total / max) * 100}%`, height: '100%', background: C.navy, borderRadius: 3 }} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div style={{ marginTop: 10, paddingTop: 8, borderTop: `1px solid ${C.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                  <span style={{ fontSize: 11, color: C.textSec, fontWeight: 600 }}>รวมทั้งสิ้น</span>
+                  <span style={{ fontSize: 16, fontWeight: 700, color: C.navy, fontVariantNumeric: 'tabular-nums' }}>{grand.toLocaleString()} <span style={{ fontSize: 10, color: C.textMuted, fontWeight: 500 }}>คน</span></span>
+                </div>
+              </>
+            );
+          })()}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ===== Dimension Risk Card =====
+function DimRiskCard({ icon, label, count, mid, low, pct, status, bg, accent }) {
+  return (
+    <div style={{
+      background: bg,
+      border: `1px solid ${C.border}`, borderRadius: 12, padding: 18,
+      display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16,
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 14, flex: 1, minWidth: 0 }}>
+        <div style={{
+          width: 44, height: 44, borderRadius: 10, background: '#fff',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, flexShrink: 0,
+          boxShadow: '0 2px 6px rgba(0,0,0,.08)',
+        }}>{icon}</div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 14, fontWeight: 700, color: C.text }}>{label}</div>
+          <div style={{ fontSize: 11.5, color: C.textSec, marginTop: 2 }}>
+            เสี่ยงสูง {count} คน · ปานกลาง {mid} คน · ปกติ {low} คน
+          </div>
+          <div style={{ display: 'flex', height: 6, marginTop: 6, borderRadius: 3, overflow: 'hidden', background: '#F1F5F9' }}>
+            <div style={{ width: `${(count/(count+mid+low))*100}%`, background: '#EF4444' }} />
+            <div style={{ width: `${(mid/(count+mid+low))*100}%`, background: '#F59E0B' }} />
+            <div style={{ width: `${(low/(count+mid+low))*100}%`, background: '#10B981' }} />
+          </div>
+          <div style={{ display: 'flex', gap: 10, marginTop: 4, fontSize: 10.5, color: C.textSec }}>
+            <span>● เสี่ยง {Math.round(count/(count+mid+low)*100)}%</span>
+            <span>● ปานกลาง {Math.round(mid/(count+mid+low)*100)}%</span>
+            <span>● ปกติ {Math.round(low/(count+mid+low)*100)}%</span>
+          </div>
+        </div>
+      </div>
+      <div style={{ textAlign: 'right', minWidth: 120 }}>
+        <div style={{ fontSize: 32, fontWeight: 700, color: accent, fontVariantNumeric: 'tabular-nums', lineHeight: 1 }}>{pct}</div>
+        <div style={{
+          display: 'inline-block', padding: '3px 10px', marginTop: 6, borderRadius: 9999,
+          background: '#fff', border: `1px solid ${C.border}`,
+          fontSize: 11, fontWeight: 600, color: accent,
+        }}>{status}</div>
+      </div>
+    </div>
+  );
+}
+
+// ===== Tooltip (info "i" with hover panel) =====
+function RadarTooltip() {
+  const [open, setOpen] = useState(false);
+  return (
+    <div style={{ position: 'relative', flexShrink: 0 }}
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
+      onClick={() => setOpen(o => !o)}
+    >
+      <button aria-label="วิธีอ่านค่า" style={{
+        width: 22, height: 22, borderRadius: '50%',
+        background: C.navyLight, color: C.navy,
+        border: `1px solid ${C.border}`,
+        fontSize: 12, fontWeight: 700, cursor: 'pointer',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        fontFamily: 'inherit',
+      }}>i</button>
+      {open && (
+        <div style={{
+          position: 'absolute', top: 28, right: 0, width: 280, zIndex: 20,
+          background: '#0F172A', color: '#fff', borderRadius: 10,
+          padding: '12px 14px', fontSize: 11.5, lineHeight: 1.55,
+          boxShadow: '0 12px 28px rgba(15,23,42,.25)',
+          animation: 'fadeIn .15s ease-out',
+        }}>
+          <div style={{
+            position: 'absolute', top: -6, right: 6,
+            width: 12, height: 12, background: '#0F172A',
+            transform: 'rotate(45deg)',
+          }} />
+          <div style={{ fontWeight: 700, fontSize: 12.5, marginBottom: 6, color: '#fff' }}>
+            📖 วิธีอ่านการ์ดนี้
+          </div>
+          <div style={{ color: '#CBD5E1', marginBottom: 8 }}>
+            กราฟเรดาร์เปรียบเทียบ <b style={{ color: '#FCA5A5' }}>กลุ่ม A (เสี่ยงสูง)</b> กับ <b style={{ color: '#93C5FD' }}>ค่าเฉลี่ยทั้งองค์กร</b> ใน 4 มิติสุขภาวะ
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 5, color: '#CBD5E1', borderTop: '1px solid rgba(255,255,255,.1)', paddingTop: 8 }}>
+            <div><span style={{ color: '#FCD34D' }}>•</span> แต่ละแกน = 1 มิติ (กาย/ใจ/สังคม/แวดล้อม)</div>
+            <div><span style={{ color: '#FCD34D' }}>•</span> ค่ายิ่งห่างจุดศูนย์กลาง = % เสี่ยงสูงยิ่งมาก</div>
+            <div><span style={{ color: '#FCD34D' }}>•</span> วงสีแดงครอบวงสีน้ำเงิน = กลุ่ม A เสี่ยงเกินค่าเฉลี่ย</div>
+          </div>
+          <div style={{
+            marginTop: 8, padding: '6px 8px',
+            background: 'rgba(16,185,129,.15)', borderRadius: 6,
+            color: '#6EE7B7', fontSize: 11,
+          }}>
+            💡 มิติที่กลุ่ม A สูงกว่ามาก = จุดที่ควรเร่งวางแผน IDP
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ===== Radar chart (SVG) =====
+function RadarChart() {
+  // 4 axes: กาย, ใจ, สังคม, แวดล้อม
+  const cx = 150, cy = 140, R = 100;
+  const pts = [
+    { angle: -90, label: '🏃 กาย', emj: '' },
+    { angle: 0, label: '🧠 ใจ', emj: '' },
+    { angle: 90, label: '👥 สังคม', emj: '' },
+    { angle: 180, label: '🌿 แวดล้อม', emj: '' },
+  ];
+  const polar = (angleDeg, r) => {
+    const a = angleDeg * Math.PI / 180;
+    return [cx + r * Math.cos(a), cy + r * Math.sin(a)];
+  };
+
+  // Group A (high risk) values out of 1
+  const gA = [0.85, 0.55, 0.15, 0.45];
+  const gOrg = [0.33, 0.20, 0.03, 0.19];
+
+  const polyA = pts.map((p, i) => polar(p.angle, R * gA[i]).join(',')).join(' ');
+  const polyOrg = pts.map((p, i) => polar(p.angle, R * gOrg[i]).join(',')).join(' ');
+
+  const ringRadii = [0.25, 0.5, 0.75, 1];
+
+  return (
+    <svg viewBox="0 0 300 280" style={{ width: '100%', height: 'auto', maxHeight: 320 }}>
+      {/* Rings */}
+      {ringRadii.map(r => {
+        const ringPts = pts.map(p => polar(p.angle, R * r).join(',')).join(' ');
+        return <polygon key={r} points={ringPts} fill="none" stroke="#E2E8F0" strokeDasharray="2 3" />;
+      })}
+      {/* Axes */}
+      {pts.map((p, i) => {
+        const [x, y] = polar(p.angle, R);
+        return <line key={i} x1={cx} y1={cy} x2={x} y2={y} stroke="#E2E8F0" />;
+      })}
+      {/* Org polygon (background) */}
+      <polygon points={polyOrg} fill="rgba(59,130,246,.18)" stroke="#3B82F6" strokeWidth="1.5" />
+      {pts.map((p, i) => {
+        const [x, y] = polar(p.angle, R * gOrg[i]);
+        return <circle key={i} cx={x} cy={y} r="3" fill="#3B82F6" />;
+      })}
+      {/* Group A polygon (front) */}
+      <polygon points={polyA} fill="rgba(239,68,68,.22)" stroke="#EF4444" strokeWidth="1.8" />
+      {pts.map((p, i) => {
+        const [x, y] = polar(p.angle, R * gA[i]);
+        return <circle key={i} cx={x} cy={y} r="3.5" fill="#EF4444" />;
+      })}
+      {/* Labels */}
+      {pts.map((p, i) => {
+        const [x, y] = polar(p.angle, R + 22);
+        return <text key={i} x={x} y={y} fontSize="11" fontWeight="600" fill="#475569" textAnchor="middle" dominantBaseline="middle" fontFamily="IBM Plex Sans Thai Looped">{p.label}</text>;
+      })}
+    </svg>
+  );
+}
+
+// ===== Dashboard =====
+function Dashboard() {
+  const [tab, setTab] = useState('exec');
+  return (
+    <div className="scr">
+      <HeroBanner tab={tab} onTab={setTab} />
+
+      <Filters />
+
+      {tab !== 'exec' ? <DimensionTab id={tab} /> : (
+      <div style={{ padding: '20px 24px 32px' }}>
+        <ExecutiveSummaryBanner />
+
+        <SubTabs />
+
+        <div style={{ marginTop: 16 }}>
+          <RiskGroupsCard />
+        </div>
+
+        {/* Two-col bottom area */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 16, marginTop: 16 }}>
+          <div style={{ background: '#fff', border: `1px solid ${C.border}`, borderRadius: 12, padding: 22, boxShadow: '0 1px 3px rgba(0,0,0,.04)' }}>
+            <h3 style={{ margin: '0 0 16px', fontSize: 15, fontWeight: 700, color: C.text }}>ความเสี่ยงแยกรายมิติ</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <DimRiskCard icon="🏃" label="มิติกาย" count={1535} mid={2078} low={1094} pct="33%" status="เสี่ยงปานกลาง" bg="#ECFDF5" accent="#059669" />
+              <DimRiskCard icon="🧠" label="มิติใจ" count={962} mid={2052} low={1693} pct="20%" status="เสี่ยงปานกลาง" bg="#FFFBEB" accent="#D97706" />
+              <DimRiskCard icon="👥" label="มิติสังคม" count={140} mid={1338} low={3229} pct="3%" status="ความเสี่ยงต่ำ" bg="#EFF6FF" accent="#2563EB" />
+              <DimRiskCard icon="🌿" label="มิติสิ่งแวดล้อม" count={896} mid={1842} low={1969} pct="19%" status="เสี่ยงปานกลาง" bg="#F0FDFA" accent="#0D9488" />
+            </div>
+          </div>
+
+          {/* Radar */}
+          <div style={{ background: '#fff', border: `1px solid ${C.border}`, borderRadius: 12, padding: 22, boxShadow: '0 1px 3px rgba(0,0,0,.04)' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8, marginBottom: 4 }}>
+              <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: C.text }}>
+                Radar: % เสี่ยงสูงรายมิติ – กลุ่ม A vs ทั้งองค์กร
+              </h3>
+              <RadarTooltip />
+            </div>
+            <p style={{ margin: '0 0 8px', fontSize: 11.5, color: C.textSec }}>
+              มิติที่กลุ่ม A สูงกว่าค่าเฉลี่ย = ตัวชี้นำ IDP
+            </p>
+            <RadarChart />
+            <div style={{ display: 'flex', justifyContent: 'center', gap: 16, marginTop: 4, fontSize: 11.5 }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ width: 12, height: 12, background: '#EF4444', borderRadius: 2, display: 'inline-block' }} />
+                <span style={{ color: C.textSec }}>กลุ่ม A</span>
+              </span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ width: 12, height: 12, background: '#3B82F6', borderRadius: 2, display: 'inline-block' }} />
+                <span style={{ color: C.textSec }}>ทั้งองค์กร</span>
+              </span>
+            </div>
+
+            <div style={{ marginTop: 18, paddingTop: 14, borderTop: `1px solid ${C.border}` }}>
+              <h4 style={{ margin: '0 0 4px', fontSize: 13, fontWeight: 700, color: C.text }}>ความเสี่ยงงานรายมิติ</h4>
+              <p style={{ margin: 0, fontSize: 11, color: C.textMuted }}>คนที่มีอย่างน้อย 1 มิติเสี่ยงสูง</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      )}
+    </div>
+  );
+}
+
+// ===== Placeholder for non-dashboard menu items =====
+function Placeholder({ title, emj }) {
+  return (
+    <div className="scr" style={{ padding: '32px 24px' }}>
+      <h1 style={{ margin: '0 0 6px', fontSize: 26, fontWeight: 700 }}>{title}</h1>
+      <p style={{ margin: '0 0 24px', fontSize: 13.5, color: C.textSec }}>หน้านี้รออกแบบเนื้อหา · เลือก Dashboard ภาพรวมเพื่อดูตัวอย่าง</p>
+      <div style={{ background: '#fff', border: `1px solid ${C.border}`, borderRadius: 12, padding: 60, textAlign: 'center', boxShadow: '0 1px 2px rgba(0,0,0,.04)' }}>
+        <div style={{ fontSize: 48, marginBottom: 12 }}>{emj}</div>
+        <div style={{ fontSize: 15, fontWeight: 600, color: C.text }}>{title}</div>
+      </div>
+    </div>
+  );
+}
+
+const PAGE_META = {
+  dashboard: { title: 'Dashboard ภาพรวม', emj: '📊' },
+  submission: { title: 'สถานะการส่งข้อมูล', emj: '📈' },
+  orgs: { title: 'องค์กรที่เข้าร่วม', emj: '🏢' },
+  'org-form': { title: 'ฟอร์มแบบสำรวจข้อมูลองค์กร', emj: '📋' },
+  wellbeing: { title: 'Wellbeing Survey', emj: '🌿' },
+  'summary-org': { title: 'สรุปภาพรวมแบบสำรวจข้อมูลองค์กร', emj: '📑' },
+  analyze: { title: 'วิเคราะห์ Wellbeing', emj: '📊' },
+  idp: { title: 'แผนพัฒนาบุคลากร (IDP)', emj: '🎯' },
+  compare: { title: 'เปรียบเทียบองค์กร', emj: '🔀' },
+  export: { title: 'Export รายงาน', emj: '📥' },
+};
+
+function App() {
+  const [active, setActive] = useState('idp');
+  const showDashboard = active === 'idp' || active === 'dashboard';
+  return (
+    <div style={{ minHeight: '100vh', display: 'flex', background: C.bg }} data-screen-label="01 Admin · IDP Dashboard">
+      <Sidebar active={active} onSelect={setActive} />
+      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+        <TopBar />
+        <main style={{ flex: 1, overflow: 'auto' }} key={active}>
+          {showDashboard
+            ? <Dashboard />
+            : <Placeholder title={PAGE_META[active].title} emj={PAGE_META[active].emj} />}
+        </main>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

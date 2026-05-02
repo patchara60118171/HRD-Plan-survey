@@ -136,7 +136,7 @@ const Tag = ({
     borderRadius: 999,
     fontSize: small ? 10 : 12,
     fontWeight: 700,
-    fontFamily: "'Sarabun',sans-serif"
+    fontFamily: "'IBM Plex Sans Thai Looped',sans-serif"
   }
 }, label);
 const ScoreBar = ({
@@ -170,7 +170,7 @@ const CustomTooltip = ({
       background: "#1E293B",
       borderRadius: 10,
       padding: "12px 16px",
-      fontFamily: "'Sarabun',sans-serif"
+      fontFamily: "'IBM Plex Sans Thai Looped',sans-serif"
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
@@ -247,14 +247,11 @@ function ExecutiveSummary() {
   const listData = [...employees].sort((a, b) => b.highCount - a.highCount).filter(e => filter === "all" || e.overallGroup === filter);
   return /*#__PURE__*/React.createElement("div", {
     style: {
-      fontFamily: "'Sarabun',sans-serif",
+      fontFamily: "'IBM Plex Sans Thai Looped',sans-serif",
       background: "#F8FAFC",
       minHeight: "100vh"
     }
-  }, /*#__PURE__*/React.createElement("link", {
-    href: "https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap",
-    rel: "stylesheet"
-  }), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", {
     style: {
       background: "linear-gradient(135deg,#0F172A 0%,#1E3A5F 50%,#1E40AF 100%)",
       padding: "28px 32px 0",
@@ -347,7 +344,7 @@ function ExecutiveSummary() {
       cursor: "pointer",
       fontSize: 13,
       fontWeight: 700,
-      fontFamily: "'Sarabun',sans-serif",
+      fontFamily: "'IBM Plex Sans Thai Looped',sans-serif",
       background: tab === t.key ? "#F8FAFC" : "transparent",
       color: tab === t.key ? "#0F172A" : "rgba(255,255,255,0.65)"
     }
@@ -433,8 +430,7 @@ function ExecutiveSummary() {
     }, cfg.label), /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 10,
-        color: "#9CA3AF",
-        marginTop: 2
+        color: "#9CA3AF"
       }
     }, cfg.desc), /*#__PURE__*/React.createElement("div", {
       style: {
@@ -697,7 +693,7 @@ function ExecutiveSummary() {
     tick: {
       fill: "#6B7280",
       fontSize: 12,
-      fontFamily: "'Sarabun',sans-serif"
+      fontFamily: "'IBM Plex Sans Thai Looped',sans-serif"
     }
   }), /*#__PURE__*/React.createElement(PolarRadiusAxis, {
     domain: [0, 100],
@@ -728,7 +724,7 @@ function ExecutiveSummary() {
     }
   }), /*#__PURE__*/React.createElement(Legend, {
     wrapperStyle: {
-      fontFamily: "'Sarabun',sans-serif",
+      fontFamily: "'IBM Plex Sans Thai Looped',sans-serif",
       fontSize: 12
     }
   })))), /*#__PURE__*/React.createElement("div", {
@@ -769,7 +765,7 @@ function ExecutiveSummary() {
       alignItems: "center",
       justifyContent: "center",
       fontSize: 18,
-      fontWeight: 800,
+      fontWeight: 900,
       color: cr.color,
       flexShrink: 0
     }
@@ -1029,7 +1025,7 @@ function ExecutiveSummary() {
       borderRadius: 999,
       fontSize: 12,
       fontWeight: 700,
-      fontFamily: "'Sarabun',sans-serif",
+      fontFamily: "'IBM Plex Sans Thai Looped',sans-serif",
       cursor: "pointer",
       border: "none",
       background: filter === key ? color : "#F3F4F6",

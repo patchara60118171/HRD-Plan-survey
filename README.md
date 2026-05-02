@@ -69,8 +69,9 @@ flowchart LR
 
 | ส่วนระบบ | ไฟล์หลัก | เส้นทางใช้งาน | จุดประสงค์ |
 |---|---|---|---|
-| Public Well-being Survey | `apps/public-survey/index.html` | `/` | แบบสำรวจสุขภาวะ 4 มิติ (97 คำถาม) |
-| CH1 Survey | `ch1.html` | `/ch1` | แบบฟอร์มสำรวจข้อมูล HRD บทที่ 1 |
+| Public Well-being Survey | `index.html` | `/` | แบบสำรวจสุขภาวะ 4 มิติ (97 คำถาม) |
+| CH1 / Org Portal | `org-portal.html` | `/ch1` หรือ `/org-portal` | พอร์ทัลองค์กร / login สำหรับ org_hr |
+| CH1 Form | `ch1-edit.html` | `/ch1-form` | แบบฟอร์มสำรวจข้อมูล HRD บทที่ 1 |
 | Admin Portal | `admin.html` | `/admin` | จัดการระบบ ดูข้อมูล และวิเคราะห์ผล |
 
 ## ฟีเจอร์หลัก
@@ -146,30 +147,29 @@ flowchart LR
 ## โครงสร้างโปรเจกต์โดยสรุป
 
 ```text
-Well-being Survey/
-├── apps/
-│   └── public-survey/            # Public Well-being Survey
-│       ├── index.html           # Main entry point
-│       ├── css/                  # Stylesheets
-│       └── js/                   # App logic, components, questions
-├── index.html                    # Legacy entry (redirects to apps/)
-├── ch1.html                      # CH1 Survey
-├── admin.html                    # Admin Portal
+HRD-Plan-survey/
+├── index.html                    # Public Well-being Survey (entry point)
+├── org-portal.html               # CH1 / Org Portal (route: /ch1, /org-portal)
+├── ch1-edit.html                 # CH1 form (route: /ch1-form)
+├── admin.html                    # Admin Portal (route: /admin)
 ├── admin-login.html              # Admin login page
 ├── wb-printable.html             # Well-being printable view
 ├── ch1-printable.html            # CH1 printable view
-├── survey-e2e-runner.js          # E2E automation script
-├── js/                          # Legacy/shared JavaScript
-├── css/                         # Main stylesheets
-├── assets/                      # Images, fonts, resources
-├── scripts/                     # Utility scripts
-├── backend/
-│   └── supabase/                # Supabase configuration
-│       ├── migrations/          # Database migrations
-│       ├── functions/           # Edge functions
-│       └── policies/             # Security policies
-├── docs/                        # Documentation
-└── vercel.json                  # Deployment configuration
+├── js/                           # Shared JavaScript (supabase-config, a11y, logger, ...)
+├── css/                          # Main stylesheets
+├── assets/                       # Images, fonts, resources
+├── admin/
+│   └── js/
+│       ├── app.js               # Admin entry point
+│       ├── pages/               # Page-level renderers
+│       └── services/            # Data, auth, export, utils
+├── supabase/
+│   ├── migrations/              # SQL migrations (apply via mcp1_apply_migration only)
+│   └── functions/               # Edge functions
+├── scripts/                      # Utility / Node.js scripts
+├── tests/                        # Unit + E2E tests
+├── docs/                         # Documentation
+└── vercel.json                   # Deployment routing & headers
 ```
 
 ## ตารางหลักในฐานข้อมูล
@@ -298,11 +298,10 @@ Production ใช้ Vercel โดยมีแนวทางดังนี้
 
 ## หมายเหตุสำคัญ
 
-- **Entry points หลัก:** `apps/public-survey/index.html`, `ch1.html`, `admin.html`
+- **Entry points หลัก:** `index.html` (public survey), `org-portal.html` (CH1 / org login), `admin.html` (admin portal)
 - **E2E Testing:** รัน `npm run test:public-survey` เพื่อทดสอบระบบอัตโนมัติ
 - **Public Survey URL:** `https://nidawellbeing.vercel.app/?org=test-org`
-- **โฟลเดอร์ `apps/`** เป็นโครงสร้างหลักสำหรับ Public Survey
-- **การ deploy:** ตรวจสอบ `vercel.json` สำหรับการตั้งค่า routing และ security
+- **Routing:** ดู `vercel.json` สำหรับ clean URL mapping และ security headers
 
 ## License
 

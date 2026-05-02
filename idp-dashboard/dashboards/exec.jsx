@@ -101,7 +101,7 @@ const Tag = ({ label, color, small }) => (
   <span style={{
     background:color+"22", color, border:`1px solid ${color}44`,
     padding: small?"1px 8px":"3px 12px", borderRadius:999,
-    fontSize: small?10:12, fontWeight:700, fontFamily:"'Sarabun',sans-serif",
+    fontSize: small?10:12, fontWeight:700, fontFamily: "'IBM Plex Sans Thai Looped',sans-serif",
   }}>{label}</span>
 );
 
@@ -114,7 +114,7 @@ const ScoreBar = ({ value, max, color, height=8 }) => (
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active||!payload?.length) return null;
   return (
-    <div style={{ background:"#1E293B", borderRadius:10, padding:"12px 16px", fontFamily:"'Sarabun',sans-serif" }}>
+    <div style={{ background:"#1E293B", borderRadius:10, padding:"12px 16px", fontFamily:"'IBM Plex Sans Thai Looped',sans-serif" }}>
       <div style={{ color:"#94A3B8", fontSize:11, marginBottom:8 }}>{label}</div>
       {payload.map((p,i) => (
         <div key={i} style={{ display:"flex", gap:10, marginBottom:4, alignItems:"center" }}>
@@ -146,8 +146,7 @@ function ExecutiveSummary() {
     .filter(e => filter==="all" || e.overallGroup===filter);
 
   return (
-    <div style={{ fontFamily:"'Sarabun',sans-serif", background:"#F8FAFC", minHeight:"100vh" }}>
-      <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <div style={{ fontFamily:"'IBM Plex Sans Thai Looped',sans-serif", background:"#F8FAFC", minHeight:"100vh" }}>
 
       {/* Header */}
       <div style={{ background:"linear-gradient(135deg,#0F172A 0%,#1E3A5F 50%,#1E40AF 100%)", padding:"28px 32px 0", color:"#fff" }}>
@@ -193,7 +192,7 @@ function ExecutiveSummary() {
               <button key={t.key} onClick={() => setTab(t.key)} style={{
                 padding:"10px 20px", borderRadius:"8px 8px 0 0", border:"none",
                 cursor:"pointer", fontSize:13, fontWeight:700,
-                fontFamily:"'Sarabun',sans-serif",
+                fontFamily: "'IBM Plex Sans Thai Looped',sans-serif",
                 background: tab===t.key?"#F8FAFC":"transparent",
                 color: tab===t.key?"#0F172A":"rgba(255,255,255,0.65)",
               }}>{t.label}</button>
@@ -228,7 +227,7 @@ function ExecutiveSummary() {
                       <div style={{ fontSize:26 }}>{cfg.emoji}</div>
                       <div style={{ fontSize:30, fontWeight:800, color:cfg.color, marginTop:4 }}>{grp.length}</div>
                       <div style={{ fontSize:12, fontWeight:700, color:cfg.color }}>{cfg.label}</div>
-                      <div style={{ fontSize:10, color:"#9CA3AF", marginTop:2 }}>{cfg.desc}</div>
+                      <div style={{ fontSize:10, color:"#9CA3AF" }}>{cfg.desc}</div>
                       <div style={{ height:5, background:cfg.color+"22", borderRadius:3, marginTop:8, overflow:"hidden" }}>
                         <div style={{ width:`${p}%`, height:"100%", background:cfg.color }} />
                       </div>
@@ -325,11 +324,11 @@ function ExecutiveSummary() {
                   <ResponsiveContainer width="100%" height={220}>
                     <RadarChart data={radarData}>
                       <PolarGrid stroke="#E5E7EB" />
-                      <PolarAngleAxis dataKey="dim" tick={{ fill:"#6B7280", fontSize:12, fontFamily:"'Sarabun',sans-serif" }} />
+                      <PolarAngleAxis dataKey="dim" tick={{ fill:"#6B7280", fontSize:12, fontFamily:"'IBM Plex Sans Thai Looped',sans-serif" }} />
                       <PolarRadiusAxis domain={[0,100]} tick={false} axisLine={false} />
                       <Radar name="กลุ่ม A" dataKey="กลุ่ม A (%)" stroke="#EF4444" fill="#EF4444" fillOpacity={0.2} strokeWidth={2} dot={{ fill:"#EF4444", r:4 }} />
                       <Radar name="ทั้งองค์กร" dataKey="ทั้งองค์กร (%)" stroke="#1E40AF" fill="#1E40AF" fillOpacity={0.08} strokeWidth={1.5} strokeDasharray="4 3" dot={{ fill:"#1E40AF", r:3 }} />
-                      <Legend wrapperStyle={{ fontFamily:"'Sarabun',sans-serif", fontSize:12 }} />
+                      <Legend wrapperStyle={{ fontFamily:"'IBM Plex Sans Thai Looped',sans-serif", fontSize:12 }} />
                     </RadarChart>
                   </ResponsiveContainer>
                 </div>
@@ -343,7 +342,7 @@ function ExecutiveSummary() {
                       <div style={{
                         width:36, height:36, borderRadius:10, background:cr.color+"22",
                         display:"flex", alignItems:"center", justifyContent:"center",
-                        fontSize:18, fontWeight:800, color:cr.color, flexShrink:0
+                        fontSize:18, fontWeight:900, color:cr.color, flexShrink:0
                       }}>{cr.count}</div>
                       <div style={{ flex:1 }}>
                         <div style={{ fontSize:12, fontWeight:700, color:"#374151" }}>{cr.label}</div>
@@ -485,7 +484,7 @@ function ExecutiveSummary() {
               ].map(([key,label,color]) => (
                 <button key={key} onClick={() => setFilter(key)} style={{
                   padding:"6px 14px", borderRadius:999, fontSize:12, fontWeight:700,
-                  fontFamily:"'Sarabun',sans-serif", cursor:"pointer", border:"none",
+                  fontFamily: "'IBM Plex Sans Thai Looped',sans-serif", cursor:"pointer", border:"none",
                   background: filter===key?color:"#F3F4F6",
                   color: filter===key?"#fff":"#6B7280",
                 }}>{label}</button>
