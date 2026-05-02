@@ -42,7 +42,13 @@
       "Bash(node idp-dashboard/build-from-jsx.js)",
       "Bash(git push *)",
       "Bash(vercel --prod --yes)",
-      "Bash(git remote *)"
+      "Bash(git remote *)",
+      "mcp__claude_ai_Supabase__get_project",
+      "mcp__claude_ai_Supabase__execute_sql"
     ]
-  }
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "code-review-graph"
+  ]
 }

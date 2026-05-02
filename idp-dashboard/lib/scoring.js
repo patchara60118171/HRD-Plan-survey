@@ -211,6 +211,27 @@
     return 'normal';
   }
 
+  // ── Waist / WHtR ────────────────────────────────────────────────────────────
+  // waist is stored in **inches** (form unit = "นิ้ว") → convert × 2.54 to get cm
+  function waistCm(row) {
+    const w = parseFloat(row.waist);
+    if (!w || w <= 0) return null;
+    return w * 2.54;
+  }
+  // WHtR = waist(cm) / height(cm);  risk threshold ≥ 0.5 (gender-neutral)
+  // Fallback: absolute cm cutoffs  ♂ > 90 cm  ♀ > 80 cm  (AHA Asia-Pacific)
+  function waistRisk(row) {
+    const wCm = waistCm(row);
+    if (wCm == null) return null;
+    const hCm = parseFloat(row.height);
+    if (hCm && hCm > 0) {
+      return (wCm / hCm) >= 0.5;
+    }
+    // fallback to absolute cutoff
+    const gender = (row.gender || '').trim();
+    return gender === 'ชาย' ? wCm > 90 : wCm > 80;
+  }
+
   // ── Age group ───────────────────────────────────────────────────────────────
   function ageGroup(age) {
     const n = Number(age);
@@ -231,6 +252,7 @@
     envRiskTotal, envAffectedCount, ENV_FIELDS,
     substanceRisk,
     physicalRisk, mentalRisk, socialRisk, environRisk,
+    waistCm, waistRisk,
     ageGroup,
   };
 })();

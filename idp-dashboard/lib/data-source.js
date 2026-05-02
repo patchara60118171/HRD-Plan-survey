@@ -1,7 +1,7 @@
 /**
  * IDP Dashboard · Data source
  *
- * Fetches non-draft rows from Supabase `survey_responses`, classifies them
+ * Fetches rows from Supabase `cleaned_responses`, classifies them
  * into the shape each dashboard expects, and applies filters.
  *
  * Exposes: window.IDPData = { init, fetchAll, applyFilters, buildEmployees }
@@ -16,7 +16,7 @@
   }
 
   let _client = null;
-  let _rows   = [];   // raw survey_responses rows cache
+  let _rows   = [];   // raw cleaned_responses rows cache
   let _ready  = false;
 
   function init(SUPABASE_URL, SUPABASE_ANON_KEY) {
@@ -27,8 +27,27 @@
     return _client;
   }
 
+  const CACHE_KEY = 'idp_dashboard_cache_v1';
+
   async function fetchAll() {
     if (!_client) throw new Error('call init(url, key) first');
+
+    // Check cache first (since data is static)
+    const cached = localStorage.getItem(CACHE_KEY);
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          _rows = parsed;
+          _ready = true;
+          console.log('[IDPData] Loaded ' + parsed.length + ' rows from cache');
+          return parsed;
+        }
+      } catch (e) {
+        localStorage.removeItem(CACHE_KEY);
+      }
+    }
+
     const all = [];
     let from = 0;
     const step = 1000;
@@ -36,18 +55,26 @@
     // eslint-disable-next-line no-constant-condition
     while (true) {
       const { data, error } = await _client
-        .from('survey_responses')
-        .select('*')
-        .eq('is_draft', false)
+        .from('cleaned_responses')
+        .select('cleaned_data')
         .range(from, from + step - 1);
       if (error) throw error;
       if (!data || data.length === 0) break;
-      all.push(...data);
+      // Extract cleaned_data JSONB into flat objects
+      all.push(...data.map(row => row.cleaned_data));
       if (data.length < step) break;
       from += step;
     }
     _rows = all;
     _ready = true;
+
+    // Save to cache
+    try {
+      localStorage.setItem(CACHE_KEY, JSON.stringify(all));
+    } catch (e) {
+      console.warn('[IDPData] Cache save failed:', e);
+    }
+
     return all;
   }
 
@@ -69,6 +96,7 @@
     const bmi = S.bmiLevel(row);
     const tmhi = S.tmhiScore(row);
     const ucla = S.uclaTotal(row);
+    const wCm = S.waistCm(row);
 
     return {
       _raw: row,
@@ -82,6 +110,11 @@
       gender: row.gender || '',
       age:  row.age != null ? Number(row.age) : null,
       ageGroup: S.ageGroup(row.age),
+      height: row.height != null ? parseFloat(row.height) : null,
+      weight: row.weight != null ? parseFloat(row.weight) : null,
+      waistIn: row.waist != null ? parseFloat(row.waist) : null,
+      waistCm: wCm != null ? parseFloat(wCm.toFixed(1)) : null,
+      waistRisk: S.waistRisk(row),
       bmi: bmi ? bmi.bmi : null,
       bmiKey: bmi ? bmi.key : null,
       bmiLabel: bmi ? bmi.label : '—',

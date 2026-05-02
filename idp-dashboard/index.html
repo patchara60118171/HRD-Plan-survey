@@ -516,7 +516,7 @@
           throw new Error('SUPABASE_URL/KEY globals missing — check /shared/config/supabase.js');
         }
         window.IDPData.init(SUPABASE_URL, SUPABASE_ANON_KEY);
-        setSubtitle('กำลังดึงข้อมูลจาก survey_responses…');
+        setSubtitle('กำลังดึงข้อมูลจาก cleaned_responses…');
         var rows = await window.IDPData.fetchAll();
         totalCount = rows.length;
         currentFiltered = rows.length;

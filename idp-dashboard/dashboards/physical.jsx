@@ -26,15 +26,18 @@ const pick = (arr) => arr[rand(0, arr.length - 1)];
 
 // ─── BMI Helpers ────────────────────────────────────────────────────────────
 const getBMILevel = (bmi) => {
-  if (bmi < 18.5) return { label: "น้ำหนักน้อย", color: "#60A5FA", risk: false };
-  if (bmi < 23)   return { label: "ปกติ",         color: "#10B981", risk: false };
+  if (bmi < 18.5) return { label: "น้ำหนักน้อย",  color: "#60A5FA", risk: false };
+  if (bmi < 23)   return { label: "สมส่วน",       color: "#10B981", risk: false };
   if (bmi < 25)   return { label: "น้ำหนักเกิน",  color: "#F59E0B", risk: true  };
-  if (bmi < 30)   return { label: "อ้วน",          color: "#F97316", risk: true  };
-  return               { label: "อ้วนมาก",        color: "#EF4444", risk: true  };
+  if (bmi < 30)   return { label: "อ้วนระดับ 1",  color: "#F97316", risk: true  };
+  return               { label: "อ้วนระดับ 2",  color: "#EF4444", risk: true  };
 };
 
-const getWaistRisk = (waist, gender) =>
-  gender === "ชาย" ? waist > 90 : waist > 80;
+// waist mock = นิ้ว (เหมือน cleaned_data จริง), แปลง × 2.54 → ซม. → WHtR ≥ 0.5
+const getWaistRisk = (waistIn, height) => {
+  const wCm = waistIn * 2.54;
+  return height > 0 ? (wCm / height) >= 0.5 : false;
+};
 
 // ─── Generate Mock Data ─────────────────────────────────────────────────────
 const generateEmployee = (name, idx) => {
@@ -42,7 +45,9 @@ const generateEmployee = (name, idx) => {
   const height = gender === "ชาย" ? rand(162, 180) : rand(152, 168);
   const weight = rand(50, 110);
   const bmi = parseFloat((weight / ((height / 100) ** 2)).toFixed(1));
-  const waist = gender === "ชาย" ? rand(72, 102) : rand(66, 92);
+  // waist เก็บเป็น **นิ้ว** เหมือน cleaned_data (unit = "นิ้ว" จาก form)
+  const waistIn = gender === "ชาย" ? rand(28, 40) : rand(26, 36);
+  const waistCm = parseFloat((waistIn * 2.54).toFixed(1));
 
   // Diet score: 0-5 (ยิ่งสูง = กินแย่)
   const dietScore = rand(0, 5);
@@ -53,7 +58,7 @@ const generateEmployee = (name, idx) => {
 
   // Risk factors
   const bmiRisk = getBMILevel(bmi).risk;
-  const waistRisk = getWaistRisk(waist, gender);
+  const waistRisk = getWaistRisk(waistIn, height);
   const dietRisk = dietScore >= 3;
   const exerciseRisk = exerciseDays < 3;
   const sedentaryRisk = sedentaryHours >= 8;
@@ -82,7 +87,7 @@ const generateEmployee = (name, idx) => {
     dept: DEPTS[idx % 3],
     height, weight, bmi,
     bmiLevel: getBMILevel(bmi),
-    waist, waistRisk,
+    waistIn, waistCm, waistRisk,
     dietScore, exerciseDays, sedentaryHours,
     bmiRisk, waistRisk, dietRisk, exerciseRisk, sedentaryRisk,
     riskCount, physicalGroup,
@@ -90,6 +95,75 @@ const generateEmployee = (name, idx) => {
     ncdList, hasNCD: ncdList.length > 0,
   };
 };
+
+// ─── Real data mapping ───────────────────────────────────────────────────────
+function classifyPhysical(emp) {
+  try {
+  const S = window.IDPScoring;
+  const row = emp._raw || emp;
+  if (!S || !row) return emp;
+
+  const bmiObj   = S.bmiLevel(row);
+  const bmi      = bmiObj ? bmiObj.bmi : emp.bmi;
+  const bmiKey   = bmiObj ? bmiObj.key : null;
+  const bmiLabel = bmiObj ? bmiObj.label : '—';
+  const bmiRisk  = bmiObj ? (bmiObj.key === 'obese1' || bmiObj.key === 'obese2') : false;
+
+  const waistInVal = emp.waistIn ?? null;
+  const waistCmVal = emp.waistCm ?? null;
+  const waistRiskVal = S.waistRisk(row) ?? false;
+
+  const height = emp.height ?? parseFloat(row.height) ?? null;
+  const weight = emp.weight ?? parseFloat(row.weight) ?? null;
+  const gender = emp.gender || row.gender || '';
+
+  const tpaxObj = S.tpaxLevel(row);
+  const tpaxMins = S.tpaxMinutes(row) ?? 0;
+  const exerciseDays = tpaxMins;  // store raw minutes/week for TPAX_LEVELS
+  const exerciseRisk = !tpaxObj || tpaxObj.key === 'low';
+
+  const sedH = S.sedentaryHours(row);
+  const sedentaryHours = sedH != null ? sedH : (emp.sedentaryHours ?? rand(4, 12));
+  const sedentaryRisk = sedentaryHours >= 8;
+
+  const sweetS = S.sweetScore(row);
+  const fatS   = S.fatScore(row);
+  const saltS  = S.saltScore(row);
+  const dietScore = sweetS ?? fatS ?? saltS ?? (emp.dietScore ?? 5);  // 0-15 range
+  const dietRisk  = S.isDietHigh(sweetS) || S.isDietHigh(fatS) || S.isDietHigh(saltS);
+
+  const subRisk = S.substanceRisk(row);
+  const smokeCig  = subRisk === 'high' ? 'daily' : subRisk === 'medium' ? 'occasional' : 'none';
+  const alcohol   = subRisk !== 'none' ? 'occasional' : 'none';
+  const hasRiskyBehavior = subRisk !== 'none';
+
+  const riskCount = [bmiRisk, dietRisk, exerciseRisk].filter(Boolean).length;
+  const physicalGroup = riskCount >= 2 ? "high" : riskCount >= 1 ? "medium" : "low";
+
+  // NCD — real field is 'diseases' (checkbox array) in cleaned_data
+  const ncdList = [];
+  const diseasesRaw = row.diseases ?? emp.diseases ?? [];
+  const diseasesArr = Array.isArray(diseasesRaw)
+    ? diseasesRaw
+    : String(diseasesRaw).split(',').map(s => s.trim());
+  if (diseasesArr.some(d => d.includes('เบาหวาน'))) ncdList.push("เบาหวาน");
+  if (diseasesArr.some(d => d.includes('ความดัน'))) ncdList.push("ความดันโลหิตสูง");
+  if (diseasesArr.some(d => d.includes('หัวใจ'))) ncdList.push("โรคหัวใจ");
+  if (diseasesArr.some(d => d.includes('ไต'))) ncdList.push("โรคไต");
+  if (diseasesArr.some(d => d.includes('ตับ'))) ncdList.push("โรคตับ");
+  if (diseasesArr.some(d => d.includes('มะเร็ง'))) ncdList.push("มะเร็ง");
+
+  return {
+    ...emp,
+    gender, height, weight, bmi, bmiLevel: bmiObj || { label: bmiLabel, color: "#9CA3AF", risk: false },
+    bmiKey, bmiRisk, waistIn: waistInVal, waistCm: waistCmVal, waistRisk: waistRiskVal,
+    dietScore, dietRisk, exerciseDays, exerciseRisk, sedentaryHours, sedentaryRisk,
+    riskCount, physicalGroup,
+    smokeCig, smokeVape: 'none', alcohol, substance: 'none', hasRiskyBehavior,
+    ncdList, hasNCD: ncdList.length > 0,
+  };
+  } catch(e) { return emp; }
+}
 
 const employees = NAMES.map((n, i) => generateEmployee(n, i));
 
@@ -118,6 +192,25 @@ const NCD_COLORS = {
 
 const pct = (n, total) => total > 0 ? Math.round((n / total) * 100) : 0;
 
+// ─── Static config (no employee data needed) ────────────────────────────────
+const BMI_CATEGORIES = [
+  { key: "น้ำหนักน้อย",  color: "#60A5FA", range: "< 18.5" },
+  { key: "สมส่วน",       color: "#10B981", range: "18.5–22.9" },
+  { key: "น้ำหนักเกิน",  color: "#F59E0B", range: "23–24.9" },
+  { key: "อ้วนระดับ 1",  color: "#F97316", range: "25–29.9" },
+  { key: "อ้วนระดับ 2",  color: "#EF4444", range: "≥ 30" },
+];
+const DIET_LEVELS = [
+  { key: "ดี",      color: "#10B981", test: s => s != null && s < 8 },
+  { key: "พอใช้",   color: "#F59E0B", test: s => s != null && s >= 8 && s < 10 },
+  { key: "เสี่ยง", color: "#EF4444", test: s => s != null && s >= 10 },
+];
+const TPAX_LEVELS = [
+  { key: "ไม่ผ่าน (< 150 นาที)",  color: "#EF4444", test: m => m < 150 },
+  { key: "ผ่านขั้นต่ำ (150–299)", color: "#F59E0B", test: m => m >= 150 && m < 300 },
+  { key: "ดี (≥ 300 นาที)",        color: "#10B981", test: m => m >= 300 },
+];
+
 // ─── Sub-components ─────────────────────────────────────────────────────────
 const Tag = ({ label, color, small }) => (
   <span style={{
@@ -142,28 +235,544 @@ const RiskDot = ({ active }) => (
   }} />
 );
 
-// ─── Overview Stats ──────────────────────────────────────────────────────────
-const highRisk   = employees.filter(e => e.physicalGroup === "high");
-const medRisk    = employees.filter(e => e.physicalGroup === "medium");
-const lowRisk    = employees.filter(e => e.physicalGroup === "low");
-const riskyBeh   = employees.filter(e => e.hasRiskyBehavior);
-const ncdGroup   = employees.filter(e => e.hasNCD);
-const highAndNCD = employees.filter(e => e.physicalGroup === "high" && e.hasNCD);
-const highAndBeh = employees.filter(e => e.physicalGroup === "high" && e.hasRiskyBehavior);
+const ChartToggleBtn = ({ mode, setMode }) => (
+  <div style={{ display: "flex", gap: 2, background: "#F3F4F6", borderRadius: 8, padding: 2 }}>
+    {[["pie","🥧"],["bar","📊"]].map(([key, icon]) => (
+      <button key={key} onClick={() => setMode(key)} style={{
+        border: "none", cursor: "pointer", borderRadius: 6, padding: "3px 9px",
+        fontSize: 12, background: mode === key ? "#fff" : "transparent",
+        boxShadow: mode === key ? "0 1px 3px rgba(0,0,0,0.12)" : "none",
+        fontFamily: "'IBM Plex Sans Thai Looped',sans-serif",
+      }}>{icon}</button>
+    ))}
+  </div>
+);
 
-const ncdCounts = ["เบาหวาน","ความดันโลหิตสูง","โรคหัวใจ","โรคไต","โรคตับ","มะเร็ง"].map(d => ({
-  name: d, value: employees.filter(e => e.ncdList.includes(d)).length, color: NCD_COLORS[d],
-})).filter(d => d.value > 0);
+// (aggregates computed inside component from real employees)
 
-const deptData = DEPTS.map(dept => {
-  const grp = employees.filter(e => e.dept === dept);
+// ─── Raw Data Viewer ─────────────────────────────────────────────────────────
+function RawDataViewer({ sections, empName }) {
+  const [open, setOpen] = useState(false);
+  const [openSec, setOpenSec] = useState({});
+  const toggleSec = (k) => setOpenSec(prev => ({ ...prev, [k]: !prev[k] }));
+
+  const RISK_WORDS = ["ทุกวัน", "2-3×/สัปดาห์", "เสี่ยง", "WHtR เกิน", "ไม่ผ่าน", "อ้วน", "น้ำหนักเกิน"];
+  const isRisk = (v) => typeof v === "string" && RISK_WORDS.some(w => v.includes(w));
+
+  return (
+    <div style={{ background: "#fff", borderRadius: 14, boxShadow: "0 1px 3px rgba(0,0,0,0.06)", overflow: "hidden" }}>
+      {/* Header / toggle */}
+      <button onClick={() => setOpen(p => !p)} style={{
+        width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
+        padding: "14px 20px", background: "none", border: "none", cursor: "pointer",
+        borderBottom: open ? "1px solid #F3F4F6" : "none",
+        fontFamily: "'IBM Plex Sans Thai Looped',sans-serif",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{ width: 4, height: 20, background: "#6366F1", borderRadius: 2 }} />
+          <span style={{ fontSize: 13, fontWeight: 800, color: "#312E81" }}>📋 ข้อมูลที่กรอกทั้งหมด — {empName}</span>
+          <span style={{ fontSize: 11, color: "#9CA3AF" }}>(ดู raw survey answers)</span>
+        </div>
+        <span style={{ fontSize: 16, color: "#6B7280", transform: open ? "rotate(180deg)" : "none", transition: "0.2s" }}>▾</span>
+      </button>
+
+      {open && (
+        <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: 8 }}>
+          {sections.map(sec => (
+            <div key={sec.key} style={{ border: "1px solid #E5E7EB", borderRadius: 10, overflow: "hidden" }}>
+              {/* Section header */}
+              <button onClick={() => toggleSec(sec.key)} style={{
+                width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
+                padding: "10px 14px", background: openSec[sec.key] ? "#F8FAFF" : "#FAFAFA",
+                border: "none", cursor: "pointer", borderBottom: openSec[sec.key] ? "1px solid #E5E7EB" : "none",
+                fontFamily: "'IBM Plex Sans Thai Looped',sans-serif",
+              }}>
+                <span style={{ fontSize: 12, fontWeight: 700, color: "#374151" }}>{sec.icon} {sec.label}</span>
+                <span style={{ fontSize: 12, color: "#9CA3AF" }}>{openSec[sec.key] ? "▲" : "▼"} {sec.rows.length} ข้อ</span>
+              </button>
+
+              {openSec[sec.key] && (
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 0 }}>
+                  {sec.rows.map(([label, val], ri) => (
+                    <div key={ri} style={{
+                      display: "flex", justifyContent: "space-between", alignItems: "center",
+                      padding: "7px 14px",
+                      background: ri % 2 === 0 ? "#FAFAFA" : "#fff",
+                      borderBottom: ri < sec.rows.length - 2 ? "1px solid #F3F4F6" : "none",
+                    }}>
+                      <span style={{ fontSize: 11, color: "#6B7280", flex: 1 }}>{label}</span>
+                      <span style={{
+                        fontSize: 11, fontWeight: 700,
+                        color: isRisk(String(val)) ? "#EF4444" : val === "—" ? "#D1D5DB" : "#111827",
+                        marginLeft: 8, textAlign: "right",
+                      }}>{val}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Diet Heatmap helpers ────────────────────────────────────────────────────
+const DIET_ITEMS = {
+  sweet: [
+    "ดื่มน้ำเปล่า / กาแฟดำ / ชาไม่ใส่น้ำตาล (R)",
+    "ดื่มน้ำอัดลม / กาแฟ 3in1 / เครื่องดื่มหวาน",
+    "ดื่มน้ำผัก / ผลไม้สำเร็จรูป",
+    "กินไอศกรีม / เบเกอรี่ / ขนมหวาน",
+    "เติมน้ำตาล / น้ำผึ้ง / น้ำเชื่อมลงในอาหาร",
+  ],
+  fat: [
+    "เลือกกินเนื้อสัตว์ติดมัน ติดหนัง",
+    "กินอาหารทอด / ฟาสต์ฟู้ด / ผัดน้ำมัน",
+    "กินอาหารจานเดียวไขมันสูง / แกงกะทิ",
+    "ดื่มเครื่องดื่มชงผสมนมข้นหวาน / ครีมเทียม",
+    "ซดน้ำผัด / น้ำแกงราดข้าว",
+  ],
+  salt: [
+    "ชิมก่อนปรุง / ปรุงน้ำปลา ซีอิ๊วน้อย (R)",
+    "ใช้สมุนไพร / เครื่องเทศแทนเครื่องปรุง (R)",
+    "กินเนื้อสัตว์แปรรูป / ไส้กรอก / ปลาเค็ม",
+    "กินบะหมี่สำเร็จรูป / อาหารกล่องแช่แข็ง",
+    "กินผักดอง / ผลไม้แช่อิ่ม / จิ้มพริกเกลือ",
+  ],
+};
+const DIET_LEVEL_LABELS = ["แทบไม่ทำ", "3-4 ครั้ง/สัปดาห์", "ทุกวัน"];
+const DIET_COLORS_3 = ["#10B981", "#F59E0B", "#EF4444"];
+
+function phexToRgb(hex) {
+  const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+  return [r,g,b];
+}
+function dietCellBg(pct, colorHex) {
+  if (pct < 25) return "transparent";
+  const [r,g,b] = phexToRgb(colorHex);
+  const alpha = pct < 50 ? 0.20 : pct < 75 ? 0.48 : 0.80;
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+function buildDietHeatmap(empArray, group) {
+  const S = window.IDPScoring;
+  const keyMap = { sweet: ['sweet_1','sweet_2','sweet_3','sweet_4','sweet_5'], fat: ['fat_1','fat_2','fat_3','fat_4','fat_5'], salt: ['salt_1','salt_2','salt_3','salt_4','salt_5'] };
+  const keys = keyMap[group];
+  const revIdx = group === 'sweet' ? new Set([0]) : group === 'salt' ? new Set([0,1]) : new Set();
+  const counts = keys.map(() => [0,0,0]);
+  let n = 0;
+  empArray.forEach(emp => {
+    const row = emp._raw || emp;
+    let valid = true;
+    const vals = keys.map((k,i) => {
+      const v = S ? S.sweetScore ? null : null : null; // fallback: parse directly
+      const raw = row[k];
+      if (raw == null) { valid = false; return null; }
+      const s = String(raw).trim();
+      let score = s.includes('ทุกวัน') || s.includes('เกือบทุกวัน') ? 3 : s.includes('3-4') || s.includes('3–4') ? 2 : s.includes('แทบไม่') || s.includes('ไม่ทำ') ? 1 : Number(raw);
+      if (!Number.isFinite(score) || score < 1 || score > 3) { valid = false; return null; }
+      return score - 1; // 0=แทบไม่ทำ, 1=3-4ครั้ง, 2=ทุกวัน
+    });
+    if (!valid || vals.some(v => v == null)) return;
+    n++;
+    vals.forEach((v, i) => counts[i][v]++);
+  });
+  // If no real data, generate mock
+  if (n === 0) {
+    empArray.forEach(emp => {
+      n++;
+      counts.forEach((c, i) => c[Math.floor(Math.random() * 3)]++);
+    });
+  }
+  return keys.map((k, i) => ({
+    label: DIET_ITEMS[group][i],
+    isRev: revIdx.has(i),
+    pcts: counts[i].map(c => n > 0 ? Math.round((c/n)*100) : 0),
+    counts: counts[i],
+    n,
+  }));
+}
+
+function buildRadarDiet(empArray) {
+  const mock = [
+    { subject: "🍬 หวาน", value: 62 },
+    { subject: "🥩 มัน", value: 48 },
+    { subject: "🧂 เค็ม", value: 55 },
+  ];
+  if (!empArray || empArray.length === 0) return mock;
+  const S = window.IDPScoring;
+  if (!S) return mock;
+  const scores = empArray.map(e => {
+    const row = e._raw || e;
+    return { sw: S.sweetScore(row), fa: S.fatScore(row), sa: S.saltScore(row) };
+  }).filter(s => s.sw != null && s.fa != null && s.sa != null);
+  if (scores.length === 0) return mock;
+  const avg = (key) => Math.round((scores.reduce((s,v) => s + v[key], 0) / scores.length / 15) * 100);
+  return [
+    { subject: "🍬 หวาน", value: avg('sw') },
+    { subject: "🥩 มัน",  value: avg('fa') },
+    { subject: "🧂 เค็ม", value: avg('sa') },
+  ];
+}
+
+// ─── Substance helpers ────────────────────────────────────────────────────────
+const SUBSTANCE_ITEMS = [
+  { label: "🚬 สูบบุหรี่ (มวน)",   key: "q2001", mockKey: "smokeCig"  },
+  { label: "💨 บุหรี่ไฟฟ้า",        key: "q2002", mockKey: "smokeVape" },
+  { label: "🍺 แอลกอฮอล์",          key: "q2003", mockKey: "alcohol"   },
+  { label: "🌿 กัญชา",               key: "q2004", mockKey: "substance" },
+  { label: "💊 สารเสพติดอื่นๆ",     key: "q2005", mockKey: "substance" },
+];
+function buildSubstanceData(empArray) {
+  return SUBSTANCE_ITEMS.map(item => {
+    let daily = 0, weekly = 0, occ = 0, none = 0;
+    empArray.forEach(emp => {
+      const raw = emp._raw ? emp._raw[item.key] : null;
+      const mock = emp[item.mockKey];
+      const s = raw != null ? String(raw).trim() : (mock || 'none');
+      if (s.includes('ทุกวัน') || s.includes('เป็นประจำ') || s === 'daily') daily++;
+      else if ((s.includes('2') && s.includes('3')) || s === 'weekly') weekly++;
+      else if (s.includes('บางโอกาส') || s.includes('นาน') || s === 'occasional') occ++;
+      else none++;
+    });
+    const total = empArray.length || 1;
+    return { label: item.label, daily, weekly, occ, none, total };
+  });
+}
+
+// ─── TPAX / Sedentary helpers ─────────────────────────────────────────────────
+function buildTpaxData(empArray) {
+  if (!empArray || empArray.length === 0) return null;
+  const S = window.IDPScoring;
+  const withTpax = empArray.filter(e => {
+    if (!e._raw) return e.exerciseDays != null;
+    return S && S.tpaxMinutes(e._raw) != null;
+  });
+  if (withTpax.length === 0) return null;
+  let low = 0, ok = 0, good = 0, totalMins = 0, sedTotal = 0, sedCount = 0;
+  withTpax.forEach(e => {
+    const row = e._raw || {};
+    const mins = S && e._raw ? S.tpaxMinutes(row) : (e.exerciseDays || 0) * 45;
+    const sed  = S && e._raw ? S.sedentaryHours(row) : (e.sedentaryHours || 0);
+    if (mins != null) { totalMins += mins; if (mins < 150) low++; else if (mins < 300) ok++; else good++; }
+    if (sed != null) { sedTotal += sed; sedCount++; }
+  });
+  const n = withTpax.length;
   return {
-    name: dept,
-    "เสี่ยงสูง":   grp.filter(e => e.physicalGroup === "high").length,
-    "เฝ้าระวัง": grp.filter(e => e.physicalGroup === "medium").length,
-    "ปกติ":        grp.filter(e => e.physicalGroup === "low").length,
+    low, ok, good, n,
+    passPct: Math.round(((ok + good) / n) * 100),
+    avgMins: Math.round(totalMins / n),
+    avgSed: sedCount > 0 ? (sedTotal / sedCount).toFixed(1) : null,
+    sedOver8: empArray.filter(e => {
+      if (e._raw && S) return (S.sedentaryHours(e._raw) || 0) >= 8;
+      return (e.sedentaryHours || 0) >= 8;
+    }).length,
   };
-});
+}
+
+// ─── Diet Heatmap Component ───────────────────────────────────────────────────
+const DIET_HEAT_PRESETS = [
+  { name: "แดง",    hex: "#DC2626" },
+  { name: "ส้ม",    hex: "#D97706" },
+  { name: "น้ำเงิน",hex: "#3B5FA0" },
+  { name: "ม่วง",   hex: "#7C3AED" },
+  { name: "เขียว",  hex: "#0F8A6A" },
+];
+const DietHeatmapSection = ({ empArray }) => {
+  const [activeGroup, setActiveGroup] = useState("sweet");
+  const [mode, setMode] = useState("pct");
+  const [colorHex, setColorHex] = useState(DIET_HEAT_PRESETS[0].hex);
+  const tableRef = useRef(null);
+  const rows = useMemo(() => buildDietHeatmap(empArray, activeGroup), [empArray, activeGroup]);
+  const radarData = useMemo(() => buildRadarDiet(empArray), [empArray]);
+  const [rv,gv,bv] = phexToRgb(colorHex);
+
+  const handleDownload = () => {
+    const node = tableRef.current; if (!node) return;
+    const scale = 2, w = node.offsetWidth, h = node.offsetHeight;
+    const canvas = document.createElement("canvas");
+    canvas.width = w*scale; canvas.height = h*scale;
+    const ctx = canvas.getContext("2d"); ctx.scale(scale,scale); ctx.fillStyle="#fff"; ctx.fillRect(0,0,w,h);
+    const xml = new XMLSerializer().serializeToString(node);
+    const svgStr = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><foreignObject width="100%" height="100%"><div xmlns="http://www.w3.org/1999/xhtml">${xml}</div></foreignObject></svg>`;
+    const img = new Image();
+    img.onload = () => { ctx.drawImage(img,0,0); const a=document.createElement("a"); a.download=`heatmap-diet-${activeGroup}.png`; a.href=canvas.toDataURL("image/png"); a.click(); };
+    img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svgStr);
+  };
+
+  const headerStyle = { fontSize: 11, fontWeight: 700, color: "#6B7280", padding: "8px 6px", textAlign: "center", borderBottom: "2px solid #E5E7EB", whiteSpace: "nowrap" };
+  const groupCfg = { sweet: { label: "🍬 หวาน", color: "#DC2626" }, fat: { label: "🥩 มัน", color: "#D97706" }, salt: { label: "🧂 เค็ม", color: "#0891B2" } };
+
+  return (
+    <div style={{ background: "#fff", borderRadius: 16, padding: 24, boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+        <div style={{ width: 4, height: 20, background: "#16A34A", borderRadius: 2 }} />
+        <div style={{ fontSize: 15, fontWeight: 800, color: "#14532D" }}>🥗 Heatmap พฤติกรรมการกิน — หวาน / มัน / เค็ม</div>
+      </div>
+
+      {/* 2-col: Radar left, Heatmap right */}
+      <div style={{ display: "grid", gridTemplateColumns: "220px 1fr", gap: 20 }}>
+        {/* Radar */}
+        <div>
+          <div style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", marginBottom: 8 }}>ภาพรวม 3 รส (% ความเสี่ยง)</div>
+          <ResponsiveContainer width="100%" height={180}>
+            <RadarChart data={radarData} margin={{ top: 10, right: 10, bottom: 10, left: 10 }}>
+              <PolarGrid stroke="#E5E7EB" />
+              <PolarAngleAxis dataKey="subject" tick={{ fontSize: 11, fontFamily: "'IBM Plex Sans Thai Looped',sans-serif", fill: "#374151" }} />
+              <PolarRadiusAxis domain={[0,100]} tick={false} axisLine={false} />
+              <Radar dataKey="value" stroke="#DC2626" fill="#DC2626" fillOpacity={0.25} />
+              <Tooltip formatter={v => [`${v}%`, "ความเสี่ยง"]} contentStyle={{ fontFamily: "'IBM Plex Sans Thai Looped',sans-serif", fontSize: 11, borderRadius: 8 }} />
+            </RadarChart>
+          </ResponsiveContainer>
+          <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 4 }}>
+            {radarData.map((d,i) => (
+              <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <span style={{ fontSize: 11, color: "#374151" }}>{d.subject}</span>
+                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <div style={{ width: 60, height: 6, background: "#F3F4F6", borderRadius: 3, overflow: "hidden" }}>
+                    <div style={{ width: `${d.value}%`, height: "100%", background: d.value >= 60 ? "#EF4444" : d.value >= 40 ? "#F59E0B" : "#10B981", borderRadius: 3 }} />
+                  </div>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: d.value >= 60 ? "#EF4444" : d.value >= 40 ? "#F59E0B" : "#10B981" }}>{d.value}%</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Heatmap side */}
+        <div>
+          {/* Controls */}
+          <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap", marginBottom: 10 }}>
+            {Object.entries(groupCfg).map(([k,v]) => (
+              <button key={k} onClick={() => setActiveGroup(k)} style={{
+                padding: "4px 14px", borderRadius: 6, fontSize: 12, fontWeight: 700, border: "none", cursor: "pointer",
+                fontFamily: "'IBM Plex Sans Thai Looped',sans-serif",
+                background: activeGroup === k ? v.color : "#F3F4F6", color: activeGroup === k ? "#fff" : "#6B7280",
+              }}>{v.label}</button>
+            ))}
+            <div style={{ marginLeft: "auto", display: "flex", gap: 6, alignItems: "center" }}>
+              <div style={{ display: "flex", gap: 4, background: "#F9FAFB", borderRadius: 8, padding: "4px 7px" }}>
+                {DIET_HEAT_PRESETS.map(p => (
+                  <button key={p.hex} title={p.name} onClick={() => setColorHex(p.hex)} style={{
+                    width: 18, height: 18, borderRadius: "50%", background: p.hex, cursor: "pointer", padding: 0, outline: "none", border: colorHex === p.hex ? "2.5px solid #111" : "2px solid transparent",
+                  }} />
+                ))}
+              </div>
+              {[["pct","%"],["count","คน"]].map(([k,l]) => (
+                <button key={k} onClick={() => setMode(k)} style={{
+                  padding: "3px 10px", borderRadius: 6, fontSize: 11, fontWeight: 700, border: "none", cursor: "pointer",
+                  fontFamily: "'IBM Plex Sans Thai Looped',sans-serif",
+                  background: mode === k ? groupCfg[activeGroup].color : "#F3F4F6", color: mode === k ? "#fff" : "#6B7280",
+                }}>{l}</button>
+              ))}
+              <button onClick={handleDownload} style={{
+                padding: "3px 10px", borderRadius: 6, fontSize: 11, fontWeight: 700, border: "none", cursor: "pointer",
+                fontFamily: "'IBM Plex Sans Thai Looped',sans-serif", background: "#1E40AF", color: "#fff",
+              }}>⬇ รูป</button>
+            </div>
+          </div>
+
+          <div ref={tableRef} style={{ overflowX: "auto", background: "#fff" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontFamily: "'IBM Plex Sans Thai Looped',sans-serif" }}>
+              <thead>
+                <tr style={{ background: "#F9FAFB" }}>
+                  <th style={{ ...headerStyle, textAlign: "left", paddingLeft: 8, width: "52%" }}>พฤติกรรม</th>
+                  {DIET_LEVEL_LABELS.map((l,i) => <th key={i} style={{ ...headerStyle, color: DIET_COLORS_3[i] }}>{l}</th>)}
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((row, ri) => (
+                  <tr key={ri} style={{ borderBottom: "1px solid #F3F4F6", background: ri % 2 === 0 ? "#fff" : "#FAFAFA" }}>
+                    <td style={{ padding: "8px 8px", fontSize: 11, color: "#374151", lineHeight: 1.4 }}>
+                      <span style={{ color: "#9CA3AF", marginRight: 5, fontSize: 10, fontWeight: 700 }}>{ri+1}.</span>
+                      {row.label}
+                      {row.isRev && <span style={{ marginLeft: 5, fontSize: 9, color: "#6366F1", background: "#EEF2FF", borderRadius: 3, padding: "1px 4px" }}>R</span>}
+                    </td>
+                    {row.pcts.map((pct, li) => {
+                      const bg = dietCellBg(pct, colorHex);
+                      const dark = pct >= 75;
+                      return (
+                        <td key={li} style={{
+                          padding: "7px 5px", textAlign: "center", fontSize: 11, background: bg,
+                          fontWeight: pct >= 50 ? 700 : 400,
+                          color: dark ? "#fff" : pct >= 25 ? "#1E293B" : "#9CA3AF",
+                          transition: "background 0.2s",
+                        }}>{mode === "pct" ? `${pct}%` : row.counts[li]}</td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {/* Legend */}
+          <div style={{ marginTop: 8, fontSize: 10, color: "#9CA3AF", display: "flex", gap: 10 }}>
+            {[["< 25%",0.0],["25–50%",0.20],["50–75%",0.48],["75%+",0.80]].map(([lbl,a]) => (
+              <span key={lbl} style={{ display:"flex", alignItems:"center", gap:3 }}>
+                <span style={{ display:"inline-block", width:10, height:10, borderRadius:2, background: a===0?"#E5E7EB":`rgba(${rv},${gv},${bv},${a})`, border:"1px solid #E5E7EB" }} />{lbl}
+              </span>
+            ))}
+            <span style={{ marginLeft: "auto" }}>{rows[0]?.n || 0} คน</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ─── Substance Chart Component ────────────────────────────────────────────────
+const SubstanceChartSection = ({ empArray }) => {
+  const data = useMemo(() => buildSubstanceData(empArray), [empArray]);
+  const anyRisk = empArray.filter(e => {
+    if (e._raw) {
+      const S = window.IDPScoring;
+      return S ? S.substanceRisk(e._raw) !== 'none' : false;
+    }
+    return e.hasRiskyBehavior;
+  }).length;
+
+  return (
+    <div style={{ background: "#fff", borderRadius: 16, padding: 24, boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{ width: 4, height: 20, background: "#D97706", borderRadius: 2 }} />
+          <div style={{ fontSize: 15, fontWeight: 800, color: "#92400E" }}>🚬 พฤติกรรมเสี่ยง — บุหรี่ / แอลกอฮอล์ / สารเสพติด</div>
+        </div>
+        <div style={{ background: "#FEF2F2", borderRadius: 10, padding: "8px 16px", textAlign: "center", border: "1px solid #FECACA" }}>
+          <div style={{ fontSize: 22, fontWeight: 800, color: "#EF4444" }}>{anyRisk}</div>
+          <div style={{ fontSize: 10, color: "#9CA3AF" }}>มีพฤติกรรมเสี่ยง ≥1</div>
+        </div>
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        {data.map((d, i) => {
+          const dailyPct = Math.round((d.daily / d.total) * 100);
+          const weeklyPct = Math.round((d.weekly / d.total) * 100);
+          const occPct = Math.round((d.occ / d.total) * 100);
+          const nonePct = 100 - dailyPct - weeklyPct - occPct;
+          return (
+            <div key={i}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 5 }}>
+                <span style={{ fontSize: 13, fontWeight: 600, color: "#374151" }}>{d.label}</span>
+                <div style={{ display: "flex", gap: 6, fontSize: 10, color: "#6B7280" }}>
+                  {d.daily > 0  && <span style={{ background: "#FEE2E2", color: "#DC2626", borderRadius: 4, padding: "1px 6px", fontWeight: 700 }}>ประจำ {dailyPct}%</span>}
+                  {d.weekly > 0 && <span style={{ background: "#FEF3C7", color: "#D97706", borderRadius: 4, padding: "1px 6px", fontWeight: 700 }}>2-3×/สัปดาห์ {weeklyPct}%</span>}
+                  {d.occ > 0    && <span style={{ background: "#FFF7ED", color: "#EA580C", borderRadius: 4, padding: "1px 6px", fontWeight: 700 }}>บางโอกาส {occPct}%</span>}
+                </div>
+              </div>
+              <div style={{ height: 10, background: "#F3F4F6", borderRadius: 5, display: "flex", overflow: "hidden" }}>
+                <div style={{ width: `${dailyPct}%`,  background: "#EF4444", transition: "width 0.3s" }} />
+                <div style={{ width: `${weeklyPct}%`, background: "#F97316", transition: "width 0.3s" }} />
+                <div style={{ width: `${occPct}%`,    background: "#FCD34D", transition: "width 0.3s" }} />
+                <div style={{ width: `${nonePct}%`,   background: "#D1FAE5", transition: "width 0.3s" }} />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      <div style={{ marginTop: 12, display: "flex", gap: 12, fontSize: 10, color: "#9CA3AF" }}>
+        {[["🔴 ประจำทุกวัน","#EF4444"],["🟠 2-3×/สัปดาห์","#F97316"],["🟡 บางโอกาส","#FCD34D"],["🟢 ไม่มี","#D1FAE5"]].map(([l,c]) => (
+          <span key={l} style={{ display:"flex", alignItems:"center", gap:4 }}>
+            <span style={{ width:8, height:8, borderRadius:2, background:c, display:"inline-block" }} />{l}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// ─── TPAX + Sedentary Section ────────────────────────────────────────────────
+const TpaxSedentarySection = ({ empArray }) => {
+  const d = useMemo(() => buildTpaxData(empArray), [empArray]);
+  if (!d) return null;
+  const passDeg = Math.round((d.passPct / 100) * 180);
+
+  return (
+    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+      {/* TPAX Gauge */}
+      <div style={{ background: "#fff", borderRadius: 16, padding: 24, boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+          <div style={{ width: 4, height: 20, background: "#7C3AED", borderRadius: 2 }} />
+          <div style={{ fontSize: 15, fontWeight: 800, color: "#4C1D95" }}>🏃 กิจกรรมทางกาย vs WHO 150 นาที/สัปดาห์</div>
+        </div>
+        {/* SVG Gauge */}
+        <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
+          <div style={{ position: "relative", width: 160, height: 90 }}>
+            <svg viewBox="0 0 160 90" width="160" height="90">
+              <path d="M 10 80 A 70 70 0 0 1 150 80" fill="none" stroke="#F3F4F6" strokeWidth="16" strokeLinecap="round" />
+              <path d="M 10 80 A 70 70 0 0 1 150 80" fill="none" stroke="#E5E7EB" strokeWidth="16" strokeLinecap="round"
+                strokeDasharray={`${Math.PI * 70 * (d.low / d.n)} ${Math.PI * 70}`} />
+              <path d="M 10 80 A 70 70 0 0 1 150 80" fill="none" stroke="#10B981" strokeWidth="16" strokeLinecap="round"
+                strokeDasharray={`${Math.PI * 70 * (d.passPct / 100)} ${Math.PI * 70}`} />
+              <text x="80" y="72" textAnchor="middle" fontSize="22" fontWeight="800" fill="#4C1D95">{d.passPct}%</text>
+              <text x="80" y="86" textAnchor="middle" fontSize="9" fill="#9CA3AF">ผ่านเกณฑ์</text>
+            </svg>
+          </div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 11, color: "#9CA3AF", marginBottom: 8 }}>เฉลี่ย {d.avgMins} นาที/สัปดาห์ · n={d.n}</div>
+            {[
+              { label: "ไม่ผ่าน (< 150 นาที)", count: d.low,  color: "#EF4444" },
+              { label: "ผ่านขั้นต่ำ (150–299)",  count: d.ok,   color: "#F59E0B" },
+              { label: "ดี (≥ 300 นาที)",         count: d.good, color: "#10B981" },
+            ].map((row, i) => (
+              <div key={i} style={{ marginBottom: 8 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
+                  <span style={{ fontSize: 11, color: "#6B7280" }}>{row.label}</span>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: row.color }}>{row.count} คน ({Math.round((row.count/d.n)*100)}%)</span>
+                </div>
+                <div style={{ height: 6, background: "#F3F4F6", borderRadius: 3 }}>
+                  <div style={{ width: `${Math.round((row.count/d.n)*100)}%`, height: "100%", background: row.color, borderRadius: 3 }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Sedentary KPI */}
+      <div style={{ background: "#fff", borderRadius: 16, padding: 24, boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+          <div style={{ width: 4, height: 20, background: "#0891B2", borderRadius: 2 }} />
+          <div style={{ fontSize: 15, fontWeight: 800, color: "#164E63" }}>🛋️ พฤติกรรมเนือยนิ่ง (Sedentary)</div>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
+          <div style={{ background: d.avgSed >= 8 ? "#FEF2F2" : "#F0FDF4", borderRadius: 12, padding: "14px 16px", borderLeft: `4px solid ${parseFloat(d.avgSed) >= 8 ? "#EF4444" : "#10B981"}` }}>
+            <div style={{ fontSize: 28, fontWeight: 800, color: parseFloat(d.avgSed) >= 8 ? "#EF4444" : "#10B981" }}>{d.avgSed}</div>
+            <div style={{ fontSize: 11, color: "#6B7280" }}>ชม./วัน เฉลี่ย</div>
+            <div style={{ fontSize: 10, color: "#9CA3AF" }}>เกณฑ์ WHO ≤ 8 ชม./วัน</div>
+          </div>
+          <div style={{ background: "#FEF2F2", borderRadius: 12, padding: "14px 16px", borderLeft: "4px solid #EF4444" }}>
+            <div style={{ fontSize: 28, fontWeight: 800, color: "#EF4444" }}>{d.sedOver8}</div>
+            <div style={{ fontSize: 11, color: "#6B7280" }}>คน นั่งนิ่ง &gt; 8 ชม./วัน</div>
+            <div style={{ fontSize: 10, color: "#9CA3AF" }}>{Math.round((d.sedOver8/empArray.length)*100)}% ของบุคลากร</div>
+          </div>
+        </div>
+        <div style={{ fontSize: 12, fontWeight: 700, color: "#374151", marginBottom: 10 }}>การแจกแจงชม.นั่งนิ่งต่อวัน</div>
+        {[["< 4 ชม.", e => (e._raw ? (window.IDPScoring?.sedentaryHours(e._raw)||0) : (e.sedentaryHours||0)) < 4],
+          ["4–8 ชม.", e => { const h = e._raw ? (window.IDPScoring?.sedentaryHours(e._raw)||0) : (e.sedentaryHours||0); return h >= 4 && h < 8; }],
+          ["8–12 ชม.", e => { const h = e._raw ? (window.IDPScoring?.sedentaryHours(e._raw)||0) : (e.sedentaryHours||0); return h >= 8 && h < 12; }],
+          ["> 12 ชม.", e => (e._raw ? (window.IDPScoring?.sedentaryHours(e._raw)||0) : (e.sedentaryHours||0)) >= 12],
+        ].map(([label, testFn], i) => {
+          const count = empArray.filter(testFn).length;
+          const colors = ["#10B981","#F59E0B","#F97316","#EF4444"];
+          return (
+            <div key={i} style={{ marginBottom: 8 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
+                <span style={{ fontSize: 11, color: "#6B7280" }}>{label}</span>
+                <span style={{ fontSize: 11, fontWeight: 700, color: colors[i] }}>{count} คน</span>
+              </div>
+              <div style={{ height: 6, background: "#F3F4F6", borderRadius: 3 }}>
+                <div style={{ width: `${Math.round((count/empArray.length)*100)}%`, height: "100%", background: colors[i], borderRadius: 3 }} />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
 
 // ─── Main Component ──────────────────────────────────────────────────────────
 function PhysicalDashboard() {
@@ -171,6 +780,82 @@ function PhysicalDashboard() {
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("all");
   const [selectedEmp, setSelectedEmp] = useState(null);
+  const [bmiChartMode, setBmiChartMode] = useState("pie");
+  const [dietChartMode, setDietChartMode] = useState("pie");
+  const [tpaxChartMode, setTpaxChartMode] = useState("pie");
+
+  // eslint-disable-next-line no-shadow
+  const employees = useMemo(() => {
+    const realBundle = window.__IDP_EMPLOYEES__;
+    const real = realBundle && realBundle.physical;
+    if (real && real.length > 0) {
+      return real.map(e => { try { return classifyPhysical(e); } catch(_) { return null; } }).filter(Boolean);
+    }
+    return NAMES.map((n, i) => generateEmployee(n, i));
+  }, []);
+
+  // ── Aggregates (from real employees) ──────────────────────────────────────
+  const bmiDist = useMemo(() => BMI_CATEGORIES.map(cat => ({
+    ...cat,
+    value: employees.filter(e => e.bmiLevel && e.bmiLevel.label === cat.key).length,
+  })).filter(d => d.value > 0), [employees]);
+
+  const validH = employees.filter(e => e.height > 0);
+  const validW = employees.filter(e => e.weight > 0);
+  const validB = employees.filter(e => e.bmi != null && !isNaN(e.bmi));
+  const avgHeight = validH.length ? Math.round(validH.reduce((s, e) => s + e.height, 0) / validH.length) : 0;
+  const avgWeight = validW.length ? Math.round(validW.reduce((s, e) => s + e.weight, 0) / validW.length) : 0;
+  const avgBmi    = validB.length ? (validB.reduce((s, e) => s + e.bmi, 0) / validB.length).toFixed(1) : "—";
+  const waistRiskCount = employees.filter(e => e.waistRisk).length;
+  const scatterData = useMemo(() => validB.filter(e => e.weight > 0).map(e => ({
+    x: e.weight, y: parseFloat(Number(e.bmi).toFixed(1)),
+    gender: e.gender, name: e.name,
+    color: e.gender === "ชาย" ? "#3B82F6" : "#EC4899",
+  })), [employees]);
+
+  const sweetDist = useMemo(() => DIET_LEVELS.map(lv => ({
+    name: lv.key, value: employees.filter(e => lv.test(e.dietScore)).length, color: lv.color,
+  })), [employees]);
+  const dietBreakdown = useMemo(() => [
+    { label: "🍬 ของหวาน/น้ำตาล", count: employees.filter(e => e.dietRisk).length, color: "#EF4444" },
+    { label: "🥩 ไขมัน",           count: employees.filter(e => e.dietScore >= 3).length, color: "#F97316" },
+    { label: "🧂 เค็ม",             count: employees.filter(e => e.dietScore >= 2).length, color: "#F59E0B" },
+  ], [employees]);
+  const dietGood = employees.filter(e => !e.dietRisk).length;
+
+  const tpaxDist = useMemo(() => TPAX_LEVELS.map(lv => ({
+    name: lv.key, value: employees.filter(e => lv.test(e.exerciseDays)).length, color: lv.color,
+  })), [employees]);
+  const tpaxBarData = useMemo(() => [
+    { name: "ไม่ผ่านเกณฑ์", value: employees.filter(e => e.exerciseDays < 150).length,  fill: "#EF4444" },
+    { name: "พอดี",           value: employees.filter(e => e.exerciseDays >= 150 && e.exerciseDays < 300).length, fill: "#F59E0B" },
+    { name: "ดีมาก",          value: employees.filter(e => e.exerciseDays >= 300).length, fill: "#10B981" },
+  ], [employees]);
+  const avgTpaxMins = employees.length ? Math.round(employees.reduce((s, e) => s + (e.exerciseDays || 0), 0) / employees.length) : 0;
+  const avgExerciseDays = avgTpaxMins;
+  const sedAvg = employees.length ? (employees.reduce((s, e) => s + (e.sedentaryHours || 0), 0) / employees.length).toFixed(1) : "0";
+
+  const highRisk   = employees.filter(e => e.physicalGroup === "high");
+  const medRisk    = employees.filter(e => e.physicalGroup === "medium");
+  const lowRisk    = employees.filter(e => e.physicalGroup === "low");
+  const riskyBeh   = employees.filter(e => e.hasRiskyBehavior);
+  const ncdGroup   = employees.filter(e => e.hasNCD);
+  const highAndNCD = employees.filter(e => e.physicalGroup === "high" && e.hasNCD);
+  const highAndBeh = employees.filter(e => e.physicalGroup === "high" && e.hasRiskyBehavior);
+
+  const ncdCounts = useMemo(() => ["เบาหวาน","ความดันโลหิตสูง","โรคหัวใจ","โรคไต","โรคตับ","มะเร็ง"].map(d => ({
+    name: d, value: employees.filter(e => e.ncdList && e.ncdList.includes(d)).length, color: NCD_COLORS[d],
+  })).filter(d => d.value > 0), [employees]);
+
+  const deptData = useMemo(() => DEPTS.map(dept => {
+    const grp = employees.filter(e => e.dept === dept);
+    return {
+      name: dept,
+      "เสี่ยงสูง":   grp.filter(e => e.physicalGroup === "high").length,
+      "เฝ้าระวัง": grp.filter(e => e.physicalGroup === "medium").length,
+      "ปกติ":        grp.filter(e => e.physicalGroup === "low").length,
+    };
+  }), [employees]);
 
   const tabs = [
     { key: "overview",  label: "🏢 ภาพรวมองค์กร" },
@@ -197,7 +882,7 @@ function PhysicalDashboard() {
               </div>
               <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800 }}>🏃 รายงานสุขภาพกายบุคลากร</h1>
               <div style={{ fontSize: 12, color: "#A7F3D0", marginTop: 4 }}>
-                NIDA · {employees.length} คน · แบ่ง 3 ชั้น: ปัจจัยเสี่ยง · พฤติกรรมเสี่ยง · NCD
+                NIDA · {employees.length} คน · แบ่ง 3 ชั้น: ปัจจัยเสี่ยง · พฤติกรรมเสี่ยง · NCD {(window.__IDP_EMPLOYEES__ && window.__IDP_EMPLOYEES__.physical) ? "· ข้อมูลจริงจาก Supabase" : "· Mock Data"}
               </div>
             </div>
             {/* Quick stats */}
@@ -310,6 +995,247 @@ function PhysicalDashboard() {
               </ResponsiveContainer>
             </div>
 
+            {/* ── Body Metrics ── */}
+            <div style={{ background: "#fff", borderRadius: 16, padding: 24, boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <div style={{ width: 4, height: 20, background: "#0EA5E9", borderRadius: 2 }} />
+                  <div style={{ fontSize: 15, fontWeight: 800, color: "#0C4A6E" }}>📏 Body Metrics — ส่วนสูง / น้ำหนัก / รอบเอว / BMI</div>
+                </div>
+                <ChartToggleBtn mode={bmiChartMode} setMode={setBmiChartMode} />
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 12, marginBottom: 20 }}>
+                {[
+                  { label: "ส่วนสูงเฉลี่ย", value: `${avgHeight} ซม.`, color: "#0EA5E9", icon: "📏" },
+                  { label: "น้ำหนักเฉลี่ย",  value: `${avgWeight} กก.`, color: "#6366F1", icon: "⚖️" },
+                  { label: "BMI เฉลี่ย",      value: avgBmi,            color: parseFloat(avgBmi) >= 23 ? "#F97316" : "#10B981", icon: "🧮" },
+                  { label: "รอบเอวเกินเกณฑ์", value: `${waistRiskCount} คน (${pct(waistRiskCount, employees.length)}%)`, color: "#EF4444", icon: "📐" },
+                ].map((m, i) => (
+                  <div key={i} style={{ background: "#F8FAFC", borderRadius: 12, padding: "14px 16px", borderLeft: `4px solid ${m.color}` }}>
+                    <div style={{ fontSize: 18, marginBottom: 4 }}>{m.icon}</div>
+                    <div style={{ fontSize: 20, fontWeight: 800, color: m.color }}>{m.value}</div>
+                    <div style={{ fontSize: 11, color: "#6B7280" }}>{m.label}</div>
+                  </div>
+                ))}
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+                {/* BMI Distribution Chart */}
+                <div>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: "#374151", marginBottom: 12 }}>การกระจาย BMI</div>
+                  {bmiChartMode === "pie" ? (
+                    <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
+                      <ResponsiveContainer width={160} height={160}>
+                        <PieChart>
+                          <Pie data={bmiDist} dataKey="value" cx="50%" cy="50%" innerRadius={40} outerRadius={68} paddingAngle={2}>
+                            {bmiDist.map((entry, i) => <Cell key={i} fill={entry.color} />)}
+                          </Pie>
+                          <Tooltip formatter={(v, n) => [`${v} คน`, n]} contentStyle={{ fontFamily: "'IBM Plex Sans Thai Looped',sans-serif", fontSize: 11, borderRadius: 8 }} />
+                        </PieChart>
+                      </ResponsiveContainer>
+                      <div style={{ flex: 1 }}>
+                        {bmiDist.map((d, i) => (
+                          <div key={i} style={{ display: "flex", justifyContent: "space-between", marginBottom: 6, alignItems: "center" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                              <div style={{ width: 8, height: 8, borderRadius: "50%", background: d.color }} />
+                              <span style={{ fontSize: 11, color: "#374151" }}>{d.key}</span>
+                              <span style={{ fontSize: 10, color: "#9CA3AF" }}>{d.range}</span>
+                            </div>
+                            <span style={{ fontSize: 11, fontWeight: 700, color: d.color }}>{d.value} คน</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <ResponsiveContainer width="100%" height={160}>
+                      <BarChart data={bmiDist} layout="vertical" margin={{ left: 8, right: 20, top: 0, bottom: 0 }}>
+                        <XAxis type="number" tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
+                        <YAxis type="category" dataKey="key" tick={{ fontSize: 11, fontFamily: "'IBM Plex Sans Thai Looped',sans-serif" }} axisLine={false} tickLine={false} width={80} />
+                        <Tooltip formatter={v => [`${v} คน`]} contentStyle={{ fontFamily: "'IBM Plex Sans Thai Looped',sans-serif", fontSize: 11, borderRadius: 8 }} />
+                        <Bar dataKey="value" radius={[0, 4, 4, 0]}>
+                          {bmiDist.map((entry, i) => <Cell key={i} fill={entry.color} />)}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  )}
+                </div>
+
+                {/* Weight vs BMI Scatter */}
+                <div>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: "#374151", marginBottom: 4 }}>น้ำหนัก vs BMI (scatter)</div>
+                  <div style={{ display: "flex", gap: 10, marginBottom: 8 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                      <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#3B82F6" }} />
+                      <span style={{ fontSize: 10, color: "#6B7280" }}>ชาย</span>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                      <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#EC4899" }} />
+                      <span style={{ fontSize: 10, color: "#6B7280" }}>หญิง</span>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 4, marginLeft: 8 }}>
+                      <div style={{ width: 20, height: 1, background: "#F59E0B", borderTop: "2px dashed #F59E0B" }} />
+                      <span style={{ fontSize: 10, color: "#9CA3AF" }}>BMI 23 (เส้นอ้างอิง ASEAN)</span>
+                    </div>
+                  </div>
+                  <ResponsiveContainer width="100%" height={150}>
+                    <ScatterChart margin={{ top: 4, right: 10, left: -20, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
+                      <XAxis dataKey="x" type="number" name="น้ำหนัก (กก.)" domain={["auto","auto"]}
+                        tick={{ fontSize: 10 }} axisLine={false} tickLine={false} label={{ value: "น้ำหนัก (กก.)", fontSize: 9, fill: "#9CA3AF", position: "insideBottomRight", offset: -4 }} />
+                      <YAxis dataKey="y" type="number" name="BMI"
+                        tick={{ fontSize: 10 }} axisLine={false} tickLine={false} domain={[14, 36]} />
+                      <ReferenceLine y={23} stroke="#F59E0B" strokeDasharray="4 3" strokeWidth={1.5} />
+                      <Tooltip cursor={{ strokeDasharray: "3 3" }} content={({ active, payload }) => {
+                        if (!active || !payload?.length) return null;
+                        const d = payload[0].payload;
+                        return (
+                          <div style={{ background: "#1E293B", borderRadius: 8, padding: "8px 12px", fontFamily: "'IBM Plex Sans Thai Looped',sans-serif" }}>
+                            <div style={{ fontSize: 11, fontWeight: 700, color: "#F8FAFC" }}>{d.name}</div>
+                            <div style={{ fontSize: 10, color: "#94A3B8" }}>น้ำหนัก: {d.x} กก. · BMI: {d.y}</div>
+                          </div>
+                        );
+                      }} />
+                      <Scatter data={scatterData.filter(d => d.gender === "ชาย")} fill="#3B82F6" opacity={0.75} />
+                      <Scatter data={scatterData.filter(d => d.gender === "หญิง")} fill="#EC4899" opacity={0.75} />
+                    </ScatterChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            </div>
+
+            {/* ── Diet + TPAX row ── */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+
+              {/* 🥗 พฤติกรรมการบริโภค */}
+              <div style={{ background: "#fff", borderRadius: 16, padding: 24, boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <div style={{ width: 4, height: 20, background: "#16A34A", borderRadius: 2 }} />
+                    <div style={{ fontSize: 14, fontWeight: 800, color: "#14532D" }}>🥗 พฤติกรรมการบริโภค</div>
+                  </div>
+                  <ChartToggleBtn mode={dietChartMode} setMode={setDietChartMode} />
+                </div>
+
+                <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
+                  <div style={{ flex: 1, background: "#FEF2F2", borderRadius: 10, padding: "10px 12px", borderLeft: "3px solid #EF4444" }}>
+                    <div style={{ fontSize: 18, fontWeight: 800, color: "#EF4444" }}>{employees.filter(e => e.dietRisk).length}</div>
+                    <div style={{ fontSize: 10, color: "#9CA3AF" }}>กินไม่ดี (เสี่ยง)</div>
+                  </div>
+                  <div style={{ flex: 1, background: "#FFFBEB", borderRadius: 10, padding: "10px 12px", borderLeft: "3px solid #F59E0B" }}>
+                    <div style={{ fontSize: 18, fontWeight: 800, color: "#F59E0B" }}>{employees.filter(e => e.dietScore >= 2 && e.dietScore < 3).length}</div>
+                    <div style={{ fontSize: 10, color: "#9CA3AF" }}>พอใช้</div>
+                  </div>
+                  <div style={{ flex: 1, background: "#F0FDF4", borderRadius: 10, padding: "10px 12px", borderLeft: "3px solid #10B981" }}>
+                    <div style={{ fontSize: 18, fontWeight: 800, color: "#10B981" }}>{dietGood}</div>
+                    <div style={{ fontSize: 10, color: "#9CA3AF" }}>กินดี</div>
+                  </div>
+                </div>
+
+                {dietChartMode === "pie" ? (
+                  <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                    <ResponsiveContainer width={130} height={130}>
+                      <PieChart>
+                        <Pie data={sweetDist} dataKey="value" cx="50%" cy="50%" innerRadius={32} outerRadius={56} paddingAngle={2}>
+                          {sweetDist.map((entry, i) => <Cell key={i} fill={entry.color} />)}
+                        </Pie>
+                        <Tooltip formatter={(v, n) => [`${v} คน`, n]} contentStyle={{ fontFamily: "'IBM Plex Sans Thai Looped',sans-serif", fontSize: 11, borderRadius: 8 }} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: "#374151", marginBottom: 8 }}>ระดับพฤติกรรมการกิน (overall)</div>
+                      {sweetDist.map((d, i) => (
+                        <div key={i} style={{ display: "flex", justifyContent: "space-between", marginBottom: 6, alignItems: "center" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                            <div style={{ width: 8, height: 8, borderRadius: "50%", background: d.color }} />
+                            <span style={{ fontSize: 11, color: "#374151" }}>{d.name}</span>
+                          </div>
+                          <span style={{ fontSize: 11, fontWeight: 700, color: d.color }}>{d.value} คน</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <ResponsiveContainer width="100%" height={130}>
+                    <BarChart data={dietBreakdown} layout="vertical" margin={{ left: 8, right: 24, top: 0, bottom: 0 }}>
+                      <XAxis type="number" tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
+                      <YAxis type="category" dataKey="label" tick={{ fontSize: 10, fontFamily: "'IBM Plex Sans Thai Looped',sans-serif" }} axisLine={false} tickLine={false} width={110} />
+                      <Tooltip formatter={v => [`${v} คน`]} contentStyle={{ fontFamily: "'IBM Plex Sans Thai Looped',sans-serif", fontSize: 11, borderRadius: 8 }} />
+                      <Bar dataKey="count" radius={[0, 4, 4, 0]}>
+                        {dietBreakdown.map((entry, i) => <Cell key={i} fill={entry.color} />)}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                )}
+              </div>
+
+              {/* 🏃 TPAX กิจกรรมทางกาย */}
+              <div style={{ background: "#fff", borderRadius: 16, padding: 24, boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <div style={{ width: 4, height: 20, background: "#7C3AED", borderRadius: 2 }} />
+                    <div style={{ fontSize: 14, fontWeight: 800, color: "#4C1D95" }}>🏃 กิจกรรมทางกาย (TPAX)</div>
+                  </div>
+                  <ChartToggleBtn mode={tpaxChartMode} setMode={setTpaxChartMode} />
+                </div>
+
+                <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
+                  <div style={{ flex: 1, background: "#FEF2F2", borderRadius: 10, padding: "10px 12px", borderLeft: "3px solid #EF4444" }}>
+                    <div style={{ fontSize: 18, fontWeight: 800, color: "#EF4444" }}>{employees.filter(e => e.exerciseDays < 150).length}</div>
+                    <div style={{ fontSize: 10, color: "#9CA3AF" }}>ไม่ผ่านเกณฑ์</div>
+                  </div>
+                  <div style={{ flex: 1, background: "#F8FAFF", borderRadius: 10, padding: "10px 12px", borderLeft: "3px solid #6366F1" }}>
+                    <div style={{ fontSize: 18, fontWeight: 800, color: "#6366F1" }}>{avgExerciseDays}</div>
+                    <div style={{ fontSize: 10, color: "#9CA3AF" }}>นาที/สัปดาห์ เฉลี่ย</div>
+                  </div>
+                  <div style={{ flex: 1, background: "#FFF8F8", borderRadius: 10, padding: "10px 12px", borderLeft: "3px solid #F97316" }}>
+                    <div style={{ fontSize: 18, fontWeight: 800, color: "#F97316" }}>{sedAvg}</div>
+                    <div style={{ fontSize: 10, color: "#9CA3AF" }}>ชม./วัน นั่งนิ่ง</div>
+                  </div>
+                </div>
+
+                {tpaxChartMode === "pie" ? (
+                  <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                    <ResponsiveContainer width={130} height={130}>
+                      <PieChart>
+                        <Pie data={tpaxDist} dataKey="value" cx="50%" cy="50%" innerRadius={32} outerRadius={56} paddingAngle={2}>
+                          {tpaxDist.map((entry, i) => <Cell key={i} fill={entry.color} />)}
+                        </Pie>
+                        <Tooltip formatter={(v, n) => [`${v} คน`, n]} contentStyle={{ fontFamily: "'IBM Plex Sans Thai Looped',sans-serif", fontSize: 11, borderRadius: 8 }} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: "#374151", marginBottom: 8 }}>ระดับกิจกรรมทางกาย</div>
+                      {tpaxDist.map((d, i) => (
+                        <div key={i} style={{ display: "flex", justifyContent: "space-between", marginBottom: 6, alignItems: "center" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                            <div style={{ width: 8, height: 8, borderRadius: "50%", background: d.color }} />
+                            <span style={{ fontSize: 10, color: "#374151" }}>{d.name}</span>
+                          </div>
+                          <span style={{ fontSize: 11, fontWeight: 700, color: d.color }}>{d.value} คน</span>
+                        </div>
+                      ))}
+                      <div style={{ marginTop: 8, paddingTop: 8, borderTop: "1px solid #F3F4F6" }}>
+                        <div style={{ fontSize: 10, color: "#9CA3AF" }}>เกณฑ์ WHO: ≥ 150 นาที/สัปดาห์</div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <ResponsiveContainer width="100%" height={130}>
+                    <BarChart data={tpaxBarData} margin={{ top: 4, right: 16, left: -20, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" vertical={false} />
+                      <XAxis dataKey="name" tick={{ fontSize: 11, fontFamily: "'IBM Plex Sans Thai Looped',sans-serif" }} axisLine={false} tickLine={false} />
+                      <YAxis tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
+                      <Tooltip formatter={v => [`${v} คน`]} contentStyle={{ fontFamily: "'IBM Plex Sans Thai Looped',sans-serif", fontSize: 11, borderRadius: 8 }} />
+                      <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                        {tpaxBarData.map((entry, i) => <Cell key={i} fill={entry.fill} />)}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                )}
+              </div>
+            </div>
+
             {/* ── ชั้น 2 + ชั้น 3 ── */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
 
@@ -405,6 +1331,16 @@ function PhysicalDashboard() {
                 </div>
               </div>
             </div>
+
+            {/* ── Diet Heatmap ── */}
+            <DietHeatmapSection empArray={employees} />
+
+            {/* ── Substance Chart ── */}
+            <SubstanceChartSection empArray={employees} />
+
+            {/* ── TPAX Gauge + Sedentary ── */}
+            <TpaxSedentarySection empArray={employees} />
+
           </div>
         )}
 
@@ -591,7 +1527,7 @@ function PhysicalDashboard() {
                         { label: "ส่วนสูง", value: `${selectedEmp.height} ซม.`, color: "#6B7280" },
                         { label: "น้ำหนัก", value: `${selectedEmp.weight} กก.`, color: "#6B7280" },
                         { label: "BMI", value: selectedEmp.bmi, color: selectedEmp.bmiLevel.color, sub: selectedEmp.bmiLevel.label },
-                        { label: "เส้นรอบเอว", value: `${selectedEmp.waist} ซม.`, color: selectedEmp.waistRisk ? "#EF4444" : "#10B981", sub: selectedEmp.waistRisk ? "เกินเกณฑ์" : "ปกติ" },
+                        { label: "เส้นรอบเอว", value: `${selectedEmp.waistIn} นิ้ว`, color: selectedEmp.waistRisk ? "#EF4444" : "#10B981", sub: selectedEmp.waistRisk ? "WHtR เกิน 0.5" : "ปกติ" },
                       ].map((m, i) => (
                         <div key={i} style={{ background: "#F9FAFB", borderRadius: 10, padding: "12px 14px", textAlign: "center" }}>
                           <div style={{ fontSize: 11, color: "#9CA3AF", marginBottom: 4 }}>{m.label}</div>
@@ -711,6 +1647,96 @@ function PhysicalDashboard() {
                       ))}
                     </div>
                   </div>
+
+                  {/* Raw Survey Data Viewer */}
+                  {(() => {
+                    const e = selectedEmp;
+                    const FREQ_MAP = { "ทุกวัน / เกือบทุกวัน": "ทุกวัน", "3-4 ครั้งต่อสัปดาห์": "3-4×/สัปดาห์", "แทบไม่ทำ / ไม่ทำเลย": "แทบไม่ทำ" };
+                    const fq = v => FREQ_MAP[v] || v || "—";
+                    const sub = v => ({ "ไม่เคยสูบ": "ไม่สูบ", "สูบเป็นประจำทุกวัน": "ทุกวัน", "สูบ 2 – 3 ครั้งต่อสัปดาห์": "2-3×/สัปดาห์", "สูบบางโอกาส/นานๆสูบที": "บางโอกาส" }[v] || v || "—");
+                    const drk = v => ({ "ไม่เคยดื่ม": "ไม่ดื่ม", "ดื่มเป็นประจำทุกวัน": "ทุกวัน", "ดื่ม 2 – 3 ครั้งต่อสัปดาห์": "2-3×/สัปดาห์", "ดื่มบางโอกาส/นานๆดื่มที": "บางโอกาส" }[v] || v || "—");
+                    const dru = v => ({ "ไม่เคยเสพ": "ไม่เสพ", "เสพเป็นประจำทุกวัน": "ทุกวัน", "เสพ 2 – 3 ครั้งต่อสัปดาห์": "2-3×/สัปดาห์", "เสพบางโอกาส/นานๆเสพที": "บางโอกาส" }[v] || v || "—");
+                    const sc = v => ({ 0: "ไม่เลย", 1: "เล็กน้อย", 2: "มาก", 3: "มากที่สุด" }[v] ?? (v ?? "—"));
+                    const yn = v => v ? "เคย" : "ไม่เคย";
+                    const SECTIONS = [
+                      {
+                        key: "personal", icon: "👤", label: "ข้อมูลส่วนบุคคล & ร่างกาย",
+                        rows: [
+                          ["เพศ", e.gender], ["อายุ", e.age ? `${e.age} ปี` : "—"],
+                          ["ประเภทหน่วยงาน", e.dept], ["ระดับตำแหน่ง", e.job || "—"],
+                          ["อายุราชการ", e._raw?.job_duration != null ? `${e._raw.job_duration} ปี` : "—"],
+                          ["เคยเข้าร่วมกิจกรรม (องค์กร)", e._raw?.activity_org || "—"],
+                          ["เคยเข้าร่วมกิจกรรม (สสส.)", e._raw?.activity_thaihealth || "—"],
+                          ["ส่วนสูง", e.height ? `${e.height} ซม.` : "—"],
+                          ["น้ำหนัก", e.weight ? `${e.weight} กก.` : "—"],
+                          ["รอบเอว", e.waistIn ? `${e.waistIn} นิ้ว (${e.waistCm} ซม.)` : "—"],
+                          ["BMI", e.bmi ? `${e.bmi} — ${e.bmiLevel?.label || ""}` : "—"],
+                          ["WHtR (รอบเอว/ส่วนสูง)", e.waistCm && e.height ? `${(e.waistCm / e.height).toFixed(3)}` : "—"],
+                          ["โรคประจำตัว", e.ncdList?.length ? e.ncdList.join(", ") : "ไม่มี"],
+                        ]
+                      },
+                      {
+                        key: "consumption", icon: "🚬", label: "การบริโภคยาสูบ & สารเสพติด",
+                        rows: [
+                          ["บุหรี่ (มวน)", sub(e._raw?.q2001)],
+                          ["บุหรี่ไฟฟ้า", sub(e._raw?.q2002)],
+                          ["แอลกอฮอล์", drk(e._raw?.q2003)],
+                          ["เครื่องดื่มกัญชา", drk(e._raw?.q2004)],
+                          ["สารเสพติดอื่น", dru(e._raw?.q2005_drug ?? e._raw?.q2005)],
+                        ]
+                      },
+                      {
+                        key: "nutrition", icon: "🥗", label: "พฤติกรรมการบริโภค (หวาน/มัน/เค็ม)",
+                        rows: [
+                          ["🍬 หวาน 1 — น้ำเปล่า/ชาดำ (ไม่หวาน)", fq(e._raw?.sweet_1)],
+                          ["🍬 หวาน 2 — น้ำอัดลม/กาแฟหวาน", fq(e._raw?.sweet_2)],
+                          ["🍬 หวาน 3 — น้ำผัก/ผลไม้สำเร็จรูป", fq(e._raw?.sweet_3)],
+                          ["🍬 หวาน 4 — ไอศกรีม/เบเกอรี่/ขนม", fq(e._raw?.sweet_4)],
+                          ["🍬 หวาน 5 — เติมน้ำตาลในอาหาร", fq(e._raw?.sweet_5)],
+                          ["🥩 ไขมัน 1 — เนื้อติดมัน/หนัง", fq(e._raw?.fat_1)],
+                          ["🥩 ไขมัน 2 — อาหารทอด/ฟาสต์ฟู้ด", fq(e._raw?.fat_2)],
+                          ["🥩 ไขมัน 3 — แกงกะทิ/อาหารไขมันสูง", fq(e._raw?.fat_3)],
+                          ["🥩 ไขมัน 4 — นมข้น/ครีม/วิปปิ้ง", fq(e._raw?.fat_4)],
+                          ["🥩 ไขมัน 5 — ซดน้ำผัด/น้ำแกง", fq(e._raw?.fat_5)],
+                          ["🧂 เค็ม 1 — ชิมก่อนปรุงเพิ่ม", fq(e._raw?.salt_1)],
+                          ["🧂 เค็ม 2 — ใช้สมุนไพรแทนเครื่องปรุง", fq(e._raw?.salt_2)],
+                          ["🧂 เค็ม 3 — เนื้อแปรรูป/ไส้กรอก/ปลาเค็ม", fq(e._raw?.salt_3)],
+                          ["🧂 เค็ม 4 — บะหมี่/อาหารสำเร็จรูป", fq(e._raw?.salt_4)],
+                          ["🧂 เค็ม 5 — ผักดอง/จิ้มพริกเกลือ", fq(e._raw?.salt_5)],
+                        ]
+                      },
+                      {
+                        key: "activity", icon: "🏃", label: "กิจกรรมทางกาย (TPAX) & พฤติกรรมเนือยนิ่ง",
+                        rows: [
+                          ["การทำงาน — จำนวนวัน", e._raw?.act_work_days != null ? `${e._raw.act_work_days} วัน/สัปดาห์` : "—"],
+                          ["การทำงาน — ระยะเวลา/วัน", e._raw?.act_work_dur || "—"],
+                          ["การเดินทาง — จำนวนวัน", e._raw?.act_commute_days != null ? `${e._raw.act_commute_days} วัน/สัปดาห์` : "—"],
+                          ["การเดินทาง — ระยะเวลา/วัน", e._raw?.act_commute_dur || "—"],
+                          ["นันทนาการ/ออกกำลังกาย — จำนวนวัน", e._raw?.act_rec_days != null ? `${e._raw.act_rec_days} วัน/สัปดาห์` : "—"],
+                          ["นันทนาการ — ระยะเวลา/วัน", e._raw?.act_rec_dur || "—"],
+                          ["นั่งนิ่ง/เอนกาย — ระยะเวลา/วัน", e._raw?.sedentary_dur || "—"],
+                          ["จอบันเทิง (ทีวี/โทรศัพท์) — ระยะเวลา/วัน", e._raw?.screen_entertain || "—"],
+                          ["จอทำงาน/เรียน — ระยะเวลา/วัน", e._raw?.screen_work || "—"],
+                        ]
+                      },
+                      {
+                        key: "mental", icon: "🧠", label: "สุขภาพจิต (TMHI-15)",
+                        rows: Array.from({ length: 15 }, (_, i) => {
+                          const labels = [
+                            "พึงพอใจในชีวิต","สบายใจ","ภูมิใจในตนเอง",
+                            "เบื่อหน่ายท้อแท้ (R)","ผิดหวังในตนเอง (R)","ชีวิตมีแต่ทุกข์ (R)",
+                            "ทำใจยอมรับปัญหา","มั่นใจควบคุมอารมณ์","มั่นใจเผชิญเหตุร้าย",
+                            "เห็นอกเห็นใจผู้อื่น","มีสุขในการช่วยผู้อื่น","ให้ความช่วยเหลือเมื่อมีโอกาส",
+                            "มั่นคงปลอดภัยในครอบครัว","เชื่อครอบครัวดูแลเมื่อป่วย","มีคนพึ่งพาได้",
+                          ];
+                          return [`ข้อ ${i+1} — ${labels[i]}`, sc(e._raw?.[`tmhi_${i+1}`])];
+                        }).concat([["คะแนนรวม TMHI-15", e.tmhiScore != null ? `${e.tmhiScore} คะแนน` : "—"]])
+                      },
+                    ];
+                    return (
+                      <RawDataViewer sections={SECTIONS} empName={e.name} />
+                    );
+                  })()}
 
                 </div>
               )}

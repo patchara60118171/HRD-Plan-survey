@@ -17,8 +17,8 @@
     { key: 'gender',  label: '👥 เพศ',       width: 100 },
     { key: 'age',     label: '🎂 อายุ',      width: 120 },
     { key: 'bmi',     label: '⚖️ BMI',      width: 160 },
-    { key: 'job',     label: '💼 ตำแหน่ง', width: 160 },
     { key: 'orgType', label: '🏷️ ประเภท',  width: 140 },
+    { key: 'job',     label: '💼 ตำแหน่ง', width: 160 },
   ];
 
   const state = {
