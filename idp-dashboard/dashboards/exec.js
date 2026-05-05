@@ -23,13 +23,13 @@ const DIMS_4 = [{
 }, {
   key: "mental",
   label: "ใจ",
-  icon: "🧠",
+  icon: "�",
   color: "#F59E0B",
   light: "#FEF3C7"
 }, {
   key: "social",
   label: "สังคม",
-  icon: "👥",
+  icon: "🤝",
   color: "#8B5CF6",
   light: "#EDE9FE"
 }, {
@@ -458,6 +458,21 @@ function ExecutiveSummary() {
     }
   }, "A = \u0E40\u0E2A\u0E35\u0E48\u0E22\u0E07\u0E2A\u0E39\u0E07 3-4 \u0E21\u0E34\u0E15\u0E34 \xB7 B = 1-2 \u0E21\u0E34\u0E15\u0E34 \xB7 C = \u0E44\u0E21\u0E48\u0E21\u0E35\u0E04\u0E27\u0E32\u0E21\u0E40\u0E2A\u0E35\u0E48\u0E22\u0E07"))), /*#__PURE__*/React.createElement("div", {
     style: {
+      background: "linear-gradient(135deg,#EFF6FF 0%,#DBEAFE 100%)",
+      borderRadius: 12,
+      padding: "14px 20px",
+      marginBottom: 16,
+      border: "1px solid #BFDBFE",
+      textAlign: "center"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 16,
+      fontWeight: 800,
+      color: "#1D4ED8"
+    }
+  }, "\u0E08\u0E33\u0E19\u0E27\u0E19\u0E02\u0E49\u0E32\u0E23\u0E32\u0E0A\u0E01\u0E32\u0E23 ", employees.length.toLocaleString(), " \u0E04\u0E19")), /*#__PURE__*/React.createElement("div", {
+    style: {
       display: "grid",
       gridTemplateColumns: "1fr 1fr 1fr 1fr 1.2fr",
       gap: 14
@@ -485,7 +500,12 @@ function ExecutiveSummary() {
         color: cfg.color,
         marginTop: 4
       }
-    }, grp.length), /*#__PURE__*/React.createElement("div", {
+    }, grp.length, " ", /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 16,
+        fontWeight: 700
+      }
+    }, "\u0E04\u0E19")), /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 12,
         fontWeight: 700,
@@ -498,7 +518,7 @@ function ExecutiveSummary() {
       }
     }, cfg.desc), /*#__PURE__*/React.createElement("div", {
       style: {
-        height: 5,
+        height: 3,
         background: cfg.color + "22",
         borderRadius: 3,
         marginTop: 8,
@@ -1294,7 +1314,7 @@ function ExecutiveSummary() {
       borderBottom: "1px solid #F3F4F6",
       gap: 8
     }
-  }, ["#", "ชื่อ", "หน่วยงาน", "🏃 กาย", "🧠 ใจ", "👥 สังคม", "🌿 แวดล้อม", "กลุ่ม"].map((h, i) => /*#__PURE__*/React.createElement("div", {
+  }, ["#", "ชื่อ", "หน่วยงาน", "🏃 กาย", "🤍 ใจ", "🤝 สังคม", "🌿 แวดล้อม", "กลุ่ม"].map((h, i) => /*#__PURE__*/React.createElement("div", {
     key: i,
     style: {
       fontSize: 10,

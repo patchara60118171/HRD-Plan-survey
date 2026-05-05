@@ -43,17 +43,20 @@
 })();
 </script>
 </head>
-<body>
+<body class="sidebar-collapsed">
 
 <!-- ===== SIDEBAR ===== -->
 <div class="sidebar-backdrop" onclick="document.body.classList.remove('sidebar-open')"></div>
-<div class="sidebar">
+<div class="sidebar collapsed">
   <div class="sidebar-logo">
     <button class="sidebar-close-btn" onclick="document.body.classList.remove('sidebar-open')" aria-label="ปิดเมนู">✕</button>
+    <button class="sidebar-toggle-btn" onclick="toggleSidebarCollapse()" aria-label="ย่อ/ขยายเมนู" title="ย่อ/ขยายเมนู">
+      <span class="sidebar-toggle-icon">◀</span>
+    </button>
     <div class="logo-main">
       <div class="logo-icon">🏛️</div>
-      <div>
-        <div class="logo-title">Well-being Survey<br>Admin Portal</div>
+      <div class="logo-text">
+        <div class="logo-title">Admin Portal</div>
       </div>
     </div>
     <div class="logo-sub">ระบบสำรวจสุขภาวะบุคลากรภาครัฐ</div>
@@ -78,9 +81,11 @@
     <div class="nav-item" onclick="go('form-wb',this)"><span class="ni">💚</span> Wellbeing Survey</div>
 
     <div class="nav-group">วิเคราะห์ข้อมูล</div>
+    <div class="nav-item" onclick="go('idp',this)"><span class="ni">📋</span> NIDA · Well-being Survey</div>
+
+    <div class="nav-group">เมนูอื่น ๆ</div>
     <div class="nav-item" onclick="go('ch1-summary',this)"><span class="ni">📊</span> สรุปภาพรวมแบบสำรวจข้อมูลองค์กร</div>
-    <div class="nav-item" onclick="go('an-wb',this)"><span class="ni">🧠</span> วิเคราะห์ Wellbeing</div>
-    <div class="nav-item" onclick="go('idp',this)"><span class="ni">📋</span> แผนพัฒนาบุคลากร (IDP)</div>
+    <div class="nav-item" onclick="go('an-wb',this)"><span class="ni">🤍</span> วิเคราะห์ Wellbeing</div>
     <div class="nav-item" onclick="go('compare',this)"><span class="ni">⚖️</span> เปรียบเทียบองค์กร</div>
     <div class="nav-item" onclick="go('export',this)"><span class="ni">📤</span> Export รายงาน</div>
 
@@ -469,7 +474,7 @@
         <div class="anwb-tabs" style="margin-bottom:20px">
           <button class="anwb-tab active" data-tab="overview"     onclick="anwbSwitchTab('overview')">📊 ภาพรวม</button>
           <button class="anwb-tab"        data-tab="physical"     onclick="anwbSwitchTab('physical')">💪 กาย</button>
-          <button class="anwb-tab"        data-tab="mental"       onclick="anwbSwitchTab('mental')">🧠 ใจ</button>
+          <button class="anwb-tab"        data-tab="mental"       onclick="anwbSwitchTab('mental')">� ใจ</button>
           <button class="anwb-tab"        data-tab="social"       onclick="anwbSwitchTab('social')">🤝 สังคม</button>
           <button class="anwb-tab"        data-tab="environment"  onclick="anwbSwitchTab('environment')">🌿 สิ่งแวดล้อม</button>
         </div>
@@ -846,6 +851,44 @@
 
 <!-- Production console silencer — must load before any JS that might log -->
 <script src="js/logger.js"></script>
+
+<!-- Sidebar collapse/expand functionality -->
+<script>
+function toggleSidebarCollapse() {
+  const sidebar = document.querySelector('.sidebar');
+  const body = document.body;
+  
+  if (sidebar.classList.contains('collapsed')) {
+    sidebar.classList.remove('collapsed');
+    body.classList.remove('sidebar-collapsed');
+    localStorage.setItem('sidebarCollapsed', 'false');
+  } else {
+    sidebar.classList.add('collapsed');
+    body.classList.add('sidebar-collapsed');
+    localStorage.setItem('sidebarCollapsed', 'true');
+  }
+}
+
+// Restore sidebar state on page load
+document.addEventListener('DOMContentLoaded', function() {
+  // Default to collapsed, but allow localStorage to override
+  const sidebarCollapsed = localStorage.getItem('sidebarCollapsed');
+  const shouldBeCollapsed = sidebarCollapsed === null ? true : sidebarCollapsed === 'true';
+  
+  if (shouldBeCollapsed) {
+    document.querySelector('.sidebar').classList.add('collapsed');
+    document.body.classList.add('sidebar-collapsed');
+  } else {
+    document.querySelector('.sidebar').classList.remove('collapsed');
+    document.body.classList.remove('sidebar-collapsed');
+  }
+  
+  // Initialize localStorage if not set
+  if (sidebarCollapsed === null) {
+    localStorage.setItem('sidebarCollapsed', 'true');
+  }
+});
+</script>
 <!-- Accessibility polyfills: keyboard support for legacy onclick elements -->
 <script src="js/a11y.js" defer></script>
 <!-- CDN: supabase-js UMD build — ensures window.supabase global -->

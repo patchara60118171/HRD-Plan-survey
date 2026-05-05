@@ -267,19 +267,18 @@
 <body>
   <header>
     <div class="header-inner">
-      <div class="brand">NIDA · Well-being Survey</div>
       <div class="title-row">
         <div>
-          <h1>IDP Dashboard</h1>
-          <div class="subtitle" id="subtitle">รายงาน 5 มิติสุขภาวะ · กำลังเชื่อม Supabase…</div>
+          <h1>Well-being Dashboard</h1>
+          <div class="subtitle" id="subtitle">รายงานสุขภาวะ 4 มิติสุขภาวะ · กำลังเชื่อม Supabase…</div>
         </div>
       </div>
       <div class="tabs" id="tabs">
-        <button class="tab active" data-key="exec">📊 Executive</button>
-        <button class="tab" data-key="physical">💪 Physical</button>
-        <button class="tab" data-key="tmhi">🧠 Mental (TMHI)</button>
-        <button class="tab" data-key="ucla">🤝 Social (UCLA)</button>
-        <button class="tab" data-key="env">🌿 Environment</button>
+        <button class="tab active" data-key="exec">📊 ภาพรวมองค์กร</button>
+        <button class="tab" data-key="physical">💪 มิติด้านกาย</button>
+        <button class="tab" data-key="tmhi">🤍 มิติด้านจิตใจ</button>
+        <button class="tab" data-key="ucla">🤝 มิติด้านสังคม</button>
+        <button class="tab" data-key="env">🌿 มิติด้านสภาพแวดล้อม</button>
       </div>
     </div>
   </header>
@@ -523,7 +522,7 @@
         var bundle = window.IDPData.buildEmployees();
         window.__IDP_EMPLOYEES__ = bundle;
         realDataLoaded = true;
-        setSubtitle('รายงาน 5 มิติสุขภาวะ · ข้อมูลจริงจาก Supabase (' + totalCount.toLocaleString() + ' คน)');
+        setSubtitle('รายงานสุขภาวะ 4 มิติสุขภาวะ · ข้อมูล (' + totalCount.toLocaleString() + ' คน)');
         mountFilterBar();
         loadAndMount('exec'); // initial render
       } catch (e) {

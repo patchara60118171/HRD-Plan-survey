@@ -499,7 +499,7 @@ function TMHIDashboard() {
               <div style={{ fontSize:11, letterSpacing:3, color:"#FDE68A", textTransform:"uppercase", marginBottom:6 }}>
                 TMHI-15 · Thai Mental Health Indicator 2007 · มิติสุขภาพจิต
               </div>
-              <h1 style={{ margin:0, fontSize:22, fontWeight:800 }}>🧠 รายงานสุขภาพจิตบุคลากร</h1>
+              <h1 style={{ margin:0, fontSize:22, fontWeight:800 }}>🤍 รายงานสุขภาพจิตบุคลากร</h1>
               <div style={{ fontSize:12, color:"#FDE68A", marginTop:4 }}>
                 NIDA · {allEmps.length.toLocaleString()} คน · คะแนนเต็ม 60 · ยิ่งสูง = สุขภาพจิตดีกว่า
               </div>
@@ -803,7 +803,7 @@ function TMHIDashboard() {
             <div style={{ flex:1 }}>
               {!selectedEmp ? (
                 <div style={{ background:"#fff", borderRadius:16, padding:60, textAlign:"center", color:"#9CA3AF", boxShadow:"0 1px 3px rgba(0,0,0,0.06)" }}>
-                  <div style={{ fontSize:48, marginBottom:16 }}>🧠</div>
+                  <div style={{ fontSize:48, marginBottom:16 }}>�</div>
                   <div>เลือกชื่อด้านซ้ายเพื่อดูรายละเอียด IDP</div>
                 </div>
               ) : (

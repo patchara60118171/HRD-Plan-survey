@@ -1682,7 +1682,7 @@ function PhysicalDashboard() {
                         ]
                       },
                       {
-                        key: "mental", icon: "🧠", label: "สุขภาพจิต (TMHI-15)",
+                        key: "mental", icon: "🤍", label: "สุขภาพจิต (TMHI-15)",
                         rows: Array.from({ length: 15 }, (_, i) => {
                           const labels = [
                             "พึงพอใจในชีวิต","สบายใจ","ภูมิใจในตนเอง",

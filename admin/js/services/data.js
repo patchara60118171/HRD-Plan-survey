@@ -29,6 +29,8 @@ const ADMIN_CANONICAL_ORG_NAMES = new Set(ADMIN_CANONICAL_ORGS.map((org) => org.
 // which performs a lazy fetch + merge.
 const SURVEY_SELECT_FIELDS = 'id,email,name,title,organization,gender,age,org_type,job,job_duration,bmi,bmi_category,is_draft,submitted_at,timestamp,tmhi_score';
 const SURVEY_RAW_FIELDS    = 'id,raw_responses';
+// Fields for cleaned_responses table (cleaned_data contains the actual survey data)
+const CLEANED_SELECT_FIELDS = 'id,response_id,cleaned_data,verification_status,cleaning_version,cleaned_at';
 // Light fields for first-paint: skip heavy form_data JSONB. form_data is filled in the extras phase.
 const CH1_LITE_FIELDS = 'id,org_code,organization,status,created_at,last_saved_at,submitted_at,form_version';
 // Full fields for extras phase — explicit list excluding raw_payload (can exceed 2MB per row).
@@ -136,14 +138,14 @@ async function ensureSurveyRaw() {
     try {
       const { data, error } = await fetchAllSurveyRaw();
       if (error) { console.warn('ensureSurveyRaw:', error.message); return { error: error.message }; }
-      const byId = new Map((data || []).map((row) => [row.id, row.raw_responses || {}]));
+      const byId = new Map((data || []).map((row) => [row.response_id, row.cleaned_data || {}]));
       const rows = state.surveyRows || [];
       state.surveyRows = rows.map((row) => {
-        const raw = byId.get(row.id);
-        if (!raw) return row;
-        // Re-normalize with raw_responses spread in, preserving top-level
-        // columns (top-level wins over raw_responses).
-        return { ...raw, ...row, raw_responses: raw };
+        const cleaned = byId.get(row.id);
+        if (!cleaned) return row;
+        // Re-normalize with cleaned_data spread in, preserving top-level
+        // columns (top-level wins over cleaned_data).
+        return { ...cleaned, ...row, cleaned_data: cleaned };
       });
       _rawMerged = true;
       return { loaded: true };
@@ -156,8 +158,9 @@ async function ensureSurveyRaw() {
 
 async function fetchAllSurveyRaw() {
   const pageSize = 1000;
-  const countRes = await sb.from('survey_responses')
-    .select('id', { count: 'exact', head: true });
+  const countRes = await sb.from('cleaned_responses')
+    .select('id', { count: 'exact', head: true })
+    .eq('verification_status', 'verified');
   if (countRes.error) return { data: [], error: countRes.error };
   const total = countRes.count || 0;
   if (total === 0) return { data: [], error: null };
@@ -169,48 +172,93 @@ async function fetchAllSurveyRaw() {
 
   const pageResults = await Promise.all(
     ranges.map(([from, to]) =>
-      sb.from('survey_responses')
-        .select(SURVEY_RAW_FIELDS)
-        .order('submitted_at', { ascending: false, nullsFirst: false })
+      sb.from('cleaned_responses')
+        .select(`
+          id,
+          response_id,
+          cleaned_data,
+          verification_status,
+          cleaning_version,
+          cleaned_at,
+          survey_responses!inner(
+            id,
+            email,
+            name,
+            title,
+            organization,
+            gender,
+            age,
+            org_type,
+            job,
+            job_duration,
+            bmi,
+            bmi_category,
+            is_draft,
+            submitted_at,
+            timestamp,
+            tmhi_score
+          )
+        `)
+        .eq('verification_status', 'verified')
+        .order('cleaned_at', { ascending: false })
         .range(from, to)
     )
   );
 
-  const failed = pageResults.find((res) => res.error);
-  if (failed?.error) return { data: [], error: failed.error };
-
-  return { data: pageResults.flatMap((res) => res.data || []), error: null };
+  const data = pageResults.flatMap(r => r.data || []);
+  return { data, error: null };
 }
 
 // Paginated survey responses for Phase 1 performance fix
 async function fetchPaginatedSurveyResponses(page = 1, pageSize = 50, options = {}) {
   const start = (page - 1) * pageSize;
-  const { data, count, error } = await sb.from('survey_responses')
-    .select(SURVEY_SELECT_FIELDS, { count: 'exact' })
-    .order('submitted_at', { ascending: false, nullsFirst: false })
+  const { data, count, error } = await sb.from('cleaned_responses')
+    .select(`
+      id,
+      response_id,
+      cleaned_data,
+      verification_status,
+      cleaning_version,
+      cleaned_at,
+      survey_responses!inner(
+        email,
+        name,
+        title,
+        organization,
+        gender,
+        age,
+        org_type,
+        job,
+        job_duration,
+        bmi,
+        bmi_category,
+        is_draft,
+        submitted_at,
+        timestamp,
+        tmhi_score
+      ),
+      { count: 'exact' }
+    `)
+    .eq('verification_status', 'verified')
+    .order('cleaned_at', { ascending: false })
     .range(start, start + pageSize - 1);
   
   if (error) return { data: [], error, totalPages: 0 };
-  
-  return {
-    data: (data || []).filter(row => !_isTestOrgRow(row)).map(normalizeSurveyRow),
-    totalPages: Math.ceil((count || 0) / pageSize),
-    currentPage: page,
-    totalRecords: count || 0
-  };
+  const totalPages = Math.ceil((count || 0) / pageSize);
+  return { data, totalPages, error: null };
 }
 
 async function fetchAllSurveyResponses() {
   const pageSize = 1000;
-  // Use ordering to ensure consistent pagination and leverage the composite index
-  const countRes = await sb.from('survey_responses')
+  // Use cleaned_responses table with verified data only
+  const countRes = await sb.from('cleaned_responses')
     .select('id', { count: 'exact', head: true })
-    .order('submitted_at', { ascending: false, nullsFirst: false });
+    .eq('verification_status', 'verified')
+    .order('cleaned_at', { ascending: false });
 
   if (countRes.error) {
     return { data: [], error: countRes.error };
   }
-
   const total = countRes.count || 0;
   if (total === 0) return { data: [], error: null };
 
@@ -219,24 +267,43 @@ async function fetchAllSurveyResponses() {
     ranges.push([from, Math.min(from + pageSize - 1, total - 1)]);
   }
 
-  // Add ordering to each page query for consistent results and index usage
+  // Fetch from cleaned_responses and join with survey_responses for metadata
   const pageResults = await Promise.all(
     ranges.map(([from, to]) =>
-      sb.from('survey_responses')
-        .select(SURVEY_SELECT_FIELDS)
-        .order('submitted_at', { ascending: false, nullsFirst: false })
+      sb.from('cleaned_responses')
+        .select(`
+          id,
+          response_id,
+          cleaned_data,
+          verification_status,
+          cleaning_version,
+          cleaned_at,
+          survey_responses!inner(
+            email,
+            name,
+            title,
+            organization,
+            gender,
+            age,
+            org_type,
+            job,
+            job_duration,
+            bmi,
+            bmi_category,
+            is_draft,
+            submitted_at,
+            timestamp,
+            tmhi_score
+          )
+        `)
+        .eq('verification_status', 'verified')
+        .order('cleaned_at', { ascending: false })
         .range(from, to)
     )
   );
 
-  const failed = pageResults.find((res) => res.error);
-  if (failed?.error) {
-    return { data: [], error: failed.error };
-  }
-
-  const rows = pageResults.flatMap((res) => res.data || []);
-
-  return { data: rows, error: null };
+  const data = pageResults.flatMap(r => r.data || []);
+  return { data, error: null };
 }
 
 // ────────────────────────────────────────────────────────────────────────

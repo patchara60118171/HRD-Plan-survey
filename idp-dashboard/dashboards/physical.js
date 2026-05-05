@@ -3772,7 +3772,7 @@ function PhysicalDashboard() {
       rows: [["การทำงาน — จำนวนวัน", e._raw?.act_work_days != null ? `${e._raw.act_work_days} วัน/สัปดาห์` : "—"], ["การทำงาน — ระยะเวลา/วัน", e._raw?.act_work_dur || "—"], ["การเดินทาง — จำนวนวัน", e._raw?.act_commute_days != null ? `${e._raw.act_commute_days} วัน/สัปดาห์` : "—"], ["การเดินทาง — ระยะเวลา/วัน", e._raw?.act_commute_dur || "—"], ["นันทนาการ/ออกกำลังกาย — จำนวนวัน", e._raw?.act_rec_days != null ? `${e._raw.act_rec_days} วัน/สัปดาห์` : "—"], ["นันทนาการ — ระยะเวลา/วัน", e._raw?.act_rec_dur || "—"], ["นั่งนิ่ง/เอนกาย — ระยะเวลา/วัน", e._raw?.sedentary_dur || "—"], ["จอบันเทิง (ทีวี/โทรศัพท์) — ระยะเวลา/วัน", e._raw?.screen_entertain || "—"], ["จอทำงาน/เรียน — ระยะเวลา/วัน", e._raw?.screen_work || "—"]]
     }, {
       key: "mental",
-      icon: "🧠",
+      icon: "🤍",
       label: "สุขภาพจิต (TMHI-15)",
       rows: Array.from({
         length: 15

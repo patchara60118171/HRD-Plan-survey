@@ -24,7 +24,7 @@ const DIMS = [
     note: "จัดกลุ่มตามเนื้อหา ไม่ใช่ sub-scale มาตรฐาน",
   },
   {
-    key: "relation", label: "ความสัมพันธ์ทางสังคม",    short: "สัมพันธ์",   icon: "🤝",
+    key: "relation", label: "ความสัมพันธ์ทางสังคม",    short: "สัมพันธ์",    icon: "🤝",
     items: [5,6,7,8,9],
     color: "#F97316",
     desc: "ข้อ 63-67 · รอคนติดต่อก่อน ไม่มีใครพึ่ง รู้สึกถูกทอดทิ้ง",
@@ -38,7 +38,7 @@ const DIMS = [
     note: "จัดกลุ่มตามเนื้อหา ไม่ใช่ sub-scale มาตรฐาน",
   },
   {
-    key: "social",   label: "พฤติกรรมทางสังคม",         short: "พฤติกรรม",  icon: "👥",
+    key: "social",   label: "พฤติกรรมทางสังคม",         short: "พฤติกรรม",  icon: "🤝",
     items: [15,16,17,18,19],
     color: "#0EA5E9",
     desc: "ข้อ 73-77 · รู้สึกถูกแยก ถอยห่างจากสังคม รู้จักคนยาก",
@@ -482,7 +482,7 @@ function UCLADashboard() {
               <div style={{ fontSize: 11, letterSpacing: 3, color: "#C4B5FD", textTransform: "uppercase", marginBottom: 6 }}>
                 UCLA Loneliness Scale V.3 · มิติสังคม
               </div>
-              <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800 }}>👥 รายงานสุขภาวะสังคมบุคลากร</h1>
+              <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800 }}>🤝 รายงานสุขภาวะสังคมบุคลากร</h1>
               <div style={{ fontSize: 12, color: "#DDD6FE", marginTop: 4 }}>
                 NIDA · {allEmps.length.toLocaleString()} คน · คะแนนเต็ม 60 · ยิ่งสูง = ยิ่งเหงา
               </div>

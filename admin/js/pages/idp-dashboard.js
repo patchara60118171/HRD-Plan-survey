@@ -632,7 +632,7 @@ function _idpRenderSocial(rows) {
     { key: 'lonely',   label: 'ความรู้สึกโดดเดี่ยว',       icon: '😔', color: '#EF4444', items: [1,2,3,4,5] },
     { key: 'relation', label: 'ความสัมพันธ์ทางสังคม',      icon: '🤝', color: '#F97316', items: [6,7,8,9,10] },
     { key: 'self',     label: 'ความรู้สึกเกี่ยวกับตนเอง',  icon: '🪞', color: '#8B5CF6', items: [11,12,13,14,15] },
-    { key: 'behavior', label: 'พฤติกรรมทางสังคม',           icon: '👥', color: '#0EA5E9', items: [16,17,18,19,20] },
+    { key: 'behavior', label: 'พฤติกรรมทางสังคม',           icon: '🤝', color: '#0EA5E9', items: [16,17,18,19,20] },
   ];
 
   const dimPcts = UCLA_DIMS.map(dim => {

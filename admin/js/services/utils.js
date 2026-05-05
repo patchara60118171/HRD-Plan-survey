@@ -60,25 +60,28 @@ function getCh1Org(row) {
 }
 
 function normalizeSurveyRow(row, index) {
-  const raw = row.raw_responses || {};
+  // Handle both old survey_responses and new cleaned_responses structure
+  const raw = row.raw_responses || row.cleaned_data || {};
+  const surveyData = row.survey_responses || {};
+  
   return {
     _index: index + 1,
     ...raw,
     id: row.id,
-    email: row.email,
-    name: row.name,
-    title: row.title,
-    organization: row.organization || raw.organization || raw.agency_name || '—',
-    gender: row.gender || raw.gender || '—',
-    age: row.age ?? raw.age ?? null,
-    org_type: row.org_type || raw.org_type || raw.position_type || '—',
-    job: row.job || raw.job || raw.level || '—',
-    job_duration: row.job_duration || raw.job_duration || raw.service_years || '—',
-    bmi: row.bmi ?? raw.bmi ?? null,
-    bmi_category: row.bmi_category || raw.bmi_category || '—',
-    is_draft: Boolean(row.is_draft),
-    submitted_at: row.submitted_at || row.timestamp || raw.submitted_at || null,
-    tmhi_score: row.tmhi_score ?? raw.tmhi_score ?? null,
+    email: row.email || surveyData.email,
+    name: row.name || surveyData.name,
+    title: row.title || surveyData.title,
+    organization: row.organization || surveyData.organization || raw.organization || raw.agency_name || '—',
+    gender: row.gender || surveyData.gender || raw.gender || '—',
+    age: row.age ?? surveyData.age ?? raw.age ?? null,
+    org_type: row.org_type || surveyData.org_type || raw.org_type || raw.position_type || '—',
+    job: row.job || surveyData.job || raw.job || raw.level || '—',
+    job_duration: row.job_duration || surveyData.job_duration || raw.job_duration || raw.service_years || '—',
+    bmi: row.bmi ?? surveyData.bmi ?? raw.bmi ?? null,
+    bmi_category: row.bmi_category || surveyData.bmi_category || raw.bmi_category || '—',
+    is_draft: Boolean(row.is_draft || surveyData.is_draft),
+    submitted_at: row.submitted_at || row.timestamp || surveyData.submitted_at || raw.submitted_at || row.cleaned_at || null,
+    tmhi_score: row.tmhi_score ?? surveyData.tmhi_score ?? raw.tmhi_score ?? null,
   };
 }
 

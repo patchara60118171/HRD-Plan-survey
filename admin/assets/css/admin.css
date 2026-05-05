@@ -22,21 +22,49 @@
 body{font-family:'IBM Plex Sans Thai Looped',sans-serif;background:var(--bg);color:var(--tx);font-size:14px;display:flex;min-height:100vh;line-height:1.6;overflow-x:clip}
 
 /* ===== SIDEBAR ===== */
-.sidebar{width:var(--sidebar-w);background:var(--PD);color:#fff;display:flex;flex-direction:column;flex-shrink:0;position:fixed;top:0;left:0;height:100vh;z-index:100;overflow-y:auto}
-.sidebar-logo{padding:20px 18px 16px;border-bottom:1px solid rgba(255,255,255,.1)}
+.sidebar{width:var(--sidebar-w);background:var(--PD);color:#fff;display:flex;flex-direction:column;flex-shrink:0;position:fixed;top:0;left:0;height:100vh;z-index:100;overflow-y:auto;transition:width .3s cubic-bezier(.4,0,.2,1)}
+.sidebar.collapsed{width:56px}
+.sidebar-logo{padding:20px 18px 16px;border-bottom:1px solid rgba(255,255,255,.1);position:relative}
+.sidebar.collapsed .sidebar-logo{padding:16px 8px 12px}
 .sidebar-logo .logo-main{display:flex;align-items:center;gap:10px;margin-bottom:6px}
-.sidebar-logo .logo-icon{width:32px;height:32px;background:var(--A);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
-.sidebar-logo .logo-title{font-size:14px;font-weight:700;color:#fff;line-height:1.25}
-.sidebar-logo .logo-sub{font-size:10.5px;color:rgba(255,255,255,.5);margin-top:1px;padding-left:42px}
+.sidebar.collapsed .logo-main{justify-content:center;margin-bottom:0}
+.sidebar-logo .logo-icon{width:32px;height:32px;background:var(--A);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;transition:all .3s}
+.sidebar.collapsed .logo-icon{width:28px;height:28px;font-size:15px}
+.sidebar-logo .logo-title{font-size:14px;font-weight:700;color:#fff;line-height:1.25;transition:all .3s}
+.sidebar.collapsed .logo-title{opacity:0;visibility:hidden;position:absolute}
+.sidebar-logo .logo-sub{font-size:10.5px;color:rgba(255,255,255,.5);margin-top:1px;padding-left:42px;transition:opacity .3s}
+.sidebar.collapsed .logo-sub{opacity:0;visibility:hidden}
 .sidebar-user{margin:12px 14px;background:rgba(255,255,255,.08);border-radius:8px;padding:9px 11px;display:flex;align-items:center;gap:9px}
+.sidebar.collapsed .sidebar-user{margin:8px 4px;padding:6px}
 .sidebar-user .u-avatar{width:30px;height:30px;border-radius:50%;background:var(--P);border:2px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;color:#fff}
+.sidebar.collapsed .u-avatar{width:24px;height:24px;font-size:10px;margin:0 auto}
 .sidebar-user .u-info{flex:1;min-width:0}
+.sidebar.collapsed .u-info{display:none}
 .sidebar-user .u-name{font-size:12px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sidebar-user .u-role{font-size:10px;color:rgba(255,255,255,.55);display:flex;align-items:center;gap:4px}
+.sidebar.collapsed .sidebar-user{justify-content:center}
 .u-role-dot{width:5px;height:5px;border-radius:50%;background:var(--A);flex-shrink:0}
+
+/* Sidebar toggle button */
+.sidebar-toggle-btn{position:absolute;top:50%;right:10px;width:20px;height:20px;border-radius:50%;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;font-size:10px;cursor:pointer;align-items:center;justify-content:center;line-height:1;font-family:inherit;transition:all .3s;flex-shrink:0;padding:0;display:flex;transform:translateY(-50%);box-shadow:0 2px 4px rgba(0,0,0,.1)}
+.sidebar-toggle-btn:hover{background:rgba(255,255,255,.25);transform:translateY(-50%) scale(1.1)}
+.sidebar.collapsed .sidebar-toggle-btn{right:6px;transform:translateY(-50%) rotate(180deg)}
+.sidebar.collapsed .sidebar-toggle-btn:hover{transform:translateY(-50%) rotate(180deg) scale(1.1)}
+.sidebar-toggle-icon{transition:transform .3s}
+
+/* Nav groups */
 nav{flex:1;padding:6px 0 12px}
-.nav-group{padding:16px 14px 4px;font-size:9.5px;font-weight:700;letter-spacing:.08em;color:rgba(255,255,255,.35);text-transform:uppercase}
-.nav-item{display:flex;align-items:center;gap:9px;padding:8px 14px;cursor:pointer;color:rgba(255,255,255,.7);transition:background .12s,color .12s;border-left:2px solid transparent;font-size:13px;user-select:none}
+.sidebar.collapsed nav{padding:4px 0}
+.nav-group{padding:16px 14px 4px;font-size:9.5px;font-weight:700;letter-spacing:.08em;color:rgba(255,255,255,.35);text-transform:uppercase;user-select:none}
+.sidebar.collapsed .nav-group{justify-content:center;padding:12px 4px 6px}
+.nav-item{display:flex;align-items:center;gap:9px;padding:8px 14px;cursor:pointer;color:rgba(255,255,255,.7);transition:all .15s ease;border-left:2px solid transparent;font-size:13px;user-select:none;position:relative}
+.nav-item:hover{background:rgba(255,255,255,.08);color:rgba(255,255,255,.95)}
+.nav-item.active{background:rgba(255,255,255,.12);color:#fff;border-left-color:var(--A)}
+.sidebar.collapsed .nav-item{justify-content:center;padding:10px 4px;margin:0 4px;border-radius:6px;border-left:none}
+.sidebar.collapsed .nav-item:hover{background:rgba(255,255,255,.15)}
+.sidebar.collapsed .nav-item.active{background:var(--A);color:#fff}
+.sidebar.collapsed .nav-item .ni{margin:0;font-size:16px;width:20px}
+.sidebar.collapsed .nav-item:not(:has(.ni)){display:none}
 .nav-item:hover{background:rgba(255,255,255,.06);color:rgba(255,255,255,.95)}
 .nav-item.active{background:rgba(255,255,255,.1);color:#fff;border-left-color:var(--A)}
 .nav-item .ni{width:16px;font-size:14px;text-align:center;flex-shrink:0;opacity:.8}
@@ -47,7 +75,8 @@ nav{flex:1;padding:6px 0 12px}
 .sidebar-foot .nav-item{border-left:none;padding:7px 4px;font-size:12.5px}
 
 /* ===== TOPBAR ===== */
-.main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column}
+.main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;transition:margin-left .3s cubic-bezier(.4,0,.2,1)}
+body.sidebar-collapsed .main{margin-left:56px}
 .topbar{background:var(--card);border-bottom:1px solid var(--bdr);padding:0 22px;height:54px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:50}
 .tb-title{font-size:15px;font-weight:700;color:var(--P)}
 .tb-bc{font-size:12px;color:var(--tx3)}

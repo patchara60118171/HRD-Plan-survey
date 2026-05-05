@@ -22,7 +22,7 @@ const ROOT_DIR = path.resolve(__dirname, '..');
 const FILES = [
   { src: '✔ Environment dashboard.txt',  key: 'env',      title: '🌿 Environment',         component: 'EnvDashboard' },
   { src: '✔ Physical dashboard.txt',     key: 'physical', title: '💪 Physical',            component: 'PhysicalDashboard' },
-  { src: '✔ Tmhi v2 dashboard.txt',      key: 'tmhi',     title: '🧠 TMHI v2 (Mental)',    component: 'TMHIDashboard' },
+  { src: '✔ Tmhi v2 dashboard.txt',      key: 'tmhi',     title: '� TMHI v2 (Mental)',    component: 'TMHIDashboard' },
   { src: '✔ UCLA dashboard_.txt',        key: 'ucla',     title: '🤝 UCLA (Social)',       component: 'UCLADashboard' },
   { src: '✔ Executive summary_.txt',     key: 'exec',     title: '📊 Executive Summary',   component: 'ExecutiveSummary' },
 ];

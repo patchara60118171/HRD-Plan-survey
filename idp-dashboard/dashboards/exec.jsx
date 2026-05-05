@@ -13,8 +13,8 @@ const {
 // ─── Shared Config ────────────────────────────────────────────────────────────
 const DIMS_4 = [
   { key: "physical", label: "กาย",       icon: "🏃", color: "#10B981", light: "#D1FAE5" },
-  { key: "mental",   label: "ใจ",         icon: "🧠", color: "#F59E0B", light: "#FEF3C7" },
-  { key: "social",   label: "สังคม",     icon: "👥", color: "#8B5CF6", light: "#EDE9FE" },
+  { key: "mental",   label: "ใจ",         icon: "�", color: "#F59E0B", light: "#FEF3C7" },
+  { key: "social",   label: "สังคม",     icon: "🤝", color: "#8B5CF6", light: "#EDE9FE" },
   { key: "environ",  label: "แวดล้อม",  icon: "🌿", color: "#0EA5E9", light: "#E0F2FE" },
 ];
 
@@ -251,6 +251,11 @@ function ExecutiveSummary() {
                 </div>
               </div>
 
+              {/* Total count header bar */}
+              <div style={{ background:"linear-gradient(135deg,#EFF6FF 0%,#DBEAFE 100%)", borderRadius:12, padding:"14px 20px", marginBottom:16, border:"1px solid #BFDBFE", textAlign:"center" }}>
+                <span style={{ fontSize:16, fontWeight:800, color:"#1D4ED8" }}>จำนวนข้าราชการ {employees.length.toLocaleString()} คน</span>
+              </div>
+
               <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr 1fr 1.2fr", gap:14 }}>
                 {["A","B","C","D"].map(g => {
                   const cfg = GROUP_CFG[g];
@@ -259,10 +264,10 @@ function ExecutiveSummary() {
                   return (
                     <div key={g} style={{ background:cfg.bg, borderRadius:14, padding:"18px 20px", border:`1px solid ${cfg.color}33` }}>
                       <div style={{ fontSize:26 }}>{cfg.emoji}</div>
-                      <div style={{ fontSize:30, fontWeight:800, color:cfg.color, marginTop:4 }}>{grp.length}</div>
+                      <div style={{ fontSize:30, fontWeight:800, color:cfg.color, marginTop:4 }}>{grp.length} <span style={{ fontSize:16, fontWeight:700 }}>คน</span></div>
                       <div style={{ fontSize:12, fontWeight:700, color:cfg.color }}>{cfg.label}</div>
                       <div style={{ fontSize:10, color:"#9CA3AF" }}>{cfg.desc}</div>
-                      <div style={{ height:5, background:cfg.color+"22", borderRadius:3, marginTop:8, overflow:"hidden" }}>
+                      <div style={{ height:3, background:cfg.color+"22", borderRadius:3, marginTop:8, overflow:"hidden" }}>
                         <div style={{ width:`${p}%`, height:"100%", background:cfg.color }} />
                       </div>
                       <div style={{ fontSize:10, color:"#9CA3AF", marginTop:4 }}>{p}% ของทั้งหมด</div>
@@ -581,18 +586,17 @@ function ExecutiveSummary() {
               <span style={{ marginLeft:"auto", fontSize:12, color:"#9CA3AF" }}>แสดง {listData.length} คน</span>
             </div>
 
-            <div style={{ background:"#fff", borderRadius:14, overflow:"hidden", boxShadow:"0 1px 3px rgba(0,0,0,0.06)" }}>
-              <div style={{
-                display:"grid", gridTemplateColumns:"28px 1fr 100px 100px 100px 100px 100px 80px",
-                padding:"10px 20px", background:"#F9FAFB", borderBottom:"1px solid #F3F4F6", gap:8
-              }}>
-                {["#","ชื่อ","หน่วยงาน","🏃 กาย","🧠 ใจ","👥 สังคม","🌿 แวดล้อม","กลุ่ม"].map((h,i) => (
-                  <div key={i} style={{ fontSize:10, fontWeight:700, color:"#9CA3AF", textTransform:"uppercase", letterSpacing:0.5 }}>{h}</div>
-                ))}
-              </div>
-
-              {listData.map((emp, idx) => {
-                const cfg = GROUP_CFG[emp.overallGroup];
+              <div style={{ background:"#fff", borderRadius:14, overflow:"hidden", boxShadow:"0 1px 3px rgba(0,0,0,0.06)" }}>
+                <div style={{
+                  display:"grid", gridTemplateColumns:"28px 1fr 100px 100px 100px 100px 100px 80px",
+                  padding:"10px 20px", background:"#F9FAFB", borderBottom:"1px solid #F3F4F6", gap:8
+                }}>
+                  {["#","ชื่อ","หน่วยงาน","🏃 กาย","🤍 ใจ","🤝 สังคม","🌿 แวดล้อม","กลุ่ม"].map((h,i) => (
+                    <div key={i} style={{ fontSize:10, fontWeight:700, color:"#9CA3AF", textTransform:"uppercase", letterSpacing:0.5 }}>{h}</div>
+                  ))}
+                </div>
+                {listData.map((emp, idx) => {
+                  const cfg = GROUP_CFG[emp.overallGroup];
                 return (
                   <div key={emp.id}
                     onClick={() => { setSelectedEmp(emp); setTab("profile"); }}
