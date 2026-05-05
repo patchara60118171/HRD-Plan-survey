@@ -56,12 +56,12 @@
     while (true) {
       const { data, error } = await _client
         .from('cleaned_responses')
-        .select('cleaned_data')
+        .select('codename, cleaned_data')
         .range(from, from + step - 1);
       if (error) throw error;
       if (!data || data.length === 0) break;
-      // Extract cleaned_data JSONB into flat objects
-      all.push(...data.map(row => row.cleaned_data));
+      // Extract cleaned_data JSONB into flat objects, merge top-level codename
+      all.push(...data.map(row => ({ ...row.cleaned_data, codename: row.codename })));
       if (data.length < step) break;
       from += step;
     }
@@ -101,7 +101,7 @@
     return {
       _raw: row,
       id:   row.id || String(idx + 1),
-      name: row.name || row.email || '—',
+      name: row.codename || row.name || row.email || '—',
       email: row.email || '',
       org:  row.organization || 'ไม่ระบุ',
       orgCode: row.org_code || '',
