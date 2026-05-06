@@ -23,7 +23,7 @@ const DIMS_4 = [{
 }, {
   key: "mental",
   label: "ใจ",
-  icon: "�",
+  icon: "🤍",
   color: "#F59E0B",
   light: "#FEF3C7"
 }, {
@@ -354,7 +354,16 @@ function ExecutiveSummary() {
       color: "#93C5FD",
       marginTop: 6
     }
-  }, "\u0E2A\u0E16\u0E32\u0E1A\u0E31\u0E19\u0E1A\u0E31\u0E13\u0E11\u0E34\u0E15\u0E1E\u0E31\u0E12\u0E19\u0E1A\u0E23\u0E34\u0E2B\u0E32\u0E23\u0E28\u0E32\u0E2A\u0E15\u0E23\u0E4C (NIDA) \xB7 ", employees.length, " \u0E04\u0E19 \xB7 \u0E04\u0E23\u0E2D\u0E1A\u0E04\u0E25\u0E38\u0E21 4 \u0E21\u0E34\u0E15\u0E34")), /*#__PURE__*/React.createElement("div", {
+  }, (() => {
+    const fs = typeof window !== 'undefined' && window.IDPFilterBar ? window.IDPFilterBar.getState() : {};
+    const orgFilter = fs.org || '';
+    if (orgFilter) {
+      return `${orgFilter} · ${employees.length.toLocaleString()} คน`;
+    }
+    const allReal = window.__IDP_EMPLOYEES__;
+    const orgCount = allReal && allReal.exec ? new Set(allReal.exec.map(e => e.org).filter(Boolean)).size : 15;
+    return `องค์กรนำร่อง ${orgCount} องค์กร · ${employees.length.toLocaleString()} คน`;
+  })())), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       gap: 8
@@ -456,7 +465,7 @@ function ExecutiveSummary() {
       fontSize: 11,
       color: "#9CA3AF"
     }
-  }, "A = \u0E40\u0E2A\u0E35\u0E48\u0E22\u0E07\u0E2A\u0E39\u0E07 3-4 \u0E21\u0E34\u0E15\u0E34 \xB7 B = 1-2 \u0E21\u0E34\u0E15\u0E34 \xB7 C = \u0E44\u0E21\u0E48\u0E21\u0E35\u0E04\u0E27\u0E32\u0E21\u0E40\u0E2A\u0E35\u0E48\u0E22\u0E07"))), /*#__PURE__*/React.createElement("div", {
+  }, "A = \u0E40\u0E2A\u0E35\u0E48\u0E22\u0E07\u0E2A\u0E39\u0E07 3-4 \u0E21\u0E34\u0E15\u0E34 \xB7 B = 2 \u0E21\u0E34\u0E15\u0E34 \xB7 C = 1 \u0E21\u0E34\u0E15\u0E34 \xB7 D = \u0E44\u0E21\u0E48\u0E21\u0E35\u0E04\u0E27\u0E32\u0E21\u0E40\u0E2A\u0E35\u0E48\u0E22\u0E07"))), /*#__PURE__*/React.createElement("div", {
     style: {
       background: "linear-gradient(135deg,#EFF6FF 0%,#DBEAFE 100%)",
       borderRadius: 12,

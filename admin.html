@@ -50,16 +50,16 @@
 <div class="sidebar collapsed">
   <div class="sidebar-logo">
     <button class="sidebar-close-btn" onclick="document.body.classList.remove('sidebar-open')" aria-label="ปิดเมนู">✕</button>
-    <button class="sidebar-toggle-btn" onclick="toggleSidebarCollapse()" aria-label="ย่อ/ขยายเมนู" title="ย่อ/ขยายเมนู">
-      <span class="sidebar-toggle-icon">◀</span>
-    </button>
     <div class="logo-main">
-      <div class="logo-icon">🏛️</div>
+      <div class="logo-icon">🏗️</div>
       <div class="logo-text">
         <div class="logo-title">Admin Portal</div>
+        <div class="logo-sub" style="padding-left:0;margin-top:2px">ระบบสำรวจสุขภาวะบุคลากรภาครัฐ</div>
       </div>
+      <button class="sidebar-toggle-btn" onclick="toggleSidebarCollapse()" aria-label="ย่อ/ขยายเมนู" title="ย่อ/ขยายเมนู" style="position:static;transform:none;margin-left:auto">
+        <span class="sidebar-toggle-icon">◄</span>
+      </button>
     </div>
-    <div class="logo-sub">ระบบสำรวจสุขภาวะบุคลากรภาครัฐ</div>
   </div>
 
   <div class="sidebar-user">
@@ -72,30 +72,30 @@
 
   <nav>
     <div class="nav-group">ภาพรวม</div>
-    <div class="nav-item active" onclick="go('dashboard',this)"><span class="ni">📊</span> Dashboard ภาพรวม</div>
-    <div class="nav-item" onclick="go('progress',this)"><span class="ni">📋</span> สถานะการส่งข้อมูล</div>
+    <div class="nav-item active" onclick="go('dashboard',this)" data-tip="Dashboard ภาพรวม"><span class="ni">📊</span> Dashboard ภาพรวม</div>
+    <div class="nav-item" onclick="go('progress',this)" data-tip="สถานะการส่งข้อมูล"><span class="ni">📋</span> สถานะการส่งข้อมูล</div>
 
     <div class="nav-group">จัดการข้อมูล</div>
-    <div class="nav-item" onclick="go('orgs',this)"><span class="ni">🏛️</span> องค์กรที่เข้าร่วม</div>
-    <div class="nav-item" onclick="go('form-ch1',this)"><span class="ni">📝</span> ฟอร์มแบบสำรวจข้อมูลองค์กร</div>
-    <div class="nav-item" onclick="go('form-wb',this)"><span class="ni">💚</span> Wellbeing Survey</div>
+    <div class="nav-item" onclick="go('orgs',this)" data-tip="องค์กรที่เข้าร่วม"><span class="ni">🏛️</span> องค์กรที่เข้าร่วม</div>
+    <div class="nav-item" onclick="go('form-ch1',this)" data-tip="ฟอร์มแบบสำรวจข้อมูลองค์กร"><span class="ni">📝</span> ฟอร์มแบบสำรวจข้อมูลองค์กร</div>
+    <div class="nav-item" onclick="go('form-wb',this)" data-tip="Wellbeing Survey"><span class="ni">💚</span> Wellbeing Survey</div>
 
     <div class="nav-group">วิเคราะห์ข้อมูล</div>
-    <div class="nav-item" onclick="go('idp',this)"><span class="ni">📋</span> NIDA · Well-being Survey</div>
+    <div class="nav-item" onclick="go('idp',this)" data-tip="NIDA · Well-being Survey"><span class="ni">📋</span> NIDA · Well-being Survey</div>
 
     <div class="nav-group">เมนูอื่น ๆ</div>
-    <div class="nav-item" onclick="go('ch1-summary',this)"><span class="ni">📊</span> สรุปภาพรวมแบบสำรวจข้อมูลองค์กร</div>
-    <div class="nav-item" onclick="go('an-wb',this)"><span class="ni">🤍</span> วิเคราะห์ Wellbeing</div>
-    <div class="nav-item" onclick="go('compare',this)"><span class="ni">⚖️</span> เปรียบเทียบองค์กร</div>
-    <div class="nav-item" onclick="go('export',this)"><span class="ni">📤</span> Export รายงาน</div>
+    <div class="nav-item" onclick="go('ch1-summary',this)" data-tip="สรุปภาพรวมแบบสำรวจข้อมูลองค์กร"><span class="ni">📊</span> สรุปภาพรวมแบบสำรวจข้อมูลองค์กร</div>
+    <div class="nav-item" onclick="go('an-wb',this)" data-tip="วิเคราะห์ Wellbeing"><span class="ni">🤍</span> วิเคราะห์ Wellbeing</div>
+    <div class="nav-item" onclick="go('compare',this)" data-tip="เปรียบเทียบองค์กร"><span class="ni">⚖️</span> เปรียบเทียบองค์กร</div>
+    <div class="nav-item" onclick="go('export',this)" data-tip="Export รายงาน"><span class="ni">📤</span> Export รายงาน</div>
 
     <div class="nav-group" data-min-role="superadmin">จัดการระบบ</div>
-    <div class="nav-item" data-min-role="superadmin" onclick="go('org-credentials',this)"><span class="ni">🏢</span> Org HR Credentials</div>
+    <div class="nav-item" data-min-role="superadmin" onclick="go('org-credentials',this)" data-tip="Org HR Credentials"><span class="ni">🏢</span> Org HR Credentials</div>
 
   </nav>
 
   <div class="sidebar-foot">
-    <div class="nav-item" style="border-left:none;padding:7px 4px" onclick="doLogout()"><span class="ni">🚪</span> ออกจากระบบ</div>
+    <div class="nav-item" style="border-left:none;padding:7px 4px" onclick="doLogout()" data-tip="ออกจากระบบ"><span class="ni">🚪</span> ออกจากระบบ</div>
   </div>
 </div>
 
@@ -470,64 +470,28 @@
         <!-- KPI Cards -->
         <div id="anwb-kpi" style="margin-bottom:20px"></div>
 
-        <!-- Tab Navigation -->
-        <div class="anwb-tabs" style="margin-bottom:20px">
-          <button class="anwb-tab active" data-tab="overview"     onclick="anwbSwitchTab('overview')">📊 ภาพรวม</button>
-          <button class="anwb-tab"        data-tab="physical"     onclick="anwbSwitchTab('physical')">💪 กาย</button>
-          <button class="anwb-tab"        data-tab="mental"       onclick="anwbSwitchTab('mental')">� ใจ</button>
-          <button class="anwb-tab"        data-tab="social"       onclick="anwbSwitchTab('social')">🤝 สังคม</button>
-          <button class="anwb-tab"        data-tab="environment"  onclick="anwbSwitchTab('environment')">🌿 สิ่งแวดล้อม</button>
+        <!-- IDP Dashboard Link -->
+        <div style="background:linear-gradient(135deg,#4C1D95 0%,#6D28D9 100%);border-radius:12px;padding:16px 20px;margin-bottom:20px;color:#fff;display:flex;align-items:center;justify-content:space-between">
+          <div>
+            <div style="font-size:14px;font-weight:700">📊 NIDA · Well-being Survey Dashboard</div>
+            <div style="font-size:12px;opacity:0.9">วิเคราะห์เชิงลึก 4 มิติ: กาย · ใจ · สังคม · สิ่งแวดล้อม</div>
+          </div>
+          <a href="idp-dashboard/index.html" target="_blank" style="background:#fff;color:#4C1D95;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:700;text-decoration:none">เปิด Dashboard →</a>
         </div>
 
-        <!-- ─── TAB: ภาพรวม ─────────────────────────────────────── -->
-        <div class="anwb-tab-panel active" id="anwb-panel-overview">
-          <!-- Distribution Charts -->
-          <div id="anwb-dist" style="margin-bottom:20px"></div>
-          <!-- Demographics -->
-          <div id="anwb-demo" style="margin-bottom:20px"></div>
-          <!-- Risk Signals -->
-          <div id="anwb-risk" style="margin-bottom:20px"></div>
-        </div>
-
-        <!-- ─── TAB: กาย ─────────────────────────────────────────── -->
-        <div class="anwb-tab-panel" id="anwb-panel-physical" style="display:none">
-          <!-- NCD & โรคประจำตัว -->
-          <div id="anwb-ncd" style="margin-bottom:20px"></div>
-          <!-- BMI & WHtR -->
-          <div id="anwb-bmi" style="margin-bottom:20px"></div>
-          <!-- ยาสูบ/แอลกอฮอล์/สิ่งเสพติด -->
-          <div id="anwb-substance" style="margin-bottom:20px"></div>
-          <!-- พฤติกรรมบริโภค หวาน/ไขมัน/โซเดียม -->
-          <div id="anwb-nutrition" style="margin-bottom:20px"></div>
-          <!-- กิจกรรมทางกาย TPAX -->
-          <div id="anwb-tpax" style="margin-bottom:20px"></div>
-          <!-- พฤติกรรมเนือยนิ่ง -->
-          <div id="anwb-sedentary" style="margin-bottom:20px"></div>
-        </div>
-
-        <!-- ─── TAB: ใจ ──────────────────────────────────────────── -->
-        <div class="anwb-tab-panel" id="anwb-panel-mental" style="display:none">
-          <!-- TMHI-15 เชิงลึก -->
-          <div id="anwb-tmhi-deep" style="margin-bottom:20px"></div>
-        </div>
-
-        <!-- ─── TAB: สังคม ───────────────────────────────────────── -->
-        <div class="anwb-tab-panel" id="anwb-panel-social" style="display:none">
-          <!-- UCLA Loneliness Scale -->
-          <div id="anwb-loneliness" style="margin-bottom:20px"></div>
-        </div>
-
-        <!-- ─── TAB: สิ่งแวดล้อม ─────────────────────────────────── -->
-        <div class="anwb-tab-panel" id="anwb-panel-environment" style="display:none">
-          <!-- อุบัติเหตุ & ความปลอดภัย -->
-          <div id="anwb-safety" style="margin-bottom:20px"></div>
-          <!-- คุณภาพชีวิต & ความพึงพอใจสภาพแวดล้อม -->
-          <div id="anwb-qol" style="margin-bottom:20px"></div>
-          <!-- สภาพแวดล้อมทำงาน (ปัจจัยเสี่ยง 6 ด้าน) -->
-          <div id="anwb-env" style="margin-bottom:20px"></div>
-          <!-- มลพิษ · Climate · โรคอุบัติใหม่ · COVID -->
-          <div id="anwb-pollution" style="margin-bottom:20px"></div>
-        </div>
+        <!-- Overview Sections -->
+        <!-- Distribution Charts -->
+        <div id="anwb-dist" style="margin-bottom:20px"></div>
+        <!-- Demographics -->
+        <div id="anwb-demo" style="margin-bottom:20px"></div>
+        <!-- Risk Signals -->
+        <div id="anwb-risk" style="margin-bottom:20px"></div>
+        <!-- Safety -->
+        <div id="anwb-safety" style="margin-bottom:20px"></div>
+        <!-- Quality of Life -->
+        <div id="anwb-qol" style="margin-bottom:20px"></div>
+        <!-- Pollution -->
+        <div id="anwb-pollution" style="margin-bottom:20px"></div>
       </div>
     </div>
 
@@ -856,37 +820,37 @@
 <script>
 function toggleSidebarCollapse() {
   const sidebar = document.querySelector('.sidebar');
-  const body = document.body;
-  
-  if (sidebar.classList.contains('collapsed')) {
+  const icon = document.querySelector('.sidebar-toggle-icon');
+  const isCollapsed = sidebar.classList.contains('collapsed');
+  if (isCollapsed) {
     sidebar.classList.remove('collapsed');
-    body.classList.remove('sidebar-collapsed');
+    document.body.classList.remove('sidebar-collapsed');
+    if (icon) icon.textContent = '◀';
     localStorage.setItem('sidebarCollapsed', 'false');
   } else {
     sidebar.classList.add('collapsed');
-    body.classList.add('sidebar-collapsed');
+    document.body.classList.add('sidebar-collapsed');
+    if (icon) icon.textContent = '☰';
     localStorage.setItem('sidebarCollapsed', 'true');
   }
 }
 
 // Restore sidebar state on page load
 document.addEventListener('DOMContentLoaded', function() {
-  // Default to collapsed, but allow localStorage to override
   const sidebarCollapsed = localStorage.getItem('sidebarCollapsed');
   const shouldBeCollapsed = sidebarCollapsed === null ? true : sidebarCollapsed === 'true';
-  
+  const sidebar = document.querySelector('.sidebar');
+  const icon = document.querySelector('.sidebar-toggle-icon');
   if (shouldBeCollapsed) {
-    document.querySelector('.sidebar').classList.add('collapsed');
+    sidebar.classList.add('collapsed');
     document.body.classList.add('sidebar-collapsed');
+    if (icon) icon.textContent = '☰';
   } else {
-    document.querySelector('.sidebar').classList.remove('collapsed');
+    sidebar.classList.remove('collapsed');
     document.body.classList.remove('sidebar-collapsed');
+    if (icon) icon.textContent = '◀';
   }
-  
-  // Initialize localStorage if not set
-  if (sidebarCollapsed === null) {
-    localStorage.setItem('sidebarCollapsed', 'true');
-  }
+  if (sidebarCollapsed === null) localStorage.setItem('sidebarCollapsed', 'true');
 });
 </script>
 <!-- Accessibility polyfills: keyboard support for legacy onclick elements -->
